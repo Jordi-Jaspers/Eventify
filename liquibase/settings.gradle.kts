@@ -1,4 +1,4 @@
-rootProject.name = "application-database"
+rootProject.name = "eventify-database"
 pluginManagement {
     val liquibasePlugin: String by settings
     val dependencyUpdatesPluginVersion: String by settings

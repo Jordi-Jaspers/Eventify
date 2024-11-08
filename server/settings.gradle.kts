@@ -1,4 +1,4 @@
-rootProject.name = "application-server"
+rootProject.name = "eventify-server"
 pluginManagement {
     val springBootPluginVersion: String by settings
     val springDependencyPluginVersion: String by settings

@@ -53,8 +53,9 @@ when {
 
 // ============== STATIC FUNCTIONS ================
 fun retrieve(property: String): String {
-    return project.findProperty(property) as String?
+    val foundProperty = project.findProperty(property) as String?
         ?: throw IllegalArgumentException("Property $property not found")
+    return foundProperty.replace("\"", "")
 }
 
 // ============== ACTIVITIES ================

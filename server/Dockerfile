@@ -7,13 +7,13 @@ FROM eclipse-temurin:21.0.4_7-jdk-jammy AS create-slimjre
 # Copy the generated jar file in a temporary directory
 RUN mkdir /workspace
 WORKDIR /workspace
-ADD build/libs/application*.jar /workspace/server.jar
+ADD build/libs/eventify*.jar /workspace/eventify.jar
 
 # Create a minimal JRE for this application
 RUN jlink --no-header-files --no-man-pages --compress=2 --strip-java-debug-attributes --add-modules java.base,java.desktop,jdk.crypto.cryptoki,java.xml,jdk.unsupported,java.sql,java.naming,java.logging,java.management,java.security.jgss,java.instrument,jdk.zipfs,jdk.attach --output slimjre
 
 # Extract the JAR file so it can be run directly from disk
-RUN mkdir unpacked; cd unpacked; jar -xf /workspace/server.jar
+RUN mkdir unpacked; cd unpacked; jar -xf /workspace/eventify.jar
 
 # STEP 2: Create a smaller runtime image for the application
 FROM ubuntu:jammy
@@ -35,20 +35,20 @@ RUN export DEBIAN_FRONTEND=noninteractive &&  \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     # Create the necessary user and directories \
-    groupadd -g 10001 server && useradd --create-home -u 10000 -g 10001 server && \
-    install -d -m 770 -o server -g server /opt/workspace/app /opt/workspace/config
+    groupadd -g 10001 eventify && useradd --create-home -u 10000 -g 10001 eventify && \
+    install -d -m 770 -o eventify -g eventify /opt/workspace/app /opt/workspace/config
 
-# Set ownership of /opt/workspace to server, because the application writes files there.
-RUN chown server:server /opt/workspace
+# Set ownership of /opt/workspace to eventify, because the application writes files there.
+RUN chown eventify:eventify /opt/workspace
 
 # From now on, run everything as non-root user
-USER server
+USER eventify
 
 # Switch to our working directory
 WORKDIR /opt/workspace
 
 # Install the slim JRE in the container
-COPY --from=create-slimjre --chown=server:server /workspace/slimjre /opt/workspace/slimjre/
+COPY --from=create-slimjre --chown=eventify:eventify /workspace/slimjre /opt/workspace/slimjre/
 
 # These are build arguments that will be set by Jenkins at build time to the running Inbucket container, but
 # they will also be added to the environment list below, so they can be overridden at run time in Kubernetes/Docker
@@ -74,12 +74,12 @@ EXPOSE 8080 8009
 
 # Install the Spring boot config files in the container
 RUN mkdir -p /opt/workspace/config
-COPY --chown=server:server config /opt/workspace/config
+COPY --chown=eventify:eventify config /opt/workspace/config
 
 # Install the unpacked Spring Boot application in the container
-COPY --from=create-slimjre --chown=server:server /workspace/unpacked/BOOT-INF/lib /opt/workspace/app/lib
-COPY --from=create-slimjre --chown=server:server /workspace/unpacked/META-INF /opt/workspace/app/META-INF
-COPY --from=create-slimjre --chown=server:server /workspace/unpacked/BOOT-INF/classes /opt/workspace/app
+COPY --from=create-slimjre --chown=eventify:eventify /workspace/unpacked/BOOT-INF/lib /opt/workspace/app/lib
+COPY --from=create-slimjre --chown=eventify:eventify /workspace/unpacked/META-INF /opt/workspace/app/META-INF
+COPY --from=create-slimjre --chown=eventify:eventify /workspace/unpacked/BOOT-INF/classes /opt/workspace/app
 
 # Start the Spring Boot process
 CMD /opt/workspace/slimjre/bin/java \
@@ -100,7 +100,7 @@ CMD /opt/workspace/slimjre/bin/java \
 # Add tomcat native library to java.library.path
 -Djava.library.path=/opt/workspace/slimjre/lib/default:/opt/workspace/slimjre/lib:/usr/lib64:/usr/lib:/usr/lib/x86_64-linux-gnu \
 # Bootable jar file
--cp /opt/workspace/app:/opt/workspace/app/lib/* org.jordijaspers.server.server \
+-cp /opt/workspace/app:/opt/workspace/app/lib/* org.jordijaspers.eventify.Application \
 # Spring boot properties
 --spring.config.additional-location=/opt/workspace/config/ \
 --spring.output.ansi.enabled=always \
