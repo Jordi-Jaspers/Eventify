@@ -43,6 +43,9 @@ spring:
     allow-bean-definition-overriding: true
     allow-circular-references: true
 
+  threads:
+    virtual.enabled: true
+    
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
