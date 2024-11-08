@@ -1,0 +1,49 @@
+version: 2
+updates:
+  # Update dependencies for github actions.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: develop
+    labels:
+      - "dependencies"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "[Actions] bump: "
+      include: "scope"
+
+  # Update dependencies for Client using NPM.
+  - package-ecosystem: "npm"
+    directory: "/client"
+    target-branch: develop
+    labels:
+      - "dependencies"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "[npm] bump: "
+      include: "scope"
+
+  # Update dependencies for Server using Gradle.
+  - package-ecosystem: "gradle"
+    directory: "/server"
+    target-branch: develop
+    labels:
+      - "dependencies"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "[spring] bump: "
+      include: "scope"
+
+  # Update dependencies for Server using Gradle.
+  - package-ecosystem: "gradle"
+    directory: "/liquibase"
+    target-branch: develop
+    labels:
+      - "dependencies"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "[liquibase] bump: "
+      include: "scope"

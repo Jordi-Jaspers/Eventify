@@ -1,0 +1,86 @@
+# ======= APPLICATION CONFIGURATION =======
+application:
+  version: APPLICATION_VERSION
+
+# ======= SECURITY CONFIGURATION =======
+security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+
+# ======= MANAGEMENT ENDPOINTS =======
+management:
+  endpoints:
+    web:
+      exposure.include: health,info,metrics,jolokia
+
+# ====== SERVER CONFIG ======
+# tomcat HTTP & ajp listen ports
+server:
+  port: 8080
+
+# ======= LOGGING CONFIG =======
+logging:
+  config: ${LOGGING_CONFIG:config/logback-spring.xml}
+
+# ======= SPRINGDOC CONFIGURATION <https://springdoc.org/> =======
+springdoc:
+  show-actuator: true
+  pre-loading-enabled: true
+  show-login-endpoint: true
+  enable-spring-security: true
+  swagger-ui:
+    disable-swagger-default-url: true
+    path: /rest/v1/public/docs/openapi.html
+  api-docs:
+    path: /rest/v1/public/docs
+
+# ======= SPRING CONFIGURATION =======
+spring:
+  profiles.include: ${SPRING_PROFILES_INCLUDE:dev}
+  main:
+    banner-mode: off
+    lazy-initialization: true
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      connectionTimeout: 1000
+      idleTimeout: 900000
+      minimumIdle: 5
+      maximumPoolSize: 17
+      poolName: application
+      registerMbeans: true
+    url: ${DATASOURCE_TOP_URL:jdbc:mariadb://100.73.50.124:3306/tst_application}
+    username: ${DATASOURCE_TOP_USERNAME:tst_application}
+    password: ${DATASOURCE_TOP_PASSWORD:tst_application}
+    driverClassName: org.mariadb.jdbc.Driver
+
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        id.optimizer.pooled.preferred: pooled-lo
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+        order_inserts: true
+        order_updates: true
+        jdbc:
+          batch_size: 1000
+
+  jackson:
+    property-naming-strategy: LOWER_CAMEL_CASE
+
+# ======= HAWAII AUTOCONFIGURATION OVERRIDE =======
+hawaii:
+  crypto:
+    enabled: false
+  logging:
+    filters:
+      transaction-id:
+        enabled: true
+      request-id:
+        enabled: true
+      open-telemetry-tracing-response:
+        enabled: false
