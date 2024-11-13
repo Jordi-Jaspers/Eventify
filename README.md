@@ -23,8 +23,8 @@
  <img alt="followers" title="Follow me on Github" src="https://custom-icon-badges.demolab.com/github/followers/Jordi-Jaspers?color=236ad3&labelColor=1155ba&style=for-the-badge&logo=person-add&label=Follow&logoColor=white"/></a>
 <a href="https://github.com/Jordi-Jaspers?tab=repositories&sort=stargazers">
  <img alt="total stars" title="Total stars on GitHub" src="https://custom-icon-badges.demolab.com/github/stars/Jordi-Jaspers?color=55960c&style=for-the-badge&labelColor=488207&logo=star"/></a>
-<a href="https://donate.stripe.com/4gw5mfcbu3yo4kUaEE">
-    <img alt="Donate" title="Donate" src="https://img.shields.io/badge/Donate-Stripe-FF69B4?style=for-the-badge&logo=stripe&logoColor=white"/></a>
+<a href="https://buymeacoffee.com/jaspers">
+    <img alt="Donate" title="Donate" src="https://img.shields.io/badge/Donate-Buy%20me%20a%20coffee-FF813F?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white"/>
 </p>
 
 ---
@@ -60,9 +60,8 @@ Feel free to create an issue and we can discuss it further.
 You can support and keep alive your anime sanctum by donating here:
 
 <p>
-    <a href="https://donate.stripe.com/4gw5mfcbu3yo4kUaEE">
-        <img alt="Donate" title="Donate" src="https://img.shields.io/badge/Donate-Stripe-FF69B4?style=for-the-badge&logo=stripe&logoColor=white"/>
-    </a>
+<a href="https://buymeacoffee.com/jaspers">
+    <img alt="Donate" title="Donate" src="https://img.shields.io/badge/Donate-Buy%20me%20a%20coffee-FF813F?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white"/>
 </p>
 
 ## ⭐ Stargazers over time
