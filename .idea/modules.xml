@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Eventify.iml" filepath="$PROJECT_DIR$/.idea/Eventify.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/eventify-server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/eventify-server.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/eventify-server.test.iml" filepath="$PROJECT_DIR$/.idea/modules/eventify-server.test.iml" />
     </modules>
   </component>

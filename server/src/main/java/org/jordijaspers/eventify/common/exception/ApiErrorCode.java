@@ -20,6 +20,34 @@ public enum ApiErrorCode implements ApiError {
     DATABASE_ERROR(
         "ERR-0003",
         "Could not perform the requested action on the database. Contact administrator."
+    ),
+    TOKEN_NOT_FOUND_ERROR(
+        "ERR-0004",
+        "Could not find the requested token."
+    ),
+    INVALID_TOKEN_ERROR(
+        "ERR-0005",
+        "The provided JWT token is invalid."
+    ),
+    INVALID_CREDENTIALS(
+        "ERR-0006",
+        "Invalid Credentials: Username or password is incorrect."
+    ),
+    USER_DISABLED_ERROR(
+        "ERR-0007",
+        "Authorization failed: your account has been disabled."
+    ),
+    USER_UNVALIDATED_ERROR(
+        "ERR-0008",
+        "Authorization failed: The user must validate their email address first."
+    ),
+    PASSWORD_DOES_NOT_MATCH(
+        "ERR-0009",
+        "The provided password does not match the current password."
+    ),
+    USER_ALREADY_EXISTS_ERROR(
+        "ERR-0010",
+        "User cannot be created: The provided email address is already in use."
     );
 
     /**

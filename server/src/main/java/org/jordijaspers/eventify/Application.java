@@ -8,7 +8,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import java.util.TimeZone;
 
-import static org.jordijaspers.eventify.common.constants.DateTimeConstants.DEFAULT_TIMEZONE;
+import static org.jordijaspers.eventify.common.constants.Constants.DateTime.DEFAULT_TIMEZONE;
 
 @EnableAspectJAutoProxy
 @SpringBootApplication(

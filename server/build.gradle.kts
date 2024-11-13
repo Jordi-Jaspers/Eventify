@@ -73,11 +73,11 @@ dependencies {
     annotationProcessor("org.mapstruct", "mapstruct-processor", retrieve("mapStructVersion"))
 
     // ======= RUNTIME DEPENDENCIES =======
-    //MariaDB client driver for the database connections.
-    runtimeOnly("org.mariadb.jdbc", "mariadb-java-client", retrieve("mariadbVersion"))
+    // Jdbc driver to connect with the PostgreSQL database.
+    runtimeOnly("org.postgresql", "postgresql", retrieve("postgresVersion"))
 
     // jolokia support for spring boot 3
-    runtimeOnly(group = "org.jolokia", name = "jolokia-support-spring", version = retrieve("jolokiaVersion"))
+    runtimeOnly("org.jolokia", "jolokia-support-spring", retrieve("jolokiaVersion"))
 
     // ======= SPRINGBOOT DEPENDENCIES =======
     implementation("org.springframework.boot", "spring-boot-starter-webflux")
@@ -86,6 +86,11 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-security")
     implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
     implementation("org.springframework.boot", "spring-boot-starter-validation")
+    implementation("org.springframework.boot", "spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot", "spring-boot-starter-mail")
+    implementation("org.springframework.boot", "spring-boot-starter-security")
+    implementation("org.springframework.boot", "spring-boot-starter-oauth2-resource-server")
+
     implementation("org.springframework.boot", "spring-boot-starter-jdbc") {
         exclude("org.apache.tomcat", module = "tomcat-jdbc")
     }
@@ -104,6 +109,9 @@ dependencies {
     // Used to validate entities and beans
     implementation("jakarta.servlet", "jakarta.servlet-api", retrieve("jakartaServletVersion"))
 
+    // Mail service provider that supports thymeleaf templating.
+    implementation("jakarta.mail", "jakarta.mail-api", retrieve("jakartaMailVersion"))
+
     // Mapstruct is used to generate code to map from domain model classes to rest application model classes
     implementation("org.mapstruct", "mapstruct", retrieve("mapStructVersion"))
 
@@ -115,6 +123,12 @@ dependencies {
     implementation("org.slf4j", "jcl-over-slf4j", retrieve("slf4jVersion"))
     implementation("net.logstash.logback", "logstash-logback-encoder", retrieve("logstashEncoderVersion"))
     implementation("ch.qos.logback", "logback-access", retrieve("logbackAccessVersion"))
+
+    // Library for checking that a password complies with a custom set of rules
+    implementation("org.passay","passay", retrieve("passayVersion"))
+
+    // Java library for Javascript Object Signing and Encryption (JOSE) and JSON Web Tokens (JWT)
+    implementation("com.nimbusds", "nimbus-jose-jwt", retrieve("nimbusJoseJwtVersion"))
 
     // ======= TEST DEPENDENCIES =======
     testImplementation("org.springframework.boot", "spring-boot-test")

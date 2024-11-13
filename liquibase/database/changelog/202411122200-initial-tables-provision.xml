@@ -1,0 +1,78 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202411122200-initial-tables-provision.xml">
+    <changeSet id="202411122200-initial-tables-provision-1" author="jordi.jaspers">
+    <ext:documentation>
+        Adding the necessary extensions in order for TimescaleDB to work. These extensions must be executed with a superuser.
+    </ext:documentation>
+
+    <sql>
+        CREATE EXTENSION IF NOT EXISTS timescaledb;
+        CREATE EXTENSION IF NOT EXISTS timescaledb_toolkit;
+    </sql>
+    </changeSet>
+
+    <changeSet id="202411122200-initial-tables-provision-2" author="jordi.jaspers">
+        <ext:documentation>
+            Creating the initial EVENTIFY tables.
+        </ext:documentation>
+        <sql>
+            -- Create the "user" table
+            CREATE TABLE IF NOT EXISTS "user"
+            (
+                id         SERIAL PRIMARY KEY,
+                first_name TEXT        NOT NULL,
+                last_name  TEXT        NOT NULL,
+                email      TEXT        NOT NULL,
+                password   TEXT        NOT NULL,
+                created    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                last_login TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                enabled    BOOLEAN     NOT NULL DEFAULT TRUE,
+                validated  BOOLEAN     NOT NULL DEFAULT FALSE,
+                UNIQUE (email)
+                );
+
+            -- Create the "role" table
+            CREATE TABLE IF NOT EXISTS "role"
+            (
+                id          SERIAL PRIMARY KEY,
+                authority   TEXT NOT NULL,
+                description TEXT NOT NULL,
+                UNIQUE (authority)
+                );
+
+            -- Create the "user_role" lookup table
+            CREATE TABLE IF NOT EXISTS "user_role"
+            (
+                user_id INTEGER NOT NULL,
+                role_id INTEGER NOT NULL,
+                PRIMARY KEY (user_id, role_id),
+                FOREIGN KEY (user_id) REFERENCES "user" (id),
+                FOREIGN KEY (role_id) REFERENCES "role" (id)
+                );
+
+            -- Create the "Token" table
+            CREATE TABLE IF NOT EXISTS "token"
+            (
+                id         SERIAL PRIMARY KEY,
+                value      TEXT        NOT NULL,
+                type       TEXT        NOT NULL,
+                expires_at TIMESTAMPTZ NOT NULL,
+                user_id    INTEGER     NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,
+                UNIQUE (value)
+                );
+
+            -- Create the "rsa_key" table
+            CREATE TABLE IF NOT EXISTS "rsa_key"
+            (
+                id          SERIAL PRIMARY KEY,
+                public_key  BYTEA NOT NULL,
+                private_key BYTEA NOT NULL
+            );
+        </sql>
+    </changeSet>
+</databaseChangeLog>

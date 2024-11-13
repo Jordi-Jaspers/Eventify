@@ -171,6 +171,7 @@
         <module name="ClassFanOutComplexity">
             <property name="excludedPackages"
                       value="org.springframework.beans.factory.annotation, org.springframework.stereotype, org.slf4j"/>
+            <property name="max" value="25"/>
         </module>
         <module name="CyclomaticComplexity"/>
         <module name="JavaNCSS"/>

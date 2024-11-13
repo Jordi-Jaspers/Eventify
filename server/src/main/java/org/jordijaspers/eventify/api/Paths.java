@@ -1,75 +1,69 @@
 package org.jordijaspers.eventify.api;
 
 /**
- * All the Paths used in the exposed REST API.
+ * Utility class containing all possible endpoints within the application.
  */
-@SuppressWarnings(
-    {
-        "PMD.ClassNamingConventions",
-        "MultipleStringLiterals"
-    }
-)
 public final class Paths {
 
     /* ------------------------------- BASIC API CONFIGURATION ------------------------------- */
 
-    /**
-     * The base part of all rest API paths.
-     */
-    public static final String BASE_PATH = "/rest/v1";
+    public static final String BASE_PATH = "/api";
 
-    /**
-     * defines publicly accessible paths.
-     */
     public static final String PUBLIC_PATH = BASE_PATH + "/public";
 
-    /**
-     * The path to the error page.
-     */
+    public static final String AUTH_PATH = BASE_PATH + "/auth";
+
+    public static final String OPENAPI_PATH = "/v3/api-docs";
+
     public static final String ERROR_PATH = "/error";
 
-    /**
-     * Actuator url.
-     */
-    public static final String ACTUATOR_PATH = "/actuator";
-
-    /**
-     * A sub path to indicate a wildcard.
-     */
     public static final String WILDCARD_PART = "/**";
 
-    /**
-     * Another wildcard.
-     */
     public static final String WILDCARD = "*";
 
-    /* ------------------------------- SEPARATE PATH NAMES ------------------------------- */
+    /* ------------------------------- SEPARATE PATH PARTS ------------------------------- */
 
-    /**
-     * Sub path used for search a specific entity.
-     */
-    private static final String ID_PART = "/{id}";
-
-    /**
-     * Partial path prefix for private calls.
-     */
-    private static final String PRIVATE = "/private";
+    public static final String ID_PART = "/{id}";
 
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
-    /**
-     * The path for the exposed HRX configuration.
-     */
-    public static final String PUBLIC_METRICS_PATH = PUBLIC_PATH + "/metrics";
+    public static final String PUBLIC_ACTUATOR_PATH = BASE_PATH + "/actuator";
 
-    /**
-     * The path for the health check of the application.
-     */
-    public static final String PUBLIC_HEALTH_PATH = ACTUATOR_PATH + "/health";
+    public static final String PUBLIC_RESET_PASSWORD_PATH = PUBLIC_PATH + "/reset_password";
 
-    /* ------------------------------ END ------------------------------- */
+    public static final String PUBLIC_REQUEST_PASSWORD_RESET_PATH = PUBLIC_RESET_PASSWORD_PATH + "/request";
+
+    public static final String PUBLIC_VALIDATE_EMAIL_PATH = PUBLIC_PATH + "/email/validate";
+
+    /* ------------------------------- PASSWORD MANAGEMENT ENDPOINTS ------------------------------- */
+
+    public static final String UPDATE_PASSWORD_PATH = BASE_PATH + "/password";
+
+    /* ------------------------------- AUTH ENDPOINTS ------------------------------- */
+
+    public static final String REGISTER_PATH = AUTH_PATH + "/register";
+
+    public static final String LOGIN_PATH = AUTH_PATH + "/login";
+
+    public static final String TOKEN_PATH = AUTH_PATH + "/token";
+
+    public static final String LOGOUT_PATH = AUTH_PATH + "/logout";
+
+    public static final String EMAIL_VERIFICATION_PATH = AUTH_PATH + "/verify";
+
+    public static final String RESEND_VERIFICATION_PATH = EMAIL_VERIFICATION_PATH + "/resend";
+
+    /* ------------------------------- USER ENDPOINTS ------------------------------- */
+
+    public static final String USER_PATH = BASE_PATH + "/user";
+
+    public static final String USER_DETAILS = USER_PATH + "/details";
+
+    public static final String USER_UPDATE_EMAIL_PATH = USER_DETAILS + "/email";
+
+    /* ------------------------------- END ------------------------------- */
 
     private Paths() {
-        // utility constructor.
+        // private constructor to prevent instantiation.
     }
 }

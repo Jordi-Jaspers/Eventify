@@ -7,4 +7,6 @@
      (https://checkstyle.sourceforge.io/config_filters.html#SuppressionFilter)-->
 <suppressions>
     <suppress checks="MissingJavadocMethod" files=".*Controller.java"/>
+    <suppress checks="MissingJavadocMethod" files=".*Repository.java"/>
+    <suppress checks="MissingJavadocMethod" files=".*Mapper.java"/>
 </suppressions>

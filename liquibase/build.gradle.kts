@@ -25,7 +25,7 @@ dependencies {
     liquibaseRuntime("org.liquibase", "liquibase-core", retrieve("liquibaseCoreVersion"))
     liquibaseRuntime("info.picocli", "picocli", retrieve("picocliVersion"))
     liquibaseRuntime("org.yaml", "snakeyaml", retrieve("snakeyaml"))
-    liquibaseRuntime("org.mariadb.jdbc", "mariadb-java-client", retrieve("mariadbVersion"))
+    liquibaseRuntime("org.postgresql", "postgresql", retrieve("postgresVersion"))
 }
 
 /** Configure the Liquibase plugin with passed properties. */
@@ -42,9 +42,9 @@ when {
 
     else -> {
         // No env specified: Use the configs for local development
-        project.ext["dbUrl"] = "jdbc:mariadb://localhost:3306/tst_application"
-        project.ext["dbUsername"] = "tst_application"
-        project.ext["dbPassword"] = "tst_application"
+        project.ext["dbUrl"] = "jdbc:postgresql://localhost:5432/tst_eventify"
+        project.ext["dbUsername"] = "tst_eventify"
+        project.ext["dbPassword"] = "tst_eventify"
         project.ext["contexts"] = "test"
         project.ext["outputFile"] = "liquibaseChanges.sql"
         project.ext["changelogFile"] = "database/db.changelog.yaml"

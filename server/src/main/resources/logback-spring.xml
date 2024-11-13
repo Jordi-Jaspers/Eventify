@@ -16,7 +16,7 @@
     </appender>
 
     <appender name="KIBANA" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./log/top.log</file>
+        <file>./log/eventify.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%level) [%green(TX:%X{tx_id})/%yellow(REQ:%X{req_id})] [%magenta(T:%thread)] [%cyan(L:%logger:%line)] %msg%n</pattern>
         </encoder>
@@ -43,6 +43,7 @@
     <logger name="org.springframework.web" level="${SPRING_LOG_LEVEL:-INFO}"/>
     <logger name="org.springframework.security" level="${SPRING_LOG_LEVEL:-INFO}"/>
     <logger name="org.springframework.security.access.intercept" level="${SPRING_LOG_LEVEL:-INFO}"/>
+    <logger name="org.springframework.context.support" level="${SPRING_LOG_LEVEL:-ERROR}"/>
     <logger name="org.springframework.beans" level="${SPRING_LOG_LEVEL:-INFO}"/>
     <logger name="org.springframework.web.socket" level="${SPRING_LOG_LEVEL:-INFO}"/>
     <logger name="org.springframework.web.socket.handler" level="${SPRING_LOG_LEVEL:-INFO}"/>
@@ -60,6 +61,8 @@
     <logger name="org.hawaiiframework.logging.web.filter.KibanaLogCleanupFilter" level="${HAWAII_LOG_LEVEL:-ERROR}"/>
     <logger name="org.hawaiiframework.logging.web.filter.TransactionTypeFilter" level="${HAWAII_LOG_LEVEL:-INFO}"/>
     <logger name="org.hawaiiframework.logging.LoggingClientHttpRequestInterceptor" level="${HAWAII_LOG_LEVEL:-DEBUG}"/>
+
+    <logger name="org.hibernate.orm.connections.pooling" level="-ERROR"/>
 
     <!-- Root level and appender selection, defaults to HUMANREADABLE, overridable with env var $LOG_APPENDER -->
     <root level="${ROOT_LOG_LEVEL:-INFO}">
