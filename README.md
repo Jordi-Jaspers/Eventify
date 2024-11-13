@@ -1,5 +1,5 @@
 <p align="center">
-    <img width="150px" src="https://github.com/Jordi-Jaspers/Aniflix/blob/develop/client/src/lib/images/eventify-logo.png" alt="logo"/>
+    <img width="150px" src="https://github.com/Jordi-Jaspers/eventify/blob/develop/client/src/lib/images/eventify-logo.png" alt="logo"/>
     <h1 align="center">Eventify</h1>
 </p>
 <p align="center">Eventify.io - An intuitive tool to manage and monitor your services via intelligent event creation.</p>
