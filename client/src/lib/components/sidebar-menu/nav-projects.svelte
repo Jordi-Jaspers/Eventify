@@ -1,14 +1,14 @@
 <script lang="ts">
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-	import { useSidebar } from "$lib/components/ui/sidebar/context.svelte.js";
-	import * as Sidebar from "$lib/components/ui/sidebar";
-	import Ellipsis from "lucide-svelte/icons/ellipsis";
-	import Folder from "lucide-svelte/icons/folder";
-	import Forward from "lucide-svelte/icons/forward";
-	import Trash2 from "lucide-svelte/icons/trash-2";
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
+	import * as Sidebar from '$lib/components/ui/sidebar';
+	import Ellipsis from 'lucide-svelte/icons/ellipsis';
+	import Folder from 'lucide-svelte/icons/folder';
+	import Forward from 'lucide-svelte/icons/forward';
+	import Trash2 from 'lucide-svelte/icons/trash-2';
 
 	let {
-		projects,
+		projects
 	}: {
 		projects: {
 			name: string;
@@ -46,8 +46,8 @@
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content
 						class="w-48 rounded-lg"
-						side={sidebar.isMobile ? "bottom" : "right"}
-						align={sidebar.isMobile ? "end" : "start"}
+						side={sidebar.isMobile ? 'bottom' : 'right'}
+						align={sidebar.isMobile ? 'end' : 'start'}
 					>
 						<DropdownMenu.Item>
 							<Folder class="text-muted-foreground" />

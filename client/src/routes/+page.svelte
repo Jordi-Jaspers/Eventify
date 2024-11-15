@@ -7,13 +7,13 @@
 	import { HeartBeat } from '$lib/components/general';
 </script>
 
-<div class="h-full flex flex-col">
+<div class="flex h-full flex-col">
 	<div class="flex p-4">
-		<Activity class="w-6 h-6 inline-block mr-2" />
+		<Activity class="mr-2 inline-block h-6 w-6" />
 		<h4>Eventify.io</h4>
 	</div>
 
-	<div class="flex w-full h-full items-center justify-center px-4">
+	<div class="flex h-full w-full items-center justify-center px-4">
 		<div class="w-full max-w-md">
 			<HeartBeat />
 			<Tabs value="login" class="w-full space-y-4">
@@ -33,7 +33,3 @@
 		</div>
 	</div>
 </div>
-
-
-
-

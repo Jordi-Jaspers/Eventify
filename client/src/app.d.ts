@@ -2,7 +2,7 @@ declare global {
 	// declare const __NAME__: string;
 	// declare const __VERSION__: string;
 	namespace App {}
-	declare module "*.png?enhanced";
+	declare module '*.png?enhanced';
 }
 
 // ======================== EXCEPTION ========================

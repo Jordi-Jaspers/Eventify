@@ -23,14 +23,12 @@
 		console.log(formData);
 		isLoading = false;
 	}
-
 </script>
 
 <form id="login" onsubmit={handleSubmit}>
 	<CardHeader>
 		<CardTitle class="text-2xl">Sign In</CardTitle>
-		<CardDescription>Enter your email and password to access your account and start your monitoring journey
-		</CardDescription>
+		<CardDescription>Enter your email and password to access your account and start your monitoring journey</CardDescription>
 	</CardHeader>
 	<CardContent class="grid w-full items-center gap-4">
 		<div>
@@ -43,12 +41,13 @@
 				<a href={CLIENT_URLS.FORGOT_PASSWORD_URL} class="text-sm text-blue-500 hover:underline">Forgot password?</a>
 			</div>
 			<div class="relative">
-				<Input type={showPassword ? "text" : "password"}
-							 bind:value={formData.password}
-							 placeholder="Password"
-							 autocomplete="current-password"
-							 class="pr-10"
-							 required
+				<Input
+					type={showPassword ? 'text' : 'password'}
+					bind:value={formData.password}
+					placeholder="Password"
+					autocomplete="current-password"
+					class="pr-10"
+					required
 				/>
 				<Privacy bind:enabled={showPassword} />
 			</div>
@@ -58,8 +57,8 @@
 			<div class="mx-1 flex flex-row content-center justify-center space-x-2 text-sm text-red-500">
 				<ShieldAlert class="m-2 w-[10%]" />
 				<span class="w-[90%]">
-						{errorMessage}
-					</span>
+					{errorMessage}
+				</span>
 			</div>
 		{/if}
 
@@ -67,17 +66,16 @@
 			<div class="mx-1 flex flex-row content-center justify-center space-x-2 text-sm text-orange-500">
 				<ShieldEllipsis class="m-2 w-[10%]" />
 				<span class="w-[90%]">
-						Your account has not been validated. Please check your email for a validation link.
-						<button type="button" class="underline"> Resend email </button>
-					</span>
+					Your account has not been validated. Please check your email for a validation link.
+					<button type="button" class="underline"> Resend email </button>
+				</span>
 			</div>
 		{/if}
 
-		<Submit isLoading={isLoading} isDisabled={isLoading} title="Log in" form="login" />
+		<Submit {isLoading} isDisabled={isLoading} title="Log in" form="login" />
 		<div class="relative">
 			<div class="absolute inset-0 flex items-center">
-					<span class="w-full border-t">
-					</span>
+				<span class="w-full border-t"> </span>
 			</div>
 			<div class="relative flex justify-center text-xs uppercase">
 				<span class="bg-background px-2 text-muted-foreground"> Or continue with </span>
@@ -85,7 +83,7 @@
 		</div>
 	</CardContent>
 	<CardFooter class="flex flex-col space-y-2">
-		<GithubButton isLoading={isLoading} />
-		<OTPButton isLoading={isLoading} />
+		<GithubButton {isLoading} />
+		<OTPButton {isLoading} />
 	</CardFooter>
 </form>

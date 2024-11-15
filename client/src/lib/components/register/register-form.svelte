@@ -23,8 +23,8 @@
 	}
 
 	let showPassword: boolean = $state(false);
-	let isPasswordValid:boolean = $state(false);
-	let isLoading:boolean = $state(false);
+	let isPasswordValid: boolean = $state(false);
+	let isLoading: boolean = $state(false);
 	let isDisabled = $derived(isLoading || !isPasswordValid);
 </script>
 
@@ -47,20 +47,20 @@
 
 		<div class="grid gap-2">
 			<Label>Email</Label>
-			<Input id="email" type="email" placeholder="johndoe@example.com" autocomplete="username" required
-						 bind:value={formData.email} />
+			<Input id="email" type="email" placeholder="johndoe@example.com" autocomplete="username" required bind:value={formData.email} />
 		</div>
 		<div class="grid gap-2">
 			<Label>Password</Label>
 			<div class="relative">
-				<Input type={showPassword ? "text" : "password"}
-							 bind:value={formData.password}
-							 placeholder="Password"
-							 autocomplete="current-password"
-							 class="pr-10"
-							 required
+				<Input
+					type={showPassword ? 'text' : 'password'}
+					bind:value={formData.password}
+					placeholder="Password"
+					autocomplete="current-password"
+					class="pr-10"
+					required
 				/>
-				<Privacy bind:enabled={showPassword}/>
+				<Privacy bind:enabled={showPassword} />
 			</div>
 		</div>
 		<div class="grid gap-2">
@@ -76,18 +76,14 @@
 				/>
 			</div>
 		</div>
-		<PasswordMeter
-			password={formData.password}
-			confirmation={formData.passwordConfirmation}
-			bind:isValid={isPasswordValid}
-		/>
+		<PasswordMeter password={formData.password} confirmation={formData.passwordConfirmation} bind:isValid={isPasswordValid} />
 
 		{#if errorMessage && registerResponse === undefined}
 			<div class="mx-1 flex flex-row content-center justify-center space-x-2 text-sm text-red-500">
 				<ShieldAlert class="m-2 w-[10%]" />
 				<span class="w-[90%]">
-						{errorMessage}
-					</span>
+					{errorMessage}
+				</span>
 			</div>
 		{/if}
 
@@ -95,13 +91,13 @@
 			<div class="space-x- mx-1 flex flex-row content-center justify-center text-sm text-green-500">
 				<ShieldCheck class="m-2 w-[10%]" />
 				<span class="w-[90%]">
-						You have successfully registered. Please check your mailbox to verify your email address.
-						<button type="button" class="underline"> Resend email </button>
-					</span>
+					You have successfully registered. Please check your mailbox to verify your email address.
+					<button type="button" class="underline"> Resend email </button>
+				</span>
 			</div>
 		{/if}
 	</CardContent>
 	<CardFooter>
-		<Submit isLoading={isLoading} isDisabled={isDisabled} title="Create Account" form="register" />
+		<Submit {isLoading} {isDisabled} title="Create Account" form="register" />
 	</CardFooter>
 </form>

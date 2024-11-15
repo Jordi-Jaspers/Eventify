@@ -1,0 +1,9 @@
+# This loads nvm.sh and sets the correct PATH before running hook
+# Currently not needed in project folder, but required in GUIs. See documentation:
+# https://typicode.github.io/husky/how-to.html#solution
+
+# To support GUIs like SmartGit, place code below in the following file:
+# ~/.config/husky/init.sh
+
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"

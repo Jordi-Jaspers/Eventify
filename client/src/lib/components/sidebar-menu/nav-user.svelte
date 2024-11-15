@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Avatar from '$lib/components/ui/avatar';
-	import {Root, Trigger, Content, Label, Separator, Group, Item} from '$lib/components/ui/dropdown-menu';
-	import {Menu, MenuItem, MenuButton} from '$lib/components/ui/sidebar';
+	import { Root, Trigger, Content, Label, Separator, Group, Item } from '$lib/components/ui/dropdown-menu';
+	import { Menu, MenuItem, MenuButton } from '$lib/components/ui/sidebar';
 	import { useSidebar } from '$lib/components/ui/sidebar';
 	import { toggleMode } from 'mode-watcher';
 	import BadgeCheck from 'lucide-svelte/icons/badge-check';
@@ -21,11 +21,7 @@
 		<Root>
 			<Trigger>
 				{#snippet child({ props })}
-					<MenuButton
-						size="lg"
-						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-						{...props}
-					>
+					<MenuButton size="lg" class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground" {...props}>
 						<Avatar.Root class="h-8 w-8 rounded-lg">
 							<Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
 						</Avatar.Root>
@@ -39,7 +35,7 @@
 			</Trigger>
 			<Content
 				class="w-[--bits-dropdown-menu-anchor-width] min-w-56 rounded-lg"
-				side={sidebar.isMobile ? "bottom" : "right"}
+				side={sidebar.isMobile ? 'bottom' : 'right'}
 				align="end"
 				sideOffset={4}
 			>
@@ -64,9 +60,9 @@
 				<Separator />
 				<Group>
 					<Item onclick={toggleMode}>
-						<span class="gap-2 items-center flex justify-center">
-							<Moon class="dark:flex hidden h-[1.2rem] w-[1.2rem] dark:scale-100 transition-all" />
-							<Sun class="flex dark:hidden h-[1.2rem] w-[1.2rem] scale-100 transition-all" />
+						<span class="flex items-center justify-center gap-2">
+							<Moon class="hidden h-[1.2rem] w-[1.2rem] transition-all dark:flex dark:scale-100" />
+							<Sun class="flex h-[1.2rem] w-[1.2rem] scale-100 transition-all dark:hidden" />
 							<span>Switch Mode</span>
 						</span>
 					</Item>

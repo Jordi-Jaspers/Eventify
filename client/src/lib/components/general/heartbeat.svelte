@@ -1,10 +1,5 @@
-<div class="flex justify-center relative">
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		class="heartbeat-container"
-		viewBox="0 0 300 150"
-		preserveAspectRatio="xMidYMid meet"
-	>
+<div class="relative flex justify-center">
+	<svg xmlns="http://www.w3.org/2000/svg" class="heartbeat-container" viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet">
 		<polyline
 			class="heartbeat"
 			fill="none"
@@ -17,30 +12,30 @@
 </div>
 
 <style>
-    .heartbeat-container {
-        width: 100%; /* Make it responsive to the container's width */
-        height: auto; /* Maintain aspect ratio */
-        max-width: 800px; /* Optional: set a maximum width */
-        filter: blur(1px); /* Adds subtle blur */
-        opacity: 0.7; /* Reduces the opacity */
-				z-index: -1;
-    }
+	.heartbeat-container {
+		width: 100%; /* Make it responsive to the container's width */
+		height: auto; /* Maintain aspect ratio */
+		max-width: 800px; /* Optional: set a maximum width */
+		filter: blur(1px); /* Adds subtle blur */
+		opacity: 0.7; /* Reduces the opacity */
+		z-index: -1;
+	}
 
-    .heartbeat {
-        stroke-dasharray: 600; /* Total length of the path */
-        stroke-dashoffset: 1200; /* Start hidden */
-        animation: pulse 4s linear infinite;
-    }
+	.heartbeat {
+		stroke-dasharray: 600; /* Total length of the path */
+		stroke-dashoffset: 1200; /* Start hidden */
+		animation: pulse 4s linear infinite;
+	}
 
-    @keyframes pulse {
-        0% {
-            stroke-dashoffset: 1200; /* Fully hidden */
-        }
-        50% {
-            stroke-dashoffset: 600; /* Pulse reaches mid-point */
-        }
-        100% {
-            stroke-dashoffset: 0; /* Pulse completes, restarts seamlessly */
-        }
-    }
+	@keyframes pulse {
+		0% {
+			stroke-dashoffset: 1200; /* Fully hidden */
+		}
+		50% {
+			stroke-dashoffset: 600; /* Pulse reaches mid-point */
+		}
+		100% {
+			stroke-dashoffset: 0; /* Pulse completes, restarts seamlessly */
+		}
+	}
 </style>

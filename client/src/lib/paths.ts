@@ -20,5 +20,5 @@ export const CLIENT_URLS = {
 	LOGIN_URL: '/login',
 	FORGOT_PASSWORD_URL: '/password/forgot',
 	RESET_PASSWORD_URL: '/password/reset',
-	ACCOUNT_URL: '/account',
+	ACCOUNT_URL: '/account'
 };
