@@ -18,7 +18,6 @@
 <Button form={form} type="submit" class="w-full" disabled={isDisabled}>
     {#if isLoading}
         <LoaderCircle class="h-4 w-4 animate-spin"/>
-        please wait...
     {:else}
         <span>{title}</span>
     {/if}

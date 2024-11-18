@@ -58,7 +58,7 @@ export const CLIENT_ROUTES = {
 		type: RouteType.PUBLIC
 	},
 	RESEND_EMAIL_VERIFICATION_PAGE: {
-		path: '/verify/resend',
+		path: '/verify/email/resend',
 		type: RouteType.PUBLIC
 	},
 	FORGOT_PASSWORD_PAGE: {

@@ -10,6 +10,7 @@
 	import {applyAction, enhance} from '$app/forms';
 	import {toast} from "svelte-sonner";
 
+	let data = $props();
 	let showPassword: boolean = $state(false);
 	let formData = $state<LoginRequest>({
 		email: '',
@@ -43,7 +44,9 @@
 		<div class="grid gap-2">
 			<div class="flex flex-row items-center justify-between">
 				<Label>Email</Label>
-				<a href={CLIENT_ROUTES.RESEND_EMAIL_VERIFICATION_PAGE.path} class="text-sm text-blue-500 hover:underline">Resend Validation</a>
+				{#if data.user && !data.user.validated}
+					<a href={CLIENT_ROUTES.RESEND_EMAIL_VERIFICATION_PAGE.path} class="text-sm text-blue-500 hover:underline">Resend Validation</a>
+					{/if}
 			</div>
 			<Input
 				name="email"
