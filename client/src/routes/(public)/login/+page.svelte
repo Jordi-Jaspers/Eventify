@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { LoginForm } from '$lib/components/login';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
-	import { RegisterForm } from '$lib/components/register/index.js';
+	import { RegisterForm } from '$lib/components/register';
 	import { Card } from '$lib/components/ui/card';
 	import { Activity } from 'lucide-svelte';
 	import { HeartBeat } from '$lib/components/general';

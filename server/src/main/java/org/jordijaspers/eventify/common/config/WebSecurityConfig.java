@@ -1,12 +1,12 @@
 package org.jordijaspers.eventify.common.config;
 
 import org.jordijaspers.eventify.common.security.converter.JwtAuthenticationConverter;
-import org.jordijaspers.eventify.common.security.entrypoint.DefaultAuthenticationEntryPoint;
 import org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,38 +31,36 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(
-    securedEnabled = true,
-    jsr250Enabled = true
-)
+@EnableMethodSecurity
 @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-public class WebSecurityConfig {
+public class WebSecurityConfig implements WebMvcConfigurer {
 
     /**
      * Configure CORS & requests handling behaviour.
      **/
     @Bean
     public SecurityFilterChain filterChain(@Value("${security.cors.allowed-origins}") final String[] allowedOrigins,
-        final DefaultAuthenticationEntryPoint authenticationEntryPoint,
         final JwtAuthenticationFilter jwtAuthenticationFilter,
         final JwtAuthenticationConverter jwtAuthenticationConverter,
-        final AuthenticationProvider authenticationProvider,
         final HttpSecurity http) throws Exception {
 
         // Adding a once per request filter to check the JWT token.
         http.addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Adding a custom authentication provider.
-        http.authenticationProvider(authenticationProvider);
+        // Configure Session Management.
+        http.sessionManagement(sessionConfiguration -> sessionConfiguration.sessionCreationPolicy(STATELESS));
+
+        // Return 401 (unauthorized) instead of 302 (redirect to login) when an authorization is missing or invalid.
+        http.exceptionHandling(handler -> handler.authenticationEntryPoint((request, response, authException) -> {
+            response.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer realm=\"Restricted Content\"");
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
+        }));
 
         // Disable CSRF because of state-less session-management.
         http.csrf(AbstractHttpConfigurer::disable);
 
         // Enable CORS.
         http.cors(cors -> cors.configurationSource(corsConfigurationSource(allowedOrigins)));
-
-        // Configure Session Management.
-        http.sessionManagement(sessionConfiguration -> sessionConfiguration.sessionCreationPolicy(STATELESS));
 
         // Configure OAuth2 Resource Server.
         http.oauth2ResourceServer(oAuth2Configurer -> {
@@ -73,9 +72,6 @@ public class WebSecurityConfig {
                 jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter);
             });
         });
-
-        // Add Exception Handling for unauthorized requests.
-        http.exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint));
 
         // Configure Endpoints
         http.authorizeHttpRequests(accessManagement -> {

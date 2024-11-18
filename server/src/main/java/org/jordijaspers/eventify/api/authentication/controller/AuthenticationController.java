@@ -77,7 +77,7 @@ public class AuthenticationController {
 
     @ResponseStatus(OK)
     @Operation(summary = "Verify the email address of a user.")
-    @PostMapping(path = EMAIL_VERIFICATION_PATH)
+    @PostMapping(path = VERIFICATION_PATH)
     public ResponseEntity<UserResponse> verifyEmail(@RequestParam("token") final String token) {
         final User user = authenticationService.verifyEmail(token);
         return ResponseEntity.status(OK).body(userMapper.toUserResponse(user));
@@ -85,8 +85,8 @@ public class AuthenticationController {
 
     @ResponseStatus(NO_CONTENT)
     @Operation(summary = "Resend the verification email to the user.")
-    @PostMapping(path = RESEND_VERIFICATION_PATH)
-    public ResponseEntity<Void> resendValidationEmail(@RequestParam("email") final String email) {
+    @PostMapping(path = RESEND_EMAIL_VERIFICATION_PATH)
+    public ResponseEntity<Void> resendEmailVerification(@RequestParam("email") final String email) {
         authenticationService.resendVerification(email);
         return ResponseEntity.status(NO_CONTENT).build();
     }

@@ -13,11 +13,9 @@
 
 <style>
 	.heartbeat-container {
-		width: 100%; /* Make it responsive to the container's width */
+		width: 50%; /* Make it responsive to the container's width */
 		height: auto; /* Maintain aspect ratio */
 		max-width: 800px; /* Optional: set a maximum width */
-		filter: blur(1px); /* Adds subtle blur */
-		opacity: 0.7; /* Reduces the opacity */
 		z-index: -1;
 	}
 

@@ -15,15 +15,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.time.ZoneOffset.UTC;
+import static org.jordijaspers.eventify.api.token.model.JWTClaimNames.*;
 import static org.jordijaspers.eventify.api.token.model.TokenType.ACCESS_TOKEN;
 import static org.jordijaspers.eventify.api.token.model.TokenType.REFRESH_TOKEN;
-
 
 /**
  * The service to extract data from a valid JWT token.
@@ -49,7 +49,20 @@ public class JwtService {
      * Generate a JWT access token for a user with the default claims.
      */
     public <T extends UserDetails> Token generateAccessToken(final T user) {
-        return generateAccessToken(user, new HashMap<>());
+        final String[] roles = user.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .toArray(String[]::new);
+
+        final User userDetails = (User) user;
+        final Map<String, Object> claims = new HashMap<>();
+        claims.put(AUTHORITIES, roles);
+        claims.put(FIRST_NAME, userDetails.getFirstName());
+        claims.put(LAST_NAME, userDetails.getLastName());
+        claims.put(ENABLED, userDetails.isEnabled());
+        claims.put(VALIDATED, userDetails.isValidated());
+        claims.put(LAST_LOGIN, ZonedDateTime.of(userDetails.getLastLogin(), UTC));
+        claims.put(CREATED, ZonedDateTime.of(userDetails.getCreated(), UTC));
+        return generateAccessToken(user, claims);
     }
 
     /**
@@ -57,16 +70,11 @@ public class JwtService {
      */
     public <T extends UserDetails> Token generateAccessToken(final T user, final Map<String, Object> claims) {
         final LocalDateTime now = LocalDateTime.now();
-        final String scope = user.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(" "));
-
         final JwtClaimsSet claimsSet = JwtClaimsSet.builder()
             .subject(user.getUsername())
             .issuer(applicationProperties.getUrl())
             .issuedAt(now.toInstant(UTC))
             .audience(List.of(applicationProperties.getUrl()))
-            .claim("roles", scope)
             .claims(claims::putAll)
             .expiresAt(now.plusSeconds(lifetime).toInstant(UTC))
             .build();

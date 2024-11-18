@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import static org.springframework.http.HttpHeaders.EMPTY;
 import static org.springframework.http.HttpStatus.*;
@@ -171,6 +172,28 @@ public class ResponseEntityExceptionHandler {
     )
     public ResponseEntity<?> handleAccessDeniedException(final AccessDeniedException exception, final WebRequest request) {
         final HttpStatus status = FORBIDDEN;
+        return ResponseEntity.status(status).body(buildErrorResponseBody(exception, status, request));
+    }
+
+    /**
+     * Handles {@code NoResourceFoundException} errors.
+     *
+     * @param exception the exception
+     * @param request   the current request
+     * @return a response entity reflecting the current exception
+     */
+    @ResponseBody
+    @ResponseStatus(NOT_FOUND)
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ApiResponse(
+        responseCode = "404",
+        description = "Resource Not Found",
+        content = @Content(
+            schema = @Schema(implementation = ErrorResponseResource.class)
+        )
+    )
+    public ResponseEntity<?> handleNoResourceFoundException(final NoResourceFoundException exception, final WebRequest request) {
+        final HttpStatus status = NOT_FOUND;
         return ResponseEntity.status(status).body(buildErrorResponseBody(exception, status, request));
     }
 

@@ -37,7 +37,8 @@
 
 [//]: # (Add a list of features here)
 
-- [ ] **...**
+- [x] **Secure OAuth**
+- [x] **...**
 </details>
 
 **Website Preview:** https://eventify.io/  

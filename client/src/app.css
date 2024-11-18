@@ -99,17 +99,13 @@
 	}
 }
 
-.loading {
-	@apply animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-muted-foreground motion-reduce:animate-[spin_1.5s_linear_infinite];
-}
-
 @property --angle {
 	syntax: '<angle>';
 	inherits: false;
 	initial-value: 0deg;
 }
 
-@keyframes spin {
+@keyframes turn {
 	from {
 		--angle: 0deg;
 	}
@@ -125,7 +121,7 @@
 .snake::after {
 	--angle: 0deg;
 	--inverse-angle: calc(360deg - var(--angle));
-	animation: spin 5s linear infinite;
+	animation: turn 5s linear infinite;
 	content: '';
 	z-index: -1;
 	background-image: conic-gradient(from var(--angle), transparent 70%, green);

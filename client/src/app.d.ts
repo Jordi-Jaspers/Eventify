@@ -1,11 +1,23 @@
 declare global {
-	// declare const __NAME__: string;
-	// declare const __VERSION__: string;
-	namespace App {}
 	declare module '*.png?enhanced';
+	namespace App {
+		interface Locals {
+			user?: UserDetailsResponse;
+		}
+	}
 }
 
 // ======================== EXCEPTION ========================
+class RetryConfig {
+	retries?: number;
+	timeout?: number;
+}
+
+class ApiResponse {
+	response?: Response;
+	error?: string;
+}
+
 class Exception {
 	method: string;
 	uri: string;
@@ -106,23 +118,28 @@ class UserDetailsResponse {
 	validated: boolean;
 }
 
-class AuthorizeResponse {
-	email: string;
-	authorities: string[];
-	lastLogin: Date;
+class AuthorizeResponse extends UserDetailsResponse {
 	accessToken: string;
 	refreshToken: string;
 	expiresAt: Date;
-	enabled: boolean;
-	validated: boolean;
 }
 
 // ======================== JWT ========================
 
+class TokenPair {
+	accessToken: string;
+	refreshToken: string;
+}
+
 class JwtPayload {
+	sub: string;
+	firstName: string;
+	lastName: string;
 	authorities: string[];
+	lastLogin: Date;
+	enabled: boolean;
+	validated: boolean;
 	exp: number;
 	iat: number;
 	iss: string;
-	sub: string;
 }

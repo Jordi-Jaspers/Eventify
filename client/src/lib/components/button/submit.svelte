@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+    import {Button} from '$lib/components/ui/button';
+    import {LoaderCircle} from "lucide-svelte";
 
 	let {
 		isLoading = false,
@@ -14,10 +15,11 @@
 	}>();
 </script>
 
-<Button {form} type="submit" class="w-full" disabled={isDisabled}>
-	{#if isLoading}
-		<div class="loading inline-block h-8 w-8" role="status"></div>
-	{:else}
-		<span>{title}</span>
-	{/if}
+<Button form={form} type="submit" class="w-full" disabled={isDisabled}>
+    {#if isLoading}
+        <LoaderCircle class="h-4 w-4 animate-spin"/>
+        please wait...
+    {:else}
+        <span>{title}</span>
+    {/if}
 </Button>

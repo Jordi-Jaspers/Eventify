@@ -49,9 +49,9 @@ public final class Paths {
 
     public static final String LOGOUT_PATH = AUTH_PATH + "/logout";
 
-    public static final String EMAIL_VERIFICATION_PATH = AUTH_PATH + "/verify";
+    public static final String VERIFICATION_PATH = AUTH_PATH + "/verify";
 
-    public static final String RESEND_VERIFICATION_PATH = EMAIL_VERIFICATION_PATH + "/resend";
+    public static final String RESEND_EMAIL_VERIFICATION_PATH = VERIFICATION_PATH + "/resend";
 
     /* ------------------------------- USER ENDPOINTS ------------------------------- */
 

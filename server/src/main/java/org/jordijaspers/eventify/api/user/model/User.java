@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.jordijaspers.eventify.api.authentication.model.Role;
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,7 +29,7 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 @Data
 @Entity
 @NoArgsConstructor
-@Table(name = "user")
+@Table(name = "\"user\"")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(
     exclude = {
@@ -44,7 +45,7 @@ public class User implements UserDetails {
     @Id
     @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @NaturalId
     @Column(
@@ -79,6 +80,7 @@ public class User implements UserDetails {
     @Column(name = "validated")
     private boolean validated;
 
+    @UpdateTimestamp
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
