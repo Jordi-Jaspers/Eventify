@@ -7,6 +7,12 @@
 	let { children } = $props();
 </script>
 
+<head>
+	<title>Dashboard - Eventify</title>
+	<meta name="description" content="Login to your Eventify account." />
+	<meta name="keywords" content="login, eventify, account, register" />
+</head>
+
 <Sidebar.Provider>
 	<SidebarMenu />
 	<Sidebar.Inset>
@@ -16,7 +22,7 @@
 			<div class="flex items-center gap-2 px-4">
 				<Sidebar.Trigger class="-ml-1" />
 				<Separator orientation="vertical" class="mr-2 h-4" />
-				<Breadcrumb.Root>test</Breadcrumb.Root>
+				<Breadcrumb.Root>Enter the location of the current page here.</Breadcrumb.Root>
 			</div>
 		</header>
 		<main>

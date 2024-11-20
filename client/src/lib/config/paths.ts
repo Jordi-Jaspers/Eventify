@@ -73,6 +73,10 @@ export const CLIENT_ROUTES = {
 		path: '/verify/email',
 		type: RouteType.PUBLIC
 	},
+	LOGOUT_PAGE: {
+		path: '/logout',
+		type: RouteType.PRIVATE
+	},
 	ACCOUNT_DETAILS_PAGE: {
 		account: '/account',
 		type: RouteType.PRIVATE

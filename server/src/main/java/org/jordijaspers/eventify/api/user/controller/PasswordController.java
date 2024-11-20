@@ -28,7 +28,7 @@ public class PasswordController {
 
     @ResponseStatus(NO_CONTENT)
     @Operation(summary = "Request a password reset.")
-    @GetMapping(path = PUBLIC_REQUEST_PASSWORD_RESET_PATH)
+    @PostMapping(path = PUBLIC_REQUEST_PASSWORD_RESET_PATH)
     public ResponseEntity<Void> requestPasswordReset(@RequestParam(name = "email") final String email) {
         passwordService.requestPasswordReset(email);
         return ResponseEntity.status(NO_CONTENT).build();
@@ -41,7 +41,7 @@ public class PasswordController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<?> resetPassword(@RequestBody final ForgotPasswordRequest request) {
+    public ResponseEntity<Void> resetPassword(@RequestBody final ForgotPasswordRequest request) {
         passwordValidator.validateAndThrow(request);
         passwordService.changePassword(request.getNewPassword(), request.getToken());
         return ResponseEntity.status(NO_CONTENT).build();
@@ -54,7 +54,7 @@ public class PasswordController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<?> updatePassword(@RequestBody final UpdatePasswordRequest request,
+    public ResponseEntity<Void> updatePassword(@RequestBody final UpdatePasswordRequest request,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
         passwordValidator.validateAndThrow(request);
         passwordService.updatePassword(request, principal.getUser());

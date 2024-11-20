@@ -55,15 +55,17 @@ public class UserService implements UserDetailsService {
     @Override
     public User loadUserByUsername(final String username) {
         return userRepository.findByEmail(username)
-            .filter(user -> {
-                if (!user.isEnabled()) {
-                    throw new AuthorizationException(USER_DISABLED_ERROR);
-                } else if (!user.isValidated()) {
-                    throw new AuthorizationException(USER_UNVALIDATED_ERROR);
-                }
-                return true;
-            })
             .orElseThrow(() -> new AuthorizationException(INVALID_CREDENTIALS));
+    }
+
+    /**
+     * Finds the user by the given username. If the user is not found, an exception is thrown.
+     *
+     * @param username the username of the user
+     * @return the user, or null if the user is not found
+     */
+    public User findByUsername(final String username) {
+        return userRepository.findByEmail(username).orElse(null);
     }
 
     /**

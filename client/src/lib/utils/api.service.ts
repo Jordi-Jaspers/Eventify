@@ -1,4 +1,4 @@
-import { ApiException } from '$lib/utils/exception.error';
+import { Exception } from '$lib/models/exception.error';
 
 export class ApiService {
 	/**
@@ -25,16 +25,16 @@ export class ApiService {
 					throw new Error(`HTTP error! Status: ${response.status}`);
 				}
 
-				return { response: response };
+				return { response: response, status: response.status };
 			} catch (error) {
 				attempts++;
 				if (attempts >= retries) {
 					if (lastErrorResponse) {
-						const exception: ApiException = ApiException.fromResponse(lastErrorResponse, await lastErrorResponse.json());
-						return { error: exception.message };
+						const exception: Exception = new Exception(lastErrorResponse, await lastErrorResponse.json());
+						return { error: exception.message, status: exception.status };
 					}
 					console.error(`Failed to fetch ${url} after ${retries} attempts`);
-					return { error: 'Something went wrong processing your request.' };
+					return { error: 'Something went wrong processing your request.', status: 500 };
 				}
 			}
 		}

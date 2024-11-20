@@ -1,4 +1,5 @@
 import { TOKEN_REFRESH_BUFFER_SECONDS } from '$lib/config/constants';
+import { SERVER_ROUTES } from '$lib/config/paths';
 
 export class JwtService {
 	/**
@@ -8,7 +9,7 @@ export class JwtService {
 	 * Returns true if token is expired or invalid
 	 */
 	static isTokenExpired(token: string, bufferSeconds: number = TOKEN_REFRESH_BUFFER_SECONDS): boolean {
-		const payload = this.decodeToken(token);
+		const payload: JwtPayload | null = this.decodeToken(token);
 		if (!payload) return true;
 
 		const currentTime = Math.floor(Date.now() / 1000); // Convert to seconds
@@ -35,20 +36,39 @@ export class JwtService {
 	 * @returns User details, or null if token is invalid
 	 */
 	static getUserDetailsFromToken(token: string): UserDetailsResponse | null {
-		const payload = this.decodeToken(token);
+		const payload: JwtPayload | null = this.decodeToken(token);
 		if (!payload) return null;
-
-		const userDetails: UserDetailsResponse = {
+		return {
 			email: payload.sub,
-			firstName: payload.firstName,
-			lastName: payload.lastName,
+			firstName: payload.first_name,
+			lastName: payload.last_name,
 			authorities: payload.authorities,
-			lastLogin: new Date(payload.lastLogin),
+			lastLogin: new Date(payload.last_login * 1000),
+			created: new Date(payload.created * 1000),
 			enabled: payload.enabled,
 			validated: payload.validated
 		};
+	}
 
-		return userDetails;
+	static async refreshTokenPair(refreshToken: string): Promise<TokenPair | undefined> {
+		try {
+			const response: Response = await fetch(SERVER_ROUTES.REFRESH.path, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ refreshToken })
+			});
+
+			if (response.ok) {
+				const refreshResponse: AuthorizeResponse = await response.json();
+				return { accessToken: refreshResponse.accessToken, refreshToken: refreshResponse.refreshToken };
+			}
+		} catch (error) {
+			console.error('Error refreshing token:', error);
+		}
+
+		return;
 	}
 
 	/**
@@ -67,7 +87,6 @@ export class JwtService {
 	 */
 	private static decodeToken(token: string): JwtPayload | null {
 		if (!this.isValidTokenFormat(token)) {
-			console.error('Invalid Token: Incorrect Format');
 			return null;
 		}
 

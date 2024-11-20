@@ -23,7 +23,7 @@ public enum ApiErrorCode implements ApiError {
     ),
     TOKEN_NOT_FOUND_ERROR(
         "ERR-0004",
-        "Could not find the requested token."
+        "Provided token does not exist, double check the token."
     ),
     INVALID_TOKEN_ERROR(
         "ERR-0005",

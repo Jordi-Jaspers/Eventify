@@ -16,7 +16,7 @@
         isLoading = true
         return async ({result}) => {
             isLoading = false
-            toast.success('If the email exists, a verification email will be sent to it.');
+            toast.success('You will receive a password reset link shortly, if the email exists.');
             await applyAction(result)
         }
     }
@@ -27,8 +27,8 @@
     <div class="flex h-full w-full items-center justify-center px-4">
         <Card class="snake">
             <CardHeader>
-                <CardTitle class="text-2xl">Resend Verification</CardTitle>
-                <CardDescription>Where should we send the verification message to?</CardDescription>
+                <CardTitle class="text-2xl">Forgot Password</CardTitle>
+                <CardDescription>Enter your email to receive a password reset link</CardDescription>
             </CardHeader>
             <CardContent class="grid w-full items-center gap-4">
                 <form id="resend" method="POST" use:enhance={resend}>

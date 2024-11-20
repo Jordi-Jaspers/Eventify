@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.time.ZoneOffset.UTC;
 import static org.jordijaspers.eventify.api.token.model.JWTClaimNames.*;
@@ -46,37 +43,28 @@ public class JwtService {
     // ================================ Token Generation ================================
 
     /**
-     * Generate a JWT access token for a user with the default claims.
+     * Generate a JWT access token for the user with the given claims.
      */
     public <T extends UserDetails> Token generateAccessToken(final T user) {
+        final LocalDateTime now = LocalDateTime.now();
+        final User userDetails = (User) user;
         final String[] roles = user.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .toArray(String[]::new);
 
-        final User userDetails = (User) user;
-        final Map<String, Object> claims = new HashMap<>();
-        claims.put(AUTHORITIES, roles);
-        claims.put(FIRST_NAME, userDetails.getFirstName());
-        claims.put(LAST_NAME, userDetails.getLastName());
-        claims.put(ENABLED, userDetails.isEnabled());
-        claims.put(VALIDATED, userDetails.isValidated());
-        claims.put(LAST_LOGIN, ZonedDateTime.of(userDetails.getLastLogin(), UTC));
-        claims.put(CREATED, ZonedDateTime.of(userDetails.getCreated(), UTC));
-        return generateAccessToken(user, claims);
-    }
-
-    /**
-     * Generate a JWT access token for the user with the given claims.
-     */
-    public <T extends UserDetails> Token generateAccessToken(final T user, final Map<String, Object> claims) {
-        final LocalDateTime now = LocalDateTime.now();
         final JwtClaimsSet claimsSet = JwtClaimsSet.builder()
             .subject(user.getUsername())
             .issuer(applicationProperties.getUrl())
             .issuedAt(now.toInstant(UTC))
             .audience(List.of(applicationProperties.getUrl()))
-            .claims(claims::putAll)
             .expiresAt(now.plusSeconds(lifetime).toInstant(UTC))
+            .claim(AUTHORITIES, roles)
+            .claim(FIRST_NAME, userDetails.getFirstName())
+            .claim(LAST_NAME, userDetails.getLastName())
+            .claim(ENABLED, userDetails.isEnabled())
+            .claim(VALIDATED, userDetails.isValidated())
+            .claim(LAST_LOGIN, userDetails.getLastLogin().toEpochSecond(UTC))
+            .claim(CREATED, userDetails.getCreated().toEpochSecond(UTC))
             .build();
 
         return new Token(

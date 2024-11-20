@@ -2,12 +2,12 @@ import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { CLIENT_ROUTES, SERVER_ROUTES } from '$lib/config/paths';
 import { CookieService } from '$lib/utils/cookie.service';
-import { ApiException } from '$lib/utils/exception.error';
+import { Exception } from '$lib/models/exception.error';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	return {
-		user: locals.user
-	};
+	if (locals.user && locals.user.validated && locals.user.enabled) {
+		throw redirect(303, CLIENT_ROUTES.DASHBOARD_PAGE.path);
+	}
 };
 
 export const actions: Actions = {
@@ -35,12 +35,12 @@ export const actions: Actions = {
 			locals.user = authorizeResponse;
 
 			if (authorizeResponse?.validated && authorizeResponse?.enabled) {
-				throw redirect(303, CLIENT_ROUTES.LOGIN_PAGE.path);
+				throw redirect(303, CLIENT_ROUTES.DASHBOARD_PAGE.path);
 			}
-			throw redirect(303, CLIENT_ROUTES.DASHBOARD_PAGE.path);
+			throw redirect(303, CLIENT_ROUTES.LOGIN_PAGE.path);
 		}
 
-		const exception: ApiException = ApiException.fromResponse(response, await response.json());
+		const exception: Exception = new Exception(response, await response.json());
 		return fail(exception.status, { error: exception.message });
 	},
 	register: async ({ request }) => {
@@ -64,7 +64,7 @@ export const actions: Actions = {
 			return { success: true };
 		}
 
-		const exception: ApiException = ApiException.fromResponse(response, await response.json());
+		const exception: Exception = new Exception(response, await response.json());
 		return fail(exception.status, { error: exception.message });
 	}
 };

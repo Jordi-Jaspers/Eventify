@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+import {user} from "$lib/store/global";
 </script>
 
-{#if $page.data.user}
-	Welcome {$page.data.user}
+{#if user}
+	Hello {user.fullName}!
 {/if}

@@ -3,16 +3,11 @@
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
 	import { RegisterForm } from '$lib/components/register';
 	import { Card } from '$lib/components/ui/card';
-	import { Activity } from 'lucide-svelte';
-	import { HeartBeat } from '$lib/components/general';
+	import {HeartBeat, Logo} from '$lib/components/general';
 </script>
 
 <div class="flex h-full flex-col">
-	<div class="flex p-4">
-		<Activity class="mr-2 inline-block h-6 w-6" />
-		<h4>Eventify.io</h4>
-	</div>
-
+	<Logo/>
 	<div class="flex h-full w-full items-center justify-center px-4">
 		<div class="w-full max-w-md">
 			<HeartBeat />
