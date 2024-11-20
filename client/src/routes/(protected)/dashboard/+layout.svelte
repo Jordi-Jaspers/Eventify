@@ -2,9 +2,11 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { SidebarMenu } from '$lib/components/sidebar-menu';
+	import { SidebarMenu } from '$lib/components/sidebar';
+	import { page } from '$app/stores';
 
 	let { children } = $props();
+	let basePath = $page.url.pathname.split('/')[1];
 </script>
 
 <head>
@@ -22,7 +24,7 @@
 			<div class="flex items-center gap-2 px-4">
 				<Sidebar.Trigger class="-ml-1" />
 				<Separator orientation="vertical" class="mr-2 h-4" />
-				<Breadcrumb.Root>Enter the location of the current page here.</Breadcrumb.Root>
+				<Breadcrumb.Root>{basePath}</Breadcrumb.Root>
 			</div>
 		</header>
 		<main>

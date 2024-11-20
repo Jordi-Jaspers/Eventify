@@ -12,8 +12,33 @@
     import {user} from "$lib/store/global";
     import {goto} from "$app/navigation";
     import {CLIENT_ROUTES} from "$lib/config/paths";
+    import {Coffee, Send} from "lucide-svelte";
+    import Settings2 from "lucide-svelte/icons/settings-2";
 
     const sidebar = useSidebar();
+    const navigations =[
+        {
+            title: "Account",
+            url: "/account",
+            icon: BadgeCheck,
+        },
+        {
+            title: "Settings",
+            url: "settings",
+            icon: Settings2,
+        },
+        {
+            title: "Donate Coffee",
+            url: "buymeacoffee.com/jaspers",
+            icon: Coffee
+        },
+        {
+            title: "Feedback",
+            url: "/feedback",
+            icon: Send,
+        },
+    ]
+
 </script>
 
 <Menu>
@@ -58,10 +83,12 @@
                 </Label>
                 <Separator/>
                 <Group>
-                    <Item>
-                        <BadgeCheck/>
-                        Account
-                    </Item>
+                    {#each navigations as item}
+                        <Item onclick={() => goto(item.url)}>
+                            <item.icon/>
+                            {item.title}
+                        </Item>
+                    {/each}
                 </Group>
                 <Separator/>
                 <Group>
