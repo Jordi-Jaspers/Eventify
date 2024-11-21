@@ -45,6 +45,9 @@
 **Website Health endpoint:** https://eventify.io/actuator/health  
 **Server API description:** https://eventify.io/api/public/docs/openapi.html
 
+## Database Schema 📊
+https://dbdiagram.io/d/Eventify-673f8ef8e9daa85aca4c0697
+
 ## Dang, you found a bug, now what? 🐞
 
 No worries, just check out our [**issues**](https://github.com/Jordi-Jaspers/Eventify) section on GitHub. If you can't find your issue, feel free to create a new one. We trample that bug as soon as possible.

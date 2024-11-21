@@ -1,0 +1,73 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202411122400-PRD-event-hypertable-optimizations.xml">
+
+    <changeSet id="202411122400-PRD-event-hypertable-optimizations-1" author="jordi.jaspers">
+        <ext:documentation>
+            Creating the event hypertable with optimizations for high-throughput event logging.
+        </ext:documentation>
+        <sql>
+            CREATE TABLE IF NOT EXISTS "event"
+            (
+                timestamp      TIMESTAMPTZ                                                NOT NULL,
+                created        TIMESTAMPTZ DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') NOT NULL,
+                check_id       INTEGER                                                    NOT NULL,
+                status         TEXT                                                       NOT NULL,
+                message        TEXT                                                       NOT NULL,
+                correlation_id TEXT,
+                PRIMARY KEY (timestamp, check_id)
+                );
+
+            -- Convert to hypertable with 2-week chunks (good for ~27k events per day)
+            SELECT create_hypertable(
+                           'event',
+                           'timestamp',
+                           chunk_time_interval => INTERVAL '2 weeks',
+                           if_not_exists => TRUE,
+                           migrate_data => TRUE
+                   );
+
+            -- Event Indexes (crucial for timeline queries)
+            CREATE INDEX idx_event_check_time ON event (check_id, timestamp DESC);
+            CREATE INDEX idx_event_status ON event (check_id, status, timestamp DESC);
+            CREATE INDEX idx_event_correlation ON event (correlation_id) WHERE correlation_id IS NOT NULL;
+
+            -- Add compression with appropriate segmenting
+            ALTER TABLE event
+                SET (
+                timescaledb.compress,
+                timescaledb.compress_segmentby = 'check_id,status',
+                timescaledb.compress_orderby = 'timestamp DESC'
+                );
+
+            -- Add compression policy (compress older than 30 days)
+            SELECT add_compression_policy('event', INTERVAL '30 days');
+
+            -- Set retention policy for 5 years
+            SELECT add_retention_policy('event', INTERVAL '5 years');
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122400-PRD-event-hypertable-optimizations-2" author="jordi.jaspers">
+    <ext:documentation>
+        Adding documentation for every table, column, and index.
+    </ext:documentation>
+    <sql>
+        COMMENT ON TABLE "event" IS 'Stores monitoring events with TimescaleDB hypertable partitioning';
+        COMMENT ON COLUMN event.timestamp IS 'Timestamp when the event occurred';
+        COMMENT ON COLUMN event.created IS 'Timestamp when the event was recorded in the system';
+        COMMENT ON COLUMN event.check_id IS 'Reference to the check this event belongs to';
+        COMMENT ON COLUMN event.status IS 'Status of the check (SUCCESS, FAILURE, WARNING, UNKNOWN)';
+        COMMENT ON COLUMN event.message IS 'Descriptive message about the event';
+        COMMENT ON COLUMN event.correlation_id IS 'Optional identifier for correlating related events';
+
+        COMMENT ON INDEX idx_event_check_time IS 'Primary index for retrieving check timelines';
+        COMMENT ON INDEX idx_event_status IS 'Index for filtering events by status within a check';
+        COMMENT ON INDEX idx_event_correlation IS 'Partial index for finding correlated events';
+    </sql>
+    </changeSet>
+
+</databaseChangeLog>

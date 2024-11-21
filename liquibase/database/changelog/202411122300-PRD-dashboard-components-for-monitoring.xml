@@ -1,0 +1,140 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202411122300-PRD-dashboard-components-for-monitoring.xml">
+
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-1" author="jordi.jaspers">
+        <ext:documentation>
+            Adding API key management for the dashboard components.
+        </ext:documentation>
+        <sql>
+            CREATE TABLE IF NOT EXISTS "api_key"
+            (
+                id         SERIAL PRIMARY KEY,
+                key_value  TEXT        NOT NULL,
+                "name"     TEXT        NOT NULL,
+                created_by INTEGER     NOT NULL REFERENCES "user" (id),
+                created    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                expires_at TIMESTAMPTZ,
+                last_used  TIMESTAMPTZ,
+                enabled    BOOLEAN     NOT NULL DEFAULT TRUE,
+                UNIQUE (key_value)
+            );
+
+            CREATE INDEX idx_api_key_value ON api_key (key_value) WHERE enabled = TRUE;
+            CREATE INDEX idx_api_key_expiry ON api_key (expires_at);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-2" author="jordi.jaspers">
+        <ext:documentation>
+            Adding dashboard components for monitoring.
+        </ext:documentation>
+        <sql>
+            CREATE TABLE IF NOT EXISTS "source"
+            (
+                id          SERIAL PRIMARY KEY,
+                "name"      TEXT        NOT NULL,
+                description TEXT,
+                api_key_id  INTEGER     NOT NULL REFERENCES api_key (id),
+                created     TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                UNIQUE (name)
+                );
+
+            CREATE INDEX idx_source_api_key ON source (api_key_id);
+
+            CREATE TABLE IF NOT EXISTS "check"
+            (
+                id          SERIAL PRIMARY KEY,
+                "name"      TEXT        NOT NULL,
+                description TEXT,
+                source_id   INTEGER     NOT NULL,
+                created     TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                FOREIGN KEY (source_id) REFERENCES "source" (id) ON DELETE CASCADE
+                );
+
+            CREATE INDEX idx_check_source ON "check" (source_id);
+            CREATE INDEX idx_check_name ON "check" (name);
+
+            CREATE TABLE IF NOT EXISTS "dashboard"
+            (
+                id          SERIAL PRIMARY KEY,
+                "name"      TEXT        NOT NULL,
+                description TEXT,
+                is_public   BOOLEAN     NOT NULL DEFAULT FALSE,
+                created_by  INTEGER     NOT NULL REFERENCES "user" (id),
+                created     TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+            );
+
+            CREATE INDEX idx_dashboard_public ON dashboard (is_public) WHERE is_public = TRUE;
+            CREATE INDEX idx_dashboard_created_by ON dashboard (created_by);
+
+            CREATE TABLE IF NOT EXISTS "dashboard_team"
+            (
+                dashboard_id INTEGER NOT NULL,
+                team_id      INTEGER NOT NULL,
+                PRIMARY KEY (dashboard_id, team_id),
+                FOREIGN KEY (dashboard_id) REFERENCES "dashboard" (id) ON DELETE CASCADE,
+                FOREIGN KEY (team_id) REFERENCES "team" (id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX idx_dashboard_team_team ON dashboard_team (team_id);
+            CREATE INDEX idx_dashboard_team_dashboard ON dashboard_team (dashboard_id);
+
+            CREATE TABLE IF NOT EXISTS "dashboard_check"
+            (
+                dashboard_id INTEGER NOT NULL,
+                check_id     INTEGER NOT NULL,
+                PRIMARY KEY (dashboard_id, check_id),
+                FOREIGN KEY (dashboard_id) REFERENCES "dashboard" (id) ON DELETE CASCADE,
+                FOREIGN KEY (check_id) REFERENCES "check" (id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX idx_dashboard_check_check ON dashboard_check (check_id);
+            CREATE INDEX idx_dashboard_check_dashboard ON dashboard_check (dashboard_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-3" author="jordi.jaspers">
+        <ext:documentation>
+            Adding documentation for every table, column, and index.
+        </ext:documentation>
+        <sql>
+            COMMENT ON TABLE "api_key" IS 'Stores API keys for authentication of external systems';
+            COMMENT ON COLUMN api_key.id IS 'Unique identifier for the API key';
+            COMMENT ON COLUMN api_key.key_value IS 'The actual API key value used for authentication';
+            COMMENT ON COLUMN api_key.name IS 'Human-readable name for the API key';
+            COMMENT ON COLUMN api_key.created_by IS 'Reference to the user who created the API key';
+            COMMENT ON COLUMN api_key.created IS 'Timestamp when the API key was created';
+            COMMENT ON COLUMN api_key.expires_at IS 'Optional expiration timestamp for the API key';
+            COMMENT ON COLUMN api_key.last_used IS 'Timestamp when the API key was last used';
+            COMMENT ON COLUMN api_key.enabled IS 'Flag indicating if the API key is active';
+            COMMENT ON INDEX idx_api_key_value IS 'Index for API key authentication lookups';
+            COMMENT ON INDEX idx_api_key_expiry IS 'Partial index for finding non-expired API keys';
+
+            COMMENT ON TABLE "dashboard" IS 'Defines monitoring dashboards';
+            COMMENT ON COLUMN dashboard.id IS 'Unique identifier for the dashboard';
+            COMMENT ON COLUMN dashboard.name IS 'Name of the dashboard';
+            COMMENT ON COLUMN dashboard.description IS 'Description of the dashboard''s purpose';
+            COMMENT ON COLUMN dashboard.is_public IS 'Flag indicating if the dashboard is publicly accessible';
+            COMMENT ON COLUMN dashboard.created_by IS 'Reference to the user who created the dashboard';
+            COMMENT ON COLUMN dashboard.created IS 'Timestamp when the dashboard was created';
+            COMMENT ON INDEX idx_dashboard_public IS 'Partial index for finding public dashboards';
+            COMMENT ON INDEX idx_dashboard_created_by IS 'Index for finding dashboards created by a user';
+
+            COMMENT ON TABLE "dashboard_team" IS 'Maps dashboards to teams that can access them';
+            COMMENT ON COLUMN dashboard_team.dashboard_id IS 'Reference to the dashboard';
+            COMMENT ON COLUMN dashboard_team.team_id IS 'Reference to the team with access';
+            COMMENT ON INDEX idx_dashboard_team_team IS 'Index for finding dashboards accessible to a team';
+            COMMENT ON INDEX idx_dashboard_team_dashboard IS 'Index for finding teams with access to a dashboard';
+
+            COMMENT ON TABLE "dashboard_check" IS 'Maps checks displayed on dashboards';
+            COMMENT ON COLUMN dashboard_check.dashboard_id IS 'Reference to the dashboard';
+            COMMENT ON COLUMN dashboard_check.check_id IS 'Reference to the check displayed';
+            COMMENT ON INDEX idx_dashboard_check_check IS 'Index for finding dashboards displaying a check';
+            COMMENT ON INDEX idx_dashboard_check_dashboard IS 'Index for finding checks displayed on a dashboard';
+        </sql>
+    </changeSet>
+</databaseChangeLog>
