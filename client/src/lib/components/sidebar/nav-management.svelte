@@ -1,7 +1,7 @@
 <script lang="ts">
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
     import * as Sidebar from "$lib/components/ui/sidebar";
-    import {HousePlug, MonitorCog, UserRoundCog} from "lucide-svelte";
+    import {HousePlus, MonitorCog, UserRoundCog, UsersRound} from "lucide-svelte";
     import {CLIENT_ROUTES} from "$lib/config/paths";
 
     const navigations = [
@@ -13,7 +13,7 @@
         {
             title: "Team Management",
             url: CLIENT_ROUTES.TEAM_MANAGEMENT_PAGE.path,
-            icon: HousePlug
+            icon: UsersRound
         },
         {
             title: "Dashboard Management",
