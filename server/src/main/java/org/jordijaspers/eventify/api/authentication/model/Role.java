@@ -2,12 +2,9 @@ package org.jordijaspers.eventify.api.authentication.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jordijaspers.eventify.api.user.model.User;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serial;
-import java.util.HashSet;
-import java.util.Set;
 import jakarta.persistence.*;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
@@ -27,7 +24,7 @@ public class Role implements GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(
@@ -39,11 +36,7 @@ public class Role implements GrantedAuthority {
     @Column(name = "description")
     private String description;
 
-    @ManyToMany(
-        mappedBy = "roles",
-        fetch = FetchType.LAZY
-    )
-    private Set<User> users = new HashSet<>();
+
 
     /**
      * Creates a non-persisted role with the given authority and description.

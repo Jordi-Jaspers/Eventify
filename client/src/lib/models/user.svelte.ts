@@ -26,6 +26,10 @@ export class User {
 		return this._user?.authorities ?? [];
 	}
 
+	get teams(): TeamResponse[] {
+		return this._user?.teams ?? [];
+	}
+
 	get lastLogin(): Date | null {
 		return this._user?.lastLogin ?? null;
 	}

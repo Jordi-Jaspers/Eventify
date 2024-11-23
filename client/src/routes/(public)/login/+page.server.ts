@@ -6,7 +6,7 @@ import { Exception } from '$lib/models/exception.error';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.user && locals.user.validated && locals.user.enabled) {
-		throw redirect(303, CLIENT_ROUTES.DASHBOARD_PAGE.path);
+		throw redirect(303, CLIENT_ROUTES.HOME_PAGE.path);
 	}
 };
 
@@ -35,9 +35,10 @@ export const actions: Actions = {
 			locals.user = authorizeResponse;
 
 			if (authorizeResponse?.validated && authorizeResponse?.enabled) {
-				throw redirect(303, CLIENT_ROUTES.DASHBOARD_PAGE.path);
+				throw redirect(303, CLIENT_ROUTES.HOME_PAGE.path);
 			}
-			throw redirect(303, CLIENT_ROUTES.LOGIN_PAGE.path);
+
+			return { user: authorizeResponse };
 		}
 
 		const exception: Exception = new Exception(response, await response.json());
@@ -45,7 +46,6 @@ export const actions: Actions = {
 	},
 	register: async ({ request }) => {
 		const data = await request.formData();
-		console.log(data);
 		const input: RegisterRequest = {
 			firstName: data.get('firstName') as string,
 			lastName: data.get('lastName') as string,

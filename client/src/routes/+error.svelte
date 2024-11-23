@@ -5,7 +5,7 @@
 	import {goto} from "$app/navigation";
 
 	function routeHomepage() {
-		window.location.href = CLIENT_ROUTES.DASHBOARD_PAGE.path;
+		window.location.href = CLIENT_ROUTES.HOME_PAGE.path;
 	}
 </script>
 

@@ -18,7 +18,7 @@ import java.util.Optional;
  * The repository for the {@link Token} entity.
  */
 @Repository
-public interface TokenRepository extends JpaRepository<Token, Integer> {
+public interface TokenRepository extends JpaRepository<Token, Long> {
 
     @Modifying
     @Transactional

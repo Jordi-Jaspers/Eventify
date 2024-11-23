@@ -30,6 +30,8 @@ management:
 # tomcat HTTP & ajp listen ports
 server:
   port: 8080
+  servlet:
+    context-path: /
 
 # ======= SPRINGDOC CONFIGURATION <https://springdoc.org/> =======
 springdoc:
@@ -39,9 +41,9 @@ springdoc:
   enable-spring-security: true
   swagger-ui:
     disable-swagger-default-url: true
-    path: /rest/v1/public/docs/openapi.html
+    path: /api/public/docs/openapi.html
   api-docs:
-    path: /rest/v1/public/docs
+    path: /api/public/docs
 
 # ======= SPRING CONFIGURATION =======
 spring:

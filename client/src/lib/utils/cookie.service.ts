@@ -14,7 +14,7 @@ export class CookieService {
 			httpOnly: true,
 			secure: true,
 			sameSite: 'strict',
-			path: CLIENT_ROUTES.HOMEPAGE.path,
+			path: CLIENT_ROUTES.LANDING_PAGE.path,
 			maxAge: accessExpiry
 		});
 
@@ -22,7 +22,7 @@ export class CookieService {
 			httpOnly: true,
 			secure: true,
 			sameSite: 'strict',
-			path: CLIENT_ROUTES.HOMEPAGE.path,
+			path: CLIENT_ROUTES.LANDING_PAGE.path,
 			maxAge: refreshExpiry
 		});
 	}
@@ -36,7 +36,7 @@ export class CookieService {
 			httpOnly: true,
 			secure: true,
 			sameSite: 'strict',
-			path: CLIENT_ROUTES.HOMEPAGE.path,
+			path: CLIENT_ROUTES.LANDING_PAGE.path,
 			maxAge: expiry
 		});
 	}
@@ -55,7 +55,7 @@ export class CookieService {
 	 * Clears authentication cookies
 	 */
 	static clearAuthCookies(cookies: Cookies): void {
-		cookies.delete(ACCESS_TOKEN_COOKIE, { path: CLIENT_ROUTES.HOMEPAGE.path });
-		cookies.delete(REFRESH_TOKEN_COOKIE, { path: CLIENT_ROUTES.HOMEPAGE.path });
+		cookies.delete(ACCESS_TOKEN_COOKIE, { path: CLIENT_ROUTES.LANDING_PAGE.path });
+		cookies.delete(REFRESH_TOKEN_COOKIE, { path: CLIENT_ROUTES.LANDING_PAGE.path });
 	}
 }

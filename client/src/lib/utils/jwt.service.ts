@@ -43,6 +43,7 @@ export class JwtService {
 			firstName: payload.first_name,
 			lastName: payload.last_name,
 			authorities: payload.authorities,
+			teams: payload.teams.map((team) => ({ name: team }) as TeamResponse),
 			lastLogin: new Date(payload.last_login * 1000),
 			created: new Date(payload.created * 1000),
 			enabled: payload.enabled,

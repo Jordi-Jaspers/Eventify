@@ -10,5 +10,4 @@ public class UpdateEmailRequest {
 
     private String email;
 
-
 }

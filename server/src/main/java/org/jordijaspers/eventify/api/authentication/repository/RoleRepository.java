@@ -12,7 +12,7 @@ import java.util.Optional;
  * The repository for the roles.
  */
 @Repository
-public interface RoleRepository extends JpaRepository<Role, Integer> {
+public interface RoleRepository extends JpaRepository<Role, Long> {
 
     Optional<Role> findByAuthority(@NonNull Authority authority);
 

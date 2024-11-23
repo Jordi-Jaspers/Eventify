@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.authentication.model.response;
 
 import lombok.Data;
+import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -20,6 +21,8 @@ public class UserDetailsResponse {
     private ZonedDateTime lastLogin;
 
     private List<String> authorities;
+
+    private List<TeamResponse> teams;
 
     private boolean enabled;
 

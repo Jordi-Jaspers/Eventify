@@ -28,6 +28,7 @@ interface JwtPayload {
 	first_name: string;
 	last_name: string;
 	authorities: string[];
+	teams: string[];
 	last_login: number;
 	created: number;
 	enabled: boolean;

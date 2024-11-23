@@ -1,25 +1,23 @@
 <script lang="ts">
 	import * as Sidebar from "$lib/components/ui/sidebar";
-	import {Sparkle, SquareActivity} from "lucide-svelte";
+	import {SquareActivity} from "lucide-svelte";
 	import House from "lucide-svelte/icons/house";
+	import {CLIENT_ROUTES} from "$lib/config/paths";
 
 	const navigations = [
 				{
-					title: "Ask AI",
-					url: "#",
-					icon: Sparkle
-				},
-				{
 					title: "Home",
-					url: "#",
+					url: CLIENT_ROUTES.HOME_PAGE.path,
 					icon: House
 				},
 				{
-					title: "Dashboards",
-					url: "#",
+					title: "Monitoring",
+					url: CLIENT_ROUTES.MONITORING_PAGE.path,
 					icon: SquareActivity,
 				},
 			];
+
+
 </script>
 
 <Sidebar.Menu>

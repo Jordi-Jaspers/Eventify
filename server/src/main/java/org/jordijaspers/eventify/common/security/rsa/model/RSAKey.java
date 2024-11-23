@@ -14,7 +14,7 @@ public class RSAKey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "public_key")
     private byte[] publicKey;

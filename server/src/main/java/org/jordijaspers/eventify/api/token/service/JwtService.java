@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.token.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.common.config.properties.ApplicationProperties;
@@ -52,6 +53,10 @@ public class JwtService {
             .map(GrantedAuthority::getAuthority)
             .toArray(String[]::new);
 
+        final String[] teams = userDetails.getTeams().stream()
+            .map(Team::getName)
+            .toArray(String[]::new);
+
         final JwtClaimsSet claimsSet = JwtClaimsSet.builder()
             .subject(user.getUsername())
             .issuer(applicationProperties.getUrl())
@@ -59,6 +64,7 @@ public class JwtService {
             .audience(List.of(applicationProperties.getUrl()))
             .expiresAt(now.plusSeconds(lifetime).toInstant(UTC))
             .claim(AUTHORITIES, roles)
+            .claim(TEAMS, teams)
             .claim(FIRST_NAME, userDetails.getFirstName())
             .claim(LAST_NAME, userDetails.getLastName())
             .claim(ENABLED, userDetails.isEnabled())

@@ -25,6 +25,11 @@ public final class JWTClaimNames {
     public static final String AUTHORITIES = "authorities";
 
     /**
+     * A custom claim that contains the teams of the user.
+     */
+    public static final String TEAMS = "teams";
+
+    /**
      * A custom claim that contains the enabled status of the user.
      */
     public static final String ENABLED = "enabled";

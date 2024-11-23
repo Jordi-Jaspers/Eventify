@@ -63,13 +63,25 @@
                 id          SERIAL PRIMARY KEY,
                 "name"      TEXT        NOT NULL,
                 description TEXT,
-                is_public   BOOLEAN     NOT NULL DEFAULT FALSE,
+                "global"      BOOLEAN     NOT NULL DEFAULT FALSE,
                 created_by  INTEGER     NOT NULL REFERENCES "user" (id),
                 created     TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
             );
 
-            CREATE INDEX idx_dashboard_public ON dashboard (is_public) WHERE is_public = TRUE;
+            CREATE INDEX idx_dashboard_global ON dashboard ("global") WHERE "global" = TRUE;
             CREATE INDEX idx_dashboard_created_by ON dashboard (created_by);
+
+            CREATE TABLE IF NOT EXISTS "dashboard_group"
+            (
+                id           SERIAL PRIMARY KEY,
+                dashboard_id INTEGER     NOT NULL,
+                name         TEXT        NOT NULL,
+                created      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                FOREIGN KEY (dashboard_id) REFERENCES "dashboard" (id) ON DELETE CASCADE,
+                UNIQUE (dashboard_id, name)
+                );
+
+            CREATE INDEX idx_dashboard_group_dashboard ON dashboard_group (dashboard_id);
 
             CREATE TABLE IF NOT EXISTS "dashboard_team"
             (
@@ -85,15 +97,19 @@
 
             CREATE TABLE IF NOT EXISTS "dashboard_check"
             (
-                dashboard_id INTEGER NOT NULL,
-                check_id     INTEGER NOT NULL,
+                dashboard_id  INTEGER NOT NULL,
+                check_id      INTEGER NOT NULL,
+                group_id      INTEGER NULL,
+                display_order INTEGER NOT NULL DEFAULT 1000,
                 PRIMARY KEY (dashboard_id, check_id),
                 FOREIGN KEY (dashboard_id) REFERENCES "dashboard" (id) ON DELETE CASCADE,
-                FOREIGN KEY (check_id) REFERENCES "check" (id) ON DELETE CASCADE
+                FOREIGN KEY (check_id) REFERENCES "check" (id) ON DELETE CASCADE,
+                FOREIGN KEY (group_id) REFERENCES dashboard_group (id) ON DELETE CASCADE
             );
 
             CREATE INDEX idx_dashboard_check_check ON dashboard_check (check_id);
             CREATE INDEX idx_dashboard_check_dashboard ON dashboard_check (dashboard_id);
+            CREATE INDEX idx_dashboard_check_ordering ON dashboard_check (dashboard_id, group_id NULLS LAST, display_order);
         </sql>
     </changeSet>
 
@@ -118,10 +134,10 @@
             COMMENT ON COLUMN dashboard.id IS 'Unique identifier for the dashboard';
             COMMENT ON COLUMN dashboard.name IS 'Name of the dashboard';
             COMMENT ON COLUMN dashboard.description IS 'Description of the dashboard''s purpose';
-            COMMENT ON COLUMN dashboard.is_public IS 'Flag indicating if the dashboard is publicly accessible';
+            COMMENT ON COLUMN dashboard.global IS 'Flag indicating if the dashboard is publicly accessible';
             COMMENT ON COLUMN dashboard.created_by IS 'Reference to the user who created the dashboard';
             COMMENT ON COLUMN dashboard.created IS 'Timestamp when the dashboard was created';
-            COMMENT ON INDEX idx_dashboard_public IS 'Partial index for finding public dashboards';
+            COMMENT ON INDEX idx_dashboard_global IS 'Partial index for finding global dashboards';
             COMMENT ON INDEX idx_dashboard_created_by IS 'Index for finding dashboards created by a user';
 
             COMMENT ON TABLE "dashboard_team" IS 'Maps dashboards to teams that can access them';
@@ -135,6 +151,15 @@
             COMMENT ON COLUMN dashboard_check.check_id IS 'Reference to the check displayed';
             COMMENT ON INDEX idx_dashboard_check_check IS 'Index for finding dashboards displaying a check';
             COMMENT ON INDEX idx_dashboard_check_dashboard IS 'Index for finding checks displayed on a dashboard';
+
+            COMMENT ON TABLE dashboard_group IS 'Stores dashboard-specific check groups for organizing checks';
+            COMMENT ON COLUMN dashboard_group.id IS 'Unique identifier for the group';
+            COMMENT ON COLUMN dashboard_group.dashboard_id IS 'Reference to the dashboard this group belongs to';
+            COMMENT ON COLUMN dashboard_group.name IS 'Name of the group';
+            COMMENT ON COLUMN dashboard_group.created IS 'Timestamp when the group was created';
+
+            COMMENT ON COLUMN dashboard_check.group_id IS 'Optional reference to a dashboard group (NULL for ungrouped checks)';
+            COMMENT ON COLUMN dashboard_check.display_order IS 'Order of the check within its group or dashboard (for ungrouped checks)';
         </sql>
     </changeSet>
 </databaseChangeLog>

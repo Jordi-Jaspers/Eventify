@@ -59,16 +59,6 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Finds the user by the given username. If the user is not found, an exception is thrown.
-     *
-     * @param username the username of the user
-     * @return the user, or null if the user is not found
-     */
-    public User findByUsername(final String username) {
-        return userRepository.findByEmail(username).orElse(null);
-    }
-
-    /**
      * Delete all unvalidated accounts that are older than a month. This method is scheduled to run every hour.
      */
     @Scheduled(fixedDelay = 24 * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MILLIS_PER_SECOND)

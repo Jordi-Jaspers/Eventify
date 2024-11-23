@@ -49,7 +49,7 @@ export const SERVER_ROUTES = {
 };
 
 export const CLIENT_ROUTES = {
-	HOMEPAGE: {
+	LANDING_PAGE: {
 		path: '/',
 		type: RouteType.PUBLIC
 	},
@@ -81,8 +81,24 @@ export const CLIENT_ROUTES = {
 		account: '/account',
 		type: RouteType.PRIVATE
 	},
-	DASHBOARD_PAGE: {
-		path: '/dashboard',
+	HOME_PAGE: {
+		path: '/app',
+		type: RouteType.PRIVATE
+	},
+	MONITORING_PAGE: {
+		path: '/app/monitoring',
+		type: RouteType.PRIVATE
+	},
+	TEAM_MANAGEMENT_PAGE: {
+		path: '/app/management/teams',
+		type: RouteType.PRIVATE
+	},
+	USER_MANAGEMENT_PAGE: {
+		path: '/app/management/users',
+		type: RouteType.PRIVATE
+	},
+	DASHBOARD_MANAGEMENT_PAGE: {
+		path: '/app/management/dashboards',
 		type: RouteType.PRIVATE
 	}
 };

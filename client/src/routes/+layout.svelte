@@ -3,13 +3,17 @@
 
     import {Toaster} from '$lib/components/ui/sonner';
     import {ModeWatcher} from 'mode-watcher';
-    import {user} from "$lib/store/global";
+    import {breadcrumbs, user} from "$lib/store/global";
 
     let {data, children} = $props();
 
     $effect(() => {
         if (!data.user) user.clear();
         user.setDetails(data.user);
+
+        if (data.paths) {
+            breadcrumbs._locations = data.paths;
+        }
     });
 </script>
 

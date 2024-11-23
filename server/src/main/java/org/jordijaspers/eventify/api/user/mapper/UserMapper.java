@@ -5,6 +5,7 @@ import org.jordijaspers.eventify.api.authentication.model.request.RegisterUserRe
 import org.jordijaspers.eventify.api.authentication.model.response.RegisterResponse;
 import org.jordijaspers.eventify.api.authentication.model.response.UserDetailsResponse;
 import org.jordijaspers.eventify.api.authentication.model.response.UserResponse;
+import org.jordijaspers.eventify.api.team.mapper.TeamMapper;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.common.mapper.DateTimeMapper;
 import org.jordijaspers.eventify.common.mapper.config.SharedMapperConfig;
@@ -19,7 +20,10 @@ import java.util.stream.Collectors;
  */
 @Mapper(
     config = SharedMapperConfig.class,
-    uses = DateTimeMapper.class
+    uses = {
+        DateTimeMapper.class,
+        TeamMapper.class
+    }
 )
 public abstract class UserMapper {
 

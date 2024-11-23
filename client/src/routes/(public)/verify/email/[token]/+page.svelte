@@ -15,7 +15,7 @@ $effect(() => {
         goto(CLIENT_ROUTES.LOGIN_PAGE.path);
     } else {
         toast.success('Email verified successfully! You can now login.');
-        goto(CLIENT_ROUTES.DASHBOARD_PAGE.path);
+        goto(CLIENT_ROUTES.HOME_PAGE.path);
     }
 });
 </script>

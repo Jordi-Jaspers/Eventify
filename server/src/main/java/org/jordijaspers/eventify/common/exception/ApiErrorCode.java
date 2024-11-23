@@ -48,6 +48,22 @@ public enum ApiErrorCode implements ApiError {
     USER_ALREADY_EXISTS_ERROR(
         "ERR-0010",
         "User cannot be created: The provided email address is already in use."
+    ),
+    DASHBOARD_NOT_FOUND_ERROR(
+        "ERR-0011",
+        "The requested dashboard does not exist."
+    ),
+    TEAM_NOT_FOUND_ERROR(
+        "ERR-0012",
+        "The requested team does not exist."
+    ),
+    USER_NOT_FOUND_ERROR(
+        "ERR-0013",
+        "One or more users could not be found."
+    ),
+    TEAM_ALREADY_EXISTS_ERROR(
+        "ERR-0014",
+        "A team with that name already exists."
     );
 
     /**

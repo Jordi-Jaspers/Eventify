@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import lombok.RequiredArgsConstructor;
 import org.jordijaspers.eventify.common.config.properties.ApplicationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,6 +22,12 @@ public class OpenAPIConfig {
 
     private final ApplicationProperties properties;
 
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+
+    @Value("${server.port}")
+    private String port;
+
     /**
      * Creates the OpenAPI documentation for the application.
      */
@@ -28,7 +35,7 @@ public class OpenAPIConfig {
     public OpenAPI myOpenAPI() {
         final Map<String, String> servers = Map.of(
             "local",
-            "http://localhost:8080"
+            "http://localhost:" + port + contextPath
         );
 
         final Contact contact = new Contact();

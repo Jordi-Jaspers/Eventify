@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jordijaspers.eventify.api.authentication.model.Role;
+import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,9 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import jakarta.persistence.*;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
@@ -45,7 +44,7 @@ public class User implements UserDetails {
     @Id
     @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @NaturalId
     @Column(
@@ -63,17 +62,6 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @ManyToMany(
-        fetch = FetchType.EAGER,
-        cascade = CascadeType.MERGE
-    )
-    @JoinTable(
-        name = "user_role",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private List<Role> roles = new ArrayList<>();
-
     @Column(name = "enabled")
     private boolean enabled;
 
@@ -85,8 +73,28 @@ public class User implements UserDetails {
     private LocalDateTime lastLogin;
 
     @CreationTimestamp
-    @Column(name = "created")
+    @Column(
+        name = "created",
+        updatable = false
+    )
     private LocalDateTime created;
+
+    @ManyToMany(
+        mappedBy = "members",
+        fetch = FetchType.EAGER
+    )
+    private List<Team> teams = new ArrayList<>();
+
+    @ManyToMany(
+        fetch = FetchType.EAGER,
+        cascade = CascadeType.MERGE
+    )
+    @JoinTable(
+        name = "user_role",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private List<Role> roles = new ArrayList<>();
 
     @OneToMany(
         mappedBy = "user",

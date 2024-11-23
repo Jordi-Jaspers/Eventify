@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 public enum Authority {
 
     USER("The default authority for a user with limited permissions."),
-    MANAGER("The authority for a user which manages the dashboards."),
+    MANAGER("The authority for a user which manages the dashboards and teams."),
     ADMIN("The authority for a user with administrative permissions.");
 
     /**

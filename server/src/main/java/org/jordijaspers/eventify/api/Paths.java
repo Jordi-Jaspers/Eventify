@@ -61,6 +61,14 @@ public final class Paths {
 
     public static final String USER_UPDATE_EMAIL_PATH = USER_DETAILS + "/email";
 
+    /* ------------------------------- TEAM ENDPOINTS ------------------------------- */
+
+    public static final String TEAMS_PATH = BASE_PATH + "/team";
+
+    public static final String TEAM_PATH = TEAMS_PATH + ID_PART;
+
+    public static final String TEAM_MEMBERS_PATH = TEAM_PATH + "/members";
+
     /* ------------------------------- END ------------------------------- */
 
     private Paths() {

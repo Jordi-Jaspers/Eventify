@@ -24,13 +24,20 @@
         return async ({result}) => {
             toast.dismiss();
             isLoading = false
-
             if (result.type === 'redirect') {
                 await applyAction(result)
             }
 
             if (result.type === 'success') {
-                toast.warning('your account has been disabled, please contact support.');
+                if (!result.data.user.validated) {
+                    toast.warning('Please verify your email address to continue, or request a new verification email.');
+                    return;
+                }
+
+                if (!result.data.user.enabled) {
+                    toast.warning('Your account has been disabled, please contact support.');
+                    return;
+                }
                 await applyAction(result)
             }
 

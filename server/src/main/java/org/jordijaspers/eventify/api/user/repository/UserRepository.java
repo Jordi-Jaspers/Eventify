@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import jakarta.persistence.LockModeType;
 
 /**
@@ -19,7 +21,15 @@ import jakarta.persistence.LockModeType;
  */
 @Repository
 @Transactional
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    /**
+     * Find all users by their ids.
+     *
+     * @param ids the ids of the users.
+     * @return the users.
+     */
+    Set<User> findAllByIdIn(Collection<Long> ids);
 
     /**
      * Find a user by email.
@@ -31,7 +41,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Transactional(propagation = Propagation.REQUIRED)
     @Query("FROM User u LEFT JOIN FETCH u.roles WHERE u.email = :email")
     Optional<User> findByEmail(@NonNull String email);
-
 
     /**
      * Delete unvalidated accounts that are older than 1 month.
