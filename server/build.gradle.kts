@@ -22,14 +22,8 @@ java {
 
 /** The repositories used to download the dependencies. */
 repositories {
-    if (System.getenv("GRADLEJENKINS") == "TRUE") {
-        println("[Gradle Config] 'GRADLEJENKINS' property found, using internal Vodafone Nexus repository")
-        maven("https://repository.smtnexus.internal.vodafone.nl/repository/maven-public/")
-    } else {
-        println("[Gradle Config] 'GRADLEJENKINS' property not found, using default repositories")
-        mavenCentral()
-        mavenLocal()
-    }
+    mavenCentral()
+    mavenLocal()
 }
 
 /** Configure the Plugins required within the project. */

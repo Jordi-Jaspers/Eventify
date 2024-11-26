@@ -46,7 +46,7 @@ when {
         project.ext["dbUsername"] = "tst_eventify"
         project.ext["dbPassword"] = "tst_eventify"
         project.ext["contexts"] = "test"
-        project.ext["outputFile"] = "liquibaseChanges.sql"
+        project.ext["outputFile"] = "build/liquibaseChanges.sql"
         project.ext["changelogFile"] = "database/db.changelog.yaml"
     }
 }
