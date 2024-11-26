@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -14,14 +15,38 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public enum Authority {
 
-    USER("The default authority for a user with limited permissions."),
-    MANAGER("The authority for a user which manages the dashboards and teams."),
-    ADMIN("The authority for a user with administrative permissions.");
+    USER(
+        "The default authority for a user with limited permissions.",
+        Set.of(
+            Permission.ACCESS_APPLICATION
+        )
+    ),
+    MANAGER(
+        "The authority for a user which manages the dashboards and teams.",
+        Set.of(
+            Permission.ACCESS_APPLICATION,
+            Permission.READ_DASHBOARDS,
+            Permission.WRITE_DASHBOARDS,
+            Permission.READ_TEAMS,
+            Permission.WRITE_TEAMS
+        )
+    ),
+    ADMIN(
+        "The authority for an administrator with full permissions.",
+        Set.of(
+            Permission.ACCESS_APPLICATION,
+            Permission.READ_DASHBOARDS,
+            Permission.WRITE_DASHBOARDS,
+            Permission.READ_TEAMS,
+            Permission.WRITE_TEAMS,
+            Permission.READ_USERS,
+            Permission.WRITE_USERS
+        )
+    );
 
-    /**
-     * The reason.
-     */
     private final String description;
+
+    private final Set<Permission> permissions;
 
     /**
      * Retrieve all the configured permissions as a stream.

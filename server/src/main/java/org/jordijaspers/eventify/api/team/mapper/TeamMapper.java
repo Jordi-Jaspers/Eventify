@@ -14,7 +14,10 @@ import java.util.List;
  */
 @Mapper(
     config = SharedMapperConfig.class,
-    uses = DateTimeMapper.class
+    uses = {
+        DateTimeMapper.class,
+        TeamMemberMapper.class
+    }
 )
 public abstract class TeamMapper {
 

@@ -2,7 +2,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { CLIENT_ROUTES, SERVER_ROUTES } from '$lib/config/paths';
 import { CookieService } from '$lib/utils/cookie.service';
-import { Exception } from '$lib/models/exception.error';
+import { ApiService } from '$lib/utils/api.service';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.user && locals.user.validated && locals.user.enabled) {
@@ -18,14 +18,14 @@ export const actions: Actions = {
 			password: data.get('password') as string
 		};
 
-		const response: Response = await fetch(SERVER_ROUTES.LOGIN.path, {
+		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.LOGIN.path, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(input)
 		});
 
-		if (response.ok) {
-			const authorizeResponse: AuthorizeResponse = await response.json();
+		if (response.success) {
+			const authorizeResponse: AuthorizeResponse = await response.data.json();
 			const tokenPair: TokenPair = {
 				accessToken: authorizeResponse.accessToken,
 				refreshToken: authorizeResponse.refreshToken
@@ -37,12 +37,8 @@ export const actions: Actions = {
 			if (authorizeResponse?.validated && authorizeResponse?.enabled) {
 				throw redirect(303, CLIENT_ROUTES.HOME_PAGE.path);
 			}
-
-			return { user: authorizeResponse };
 		}
-
-		const exception: Exception = new Exception(response, await response.json());
-		return fail(exception.status, { error: exception.message });
+		return response.success ? { response: response } : fail(response.status, { response: response });
 	},
 	register: async ({ request }) => {
 		const data = await request.formData();
@@ -54,17 +50,19 @@ export const actions: Actions = {
 			passwordConfirmation: data.get('passwordConfirmation') as string
 		};
 
-		const response: Response = await fetch(SERVER_ROUTES.REGISTER.path, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(input)
-		});
+		const response: ApiResponse = await ApiService.fetchWithRetry(
+			SERVER_ROUTES.REGISTER.path,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(input)
+			},
+			{
+				retries: 1,
+				timeout: 60_000
+			}
+		);
 
-		if (response.ok) {
-			return { success: true };
-		}
-
-		const exception: Exception = new Exception(response, await response.json());
-		return fail(exception.status, { error: exception.message });
+		return response.success ? { response: response } : fail(response.status, { response: response });
 	}
 };

@@ -13,30 +13,19 @@
     import {goto} from "$app/navigation";
     import {CLIENT_ROUTES} from "$lib/config/paths";
     import {Coffee, Send} from "lucide-svelte";
-    import Settings2 from "lucide-svelte/icons/settings-2";
 
     const sidebar = useSidebar();
     const navigations =[
         {
-            title: "Account",
-            url: "/account",
-            icon: BadgeCheck,
-        },
-        {
-            title: "Settings",
-            url: "settings",
-            icon: Settings2,
-        },
-        {
             title: "Donate Coffee",
-            url: "buymeacoffee.com/jaspers",
+            url: "https://buymeacoffee.com/jaspers",
             icon: Coffee
         },
         {
             title: "Feedback",
-            url: "/feedback",
+            url: "https://github.com/Jordi-Jaspers/Eventify",
             icon: Send,
-        },
+        }
     ]
 
 </script>
@@ -83,15 +72,10 @@
                 </Label>
                 <Separator/>
                 <Group>
-                    {#each navigations as item}
-                        <Item onclick={() => goto(item.url)}>
-                            <item.icon/>
-                            {item.title}
-                        </Item>
-                    {/each}
-                </Group>
-                <Separator/>
-                <Group>
+                    <Item onclick={() => goto(CLIENT_ROUTES.ACCOUNT_DETAILS_PAGE.path)}>
+                        <BadgeCheck/>
+                        Account
+                    </Item>
                     <Item onclick={toggleMode}>
 						<span class="flex items-center justify-center gap-2">
 							<Moon class="hidden h-[1.2rem] w-[1.2rem] transition-all dark:flex dark:scale-100"/>
@@ -99,6 +83,15 @@
 							<span>Switch Mode</span>
 						</span>
                     </Item>
+                </Group>
+                <Separator/>
+                <Group>
+                    {#each navigations as item}
+                        <Item onclick={() => window.open(item.url)}>
+                            <item.icon/>
+                            {item.title}
+                        </Item>
+                    {/each}
                 </Group>
                 <Separator/>
                 <Item class="data-[highlighted]:bg-red-400/80" onclick={() => goto(CLIENT_ROUTES.LOGOUT_PAGE.path)}>

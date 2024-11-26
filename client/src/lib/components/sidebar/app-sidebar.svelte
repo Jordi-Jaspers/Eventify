@@ -5,9 +5,25 @@
     import TeamSwitcher from "$lib/components/sidebar/team-switcher.svelte";
     import {Content, Footer, Header, Rail, Root, Separator} from "$lib/components/ui/sidebar";
     import type {ComponentProps} from "svelte";
-    import {user} from "$lib/store/global";
 
-    let {ref = $bindable(null), collapsible = 'icon', ...restProps}: ComponentProps<typeof Root> = $props();
+    let {sidebarWidth = $bindable(0), ref = $bindable(null), collapsible = 'icon', ...restProps}: ComponentProps<typeof Root> = $props();
+    $effect(() => {
+        if (ref) {
+            sidebarWidth = ref.clientWidth;
+
+            // Optional: Add a resize observer to track width changes
+            const resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    sidebarWidth = entry.target.clientWidth;
+                }
+            });
+
+            resizeObserver.observe(ref);
+            return () => {
+                resizeObserver.disconnect();
+            };
+        }
+    });
 </script>
 
 <Root bind:ref {collapsible} {...restProps}>
@@ -15,12 +31,9 @@
         <TeamSwitcher/>
         <Separator/>
         <NavMain/>
-        <Separator/>
     </Header>
     <Content>
-        {#if user.authorities.includes("ADMIN")}
-            <NavManagement/>
-        {/if}
+        <NavManagement/>
     </Content>
     <Footer>
         <NavUser/>

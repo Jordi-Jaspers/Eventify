@@ -45,6 +45,18 @@ export const SERVER_ROUTES = {
 	UPDATE_PASSWORD: {
 		path: `${SERVER_BASE_URL}/password`,
 		type: RouteType.PRIVATE
+	},
+	TEAMS: {
+		path: `${SERVER_BASE_URL}/team`,
+		type: RouteType.PRIVATE
+	},
+	TEAM: {
+		path: `${SERVER_BASE_URL}/team/{id}`,
+		type: RouteType.PRIVATE
+	},
+	TEAM_MEMBERS: {
+		path: `${SERVER_BASE_URL}/team/{id}/members`,
+		type: RouteType.PRIVATE
 	}
 };
 
@@ -77,12 +89,12 @@ export const CLIENT_ROUTES = {
 		path: '/logout',
 		type: RouteType.PRIVATE
 	},
-	ACCOUNT_DETAILS_PAGE: {
-		account: '/account',
-		type: RouteType.PRIVATE
-	},
 	HOME_PAGE: {
 		path: '/app',
+		type: RouteType.PRIVATE
+	},
+	ACCOUNT_DETAILS_PAGE: {
+		path: '/app/account',
 		type: RouteType.PRIVATE
 	},
 	MONITORING_PAGE: {

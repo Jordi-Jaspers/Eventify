@@ -20,7 +20,7 @@ public class UserDetailsResponse {
 
     private ZonedDateTime lastLogin;
 
-    private List<String> authorities;
+    private String authority;
 
     private List<TeamResponse> teams;
 

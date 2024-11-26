@@ -26,8 +26,9 @@
                 await applyAction(result)
             }
 
-            if (result.type === 'failure') {
-                toast.error(result.data.error);
+            if (result.type === 'failure' && result.data) {
+                const response = result.data.response;
+                toast.error(response.message);
             }
         }
     }

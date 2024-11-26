@@ -44,7 +44,7 @@ public class Team implements Serializable {
     )
     private LocalDateTime created;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_team",
         joinColumns = @JoinColumn(name = "team_id"),

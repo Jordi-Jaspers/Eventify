@@ -28,21 +28,22 @@
                 await applyAction(result)
             }
 
-            if (result.type === 'success') {
-                if (!result.data.user.validated) {
+            if (result.type === 'success' && result.data) {
+                const apiResponse: ApiResponse = result.data.response;
+                const resultData: AuthorizeResponse = apiResponse.data;
+                if (!resultData.validated) {
                     toast.warning('Please verify your email address to continue, or request a new verification email.');
-                    return;
                 }
 
-                if (!result.data.user.enabled) {
+                if (!resultData.enabled) {
                     toast.warning('Your account has been disabled, please contact support.');
-                    return;
                 }
                 await applyAction(result)
             }
 
-            if (result.type === 'failure') {
-                toast.error(result.data.error);
+            if (result.type === 'failure' && result.data) {
+                const apiResponse: ApiResponse = result.data.response;
+                toast.error(apiResponse.message);
             }
         }
     }

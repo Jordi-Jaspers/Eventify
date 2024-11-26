@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serial;
+import java.util.Set;
 import jakarta.persistence.*;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
@@ -29,14 +30,14 @@ public class Role implements GrantedAuthority {
     @Enumerated(EnumType.STRING)
     @Column(
         name = "authority",
-        unique = true
+        unique = true,
+        nullable = false,
+        updatable = false
     )
     private Authority authority;
 
     @Column(name = "description")
     private String description;
-
-
 
     /**
      * Creates a non-persisted role with the given authority and description.
@@ -46,11 +47,30 @@ public class Role implements GrantedAuthority {
         this.description = authority.getDescription();
     }
 
-    @Override
-    public String getAuthority() {
-        return authority.name();
+    /**
+     * Retrieves the permissions of the {@link Authority}.
+     *
+     * @return The permissions of the {@link Authority}.
+     */
+    public Set<Permission> getPermissions() {
+        return this.authority.getPermissions();
     }
 
+    /**
+     * Retrieves the name of the role as a string.
+     *
+     * @return The name of the role.
+     */
+    @Override
+    public String getAuthority() {
+        return this.authority.name();
+    }
+
+    /**
+     * Sets the role of the user.
+     *
+     * @param authority The role of the user.
+     */
     public void setAuthority(final String authority) {
         this.authority = Authority.valueOf(authority);
     }

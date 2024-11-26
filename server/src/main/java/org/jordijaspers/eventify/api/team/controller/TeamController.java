@@ -8,6 +8,7 @@ import org.jordijaspers.eventify.api.team.model.request.TeamMemberRequest;
 import org.jordijaspers.eventify.api.team.model.request.TeamRequest;
 import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
 import org.jordijaspers.eventify.api.team.service.TeamService;
+import org.jordijaspers.eventify.api.team.validator.TeamValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +27,17 @@ public class TeamController {
 
     private final TeamMapper teamMapper;
 
+    private final TeamValidator teamValidator;
+
     @ResponseStatus(OK)
     @Operation(summary = "Get a paginated response of all the teams.")
     @GetMapping(
         path = TEAMS_PATH,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAnyAuthority('MANAGER, ADMIN')")
-    public ResponseEntity<Page<TeamResponse>> getTeams(@RequestParam(defaultValue = "0") int pageNo,
+    @PreAuthorize("hasAnyAuthority('READ_TEAMS')")
+    public ResponseEntity<Page<TeamResponse>> getTeams(
+        @RequestParam(defaultValue = "0") int pageNo,
         @RequestParam(defaultValue = "10") int pageSize) {
         final Page<Team> teamPage = teamService.getTeams(PageRequest.of(pageNo, pageSize));
         return ResponseEntity.status(OK).body(teamPage.map(teamMapper::toTeamResponse));
@@ -46,8 +50,9 @@ public class TeamController {
         produces = APPLICATION_JSON_VALUE,
         consumes = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAnyAuthority('MANAGER, ADMIN')")
+    @PreAuthorize("hasAnyAuthority('WRITE_TEAMS')")
     public ResponseEntity<TeamResponse> createTeam(@RequestBody final TeamRequest request) {
+        teamValidator.validateAndThrow(request);
         final Team team = teamService.createTeam(request);
         return ResponseEntity.status(CREATED).body(teamMapper.toTeamResponse(team));
     }
@@ -59,9 +64,9 @@ public class TeamController {
         produces = APPLICATION_JSON_VALUE,
         consumes = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAnyAuthority('MANAGER, ADMIN')")
-    public ResponseEntity<TeamResponse> updateTeam(@PathVariable final Long id,
-        @RequestBody final TeamRequest request) {
+    @PreAuthorize("hasAnyAuthority('WRITE_TEAMS')")
+    public ResponseEntity<TeamResponse> updateTeam(@PathVariable final Long id, @RequestBody final TeamRequest request) {
+        teamValidator.validateAndThrow(request);
         final Team team = teamService.updateTeam(id, request);
         return ResponseEntity.status(OK).body(teamMapper.toTeamResponse(team));
     }
@@ -72,7 +77,7 @@ public class TeamController {
         path = TEAM_PATH,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAnyAuthority('MANAGER, ADMIN')")
+    @PreAuthorize("hasAnyAuthority('WRITE_TEAMS')")
     public ResponseEntity<Void> deleteTeam(@PathVariable final Long id) {
         teamService.deleteTeam(id);
         return ResponseEntity.status(NO_CONTENT).build();
@@ -85,7 +90,7 @@ public class TeamController {
         produces = APPLICATION_JSON_VALUE,
         consumes = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAnyAuthority('MANAGER, ADMIN')")
+    @PreAuthorize("hasAnyAuthority('WRITE_TEAMS')")
     public ResponseEntity<TeamResponse> addMembers(@PathVariable final Long id,
         @RequestBody final TeamMemberRequest request) {
         final Team team = teamService.addMembers(id, request.getUserIds());
@@ -98,7 +103,7 @@ public class TeamController {
         path = TEAM_MEMBERS_PATH,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAnyAuthority('MANAGER, ADMIN')")
+    @PreAuthorize("hasAnyAuthority('WRITE_TEAMS')")
     public ResponseEntity<TeamResponse> removeMembers(@PathVariable final Long id,
         @RequestBody final TeamMemberRequest request) {
         final Team team = teamService.removeMembers(id, request.getUserIds());

@@ -15,7 +15,6 @@
     });
 
     const hasMultipleTeams = user?.teams?.length > 1;
-
     function selectTeam(team: string) {
         activeTeam = team;
     }

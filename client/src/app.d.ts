@@ -13,9 +13,10 @@ interface RetryConfig {
 }
 
 interface ApiResponse {
-	response?: Response;
-	error?: string;
+	success: boolean;
 	status: number;
+	message: string;
+	data: any;
 }
 
 interface TokenPair {
@@ -27,7 +28,8 @@ interface JwtPayload {
 	sub: string;
 	first_name: string;
 	last_name: string;
-	authorities: string[];
+	authority: string;
+	permissions: string[];
 	teams: string[];
 	last_login: number;
 	created: number;

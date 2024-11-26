@@ -14,8 +14,6 @@ export const actions: Actions = {
 			token: params.token
 		};
 
-		console.log(input);
-
 		const response: ApiResponse = await ApiService.fetchWithRetry(
 			SERVER_ROUTES.RESET_FORGOTTEN_PASSWORD.path,
 			{
@@ -29,10 +27,9 @@ export const actions: Actions = {
 			}
 		);
 
-		if (!response.error) {
+		if (response.success) {
 			throw redirect(303, CLIENT_ROUTES.LOGIN_PAGE.path);
 		}
-
-		return fail(response.status, { error: response.error });
+		return fail(response.status, { response: response });
 	}
 };

@@ -2,7 +2,6 @@ package org.jordijaspers.eventify.api.authentication.model.response;
 
 import lombok.Data;
 
-import java.util.List;
 
 /**
  * A response model for user registration.
@@ -12,7 +11,7 @@ public class RegisterResponse {
 
     private String email;
 
-    private List<String> authorities;
+    private String authority;
 
     private boolean enabled;
 

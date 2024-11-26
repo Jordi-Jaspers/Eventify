@@ -12,8 +12,6 @@ import org.jordijaspers.eventify.common.mapper.config.SharedMapperConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The mapper for the user.
@@ -30,14 +28,14 @@ public abstract class UserMapper {
     public abstract User toUser(RegisterUserRequest request);
 
     @Mapping(
-        target = "authorities",
-        expression = "java(mapRolesToAuthorities(user.getRoles()))"
+        target = "authority",
+        expression = "java(mapRoleToAuthority(user.getRole()))"
     )
     public abstract RegisterResponse toRegisterResponse(User user);
 
     @Mapping(
-        target = "authorities",
-        expression = "java(mapRolesToAuthorities(user.getRoles()))"
+        target = "authority",
+        expression = "java(mapRoleToAuthority(user.getRole()))"
     )
     @Mapping(
         target = "refreshToken",
@@ -54,12 +52,12 @@ public abstract class UserMapper {
     public abstract UserResponse toUserResponse(User user);
 
     @Mapping(
-        target = "authorities",
-        expression = "java(mapRolesToAuthorities(user.getRoles()))"
+        target = "authority",
+        expression = "java(mapRoleToAuthority(user.getRole()))"
     )
     public abstract UserDetailsResponse toUserDetailsResponse(User user);
 
-    public List<String> mapRolesToAuthorities(final List<Role> roles) {
-        return roles.stream().map(Role::getAuthority).collect(Collectors.toList());
+    public String mapRoleToAuthority(final Role role) {
+        return role.getAuthority();
     }
 }

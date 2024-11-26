@@ -33,7 +33,7 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 @ToString(
     exclude = {
         "password",
-        "roles"
+        "role"
     }
 )
 public class User implements UserDetails {
@@ -85,16 +85,11 @@ public class User implements UserDetails {
     )
     private List<Team> teams = new ArrayList<>();
 
-    @ManyToMany(
+    @ManyToOne(
         fetch = FetchType.EAGER,
         cascade = CascadeType.MERGE
     )
-    @JoinTable(
-        name = "user_role",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private List<Role> roles = new ArrayList<>();
+    private Role role;
 
     @OneToMany(
         mappedBy = "user",
@@ -125,7 +120,10 @@ public class User implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getAuthority())).toList();
+        return role.getPermissions()
+            .stream()
+            .map(permission -> new SimpleGrantedAuthority(permission.name()))
+            .toList();
     }
 
     /**

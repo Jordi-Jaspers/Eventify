@@ -16,7 +16,7 @@ public class UserResponse {
 
     private List<TeamResponse> teams;
 
-    private List<String> authorities;
+    private String authority;
 
     private ZonedDateTime lastLogin;
 

@@ -16,6 +16,11 @@ interface LoginRequest {
 	password: string;
 }
 
+interface TeamRequest {
+	name: string;
+	description: string;
+}
+
 interface RefreshTokenRequest {
 	refreshToken: string;
 }

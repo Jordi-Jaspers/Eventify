@@ -20,9 +20,14 @@ public final class JWTClaimNames {
     public static final String LAST_NAME = "last_name";
 
     /**
-     * A custom claim that contains the authorities of the user.
+     * A custom claim that contains the authority of the user.
      */
-    public static final String AUTHORITIES = "authorities";
+    public static final String AUTHORITY = "authority";
+
+    /**
+     * A custom claim that contains the permissions of the user.
+     */
+    public static final String PERMISSIONS = "permissions";
 
     /**
      * A custom claim that contains the teams of the user.

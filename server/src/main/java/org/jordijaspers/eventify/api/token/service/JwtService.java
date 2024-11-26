@@ -49,7 +49,7 @@ public class JwtService {
     public <T extends UserDetails> Token generateAccessToken(final T user) {
         final LocalDateTime now = LocalDateTime.now();
         final User userDetails = (User) user;
-        final String[] roles = user.getAuthorities().stream()
+        final String[] permissions = user.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .toArray(String[]::new);
 
@@ -63,7 +63,8 @@ public class JwtService {
             .issuedAt(now.toInstant(UTC))
             .audience(List.of(applicationProperties.getUrl()))
             .expiresAt(now.plusSeconds(lifetime).toInstant(UTC))
-            .claim(AUTHORITIES, roles)
+            .claim(AUTHORITY, userDetails.getRole().getAuthority())
+            .claim(PERMISSIONS, permissions)
             .claim(TEAMS, teams)
             .claim(FIRST_NAME, userDetails.getFirstName())
             .claim(LAST_NAME, userDetails.getLastName())

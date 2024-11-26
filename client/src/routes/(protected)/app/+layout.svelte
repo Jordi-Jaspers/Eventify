@@ -6,6 +6,7 @@
     import {breadcrumbs} from "$lib/store/global";
 
     let {children} = $props();
+    let sidebarWidth = $state(0);
 </script>
 
 <head>
@@ -15,11 +16,9 @@
 </head>
 
 <Sidebar.Provider>
-    <SidebarMenu/>
+    <SidebarMenu bind:sidebarWidth={sidebarWidth}/>
     <Sidebar.Inset>
-            <header
-                    class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
-            >
+            <header class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
                 <div class="flex items-center gap-2 px-4">
                     <Sidebar.Trigger class="-ml-1"/>
                     <Separator orientation="vertical" class="mr-2 h-4"/>
@@ -38,14 +37,16 @@
                     </Breadcrumb.Root>
                     {:else}
                         <Breadcrumb.Root>
+                            <Breadcrumb.List>
                                     <Breadcrumb.Item>
                                         Home
                                     </Breadcrumb.Item>
+                            </Breadcrumb.List>
                         </Breadcrumb.Root>
                     {/if}
                 </div>
             </header>
-        <main>
+        <main class="p-4 w-full" style:max-width="calc(100vw - {sidebarWidth}px)">
             {@render children()}
         </main>
     </Sidebar.Inset>

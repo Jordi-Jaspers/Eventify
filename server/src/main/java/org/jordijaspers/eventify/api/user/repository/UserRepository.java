@@ -39,7 +39,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional(propagation = Propagation.REQUIRED)
-    @Query("FROM User u LEFT JOIN FETCH u.roles WHERE u.email = :email")
+    @Query("FROM User u LEFT JOIN FETCH u.role WHERE u.email = :email")
     Optional<User> findByEmail(@NonNull String email);
 
     /**

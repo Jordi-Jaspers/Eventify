@@ -39,7 +39,7 @@ export class Exception extends Error {
 
 		if ('errors' in throwable) {
 			const validationException = throwable as ValidationException;
-			return validationException.errors.map((error: ValidationField) => `${error.field}: ${error.code}`).join('\n');
+			return validationException.errors.map((error: ValidationField) => `${error.code}`).join('\n');
 		}
 
 		if ('apiErrorReason' in throwable && throwable.apiErrorReason) {

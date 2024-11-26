@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.jordijaspers.eventify.api.Paths.*;
+import static org.jordijaspers.eventify.api.token.model.JWTClaimNames.PERMISSIONS;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 /**
@@ -67,7 +68,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             oAuth2Configurer.jwt(jwtConfigurer -> {
                 final JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
                 converter.setAuthorityPrefix("");
-                converter.setAuthoritiesClaimName("roles");
+                converter.setAuthoritiesClaimName(PERMISSIONS);
                 jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(converter);
                 jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter);
             });

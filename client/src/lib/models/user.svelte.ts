@@ -22,8 +22,12 @@ export class User {
 		return this._user.firstName[0] + this._user.lastName[0];
 	}
 
-	get authorities(): string[] {
-		return this._user?.authorities ?? [];
+	get authority(): string | null {
+		return this._user?.authority ?? null;
+	}
+
+	get permissions(): string[] {
+		return this._user?.permissions ?? [];
 	}
 
 	get teams(): TeamResponse[] {

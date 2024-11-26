@@ -16,7 +16,7 @@
 
     <changeSet id="202411122200-PRD-initial-tables-user-management-2" author="jordi.jaspers">
         <ext:documentation>
-            Creating the necessary tables user management, roles, and tokens.
+            Creating the necessary tables user management, authority, and tokens.
         </ext:documentation>
         <sql>
             CREATE TABLE IF NOT EXISTS "rsa_key"
@@ -24,6 +24,14 @@
                 id          SERIAL PRIMARY KEY,
                 public_key  BYTEA NOT NULL,
                 private_key BYTEA NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS "role"
+            (
+                id          SERIAL PRIMARY KEY,
+                authority   TEXT NOT NULL,
+                description TEXT NOT NULL,
+                UNIQUE (authority)
             );
 
             CREATE TABLE IF NOT EXISTS "user"
@@ -37,31 +45,13 @@
                 last_login TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
                 enabled    BOOLEAN     NOT NULL DEFAULT TRUE,
                 validated  BOOLEAN     NOT NULL DEFAULT FALSE,
-                UNIQUE (email)
+                role_id    INTEGER     NOT NULL,
+                UNIQUE (email),
+                FOREIGN KEY (role_id) REFERENCES "role" (id) ON DELETE SET NULL
             );
 
             CREATE INDEX idx_user_email ON "user" (email);
             CREATE INDEX idx_user_status ON "user" (enabled) WHERE enabled = TRUE;
-
-            CREATE TABLE IF NOT EXISTS "role"
-            (
-                id          SERIAL PRIMARY KEY,
-                authority   TEXT NOT NULL,
-                description TEXT NOT NULL,
-                UNIQUE (authority)
-            );
-
-            CREATE TABLE IF NOT EXISTS "user_role"
-            (
-                user_id INTEGER NOT NULL,
-                role_id INTEGER NOT NULL,
-                PRIMARY KEY (user_id, role_id),
-                FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,
-                FOREIGN KEY (role_id) REFERENCES "role" (id) ON DELETE CASCADE
-            );
-
-            CREATE INDEX idx_user_role_user ON user_role (user_id);
-            CREATE INDEX idx_user_role_role ON user_role (role_id);
 
             CREATE TABLE IF NOT EXISTS "token"
             (
@@ -73,6 +63,8 @@
                 FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,
                 UNIQUE (value)
             );
+
+            CREATE INDEX idx_token_value ON token (value);
         </sql>
     </changeSet>
 
@@ -123,16 +115,23 @@
             COMMENT ON INDEX idx_user_email IS 'Index for quick user lookup by email during authentication';
             COMMENT ON INDEX idx_user_status IS 'Partial index for finding active users';
 
-            COMMENT ON TABLE "role" IS 'Defines system roles for authorization';
+            COMMENT ON TABLE "role" IS 'Defines system authority for authorization';
             COMMENT ON COLUMN role.id IS 'Unique identifier for the role';
             COMMENT ON COLUMN role.authority IS 'Role name/identifier (e.g., ADMIN, USER)';
             COMMENT ON COLUMN role.description IS 'Human-readable description of the role''s permissions';
 
-            COMMENT ON TABLE "user_role" IS 'Maps users to their assigned roles for authorization';
-            COMMENT ON COLUMN user_role.user_id IS 'Reference to the user';
-            COMMENT ON COLUMN user_role.role_id IS 'Reference to the role assigned to the user';
-            COMMENT ON INDEX idx_user_role_user IS 'Index for finding roles assigned to a specific user';
-            COMMENT ON INDEX idx_user_role_role IS 'Index for finding users with a specific role';
+            COMMENT ON TABLE "token" IS 'Stores authentication tokens for user sessions';
+            COMMENT ON COLUMN token.id IS 'Unique identifier for the token';
+            COMMENT ON COLUMN token.value IS 'Token value used for authentication';
+            COMMENT ON COLUMN token.type IS 'Type of token (e.g., ACCESS, REFRESH)';
+            COMMENT ON COLUMN token.expires_at IS 'Timestamp when the token expires';
+            COMMENT ON COLUMN token.user_id IS 'Reference to the user';
+            COMMENT ON INDEX idx_token_value IS 'Index for finding tokens by value';
+
+            COMMENT ON TABLE "rsa_key" IS 'Stores RSA key pairs for JWT token signing';
+            COMMENT ON COLUMN rsa_key.id IS 'Unique identifier for the RSA key pair';
+            COMMENT ON COLUMN rsa_key.public_key IS 'Public key for JWT token signing';
+            COMMENT ON COLUMN rsa_key.private_key IS 'Private key for JWT token signing';
 
             COMMENT ON TABLE "team" IS 'Organizes users into teams for access control';
             COMMENT ON COLUMN team.id IS 'Unique identifier for the team';

@@ -3,7 +3,7 @@ import { ApiService } from '$lib/utils/api.service';
 import { CookieService } from '$lib/utils/cookie.service';
 
 export async function load({ params, locals, cookies }) {
-	const verifyEmail = async () => {
+	const verifyEmail: () => Promise<ApiResponse> = async (): Promise<ApiResponse> => {
 		const url: string = new URL(SERVER_ROUTES.VERIFY_EMAIL.path) + '?token=' + params.token;
 		const response: ApiResponse = await ApiService.fetchWithRetry(
 			url,
@@ -17,8 +17,8 @@ export async function load({ params, locals, cookies }) {
 			}
 		);
 
-		if (response.response) {
-			const authorizeResponse: AuthorizeResponse = await response.response.json();
+		if (response.success) {
+			const authorizeResponse: AuthorizeResponse = await response.data.json();
 			const tokenPair: TokenPair = {
 				accessToken: authorizeResponse.accessToken,
 				refreshToken: authorizeResponse.refreshToken
@@ -26,10 +26,8 @@ export async function load({ params, locals, cookies }) {
 
 			CookieService.setAuthCookies(cookies, tokenPair);
 			locals.user = authorizeResponse;
-
-			return { response: authorizeResponse };
 		}
-		return { error: response.error };
+		return response;
 	};
 
 	return {

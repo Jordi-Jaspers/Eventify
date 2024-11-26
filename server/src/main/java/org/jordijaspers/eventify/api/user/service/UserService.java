@@ -18,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -164,7 +163,7 @@ public class UserService implements UserDetailsService {
 
     private User register(final User newUser, final String password) {
         newUser.setPassword(passwordEncoder.encode(password));
-        newUser.setRoles(List.of(roleRepository.findByAuthority(USER).orElseThrow()));
+        newUser.setRole(roleRepository.findByAuthority(USER).orElseThrow());
         newUser.setEnabled(true);
         newUser.setValidated(false);
         return userRepository.save(newUser);
