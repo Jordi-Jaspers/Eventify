@@ -41,3 +41,7 @@ interface UpdateUserDetailsRequest {
 interface UpdateEmailRequest {
 	email: string;
 }
+
+interface TeamMemberRequest {
+	userIds: number[];
+}

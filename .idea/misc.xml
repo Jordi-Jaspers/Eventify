@@ -5,7 +5,7 @@
     <file type="web" url="file://$PROJECT_DIR$/liquibase" />
     <file type="web" url="file://$PROJECT_DIR$/server" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="temurin-21 (2)" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" project-jdk-name="temurin-21 (3)" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

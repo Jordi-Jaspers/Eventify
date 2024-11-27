@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    private static final String BEARER = "bearer ";
+    private static final String BEARER = "Bearer ";
 
     private final JwtService jwtService;
 
@@ -84,7 +84,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authorizationHeader = request.getHeader(AUTHORIZATION);
         if (!startsWithIgnoreCase(authorizationHeader, BEARER)) {
             LOGGER.debug("No JWT token found in request headers.");
-            filterChain.doFilter(request, response);
             return;
         }
 
@@ -101,16 +100,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     LOGGER.debug("Authentication successful for '{}', setting security context.", user.getUsername());
                     SecurityContextHolder.getContext().setAuthentication(getAuthentication(user, request));
-                    filterChain.doFilter(request, response);
                     return;
                 }
             } catch (final ApiException exception) {
-                filterChain.doFilter(request, response);
+                LOGGER.debug("Authentication failed because of an invalid token.");
                 return;
             }
         }
 
-        LOGGER.debug("Authentication failed because of an invalid token.");
         filterChain.doFilter(request, response);
     }
 

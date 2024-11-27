@@ -9,8 +9,12 @@ import org.jordijaspers.eventify.api.team.mapper.TeamMapper;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.common.mapper.DateTimeMapper;
 import org.jordijaspers.eventify.common.mapper.config.SharedMapperConfig;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import java.util.List;
 
 
 /**
@@ -55,7 +59,11 @@ public abstract class UserMapper {
         target = "authority",
         expression = "java(mapRoleToAuthority(user.getRole()))"
     )
+    @Named("toUserDetailsResponse")
     public abstract UserDetailsResponse toUserDetailsResponse(User user);
+
+    @IterableMapping(qualifiedByName = "toUserDetailsResponse")
+    public abstract List<UserDetailsResponse> toUserDetailsResponseList(List<User> users);
 
     public String mapRoleToAuthority(final Role role) {
         return role.getAuthority();

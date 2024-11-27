@@ -18,7 +18,7 @@ export async function load({ params, locals, cookies }) {
 		);
 
 		if (response.success) {
-			const authorizeResponse: AuthorizeResponse = await response.data.json();
+			const authorizeResponse: AuthorizeResponse = await response.data;
 			const tokenPair: TokenPair = {
 				accessToken: authorizeResponse.accessToken,
 				refreshToken: authorizeResponse.refreshToken

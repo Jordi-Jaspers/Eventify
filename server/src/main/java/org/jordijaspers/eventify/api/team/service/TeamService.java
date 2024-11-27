@@ -76,10 +76,6 @@ public class TeamService {
      */
     public Team updateTeam(final Long id, final TeamRequest request) {
         final Team team = getTeam(id);
-        if (teamRepository.existsByNameIgnoreCase(request.getName())) {
-            throw new TeamAlreadyExistsException();
-        }
-
         team.setName(request.getName());
         team.setDescription(request.getDescription());
         return teamRepository.save(team);

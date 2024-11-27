@@ -35,7 +35,7 @@ export class ApiService {
 				};
 
 				// TODO: log response
-				console.log('API Response: ', apiResponse);
+				console.log(JSON.stringify(apiResponse, null, 2));
 				return apiResponse;
 			} catch (error) {
 				attempts++;

@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -55,6 +56,15 @@ public class UserService implements UserDetailsService {
     public User loadUserByUsername(final String username) {
         return userRepository.findByEmail(username)
             .orElseThrow(() -> new AuthorizationException(INVALID_CREDENTIALS));
+    }
+
+    /**
+     * Retrieve all the users from the database.
+     *
+     * @return a list of all the users
+     */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     /**

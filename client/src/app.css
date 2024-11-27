@@ -97,6 +97,18 @@
 	blockquote {
 		@apply mt-6 border-l-2 pl-6 italic;
 	}
+
+	pre {
+		background-color: #cac030;
+		color: #000000;
+		border-radius: 5px;
+		padding: 10px;
+		font-family: 'Fira Code', monospace;
+		font-size: 14px;
+		line-height: 1.5;
+		white-space: pre-wrap;
+		overflow-x: auto;
+	}
 }
 
 @property --angle {

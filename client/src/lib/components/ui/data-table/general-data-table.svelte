@@ -1,17 +1,14 @@
 <script lang="ts" generics="TData, TValue">
-    import { type ColumnDef, getCoreRowModel } from "@tanstack/table-core";
-    import * as Table from "$lib/components/ui/table";
-    import {
-        createSvelteTable,
-        FlexRender,
-    } from "$lib/components/ui/data-table/index";
+    import {type ColumnDef, getCoreRowModel} from "@tanstack/table-core";
+    import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "$lib/components/ui/table";
+    import {createSvelteTable, FlexRender,} from "$lib/components/ui/data-table/index";
 
     type DataTableProps<TData, TValue> = {
         columns: ColumnDef<TData, TValue>[];
         data: TData[];
     };
 
-    let { data, columns }: DataTableProps<TData, TValue> = $props();
+    let {data, columns}: DataTableProps<TData, TValue> = $props();
     const table = createSvelteTable({
         get data() {
             return data;
@@ -22,42 +19,42 @@
 </script>
 
 <div class="rounded-md border">
-    <Table.Root >
-        <Table.Header>
+    <Table>
+        <TableHeader>
             {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-                <Table.Row>
+                <TableRow>
                     {#each headerGroup.headers as header (header.id)}
-                        <Table.Head class={header.column.columnDef.meta?.headerClassName}>
+                        <TableHead class={header.column.columnDef.meta?.headerClassName}>
                             {#if !header.isPlaceholder}
                                 <FlexRender
                                         content={header.column.columnDef.header}
                                         context={header.getContext()}
                                 />
                             {/if}
-                        </Table.Head>
+                        </TableHead>
                     {/each}
-                </Table.Row>
+                </TableRow>
             {/each}
-        </Table.Header>
-        <Table.Body >
+        </TableHeader>
+        <TableBody>
             {#each table.getRowModel().rows as row (row.id)}
-                <Table.Row data-state={row.getIsSelected() && "selected"}>
+                <TableRow data-state={row.getIsSelected() && "selected"}>
                     {#each row.getVisibleCells() as cell (cell.id)}
-                        <Table.Cell class={cell.column.columnDef.meta?.cellClassName}>
+                        <TableCell class={cell.column.columnDef.meta?.cellClassName}>
                             <FlexRender
                                     content={cell.column.columnDef.cell}
                                     context={cell.getContext()}
                             />
-                        </Table.Cell>
+                        </TableCell>
                     {/each}
-                </Table.Row>
+                </TableRow>
             {:else}
-                <Table.Row>
-                    <Table.Cell colspan={columns.length} class="h-24 text-center">
+                <TableRow>
+                    <TableCell colspan={columns.length} class="h-24 text-center">
                         No results.
-                    </Table.Cell>
-                </Table.Row>
+                    </TableCell>
+                </TableRow>
             {/each}
-        </Table.Body>
-    </Table.Root>
+        </TableBody>
+    </Table>
 </div>

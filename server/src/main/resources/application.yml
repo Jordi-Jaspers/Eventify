@@ -60,11 +60,11 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
-      connectionTimeout: 1000
-      idleTimeout: 900000
-      minimumIdle: 5
-      maximumPoolSize: 17
-      poolName: application
+      connectionTimeout: 5000
+      idleTimeout: 30000
+      minimumIdle: 10
+      maximumPoolSize: 20
+      poolName: eventify
       registerMbeans: true
     url: ${DATASOURCE_TOP_URL:jdbc:postgresql://100.89.27.58:5432/tst_eventify}
     username: ${DATASOURCE_TOP_USERNAME:tst_eventify}

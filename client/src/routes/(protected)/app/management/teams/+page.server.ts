@@ -17,8 +17,22 @@ export async function load({ cookies }) {
 		return response.data;
 	};
 
+	const getUsers = async () => {
+		const { accessToken } = CookieService.getAuthTokens(cookies);
+		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.USERS.path, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${accessToken}`
+			}
+		});
+
+		return response.data;
+	};
+
 	return {
-		teams: await getTeams()
+		teams: await getTeams(),
+		members: await getUsers()
 	};
 }
 
@@ -74,6 +88,46 @@ export const actions: Actions = {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${accessToken}`
 			}
+		});
+
+		return response.success ? { response: response } : fail(response.status, { response: response });
+	},
+	assignMember: async ({ request, cookies }) => {
+		const { accessToken } = CookieService.getAuthTokens(cookies);
+		const data: FormData = await request.formData();
+		const teamId: string = data.get('team_id') as string;
+		const userId: string = data.get('user_id') as string;
+		const teamMemberRequest: TeamMemberRequest = {
+			userIds: [parseInt(userId)]
+		};
+
+		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.TEAM_MEMBERS.path.replace('{id}', teamId), {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${accessToken}`
+			},
+			body: JSON.stringify(teamMemberRequest)
+		});
+
+		return response.success ? { response: response } : fail(response.status, { response: response });
+	},
+	unassignMember: async ({ request, cookies }) => {
+		const { accessToken } = CookieService.getAuthTokens(cookies);
+		const data: FormData = await request.formData();
+		const teamId: string = data.get('team_id') as string;
+		const userId: string = data.get('user_id') as string;
+		const teamMemberRequest: TeamMemberRequest = {
+			userIds: [parseInt(userId)]
+		};
+
+		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.TEAM_MEMBERS.path.replace('{id}', teamId), {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${accessToken}`
+			},
+			body: JSON.stringify(teamMemberRequest)
 		});
 
 		return response.success ? { response: response } : fail(response.status, { response: response });

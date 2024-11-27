@@ -1,40 +1,18 @@
 interface PageableResponse {
-	pageNumber: number;
-	pageSize: number;
-	sort: any;
-	offset: number;
-	paged: boolean;
-	unpaged: boolean;
+	number: number;
+	size: number;
+	totalElements: number;
+	totalPages: number;
 }
 
 interface PageResponse<T> {
 	content: T[];
-	pageable: PageableResponse;
-	totalElements: number;
-	totalPages: number;
-	last: boolean;
-	numberOfElements: number;
-	first: boolean;
-	size: number;
-	number: number;
+	page: PageableResponse;
 }
 
 interface RegisterResponse {
 	email: string;
 	authority: string;
-	enabled: boolean;
-	validated: boolean;
-}
-
-interface UserDetailsResponse {
-	email: string;
-	firstName: string;
-	lastName: string;
-	authority: string;
-	permissions: string[];
-	teams: TeamResponse[];
-	lastLogin: Date;
-	created: Date;
 	enabled: boolean;
 	validated: boolean;
 }
@@ -52,6 +30,16 @@ interface TeamMemberResponse {
 	email: string;
 	firstName: string;
 	lastName: string;
+}
+
+interface UserDetailsResponse extends TeamMemberResponse {
+	authority: string;
+	permissions: string[];
+	teams: TeamResponse[];
+	lastLogin: Date;
+	created: Date;
+	enabled: boolean;
+	validated: boolean;
 }
 
 interface AuthorizeResponse extends UserDetailsResponse {

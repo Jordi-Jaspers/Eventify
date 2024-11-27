@@ -84,6 +84,7 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-mail")
     implementation("org.springframework.boot", "spring-boot-starter-security")
     implementation("org.springframework.boot", "spring-boot-starter-oauth2-resource-server")
+    implementation(group = "org.springframework.boot", name = "spring-boot-starter-data-redis")
 
     implementation("org.springframework.boot", "spring-boot-starter-jdbc") {
         exclude("org.apache.tomcat", module = "tomcat-jdbc")
@@ -113,17 +114,11 @@ dependencies {
     implementation("org.hibernate.orm", "hibernate-core", retrieve("hibernateCoreVersion"))
     implementation("org.hibernate.validator", "hibernate-validator", retrieve("hibernateValidatorVersion"))
 
-    // Hawaii-framework must-have logging dependencies.
-    implementation("org.slf4j", "jcl-over-slf4j", retrieve("slf4jVersion"))
-    implementation("net.logstash.logback", "logstash-logback-encoder", retrieve("logstashEncoderVersion"))
-    implementation("ch.qos.logback", "logback-access", retrieve("logbackAccessVersion"))
-
     // Library for checking that a password complies with a custom set of rules
     implementation("org.passay","passay", retrieve("passayVersion"))
 
     // Java library for Javascript Object Signing and Encryption (JOSE) and JSON Web Tokens (JWT)
     implementation("com.nimbusds", "nimbus-jose-jwt", retrieve("nimbusJoseJwtVersion"))
-
     // ======= TEST DEPENDENCIES =======
     testImplementation("org.springframework.boot", "spring-boot-test")
     testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))

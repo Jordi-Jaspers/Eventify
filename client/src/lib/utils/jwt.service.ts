@@ -35,10 +35,11 @@ export class JwtService {
 	 * @param token - The JWT token to check
 	 * @returns User details, or null if token is invalid
 	 */
-	static getUserDetailsFromToken(token: string): UserDetailsResponse | null {
+	static getUserDetailsFromToken(token: string): UserDetailsResponse {
 		const payload: JwtPayload | null = this.decodeToken(token);
-		if (!payload) return null;
+		if (!payload) throw new Error('Invalid token');
 		return {
+			id: 0,
 			email: payload.sub,
 			firstName: payload.first_name,
 			lastName: payload.last_name,

@@ -46,6 +46,14 @@ export const SERVER_ROUTES = {
 		path: `${SERVER_BASE_URL}/password`,
 		type: RouteType.PRIVATE
 	},
+	USERS: {
+		path: `${SERVER_BASE_URL}/user`,
+		type: RouteType.PRIVATE
+	},
+	USER_DETAILS: {
+		path: `${SERVER_BASE_URL}/user/details`,
+		type: RouteType.PRIVATE
+	},
 	TEAMS: {
 		path: `${SERVER_BASE_URL}/team`,
 		type: RouteType.PRIVATE

@@ -25,7 +25,7 @@ export const actions: Actions = {
 		});
 
 		if (response.success) {
-			const authorizeResponse: AuthorizeResponse = await response.data.json();
+			const authorizeResponse: AuthorizeResponse = await response.data;
 			const tokenPair: TokenPair = {
 				accessToken: authorizeResponse.accessToken,
 				refreshToken: authorizeResponse.refreshToken

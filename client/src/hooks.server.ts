@@ -2,6 +2,7 @@ import { CLIENT_ROUTES, isPublicPath, SERVER_ROUTES } from '$lib/config/paths';
 import { CookieService } from '$lib/utils/cookie.service';
 import { JwtService } from '$lib/utils/jwt.service';
 import { type Handle, redirect } from '@sveltejs/kit';
+import { ApiService } from '$lib/utils/api.service';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	//----- event logging -----
@@ -25,7 +26,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// if everything is good, try and set the user details in locals
 	if (accessToken && refreshToken) {
 		CookieService.setAuthCookies(event.cookies, { accessToken, refreshToken });
-		event.locals.user = JwtService.getUserDetailsFromToken(accessToken);
+		const userDetails: UserDetailsResponse = JwtService.getUserDetailsFromToken(accessToken);
+		const apiResponse: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.USER_DETAILS.path, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${accessToken}`
+			}
+		});
+
+		userDetails.id = apiResponse.data.id;
+		userDetails.teams = apiResponse.data.teams;
+		event.locals.user = userDetails;
 	}
 
 	// ---- event handling ----

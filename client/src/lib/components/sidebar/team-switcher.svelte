@@ -1,29 +1,31 @@
 <script lang="ts">
-    import { Menu, MenuButton, MenuItem, useSidebar } from '$lib/components/ui/sidebar';
-    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-    import { Building2 } from "lucide-svelte";
+    import {Menu, MenuButton, MenuItem, useSidebar} from '$lib/components/ui/sidebar';
+    import {
+        DropdownMenu,
+        DropdownMenuContent,
+        DropdownMenuItem,
+        DropdownMenuLabel,
+        DropdownMenuShortcut,
+        DropdownMenuTrigger
+    } from "$lib/components/ui/dropdown-menu";
+    import {Building2} from "lucide-svelte";
     import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
     import {user} from "$lib/store/global";
 
     const sidebar = useSidebar();
-    let activeTeam = $state();
+    const hasMultipleTeams = $derived(user.teams.length > 1);
+    let activeTeam: TeamResponse | undefined = $state();
 
     $effect(() => {
-        if (user?.teams?.length) {
-            activeTeam = user.teams[0];
-        }
+        if (!user.teams) return;
+        activeTeam = user.teams[0];
     });
-
-    const hasMultipleTeams = user?.teams?.length > 1;
-    function selectTeam(team: string) {
-        activeTeam = team;
-    }
 </script>
 
 <Menu>
     <MenuItem>
-        <DropdownMenu.Root>
-            <DropdownMenu.Trigger>
+        <DropdownMenu>
+            <DropdownMenuTrigger>
                 {#snippet child({props})}
                     <MenuButton
                             {...props}
@@ -34,44 +36,42 @@
                     >
                         <!-- Icon -->
                         <div class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                            <Building2 class="size-4" />
+                            <Building2 class="size-4"/>
                         </div>
                         <!-- Text Content -->
                         <div class="grid flex-1 text-left text-sm leading-tight">
                             <span class="truncate font-semibold">Ilionx - Monitoring</span>
                             <span class="truncate text-xs">
-                                {activeTeam ? activeTeam : "No team assigned"}
+                                {activeTeam ? activeTeam.name : "No team assigned"}
                             </span>
                         </div>
                         <!-- Dropdown Icon -->
                         {#if hasMultipleTeams}
-                            <ChevronsUpDown class="ml-auto" />
+                            <ChevronsUpDown class="ml-auto"/>
                         {/if}
                     </MenuButton>
                 {/snippet}
-            </DropdownMenu.Trigger>
+            </DropdownMenuTrigger>
 
             {#if hasMultipleTeams}
-                <DropdownMenu.Content
+                <DropdownMenuContent
                         class="w-[--bits-dropdown-menu-anchor-width] min-w-56 rounded-lg"
                         align="start"
                         side={sidebar.isMobile ? "bottom" : "right"}
                         sideOffset={4}
                 >
-                    <DropdownMenu.Label class="text-muted-foreground text-xs">Teams</DropdownMenu.Label>
+                    <DropdownMenuLabel class="text-muted-foreground text-xs">Teams</DropdownMenuLabel>
                     {#each user.teams as team, index (team.name)}
-                        <DropdownMenu.Item onSelect={() => selectTeam(team.name)} class="gap-2 p-2">
-                            <!-- Team Icon -->
+                        <DropdownMenuItem onSelect={() => activeTeam = team} class="gap-2 p-2">
                             <div class="flex size-6 items-center justify-center rounded-sm border">
-                                <Building2 class="size-4 shrink-0" />
+                                <Building2 class="size-4 shrink-0"/>
                             </div>
                             {team.name}
-                            <!-- Shortcut Key -->
-                            <DropdownMenu.Shortcut>⌘{index + 1}</DropdownMenu.Shortcut>
-                        </DropdownMenu.Item>
+                            <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                        </DropdownMenuItem>
                     {/each}
-                </DropdownMenu.Content>
+                </DropdownMenuContent>
             {/if}
-        </DropdownMenu.Root>
+        </DropdownMenu>
     </MenuItem>
 </Menu>

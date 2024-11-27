@@ -55,9 +55,9 @@ public final class Paths {
 
     /* ------------------------------- USER ENDPOINTS ------------------------------- */
 
-    public static final String USER_PATH = BASE_PATH + "/user";
+    public static final String USERS_PATH = BASE_PATH + "/user";
 
-    public static final String USER_DETAILS = USER_PATH + "/details";
+    public static final String USER_DETAILS = USERS_PATH + "/details";
 
     public static final String USER_UPDATE_EMAIL_PATH = USER_DETAILS + "/email";
 

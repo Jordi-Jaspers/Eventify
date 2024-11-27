@@ -44,7 +44,10 @@ export const columns: ColumnDef<TeamResponse>[] = [
 	},
 	{
 		accessorKey: 'name',
-		header: 'Name'
+		header: 'Name',
+		meta: {
+			cellClassName: 'text-nowrap'
+		}
 	},
 	{
 		accessorKey: 'description',

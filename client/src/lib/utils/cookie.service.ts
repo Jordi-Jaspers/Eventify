@@ -52,6 +52,13 @@ export class CookieService {
 	}
 
 	/**
+	 * Clears the access token cookie.
+	 */
+	static clearAccessToken(cookies: Cookies): void {
+		cookies.delete(ACCESS_TOKEN_COOKIE, { path: CLIENT_ROUTES.LANDING_PAGE.path });
+	}
+
+	/**
 	 * Clears authentication cookies
 	 */
 	static clearAuthCookies(cookies: Cookies): void {

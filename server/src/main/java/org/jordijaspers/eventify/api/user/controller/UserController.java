@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static org.jordijaspers.eventify.api.Paths.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -30,6 +32,17 @@ public class UserController {
     private final UserMapper userMapper;
 
     private final EmailValidator emailValidator;
+
+    @ResponseStatus(OK)
+    @Operation(summary = "Get a list of all the users.")
+    @GetMapping(
+        path = USERS_PATH,
+        produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<UserDetailsResponse>> getListUsers() {
+        final List<User> users = userService.getAllUsers();
+        return ResponseEntity.status(OK).body(userMapper.toUserDetailsResponseList(users));
+    }
 
     @ResponseStatus(OK)
     @Operation(summary = "Get the details of the authenticated user.")
