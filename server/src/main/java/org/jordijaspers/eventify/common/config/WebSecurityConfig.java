@@ -32,7 +32,10 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(
+    securedEnabled = true,
+    jsr250Enabled = true
+)
 @SuppressWarnings("PMD.SignatureDeclareThrowsException")
 public class WebSecurityConfig implements WebMvcConfigurer {
 
