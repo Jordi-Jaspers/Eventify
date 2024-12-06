@@ -1,9 +1,9 @@
 <script lang="ts">
     import Ellipsis from "lucide-svelte/icons/ellipsis";
-    import {Button} from "$lib/components/ui/button/index.js";
-    import DeleteTeamAction from "$lib/components/teams/table/delete-team-action.svelte";
-    import UpdateTeamAction from "$lib/components/teams/table/update-team-action.svelte";
-    import ManageMembersAction from "$lib/components/teams/table/manage-members-action.svelte";
+    import {Button} from "$lib/components/ui/button";
+    import DeleteTeamAction from "$lib/components/teams/table/actions/delete-team-action.svelte";
+    import UpdateTeamAction from "$lib/components/teams/table/actions/update-team-action.svelte";
+    import ManageMembersAction from "$lib/components/teams/table/actions/manage-members-action.svelte";
     import {Content, Item, Root, Trigger} from "$lib/components/ui/dropdown-menu";
 
     let isDeleteDialogOpen = $state(false);

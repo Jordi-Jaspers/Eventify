@@ -2,6 +2,9 @@ import type { ColumnDef } from '@tanstack/table-core';
 import { createRawSnippet } from 'svelte';
 import { renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
 import { TeamTableActions } from '$lib/components/teams';
+import DataTableNameButton from '$lib/components/teams/table/header/name-header-button.svelte';
+import DataTableCreatedButton from '$lib/components/teams/table/header/created-header-button.svelte';
+import DataTableMembersButton from '$lib/components/teams/table/header/members-header-button.svelte';
 
 export const columns: ColumnDef<TeamResponse>[] = [
 	{
@@ -17,7 +20,10 @@ export const columns: ColumnDef<TeamResponse>[] = [
 	},
 	{
 		accessorKey: 'members',
-		header: 'Members',
+		header: ({ column }) =>
+			renderComponent(DataTableMembersButton, {
+				onclick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+			}),
 		cell: ({ row }) => {
 			const members: TeamMemberResponse[] = row.getValue('members');
 			const membersSnippet = createRawSnippet(() => ({
@@ -29,7 +35,10 @@ export const columns: ColumnDef<TeamResponse>[] = [
 	},
 	{
 		accessorKey: 'created',
-		header: 'Created',
+		header: ({ column }) =>
+			renderComponent(DataTableCreatedButton, {
+				onclick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+			}),
 		cell: ({ row }) => {
 			const time: string = new Date(row.getValue('created')).toLocaleTimeString(navigator.language);
 			const date: string = new Date(row.getValue('created')).toLocaleDateString(navigator.language);
@@ -44,7 +53,10 @@ export const columns: ColumnDef<TeamResponse>[] = [
 	},
 	{
 		accessorKey: 'name',
-		header: 'Name',
+		header: ({ column }) =>
+			renderComponent(DataTableNameButton, {
+				onclick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+			}),
 		meta: {
 			cellClassName: 'text-nowrap'
 		}

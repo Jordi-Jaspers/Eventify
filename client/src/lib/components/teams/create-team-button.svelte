@@ -18,6 +18,7 @@
     import {Submit} from "$lib/components/button";
     import {Textarea} from "$lib/components/ui/textarea";
     import {teams} from "$lib/store/global";
+    import type {ServerResponse} from "$lib/models/server-response.svelte.js";
 
     let formData = $state<TeamRequest>({
         name: '',
@@ -32,12 +33,12 @@
             isLoading = false
             console.log(result)
             if (result.type === 'failure' && result.data) {
-                const apiResponse: ApiResponse = result.data.response;
+                const apiResponse: ServerResponse = result.data.response;
                 toast.error(apiResponse.message);
             }
 
             if (result.type === 'success' && result.data) {
-                const apiResponse: ApiResponse = result.data.response;
+                const apiResponse: ServerResponse = result.data.response;
                 toast.success('Team created successfully');
 
                 const team: TeamResponse = apiResponse.data;

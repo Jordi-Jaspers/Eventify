@@ -5,7 +5,7 @@
 	import {goto} from "$app/navigation";
 
 	function routeHomepage() {
-		window.location.href = CLIENT_ROUTES.HOME_PAGE.path;
+		goto(CLIENT_ROUTES.LOGIN_PAGE.path);
 	}
 </script>
 

@@ -1,4 +1,4 @@
-import { type RowData, type TableOptions, type TableOptionsResolved, type TableState, createTable } from '@tanstack/table-core';
+import { type RowData, type Table, type TableOptions, type TableOptionsResolved, type TableState, createTable } from '@tanstack/table-core';
 
 /**
  * Creates a reactive TanStack table object for Svelte.
@@ -26,7 +26,7 @@ import { type RowData, type TableOptions, type TableOptionsResolved, type TableS
  * </table>
  * ```
  */
-export function createSvelteTable<TData extends RowData>(options: TableOptions<TData>) {
+export function createSvelteTable<TData extends RowData>(options: TableOptions<TData>): Table<TData> {
 	const resolvedOptions: TableOptionsResolved<TData> = mergeObjects(
 		{
 			state: {},

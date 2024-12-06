@@ -5,9 +5,6 @@ import { type Handle, redirect } from '@sveltejs/kit';
 import { ApiService } from '$lib/utils/api.service';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	//----- event logging -----
-	// TODO: capture logs.
-
 	// ---- pre-processing ----
 	// Try and retrieve tokens from cookies
 	let { accessToken, refreshToken } = CookieService.getAuthTokens(event.cookies);
@@ -51,7 +48,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.user = null;
 		CookieService.clearAuthCookies(event.cookies);
 		throw redirect(303, CLIENT_ROUTES.LOGIN_PAGE.path);
-	} else {
-		return resolve(event);
 	}
+
+	return resolve(event);
 };

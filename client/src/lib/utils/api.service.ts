@@ -1,5 +1,6 @@
+import { LoggerService } from '$lib/utils/logger.service';
+import { ServerResponse } from '$lib/models/server-response.svelte.js';
 import { Exception } from '$lib/models/exception.error';
-import { CookieService } from '$lib/utils/cookie.service';
 
 export class ApiService {
 	/**
@@ -10,11 +11,12 @@ export class ApiService {
 	 * @returns {Promise<{response?: Response; error?: string}>}
 	 */
 	static async fetchWithRetry(url: string, options: RequestInit = {}, config: RetryConfig = {}): Promise<ApiResponse> {
-		let attempts: number = 0;
-		let lastErrorResponse: Response | null = null;
-
 		const { retries = 3, timeout = 60_000 } = config;
-		while (attempts < retries) {
+		let lastErrorResponse: Response | null = null;
+		const apiResponse = new ServerResponse(options.method || 'GET', url, options.headers);
+
+		for (let attempts: number = 0; attempts < retries; attempts++) {
+			const start: number = performance.now();
 			try {
 				const response: Response = await fetch(url, {
 					...options,
@@ -27,44 +29,60 @@ export class ApiService {
 					throw new Error(`HTTP error! Status: ${response.status}`);
 				}
 
-				const apiResponse: ApiResponse = {
-					success: true,
-					status: response.status,
-					message: 'The request was successful with status code ' + response.status,
-					data: response.status === 204 ? null : await response.json()
-				};
-
-				// TODO: log response
-				console.log(JSON.stringify(apiResponse, null, 2));
-				return apiResponse;
+				return this.handleSuccessResponse(response, apiResponse, start);
 			} catch (error) {
-				attempts++;
-				if (attempts >= retries) {
-					if (lastErrorResponse) {
-						const exception: Exception = new Exception(lastErrorResponse, await lastErrorResponse.json());
-						const apiResponse: ApiResponse = {
-							success: false,
-							status: lastErrorResponse.status,
-							message: exception.message,
-							data: exception.throwable
-						};
-
-						// TODO: log exception
-						console.log(apiResponse);
-						return apiResponse;
-					}
-
-					console.error(`Failed to fetch ${url} after ${retries} attempts`);
-					return {
-						success: false,
-						status: 500,
-						message: 'Something went wrong processing your request.',
-						data: null
-					};
+				if (attempts === retries - 1) {
+					return this.handleErrorResponse(lastErrorResponse, apiResponse, start, retries);
 				}
 			}
 		}
-
 		throw new Error(`Unexpected fetch failure for ${url}`);
+	}
+
+	private static async handleSuccessResponse(response: Response, apiResponse: ServerResponse, start: number): Promise<ApiResponse> {
+		apiResponse.success = true;
+		apiResponse.status = response.status;
+		apiResponse.headers = this.extractHeaders(response);
+		apiResponse.duration = performance.now() - start;
+		apiResponse.message = `Request successful with status ${response.status}`;
+		apiResponse.data = response.status === 204 ? null : await response.json();
+		LoggerService.log(apiResponse);
+		return apiResponse.toApiResponse();
+	}
+
+	private static async handleErrorResponse(
+		lastErrorResponse: Response | null,
+		apiResponse: ServerResponse,
+		start: number,
+		retries: number
+	): Promise<ApiResponse> {
+		if (lastErrorResponse) {
+			try {
+				const exception = new Exception(lastErrorResponse, await lastErrorResponse.json());
+				apiResponse.status = lastErrorResponse.status;
+				apiResponse.headers = this.extractHeaders(lastErrorResponse);
+				apiResponse.duration = performance.now() - start;
+				apiResponse.message = exception.message;
+				apiResponse.data = exception.throwable;
+			} catch {
+				// Fallback if JSON parsing fails
+				apiResponse.status = 500;
+				apiResponse.message = `Failed to parse error response from ${apiResponse.method} ${apiResponse.path}`;
+			}
+		} else {
+			// Generic network error
+			apiResponse.status = 500;
+			apiResponse.message = `Failed to fetch ${apiResponse.method} ${apiResponse.path} after ${retries} attempts`;
+		}
+
+		apiResponse.duration = performance.now() - start;
+		LoggerService.log(apiResponse);
+		return apiResponse.toApiResponse();
+	}
+
+	private static extractHeaders(response: Response): Map<string, string> {
+		const headersMap = new Map<string, string>();
+		response.headers.forEach((value, key) => headersMap.set(key, value));
+		return headersMap;
 	}
 }

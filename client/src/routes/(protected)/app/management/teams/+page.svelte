@@ -16,11 +16,13 @@
 
 <div class="flex justify-between items-center mb-4">
     <h1 class="text-2xl font-bold">Team Management</h1>
-    <CreateTeam/>
 </div>
 
+
 {#if data}
-    <DataTable {columns} data={teams.getTeams()}/>
+    <DataTable {columns} data={teams.getTeams()}>
+        <CreateTeam/>
+    </DataTable>
 {:else}
     <div class="flex flex-col items-center space-y-2 mt-32">
         <LoaderCircle class="h-8 w-8 animate-spin"/>

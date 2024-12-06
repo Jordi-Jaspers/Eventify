@@ -31,6 +31,8 @@
             if (result.type === 'success' && result.data) {
                 const apiResponse: ApiResponse = result.data.response;
                 const resultData: AuthorizeResponse = apiResponse.data;
+
+                user.setDetails(resultData);
                 if (!resultData.validated) {
                     toast.warning('Please verify your email address to continue, or request a new verification email.');
                 }

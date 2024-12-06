@@ -49,23 +49,4 @@ export class Exception extends Error {
 
 		return throwable.errorMessage || this.message;
 	}
-
-	private logResponse(): void {
-		let consoleMessage = 'Response Log:\n';
-		consoleMessage += '  Request:\n';
-		consoleMessage += '    Method: ' + (this.throwable?.method || 'N/A') + '\n';
-		consoleMessage += '    URI: ' + (this.throwable?.uri || 'N/A') + '\n';
-		consoleMessage += '  Status:\n';
-		consoleMessage += '    Code: ' + (this.throwable?.statusCode || this.status) + '\n';
-		consoleMessage += '    Message: ' + (this.throwable?.statusMessage || this.message) + '\n';
-		consoleMessage += '  Headers:\n';
-
-		this.headers.forEach((value, key) => {
-			consoleMessage += '    ' + key + ': ' + value + '\n';
-		});
-
-		consoleMessage += '  Body:\n';
-		consoleMessage += JSON.stringify(this.throwable, null, 2) + '\n';
-		console.error(consoleMessage);
-	}
 }
