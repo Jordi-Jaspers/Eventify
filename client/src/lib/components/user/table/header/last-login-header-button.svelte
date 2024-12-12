@@ -7,6 +7,6 @@
 </script>
 
 <Button {variant} {...restProps}>
-    Name
+    Last Login
     <ArrowUpDown class="ml-2 size-4"/>
 </Button>

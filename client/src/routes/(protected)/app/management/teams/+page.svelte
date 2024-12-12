@@ -7,11 +7,8 @@
 
     let {data} = $props();
 
-    let teamsPage: PageResponse<TeamResponse> = $state(data.teams);
-    teams.setTeams(teamsPage.content);
-
-    let members: UserDetailsResponse[] = $state(data.members);
-    users.setUsers(members);
+    teams.setTeams(data.teams);
+    users.setUsers(data.users);
 </script>
 
 <div class="flex justify-between items-center mb-4">

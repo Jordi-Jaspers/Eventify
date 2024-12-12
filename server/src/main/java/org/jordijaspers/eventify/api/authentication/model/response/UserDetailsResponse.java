@@ -22,6 +22,8 @@ public class UserDetailsResponse {
 
     private ZonedDateTime lastLogin;
 
+    private ZonedDateTime created;
+
     private String authority;
 
     private List<TeamResponse> teams;

@@ -21,7 +21,7 @@ export class Teams {
 		this._teams = [];
 	}
 
-	updateTeam(id: number, team: TeamResponse) {
-		this._teams = this._teams.map((t) => (t.id === id ? team : t));
+	updateTeam(id: number, updatedTeam: TeamResponse): void {
+		this._teams = this._teams.map((team) => (team.id === id ? updatedTeam : team));
 	}
 }

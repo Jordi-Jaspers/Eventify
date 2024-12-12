@@ -50,6 +50,18 @@ export const SERVER_ROUTES = {
 		path: `${SERVER_BASE_URL}/user`,
 		type: RouteType.PRIVATE
 	},
+	USER: {
+		path: `${SERVER_BASE_URL}/user/{id}`,
+		type: RouteType.PRIVATE
+	},
+	LOCK_USER: {
+		path: `${SERVER_BASE_URL}/user/{id}/lock`,
+		type: RouteType.PRIVATE
+	},
+	UNLOCK_USER: {
+		path: `${SERVER_BASE_URL}/user/{id}/unlock`,
+		type: RouteType.PRIVATE
+	},
 	USER_DETAILS: {
 		path: `${SERVER_BASE_URL}/user/details`,
 		type: RouteType.PRIVATE
@@ -64,6 +76,10 @@ export const SERVER_ROUTES = {
 	},
 	TEAM_MEMBERS: {
 		path: `${SERVER_BASE_URL}/team/{id}/members`,
+		type: RouteType.PRIVATE
+	},
+	OPTIONS: {
+		path: `${SERVER_BASE_URL}/options`,
 		type: RouteType.PRIVATE
 	}
 };

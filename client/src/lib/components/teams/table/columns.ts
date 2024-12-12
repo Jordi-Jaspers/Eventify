@@ -45,7 +45,7 @@ export const columns: ColumnDef<TeamResponse>[] = [
 			const created = time + ' ' + date;
 
 			const createdSnippet = createRawSnippet(() => ({
-				render: () => `<p class="text-muted-foreground">${created}</p>`
+				render: () => `<p class="text-muted-foreground text-wrap">${created}</p>`
 			}));
 
 			return renderSnippet(createdSnippet, created);

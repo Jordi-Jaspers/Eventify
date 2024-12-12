@@ -32,7 +32,7 @@ export async function load({ cookies }) {
 
 	return {
 		teams: await getTeams(),
-		members: await getUsers()
+		users: await getUsers()
 	};
 }
 

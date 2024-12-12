@@ -45,3 +45,7 @@ interface UpdateEmailRequest {
 interface TeamMemberRequest {
 	userIds: number[];
 }
+
+interface UpdateAuthorityRequest {
+	authority: string;
+}

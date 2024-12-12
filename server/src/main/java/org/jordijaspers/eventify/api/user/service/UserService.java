@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jordijaspers.eventify.api.authentication.model.Authority;
 import org.jordijaspers.eventify.api.authentication.repository.RoleRepository;
 import org.jordijaspers.eventify.api.token.model.TokenType;
 import org.jordijaspers.eventify.api.token.service.TokenService;
@@ -24,7 +25,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.authentication.model.Authority.USER;
 import static org.jordijaspers.eventify.common.constants.Constants.Time.*;
-import static org.jordijaspers.eventify.common.exception.ApiErrorCode.*;
+import static org.jordijaspers.eventify.common.exception.ApiErrorCode.INVALID_CREDENTIALS;
 
 /**
  * A service to manage users, their registration and authentication. It also implements the {@link UserDetailsService} to load users by
@@ -73,6 +74,27 @@ public class UserService implements UserDetailsService {
     @Scheduled(fixedDelay = 24 * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MILLIS_PER_SECOND)
     public void deleteUnvalidatedAccounts() {
         userRepository.deleteUnvalidatedAccounts(LocalDateTime.now().minusMonths(1));
+    }
+
+    /**
+     * Locks or unlocks the user with the given id.
+     *
+     * @param id       the id of the user
+     * @param lockUser true to lock the user, false to unlock the user
+     */
+    public User lockUser(final Long id, final boolean lockUser) {
+        final User user = userRepository.findById(id).orElseThrow();
+        user.setEnabled(!lockUser);
+        return userRepository.save(user);
+    }
+
+    /**
+     * Update the authority of the user with the given id.
+     */
+    public User updateAuthority(final Long id, final Authority authority) {
+        final User user = userRepository.findById(id).orElseThrow();
+        user.setRole(roleRepository.findByAuthority(authority).orElseThrow());
+        return userRepository.save(user);
     }
 
     /**

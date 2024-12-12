@@ -1,6 +1,10 @@
 export class User {
 	_user: UserDetailsResponse | null = $state(null);
 
+	get id(): number | null {
+		return this._user?.id ?? null;
+	}
+
 	get email(): string | null {
 		return this._user?.email ?? null;
 	}

@@ -57,6 +57,12 @@ public final class Paths {
 
     public static final String USERS_PATH = BASE_PATH + "/user";
 
+    public static final String USER_PATH = USERS_PATH + ID_PART;
+
+    public static final String LOCK_USER_PATH = USER_PATH + "/lock";
+
+    public static final String UNLOCK_USER_PATH = USER_PATH + "/unlock";
+
     public static final String USER_DETAILS = USERS_PATH + "/details";
 
     public static final String USER_UPDATE_EMAIL_PATH = USER_DETAILS + "/email";
@@ -68,6 +74,14 @@ public final class Paths {
     public static final String TEAM_PATH = TEAMS_PATH + ID_PART;
 
     public static final String TEAM_MEMBERS_PATH = TEAM_PATH + "/members";
+
+    /* ------------------------------- EVENT ENDPOINTS ------------------------------- */
+
+    public static final String EVENTS_PATH = BASE_PATH + "/event";
+
+    /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
+
+    public static final String OPTIONS_PATH = BASE_PATH + "/options";
 
     /* ------------------------------- END ------------------------------- */
 

@@ -30,6 +30,7 @@ interface TeamMemberResponse {
 	email: string;
 	firstName: string;
 	lastName: string;
+	name?: string;
 }
 
 interface UserDetailsResponse extends TeamMemberResponse {

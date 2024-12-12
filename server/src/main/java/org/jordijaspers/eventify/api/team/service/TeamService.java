@@ -8,10 +8,9 @@ import org.jordijaspers.eventify.api.team.repository.TeamRepository;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.repository.UserRepository;
 import org.jordijaspers.eventify.common.exception.TeamAlreadyExistsException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 import jakarta.transaction.Transactional;
 
@@ -45,11 +44,10 @@ public class TeamService {
     /**
      * Retrieves all teams. The result is paged.
      *
-     * @param pageable The paging information.
      * @return The teams.
      */
-    public Page<Team> getTeams(final Pageable pageable) {
-        return teamRepository.findAll(pageable);
+    public List<Team> getAllTeams() {
+        return teamRepository.findAll();
     }
 
     /**

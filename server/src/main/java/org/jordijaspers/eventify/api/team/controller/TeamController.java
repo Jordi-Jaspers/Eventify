@@ -9,11 +9,11 @@ import org.jordijaspers.eventify.api.team.model.request.TeamRequest;
 import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
 import org.jordijaspers.eventify.api.team.service.TeamService;
 import org.jordijaspers.eventify.api.team.validator.TeamValidator;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.jordijaspers.eventify.api.Paths.*;
 import static org.springframework.http.HttpStatus.*;
@@ -36,11 +36,9 @@ public class TeamController {
         produces = APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasAnyAuthority('READ_TEAMS')")
-    public ResponseEntity<Page<TeamResponse>> getTeams(
-        @RequestParam(defaultValue = "0") int pageNo,
-        @RequestParam(defaultValue = "10") int pageSize) {
-        final Page<Team> teamPage = teamService.getTeams(PageRequest.of(pageNo, pageSize));
-        return ResponseEntity.status(OK).body(teamPage.map(teamMapper::toTeamResponse));
+    public ResponseEntity<List<TeamResponse>> getTeams() {
+        final List<Team> teams = teamService.getAllTeams();
+        return ResponseEntity.status(OK).body(teamMapper.toTeamResponse(teams));
     }
 
     @ResponseStatus(CREATED)

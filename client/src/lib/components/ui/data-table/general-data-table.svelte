@@ -19,7 +19,7 @@
     type DataTableProps<TData, TValue> = {
         columns: ColumnDef<TData, TValue>[];
         data: TData[];
-        children: Snippet;
+        children?: Snippet;
     };
 
     let {data, columns, children}: DataTableProps<TData, TValue> = $props();
@@ -75,13 +75,15 @@
 <div>
     <div class="flex items-center py-4 justify-between">
         <Input
-                placeholder="Filter Teams..."
+                placeholder="Search..."
                 value={(table.getColumn("name")?.getFilterValue()) ?? ""}
                 onchange={(e) => table.getColumn("name")?.setFilterValue(e.currentTarget.value)}
                 oninput={(e) => table.getColumn("name")?.setFilterValue(e.currentTarget.value)}
                 class="max-w-sm"
         />
-        {@render children()}
+        {#if children}
+            {@render children()}
+        {/if}
     </div>
     <div class="rounded-md border">
         <Table>

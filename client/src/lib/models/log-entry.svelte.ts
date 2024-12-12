@@ -25,6 +25,7 @@ export class LogEntry {
 		this.method = response.method;
 		this.path = response.path;
 		this.headers = response.headers;
+		this.duration = Math.round(response.duration);
 		this.data = response.data;
 	}
 

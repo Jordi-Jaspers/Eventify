@@ -16,12 +16,14 @@ import java.util.stream.Stream;
 public enum Authority {
 
     USER(
+        "User",
         "The default authority for a user with limited permissions.",
         Set.of(
             Permission.ACCESS_APPLICATION
         )
     ),
     MANAGER(
+        "Manager",
         "The authority for a user which manages the dashboards and teams.",
         Set.of(
             Permission.ACCESS_APPLICATION,
@@ -32,6 +34,7 @@ public enum Authority {
         )
     ),
     ADMIN(
+        "Admin",
         "The authority for an administrator with full permissions.",
         Set.of(
             Permission.ACCESS_APPLICATION,
@@ -43,6 +46,8 @@ public enum Authority {
             Permission.WRITE_USERS
         )
     );
+
+    private final String name;
 
     private final String description;
 

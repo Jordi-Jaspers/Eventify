@@ -1,6 +1,4 @@
-import type { PageServerLoad } from '../../.svelte-kit/types/src/routes/(public)/login/$types';
-
-export const load: PageServerLoad = async ({ locals, url }) => {
+export const load = async ({ locals, url }) => {
 	let paths: string[] = url.pathname
 		.split('/')
 		.filter((path) => path !== '')
