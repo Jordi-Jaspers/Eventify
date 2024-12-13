@@ -13,7 +13,8 @@ export class Users {
 	}
 
 	updateUser(updatedUser: UserDetailsResponse): void {
-		this._users = this._users.map((user) => (user.id === updatedUser.id ? updatedUser : user));
+		updatedUser.name = `${updatedUser.firstName} ${updatedUser.lastName} ${updatedUser.email}`;
+		this._users = this._users.map((user: UserDetailsResponse): UserDetailsResponse => (user.id === updatedUser.id ? updatedUser : user));
 	}
 
 	clear(): void {
