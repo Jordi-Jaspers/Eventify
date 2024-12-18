@@ -14,9 +14,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +21,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,21 +58,6 @@ public class AuthenticationConfig {
     @Bean
     public AuthenticationManager authenticationManager(final AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
-    }
-
-    /**
-     * An API for changing a {@link UserDetails} password.
-     *
-     * @param userDetailsManager the user details manager
-     * @return the user details password service
-     */
-    @Bean
-    public UserDetailsPasswordService userDetailsPasswordService(final UserDetailsManager userDetailsManager) {
-        return (user, newPassword) -> {
-            final UserDetails updated = User.withUserDetails(user).password(newPassword).build();
-            userDetailsManager.updateUser(updated);
-            return updated;
-        };
     }
 
     /**

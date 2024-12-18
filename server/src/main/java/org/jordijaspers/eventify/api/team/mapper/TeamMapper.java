@@ -5,7 +5,10 @@ import org.jordijaspers.eventify.api.team.model.request.TeamRequest;
 import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
 import org.jordijaspers.eventify.common.mapper.DateTimeMapper;
 import org.jordijaspers.eventify.common.mapper.config.SharedMapperConfig;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.List;
 
@@ -29,8 +32,21 @@ public abstract class TeamMapper {
 
     public abstract List<TeamRequest> toTeamRequest(List<Team> teams);
 
-    public abstract TeamResponse toTeamResponse(Team team);
+    @Named("toTeamResponseWithMembers")
+    public abstract TeamResponse toTeamResponseWithMembers(Team team);
 
-    public abstract List<TeamResponse> toTeamResponse(List<Team> teams);
+    @Named("toTeamResponsesWithMembers")
+    @IterableMapping(qualifiedByName = "toTeamResponseWithMembers")
+    public abstract List<TeamResponse> toTeamResponsesWithMembers(List<Team> teams);
 
+    @Mapping(
+        target = "members",
+        ignore = true
+    )
+    @Named("toTeamResponseWithoutMembers")
+    public abstract TeamResponse toTeamResponseWithoutMembers(Team team);
+
+    @Named("toTeamResponsesWithoutMembers")
+    @IterableMapping(qualifiedByName = "toTeamResponseWithoutMembers")
+    public abstract List<TeamResponse> toTeamResponsesWithoutMembers(List<Team> teams);
 }

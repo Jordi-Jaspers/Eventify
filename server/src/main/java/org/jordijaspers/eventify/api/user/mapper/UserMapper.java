@@ -53,11 +53,19 @@ public abstract class UserMapper {
         target = "expiresAt",
         source = "accessToken.expiresAt"
     )
+    @Mapping(
+        target = "teams",
+        qualifiedByName = "toTeamResponsesWithoutMembers"
+    )
     public abstract UserResponse toUserResponse(User user);
 
     @Mapping(
         target = "authority",
         expression = "java(mapRoleToAuthority(user.getRole()))"
+    )
+    @Mapping(
+        target = "teams",
+        qualifiedByName = "toTeamResponsesWithoutMembers"
     )
     @Named("toUserDetailsResponse")
     public abstract UserDetailsResponse toUserDetailsResponse(User user);

@@ -50,7 +50,6 @@ spring:
   profiles.include: ${SPRING_PROFILES_INCLUDE:development}
   main:
     banner-mode: off
-    lazy-initialization: true
     allow-bean-definition-overriding: true
     allow-circular-references: true
 

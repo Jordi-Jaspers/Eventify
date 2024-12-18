@@ -51,7 +51,8 @@ public class UserController {
         produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<UserDetailsResponse> getUserDetails(@AuthenticationPrincipal final UserTokenPrincipal principal) {
-        return ResponseEntity.status(OK).body(userMapper.toUserDetailsResponse(principal.getUser()));
+        final UserDetailsResponse response = userMapper.toUserDetailsResponse(principal.getUser());
+        return ResponseEntity.status(OK).body(response);
     }
 
     @ResponseStatus(OK)

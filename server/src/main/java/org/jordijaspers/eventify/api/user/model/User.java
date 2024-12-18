@@ -81,7 +81,7 @@ public class User implements UserDetails {
 
     @ManyToMany(
         mappedBy = "members",
-        fetch = FetchType.EAGER
+        fetch = FetchType.LAZY
     )
     private List<Team> teams = new ArrayList<>();
 

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,6 +20,11 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
             WHERE t.id = :id
         """)
     Optional<Team> findByIdWithMembers(@Param("id") Long id);
+
+    @Override
+    @NonNull
+    @Query("FROM Team t LEFT JOIN FETCH t.members")
+    List<Team> findAll();
 
     @Override
     @Modifying

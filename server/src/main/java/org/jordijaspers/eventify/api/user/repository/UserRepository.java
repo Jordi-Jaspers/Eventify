@@ -36,7 +36,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @NonNull
     @Override
-    @Query("FROM User u LEFT JOIN FETCH u.role")
+    @Query("""
+        FROM User u
+        LEFT JOIN FETCH u.role
+        LEFT JOIN FETCH u.teams
+        """)
     List<User> findAll();
 
     /**
@@ -45,7 +49,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param email the email.
      * @return the user.
      */
-    @Query("FROM User u LEFT JOIN FETCH u.role WHERE u.email = :email")
+    @Query("""
+        FROM User u
+        LEFT JOIN FETCH u.role
+        LEFT JOIN FETCH u.teams
+        WHERE u.email = :email
+        """)
     Optional<User> findByEmail(@NonNull String email);
 
     /**

@@ -38,7 +38,7 @@ public class TeamController {
     @PreAuthorize("hasAnyAuthority('READ_TEAMS')")
     public ResponseEntity<List<TeamResponse>> getTeams() {
         final List<Team> teams = teamService.getAllTeams();
-        return ResponseEntity.status(OK).body(teamMapper.toTeamResponse(teams));
+        return ResponseEntity.status(OK).body(teamMapper.toTeamResponsesWithMembers(teams));
     }
 
     @ResponseStatus(CREATED)
@@ -52,7 +52,7 @@ public class TeamController {
     public ResponseEntity<TeamResponse> createTeam(@RequestBody final TeamRequest request) {
         teamValidator.validateAndThrow(request);
         final Team team = teamService.createTeam(request);
-        return ResponseEntity.status(CREATED).body(teamMapper.toTeamResponse(team));
+        return ResponseEntity.status(CREATED).body(teamMapper.toTeamResponseWithMembers(team));
     }
 
     @ResponseStatus(OK)
@@ -66,7 +66,7 @@ public class TeamController {
     public ResponseEntity<TeamResponse> updateTeam(@PathVariable final Long id, @RequestBody final TeamRequest request) {
         teamValidator.validateAndThrow(request);
         final Team team = teamService.updateTeam(id, request);
-        return ResponseEntity.status(OK).body(teamMapper.toTeamResponse(team));
+        return ResponseEntity.status(OK).body(teamMapper.toTeamResponseWithMembers(team));
     }
 
     @ResponseStatus(NO_CONTENT)
@@ -92,7 +92,7 @@ public class TeamController {
     public ResponseEntity<TeamResponse> addMembers(@PathVariable final Long id,
         @RequestBody final TeamMemberRequest request) {
         final Team team = teamService.addMembers(id, request.getUserIds());
-        return ResponseEntity.status(OK).body(teamMapper.toTeamResponse(team));
+        return ResponseEntity.status(OK).body(teamMapper.toTeamResponseWithMembers(team));
     }
 
     @ResponseStatus(OK)
@@ -105,6 +105,6 @@ public class TeamController {
     public ResponseEntity<TeamResponse> removeMembers(@PathVariable final Long id,
         @RequestBody final TeamMemberRequest request) {
         final Team team = teamService.removeMembers(id, request.getUserIds());
-        return ResponseEntity.status(OK).body(teamMapper.toTeamResponse(team));
+        return ResponseEntity.status(OK).body(teamMapper.toTeamResponseWithMembers(team));
     }
 }
