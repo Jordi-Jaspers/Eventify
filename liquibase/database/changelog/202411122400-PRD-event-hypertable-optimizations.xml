@@ -19,7 +19,7 @@
                 message        TEXT                                                       NOT NULL,
                 correlation_id TEXT,
                 PRIMARY KEY (timestamp, check_id)
-                );
+            );
 
             -- Convert to hypertable with 2-week chunks (good for ~27k events per day)
             SELECT create_hypertable(
@@ -28,7 +28,7 @@
                            chunk_time_interval => INTERVAL '2 weeks',
                            if_not_exists => TRUE,
                            migrate_data => TRUE
-                   );
+           );
 
             -- Event Indexes (crucial for timeline queries)
             CREATE INDEX idx_event_check_time ON event (check_id, timestamp DESC);

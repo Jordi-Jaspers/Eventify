@@ -75,6 +75,14 @@ public final class Paths {
 
     public static final String TEAM_MEMBERS_PATH = TEAM_PATH + "/members";
 
+    /* ------------------------------- DASHBOARD ENDPOINTS ------------------------------- */
+
+    public static final String DASHBOARDS_PATH = BASE_PATH + "/dashboard";
+
+    public static final String DASHBOARD_PATH = DASHBOARDS_PATH + ID_PART;
+
+    public static final String DASHBOARD_CONFIGURATION_PATH = DASHBOARD_PATH + "/configuration";
+
     /* ------------------------------- EVENT ENDPOINTS ------------------------------- */
 
     public static final String EVENTS_PATH = BASE_PATH + "/event";

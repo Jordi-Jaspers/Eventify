@@ -3,14 +3,15 @@ package org.jordijaspers.eventify.api.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.jordijaspers.eventify.api.authentication.model.response.UserDetailsResponse;
-import org.jordijaspers.eventify.api.user.mapper.UserMapper;
 import org.jordijaspers.eventify.api.user.model.User;
+import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;
 import org.jordijaspers.eventify.api.user.model.request.UpdateEmailRequest;
 import org.jordijaspers.eventify.api.user.model.request.UpdateUserDetailsRequest;
+import org.jordijaspers.eventify.api.user.model.validator.EmailValidator;
 import org.jordijaspers.eventify.api.user.service.UserService;
-import org.jordijaspers.eventify.api.user.validator.EmailValidator;
 import org.jordijaspers.eventify.common.security.principal.UserTokenPrincipal;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,7 @@ public class UserController {
         path = USERS_PATH,
         produces = APPLICATION_JSON_VALUE
     )
+    @PreAuthorize("hasAnyAuthority('READ_USERS')")
     public ResponseEntity<List<UserDetailsResponse>> getListUsers() {
         final List<User> users = userService.getAllUsers();
         return ResponseEntity.status(OK).body(userMapper.toUserDetailsResponseList(users));

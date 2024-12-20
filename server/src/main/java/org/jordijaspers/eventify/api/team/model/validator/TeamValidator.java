@@ -1,4 +1,4 @@
-package org.jordijaspers.eventify.api.team.validator;
+package org.jordijaspers.eventify.api.team.model.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.hawaiiframework.validation.ValidationResult;

@@ -4,7 +4,7 @@
     import {Content, Item, Root, Trigger} from "$lib/components/ui/dropdown-menu";
     import LockUserAction from "$lib/components/user/table/actions/lock-user-action.svelte";
     import UpdateAuthorityAction from "$lib/components/user/table/actions/update-authority-action.svelte";
-    import {user} from "$lib/store/global";
+    import {user} from "$lib/store/global.js";
 
     let {id, enabled, authority}: { id: number, enabled: boolean, authority: string } = $props();
 

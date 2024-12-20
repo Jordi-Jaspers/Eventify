@@ -31,6 +31,13 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
     void deleteExpiredTokens();
 
     @Transactional
-    @Query("FROM Token t LEFT JOIN FETCH t.user u WHERE t.expiresAt > CURRENT_TIMESTAMP AND t.value = :token")
+    @Query(
+        """
+            FROM Token t
+                LEFT JOIN FETCH t.user user
+                LEFT JOIN FETCH user.teams teams
+                WHERE t.expiresAt > CURRENT_TIMESTAMP AND t.value = :token
+            """
+    )
     Optional<Token> findByValue(String token);
 }

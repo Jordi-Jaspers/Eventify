@@ -9,7 +9,7 @@
     import type {SubmitFunction} from "@sveltejs/kit";
     import {applyAction, enhance} from '$app/forms';
     import {toast} from "svelte-sonner";
-    import {user} from "$lib/store/global";
+    import {user} from "$lib/store/global.js";
 
     let showPassword: boolean = $state(false);
     let formData = $state<LoginRequest>({

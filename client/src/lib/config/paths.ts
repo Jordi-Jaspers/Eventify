@@ -81,6 +81,18 @@ export const SERVER_ROUTES = {
 	OPTIONS: {
 		path: `${SERVER_BASE_URL}/options`,
 		type: RouteType.PRIVATE
+	},
+	DASHBOARDS: {
+		path: `${SERVER_BASE_URL}/dashboard`,
+		type: RouteType.PRIVATE
+	},
+	DASHBOARD: {
+		path: `${SERVER_BASE_URL}/dashboard/{id}`,
+		type: RouteType.PRIVATE
+	},
+	DASHBOARD_CONFIGURATION: {
+		path: `${SERVER_BASE_URL}/dashboard/{id}/configuration`,
+		type: RouteType.PRIVATE
 	}
 };
 
@@ -113,8 +125,12 @@ export const CLIENT_ROUTES = {
 		path: '/logout',
 		type: RouteType.PRIVATE
 	},
-	HOME_PAGE: {
+	APPLICATION_PAGE: {
 		path: '/app',
+		type: RouteType.PRIVATE
+	},
+	DASHBOARDS_PAGE: {
+		path: '/app/dashboards',
 		type: RouteType.PRIVATE
 	},
 	ACCOUNT_DETAILS_PAGE: {
@@ -131,10 +147,6 @@ export const CLIENT_ROUTES = {
 	},
 	USER_MANAGEMENT_PAGE: {
 		path: '/app/management/users',
-		type: RouteType.PRIVATE
-	},
-	DASHBOARD_MANAGEMENT_PAGE: {
-		path: '/app/management/dashboards',
 		type: RouteType.PRIVATE
 	}
 };

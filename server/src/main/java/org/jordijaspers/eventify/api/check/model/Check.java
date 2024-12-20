@@ -16,7 +16,7 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 @Data
 @Entity
 @NoArgsConstructor
-@Table(name = "check")
+@Table(name = "\"check\"")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Check implements Serializable {
 
@@ -30,9 +30,6 @@ public class Check implements Serializable {
 
     @Column(name = "name")
     private String name;
-
-    @Column(name = "description")
-    private String description;
 
     @CreationTimestamp
     @Column(

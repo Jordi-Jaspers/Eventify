@@ -17,6 +17,34 @@ interface RegisterResponse {
 	validated: boolean;
 }
 
+interface DashboardResponse {
+	id: number;
+	name: string;
+	description: string;
+	global: boolean;
+	created: Date;
+	lastUpdated: Date;
+	createdBy: string;
+	team: TeamResponse;
+	configuration: DashboardConfigurationResponse;
+}
+
+interface DashboardConfigurationResponse {
+	groups: DashboardGroupResponse[];
+	ungroupedChecks: CheckResponse[];
+}
+
+interface DashboardGroupResponse {
+	name: string;
+	checks: CheckResponse[];
+}
+
+interface CheckResponse {
+	id: number;
+	name: string;
+	created: Date;
+}
+
 interface TeamResponse {
 	id: number;
 	name: string;

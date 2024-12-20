@@ -5,8 +5,11 @@ import lombok.Data;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Request object to create a new dashboard group.
+ */
 @Data
-public class GroupRequest {
+public class DashboardGroupRequest {
 
     private final String name;
 

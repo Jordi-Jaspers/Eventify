@@ -21,6 +21,20 @@ interface TeamRequest {
 	description: string;
 }
 
+interface DashboardCreationRequest {
+	name: string;
+	description: string;
+	teamId: number;
+	global: boolean;
+}
+
+interface DashboardUpdateRequest {
+	name: string;
+	description: string;
+	teamId: number;
+	global: boolean;
+}
+
 interface RefreshTokenRequest {
 	refreshToken: string;
 }

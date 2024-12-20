@@ -70,6 +70,18 @@
 
     <changeSet id="202411122200-PRD-initial-tables-user-management-3" author="jordi.jaspers">
         <ext:documentation>
+            Adding default set of roles for user management, which will be updated later by 'DataProvisioningConfiguration.java'.
+        </ext:documentation>
+        <sql>
+            INSERT INTO "role" (authority, description) VALUES
+            ('USER', 'Standard user with basic permissions'),
+            ('MANAGER', 'User with additional management permissions'),
+            ('ADMIN', 'System administrator with full permissions');
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122200-PRD-initial-tables-user-management-4" author="jordi.jaspers">
+        <ext:documentation>
             Adding team management for users.
         </ext:documentation>
         <sql>
@@ -97,7 +109,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202411122200-PRD-initial-tables-user-management-4" author="jordi.jaspers">
+    <changeSet id="202411122200-PRD-initial-tables-user-management-5" author="jordi.jaspers">
         <ext:documentation>
             Adding documentation for every table, column, and index.
         </ext:documentation>

@@ -1,10 +1,10 @@
-package org.jordijaspers.eventify.api.user.validator;
+package org.jordijaspers.eventify.api.user.model.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.hawaiiframework.validation.ValidationException;
 import org.hawaiiframework.validation.ValidationResult;
 import org.hawaiiframework.validation.Validator;
-import org.jordijaspers.eventify.api.authentication.validator.CustomPasswordValidator;
+import org.jordijaspers.eventify.api.authentication.model.validator.CustomPasswordValidator;
 import org.jordijaspers.eventify.api.user.model.request.PasswordRequest;
 import org.passay.RuleResult;
 import org.springframework.stereotype.Component;

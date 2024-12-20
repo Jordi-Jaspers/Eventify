@@ -7,10 +7,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Request object for configuring a dashboard.
+ */
 @Data
 public class DashboardConfigurationRequest {
 
-    private final List<GroupRequest> groups = new ArrayList<>();
+    private final List<DashboardGroupRequest> groups = new ArrayList<>();
 
     private final Set<Long> ungroupedCheckIds = new HashSet<>();
 

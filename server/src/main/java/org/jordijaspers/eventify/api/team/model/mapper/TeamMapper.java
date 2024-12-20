@@ -1,4 +1,4 @@
-package org.jordijaspers.eventify.api.team.mapper;
+package org.jordijaspers.eventify.api.team.model.mapper;
 
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.team.model.request.TeamRequest;

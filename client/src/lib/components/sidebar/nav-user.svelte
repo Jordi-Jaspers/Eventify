@@ -9,7 +9,7 @@
     import LogOut from 'lucide-svelte/icons/log-out';
     import Sun from 'lucide-svelte/icons/sun';
     import Moon from 'lucide-svelte/icons/moon';
-    import {user} from "$lib/store/global";
+    import {user} from "$lib/store/global.js";
     import {goto} from "$app/navigation";
     import {CLIENT_ROUTES} from "$lib/config/paths";
     import {Coffee, Send} from "lucide-svelte";

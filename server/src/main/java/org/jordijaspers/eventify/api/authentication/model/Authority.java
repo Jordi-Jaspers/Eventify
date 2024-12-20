@@ -19,7 +19,9 @@ public enum Authority {
         "User",
         "The default authority for a user with limited permissions.",
         Set.of(
-            Permission.ACCESS_APPLICATION
+            Permission.ACCESS_APPLICATION,
+            Permission.READ_DASHBOARDS,
+            Permission.READ_TEAMS
         )
     ),
     MANAGER(
@@ -30,7 +32,8 @@ public enum Authority {
             Permission.READ_DASHBOARDS,
             Permission.WRITE_DASHBOARDS,
             Permission.READ_TEAMS,
-            Permission.WRITE_TEAMS
+            Permission.WRITE_TEAMS,
+            Permission.READ_USERS
         )
     ),
     ADMIN(

@@ -5,8 +5,14 @@
     import TeamSwitcher from "$lib/components/sidebar/team-switcher.svelte";
     import {Content, Footer, Header, Rail, Root, Separator} from "$lib/components/ui/sidebar";
     import type {ComponentProps} from "svelte";
+    import {user} from "$lib/store/global.js";
 
-    let {sidebarWidth = $bindable(0), ref = $bindable(null), collapsible = 'icon', ...restProps}: ComponentProps<typeof Root> = $props();
+    let {
+        sidebarWidth = $bindable(0),
+        ref = $bindable(null),
+        collapsible = 'icon',
+        ...restProps
+    }: ComponentProps<typeof Root> = $props();
     $effect(() => {
         if (ref) {
             sidebarWidth = ref.clientWidth;
@@ -26,17 +32,19 @@
     });
 </script>
 
-<Root bind:ref {collapsible} {...restProps}>
-    <Header>
-        <TeamSwitcher/>
-        <Separator/>
-        <NavMain/>
-    </Header>
-    <Content>
-        <NavManagement/>
-    </Content>
-    <Footer>
-        <NavUser/>
-    </Footer>
-    <Rail/>
-</Root>
+{#if user}
+    <Root bind:ref {collapsible} {...restProps}>
+        <Header>
+            <TeamSwitcher/>
+            <Separator/>
+            <NavMain/>
+        </Header>
+        <Content>
+            <NavManagement/>
+        </Content>
+        <Footer>
+            <NavUser/>
+        </Footer>
+        <Rail/>
+    </Root>
+{/if}

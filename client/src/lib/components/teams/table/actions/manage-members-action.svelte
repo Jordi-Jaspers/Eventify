@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {SubmitFunction} from "@sveltejs/kit";
-    import {teams, users} from "$lib/store/global";
+    import {teams, users} from "$lib/store/global.js";
     import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "$lib/components/ui/dialog";
     import {Input} from "$lib/components/ui/input";
     import {ChevronLeft, Search} from "lucide-svelte";

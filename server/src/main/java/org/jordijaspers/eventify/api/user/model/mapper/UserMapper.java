@@ -1,11 +1,11 @@
-package org.jordijaspers.eventify.api.user.mapper;
+package org.jordijaspers.eventify.api.user.model.mapper;
 
 import org.jordijaspers.eventify.api.authentication.model.Role;
 import org.jordijaspers.eventify.api.authentication.model.request.RegisterUserRequest;
 import org.jordijaspers.eventify.api.authentication.model.response.RegisterResponse;
 import org.jordijaspers.eventify.api.authentication.model.response.UserDetailsResponse;
 import org.jordijaspers.eventify.api.authentication.model.response.UserResponse;
-import org.jordijaspers.eventify.api.team.mapper.TeamMapper;
+import org.jordijaspers.eventify.api.team.model.mapper.TeamMapper;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.common.mapper.DateTimeMapper;
 import org.jordijaspers.eventify.common.mapper.config.SharedMapperConfig;

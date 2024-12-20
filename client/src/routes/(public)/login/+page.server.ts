@@ -6,7 +6,7 @@ import { ApiService } from '$lib/utils/api.service';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.user && locals.user.validated && locals.user.enabled) {
-		throw redirect(303, CLIENT_ROUTES.HOME_PAGE.path);
+		throw redirect(303, CLIENT_ROUTES.APPLICATION_PAGE.path);
 	}
 };
 
@@ -35,7 +35,7 @@ export const actions: Actions = {
 			locals.user = authorizeResponse;
 
 			if (authorizeResponse?.validated && authorizeResponse?.enabled) {
-				throw redirect(303, CLIENT_ROUTES.HOME_PAGE.path);
+				throw redirect(303, CLIENT_ROUTES.APPLICATION_PAGE.path);
 			}
 		}
 		return response.success ? { response: response } : fail(response.status, { response: response });

@@ -3,7 +3,7 @@
     import {Separator} from '$lib/components/ui/separator';
     import * as Sidebar from '$lib/components/ui/sidebar';
     import {SidebarMenu} from '$lib/components/sidebar';
-    import {breadcrumbs} from "$lib/store/global";
+    import {breadcrumbs} from "$lib/store/global.js";
 
     let {children} = $props();
     let sidebarWidth = $state(0);

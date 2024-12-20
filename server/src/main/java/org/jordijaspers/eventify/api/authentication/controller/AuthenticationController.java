@@ -7,10 +7,10 @@ import org.jordijaspers.eventify.api.authentication.model.request.RefreshTokenRe
 import org.jordijaspers.eventify.api.authentication.model.request.RegisterUserRequest;
 import org.jordijaspers.eventify.api.authentication.model.response.RegisterResponse;
 import org.jordijaspers.eventify.api.authentication.model.response.UserResponse;
+import org.jordijaspers.eventify.api.authentication.model.validator.AuthenticationValidator;
 import org.jordijaspers.eventify.api.authentication.service.AuthenticationService;
-import org.jordijaspers.eventify.api.authentication.validator.AuthenticationValidator;
-import org.jordijaspers.eventify.api.user.mapper.UserMapper;
 import org.jordijaspers.eventify.api.user.model.User;
+import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;
 import org.jordijaspers.eventify.common.security.principal.UserTokenPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

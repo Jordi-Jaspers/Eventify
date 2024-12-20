@@ -1,4 +1,4 @@
-package org.jordijaspers.eventify.api.authentication.validator;
+package org.jordijaspers.eventify.api.authentication.model.validator;
 
 import org.passay.*;
 import org.springframework.stereotype.Component;

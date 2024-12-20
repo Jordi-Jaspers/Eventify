@@ -35,11 +35,11 @@
         <sql>
             CREATE TABLE IF NOT EXISTS "source"
             (
-                id          SERIAL PRIMARY KEY,
-                "name"      TEXT        NOT NULL,
-                description TEXT,
-                api_key_id  INTEGER     NOT NULL REFERENCES api_key (id),
-                created     TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                id              SERIAL PRIMARY KEY,
+                "name"          TEXT        NOT NULL,
+                description     TEXT,
+                api_key_id      INTEGER     NOT NULL REFERENCES api_key (id),
+                created         TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
                 UNIQUE (name)
                 );
 
@@ -49,7 +49,6 @@
             (
                 id          SERIAL PRIMARY KEY,
                 "name"      TEXT        NOT NULL,
-                description TEXT,
                 source_id   INTEGER     NOT NULL,
                 created     TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
                 FOREIGN KEY (source_id) REFERENCES "source" (id) ON DELETE CASCADE
@@ -60,12 +59,16 @@
 
             CREATE TABLE IF NOT EXISTS "dashboard"
             (
-                id          SERIAL PRIMARY KEY,
-                "name"      TEXT        NOT NULL,
-                description TEXT,
-                "global"      BOOLEAN     NOT NULL DEFAULT FALSE,
-                created_by  INTEGER     NOT NULL REFERENCES "user" (id),
-                created     TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+                id              SERIAL PRIMARY KEY,
+                team_id         INTEGER     NOT NULL,
+                "name"          TEXT        NOT NULL,
+                description     TEXT,
+                "global"        BOOLEAN     NOT NULL DEFAULT FALSE,
+                created_by      TEXT        NOT NULL,
+                created         TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                last_updated    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                FOREIGN KEY (team_id) REFERENCES "team" (id),
+                UNIQUE (team_id, "name")
             );
 
             CREATE INDEX idx_dashboard_global ON dashboard ("global") WHERE "global" = TRUE;
@@ -82,18 +85,6 @@
                 );
 
             CREATE INDEX idx_dashboard_group_dashboard ON dashboard_group (dashboard_id);
-
-            CREATE TABLE IF NOT EXISTS "dashboard_team"
-            (
-                dashboard_id INTEGER NOT NULL,
-                team_id      INTEGER NOT NULL,
-                PRIMARY KEY (dashboard_id, team_id),
-                FOREIGN KEY (dashboard_id) REFERENCES "dashboard" (id) ON DELETE CASCADE,
-                FOREIGN KEY (team_id) REFERENCES "team" (id) ON DELETE CASCADE
-            );
-
-            CREATE INDEX idx_dashboard_team_team ON dashboard_team (team_id);
-            CREATE INDEX idx_dashboard_team_dashboard ON dashboard_team (dashboard_id);
 
             CREATE TABLE IF NOT EXISTS "dashboard_check"
             (
@@ -137,14 +128,9 @@
             COMMENT ON COLUMN dashboard.global IS 'Flag indicating if the dashboard is publicly accessible';
             COMMENT ON COLUMN dashboard.created_by IS 'Reference to the user who created the dashboard';
             COMMENT ON COLUMN dashboard.created IS 'Timestamp when the dashboard was created';
+            COMMENT ON COLUMN dashboard.team_id IS 'Reference to the team the dashboard belongs to';
             COMMENT ON INDEX idx_dashboard_global IS 'Partial index for finding global dashboards';
             COMMENT ON INDEX idx_dashboard_created_by IS 'Index for finding dashboards created by a user';
-
-            COMMENT ON TABLE "dashboard_team" IS 'Maps dashboards to teams that can access them';
-            COMMENT ON COLUMN dashboard_team.dashboard_id IS 'Reference to the dashboard';
-            COMMENT ON COLUMN dashboard_team.team_id IS 'Reference to the team with access';
-            COMMENT ON INDEX idx_dashboard_team_team IS 'Index for finding dashboards accessible to a team';
-            COMMENT ON INDEX idx_dashboard_team_dashboard IS 'Index for finding teams with access to a dashboard';
 
             COMMENT ON TABLE "dashboard_check" IS 'Maps checks displayed on dashboards';
             COMMENT ON COLUMN dashboard_check.dashboard_id IS 'Reference to the dashboard';

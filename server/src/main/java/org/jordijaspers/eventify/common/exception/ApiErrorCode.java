@@ -64,6 +64,18 @@ public enum ApiErrorCode implements ApiError {
     TEAM_ALREADY_EXISTS_ERROR(
         "ERR-0014",
         "A team with that name already exists."
+    ),
+    USER_NOT_LOGGED_IN(
+        "ERR-0015",
+        "No user is logged in. Cannot perform action without authorization."
+    ),
+    USER_NOT_PART_OF_TEAM(
+        "ERR-0016",
+        "The user is not part of the specified team, and therefore cannot perform this action."
+    ),
+    CANNOT_ACCESS_DASHBOARD(
+        "ERR-0017",
+        "The user does not have access to the specified dashboard."
     );
 
     /**

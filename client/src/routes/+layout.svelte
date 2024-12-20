@@ -3,7 +3,7 @@
 
     import {Toaster} from '$lib/components/ui/sonner';
     import {ModeWatcher} from 'mode-watcher';
-    import {breadcrumbs, user} from "$lib/store/global";
+    import {breadcrumbs, user} from "$lib/store/global.js";
 
     let {data, children} = $props();
 

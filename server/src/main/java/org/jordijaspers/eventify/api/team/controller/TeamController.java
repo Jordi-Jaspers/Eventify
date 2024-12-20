@@ -2,13 +2,13 @@ package org.jordijaspers.eventify.api.team.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.jordijaspers.eventify.api.team.mapper.TeamMapper;
 import org.jordijaspers.eventify.api.team.model.Team;
+import org.jordijaspers.eventify.api.team.model.mapper.TeamMapper;
 import org.jordijaspers.eventify.api.team.model.request.TeamMemberRequest;
 import org.jordijaspers.eventify.api.team.model.request.TeamRequest;
 import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
+import org.jordijaspers.eventify.api.team.model.validator.TeamValidator;
 import org.jordijaspers.eventify.api.team.service.TeamService;
-import org.jordijaspers.eventify.api.team.validator.TeamValidator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

@@ -17,7 +17,7 @@
     import {toast} from "svelte-sonner";
     import {Submit} from "$lib/components/button";
     import {Textarea} from "$lib/components/ui/textarea";
-    import {teams} from "$lib/store/global";
+    import {teams} from "$lib/store/global.js";
     import type {ServerResponse} from "$lib/models/server-response.svelte.js";
 
     let formData = $state<TeamRequest>({

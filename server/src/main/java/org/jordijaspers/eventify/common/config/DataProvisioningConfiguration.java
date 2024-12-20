@@ -34,6 +34,12 @@ public class DataProvisioningConfiguration {
             if (!roleRepository.existsByAuthority(authority)) {
                 LOGGER.debug("[Permissions] Provisioning role '{}' - '{}'", authority, authority.getDescription());
                 roleRepository.save(new Role(authority));
+            } else {
+                LOGGER.debug("[Permissions] Role '{}' already exists, updating details.", authority);
+                roleRepository.findByAuthority(authority).ifPresent(role -> {
+                    role.setDescription(authority.getDescription());
+                    roleRepository.save(role);
+                });
             }
         });
         LOGGER.info("Data provisioning completed successfully. Eventify ({}) is ready to use.", applicationProperties.getVersion());

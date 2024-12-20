@@ -1,4 +1,4 @@
-package org.jordijaspers.eventify.api.user.validator;
+package org.jordijaspers.eventify.api.user.model.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.hawaiiframework.validation.ValidationResult;

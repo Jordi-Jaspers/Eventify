@@ -2,7 +2,7 @@
     import type {SubmitFunction} from "@sveltejs/kit";
     import {toast} from "svelte-sonner";
     import {enhance} from '$app/forms';
-    import {options, users} from "$lib/store/global";
+    import {options, users} from "$lib/store/global.js";
     import {
         DialogContent,
         DialogDescription,

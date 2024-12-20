@@ -6,7 +6,8 @@
 		isLoading = false,
 		isDisabled = false,
 		title = 'Submit',
-		form = 'submit'
+		form = 'submit',
+        children,
 	} = $props<{
 		isLoading: boolean;
 		isDisabled: boolean;
@@ -20,5 +21,8 @@
         <LoaderCircle class="h-4 w-4 animate-spin"/>
     {:else}
         <span>{title}</span>
+    {/if}
+    {#if children}
+        {@render children()}
     {/if}
 </Button>

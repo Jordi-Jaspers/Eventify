@@ -1,57 +1,54 @@
 <script lang="ts">
-    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-    import * as Sidebar from "$lib/components/ui/sidebar";
-    import {HousePlus, MonitorCog, UserRoundCog, UsersRound} from "lucide-svelte";
+    import {
+        Separator,
+        SidebarGroup,
+        SidebarGroupLabel,
+        SidebarMenu,
+        SidebarMenuButton,
+        SidebarMenuItem
+    } from "$lib/components/ui/sidebar";
+    import {UserRoundCog, UsersRound} from "lucide-svelte";
     import {CLIENT_ROUTES} from "$lib/config/paths";
-    import {Separator} from "$lib/components/ui/sidebar";
-    import {user} from "$lib/store/global";
+    import {user} from "$lib/store/global.js";
 
     const navigations = [
         {
             title: "User Management",
             url: CLIENT_ROUTES.USER_MANAGEMENT_PAGE.path,
             icon: UserRoundCog,
-            permissions: ["READ_USERS", "EDIT_USERS"]
+            permission: "WRITE_USERS"
         },
         {
             title: "Team Management",
             url: CLIENT_ROUTES.TEAM_MANAGEMENT_PAGE.path,
             icon: UsersRound,
-            permissions: ["READ_TEAMS", "EDIT_TEAMS"]
-        },
-        {
-            title: "Dashboard Management",
-            url: CLIENT_ROUTES.DASHBOARD_MANAGEMENT_PAGE.path,
-            icon: MonitorCog,
-            permissions: ["READ_DASHBOARDS", "EDIT_DASHBOARDS"]
-        },
+            permission: "WRITE_TEAMS"
+        }
     ];
 
     const allowedNavigations = $derived(
-        user ? navigations.filter(item =>
-            item.permissions.some(p => user.permissions.includes(p))
-        ) : []
+        user ? navigations.filter(navigation => user.permissions.includes(navigation.permission)) : []
     );
 </script>
 
 {#if allowedNavigations.length > 0}
     <Separator/>
-    <Sidebar.Group>
-        <Sidebar.GroupLabel>Configuration</Sidebar.GroupLabel>
-        <Sidebar.Menu>
+    <SidebarGroup>
+        <SidebarGroupLabel>Management</SidebarGroupLabel>
+        <SidebarMenu>
             {#each allowedNavigations as item (item.title)}
-                <Sidebar.MenuItem>
-                    <Sidebar.MenuButton>
-                        {#snippet child({ props })}
+                <SidebarMenuItem>
+                    <SidebarMenuButton>
+                        {#snippet child({props})}
                             <a href={item.url} {...props}>
-                                <item.icon />
+                                <item.icon/>
                                 <span>{item.title}</span>
                             </a>
                         {/snippet}
-                    </Sidebar.MenuButton>
-                </Sidebar.MenuItem>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
             {/each}
-        </Sidebar.Menu>
-    </Sidebar.Group>
+        </SidebarMenu>
+    </SidebarGroup>
 {/if}
 
