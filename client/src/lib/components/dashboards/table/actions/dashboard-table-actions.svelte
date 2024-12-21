@@ -5,6 +5,8 @@
     import DeleteDashboardAction from "$lib/components/dashboards/table/actions/delete-dashboard-action.svelte";
     import UpdateDashboardAction from "$lib/components/dashboards/table/actions/update-dashboard-action.svelte";
     import {user} from "$lib/store/global.js";
+    import {goto} from "$app/navigation";
+    import {CLIENT_ROUTES} from "$lib/config/paths";
 
     let {id, name, description, global}: { id: number, name: string, description: string, global: boolean } = $props();
     let isUpdateDialogOpen = $state(false);
@@ -27,15 +29,21 @@
         {/snippet}
     </Trigger>
     <Content side="bottom" align="start">
+        <Item onclick={() => goto(CLIENT_ROUTES.DASHBOARD_MONITORING_PAGE.path.replace('{id}', id.toString()))}>
+            Monitor
+        </Item>
+        <Item onclick={() => goto(CLIENT_ROUTES.DASHBOARD_CONFIGURATION_PAGE.path.replace('{id}', id.toString()))}>
+            Configure
+        </Item>
         <Item onclick={() => { isUpdateDialogOpen = true; }}>
             {#if user.permissions.includes('WRITE_DASHBOARDS')}
-                Update Dashboard
+                Update
             {:else}
-                View Dashboard
+                View
             {/if}
         </Item>
         <Item class="data-[highlighted]:bg-red-400/80" onclick={() => { isDeleteDialogOpen = true; }}>
-            Delete Dashboard
+            Delete
         </Item>
     </Content>
 </Root>

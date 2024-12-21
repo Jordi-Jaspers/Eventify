@@ -21,6 +21,8 @@
     import type {ServerResponse} from "$lib/models/server-response.svelte.js";
     import {Checkbox} from "$lib/components/ui/checkbox";
     import {Separator} from "$lib/components/ui/separator";
+    import {goto} from "$app/navigation";
+    import {CLIENT_ROUTES} from "$lib/config/paths";
 
 
     let isOpen = $state(false);
@@ -47,6 +49,8 @@
 
                 const dashboard: DashboardResponse = apiResponse.data;
                 dashboards.addDashboard(dashboard);
+
+                await goto(CLIENT_ROUTES.DASHBOARD_CONFIGURATION_PAGE.path.replace('{id}', dashboard.id.toString()))
             }
 
             isOpen = false;

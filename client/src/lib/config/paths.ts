@@ -130,7 +130,15 @@ export const CLIENT_ROUTES = {
 		type: RouteType.PRIVATE
 	},
 	DASHBOARDS_PAGE: {
-		path: '/app/dashboards',
+		path: '/app/dashboard',
+		type: RouteType.PRIVATE
+	},
+	DASHBOARD_PAGE: {
+		path: '/app/dashboard/{id}',
+		type: RouteType.PRIVATE
+	},
+	DASHBOARD_CONFIGURATION_PAGE: {
+		path: '/app/dashboard/{id}/configure',
 		type: RouteType.PRIVATE
 	},
 	ACCOUNT_DETAILS_PAGE: {
@@ -141,12 +149,16 @@ export const CLIENT_ROUTES = {
 		path: '/app/monitoring',
 		type: RouteType.PRIVATE
 	},
+	DASHBOARD_MONITORING_PAGE: {
+		path: '/app/monitoring/{id}',
+		type: RouteType.PRIVATE
+	},
 	TEAM_MANAGEMENT_PAGE: {
-		path: '/app/management/teams',
+		path: '/app/management/team',
 		type: RouteType.PRIVATE
 	},
 	USER_MANAGEMENT_PAGE: {
-		path: '/app/management/users',
+		path: '/app/management/user',
 		type: RouteType.PRIVATE
 	}
 };
