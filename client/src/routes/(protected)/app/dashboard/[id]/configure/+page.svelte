@@ -3,7 +3,7 @@
     import {CLIENT_ROUTES} from "$lib/config/paths";
     import {goto} from "$app/navigation";
     import {toast} from "svelte-sonner";
-    import {FolderPlus, GripVertical, Plus} from "lucide-svelte";
+    import {FolderPlus, Plus} from "lucide-svelte";
     import {Switch} from "$lib/components/ui/switch";
     import {Label} from "$lib/components/ui/label";
     import {Separator} from "$lib/components/ui/separator";
@@ -24,10 +24,8 @@
 
     function toggleGroup(groupName: string) {
         if (expandedGroups.includes(groupName)) {
-            toast.info(`Collapsing group: ${groupName}`);
             expandedGroups = expandedGroups.filter(group => group !== groupName);
         } else {
-            toast.info(`Expanding group: ${groupName}`);
             expandedGroups = [...expandedGroups, groupName];
         }
     }
@@ -70,10 +68,8 @@
                 ];
                 isAddingGroup = false;
                 newGroupName = "";
-                toast.success(`Group "${trimmedName}" created successfully`);
             } else {
                 toast.error(`Group "${trimmedName}" already exists`);
-                // Optionally, you can focus the input again for the user to try another name
                 newGroupInputRef?.focus();
             }
         }
@@ -253,7 +249,8 @@
                             <Submit {isLoading} isDisabled={isLoading} title="Save" form="configure-dashboard"/>
                         </form>
                     </div>
-                    <form id="configure-dashboard-and-monitor" action="?/configureAndMonitor" method="POST" use:enhance={configure}>
+                    <form id="configure-dashboard-and-monitor" action="?/configureAndMonitor" method="POST"
+                          use:enhance={configure}>
                         <input type="hidden" name="configuration" value={JSON.stringify(dashboard.configuration)}/>
                         <Submit {isLoading} isDisabled={isLoading} title="Save & Monitor"
                                 form="configure-dashboard-and-monitor"/>
