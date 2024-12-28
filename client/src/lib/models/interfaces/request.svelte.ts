@@ -35,6 +35,20 @@ interface DashboardUpdateRequest {
 	global: boolean;
 }
 
+interface DashboardConfigurationRequest {
+	groups: DashboardGroupRequest[];
+	ungroupedChecks: CheckRequest[];
+}
+
+interface DashboardGroupRequest {
+	name: string;
+	checks: CheckResponse[];
+}
+
+interface CheckRequest {
+	name: string;
+}
+
 interface RefreshTokenRequest {
 	refreshToken: string;
 }

@@ -24,6 +24,7 @@
         name = '',
         description = '',
         global = false,
+        team = {} as TeamResponse,
         isDropdownOpen = $bindable(false),
         isUpdateDialogOpen = $bindable(false)
     } = $props<{
@@ -31,6 +32,7 @@
         name: string,
         description: string,
         global: boolean,
+        team: TeamResponse,
         isDropdownOpen: boolean,
         isUpdateDialogOpen: boolean
     }>();
@@ -53,8 +55,6 @@
                 const dashboard: DashboardResponse = apiResponse.data;
 
                 toast.success('Dashboard updated successfully');
-
-                console.log(dashboard);
                 dashboards.updateDashboard(id, dashboard);
                 isUpdateDialogOpen = false;
             }
@@ -110,7 +110,7 @@
                     </div>
                     <p class="text-sm text-gray-500">
                         Make this dashboard visible to everyone, including users outside
-                        your team.
+                        your team. Otherwise, it will only be visible to members of the originating team '{team.name}'.
                     </p>
                 </div>
             </div>

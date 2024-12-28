@@ -14,7 +14,9 @@ import org.jordijaspers.eventify.api.user.model.User;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import jakarta.persistence.*;
 
@@ -52,10 +54,10 @@ public class Dashboard implements Serializable {
     private LocalDateTime created;
 
     @Column(
-        name = "created_by",
+        name = "updated_by",
         updatable = false
     )
-    private String createdBy;
+    private String updatedBy;
 
     @UpdateTimestamp
     @Column(name = "last_updated")
@@ -70,8 +72,8 @@ public class Dashboard implements Serializable {
         orphanRemoval = true,
         fetch = FetchType.LAZY
     )
-    @OrderBy("group_id NULLS LAST, display_order")
-    private Set<DashboardCheck> dashboardChecks = new HashSet<>();
+    @OrderBy("displayOrder")
+    private Set<DashboardGroup> groups = new HashSet<>();
 
     @OneToMany(
         mappedBy = "dashboard",
@@ -79,7 +81,8 @@ public class Dashboard implements Serializable {
         orphanRemoval = true,
         fetch = FetchType.LAZY
     )
-    private Set<DashboardGroup> groups = new HashSet<>();
+    @OrderBy("group NULLS LAST, displayOrder")
+    private List<DashboardCheck> dashboardChecks = new ArrayList<>();
 
     /**
      * A constructor to create a new dashboard.
@@ -90,9 +93,12 @@ public class Dashboard implements Serializable {
     public Dashboard(final CreateDashboardRequest request, final User user, final Team team) {
         this.name = request.getName();
         this.description = request.getDescription();
-        this.createdBy = user.getUsername();
         this.global = request.isGlobal();
         this.team = team;
+
+        this.updatedBy = user.getUsername();
+        this.lastUpdated = LocalDateTime.now();
+        this.created = LocalDateTime.now();
     }
 
     /**
@@ -105,15 +111,6 @@ public class Dashboard implements Serializable {
     public void addCheck(final Check check, final DashboardGroup group, final int displayOrder) {
         final DashboardCheck dashboardCheck = new DashboardCheck(this, check, group, displayOrder);
         dashboardChecks.add(dashboardCheck);
-    }
-
-    /**
-     * Add a new group to the dashboard.
-     *
-     * @param name The name of the group.
-     */
-    public void addGroup(final String name) {
-        groups.add(new DashboardGroup(this, name));
     }
 
     /**

@@ -8,8 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.persistence.*;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
@@ -17,8 +15,8 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 @Data
 @Entity
 @NoArgsConstructor
+@EqualsAndHashCode
 @Table(name = "dashboard_group")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class DashboardGroup implements Serializable {
 
     @Serial
@@ -45,9 +43,8 @@ public class DashboardGroup implements Serializable {
     )
     private LocalDateTime created;
 
-    @OrderBy("display_order")
-    @OneToMany(mappedBy = "group")
-    private List<DashboardCheck> checks = new ArrayList<>();
+    @Column(name = "display_order")
+    private int displayOrder;
 
     /**
      * A constructor to create a new dashboard group.
@@ -55,8 +52,9 @@ public class DashboardGroup implements Serializable {
      * @param dashboard The dashboard to which the group belongs.
      * @param name      The name of the group.
      */
-    public DashboardGroup(final Dashboard dashboard, final String name) {
+    public DashboardGroup(final Dashboard dashboard, final String name, final int displayOrder) {
         this.dashboard = dashboard;
         this.name = name;
+        this.displayOrder = displayOrder;
     }
 }

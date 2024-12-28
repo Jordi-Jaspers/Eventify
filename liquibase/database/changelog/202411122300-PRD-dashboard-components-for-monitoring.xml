@@ -13,17 +13,16 @@
             CREATE TABLE IF NOT EXISTS "api_key"
             (
                 id         SERIAL PRIMARY KEY,
-                key_value  TEXT        NOT NULL,
-                "name"     TEXT        NOT NULL,
-                created_by INTEGER     NOT NULL REFERENCES "user" (id),
+                "key"  TEXT        NOT NULL,
+                created_by TEXT        NOT NULL,
                 created    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
                 expires_at TIMESTAMPTZ,
                 last_used  TIMESTAMPTZ,
                 enabled    BOOLEAN     NOT NULL DEFAULT TRUE,
-                UNIQUE (key_value)
+                UNIQUE ("key")
             );
 
-            CREATE INDEX idx_api_key_value ON api_key (key_value) WHERE enabled = TRUE;
+            CREATE INDEX idx_api_key ON api_key ("key") WHERE enabled = TRUE;
             CREATE INDEX idx_api_key_expiry ON api_key (expires_at);
         </sql>
     </changeSet>
@@ -64,7 +63,7 @@
                 "name"          TEXT        NOT NULL,
                 description     TEXT,
                 "global"        BOOLEAN     NOT NULL DEFAULT FALSE,
-                created_by      TEXT        NOT NULL,
+                updated_by      TEXT        NOT NULL,
                 created         TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
                 last_updated    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
                 FOREIGN KEY (team_id) REFERENCES "team" (id),
@@ -72,17 +71,18 @@
             );
 
             CREATE INDEX idx_dashboard_global ON dashboard ("global") WHERE "global" = TRUE;
-            CREATE INDEX idx_dashboard_created_by ON dashboard (created_by);
+            CREATE INDEX idx_dashboard_updated_by ON dashboard (updated_by);
 
             CREATE TABLE IF NOT EXISTS "dashboard_group"
             (
-                id           SERIAL PRIMARY KEY,
-                dashboard_id INTEGER     NOT NULL,
-                name         TEXT        NOT NULL,
-                created      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                id              SERIAL PRIMARY KEY,
+                dashboard_id    INTEGER     NOT NULL,
+                name            TEXT        NOT NULL,
+                created         TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                display_order   INTEGER NOT NULL DEFAULT 1000,
                 FOREIGN KEY (dashboard_id) REFERENCES "dashboard" (id) ON DELETE CASCADE,
                 UNIQUE (dashboard_id, name)
-                );
+            );
 
             CREATE INDEX idx_dashboard_group_dashboard ON dashboard_group (dashboard_id);
 
@@ -111,14 +111,13 @@
         <sql>
             COMMENT ON TABLE "api_key" IS 'Stores API keys for authentication of external systems';
             COMMENT ON COLUMN api_key.id IS 'Unique identifier for the API key';
-            COMMENT ON COLUMN api_key.key_value IS 'The actual API key value used for authentication';
-            COMMENT ON COLUMN api_key.name IS 'Human-readable name for the API key';
+            COMMENT ON COLUMN api_key.key IS 'The actual API key value used for authentication';
             COMMENT ON COLUMN api_key.created_by IS 'Reference to the user who created the API key';
             COMMENT ON COLUMN api_key.created IS 'Timestamp when the API key was created';
             COMMENT ON COLUMN api_key.expires_at IS 'Optional expiration timestamp for the API key';
             COMMENT ON COLUMN api_key.last_used IS 'Timestamp when the API key was last used';
             COMMENT ON COLUMN api_key.enabled IS 'Flag indicating if the API key is active';
-            COMMENT ON INDEX idx_api_key_value IS 'Index for API key authentication lookups';
+            COMMENT ON INDEX idx_api_key IS 'Index for API key authentication lookups';
             COMMENT ON INDEX idx_api_key_expiry IS 'Partial index for finding non-expired API keys';
 
             COMMENT ON TABLE "dashboard" IS 'Defines monitoring dashboards';
@@ -126,11 +125,11 @@
             COMMENT ON COLUMN dashboard.name IS 'Name of the dashboard';
             COMMENT ON COLUMN dashboard.description IS 'Description of the dashboard''s purpose';
             COMMENT ON COLUMN dashboard.global IS 'Flag indicating if the dashboard is publicly accessible';
-            COMMENT ON COLUMN dashboard.created_by IS 'Reference to the user who created the dashboard';
+            COMMENT ON COLUMN dashboard.updated_by IS 'Reference to the user who updated the dashboard';
             COMMENT ON COLUMN dashboard.created IS 'Timestamp when the dashboard was created';
             COMMENT ON COLUMN dashboard.team_id IS 'Reference to the team the dashboard belongs to';
             COMMENT ON INDEX idx_dashboard_global IS 'Partial index for finding global dashboards';
-            COMMENT ON INDEX idx_dashboard_created_by IS 'Index for finding dashboards created by a user';
+            COMMENT ON INDEX idx_dashboard_updated_by IS 'Index for finding dashboards created by a user';
 
             COMMENT ON TABLE "dashboard_check" IS 'Maps checks displayed on dashboards';
             COMMENT ON COLUMN dashboard_check.dashboard_id IS 'Reference to the dashboard';
@@ -143,6 +142,7 @@
             COMMENT ON COLUMN dashboard_group.dashboard_id IS 'Reference to the dashboard this group belongs to';
             COMMENT ON COLUMN dashboard_group.name IS 'Name of the group';
             COMMENT ON COLUMN dashboard_group.created IS 'Timestamp when the group was created';
+            COMMENT ON COLUMN dashboard_group.display_order IS 'Order of the group withing the dashboard';
 
             COMMENT ON COLUMN dashboard_check.group_id IS 'Optional reference to a dashboard group (NULL for ungrouped checks)';
             COMMENT ON COLUMN dashboard_check.display_order IS 'Order of the check within its group or dashboard (for ungrouped checks)';

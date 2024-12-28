@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.hawaiiframework.repository.DataNotFoundException;
 import org.jordijaspers.eventify.api.authentication.model.Authority;
 import org.jordijaspers.eventify.api.authentication.repository.RoleRepository;
 import org.jordijaspers.eventify.api.token.model.TokenType;
@@ -26,6 +27,7 @@ import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.authentication.model.Authority.USER;
 import static org.jordijaspers.eventify.common.constants.Constants.Time.*;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.INVALID_CREDENTIALS;
+import static org.jordijaspers.eventify.common.exception.ApiErrorCode.USER_NOT_FOUND_ERROR;
 
 /**
  * A service to manage users, their registration and authentication. It also implements the {@link UserDetailsService} to load users by
@@ -92,7 +94,8 @@ public class UserService implements UserDetailsService {
      * Update the authority of the user with the given id.
      */
     public User updateAuthority(final Long id, final Authority authority) {
-        final User user = userRepository.findById(id).orElseThrow();
+        final User user = userRepository.findById(id)
+            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
         user.setRole(roleRepository.findByAuthority(authority).orElseThrow());
         return userRepository.save(user);
     }

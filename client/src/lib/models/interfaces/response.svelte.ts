@@ -24,7 +24,7 @@ interface DashboardResponse {
 	global: boolean;
 	created: Date;
 	lastUpdated: Date;
-	createdBy: string;
+	updatedBy: string;
 	team: TeamResponse;
 	configuration: DashboardConfigurationResponse;
 }

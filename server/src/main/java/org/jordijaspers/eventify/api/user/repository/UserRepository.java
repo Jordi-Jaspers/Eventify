@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -28,20 +27,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return the users.
      */
     Set<User> findAllByIdIn(Collection<Long> ids);
-
-    /**
-     * Returns all instances of the type.
-     *
-     * @return all entities
-     */
-    @NonNull
-    @Override
-    @Query("""
-        FROM User u
-        LEFT JOIN FETCH u.role
-        LEFT JOIN FETCH u.teams
-        """)
-    List<User> findAll();
 
     /**
      * Find a user by email.

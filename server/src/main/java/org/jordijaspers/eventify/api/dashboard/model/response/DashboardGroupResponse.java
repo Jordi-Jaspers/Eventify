@@ -3,8 +3,8 @@ package org.jordijaspers.eventify.api.dashboard.model.response;
 import lombok.Data;
 import org.jordijaspers.eventify.api.check.model.response.CheckResponse;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Response object for a dashboard group.
@@ -14,7 +14,7 @@ public class DashboardGroupResponse {
 
     private final String name;
 
-    private final Set<CheckResponse> checks = new HashSet<>();
+    private final List<CheckResponse> checks = new ArrayList<>();
 
     /**
      * A default constructor to create an existing dashboard group.
@@ -22,8 +22,8 @@ public class DashboardGroupResponse {
      * @param name   The name of the group.
      * @param checks The checks in the group.
      */
-    public DashboardGroupResponse(final String name, final Set<CheckResponse> checks) {
+    public DashboardGroupResponse(final String name, final List<CheckResponse> checks) {
         this.name = name;
+        this.checks.addAll(checks);
     }
-
 }

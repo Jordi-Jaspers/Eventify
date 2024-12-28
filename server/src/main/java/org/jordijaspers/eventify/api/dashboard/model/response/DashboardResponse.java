@@ -23,7 +23,7 @@ public class DashboardResponse {
 
     private ZonedDateTime lastUpdated;
 
-    private String createdBy;
+    private String updatedBy;
 
     private TeamResponse team;
 

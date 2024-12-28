@@ -5,9 +5,7 @@ import lombok.NoArgsConstructor;
 import org.jordijaspers.eventify.api.check.model.response.CheckResponse;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Response object for a dashboard configuration.
@@ -18,7 +16,7 @@ public class DashboardConfigurationResponse {
 
     private final List<DashboardGroupResponse> groups = new ArrayList<>();
 
-    private final Set<CheckResponse> ungroupedChecks = new HashSet<>();
+    private final List<CheckResponse> ungroupedChecks = new ArrayList<>();
 
     /**
      * A default constructor to create an existing dashboard configuration.
@@ -26,7 +24,7 @@ public class DashboardConfigurationResponse {
      * @param groups          The groups of checks.
      * @param ungroupedChecks The ungrouped checks.
      */
-    public DashboardConfigurationResponse(final List<DashboardGroupResponse> groups, final Set<CheckResponse> ungroupedChecks) {
+    public DashboardConfigurationResponse(final List<DashboardGroupResponse> groups, final List<CheckResponse> ungroupedChecks) {
         this.groups.addAll(groups);
         this.ungroupedChecks.addAll(ungroupedChecks);
     }

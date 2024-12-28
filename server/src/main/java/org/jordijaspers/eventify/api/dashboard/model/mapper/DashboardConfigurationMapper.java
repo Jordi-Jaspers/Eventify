@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -42,26 +41,26 @@ public class DashboardConfigurationMapper {
             return new DashboardConfigurationResponse();
         }
 
-        final Set<CheckResponse> ungroupedChecks = dashboard.getDashboardChecks().stream()
+        final List<CheckResponse> ungroupedChecks = dashboard.getDashboardChecks().stream()
             .filter(dashboardCheck -> isNull(dashboardCheck.getGroup()))
             .sorted(Comparator.comparing(DashboardCheck::getDisplayOrder))
             .map(dashboardCheck -> checkMapper.toCheckResponse(dashboardCheck.getCheck()))
-            .collect(Collectors.toSet());
+            .toList();
 
-        final Map<DashboardGroup, Set<CheckResponse>> groupedChecks = dashboard.getDashboardChecks().stream()
+        final Map<DashboardGroup, List<CheckResponse>> groupedChecks = dashboard.getDashboardChecks().stream()
             .filter(dashboardCheck -> nonNull(dashboardCheck.getGroup()))
             .collect(
                 Collectors.groupingBy(
                     DashboardCheck::getGroup,
                     Collectors.mapping(
                         dashboardCheck -> checkMapper.toCheckResponse(dashboardCheck.getCheck()),
-                        Collectors.toSet()
+                        Collectors.toList()
                     )
                 )
             );
 
         final List<DashboardGroupResponse> groups = dashboard.getGroups().stream()
-            .map(group -> new DashboardGroupResponse(group.getName(), groupedChecks.getOrDefault(group, Set.of())))
+            .map(group -> new DashboardGroupResponse(group.getName(), groupedChecks.getOrDefault(group, List.of())))
             .toList();
 
         return new DashboardConfigurationResponse(groups, ungroupedChecks);

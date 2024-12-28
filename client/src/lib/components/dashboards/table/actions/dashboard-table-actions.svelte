@@ -8,7 +8,7 @@
     import {goto} from "$app/navigation";
     import {CLIENT_ROUTES} from "$lib/config/paths";
 
-    let {id, name, description, global}: { id: number, name: string, description: string, global: boolean } = $props();
+    let {id, name, description, global, team}: { id: number, name: string, description: string, global: boolean, team: TeamResponse } = $props();
     let isUpdateDialogOpen = $state(false);
     let isDeleteDialogOpen = $state(false);
     let isDropdownOpen = $state(false);
@@ -52,7 +52,7 @@
                        bind:isDropdownOpen={isDropdownOpen}
                        bind:isDeleteDialogOpen={isDeleteDialogOpen}/>
 
-<UpdateDashboardAction {id} {name} {description} {global}
+<UpdateDashboardAction {id} {name} {description} {global} {team}
                        bind:isDropdownOpen={isDropdownOpen}
                        bind:isUpdateDialogOpen={isUpdateDialogOpen}/>
 

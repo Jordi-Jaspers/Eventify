@@ -28,14 +28,11 @@ public class ApiKey implements Serializable {
     private Long id;
 
     @Column(
-        name = "key_value",
+        name = "key",
         updatable = false,
         nullable = false
     )
     private String key;
-
-    @Column(name = "name")
-    private String name;
 
     @Column(
         name = "created_by",

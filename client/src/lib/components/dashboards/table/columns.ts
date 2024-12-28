@@ -15,7 +15,8 @@ export const columns: ColumnDef<DashboardResponse>[] = [
 				id: row.original.id,
 				name: row.original.name,
 				description: row.original.description,
-				global: row.original.global
+				global: row.original.global,
+				team: row.original.team
 			});
 		}
 	},

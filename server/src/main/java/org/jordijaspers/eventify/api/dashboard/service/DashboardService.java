@@ -31,6 +31,7 @@ public class DashboardService {
 
     private final DashboardRepository dashboardRepository;
 
+
     /**
      * Retrieves the dashboard configuration.
      *
@@ -64,6 +65,16 @@ public class DashboardService {
     }
 
     /**
+     * Deletes the dashboard with the given id.
+     *
+     * @param id The id of the dashboard.
+     */
+    public void deleteDashboard(final Long id) {
+        final Dashboard dashboard = getDashboardConfiguration(id);
+        dashboardRepository.deleteById(dashboard.getId());
+    }
+
+    /**
      * Creates a new dashboard without any configuration.
      *
      * @param request The request to create the dashboard.
@@ -75,33 +86,7 @@ public class DashboardService {
             .filter(team -> team.getId().equals(request.getTeamId()))
             .findFirst()
             .orElseThrow(UserNotPartOfTeamException::new);
-
-        return dashboardRepository.save(new Dashboard(request, user, selectedTeam));
-    }
-
-    /**
-     * Configures the dashboard with the given checks and dashboard groups.
-     *
-     * @param dashboardId The dashboard that needs to be configured.
-     * @param request     The configuration request.
-     * @return The configured dashboard.
-     */
-    public Dashboard configureDashboard(final Long dashboardId, final DashboardConfigurationRequest request) {
-        final Dashboard dashboard = getDashboardConfiguration(dashboardId);
-        dashboard.clearConfiguration();
-        configureGroupedChecks(request.getGroups(), dashboard);
-        configureUngroupedChecks(request, dashboard);
-        return dashboardRepository.save(dashboard);
-    }
-
-    /**
-     * Deletes the dashboard with the given id.
-     *
-     * @param id The id of the dashboard.
-     */
-    public void deleteDashboard(final Long id) {
-        final Dashboard dashboard = getDashboardConfiguration(id);
-        dashboardRepository.deleteById(dashboard.getId());
+        return save(new Dashboard(request, user, selectedTeam));
     }
 
     /**
@@ -116,6 +101,30 @@ public class DashboardService {
         dashboard.setName(request.getName());
         dashboard.setDescription(request.getDescription());
         dashboard.setGlobal(request.isGlobal());
+        return save(dashboard);
+    }
+
+    /**
+     * Configures the dashboard with the given checks and dashboard groups.
+     *
+     * @param dashboardId The dashboard that needs to be configured.
+     * @param request     The configuration request.
+     * @return The configured dashboard.
+     */
+    @Transactional
+    public Dashboard configureDashboard(final Long dashboardId, final DashboardConfigurationRequest request) {
+        final Dashboard dashboard = getDashboardConfiguration(dashboardId);
+
+        dashboard.clearConfiguration();
+        dashboardRepository.saveAndFlush(dashboard);
+
+        configureGroupedChecks(request.getGroups(), dashboard);
+        configureUngroupedChecks(request, dashboard);
+        return save(dashboard);
+    }
+
+    private Dashboard save(final Dashboard dashboard) {
+        dashboard.setUpdatedBy(SecurityUtil.getLoggedInUser().getUsername());
         dashboard.setLastUpdated(LocalDateTime.now());
         return dashboardRepository.save(dashboard);
     }
@@ -128,14 +137,15 @@ public class DashboardService {
     }
 
     private static void configureGroupedChecks(final List<DashboardGroupRequest> requests, final Dashboard dashboard) {
-        requests.forEach(request -> {
-            final DashboardGroup group = new DashboardGroup(dashboard, request.getName());
+        int groupOrder = 1;
+        for (final DashboardGroupRequest request : requests) {
+            final DashboardGroup group = new DashboardGroup(dashboard, request.getName(), groupOrder++);
             dashboard.getGroups().add(group);
 
-            int displayOrder = 1;
+            int checkOrder = 1;
             for (final Long checkId : request.getCheckIds()) {
-                dashboard.addCheck(new Check(checkId), group, displayOrder++);
+                dashboard.addCheck(new Check(checkId), group, checkOrder++);
             }
-        });
+        }
     }
 }

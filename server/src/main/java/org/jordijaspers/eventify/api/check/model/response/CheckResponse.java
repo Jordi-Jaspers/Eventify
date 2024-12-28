@@ -13,8 +13,6 @@ public class CheckResponse {
 
     private String name;
 
-    private String description;
-
     private ZonedDateTime created;
 
 }
