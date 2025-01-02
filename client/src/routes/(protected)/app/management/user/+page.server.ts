@@ -6,7 +6,7 @@ import { type Actions, fail } from '@sveltejs/kit';
 export async function load({ cookies }) {
 	const getUsers = async () => {
 		const { accessToken } = CookieService.getAuthTokens(cookies);
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.USERS.path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.USERS.path, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ export async function load({ cookies }) {
 
 	const getOptions = async () => {
 		const { accessToken } = CookieService.getAuthTokens(cookies);
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.OPTIONS.path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.OPTIONS.path, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -42,7 +42,7 @@ export const actions: Actions = {
 		const data: FormData = await request.formData();
 
 		const path: string = SERVER_ROUTES.LOCK_USER.path.replace('{id}', data.get('id') as string);
-		const response: ApiResponse = await ApiService.fetchWithRetry(path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(path, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export const actions: Actions = {
 		const data: FormData = await request.formData();
 
 		const path: string = SERVER_ROUTES.UNLOCK_USER.path.replace('{id}', data.get('id') as string);
-		const response: ApiResponse = await ApiService.fetchWithRetry(path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(path, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export const actions: Actions = {
 		};
 
 		const path: string = SERVER_ROUTES.USER.path.replace('{id}', id);
-		const response: ApiResponse = await ApiService.fetchWithRetry(path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(path, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

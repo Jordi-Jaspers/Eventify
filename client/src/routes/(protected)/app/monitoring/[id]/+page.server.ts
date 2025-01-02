@@ -6,7 +6,7 @@ export async function load({ cookies, params }) {
 	const getDashboard = async () => {
 		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const id: string = params.id;
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.DASHBOARD_CONFIGURATION.path.replace('{id}', id), {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.DASHBOARD_CONFIGURATION.path.replace('{id}', id), {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',

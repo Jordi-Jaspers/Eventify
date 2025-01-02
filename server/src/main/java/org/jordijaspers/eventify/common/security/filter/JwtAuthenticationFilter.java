@@ -24,14 +24,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import static java.util.Objects.isNull;
 import static org.jordijaspers.eventify.common.config.RequestMatcherConfig.getPublicMatchers;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.StringUtils.hasText;
-import static org.springframework.util.StringUtils.startsWithIgnoreCase;
 
 /**
  * The filter to extract the JWT token from the request and set the security context, when the token is validated against the user and the
@@ -46,6 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private static final String BEARER = "Bearer ";
+
+    private static final String ACCESS_TOKEN_COOKIE = "EVENTIFY_ACCESS_TOKEN";
 
     private final JwtService jwtService;
 
@@ -79,36 +82,65 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
         @NonNull final HttpServletRequest request,
         @NonNull final HttpServletResponse response,
-        @NonNull final FilterChain filterChain) throws ServletException, IOException, ApiException {
-        LOGGER.debug("Processing authentication for '{}'", request.getRequestURL());
-        final String authorizationHeader = request.getHeader(AUTHORIZATION);
-        if (!startsWithIgnoreCase(authorizationHeader, BEARER)) {
-            LOGGER.debug("No JWT token found in request headers.");
+        @NonNull final FilterChain filterChain) throws ServletException, IOException {
+        String jwt = extractJwtFromHeader(request);
+        if (!hasText(jwt)) {
+            jwt = extractJwtFromCookies(request);
+        }
+
+        if (!hasText(jwt)) {
+            LOGGER.debug("No JWT token found in the request headers or cookies.");
+            filterChain.doFilter(request, response);
             return;
         }
 
-        final String jwt = authorizationHeader.substring(BEARER.length());
-        if (hasText(jwt)) {
-            try {
-                LOGGER.debug("Found JWT token in request headers: '{}'", jwt);
-                final String email = jwtService.extractSubject(jwt);
-                final User user = userService.loadUserByUsername(email);
-                if (tokenService.isValidAccessToken(jwt, user)) {
-                    if (isUserAllowed(request, response, filterChain, user)) {
-                        return;
-                    }
+        try {
+            LOGGER.debug("Validating JWT token.");
+            final String email = jwtService.extractSubject(jwt);
+            final User user = userService.loadUserByUsername(email);
 
-                    LOGGER.debug("Authentication successful for '{}', setting security context.", user.getUsername());
+            if (tokenService.isValidAccessToken(jwt, user)) {
+                if (!isUserRestricted(user, request, response)) {
+                    LOGGER.debug("Authentication successful for user '{}'. Setting security context.", user.getUsername());
                     SecurityContextHolder.getContext().setAuthentication(getAuthentication(user, request));
+                } else {
+                    LOGGER.debug("User '{}' is restricted. Authentication skipped.", user.getUsername());
                     return;
                 }
-            } catch (final ApiException exception) {
-                LOGGER.debug("Authentication failed because of an invalid token.");
-                return;
+            } else {
+                LOGGER.debug("JWT token validation failed for user '{}'.", email);
+                SecurityContextHolder.clearContext();
             }
+        } catch (final ApiException ex) {
+            LOGGER.warn("Authentication failed due to exception: {}", ex.getMessage());
+            SecurityContextHolder.clearContext();
+            respondWithError(response, ApiErrorCode.INVALID_TOKEN_ERROR, HttpStatus.UNAUTHORIZED, "Invalid token.");
+            return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String extractJwtFromHeader(final HttpServletRequest request) {
+        final String authorizationHeader = request.getHeader(AUTHORIZATION);
+        if (hasText(authorizationHeader) && authorizationHeader.startsWith(BEARER)) {
+            return authorizationHeader.substring(BEARER.length()).trim();
+        }
+        return null;
+    }
+
+    private String extractJwtFromCookies(final HttpServletRequest request) {
+        if (isNull(request.getCookies())) {
+            return null;
+        }
+
+        for (final Cookie cookie : request.getCookies()) {
+            if (ACCESS_TOKEN_COOKIE.equals(cookie.getName())) {
+                LOGGER.debug("JWT token found in cookie: {}", cookie.getName());
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(final User user, final HttpServletRequest request) {
@@ -121,47 +153,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return authentication;
     }
 
-    private boolean isUserAllowed(
+    private boolean isUserRestricted(
+        final User user,
         final HttpServletRequest request,
-        final HttpServletResponse response,
-        final FilterChain filterChain,
-        final User user) throws IOException, ServletException {
+        final HttpServletResponse response) throws IOException {
+
         if (!user.isEnabled()) {
-            LOGGER.debug("User '{}' is currently disabled.", user.getUsername());
-            handleAccountRestriction(request, response, ApiErrorCode.USER_DISABLED_ERROR);
-            filterChain.doFilter(request, response);
+            LOGGER.debug("User '{}' is disabled.", user.getUsername());
+            respondWithError(response, ApiErrorCode.USER_DISABLED_ERROR, HttpStatus.FORBIDDEN, "User account is disabled.");
             return true;
         }
 
         if (!user.isValidated()) {
             LOGGER.debug("User '{}' is not validated.", user.getUsername());
-            handleAccountRestriction(request, response, ApiErrorCode.USER_UNVALIDATED_ERROR);
-            filterChain.doFilter(request, response);
+            respondWithError(response, ApiErrorCode.USER_UNVALIDATED_ERROR, HttpStatus.FORBIDDEN, "User account is not validated.");
             return true;
         }
+
         return false;
     }
 
-    private void handleAccountRestriction(final HttpServletRequest request, final HttpServletResponse response, final ApiErrorCode code) {
-        try {
-            final HttpStatus status = HttpStatus.FORBIDDEN;
-            final AuthorizationException exception = new AuthorizationException(code);
+    private void respondWithError(
+        final HttpServletResponse response,
+        final ApiErrorCode errorCode,
+        final HttpStatus status,
+        final String message) {
 
-            final ErrorResponseResource errorResponse = new ErrorResponseResource(exception);
-            errorResponse.setErrorMessage(exception.getMessage());
+        try {
+            final ErrorResponseResource errorResponse = new ErrorResponseResource(new AuthorizationException(errorCode));
+            errorResponse.setErrorMessage(message);
             errorResponse.setStatusCode(status.value());
             errorResponse.setStatusMessage(status.getReasonPhrase());
-            errorResponse.setMethod(request.getMethod());
-            errorResponse.setUri(request.getRequestURI());
             errorResponse.setContentType(APPLICATION_JSON_VALUE);
-            errorResponse.setQuery(request.getQueryString());
+
+            response.setStatus(status.value());
+            response.setContentType(APPLICATION_JSON_VALUE);
 
             final ObjectWriter writer = new ObjectMapper().writer().withDefaultPrettyPrinter();
             response.getWriter().write(writer.writeValueAsString(errorResponse));
-            response.setStatus(errorResponse.getStatusCode());
-            response.setContentType(errorResponse.getContentType());
-        } catch (final IOException exception) {
-            LOGGER.error("Error while writing the error response.", exception);
+
+        } catch (final IOException ex) {
+            LOGGER.error("Error while writing the error response: {}", ex.getMessage(), ex);
         }
     }
 }

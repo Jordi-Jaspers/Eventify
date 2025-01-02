@@ -18,7 +18,7 @@ export const actions: Actions = {
 			password: data.get('password') as string
 		};
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.LOGIN.path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.LOGIN.path, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(input)
@@ -50,7 +50,7 @@ export const actions: Actions = {
 			passwordConfirmation: data.get('passwordConfirmation') as string
 		};
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(
+		const response: ApiResponse = await ApiService.fetchFromServer(
 			SERVER_ROUTES.REGISTER.path,
 			{
 				method: 'POST',

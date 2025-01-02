@@ -10,7 +10,7 @@ export class ApiService {
 	 * @param config Configuration for retries and timeout
 	 * @returns {Promise<{response?: Response; error?: string}>}
 	 */
-	static async fetchWithRetry(url: string, options: RequestInit = {}, config: RetryConfig = {}): Promise<ApiResponse> {
+	static async fetchFromServer(url: string, options: RequestInit = {}, config: RetryConfig = {}): Promise<ApiResponse> {
 		const { retries = 3, timeout = 60_000 } = config;
 		let lastErrorResponse: Response | null = null;
 		const apiResponse = new ServerResponse(options.method || 'GET', url, options.headers);

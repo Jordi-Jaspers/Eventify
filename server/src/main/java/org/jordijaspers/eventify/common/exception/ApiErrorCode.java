@@ -76,6 +76,10 @@ public enum ApiErrorCode implements ApiError {
     CANNOT_ACCESS_DASHBOARD(
         "ERR-0017",
         "The user does not have access to the specified dashboard."
+    ),
+    UNAUTHORIZED_ERROR(
+        "ERR-0018",
+        "You are not authorized to access this content."
     );
 
     /**

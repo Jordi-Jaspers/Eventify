@@ -1,20 +1,20 @@
 package org.jordijaspers.eventify.api.dashboard.model.request;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Request object to create a new dashboard group.
  */
 @Data
+@NoArgsConstructor
 public class DashboardGroupRequest {
 
-    private final String name;
+    private String name;
 
-    private final String description;
-
-    private final Set<Long> checkIds = new HashSet<>();
+    private List<Long> checkIds = new ArrayList<>();
 
 }

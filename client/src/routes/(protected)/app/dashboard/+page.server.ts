@@ -6,7 +6,7 @@ import { type Actions, fail } from '@sveltejs/kit';
 export async function load({ cookies }) {
 	const getDashboards = async () => {
 		const { accessToken } = CookieService.getAuthTokens(cookies);
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.DASHBOARDS.path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.DASHBOARDS.path, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -33,7 +33,7 @@ export const actions: Actions = {
 			global: data.get('global') ? data.get('global') === 'on' : false
 		};
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.DASHBOARDS.path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.DASHBOARDS.path, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export const actions: Actions = {
 		const data: FormData = await request.formData();
 		const id: string = data.get('id') as string;
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.DASHBOARD.path.replace('{id}', id), {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.DASHBOARD.path.replace('{id}', id), {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export const actions: Actions = {
 			global: data.get('global') ? data.get('global') === 'on' : false
 		};
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.DASHBOARD.path.replace('{id}', id), {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.DASHBOARD.path.replace('{id}', id), {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',

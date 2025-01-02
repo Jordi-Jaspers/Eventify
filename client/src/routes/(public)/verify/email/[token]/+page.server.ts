@@ -5,7 +5,7 @@ import { CookieService } from '$lib/utils/cookie.service';
 export async function load({ params, locals, cookies }) {
 	const verifyEmail: () => Promise<ApiResponse> = async (): Promise<ApiResponse> => {
 		const url: string = new URL(SERVER_ROUTES.VERIFY_EMAIL.path) + '?token=' + params.token;
-		const response: ApiResponse = await ApiService.fetchWithRetry(
+		const response: ApiResponse = await ApiService.fetchFromServer(
 			url,
 			{
 				method: 'POST',

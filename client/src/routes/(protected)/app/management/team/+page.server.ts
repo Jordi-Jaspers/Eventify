@@ -6,7 +6,7 @@ import { type Actions, fail } from '@sveltejs/kit';
 export async function load({ cookies }) {
 	const getTeams = async () => {
 		const { accessToken } = CookieService.getAuthTokens(cookies);
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.TEAMS.path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.TEAMS.path, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ export async function load({ cookies }) {
 
 	const getUsers = async () => {
 		const { accessToken } = CookieService.getAuthTokens(cookies);
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.USERS.path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.USERS.path, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export const actions: Actions = {
 			description: data.get('description') as string
 		};
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.TEAMS.path, {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.TEAMS.path, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ export const actions: Actions = {
 			description: data.get('description') as string
 		};
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.TEAM.path.replace('{id}', id), {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.TEAM.path.replace('{id}', id), {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export const actions: Actions = {
 		const data: FormData = await request.formData();
 		const id: string = data.get('id') as string;
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.TEAM.path.replace('{id}', id), {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.TEAM.path.replace('{id}', id), {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export const actions: Actions = {
 			userIds: [parseInt(userId)]
 		};
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.TEAM_MEMBERS.path.replace('{id}', teamId), {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.TEAM_MEMBERS.path.replace('{id}', teamId), {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ export const actions: Actions = {
 			userIds: [parseInt(userId)]
 		};
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.TEAM_MEMBERS.path.replace('{id}', teamId), {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.TEAM_MEMBERS.path.replace('{id}', teamId), {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',

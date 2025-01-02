@@ -10,6 +10,12 @@ interface PageResponse<T> {
 	page: PageableResponse;
 }
 
+interface CheckResponse {
+	id: number;
+	name: string;
+	created: Date;
+}
+
 interface RegisterResponse {
 	email: string;
 	authority: string;

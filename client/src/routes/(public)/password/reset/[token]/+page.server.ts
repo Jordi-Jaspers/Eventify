@@ -14,7 +14,7 @@ export const actions: Actions = {
 			token: params.token
 		};
 
-		const response: ApiResponse = await ApiService.fetchWithRetry(
+		const response: ApiResponse = await ApiService.fetchFromServer(
 			SERVER_ROUTES.RESET_FORGOTTEN_PASSWORD.path,
 			{
 				method: 'POST',

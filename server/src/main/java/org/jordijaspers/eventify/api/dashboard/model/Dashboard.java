@@ -14,9 +14,7 @@ import org.jordijaspers.eventify.api.user.model.User;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import jakarta.persistence.*;
 
@@ -82,7 +80,7 @@ public class Dashboard implements Serializable {
         fetch = FetchType.LAZY
     )
     @OrderBy("group NULLS LAST, displayOrder")
-    private List<DashboardCheck> dashboardChecks = new ArrayList<>();
+    private Set<DashboardCheck> dashboardChecks = new HashSet<>();
 
     /**
      * A constructor to create a new dashboard.
@@ -113,11 +111,4 @@ public class Dashboard implements Serializable {
         dashboardChecks.add(dashboardCheck);
     }
 
-    /**
-     * Clear the dashboard configuration.
-     */
-    public void clearConfiguration() {
-        dashboardChecks.clear();
-        groups.clear();
-    }
 }

@@ -24,7 +24,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (accessToken && refreshToken) {
 		CookieService.setAuthCookies(event.cookies, { accessToken, refreshToken });
 		const userDetails: UserDetailsResponse = JwtService.getUserDetailsFromToken(accessToken);
-		const apiResponse: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.USER_DETAILS.path, {
+		const apiResponse: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.USER_DETAILS.path, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',

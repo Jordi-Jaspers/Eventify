@@ -9,6 +9,8 @@ import org.jordijaspers.eventify.api.dashboard.model.request.CreateDashboardRequ
 import org.jordijaspers.eventify.api.dashboard.model.request.DashboardConfigurationRequest;
 import org.jordijaspers.eventify.api.dashboard.model.request.DashboardGroupRequest;
 import org.jordijaspers.eventify.api.dashboard.model.request.UpdateDashboardDetailsRequest;
+import org.jordijaspers.eventify.api.dashboard.repository.DashboardCheckRepository;
+import org.jordijaspers.eventify.api.dashboard.repository.DashboardGroupRepository;
 import org.jordijaspers.eventify.api.dashboard.repository.DashboardRepository;
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.user.model.User;
@@ -31,6 +33,9 @@ public class DashboardService {
 
     private final DashboardRepository dashboardRepository;
 
+    private final DashboardGroupRepository dashboardGroupRepository;
+
+    private final DashboardCheckRepository dashboardCheckRepository;
 
     /**
      * Retrieves the dashboard configuration.
@@ -111,13 +116,11 @@ public class DashboardService {
      * @param request     The configuration request.
      * @return The configured dashboard.
      */
-    @Transactional
     public Dashboard configureDashboard(final Long dashboardId, final DashboardConfigurationRequest request) {
+        dashboardCheckRepository.deleteConfigurationForDashboard(dashboardId);
+        dashboardGroupRepository.deleteGroupsForDashboard(dashboardId);
+
         final Dashboard dashboard = getDashboardConfiguration(dashboardId);
-
-        dashboard.clearConfiguration();
-        dashboardRepository.saveAndFlush(dashboard);
-
         configureGroupedChecks(request.getGroups(), dashboard);
         configureUngroupedChecks(request, dashboard);
         return save(dashboard);

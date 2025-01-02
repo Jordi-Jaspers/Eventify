@@ -37,16 +37,12 @@ interface DashboardUpdateRequest {
 
 interface DashboardConfigurationRequest {
 	groups: DashboardGroupRequest[];
-	ungroupedChecks: CheckRequest[];
+	ungroupedCheckIds: number[];
 }
 
 interface DashboardGroupRequest {
 	name: string;
-	checks: CheckResponse[];
-}
-
-interface CheckRequest {
-	name: string;
+	checkIds: number[];
 }
 
 interface RefreshTokenRequest {

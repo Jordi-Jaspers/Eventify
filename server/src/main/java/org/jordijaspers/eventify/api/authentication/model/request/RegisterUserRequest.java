@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.authentication.model.request;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -8,6 +9,7 @@ import lombok.ToString;
  */
 @Data
 @ToString
+@NoArgsConstructor
 public class RegisterUserRequest {
 
     private String email;

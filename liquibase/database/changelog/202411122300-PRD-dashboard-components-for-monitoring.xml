@@ -7,13 +7,22 @@
 
     <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-1" author="jordi.jaspers">
         <ext:documentation>
+            The pg_trgm module provides functions and operators for determining the similarity of alphanumeric text based on trigram matching, as well as index operator classes that support fast searching for similar strings.
+        </ext:documentation>
+        <sql>
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-2" author="jordi.jaspers">
+        <ext:documentation>
             Adding API key management for the dashboard components.
         </ext:documentation>
         <sql>
             CREATE TABLE IF NOT EXISTS "api_key"
             (
                 id         SERIAL PRIMARY KEY,
-                "key"  TEXT        NOT NULL,
+                "key"      TEXT        NOT NULL,
                 created_by TEXT        NOT NULL,
                 created    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
                 expires_at TIMESTAMPTZ,
@@ -27,7 +36,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-2" author="jordi.jaspers">
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-3" author="jordi.jaspers">
         <ext:documentation>
             Adding dashboard components for monitoring.
         </ext:documentation>
@@ -54,7 +63,8 @@
                 );
 
             CREATE INDEX idx_check_source ON "check" (source_id);
-            CREATE INDEX idx_check_name ON "check" (name);
+            CREATE INDEX idx_check_name ON "check" ("name");
+            CREATE INDEX idx_item_name_trgm ON "check" USING gin ("name" gin_trgm_ops);
 
             CREATE TABLE IF NOT EXISTS "dashboard"
             (
@@ -104,7 +114,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-3" author="jordi.jaspers">
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-4" author="jordi.jaspers">
         <ext:documentation>
             Adding documentation for every table, column, and index.
         </ext:documentation>

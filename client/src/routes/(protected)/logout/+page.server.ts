@@ -5,7 +5,7 @@ import { redirect } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
 	const logout = async () => {
-		await ApiService.fetchWithRetry(SERVER_ROUTES.LOGOUT.path);
+		await ApiService.fetchFromServer(SERVER_ROUTES.LOGOUT.path);
 		CookieService.clearAuthCookies(cookies);
 		throw redirect(303, CLIENT_ROUTES.LOGIN_PAGE.path);
 	};

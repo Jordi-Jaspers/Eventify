@@ -29,11 +29,11 @@ public class DashboardCheck implements Serializable {
     private Dashboard dashboard;
 
     @MapsId("checkId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Check check;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
+    @ManyToOne(fetch = FetchType.EAGER)
     private DashboardGroup group;
 
     @Column(name = "display_order")

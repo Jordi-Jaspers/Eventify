@@ -93,6 +93,10 @@ export const SERVER_ROUTES = {
 	DASHBOARD_CONFIGURATION: {
 		path: `${SERVER_BASE_URL}/dashboard/{id}/configuration`,
 		type: RouteType.PRIVATE
+	},
+	CHECK_SEARCH: {
+		path: `${SERVER_BASE_URL}/check`,
+		type: RouteType.PRIVATE
 	}
 };
 
@@ -159,6 +163,10 @@ export const CLIENT_ROUTES = {
 	},
 	USER_MANAGEMENT_PAGE: {
 		path: '/app/management/user',
+		type: RouteType.PRIVATE
+	},
+	PROXY_CHECK_SEARCH: {
+		path: '/proxy/check',
 		type: RouteType.PRIVATE
 	}
 };

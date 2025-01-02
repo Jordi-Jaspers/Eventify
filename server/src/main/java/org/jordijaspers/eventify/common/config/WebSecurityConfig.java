@@ -2,11 +2,10 @@ package org.jordijaspers.eventify.common.config;
 
 import org.jordijaspers.eventify.common.security.converter.JwtAuthenticationConverter;
 import org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter;
+import org.jordijaspers.eventify.common.security.filter.UnauthorizedHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,6 +45,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public SecurityFilterChain filterChain(@Value("${security.cors.allowed-origins}") final String[] allowedOrigins,
         final JwtAuthenticationFilter jwtAuthenticationFilter,
         final JwtAuthenticationConverter jwtAuthenticationConverter,
+        final UnauthorizedHandler unauthorizedHandler,
         final HttpSecurity http) throws Exception {
 
         // Adding a once per request filter to check the JWT token.
@@ -55,10 +55,9 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         http.sessionManagement(sessionConfiguration -> sessionConfiguration.sessionCreationPolicy(STATELESS));
 
         // Return 401 (unauthorized) instead of 302 (redirect to login) when an authorization is missing or invalid.
-        http.exceptionHandling(handler -> handler.authenticationEntryPoint((request, response, authException) -> {
-            response.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer realm=\"Restricted Content\"");
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
-        }));
+        http.exceptionHandling(handler -> {
+            handler.authenticationEntryPoint(unauthorizedHandler);
+        });
 
         // Disable CSRF because of state-less session-management.
         http.csrf(AbstractHttpConfigurer::disable);

@@ -7,7 +7,7 @@ export async function load({ cookies, params }) {
 	const getDashboard = async () => {
 		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const id: string = params.id;
-		const response: ApiResponse = await ApiService.fetchWithRetry(SERVER_ROUTES.DASHBOARD_CONFIGURATION.path.replace('{id}', id), {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.DASHBOARD_CONFIGURATION.path.replace('{id}', id), {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -30,9 +30,9 @@ export const actions: Actions = {
 		const data: FormData = await request.formData();
 
 		const url: string = SERVER_ROUTES.DASHBOARD_CONFIGURATION.path.replace('{id}', dashboardId);
-		const configurationRequest: DashboardConfigurationRequest = JSON.parse(data.get('configuration') as string);
-
-		const response: ApiResponse = await ApiService.fetchWithRetry(url, {
+		const configuration: DashboardConfigurationResponse = JSON.parse(data.get('configuration') as string);
+		const configurationRequest: DashboardConfigurationRequest = mapConfigurationToRequest(configuration);
+		const response: ApiResponse = await ApiService.fetchFromServer(url, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -49,17 +49,28 @@ export const actions: Actions = {
 		const data: FormData = await request.formData();
 
 		const url: string = SERVER_ROUTES.DASHBOARD_CONFIGURATION.path.replace('{id}', dashboardId);
-		const dashboardConfiguration: DashboardConfigurationRequest = JSON.parse(data.get('form') as string);
-		const response: ApiResponse = await ApiService.fetchWithRetry(url, {
+		const configuration: DashboardConfigurationResponse = JSON.parse(data.get('configuration') as string);
+		const configurationRequest: DashboardConfigurationRequest = mapConfigurationToRequest(configuration);
+		const response: ApiResponse = await ApiService.fetchFromServer(url, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${accessToken}`
 			},
-			body: JSON.stringify(dashboardConfiguration)
+			body: JSON.stringify(configurationRequest)
 		});
 
 		const monitoringPage: string = CLIENT_ROUTES.DASHBOARD_MONITORING_PAGE.path.replace('{id}', params.id as string);
 		return response.success ? redirect(303, monitoringPage) : fail(response.status, { response: response });
 	}
 };
+
+function mapConfigurationToRequest(configuration: DashboardConfigurationResponse): DashboardConfigurationRequest {
+	const ungroupedCheckIds: number[] = configuration.ungroupedChecks.map((check) => check.id);
+	const groups: DashboardGroupRequest[] = configuration.groups.map((group) => {
+		const checkIds: number[] = group.checks.map((check) => check.id);
+		return { name: group.name, checkIds: checkIds };
+	});
+
+	return { groups: groups, ungroupedCheckIds: ungroupedCheckIds };
+}
