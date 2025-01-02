@@ -12,7 +12,7 @@
         <sql>
             INSERT INTO "user" (first_name, last_name, email, password, created, last_login, enabled, validated, role_id) VALUES
             ('Jordi', 'Jaspers', 'jordijaspers@gmail.com', '{bcrypt}$2a$10$aE6bcHveuelaISj.pwBHQOyOKshD86PmBquAv3jXUAotP.Luh23eq', '2024-12-05 21:08:01.029457 +00:00', '2024-12-18 23:09:25.934774 +00:00', true, true, (SELECT id FROM role WHERE authority = 'ADMIN')),
-            ('John', 'Doe', 'johndoe@gmail.com', '{bcrypt}$2a$10$aE6bcHveuelaISj.pwBHQOyOKshD86PmBquAv3jXUAotP.Luh23eq', '2024-12-06 11:12:00.000000 +00:00', '2024-12-18 23:00:00.000000 +00:00', true, true, (SELECT id FROM role WHERE authority = 'USER')),
+            ('John', 'Doe', 'johndoe@gmail.com', '{bcrypt}$2a$10$aE6bcHveuelaISj.pwBHQOyOKshD86PmBquAv3jXUAotP.Luh23eq', '2024-12-06 11:12:00.000000 +00:00', '2024-12-18 23:00:00.000000 +00:00', true, true, (SELECT id FROM role WHERE authority = 'ADMIN')),
             ('Jane', 'Doe', 'janedoe@gmail.com', '{bcrypt}$2a$10$aE6bcHveuelaISj.pwBHQOyOKshD86PmBquAv3jXUAotP.Luh23eq', '2024-12-07 12:00:00.000000 +00:00', '2024-12-18 23:10:00.000000 +00:00', true, true, (SELECT id FROM role WHERE authority = 'MANAGER')),
             ('Alice', 'Smith', 'alicesmith@gmail.com', '{bcrypt}$2a$10$aE6bcHveuelaISj.pwBHQOyOKshD86PmBquAv3jXUAotP.Luh23eq', '2024-12-08 13:00:00.000000 +00:00', '2024-12-18 23:20:00.000000 +00:00', true, true, (SELECT id FROM role WHERE authority = 'ADMIN')),
             ('Bob', 'Johnson', 'bobjohnson@gmail.com', '{bcrypt}$2a$10$aE6bcHveuelaISj.pwBHQOyOKshD86PmBquAv3jXUAotP.Luh23eq', '2024-12-09 14:00:00.000000 +00:00', '2024-12-18 23:30:00.000000 +00:00', true, true, (SELECT id FROM role WHERE authority = 'USER')),

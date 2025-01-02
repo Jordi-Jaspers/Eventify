@@ -74,7 +74,6 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-#        enable_lazy_load_no_trans: true
         id.optimizer.pooled.preferred: pooled-lo
         physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         implicit_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
