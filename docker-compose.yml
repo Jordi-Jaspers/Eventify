@@ -1,0 +1,21 @@
+services:
+  timescaledb:
+    # Using the TimescaleDB HA (High Availability) version is required to enable the use of Timescale extensions.
+    image: timescale/timescaledb-ha:pg17
+    container_name: timescaled
+    environment:
+      - POSTGRES_PASSWORD=tst_eventify
+      - POSTGRES_USER=tst_eventify
+      - POSTGRES_DB=tst_eventify
+    ports:
+      - "5432:5432"
+    restart: always
+
+  inbucket:
+    image: inbucket/inbucket:latest
+    container_name: inbucket
+    ports:
+      - "9000:9000"  # Web UI port.
+      - "2500:2500"  # SMTP service port (correct port mapping).
+      - "1100:1100"  # POP3 service port.
+    restart: always

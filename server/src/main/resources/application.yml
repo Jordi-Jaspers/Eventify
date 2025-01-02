@@ -65,7 +65,7 @@ spring:
       maximumPoolSize: 20
       poolName: eventify
       registerMbeans: true
-    url: ${DATASOURCE_TOP_URL:jdbc:postgresql://100.89.27.58:5432/tst_eventify}
+    url: ${DATASOURCE_TOP_URL:jdbc:postgresql://localhost:5432/tst_eventify}
     username: ${DATASOURCE_TOP_USERNAME:tst_eventify}
     password: ${DATASOURCE_TOP_PASSWORD:tst_eventify}
     driverClassName: org.postgresql.Driver
