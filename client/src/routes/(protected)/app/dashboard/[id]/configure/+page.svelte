@@ -16,6 +16,7 @@
     import type {ServerResponse} from "$lib/models/server-response.svelte";
     import {applyAction, enhance} from '$app/forms';
     import {CheckSearchDialog} from "$lib/components/dashboards/index.js";
+    import moment from "moment";
 
     let {data} = $props();
     let dashboard: DashboardResponse = $state(data.dashboard);
@@ -269,19 +270,25 @@
             </div>
         </div>
         <div class="border rounded-md p-4 pt-2 w-full h-full col-span-3 flex flex-col">
-            <h4 class="text-lg font-bold pb-4">Filters</h4>
+            <div class="pb-4">
+                <h4 class="text-lg font-bold ">Filters </h4>
+                <p class="text-muted-foreground text-sm italic">
+                    This feature has not been implemented yet.
+                </p>
+            </div>
+
             <div class="flex flex-col justify-between h-full">
                 <div class="flex flex-col space-y-2">
                     <div class="flex items-center space-x-2">
-                        <Switch id="airplane-mode"/>
+                        <Switch id="airplane-mode" disabled/>
                         <Label for="airplane-mode">Show Groups</Label>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <Switch id="airplane-mode"/>
+                        <Switch id="airplane-mode" disabled/>
                         <Label for="airplane-mode">Map Warnings</Label>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <Switch id="airplane-mode"/>
+                        <Switch id="airplane-mode" disabled/>
                         <Label for="airplane-mode">Critical Only</Label>
                     </div>
                 </div>
