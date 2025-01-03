@@ -45,7 +45,7 @@ echo -e "\e[94mDone.\e[0m"
 echo -e ""
 echo -e ""
 echo -e "\e[32mStarting Liquibase with Gradle to provision database... The Liquibase output will follow below here: \e[0m"
-cd $PROJECTS/Eventify/liquibase
+cd "$(dirname "$0")/../liquibase" || { echo "Failed to find liquibase directory"; exit 1; }
 ./gradlew -Denv=custom -Dcontexts=test -DdbUrl=jdbc:postgresql://${HOST}:${PORT}/${SCHEMA} -DdbUsername=${SCHEMA} -DdbPassword=${SCHEMA} -DchangelogFile=database/db.changelog.yaml -DoutputFile=build/liquibaseChanges.sql --no-daemon --stacktrace update
 cd -
 echo -e ""

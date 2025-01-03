@@ -13,9 +13,9 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 
 @Data
 @Entity
+@EqualsAndHashCode
 @NoArgsConstructor
 @Table(name = "dashboard_check")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class DashboardCheck implements Serializable {
 
     @Serial
