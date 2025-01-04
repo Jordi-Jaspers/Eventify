@@ -9,8 +9,6 @@ import org.jordijaspers.eventify.api.dashboard.model.request.CreateDashboardRequ
 import org.jordijaspers.eventify.api.dashboard.model.request.DashboardConfigurationRequest;
 import org.jordijaspers.eventify.api.dashboard.model.request.DashboardGroupRequest;
 import org.jordijaspers.eventify.api.dashboard.model.request.UpdateDashboardDetailsRequest;
-import org.jordijaspers.eventify.api.dashboard.repository.DashboardCheckRepository;
-import org.jordijaspers.eventify.api.dashboard.repository.DashboardGroupRepository;
 import org.jordijaspers.eventify.api.dashboard.repository.DashboardRepository;
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.user.model.User;
@@ -18,10 +16,10 @@ import org.jordijaspers.eventify.common.exception.InvalidAccessException;
 import org.jordijaspers.eventify.common.exception.UserNotPartOfTeamException;
 import org.jordijaspers.eventify.common.util.SecurityUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import jakarta.transaction.Transactional;
 
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.CANNOT_ACCESS_DASHBOARD;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.DASHBOARD_NOT_FOUND_ERROR;
@@ -33,16 +31,13 @@ public class DashboardService {
 
     private final DashboardRepository dashboardRepository;
 
-    private final DashboardGroupRepository dashboardGroupRepository;
-
-    private final DashboardCheckRepository dashboardCheckRepository;
-
     /**
      * Retrieves the dashboard configuration.
      *
      * @param dashboardId The dashboard id.
      * @return The dashboard configuration.
      */
+    @Transactional(readOnly = true)
     public Dashboard getDashboardConfiguration(final Long dashboardId) {
         final User user = SecurityUtil.getLoggedInUser();
         final Dashboard dashboard = dashboardRepository.findByIdWithConfiguration(dashboardId)
@@ -116,11 +111,12 @@ public class DashboardService {
      * @param request     The configuration request.
      * @return The configured dashboard.
      */
+    @Transactional
     public Dashboard configureDashboard(final Long dashboardId, final DashboardConfigurationRequest request) {
-        dashboardCheckRepository.deleteConfigurationForDashboard(dashboardId);
-        dashboardGroupRepository.deleteGroupsForDashboard(dashboardId);
-
         final Dashboard dashboard = getDashboardConfiguration(dashboardId);
+        dashboard.clearConfiguration();
+        dashboardRepository.saveAndFlush(dashboard);
+
         configureGroupedChecks(request.getGroups(), dashboard);
         configureUngroupedChecks(request, dashboard);
         return save(dashboard);

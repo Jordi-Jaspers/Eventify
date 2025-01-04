@@ -111,4 +111,12 @@ public class Dashboard implements Serializable {
         dashboardChecks.add(dashboardCheck);
     }
 
+    /**
+     * Clear the configuration of the dashboard.
+     */
+    public void clearConfiguration() {
+        dashboardChecks.clear();
+        groups.clear();
+    }
+
 }
