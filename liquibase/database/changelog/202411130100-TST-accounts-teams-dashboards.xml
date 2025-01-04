@@ -173,4 +173,27 @@
         );
     </sql>
     </changeSet>
+
+    <changeSet id="202411130100-TST-accounts-teams-dashboards-5" author="jordi.jaspers" context="test">
+    <ext:documentation>
+        Adding events to the created checks to support monitoring.
+    </ext:documentation>
+    <sql>
+        INSERT INTO "event" (check_id, "created", "timestamp", status, message)
+        SELECT
+            c.id AS check_id,
+            (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+            event_time,
+            (ARRAY ['OK','OK','OK','OK','WARNING','CRITICAL','CRITICAL'])[round(random() * 6) + 1] as "check_result",
+            'This is a random message for the event occurring at ' || event_time
+        FROM generate_series((CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 WEEK', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), '15 SECOND'::interval) as event_time
+        JOIN "check" AS c ON c.name IN (
+            'Server CPU',
+            'Server Memory',
+            'Server Disk',
+            'Server Network'
+        )
+        ON CONFLICT DO NOTHING;
+    </sql>
+    </changeSet>
 </databaseChangeLog>
