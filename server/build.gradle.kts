@@ -118,6 +118,9 @@ dependencies {
 
     // Java library for Javascript Object Signing and Encryption (JOSE) and JSON Web Tokens (JWT)
     implementation("com.nimbusds", "nimbus-jose-jwt", retrieve("nimbusJoseJwtVersion"))
+
+    // LogstashEncoder is used to encode log messages in logstash format
+    implementation("net.logstash.logback", "logstash-logback-encoder", retrieve("logstashEncoderVersion"))
     // ======= TEST DEPENDENCIES =======
     testImplementation("org.springframework.boot", "spring-boot-test")
     testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))
