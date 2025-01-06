@@ -7,6 +7,7 @@ pluginManagement {
     val lombokPluginVersion: String by settings
     val dependencyUpdatesPluginVersion: String by settings
     val cycloneDxPluginVersion: String by settings
+
     plugins {
         id("org.springframework.boot") version springBootPluginVersion
         id("io.spring.dependency-management") version springDependencyPluginVersion

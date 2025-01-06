@@ -210,7 +210,6 @@ fun retrieve(property: String): String {
     return foundProperty.replace("\"", "")
 }
 
-
 // ============== TASK CONFIGURATION ================
 tasks.getByName<BootJar>("bootJar") {
     loaderImplementation = CLASSIC

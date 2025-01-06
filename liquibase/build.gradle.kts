@@ -1,4 +1,5 @@
 import org.gradle.jvm.toolchain.JavaLanguageVersion.of
+import org.liquibase.gradle.LiquibaseExtension
 
 /** The repositories used to download the dependencies */
 repositories {
@@ -59,7 +60,7 @@ fun retrieve(property: String): String {
 }
 
 // ============== ACTIVITIES ================
-liquibase {
+configure<LiquibaseExtension> {
     activities.register("main") {
         this.arguments = mapOf(
             "logLevel" to "info",
