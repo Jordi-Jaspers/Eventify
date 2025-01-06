@@ -4,6 +4,7 @@ import org.hawaiiframework.exception.ApiException;
 
 import java.io.Serial;
 
+import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.DATABASE_ERROR;
 
 /**
@@ -12,7 +13,7 @@ import static org.jordijaspers.eventify.common.exception.ApiErrorCode.DATABASE_E
 public class GeneralDatabaseException extends ApiException {
 
     @Serial
-    private static final long serialVersionUID = -7873153884219235760L;
+    private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     /**
      * Default constructor.

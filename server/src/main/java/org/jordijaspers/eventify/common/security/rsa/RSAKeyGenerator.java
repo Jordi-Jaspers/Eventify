@@ -1,11 +1,10 @@
 package org.jordijaspers.eventify.common.security.rsa;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jordijaspers.eventify.common.exception.InternalServerException;
 import org.jordijaspers.eventify.common.security.rsa.model.RSAKey;
 import org.jordijaspers.eventify.common.security.rsa.repository.RSAKeyRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.security.*;
@@ -16,11 +15,10 @@ import java.security.spec.X509EncodedKeySpec;
 /**
  * A service that generates and loads RSA keys in the database.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RSAKeyGenerator {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RSAKeyGenerator.class);
 
     private static final String RSA = "RSA";
 
@@ -32,7 +30,7 @@ public class RSAKeyGenerator {
      * @return The RSA key pair.
      */
     public KeyPair loadRsaKey() {
-        LOGGER.info("Attempting to configure public and private keys for the application");
+        log.info("Attempting to configure public and private keys for the application");
         return rsaKeyRepository.findAll()
             .stream()
             .findFirst()
@@ -41,25 +39,25 @@ public class RSAKeyGenerator {
     }
 
     private KeyPair generateRsaKey() {
-        LOGGER.debug("No RSA key found in the database, generating a new one..");
+        log.debug("No RSA key found in the database, generating a new one..");
         try {
             final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(RSA);
             keyPairGenerator.initialize(2048);
             return saveRsaKey(keyPairGenerator.generateKeyPair());
         } catch (final Exception exception) {
-            LOGGER.error("Something went wrong while generating the RSA key");
+            log.error("Something went wrong while generating the RSA key");
             throw new InternalServerException(exception);
         }
     }
 
     private KeyPair toKeyPair(final RSAKey rsaKey) {
-        LOGGER.debug("RSA key found in the database, loading it..");
+        log.debug("RSA key found in the database, loading it..");
         try {
             final PrivateKey privateKey = getPrivateKeyFromBytes(rsaKey.getPrivateKey());
             final PublicKey publicKey = getPublicKeyFromBytes(rsaKey.getPublicKey());
             return new KeyPair(publicKey, privateKey);
         } catch (final NoSuchAlgorithmException | InvalidKeySpecException exception) {
-            LOGGER.error("Something went wrong while loading the RSA key from the database", exception);
+            log.error("Something went wrong while loading the RSA key from the database", exception);
             return generateRsaKey();
         }
     }

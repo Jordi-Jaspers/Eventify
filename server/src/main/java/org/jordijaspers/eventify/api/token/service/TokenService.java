@@ -1,13 +1,12 @@
 package org.jordijaspers.eventify.api.token.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hawaiiframework.repository.DataNotFoundException;
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.model.TokenType;
 import org.jordijaspers.eventify.api.token.repository.TokenRepository;
 import org.jordijaspers.eventify.api.user.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +23,11 @@ import static org.jordijaspers.eventify.common.exception.ApiErrorCode.TOKEN_NOT_
 /**
  * A service class which interacts with the token table in the database.
  */
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class TokenService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenService.class);
 
     private final TokenRepository tokenRepository;
 
@@ -50,7 +48,7 @@ public class TokenService {
         tokenRepository.invalidateTokensWithTypeForUser(List.of(REFRESH_TOKEN, ACCESS_TOKEN), user);
         final Token accessToken = jwtService.generateAccessToken(user);
         final Token refreshToken = tokenRepository.save(jwtService.generateRefreshToken(user));
-        LOGGER.info("Generated Access & Refresh tokens for user '{}'", user.getEmail());
+        log.info("Generated Access & Refresh tokens for user '{}'", user.getEmail());
         user.setRefreshToken(refreshToken);
         user.setAccessToken(accessToken);
         return user;
@@ -67,7 +65,7 @@ public class TokenService {
             .expiresAt(LocalDateTime.now().plusDays(1))
             .user(user)
             .build();
-        LOGGER.info("Generated '{}' token for user '{}'", type, user.getEmail());
+        log.info("Generated '{}' token for user '{}'", type, user.getEmail());
         return tokenRepository.save(token);
     }
 
@@ -75,7 +73,7 @@ public class TokenService {
      * Invalidate all tokens of the provided types for the specified user.
      */
     public void invalidateTokensForUser(final User user, final TokenType... types) {
-        LOGGER.info("Invalidating '{}' token for user '{}'", types, user.getEmail());
+        log.info("Invalidating '{}' token for user '{}'", types, user.getEmail());
         tokenRepository.invalidateTokensWithTypeForUser(List.of(types), user);
     }
 
@@ -103,7 +101,7 @@ public class TokenService {
      * Returns token details for the given token value if it exists.
      */
     public Token findValidationTokenByValue(final String token) {
-        LOGGER.info("Searching validation token with value '{}'", token);
+        log.info("Searching validation token with value '{}'", token);
         return tokenRepository.findByValue(token)
             .filter(entry -> entry.getType().equals(USER_VALIDATION_TOKEN))
             .orElseThrow(() -> new DataNotFoundException(TOKEN_NOT_FOUND_ERROR));
@@ -113,7 +111,7 @@ public class TokenService {
      * Returns token details for the given token value if it exists.
      */
     public Token findAuthorizationTokenByValue(final String token) {
-        LOGGER.info("Searching jwt token with value '{}'", token);
+        log.info("Searching jwt token with value '{}'", token);
         return tokenRepository.findByValue(token)
             .filter(entry -> entry.getType().isAccessToken() || entry.getType().isRefreshToken())
             .orElse(null);
@@ -123,7 +121,7 @@ public class TokenService {
      * Find a password reset token by its value.
      */
     public Token findPasswordResetTokenByValue(final String token) {
-        LOGGER.info("Searching token with value '{}'", token);
+        log.info("Searching token with value '{}'", token);
         return tokenRepository.findByValue(token)
             .filter(entry -> entry.getType().equals(RESET_PASSWORD_TOKEN))
             .orElseThrow(() -> new DataNotFoundException(TOKEN_NOT_FOUND_ERROR));

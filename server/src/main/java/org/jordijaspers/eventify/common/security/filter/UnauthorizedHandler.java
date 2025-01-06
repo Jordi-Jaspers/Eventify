@@ -2,10 +2,9 @@ package org.jordijaspers.eventify.common.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import lombok.extern.slf4j.Slf4j;
 import org.hawaiiframework.web.resource.ErrorResponseResource;
 import org.jordijaspers.eventify.common.exception.AuthorizationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
@@ -22,15 +21,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 /**
  * Authentication entry point returning a 401 instead with customized exception message.
  */
+@Slf4j
 @Component
 public final class UnauthorizedHandler implements AuthenticationEntryPoint {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UnauthorizedHandler.class);
 
     @Override
     public void commence(final HttpServletRequest request, final HttpServletResponse response, final AuthenticationException authException)
         throws IOException {
-        LOGGER.debug("Authentication failed: '{}'.", authException.getMessage());
+        log.debug("Authentication failed: '{}'.", authException.getMessage());
         final ErrorResponseResource errorResponse = new ErrorResponseResource(new AuthorizationException(UNAUTHORIZED_ERROR));
         errorResponse.setErrorMessage(HttpStatus.UNAUTHORIZED.getReasonPhrase());
         errorResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());

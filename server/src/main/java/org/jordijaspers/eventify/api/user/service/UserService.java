@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hawaiiframework.repository.DataNotFoundException;
 import org.jordijaspers.eventify.api.authentication.model.Authority;
 import org.jordijaspers.eventify.api.authentication.repository.RoleRepository;
@@ -12,8 +13,6 @@ import org.jordijaspers.eventify.api.user.repository.UserRepository;
 import org.jordijaspers.eventify.common.exception.AuthorizationException;
 import org.jordijaspers.eventify.common.exception.UserAlreadyExistsException;
 import org.jordijaspers.eventify.email.service.sender.EmailService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,11 +32,10 @@ import static org.jordijaspers.eventify.common.exception.ApiErrorCode.USER_NOT_F
  * A service to manage users, their registration and authentication. It also implements the {@link UserDetailsService} to load users by
  * their username. So, Spring Security can use this service to authenticate users.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     private final PasswordEncoder passwordEncoder;
 
@@ -131,7 +129,7 @@ public class UserService implements UserDetailsService {
      * @return the updated user
      */
     public User updateEmail(final User user, final String email) {
-        LOGGER.info("Attempting to update email for '{}'", user.getEmail());
+        log.info("Attempting to update email for '{}'", user.getEmail());
         if (isEmailInAlreadyUse(email)) {
             throw new UserAlreadyExistsException();
         }
@@ -141,7 +139,7 @@ public class UserService implements UserDetailsService {
         user.setCreated(LocalDateTime.now());
         tokenService.invalidateTokensForUser(user, TokenType.values());
 
-        LOGGER.info("Email has been updated to '{}', sending email to validate account.", email);
+        log.info("Email has been updated to '{}', sending email to validate account.", email);
         emailService.sendUserValidationEmail(user);
         return userRepository.save(user);
     }
@@ -162,10 +160,10 @@ public class UserService implements UserDetailsService {
      * @param email the email of the user
      */
     public void resendVerificationEmail(final String email) {
-        LOGGER.info("Attempting to resend validation email to '{}'", email);
+        log.info("Attempting to resend validation email to '{}'", email);
         final User user = userRepository.findByEmail(email).orElse(null);
         if (isNull(user) || user.isValidated()) {
-            LOGGER.error("User '{}' not found or already validated", email);
+            log.error("User '{}' not found or already validated", email);
         } else {
             emailService.sendUserValidationEmail(user);
         }
@@ -179,19 +177,19 @@ public class UserService implements UserDetailsService {
      * @return the registered user
      */
     public User registerAndNotify(final User newUser, final String password) {
-        LOGGER.info("Attempting to register new user '{}'", newUser.getEmail());
+        log.info("Attempting to register new user '{}'", newUser.getEmail());
         final User existingUser = userRepository.findByEmail(newUser.getEmail()).orElse(null);
         if (nonNull(existingUser)) {
             if (existingUser.isValidated()) {
                 resendVerificationEmail(existingUser.getEmail());
                 return existingUser;
             }
-            LOGGER.error("User '{}' already exists", newUser.getEmail());
+            log.error("User '{}' already exists", newUser.getEmail());
             throw new UserAlreadyExistsException();
         }
 
         final User user = register(newUser, password);
-        LOGGER.info("User has been registered, sending email to validate account.");
+        log.info("User has been registered, sending email to validate account.");
         emailService.sendUserValidationEmail(user);
         return user;
     }

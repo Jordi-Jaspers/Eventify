@@ -3,6 +3,7 @@ package org.jordijaspers.eventify.common.exception.handler;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.hawaiiframework.exception.ApiException;
 import org.hawaiiframework.validation.ValidationException;
 import org.hawaiiframework.web.exception.ErrorResponseEntityBuilder;
@@ -13,8 +14,6 @@ import org.hawaiiframework.web.resource.MethodArgumentNotValidResponseResource;
 import org.hawaiiframework.web.resource.ValidationErrorResponseResource;
 import org.jordijaspers.eventify.common.exception.ApiErrorCode;
 import org.jordijaspers.eventify.common.exception.GeneralDatabaseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -37,11 +36,10 @@ import static org.springframework.http.HttpStatus.*;
  *
  * @author Jordi Jaspers
  */
+@Slf4j
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ResponseEntityExceptionHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseEntityExceptionHandler.class);
 
     private final ErrorResponseEntityBuilder errorResponseEntityBuilder;
 
@@ -216,7 +214,7 @@ public class ResponseEntityExceptionHandler {
         )
     )
     public ResponseEntity<Object> handleThrowable(final Throwable throwable, final WebRequest request) {
-        LOGGER.error(ApiErrorCode.INTERNAL_SERVER_ERROR.getReason(), throwable);
+        log.error(ApiErrorCode.INTERNAL_SERVER_ERROR.getReason(), throwable);
         return new ResponseEntity<>(buildErrorResponseBody(throwable, INTERNAL_SERVER_ERROR, request), EMPTY, INTERNAL_SERVER_ERROR);
     }
 
@@ -231,7 +229,7 @@ public class ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<Object> handleDatabaseExceptions(final DataAccessException exception, final WebRequest request) {
-        LOGGER.error("Something went wrong during a database operation", exception);
+        log.error("Something went wrong during a database operation", exception);
         return handleApiException(new GeneralDatabaseException(exception, "Cannot execute database operation."), request);
     }
 

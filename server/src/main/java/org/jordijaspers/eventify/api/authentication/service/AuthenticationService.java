@@ -1,14 +1,13 @@
 package org.jordijaspers.eventify.api.authentication.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.service.TokenService;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.common.exception.AuthorizationException;
 import org.jordijaspers.eventify.common.exception.InvalidJwtException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -24,11 +23,10 @@ import static org.jordijaspers.eventify.common.exception.ApiErrorCode.INVALID_CR
 /**
  * A service to manage authentication.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
 
     private final AuthenticationManager authenticationManager;
 
@@ -44,7 +42,7 @@ public class AuthenticationService {
      * @return the registered user
      */
     public User register(final User user, final String password) {
-        LOGGER.info("Registering new user '{}'.", user.getUsername());
+        log.info("Registering new user '{}'.", user.getUsername());
         return userService.registerAndNotify(user, password);
     }
 
@@ -61,7 +59,7 @@ public class AuthenticationService {
         user.setLastLogin(LocalDateTime.now());
         userService.updateUserDetails(user);
 
-        LOGGER.info("User '{}' successfully authenticated", username);
+        log.info("User '{}' successfully authenticated", username);
         return tokenService.generateAuthorizationTokens(user);
     }
 
@@ -72,14 +70,14 @@ public class AuthenticationService {
      * @return the user with the updated email address
      */
     public User verifyEmail(final String token) {
-        LOGGER.info("Attempting to validate user with token '{}'", token);
+        log.info("Attempting to validate user with token '{}'", token);
         User user = tokenService.findValidationTokenByValue(token).getUser();
         tokenService.invalidateTokensForUser(user, USER_VALIDATION_TOKEN);
 
         user.setValidated(true);
         user.setLastLogin(user.getLastLogin());
         user = userService.updateUserDetails(user);
-        LOGGER.info("User '{}' successfully validated", user.getEmail());
+        log.info("User '{}' successfully validated", user.getEmail());
         return tokenService.generateAuthorizationTokens(user);
     }
 
@@ -102,7 +100,7 @@ public class AuthenticationService {
         final Token token = tokenService.findAuthorizationTokenByValue(refreshToken);
         if (nonNull(token)) {
             final User user = token.getUser();
-            LOGGER.info("Refreshing tokens for user '{}'", user.getUsername());
+            log.info("Refreshing tokens for user '{}'", user.getUsername());
             return tokenService.generateAuthorizationTokens(user);
         } else {
             throw new InvalidJwtException();
@@ -117,7 +115,7 @@ public class AuthenticationService {
     public void logout(final User user) {
         if (nonNull(user)) {
             tokenService.invalidateTokensForUser(user, REFRESH_TOKEN);
-            LOGGER.debug("User '{}' successfully logged out", user.getUsername());
+            log.debug("User '{}' successfully logged out", user.getUsername());
         }
     }
 
@@ -125,7 +123,7 @@ public class AuthenticationService {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         } catch (final AuthenticationException exception) {
-            LOGGER.error("Authorization failed for specified user '{}'", username);
+            log.error("Authorization failed for specified user '{}'", username);
             if (exception.getCause() instanceof AuthorizationException) {
                 throw (AuthorizationException) exception.getCause();
             }

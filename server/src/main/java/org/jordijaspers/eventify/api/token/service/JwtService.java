@@ -1,13 +1,12 @@
 package org.jordijaspers.eventify.api.token.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.common.config.properties.ApplicationProperties;
 import org.jordijaspers.eventify.common.exception.InvalidJwtException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,11 +25,10 @@ import static org.jordijaspers.eventify.api.token.model.TokenType.REFRESH_TOKEN;
 /**
  * The service to extract data from a valid JWT token.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JwtService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtService.class);
 
     private final ApplicationProperties applicationProperties;
 
@@ -133,7 +131,7 @@ public class JwtService {
         try {
             return decoder.decode(token);
         } catch (final Exception exception) {
-            LOGGER.error(exception.getMessage());
+            log.error(exception.getMessage());
             throw new InvalidJwtException(exception);
         }
     }

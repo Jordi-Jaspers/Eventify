@@ -1,8 +1,7 @@
 package org.jordijaspers.eventify.common.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jordijaspers.eventify.common.exception.CouldNotLoadResourceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -18,13 +17,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * Utility class for loading resources.
  */
+@Slf4j
 @SuppressWarnings("MultipleStringLiterals")
 public final class ResourceLoaderUtil {
-
-    /**
-     * The class logger.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceLoaderUtil.class);
 
     /**
      * The constructor is private to prevent instantiation.
@@ -46,10 +41,11 @@ public final class ResourceLoaderUtil {
             if (!file.exists()) {
                 throw new CouldNotLoadResourceException("File does not exist: " + file.getAbsolutePath());
             }
-            LOGGER.debug("Resource file: {}", file);
+
+            log.debug("Resource file loaded: {}", file.getAbsolutePath());
             return file;
         } catch (final IOException exception) {
-            LOGGER.error("Error while retrieving the resource file.", exception);
+            log.error("Error while retrieving the resource file.", exception);
             throw new CouldNotLoadResourceException(exception);
         }
     }
@@ -65,7 +61,7 @@ public final class ResourceLoaderUtil {
         try (Reader reader = new InputStreamReader(resource.getInputStream(), UTF_8)) {
             return FileCopyUtils.copyToString(reader);
         } catch (final IOException exception) {
-            LOGGER.error("Cannot load resource as string.", exception);
+            log.error("Cannot load resource as string.", exception);
             throw new CouldNotLoadResourceException(exception);
         }
     }

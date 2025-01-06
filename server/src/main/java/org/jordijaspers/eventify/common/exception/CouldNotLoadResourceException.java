@@ -4,6 +4,7 @@ import org.hawaiiframework.exception.ApiException;
 
 import java.io.Serial;
 
+import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.CANNOT_RETRIEVE_RESOURCE;
 
 
@@ -16,7 +17,7 @@ public class CouldNotLoadResourceException extends ApiException {
      * The serialVersionUID.
      */
     @Serial
-    private static final long serialVersionUID = 6478379730702994868L;
+    private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     /**
      * Constructor.

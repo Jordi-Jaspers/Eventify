@@ -3,6 +3,7 @@ package org.jordijaspers.eventify.common.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hawaiiframework.exception.ApiException;
 import org.hawaiiframework.web.resource.ErrorResponseResource;
 import org.jordijaspers.eventify.api.token.service.JwtService;
@@ -11,8 +12,6 @@ import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.common.exception.ApiErrorCode;
 import org.jordijaspers.eventify.common.exception.AuthorizationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,12 +38,11 @@ import static org.springframework.util.StringUtils.hasText;
  * expiration date. The filter is only applied once per request. When there is already an authentication object in the security context, the
  * filter is skipped.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @SuppressWarnings("ReturnCount")
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private static final String BEARER = "Bearer ";
 
@@ -89,30 +87,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (!hasText(jwt)) {
-            LOGGER.debug("No JWT token found in the request headers or cookies.");
+            log.debug("No JWT token found in the request headers or cookies.");
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            LOGGER.debug("Validating JWT token.");
+            log.debug("Validating JWT token.");
             final String email = jwtService.extractSubject(jwt);
             final User user = userService.loadUserByUsername(email);
 
             if (tokenService.isValidAccessToken(jwt, user)) {
                 if (!isUserRestricted(user, request, response)) {
-                    LOGGER.debug("Authentication successful for user '{}'. Setting security context.", user.getUsername());
+                    log.debug("Authentication successful for user '{}'. Setting security context.", user.getUsername());
                     SecurityContextHolder.getContext().setAuthentication(getAuthentication(user, request));
                 } else {
-                    LOGGER.debug("User '{}' is restricted. Authentication skipped.", user.getUsername());
+                    log.debug("User '{}' is restricted. Authentication skipped.", user.getUsername());
                     return;
                 }
             } else {
-                LOGGER.debug("JWT token validation failed for user '{}'.", email);
+                log.debug("JWT token validation failed for user '{}'.", email);
                 SecurityContextHolder.clearContext();
             }
         } catch (final ApiException ex) {
-            LOGGER.warn("Authentication failed due to exception: {}", ex.getMessage());
+            log.warn("Authentication failed due to exception: {}", ex.getMessage());
             SecurityContextHolder.clearContext();
             respondWithError(response, ApiErrorCode.INVALID_TOKEN_ERROR, HttpStatus.UNAUTHORIZED, "Invalid token.");
             return;
@@ -136,7 +134,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         for (final Cookie cookie : request.getCookies()) {
             if (ACCESS_TOKEN_COOKIE.equals(cookie.getName())) {
-                LOGGER.debug("JWT token found in cookie: {}", cookie.getName());
+                log.debug("JWT token found in cookie: {}", cookie.getName());
                 return cookie.getValue();
             }
         }
@@ -159,13 +157,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final HttpServletResponse response) throws IOException {
 
         if (!user.isEnabled()) {
-            LOGGER.debug("User '{}' is disabled.", user.getUsername());
+            log.debug("User '{}' is disabled.", user.getUsername());
             respondWithError(response, ApiErrorCode.USER_DISABLED_ERROR, HttpStatus.FORBIDDEN, "User account is disabled.");
             return true;
         }
 
         if (!user.isValidated()) {
-            LOGGER.debug("User '{}' is not validated.", user.getUsername());
+            log.debug("User '{}' is not validated.", user.getUsername());
             respondWithError(response, ApiErrorCode.USER_UNVALIDATED_ERROR, HttpStatus.FORBIDDEN, "User account is not validated.");
             return true;
         }
@@ -193,7 +191,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.getWriter().write(writer.writeValueAsString(errorResponse));
 
         } catch (final IOException ex) {
-            LOGGER.error("Error while writing the error response: {}", ex.getMessage(), ex);
+            log.error("Error while writing the error response: {}", ex.getMessage(), ex);
         }
     }
 }
