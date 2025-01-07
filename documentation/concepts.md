@@ -6,6 +6,10 @@
 
 ![concept_2.png](./assets/concept_2.png)
 
+### Concept 3: Event processing
+
+![concept_3.png](assets/concept_3.png)
+
 ### Excalidraw Diagram
 
 https://excalidraw.com/#json=spCc5QGt8tOYZ-c9SCpLn,dXvLww8Lo9tZxBbOlpO_NA
