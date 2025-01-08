@@ -6,7 +6,6 @@ pluginManagement {
     val spotlessPluginVersion: String by settings
     val lombokPluginVersion: String by settings
     val dependencyUpdatesPluginVersion: String by settings
-    val cycloneDxPluginVersion: String by settings
     val liquibasePlugin: String by settings
 
     plugins {
@@ -14,7 +13,6 @@ pluginManagement {
         id("io.spring.dependency-management") version springDependencyPluginVersion
         id("ru.vyarus.quality") version qualityPluginVersion
         id("io.freefair.lombok") version lombokPluginVersion
-        id("org.cyclonedx.bom") version cycloneDxPluginVersion
         id("com.github.ben-manes.versions") version dependencyUpdatesPluginVersion
         id("com.diffplug.spotless") version spotlessPluginVersion
         id("org.liquibase.gradle") version liquibasePlugin

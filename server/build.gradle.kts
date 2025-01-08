@@ -1,15 +1,14 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import org.cyclonedx.gradle.CycloneDxTask
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.jvm.toolchain.JavaLanguageVersion.of
 import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.liquibase.gradle.LiquibaseExtension
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.springframework.boot.gradle.tasks.run.BootRun
 import org.springframework.boot.loader.tools.LoaderImplementation.CLASSIC
 import ru.vyarus.gradle.plugin.quality.QualityExtension
-import org.liquibase.gradle.LiquibaseExtension
 
 group = retrieve("group")
 version = retrieve("version")
@@ -44,9 +43,6 @@ plugins {
 
     // Spotless is a code formatter that uses a set of pre-defined rules to format the code.
     id("com.diffplug.spotless")
-
-    // The CycloneDX Gradle plugin creates an aggregate of all direct and transitive dependencies of a project.
-    id("org.cyclonedx.bom")
 
     // Automatically generates a list of updatable dependencies.
     id("com.github.ben-manes.versions")
@@ -88,7 +84,6 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-mail")
     implementation("org.springframework.boot", "spring-boot-starter-security")
     implementation("org.springframework.boot", "spring-boot-starter-oauth2-resource-server")
-
     implementation("org.springframework.boot", "spring-boot-starter-jdbc") {
         exclude("org.apache.tomcat", module = "tomcat-jdbc")
     }
@@ -311,19 +306,7 @@ tasks.withType<DependencyUpdatesTask> {
     gradleReleaseChannel = "current"
 }
 
-tasks.withType<CycloneDxTask> {
-    setProjectType("application")
-    setSchemaVersion("1.5")
-    setDestination(project.file("build/reports"))
-    setOutputName("application-sbom")
-    setOutputFormat("json")
-    setIncludeBomSerialNumber(true)
-    setIncludeLicenseText(true)
-    setComponentVersion(version.toString())
-}
-
 tasks.withType<JavaCompile> {
-    finalizedBy("spotlessApply")
     options.isDeprecation = true
     options.encoding = "UTF-8"
     options.compilerArgs.addAll(
@@ -340,20 +323,6 @@ tasks.withType<JavaCompile> {
 tasks.named<BootRun>("bootRun") {
     systemProperty("application.version", version)
     val arguments = ArrayList<String>()
-    if (System.getenv("TRUSTSTORE_LOCATION") != null && System.getenv("TRUSTSTORE_PASSWORD") != null) {
-        val trustStoreLocation = System.getenv("TRUSTSTORE_LOCATION")
-        val trustStorePassword = System.getenv("TRUSTSTORE_PASSWORD")
-        println("[Gradle Config] 'TRUSTSTORE' properties found, setting trustStore to: $trustStoreLocation")
-        arguments.add("-Djavax.net.ssl.trustStore=$trustStoreLocation")
-        arguments.add("-Djavax.net.ssl.trustStorePassword=$trustStorePassword")
-    } else {
-        val defaultTrustStoreLocation = "../../smtvagrant/pki/truststore.jks"
-        val defaultTrustStorePassword = "changeit"
-        println("[Gradle Config] 'TRUSTSTORE_LOCATION' and 'TRUSTSTORE_PASSWORD' properties not found, setting trustStore to default location: $defaultTrustStoreLocation")
-        arguments.add("-Djavax.net.ssl.trustStore=$defaultTrustStoreLocation")
-        arguments.add("-Djavax.net.ssl.trustStorePassword=$defaultTrustStorePassword")
-    }
-
     arguments.addAll(
         arrayOf(
             "-Xms512m",
@@ -361,8 +330,8 @@ tasks.named<BootRun>("bootRun") {
             "-XX:MetaspaceSize=512m",
             "-XX:MaxMetaspaceSize=1024m",
             "-XX:MaxMetaspaceFreeRatio=60",
-            "-Djava.awt.headless=true",
             "-XX:+UseG1GC",
+            "-Djava.awt.headless=true",
             "-Dspring.output.ansi.enabled=ALWAYS",
         )
     )
