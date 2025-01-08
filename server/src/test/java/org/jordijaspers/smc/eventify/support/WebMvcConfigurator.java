@@ -1,4 +1,4 @@
-package org.jordijaspers.smc.eventify.test_support;
+package org.jordijaspers.smc.eventify.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -8,29 +8,31 @@ import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import io.restassured.module.mockmvc.config.RestAssuredMockMvcConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.jordijaspers.eventify.Application;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
+import org.jordijaspers.smc.eventify.support.config.BeanConfiguration;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.lang.reflect.Type;
 
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @Slf4j
-@Ignore
-@RunWith(SpringRunner.class)
+@Disabled
+@Import(BeanConfiguration.class)
+@ActiveProfiles("test")
 @SpringBootTest(
     classes = Application.class,
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
-    properties = "spring.profiles.include=itest"
+    webEnvironment = DEFINED_PORT
 )
-public class WebMvcConfigurator extends BaseTest {
+public class WebMvcConfigurator {
 
     @Autowired
     protected WebApplicationContext context;
@@ -38,7 +40,7 @@ public class WebMvcConfigurator extends BaseTest {
     @Autowired
     protected HawaiiFilters filters;
 
-    @Before
+    @BeforeEach
     public void setUpMockMvc() {
         log.info("Setting up RestAssuredMockMvc");
         RestAssuredMockMvc.config = RestAssuredMockMvcConfig.config().objectMapperConfig(

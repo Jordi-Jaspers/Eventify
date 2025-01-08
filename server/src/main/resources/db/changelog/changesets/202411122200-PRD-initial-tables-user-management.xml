@@ -1,0 +1,163 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202411122200-PRD-initial-tables-user-management.xml">
+    <changeSet id="202411122200-PRD-initial-tables-user-management-1" author="jordi.jaspers">
+    <ext:documentation>
+        Adding the necessary extensions in order for TimescaleDB to work. These extensions must be executed with a superuser.
+    </ext:documentation>
+    <sql>
+        CREATE EXTENSION IF NOT EXISTS timescaledb;
+        CREATE EXTENSION IF NOT EXISTS timescaledb_toolkit;
+        CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    </sql>
+    </changeSet>
+
+    <changeSet id="202411122200-PRD-initial-tables-user-management-2" author="jordi.jaspers">
+        <ext:documentation>
+            Creating the necessary tables user management, authority, and tokens.
+        </ext:documentation>
+        <sql>
+            CREATE TABLE IF NOT EXISTS "rsa_key"
+            (
+                id          SERIAL PRIMARY KEY,
+                public_key  BYTEA NOT NULL,
+                private_key BYTEA NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS "role"
+            (
+                id          SERIAL PRIMARY KEY,
+                authority   TEXT NOT NULL,
+                description TEXT NOT NULL,
+                UNIQUE (authority)
+            );
+
+            CREATE TABLE IF NOT EXISTS "user"
+            (
+                id         SERIAL PRIMARY KEY,
+                first_name TEXT        NOT NULL,
+                last_name  TEXT        NOT NULL,
+                email      TEXT        NOT NULL,
+                password   TEXT        NOT NULL,
+                created    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                last_login TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                enabled    BOOLEAN     NOT NULL DEFAULT TRUE,
+                validated  BOOLEAN     NOT NULL DEFAULT FALSE,
+                role_id    INTEGER     NOT NULL,
+                UNIQUE (email),
+                FOREIGN KEY (role_id) REFERENCES "role" (id) ON DELETE SET NULL
+            );
+
+            CREATE INDEX idx_user_email ON "user" (email);
+            CREATE INDEX idx_user_status ON "user" (enabled) WHERE enabled = TRUE;
+
+            CREATE TABLE IF NOT EXISTS "token"
+            (
+                id         SERIAL PRIMARY KEY,
+                value      TEXT        NOT NULL,
+                type       TEXT        NOT NULL,
+                expires_at TIMESTAMPTZ NOT NULL,
+                user_id    INTEGER     NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,
+                UNIQUE (value)
+            );
+
+            CREATE INDEX idx_token_value ON token (value);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122200-PRD-initial-tables-user-management-3" author="jordi.jaspers">
+        <ext:documentation>
+            Adding default set of roles for user management, which will be updated later by 'DataProvisioningConfiguration.java'.
+        </ext:documentation>
+        <sql>
+            INSERT INTO "role" (authority, description) VALUES
+            ('USER', 'Standard user with basic permissions'),
+            ('MANAGER', 'User with additional management permissions'),
+            ('ADMIN', 'System administrator with full permissions');
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122200-PRD-initial-tables-user-management-4" author="jordi.jaspers">
+        <ext:documentation>
+            Adding team management for users.
+        </ext:documentation>
+        <sql>
+            -- Team Management
+            CREATE TABLE IF NOT EXISTS "team"
+            (
+                id          SERIAL PRIMARY KEY,
+                name        TEXT        NOT NULL,
+                description TEXT,
+                created     TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                UNIQUE (name)
+                );
+
+            CREATE TABLE IF NOT EXISTS "user_team"
+            (
+                user_id INTEGER NOT NULL,
+                team_id INTEGER NOT NULL,
+                PRIMARY KEY (user_id, team_id),
+                FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,
+                FOREIGN KEY (team_id) REFERENCES "team" (id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX idx_user_team_user ON user_team (user_id);
+            CREATE INDEX idx_user_team_team ON user_team (team_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122200-PRD-initial-tables-user-management-5" author="jordi.jaspers">
+        <ext:documentation>
+            Adding documentation for every table, column, and index.
+        </ext:documentation>
+        <sql>
+            COMMENT ON TABLE "user" IS 'Stores user account information and authentication details';
+            COMMENT ON COLUMN "user".id IS 'Unique identifier for the user';
+            COMMENT ON COLUMN "user".first_name IS 'User''s first name';
+            COMMENT ON COLUMN "user".last_name IS 'User''s last name';
+            COMMENT ON COLUMN "user".email IS 'User''s email address, used for authentication and communication';
+            COMMENT ON COLUMN "user".password IS 'Hashed password for user authentication';
+            COMMENT ON COLUMN "user".created IS 'Timestamp when the user account was created';
+            COMMENT ON COLUMN "user".last_login IS 'Timestamp of the user''s most recent login';
+            COMMENT ON COLUMN "user".enabled IS 'Flag indicating if the user account is active';
+            COMMENT ON COLUMN "user".validated IS 'Flag indicating if the user''s email has been verified';
+            COMMENT ON INDEX idx_user_email IS 'Index for quick user lookup by email during authentication';
+            COMMENT ON INDEX idx_user_status IS 'Partial index for finding active users';
+
+            COMMENT ON TABLE "role" IS 'Defines system authority for authorization';
+            COMMENT ON COLUMN role.id IS 'Unique identifier for the role';
+            COMMENT ON COLUMN role.authority IS 'Role name/identifier (e.g., ADMIN, USER)';
+            COMMENT ON COLUMN role.description IS 'Human-readable description of the role''s permissions';
+
+            COMMENT ON TABLE "token" IS 'Stores authentication tokens for user sessions';
+            COMMENT ON COLUMN token.id IS 'Unique identifier for the token';
+            COMMENT ON COLUMN token.value IS 'Token value used for authentication';
+            COMMENT ON COLUMN token.type IS 'Type of token (e.g., ACCESS, REFRESH)';
+            COMMENT ON COLUMN token.expires_at IS 'Timestamp when the token expires';
+            COMMENT ON COLUMN token.user_id IS 'Reference to the user';
+            COMMENT ON INDEX idx_token_value IS 'Index for finding tokens by value';
+
+            COMMENT ON TABLE "rsa_key" IS 'Stores RSA key pairs for JWT token signing';
+            COMMENT ON COLUMN rsa_key.id IS 'Unique identifier for the RSA key pair';
+            COMMENT ON COLUMN rsa_key.public_key IS 'Public key for JWT token signing';
+            COMMENT ON COLUMN rsa_key.private_key IS 'Private key for JWT token signing';
+
+            COMMENT ON TABLE "team" IS 'Organizes users into teams for access control';
+            COMMENT ON COLUMN team.id IS 'Unique identifier for the team';
+            COMMENT ON COLUMN team.name IS 'Name of the team';
+            COMMENT ON COLUMN team.description IS 'Description of the team''s purpose';
+            COMMENT ON COLUMN team.created IS 'Timestamp when the team was created';
+
+            COMMENT ON TABLE "user_team" IS 'Maps users to their team memberships';
+            COMMENT ON COLUMN user_team.user_id IS 'Reference to the team member';
+            COMMENT ON COLUMN user_team.team_id IS 'Reference to the team';
+            COMMENT ON INDEX idx_user_team_user IS 'Index for finding team memberships for a user';
+            COMMENT ON INDEX idx_user_team_team IS 'Index for finding members of a team';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

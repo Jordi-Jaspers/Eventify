@@ -1,0 +1,161 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202411122300-PRD-dashboard-components-for-monitoring.xml">
+
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-1" author="jordi.jaspers">
+        <ext:documentation>
+            The pg_trgm module provides functions and operators for determining the similarity of alphanumeric text based on trigram matching, as well as index operator classes that support fast searching for similar strings.
+        </ext:documentation>
+        <sql>
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-2" author="jordi.jaspers">
+        <ext:documentation>
+            Adding API key management for the dashboard components.
+        </ext:documentation>
+        <sql>
+            CREATE TABLE IF NOT EXISTS "api_key"
+            (
+                id         SERIAL PRIMARY KEY,
+                "key"      TEXT        NOT NULL,
+                created_by TEXT        NOT NULL,
+                created    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                expires_at TIMESTAMPTZ,
+                last_used  TIMESTAMPTZ,
+                enabled    BOOLEAN     NOT NULL DEFAULT TRUE,
+                UNIQUE ("key")
+            );
+
+            CREATE INDEX idx_api_key ON api_key ("key") WHERE enabled = TRUE;
+            CREATE INDEX idx_api_key_expiry ON api_key (expires_at);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-3" author="jordi.jaspers">
+        <ext:documentation>
+            Adding dashboard components for monitoring.
+        </ext:documentation>
+        <sql>
+            CREATE TABLE IF NOT EXISTS "source"
+            (
+                id              SERIAL PRIMARY KEY,
+                "name"          TEXT        NOT NULL,
+                description     TEXT,
+                api_key_id      INTEGER     NOT NULL REFERENCES api_key (id),
+                created         TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                UNIQUE (name)
+                );
+
+            CREATE INDEX idx_source_api_key ON source (api_key_id);
+
+            CREATE TABLE IF NOT EXISTS "check"
+            (
+                id          SERIAL PRIMARY KEY,
+                "name"      TEXT        NOT NULL,
+                source_id   INTEGER     NOT NULL,
+                created     TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                FOREIGN KEY (source_id) REFERENCES "source" (id) ON DELETE CASCADE
+                );
+
+            CREATE INDEX idx_check_source ON "check" (source_id);
+            CREATE INDEX idx_check_name ON "check" ("name");
+            CREATE INDEX idx_item_name_trgm ON "check" USING gin ("name" gin_trgm_ops);
+
+            CREATE TABLE IF NOT EXISTS "dashboard"
+            (
+                id              SERIAL PRIMARY KEY,
+                team_id         INTEGER     NOT NULL,
+                "name"          TEXT        NOT NULL,
+                description     TEXT,
+                "global"        BOOLEAN     NOT NULL DEFAULT FALSE,
+                updated_by      TEXT        NOT NULL,
+                created         TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                last_updated    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                FOREIGN KEY (team_id) REFERENCES "team" (id),
+                UNIQUE (team_id, "name")
+            );
+
+            CREATE INDEX idx_dashboard_global ON dashboard ("global") WHERE "global" = TRUE;
+            CREATE INDEX idx_dashboard_updated_by ON dashboard (updated_by);
+
+            CREATE TABLE IF NOT EXISTS "dashboard_group"
+            (
+                id              SERIAL PRIMARY KEY,
+                dashboard_id    INTEGER     NOT NULL,
+                name            TEXT        NOT NULL,
+                created         TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                display_order   INTEGER NOT NULL DEFAULT 1000,
+                FOREIGN KEY (dashboard_id) REFERENCES "dashboard" (id) ON DELETE CASCADE,
+                UNIQUE (dashboard_id, name)
+            );
+
+            CREATE INDEX idx_dashboard_group_dashboard ON dashboard_group (dashboard_id);
+
+            CREATE TABLE IF NOT EXISTS "dashboard_check"
+            (
+                dashboard_id  INTEGER NOT NULL,
+                check_id      INTEGER NOT NULL,
+                group_id      INTEGER NULL,
+                display_order INTEGER NOT NULL DEFAULT 1000,
+                PRIMARY KEY (dashboard_id, check_id),
+                FOREIGN KEY (dashboard_id) REFERENCES "dashboard" (id) ON DELETE CASCADE,
+                FOREIGN KEY (check_id) REFERENCES "check" (id) ON DELETE CASCADE,
+                FOREIGN KEY (group_id) REFERENCES dashboard_group (id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX idx_dashboard_check_check ON dashboard_check (check_id);
+            CREATE INDEX idx_dashboard_check_dashboard ON dashboard_check (dashboard_id);
+            CREATE INDEX idx_dashboard_check_ordering ON dashboard_check (dashboard_id, group_id NULLS LAST, display_order);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202411122300-PRD-dashboard-components-for-monitoring-4" author="jordi.jaspers">
+        <ext:documentation>
+            Adding documentation for every table, column, and index.
+        </ext:documentation>
+        <sql>
+            COMMENT ON TABLE "api_key" IS 'Stores API keys for authentication of external systems';
+            COMMENT ON COLUMN api_key.id IS 'Unique identifier for the API key';
+            COMMENT ON COLUMN api_key.key IS 'The actual API key value used for authentication';
+            COMMENT ON COLUMN api_key.created_by IS 'Reference to the user who created the API key';
+            COMMENT ON COLUMN api_key.created IS 'Timestamp when the API key was created';
+            COMMENT ON COLUMN api_key.expires_at IS 'Optional expiration timestamp for the API key';
+            COMMENT ON COLUMN api_key.last_used IS 'Timestamp when the API key was last used';
+            COMMENT ON COLUMN api_key.enabled IS 'Flag indicating if the API key is active';
+            COMMENT ON INDEX idx_api_key IS 'Index for API key authentication lookups';
+            COMMENT ON INDEX idx_api_key_expiry IS 'Partial index for finding non-expired API keys';
+
+            COMMENT ON TABLE "dashboard" IS 'Defines monitoring dashboards';
+            COMMENT ON COLUMN dashboard.id IS 'Unique identifier for the dashboard';
+            COMMENT ON COLUMN dashboard.name IS 'Name of the dashboard';
+            COMMENT ON COLUMN dashboard.description IS 'Description of the dashboard''s purpose';
+            COMMENT ON COLUMN dashboard.global IS 'Flag indicating if the dashboard is publicly accessible';
+            COMMENT ON COLUMN dashboard.updated_by IS 'Reference to the user who updated the dashboard';
+            COMMENT ON COLUMN dashboard.created IS 'Timestamp when the dashboard was created';
+            COMMENT ON COLUMN dashboard.team_id IS 'Reference to the team the dashboard belongs to';
+            COMMENT ON INDEX idx_dashboard_global IS 'Partial index for finding global dashboards';
+            COMMENT ON INDEX idx_dashboard_updated_by IS 'Index for finding dashboards created by a user';
+
+            COMMENT ON TABLE "dashboard_check" IS 'Maps checks displayed on dashboards';
+            COMMENT ON COLUMN dashboard_check.dashboard_id IS 'Reference to the dashboard';
+            COMMENT ON COLUMN dashboard_check.check_id IS 'Reference to the check displayed';
+            COMMENT ON INDEX idx_dashboard_check_check IS 'Index for finding dashboards displaying a check';
+            COMMENT ON INDEX idx_dashboard_check_dashboard IS 'Index for finding checks displayed on a dashboard';
+
+            COMMENT ON TABLE dashboard_group IS 'Stores dashboard-specific check groups for organizing checks';
+            COMMENT ON COLUMN dashboard_group.id IS 'Unique identifier for the group';
+            COMMENT ON COLUMN dashboard_group.dashboard_id IS 'Reference to the dashboard this group belongs to';
+            COMMENT ON COLUMN dashboard_group.name IS 'Name of the group';
+            COMMENT ON COLUMN dashboard_group.created IS 'Timestamp when the group was created';
+            COMMENT ON COLUMN dashboard_group.display_order IS 'Order of the group withing the dashboard';
+
+            COMMENT ON COLUMN dashboard_check.group_id IS 'Optional reference to a dashboard group (NULL for ungrouped checks)';
+            COMMENT ON COLUMN dashboard_check.display_order IS 'Order of the check within its group or dashboard (for ungrouped checks)';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

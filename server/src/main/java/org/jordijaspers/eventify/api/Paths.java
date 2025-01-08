@@ -27,7 +27,9 @@ public final class Paths {
 
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
-    public static final String PUBLIC_ACTUATOR_PATH = BASE_PATH + "/actuator";
+    public static final String PUBLIC_ACTUATOR_PATH = PUBLIC_PATH + "/actuator";
+
+    public static final String PUBLIC_HEALTH_PATH = PUBLIC_ACTUATOR_PATH + "/health";
 
     public static final String PUBLIC_RESET_PASSWORD_PATH = PUBLIC_PATH + "/reset_password";
 

@@ -29,28 +29,7 @@ dependencies {
     liquibaseRuntime("org.postgresql", "postgresql", retrieve("postgresVersion"))
 }
 
-/** Configure the Liquibase plugin with passed properties. */
-project.ext["env"] = System.getProperty("env")
-when {
-    project.ext["env"] == "custom" -> {
-        project.ext["dbUrl"] = System.getProperty("dbUrl")
-        project.ext["dbUsername"] = System.getProperty("dbUsername")
-        project.ext["dbPassword"] = System.getProperty("dbPassword")
-        project.ext["contexts"] = System.getProperty("contexts")
-        project.ext["outputFile"] = System.getProperty("outputFile")
-        project.ext["changelogFile"] = System.getProperty("changelogFile")
-    }
 
-    else -> {
-        // No env specified: Use the configs for local development
-        project.ext["dbUrl"] = "jdbc:postgresql://localhost:5432/tst_eventify"
-        project.ext["dbUsername"] = "tst_eventify"
-        project.ext["dbPassword"] = "tst_eventify"
-        project.ext["contexts"] = "test"
-        project.ext["outputFile"] = "build/changes/updateSQL.sql"
-        project.ext["changelogFile"] = "database/db.changelog.yaml"
-    }
-}
 
 // ============== STATIC FUNCTIONS ================
 fun retrieve(property: String): String {

@@ -1,3 +1,12 @@
+# ====== SERVER CONFIG ======
 server:
   port: 9081
+  servlet:
+    context-path: /
 
+# ======= LIQUIBASE CONFIGURATION =======
+spring:
+  liquibase:
+    enabled: true
+    drop-first: true
+    contexts: test
