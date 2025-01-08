@@ -188,12 +188,13 @@ configure<SpotlessExtension> {
         java {
             cleanthat()
             toggleOffOn()
+            target("src/main/java/**/*.java", "src/test/java/**/*.java")
             eclipse().configFile("src/quality/config/spotless/HawaiiFrameworkStyle.xml")
 
             endWithNewline()
             removeUnusedImports()
             trimTrailingWhitespace()
-            importOrder("", "java|jakarta|javax", "\\#")
+            importOrder("", "java|jakarta|javax", "groovy", "org", "com", "\\#")
         }
     }
 }
@@ -322,7 +323,7 @@ tasks.withType<CycloneDxTask> {
 }
 
 tasks.withType<JavaCompile> {
-    dependsOn("spotlessApply")
+    finalizedBy("spotlessApply")
     options.isDeprecation = true
     options.encoding = "UTF-8"
     options.compilerArgs.addAll(

@@ -3,13 +3,14 @@ package org.jordijaspers.eventify.api.check.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.jordijaspers.eventify.api.source.model.Source;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.jordijaspers.eventify.api.source.model.Source;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 

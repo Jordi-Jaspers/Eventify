@@ -2,6 +2,11 @@ package org.jordijaspers.eventify.api.token.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
 import org.hawaiiframework.repository.DataNotFoundException;
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.model.TokenType;
@@ -10,10 +15,6 @@ import org.jordijaspers.eventify.api.user.model.User;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.token.model.TokenType.*;

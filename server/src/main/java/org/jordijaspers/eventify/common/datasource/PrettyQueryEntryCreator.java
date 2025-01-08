@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.common.datasource;
 
 import net.ttddyy.dsproxy.listener.logging.DefaultQueryLogEntryCreator;
+
 import org.hibernate.engine.jdbc.internal.FormatStyle;
 import org.hibernate.engine.jdbc.internal.Formatter;
 

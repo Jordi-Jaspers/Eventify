@@ -2,6 +2,7 @@ package org.jordijaspers.eventify.common.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.jordijaspers.eventify.api.authentication.model.Authority;
 import org.jordijaspers.eventify.api.authentication.model.Role;
 import org.jordijaspers.eventify.api.authentication.repository.RoleRepository;

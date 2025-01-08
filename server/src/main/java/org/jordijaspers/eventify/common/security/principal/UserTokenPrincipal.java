@@ -3,11 +3,12 @@ package org.jordijaspers.eventify.common.security.principal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
+
+import java.time.Instant;
+
 import org.jordijaspers.eventify.api.user.model.User;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.time.Instant;
 
 /**
  * A Wrapper class to have a useful principal in the SecurityContext.

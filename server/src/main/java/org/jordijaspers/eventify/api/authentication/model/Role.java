@@ -2,11 +2,12 @@ package org.jordijaspers.eventify.api.authentication.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serial;
 import java.util.Set;
 import jakarta.persistence.*;
+
+import org.springframework.security.core.GrantedAuthority;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 

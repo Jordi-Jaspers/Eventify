@@ -1,12 +1,13 @@
 package org.jordijaspers.eventify.api.token.model;
 
 import lombok.*;
-import org.jordijaspers.eventify.api.user.model.User;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
+
+import org.jordijaspers.eventify.api.user.model.User;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 

@@ -1,6 +1,11 @@
 package org.jordijaspers.eventify.api.team.service;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.Set;
+import jakarta.transaction.Transactional;
+
 import org.hawaiiframework.repository.DataNotFoundException;
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.team.model.request.TeamRequest;
@@ -9,10 +14,6 @@ import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.repository.UserRepository;
 import org.jordijaspers.eventify.common.exception.TeamAlreadyExistsException;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Set;
-import jakarta.transaction.Transactional;
 
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.TEAM_NOT_FOUND_ERROR;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.USER_NOT_FOUND_ERROR;

@@ -1,5 +1,7 @@
 package org.jordijaspers.eventify.api.team.model.mapper;
 
+import java.util.List;
+
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.team.model.request.TeamRequest;
 import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
@@ -9,8 +11,6 @@ import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-
-import java.util.List;
 
 /**
  * The mapper for the user.

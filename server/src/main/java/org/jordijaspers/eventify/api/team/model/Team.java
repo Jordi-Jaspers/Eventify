@@ -4,8 +4,6 @@ package org.jordijaspers.eventify.api.team.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.jordijaspers.eventify.api.user.model.User;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,6 +11,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import jakarta.persistence.*;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.jordijaspers.eventify.api.user.model.User;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 

@@ -1,6 +1,12 @@
 package org.jordijaspers.eventify.api.dashboard.model.mapper;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.jordijaspers.eventify.api.check.model.mapper.CheckMapper;
 import org.jordijaspers.eventify.api.check.model.response.CheckResponse;
 import org.jordijaspers.eventify.api.dashboard.model.Dashboard;
@@ -10,11 +16,6 @@ import org.jordijaspers.eventify.api.dashboard.model.response.DashboardConfigura
 import org.jordijaspers.eventify.api.dashboard.model.response.DashboardGroupResponse;
 import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;

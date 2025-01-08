@@ -1,14 +1,15 @@
 package org.jordijaspers.eventify.email.service.message;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
+
 import org.jordijaspers.eventify.common.config.properties.ApplicationProperties;
 import org.jordijaspers.eventify.email.config.properties.EmailProperties;
 import org.jordijaspers.eventify.email.model.MailMessage;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
-import java.util.Map;
 
 /**
  * Mail message factory to create thymeleaf messages.

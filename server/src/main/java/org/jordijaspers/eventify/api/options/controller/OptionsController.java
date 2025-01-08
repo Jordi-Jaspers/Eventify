@@ -2,13 +2,14 @@ package org.jordijaspers.eventify.api.options.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
+
 import org.jordijaspers.eventify.api.authentication.model.Authority;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 import static org.jordijaspers.eventify.api.Paths.OPTIONS_PATH;
 import static org.springframework.http.HttpStatus.OK;

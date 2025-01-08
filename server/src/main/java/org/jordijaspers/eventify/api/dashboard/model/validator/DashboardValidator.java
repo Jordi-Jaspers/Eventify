@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.dashboard.model.validator;
 
 import lombok.RequiredArgsConstructor;
+
 import org.hawaiiframework.validation.ValidationException;
 import org.hawaiiframework.validation.ValidationResult;
 import org.hawaiiframework.validation.Validator;

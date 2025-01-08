@@ -1,16 +1,17 @@
 package org.jordijaspers.eventify.common.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jordijaspers.eventify.common.exception.CouldNotLoadResourceException;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+
+import org.jordijaspers.eventify.common.exception.CouldNotLoadResourceException;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.FileCopyUtils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

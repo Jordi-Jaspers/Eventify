@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.email.config;
 
 import lombok.RequiredArgsConstructor;
+
 import org.jordijaspers.eventify.email.config.properties.EmailProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

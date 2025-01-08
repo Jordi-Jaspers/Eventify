@@ -2,6 +2,10 @@ package org.jordijaspers.eventify.email.service.sender;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.model.TokenType;
 import org.jordijaspers.eventify.api.token.service.TokenService;
@@ -10,9 +14,6 @@ import org.jordijaspers.eventify.email.model.MailMessage;
 import org.jordijaspers.eventify.email.service.message.MailMessageFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A service to send emails in a development environment.

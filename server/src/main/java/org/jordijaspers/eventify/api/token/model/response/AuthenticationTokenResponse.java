@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.token.model.response;
 
 import lombok.Data;
+
 import org.jordijaspers.eventify.api.token.model.Token;
 
 /**

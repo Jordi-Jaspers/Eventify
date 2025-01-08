@@ -1,12 +1,12 @@
 package org.jordijaspers.eventify.api.check.repository;
 
+import java.util.List;
+
 import org.jordijaspers.eventify.api.check.model.Check;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * The repository for the Check entity.

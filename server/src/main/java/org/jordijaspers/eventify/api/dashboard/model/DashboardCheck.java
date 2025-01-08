@@ -3,11 +3,12 @@ package org.jordijaspers.eventify.api.dashboard.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.jordijaspers.eventify.api.check.model.Check;
 
 import java.io.Serial;
 import java.io.Serializable;
 import jakarta.persistence.*;
+
+import org.jordijaspers.eventify.api.check.model.Check;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 

@@ -1,6 +1,10 @@
 package org.jordijaspers.eventify.api.dashboard.service;
 
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.hawaiiframework.repository.DataNotFoundException;
 import org.jordijaspers.eventify.api.check.model.Check;
 import org.jordijaspers.eventify.api.dashboard.model.Dashboard;
@@ -17,9 +21,6 @@ import org.jordijaspers.eventify.common.exception.UserNotPartOfTeamException;
 import org.jordijaspers.eventify.common.util.SecurityUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.CANNOT_ACCESS_DASHBOARD;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.DASHBOARD_NOT_FOUND_ERROR;
