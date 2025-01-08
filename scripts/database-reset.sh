@@ -5,14 +5,16 @@ HOST='localhost'
 PORT='5432'
 SCHEMA='tst_eventify'
 PASSWORD='postgres'
+CONTEXTS='test'
 
 # Parse command-line options
-while getopts ":n:h:p:P:" opt; do
+while getopts ":n:h:p:P:c:" opt; do
   case $opt in
     n) SCHEMA="$OPTARG" ;;               # Custom schema (database) name
     h) HOST="$OPTARG" ;;                 # Custom host
     p) PORT="$OPTARG" ;;                 # Custom port
     P) PASSWORD="$OPTARG" ;;             # Custom password
+    c) CONTEXTS="$OPTARG" ;;             # Custom contexts
     \?) echo "Invalid option: -$OPTARG" >&2; exit 1 ;;
     :) echo "Option -$OPTARG requires an argument." >&2; exit 1 ;;
   esac
@@ -45,8 +47,8 @@ echo -e "\e[94mDone.\e[0m"
 echo -e ""
 echo -e ""
 echo -e "\e[32mStarting Liquibase with Gradle to provision database... The Liquibase output will follow below here: \e[0m"
-cd "$(dirname "$0")/../liquibase" || { echo "Failed to find liquibase directory"; exit 1; }
-./gradlew -Denv=custom -Dcontexts=test -DdbUrl=jdbc:postgresql://${HOST}:${PORT}/${SCHEMA} -DdbUsername=${SCHEMA} -DdbPassword=${SCHEMA} -DchangelogFile=database/db.changelog.yaml -DoutputFile=build/liquibaseChanges.sql --no-daemon --stacktrace update
+cd "$(dirname "$0")/../server" || { echo "Failed to find server directory containing the backend project"; exit 1; }
+./gradlew -Denv=custom -Dcontexts=${CONTEXTS} -DdbUrl=jdbc:postgresql://${HOST}:${PORT}/${SCHEMA} -DdbUsername=${SCHEMA} -DdbPassword=${SCHEMA} -DchangelogFile=src/main/resources/db/changelog/db.changelog-plugin.yaml -DoutputFile=build/liquibase/updateSQL.sql --no-daemon --stacktrace update
 cd -
 echo -e ""
 echo -e ""

@@ -1,6 +1,9 @@
 package org.jordijaspers.eventify.common.security.converter;
 
 import lombok.Data;
+
+import java.util.Collection;
+
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.common.security.principal.JwtUserPrincipalAuthenticationToken;
@@ -11,8 +14,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
-
-import java.util.Collection;
 
 /**
  * Converts a {@link Jwt} into a {@link JwtUserPrincipalAuthenticationToken}.

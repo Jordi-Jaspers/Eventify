@@ -1,8 +1,8 @@
 package org.jordijaspers.eventify.common.exception;
 
-import org.hawaiiframework.exception.ApiException;
-
 import java.io.Serial;
+
+import org.hawaiiframework.exception.ApiException;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.DATABASE_ERROR;

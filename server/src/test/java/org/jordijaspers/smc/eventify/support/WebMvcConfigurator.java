@@ -1,36 +1,36 @@
-package org.jordijaspers.smc.eventify.test_support;
+package org.jordijaspers.smc.eventify.support;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import io.restassured.module.mockmvc.config.RestAssuredMockMvcConfig;
-import lombok.extern.slf4j.Slf4j;
+
+import java.lang.reflect.Type;
+
 import org.jordijaspers.eventify.Application;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
+import org.jordijaspers.smc.eventify.support.config.BeanConfiguration;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.lang.reflect.Type;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
-@Slf4j
-@Ignore
-@RunWith(SpringRunner.class)
+@ActiveProfiles("test")
+@Import(BeanConfiguration.class)
 @SpringBootTest(
     classes = Application.class,
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
-    properties = "spring.profiles.include=itest"
+    webEnvironment = DEFINED_PORT
 )
-public class WebMvcConfigurator extends BaseTest {
+public class WebMvcConfigurator {
 
     @Autowired
     protected WebApplicationContext context;
@@ -38,9 +38,8 @@ public class WebMvcConfigurator extends BaseTest {
     @Autowired
     protected HawaiiFilters filters;
 
-    @Before
+    @BeforeEach
     public void setUpMockMvc() {
-        log.info("Setting up RestAssuredMockMvc");
         RestAssuredMockMvc.config = RestAssuredMockMvcConfig.config().objectMapperConfig(
             new ObjectMapperConfig().jackson2ObjectMapperFactory((final Type type, final String s) -> {
                 ObjectMapper om = new ObjectMapper();
@@ -58,6 +57,5 @@ public class WebMvcConfigurator extends BaseTest {
             .build();
 
         RestAssuredMockMvc.mockMvc(mockMvc);
-        log.info("Finished setting up RestAssuredMockMvc");
     }
 }

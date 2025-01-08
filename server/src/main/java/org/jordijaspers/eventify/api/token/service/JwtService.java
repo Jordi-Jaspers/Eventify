@@ -2,6 +2,11 @@ package org.jordijaspers.eventify.api.token.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.user.model.User;
@@ -12,10 +17,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
 import static org.jordijaspers.eventify.api.token.model.JWTClaimNames.*;

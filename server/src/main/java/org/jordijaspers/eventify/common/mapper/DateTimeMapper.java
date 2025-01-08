@@ -1,12 +1,12 @@
 package org.jordijaspers.eventify.common.mapper;
 
-import org.jordijaspers.eventify.common.mapper.config.SharedMapperConfig;
-import org.mapstruct.Mapper;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+
+import org.jordijaspers.eventify.common.mapper.config.SharedMapperConfig;
+import org.mapstruct.Mapper;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;

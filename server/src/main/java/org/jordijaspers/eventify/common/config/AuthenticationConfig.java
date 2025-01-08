@@ -1,9 +1,8 @@
 package org.jordijaspers.eventify.common.config;
 
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.common.security.rsa.config.RSAKeyProperties;
 import org.springframework.context.annotation.Bean;
@@ -22,8 +21,10 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 
 import static org.jordijaspers.eventify.common.constants.Constants.Encoder.BCRYPT;
 

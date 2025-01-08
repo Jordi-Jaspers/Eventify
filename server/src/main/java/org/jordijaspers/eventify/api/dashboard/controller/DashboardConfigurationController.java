@@ -2,6 +2,7 @@ package org.jordijaspers.eventify.api.dashboard.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+
 import org.jordijaspers.eventify.api.dashboard.model.Dashboard;
 import org.jordijaspers.eventify.api.dashboard.model.mapper.DashboardMapper;
 import org.jordijaspers.eventify.api.dashboard.model.request.DashboardConfigurationRequest;

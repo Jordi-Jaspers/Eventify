@@ -2,6 +2,9 @@ package org.jordijaspers.eventify.api.authentication.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
+
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.service.TokenService;
 import org.jordijaspers.eventify.api.user.model.User;
@@ -12,8 +15,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.token.model.TokenType.REFRESH_TOKEN;

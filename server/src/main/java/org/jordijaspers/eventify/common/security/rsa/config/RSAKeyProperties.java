@@ -1,12 +1,13 @@
 package org.jordijaspers.eventify.common.security.rsa.config;
 
 import lombok.Data;
-import org.jordijaspers.eventify.common.security.rsa.RSAKeyGenerator;
-import org.springframework.stereotype.Component;
 
 import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+
+import org.jordijaspers.eventify.common.security.rsa.RSAKeyGenerator;
+import org.springframework.stereotype.Component;
 
 /**
  * A class containing the public and private key for RSA encryption.

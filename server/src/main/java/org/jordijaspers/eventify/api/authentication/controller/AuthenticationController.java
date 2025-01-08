@@ -2,6 +2,7 @@ package org.jordijaspers.eventify.api.authentication.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+
 import org.jordijaspers.eventify.api.authentication.model.request.LoginRequest;
 import org.jordijaspers.eventify.api.authentication.model.request.RefreshTokenRequest;
 import org.jordijaspers.eventify.api.authentication.model.request.RegisterUserRequest;

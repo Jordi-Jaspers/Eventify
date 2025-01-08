@@ -4,12 +4,6 @@ package org.jordijaspers.eventify.api.dashboard.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.jordijaspers.eventify.api.check.model.Check;
-import org.jordijaspers.eventify.api.dashboard.model.request.CreateDashboardRequest;
-import org.jordijaspers.eventify.api.team.model.Team;
-import org.jordijaspers.eventify.api.user.model.User;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -17,6 +11,13 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import jakarta.persistence.*;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.jordijaspers.eventify.api.check.model.Check;
+import org.jordijaspers.eventify.api.dashboard.model.request.CreateDashboardRequest;
+import org.jordijaspers.eventify.api.team.model.Team;
+import org.jordijaspers.eventify.api.user.model.User;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 

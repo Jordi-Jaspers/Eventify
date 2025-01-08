@@ -1,5 +1,7 @@
 package org.jordijaspers.eventify.api.user.model.mapper;
 
+import java.util.List;
+
 import org.jordijaspers.eventify.api.authentication.model.Role;
 import org.jordijaspers.eventify.api.authentication.model.request.RegisterUserRequest;
 import org.jordijaspers.eventify.api.authentication.model.response.RegisterResponse;
@@ -13,8 +15,6 @@ import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-
-import java.util.List;
 
 
 /**

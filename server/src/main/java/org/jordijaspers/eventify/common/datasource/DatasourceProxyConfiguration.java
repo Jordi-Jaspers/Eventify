@@ -1,15 +1,17 @@
 package org.jordijaspers.eventify.common.datasource;
 
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import net.ttddyy.dsproxy.listener.logging.SLF4JQueryLoggingListener;
 import net.ttddyy.dsproxy.support.ProxyDataSource;
+
+import javax.sql.DataSource;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 
-import javax.sql.DataSource;
+import com.zaxxer.hikari.HikariDataSource;
 
 import static net.ttddyy.dsproxy.support.ProxyDataSourceBuilder.create;
 

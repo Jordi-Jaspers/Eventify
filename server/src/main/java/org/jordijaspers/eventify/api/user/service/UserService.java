@@ -2,6 +2,10 @@ package org.jordijaspers.eventify.api.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.hawaiiframework.repository.DataNotFoundException;
 import org.jordijaspers.eventify.api.authentication.model.Authority;
 import org.jordijaspers.eventify.api.authentication.repository.RoleRepository;
@@ -17,9 +21,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;

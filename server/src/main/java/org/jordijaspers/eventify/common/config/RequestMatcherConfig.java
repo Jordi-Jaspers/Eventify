@@ -1,8 +1,8 @@
 package org.jordijaspers.eventify.common.config;
 
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
 import java.util.List;
+
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static org.jordijaspers.eventify.api.Paths.*;
 

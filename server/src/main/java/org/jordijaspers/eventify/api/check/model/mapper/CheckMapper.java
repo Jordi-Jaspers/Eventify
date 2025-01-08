@@ -1,5 +1,7 @@
 package org.jordijaspers.eventify.api.check.model.mapper;
 
+import java.util.List;
+
 import org.jordijaspers.eventify.api.check.model.Check;
 import org.jordijaspers.eventify.api.check.model.response.CheckResponse;
 import org.jordijaspers.eventify.common.mapper.DateTimeMapper;
@@ -7,8 +9,6 @@ import org.jordijaspers.eventify.common.mapper.config.SharedMapperConfig;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;
-
-import java.util.List;
 
 /**
  * The mapper for the dashboards.

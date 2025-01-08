@@ -1,9 +1,10 @@
 package org.jordijaspers.eventify.api.dashboard.model.response;
 
 import lombok.Data;
-import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
 
 import java.time.ZonedDateTime;
+
+import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
 
 /**
  * A response model for a dashboard.

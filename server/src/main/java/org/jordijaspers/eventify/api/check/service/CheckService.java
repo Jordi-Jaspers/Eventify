@@ -1,6 +1,9 @@
 package org.jordijaspers.eventify.api.check.service;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.jordijaspers.eventify.api.check.model.Check;
 import org.jordijaspers.eventify.api.check.repository.CheckRepository;
 import org.springframework.data.domain.Page;
@@ -8,8 +11,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * A service to handle everything around {@link Check}.

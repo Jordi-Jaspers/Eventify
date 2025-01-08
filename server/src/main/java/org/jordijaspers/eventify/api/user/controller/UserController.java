@@ -2,6 +2,9 @@ package org.jordijaspers.eventify.api.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.jordijaspers.eventify.api.authentication.model.response.UserDetailsResponse;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;
@@ -14,8 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static org.jordijaspers.eventify.api.Paths.*;
 import static org.springframework.http.HttpStatus.OK;

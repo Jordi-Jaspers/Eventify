@@ -1,5 +1,8 @@
 package org.jordijaspers.eventify.common.config;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.jordijaspers.eventify.common.security.converter.JwtAuthenticationConverter;
 import org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter;
 import org.jordijaspers.eventify.common.security.filter.UnauthorizedHandler;
@@ -16,9 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.jordijaspers.eventify.api.Paths.*;
 import static org.jordijaspers.eventify.api.token.model.JWTClaimNames.PERMISSIONS;

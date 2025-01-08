@@ -1,9 +1,9 @@
 package org.jordijaspers.eventify.api.authentication.model.validator;
 
+import java.util.List;
+
 import org.passay.*;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * A custom password strength validator.

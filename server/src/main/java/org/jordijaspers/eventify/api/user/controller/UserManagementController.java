@@ -2,6 +2,7 @@ package org.jordijaspers.eventify.api.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+
 import org.jordijaspers.eventify.api.authentication.model.response.UserDetailsResponse;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;

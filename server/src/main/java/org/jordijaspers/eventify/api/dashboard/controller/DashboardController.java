@@ -2,6 +2,9 @@ package org.jordijaspers.eventify.api.dashboard.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.jordijaspers.eventify.api.dashboard.model.Dashboard;
 import org.jordijaspers.eventify.api.dashboard.model.mapper.DashboardMapper;
 import org.jordijaspers.eventify.api.dashboard.model.request.CreateDashboardRequest;
@@ -12,8 +15,6 @@ import org.jordijaspers.eventify.api.dashboard.service.DashboardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static org.jordijaspers.eventify.api.Paths.DASHBOARDS_PATH;
 import static org.jordijaspers.eventify.api.Paths.DASHBOARD_PATH;

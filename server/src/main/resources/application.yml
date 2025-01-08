@@ -25,9 +25,9 @@ management:
   endpoints:
     web:
       exposure.include: health,info,metrics,jolokia
+      base-path: /api/public/actuator
 
 # ====== SERVER CONFIG ======
-# tomcat HTTP & ajp listen ports
 server:
   port: 8080
   servlet:
@@ -55,6 +55,11 @@ spring:
 
   threads:
     virtual.enabled: true
+
+  liquibase:
+    enabled: true
+    drop-first: false
+    contexts: test
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource

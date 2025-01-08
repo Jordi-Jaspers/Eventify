@@ -27,7 +27,7 @@ Before you begin, ensure you have the following installed:
 3. **Setup the database**  
    Use the provided Liquibase script to set up the database with test data:
    ```bash
-   bash ./scripts/create-schema-postgres-local.sh -h localhost -p 5432 -P root
+   bash ../scripts/database-reset.sh -h localhost -p 5432 -P root
     ```
 
 4. **Start the frontend**  

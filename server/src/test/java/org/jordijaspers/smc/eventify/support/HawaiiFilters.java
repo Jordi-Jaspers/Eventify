@@ -1,19 +1,17 @@
-package org.jordijaspers.smc.eventify.test_support;
-
-import org.hawaiiframework.logging.model.MockMvcFilter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+package org.jordijaspers.smc.eventify.support;
 
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.Filter;
 
+import org.hawaiiframework.logging.model.MockMvcFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 /**
  * Holds all filters used while testing.
  */
 @Component
-@Profile("itest")
 public class HawaiiFilters {
 
     /**

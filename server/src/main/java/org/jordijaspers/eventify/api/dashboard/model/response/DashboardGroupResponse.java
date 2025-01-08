@@ -1,10 +1,11 @@
 package org.jordijaspers.eventify.api.dashboard.model.response;
 
 import lombok.Data;
-import org.jordijaspers.eventify.api.check.model.response.CheckResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jordijaspers.eventify.api.check.model.response.CheckResponse;
 
 /**
  * Response object for a dashboard group.

@@ -1,6 +1,9 @@
 package org.jordijaspers.eventify.api.token.repository;
 
 
+import java.util.List;
+import java.util.Optional;
+
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.model.TokenType;
 import org.jordijaspers.eventify.api.user.model.User;
@@ -10,9 +13,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * The repository for the {@link Token} entity.

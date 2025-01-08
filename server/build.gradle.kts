@@ -1,10 +1,10 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import org.cyclonedx.gradle.CycloneDxTask
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.jvm.toolchain.JavaLanguageVersion.of
 import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.liquibase.gradle.LiquibaseExtension
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.springframework.boot.gradle.tasks.run.BootRun
 import org.springframework.boot.loader.tools.LoaderImplementation.CLASSIC
@@ -44,9 +44,6 @@ plugins {
     // Spotless is a code formatter that uses a set of pre-defined rules to format the code.
     id("com.diffplug.spotless")
 
-    // The CycloneDX Gradle plugin creates an aggregate of all direct and transitive dependencies of a project.
-    id("org.cyclonedx.bom")
-
     // Automatically generates a list of updatable dependencies.
     id("com.github.ben-manes.versions")
 
@@ -55,6 +52,9 @@ plugins {
 
     // Automatic lombok and delombok configuration.
     id("io.freefair.lombok")
+
+    // Liquibase plugin for managing database changes.
+    id("org.liquibase.gradle")
 }
 
 /** Configure the dependencies required within the project. */
@@ -84,7 +84,6 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-mail")
     implementation("org.springframework.boot", "spring-boot-starter-security")
     implementation("org.springframework.boot", "spring-boot-starter-oauth2-resource-server")
-
     implementation("org.springframework.boot", "spring-boot-starter-jdbc") {
         exclude("org.apache.tomcat", module = "tomcat-jdbc")
     }
@@ -114,25 +113,34 @@ dependencies {
     implementation("org.hibernate.validator", "hibernate-validator", retrieve("hibernateValidatorVersion"))
 
     // Library for checking that a password complies with a custom set of rules
-    implementation("org.passay","passay", retrieve("passayVersion"))
+    implementation("org.passay", "passay", retrieve("passayVersion"))
 
     // Java library for Javascript Object Signing and Encryption (JOSE) and JSON Web Tokens (JWT)
     implementation("com.nimbusds", "nimbus-jose-jwt", retrieve("nimbusJoseJwtVersion"))
 
     // LogstashEncoder is used to encode log messages in logstash format
     implementation("net.logstash.logback", "logstash-logback-encoder", retrieve("logstashEncoderVersion"))
+
     // ======= TEST DEPENDENCIES =======
     testImplementation("org.springframework.boot", "spring-boot-test")
-    testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))
+    testImplementation("org.springframework.boot", "spring-boot-testcontainers")
     testImplementation("org.springframework.boot", "spring-boot-starter-test") {
         exclude("com.vaadin.external.google", module = "android-json")
     }
 
-    testImplementation("org.junit.vintage", "junit-vintage-engine", retrieve("junitVintageVersion"))
+    testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))
+    testImplementation("org.testcontainers", "postgresql", retrieve("testContainerVersion"))
+    testImplementation("org.testcontainers", "junit-jupiter", retrieve("testContainerVersion"))
+    testImplementation("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
+
     testImplementation("io.rest-assured", "rest-assured", retrieve("restAssuredVersion"))
     testImplementation("io.rest-assured", "spring-mock-mvc", retrieve("restAssuredVersion"))
 
-    testImplementation("org.assertj", "assertj-core", retrieve("assertjVersion"))
+    // ======= LIQUIBASE PLUGIN DEPENDENCIES =======
+    liquibaseRuntime("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
+    liquibaseRuntime("info.picocli", "picocli", retrieve("picocliVersion"))
+    liquibaseRuntime("org.yaml", "snakeyaml", retrieve("snakeyaml"))
+    liquibaseRuntime("org.postgresql", "postgresql", retrieve("postgresVersion"))
 }
 
 /**
@@ -175,12 +183,13 @@ configure<SpotlessExtension> {
         java {
             cleanthat()
             toggleOffOn()
+            target("src/main/java/**/*.java", "src/test/java/**/*.java")
             eclipse().configFile("src/quality/config/spotless/HawaiiFrameworkStyle.xml")
 
             endWithNewline()
             removeUnusedImports()
             trimTrailingWhitespace()
-            importOrder("", "java|jakarta|javax", "\\#")
+            importOrder("", "java|jakarta|javax", "groovy", "org", "com", "\\#")
         }
     }
 }
@@ -201,6 +210,46 @@ configure<QualityExtension> {
 
     codenarcVersion = retrieve("codenarcVersion")
     codenarc = true
+}
+
+configure<LiquibaseExtension> {
+    activities.register("main") {
+        this.arguments = mapOf(
+            "logLevel" to "info",
+            "output-default-catalog" to "false",
+            "output-default-schema" to "false",
+            "changelogFile" to project.ext["changelogFile"],
+            "url" to project.ext["dbUrl"],
+            "username" to project.ext["dbUsername"],
+            "password" to project.ext["dbPassword"],
+            "contexts" to project.ext["contexts"],
+            "outputFile" to project.ext["outputFile"]
+        )
+    }
+    runList = "main"
+}
+
+/** Configure the Liquibase plugin with passed properties. */
+project.ext["env"] = System.getProperty("env")
+when {
+    project.ext["env"] == "custom" -> {
+        project.ext["dbUrl"] = System.getProperty("dbUrl")
+        project.ext["dbUsername"] = System.getProperty("dbUsername")
+        project.ext["dbPassword"] = System.getProperty("dbPassword")
+        project.ext["contexts"] = System.getProperty("contexts")
+        project.ext["outputFile"] = System.getProperty("outputFile")
+        project.ext["changelogFile"] = System.getProperty("changelogFile")
+    }
+
+    else -> {
+        // No env specified: Use the configs for local development
+        project.ext["dbUrl"] = "jdbc:postgresql://localhost:5432/tst_eventify"
+        project.ext["dbUsername"] = "tst_eventify"
+        project.ext["dbPassword"] = "tst_eventify"
+        project.ext["contexts"] = "test"
+        project.ext["outputFile"] = "build/liquibase/updateSQL.sql"
+        project.ext["changelogFile"] = "src/main/resources/db/changelog/db.changelog-master.yaml"
+    }
 }
 
 // ============== STATIC FUNCTIONS ================
@@ -257,19 +306,7 @@ tasks.withType<DependencyUpdatesTask> {
     gradleReleaseChannel = "current"
 }
 
-tasks.withType<CycloneDxTask> {
-    setProjectType("application")
-    setSchemaVersion("1.5")
-    setDestination(project.file("build/reports"))
-    setOutputName("application-sbom")
-    setOutputFormat("json")
-    setIncludeBomSerialNumber(true)
-    setIncludeLicenseText(true)
-    setComponentVersion(version.toString())
-}
-
 tasks.withType<JavaCompile> {
-    dependsOn("spotlessApply")
     options.isDeprecation = true
     options.encoding = "UTF-8"
     options.compilerArgs.addAll(
@@ -286,20 +323,6 @@ tasks.withType<JavaCompile> {
 tasks.named<BootRun>("bootRun") {
     systemProperty("application.version", version)
     val arguments = ArrayList<String>()
-    if (System.getenv("TRUSTSTORE_LOCATION") != null && System.getenv("TRUSTSTORE_PASSWORD") != null) {
-        val trustStoreLocation = System.getenv("TRUSTSTORE_LOCATION")
-        val trustStorePassword = System.getenv("TRUSTSTORE_PASSWORD")
-        println("[Gradle Config] 'TRUSTSTORE' properties found, setting trustStore to: $trustStoreLocation")
-        arguments.add("-Djavax.net.ssl.trustStore=$trustStoreLocation")
-        arguments.add("-Djavax.net.ssl.trustStorePassword=$trustStorePassword")
-    } else {
-        val defaultTrustStoreLocation = "../../smtvagrant/pki/truststore.jks"
-        val defaultTrustStorePassword = "changeit"
-        println("[Gradle Config] 'TRUSTSTORE_LOCATION' and 'TRUSTSTORE_PASSWORD' properties not found, setting trustStore to default location: $defaultTrustStoreLocation")
-        arguments.add("-Djavax.net.ssl.trustStore=$defaultTrustStoreLocation")
-        arguments.add("-Djavax.net.ssl.trustStorePassword=$defaultTrustStorePassword")
-    }
-    
     arguments.addAll(
         arrayOf(
             "-Xms512m",
@@ -307,8 +330,8 @@ tasks.named<BootRun>("bootRun") {
             "-XX:MetaspaceSize=512m",
             "-XX:MaxMetaspaceSize=1024m",
             "-XX:MaxMetaspaceFreeRatio=60",
-            "-Djava.awt.headless=true",
             "-XX:+UseG1GC",
+            "-Djava.awt.headless=true",
             "-Dspring.output.ansi.enabled=ALWAYS",
         )
     )

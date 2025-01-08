@@ -4,6 +4,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.time.LocalDateTime;
+import java.util.*;
+import jakarta.persistence.*;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,11 +19,6 @@ import org.jordijaspers.eventify.api.token.model.Token;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.io.Serial;
-import java.time.LocalDateTime;
-import java.util.*;
-import jakarta.persistence.*;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 

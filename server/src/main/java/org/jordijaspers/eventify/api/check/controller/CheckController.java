@@ -2,6 +2,7 @@ package org.jordijaspers.eventify.api.check.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+
 import org.jordijaspers.eventify.api.check.model.Check;
 import org.jordijaspers.eventify.api.check.model.mapper.CheckMapper;
 import org.jordijaspers.eventify.api.check.model.response.CheckResponse;

@@ -2,15 +2,16 @@ package org.jordijaspers.eventify.common.security.rsa;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jordijaspers.eventify.common.exception.InternalServerException;
-import org.jordijaspers.eventify.common.security.rsa.model.RSAKey;
-import org.jordijaspers.eventify.common.security.rsa.repository.RSAKeyRepository;
-import org.springframework.stereotype.Component;
 
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+
+import org.jordijaspers.eventify.common.exception.InternalServerException;
+import org.jordijaspers.eventify.common.security.rsa.model.RSAKey;
+import org.jordijaspers.eventify.common.security.rsa.repository.RSAKeyRepository;
+import org.springframework.stereotype.Component;
 
 /**
  * A service that generates and loads RSA keys in the database.

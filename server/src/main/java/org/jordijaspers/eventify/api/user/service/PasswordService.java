@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.user.service;
 
 import lombok.RequiredArgsConstructor;
+
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.model.TokenType;
 import org.jordijaspers.eventify.api.token.service.TokenService;
