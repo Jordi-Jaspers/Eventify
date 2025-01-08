@@ -23,7 +23,7 @@ jobs:
         with:
           bun-version: latest
 
-      - name: build project
+      - name: Build project
         run: bun install --frozen-lockfile && bun run build
 
   build-server:
