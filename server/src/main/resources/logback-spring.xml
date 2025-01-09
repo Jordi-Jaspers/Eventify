@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="false"> <!-- disable logback config file scanning, we always require a reboot to change logs -->
-    <!-- Human-readable encoder with some nice management-proof colours, default in local development mode -->
+<configuration scan="false">
     <appender name="HUMANREADABLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- Human-readable encoder with some nice management-proof colours, default in local development mode -->
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>
                 %d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%level) [%green(TX:%X{tx_id})/%yellow(REQ:%X{req_id})] [%magenta(T:%thread)] [%cyan(L:%logger:%line)] -
@@ -30,43 +30,39 @@
     </appender>
 
     <!-- Logging levels -->
+    <logger name="org.keycloak" level="DEBUG"/>
+    <logger name="com.zaxxer" level="INFO"/>
+    <logger name="javax.net.ssl" level="INFO"/>
+    <logger name="org.hibernate.sql" level="INFO"/>
+    <logger name="org.hibernate.orm.connections.pooling" level="ERROR"/>
+
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.springframework.security.access.intercept" level="INFO"/>
+    <logger name="org.springframework.context.support" level="ERROR"/>
+    <logger name="org.springframework.beans" level="INFO"/>
+    <logger name="org.springframework.web.socket" level="INFO"/>
+    <logger name="org.springframework.web.socket.handler" level="INFO"/>
+    <logger name="org.springframework.data.repository.config" level="WARN"/>
+    <logger name="org.springframework.security.web.FilterChainProxy" level="INFO"/>
+
+    <logger name="org.hawaiiframework" level="DEBUG"/>
+    <logger name="org.hawaiiframework.async" level="DEBUG"/>
+    <logger name="org.hawaiiframework.security" level="DEBUG"/>
+    <logger name="org.hawaiiframework.web.filter" level="DEBUG"/>
+    <logger name="org.hawaiiframework.logging" level="DEBUG"/>
+    <logger name="org.hawaiiframework.logging.web.filter" level="INFO"/>
+    <logger name="org.hawaiiframework.logging.web.filter.KibanaLogCleanupFilter" level="ERROR"/>
+    <logger name="org.hawaiiframework.logging.web.filter.TransactionTypeFilter" level="INFO"/>
+    <logger name="org.hawaiiframework.logging.config.MediaTypeVoter" level="ERROR"/>
+    <logger name="org.hawaiiframework.logging.LoggingClientHttpRequestInterceptor" level="DEBUG"/>
+    <logger name="org.hawaiiframework.logging.sql.StatementLoggerQueryExecutionListener" level="ERROR"/>
+
     <logger name="org.jordijaspers" level="${APPLICATION_LOG_LEVEL:-DEBUG}"/>
-
-    <logger name="org.keycloak" level="${APPLICATION_LOG_LEVEL:-DEBUG}"/>
-    <logger name="com.zaxxer" level="${APPLICATION_LOG_LEVEL:-INFO}"/>
-    <logger name="javax.net.ssl" level="${APPLICATION_LOG_LEVEL:-INFO}"/>
-    <logger name="org.hibernate.sql" level="${APPLICATION_LOG_LEVEL:-INFO}"/>
-
     <logger name="net.ttddyy.dsproxy.listener" level="${SQL_LOG_LEVEL:-INFO}"/>
 
-    <logger name="org.springframework" level="${SPRING_LOG_LEVEL:-INFO}"/>
-    <logger name="org.springframework.web" level="${SPRING_LOG_LEVEL:-INFO}"/>
-    <logger name="org.springframework.security" level="${SPRING_LOG_LEVEL:-INFO}"/>
-    <logger name="org.springframework.security.access.intercept" level="${SPRING_LOG_LEVEL:-INFO}"/>
-    <logger name="org.springframework.context.support" level="${SPRING_LOG_LEVEL:-ERROR}"/>
-    <logger name="org.springframework.beans" level="${SPRING_LOG_LEVEL:-INFO}"/>
-    <logger name="org.springframework.web.socket" level="${SPRING_LOG_LEVEL:-INFO}"/>
-    <logger name="org.springframework.web.socket.handler" level="${SPRING_LOG_LEVEL:-INFO}"/>
-    <logger name="org.springframework.data.repository.config" level="${SPRING_LOG_LEVEL:-WARN}"/>
-    <logger name="org.springframework.security.web.FilterChainProxy" level="${SPRING_LOG_LEVEL:-INFO}"/>
-
-    <logger name="org.hawaiiframework" level="${HAWAII_LOG_LEVEL:-DEBUG}"/>
-    <logger name="org.hawaiiframework.async" level="${HAWAII_LOG_LEVEL:-DEBUG}"/>
-    <logger name="org.hawaiiframework.security" level="${HAWAII_LOG_LEVEL:-DEBUG}"/>
-    <logger name="org.hawaiiframework.web.filter" level="${HAWAII_LOG_LEVEL:-DEBUG}"/>
-    <logger name="org.hawaiiframework.logging" level="${HAWAII_LOG_LEVEL:-DEBUG}"/>
-    <logger name="org.hawaiiframework.logging.sql.StatementLoggerQueryExecutionListener" level="${HAWAII_LOG_LEVEL:-ERROR}"/>
-    <logger name="org.hawaiiframework.logging.config.MediaTypeVoter" level="${HAWAII_LOG_LEVEL:-ERROR}"/>
-    <logger name="org.hawaiiframework.logging.web.filter" level="${HAWAII_LOG_LEVEL:-INFO}"/>
-    <logger name="org.hawaiiframework.logging.web.filter.KibanaLogCleanupFilter" level="${HAWAII_LOG_LEVEL:-ERROR}"/>
-    <logger name="org.hawaiiframework.logging.web.filter.TransactionTypeFilter" level="${HAWAII_LOG_LEVEL:-INFO}"/>
-    <logger name="org.hawaiiframework.logging.LoggingClientHttpRequestInterceptor" level="${HAWAII_LOG_LEVEL:-DEBUG}"/>
-
-    <logger name="org.hibernate.orm.connections.pooling" level="-ERROR"/>
-
-    <!-- Root level and appender selection, defaults to HUMANREADABLE, overridable with env var $LOG_APPENDER -->
     <root level="${ROOT_LOG_LEVEL:-INFO}">
-        <!-- In the logback config file, the separator between variable and default value is ":-". Deal with it. -->
         <appender-ref ref="${LOG_APPENDER:-HUMANREADABLE}"/>
     </root>
 </configuration>

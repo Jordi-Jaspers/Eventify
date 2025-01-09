@@ -31,7 +31,7 @@ public class DatasourceProxyConfiguration implements BeanPostProcessor {
         if (bean instanceof DataSource && !(bean instanceof ProxyDataSource)) {
             final HikariDataSource originalDatasource = (HikariDataSource) bean;
             final SLF4JQueryLoggingListener loggingListener = new SLF4JQueryLoggingListener();
-            log.info("Enabling datasource proxy to log queries for datasource named '{}'", originalDatasource.getPoolName());
+            log.debug("Enabling datasource proxy to log queries for datasource named '{}'", originalDatasource.getPoolName());
 
             final PrettyQueryEntryCreator prettyQueryEntryCreator = new PrettyQueryEntryCreator();
             prettyQueryEntryCreator.setMultiline(true);

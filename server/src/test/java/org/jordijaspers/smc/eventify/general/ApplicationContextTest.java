@@ -1,37 +1,37 @@
 package org.jordijaspers.smc.eventify.general;
 
 import io.restassured.module.mockmvc.response.MockMvcResponse;
-
-import java.io.IOException;
-
 import org.jordijaspers.smc.eventify.support.IntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
+import java.io.IOException;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.jordijaspers.eventify.api.Paths.PUBLIC_HEALTH_PATH;
-import static org.jordijaspers.smc.eventify.support.config.ContainersConfiguration.DATABASE_NAME;
+import static org.jordijaspers.smc.eventify.support.container.TimescaleContainer.DATABASE_NAME;
 
-@AutoConfigureMockMvc
-public class ContextTest extends IntegrationTest {
+/**
+ * Test class to verify the context is loaded correctly.
+ */
+public class ApplicationContextTest extends IntegrationTest {
 
     @Test
     @Order(1)
     @DisplayName("Spring context loads successfully")
     public void contextLoads() {
-        assertThat(context, is(notNullValue()));
+        assertThat(applicationContext, is(notNullValue()));
     }
 
     @Test
     @Order(2)
     @DisplayName("Hawaii filters are loaded")
     public void testHawaiiFilters() {
-        assertThat(filters, is(notNullValue()));
+        assertThat(hawaiiFilters, is(notNullValue()));
     }
 
     @Test
@@ -58,8 +58,8 @@ public class ContextTest extends IntegrationTest {
         // @formatter:off
         final MockMvcResponse response = given()
             .when()
-            .get(PUBLIC_HEALTH_PATH)
-            .andReturn();
+                .get(PUBLIC_HEALTH_PATH)
+                .andReturn();
         // @formatter:on
 
         // Then: The response is 200 - OK

@@ -57,9 +57,7 @@ spring:
     virtual.enabled: true
 
   liquibase:
-    enabled: true
-    drop-first: false
-    contexts: test
+    enabled: false
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
