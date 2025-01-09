@@ -1,0 +1,25 @@
+name: CI Pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * *'
+  pull_request:
+    branches: [ master, develop ]
+  push:
+    branches: [ master, develop ]
+
+jobs:
+  client-quality:
+    uses: ./.github/workflows/client-quality.yml
+
+  server-quality:
+    uses: ./.github/workflows/server-quality.yml
+
+  client-build:
+    needs: client-quality
+    uses: ./.github/workflows/client-build.yml
+
+  server-build:
+    needs: server-quality
+    uses: ./.github/workflows/server-build.yml

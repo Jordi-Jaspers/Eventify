@@ -1,0 +1,41 @@
+name: Client Quality Check
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master, develop ]
+    paths:
+      - 'client/**'
+  push:
+    branches: [ master, develop ]
+    paths:
+      - 'client/**'
+
+jobs:
+  frontend-quality:
+    name: Frontend Quality Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    env:
+      SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
+      NODE_ENV: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check formatting
+        run: bun run format-check

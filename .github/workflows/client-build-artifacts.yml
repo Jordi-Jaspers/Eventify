@@ -1,0 +1,61 @@
+name: Build Client & Run Tests
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master, develop ]
+    paths:
+      - 'client/**'
+  push:
+    branches: [ master, develop ]
+    paths:
+      - 'client/**'
+
+jobs:
+  build-client:
+    name: Build the Client
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    env:
+      SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
+      NODE_ENV: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Bun version manager
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            ./client/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Build project
+        run: bun install --frozen-lockfile && bun run build
+
+      - name: Upload client build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-build-artifacts-${{ github.sha }}
+          path: |
+            ./client/build
+            ./client/.svelte-kit
+            ./client/package.json
+            ./client/bun.lockb
+          retention-days: 7
+          if-no-files-found: error
