@@ -27,18 +27,24 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 )
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = NONE)
-@SpringBootTest(classes = Application.class, webEnvironment = RANDOM_PORT)
+@SpringBootTest(
+    classes = Application.class,
+    webEnvironment = RANDOM_PORT
+)
 public class TestContextInitializer {
 
     // ========================= CONTAINERS =========================
-    @Autowired @NonNull
+    @Autowired
+    @NonNull
     protected PostgreSQLContainer<?> timescaleContainer;
 
     // ========================= CONTEXT =========================
-    @Autowired @NonNull
+    @Autowired
+    @NonNull
     protected WebApplicationContext applicationContext;
 
-    @Autowired @NonNull
+    @Autowired
+    @NonNull
     protected HawaiiFilters hawaiiFilters;
 
     // ========================= APPLICATION =========================

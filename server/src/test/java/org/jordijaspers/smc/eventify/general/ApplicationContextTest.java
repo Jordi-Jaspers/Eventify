@@ -1,12 +1,13 @@
 package org.jordijaspers.smc.eventify.general;
 
 import io.restassured.module.mockmvc.response.MockMvcResponse;
+
+import java.io.IOException;
+
 import org.jordijaspers.smc.eventify.support.IntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.apache.http.HttpStatus.SC_OK;
