@@ -66,6 +66,7 @@ jobs:
     env:
       SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
       TESTCONTAINERS_RYUK_DISABLED: true
+      TESTCONTAINER_DOCKER_NETWORK: integration-testcontainers
       GRADLE_OPTS: "-Xmx4g -Xms1g -Dorg.gradle.daemon=false"
 
     steps:
@@ -86,14 +87,13 @@ jobs:
 
       - name: Docker network setup
         run: |
-          docker network create integration-tests || true
+          docker network create ${{ env.TESTCONTAINER_DOCKER_NETWORK }} || true
           docker network ls
+          docker info
+          docker ps
 
       - name: Build with Gradle
-        run: |
-          docker ps
-          docker info
-          ./gradlew clean build --stacktrace
+        run: ./gradlew clean build --no-daemon --parallel --stacktrace
         env:
           DOCKER_HOST: unix:///var/run/docker.sock
           TC_DAEMON: true
@@ -114,7 +114,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ github.sha }}
+          name: build-report-${{ github.sha }}
           path: |
             ./server/build/reports
           retention-days: 7
