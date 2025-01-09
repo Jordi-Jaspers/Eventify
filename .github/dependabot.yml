@@ -1,17 +1,5 @@
 version: 2
 updates:
-  # Update dependencies for github actions.
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    target-branch: develop
-    labels:
-      - "dependencies"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "[Actions] bump: "
-      include: "scope"
-
   # Update dependencies for Client using NPM.
   - package-ecosystem: "npm"
     directory: "/client"
@@ -23,6 +11,19 @@ updates:
     commit-message:
       prefix: "[npm] bump: "
       include: "scope"
+    reviewers:
+      - "jordi-jaspers"
+    versioning-strategy: increase
+    version-update:
+      ignore:
+        - dependency-name: "*"
+          update-types: ["version-update:semver-major"]
+    security-updates:
+      pull-requests: true
+    groups:
+      all:
+        patterns:
+          - "*"
 
   # Update dependencies for Server using Gradle.
   - package-ecosystem: "gradle"
@@ -35,15 +36,15 @@ updates:
     commit-message:
       prefix: "[spring] bump: "
       include: "scope"
-
-  # Update dependencies for Server using Gradle.
-  - package-ecosystem: "gradle"
-    directory: "/liquibase"
-    target-branch: develop
-    labels:
-      - "dependencies"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "[liquibase] bump: "
-      include: "scope"
+    reviewers:
+      - "jordi-jaspers"
+    version-update:
+      ignore:
+        - dependency-name: "*"
+          update-types: ["version-update:semver-major"]
+    security-updates:
+      pull-requests: true
+    groups:
+      all:
+        patterns:
+          - "*"

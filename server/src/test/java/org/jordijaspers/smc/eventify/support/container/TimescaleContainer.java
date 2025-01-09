@@ -1,15 +1,16 @@
 package org.jordijaspers.smc.eventify.support.container;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 import org.testcontainers.utility.DockerImageName;
-
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 /**
  * Timescale container configuration.
