@@ -27,7 +27,7 @@ Before you begin, ensure you have the following installed:
 3. **Setup the database**  
    Use the provided Liquibase script to set up the database with test data:
    ```bash
-   bash ../scripts/database-reset.sh -h localhost -p 5432 -P root
+   bash ./scripts/database-reset.sh -h localhost -p 5432 -P root
     ```
 
 4. **Start the frontend**  
@@ -44,6 +44,7 @@ Before you begin, ensure you have the following installed:
     cd server
     ./gradlew bootRun
     ```
+  
 6. **Access the app**  
    Open your browser and go to the following URL:
     - http://localhost:5173/login
@@ -62,23 +63,30 @@ Before you begin, ensure you have the following installed:
    You can adjust the environment variables in the `./gradlew bootRun` command to customize the application
    configuration.
 
-| Environment Variable          | Default Value                                   | Purpose                                                 |
-|-------------------------------|-------------------------------------------------|---------------------------------------------------------|
-| **APPLICATION CONFIGURATION** |                                                 |                                                         |
-| `SPRING_APPLICATION_URL`      | `http://localhost:5173`                         | Base URL of the application.                            |
-| **EMAIL CONFIGURATION**       |                                                 |                                                         |
-| `EMAIL_HOST`                  | `localhost`                                     | Email server host.                                      |
-| `EMAIL_PORT`                  | `2500`                                          | Email server port.                                      |
-| `EMAIL_ADDRESS`               | `no-reply@localhost`                            | Sender email address.                                   |
-| `EMAIL_USERNAME`              | `no-login@localhost.com`                        | Username for email authentication.                      |
-| `EMAIL_PASSWORD`              | `password`                                      | Password for email authentication.                      |
-| **SECURITY CONFIGURATION**    |                                                 |                                                         |
-| `JWT_LIFETIME_SECONDS`        | `900`                                           | Lifetime of JWT tokens in seconds.                      |
-| `CORS_ALLOWED_ORIGINS`        | `*`                                             | Comma-separated list of allowed origins for CORS.       |
-| **SPRING CONFIGURATION**      |                                                 |                                                         |
-| `SPRING_PROFILES_INCLUDE`     | `development`                                   | Active Spring profiles.                                 |
-| `DATASOURCE_TOP_URL`          | `jdbc:postgresql://localhost:5432/tst_eventify` | JDBC URL for the database.                              |
-| `DATASOURCE_TOP_USERNAME`     | `tst_eventify`                                  | Database username.                                      |
-| `DATASOURCE_TOP_PASSWORD`     | `tst_eventify`                                  | Database password.                                      |
-| **LOGGING CONFIGURATION**     |                                                 |                                                         |
-| `SQL_LOG_LEVEL`               | `INFO`                                          | `DEBUG` for database logging and `INFO` to turn it off. |
+| Environment Variable          | Default Value                                   | Purpose                                                                     |
+|-------------------------------|-------------------------------------------------|-----------------------------------------------------------------------------|
+| **APPLICATION CONFIGURATION** |                                                 |                                                                             |
+| `SPRING_APPLICATION_URL`      | `http://localhost:5173`                         | Base URL of the application.                                                |
+|                               |                                                 |                                                                             |
+| **EMAIL CONFIGURATION**       |                                                 |                                                                             |
+| `EMAIL_HOST`                  | `localhost`                                     | Email server host.                                                          |
+| `EMAIL_PORT`                  | `2500`                                          | Email server port.                                                          |
+| `EMAIL_ADDRESS`               | `no-reply@localhost`                            | Sender email address.                                                       |
+| `EMAIL_USERNAME`              | `no-login@localhost.com`                        | Username for email authentication.                                          |
+| `EMAIL_PASSWORD`              | `password`                                      | Password for email authentication.                                          |
+|                               |                                                 |                                                                             |
+| **SECURITY CONFIGURATION**    |                                                 |                                                                             |
+| `JWT_LIFETIME_SECONDS`        | `900`                                           | Lifetime of JWT tokens in seconds.                                          |
+| `CORS_ALLOWED_ORIGINS`        | `*`                                             | Comma-separated list of allowed origins for CORS.                           |
+|                               |                                                 |                                                                             |
+| **SPRING CONFIGURATION**      |                                                 |                                                                             |
+| `SPRING_PROFILES_INCLUDE`     | `development`                                   | Active Spring profiles.                                                     |
+| `DATASOURCE_TOP_URL`          | `jdbc:postgresql://localhost:5432/tst_eventify` | JDBC URL for the database.                                                  |
+| `DATASOURCE_TOP_USERNAME`     | `tst_eventify`                                  | Database username.                                                          |
+| `DATASOURCE_TOP_PASSWORD`     | `tst_eventify`                                  | Database password.                                                          |
+|                               |                                                 |                                                                             |
+| **LOGGING CONFIGURATION**     |                                                 |                                                                             |
+| `LOG_APPENDER`                | `HUMANREADABLE`                                 | `HUMANREADABLE` for readable logs or `LOGSTASHENCODER` for JSON formatting. |
+| `ROOT_LOG_LEVEL`              | `INFO`                                          | The level of all logs (dependencies, application, JVM)                      |
+| `APPLICATION_LOG_LEVEL`       | `INFO`                                          | The level of custom application logs                                        |
+| `SQL_LOG_LEVEL`               | `INFO`                                          | `DEBUG` for database logging and `INFO` to turn it off.                     |

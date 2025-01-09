@@ -1,42 +1,23 @@
 package org.jordijaspers.smc.eventify.support;
 
-import io.restassured.config.ObjectMapperConfig;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.config.RestAssuredMockMvcConfig;
-
-import java.lang.reflect.Type;
-
-import org.jordijaspers.eventify.Application;
-import org.jordijaspers.smc.eventify.support.config.BeanConfiguration;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.restassured.config.ObjectMapperConfig;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.module.mockmvc.config.RestAssuredMockMvcConfig;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
+import java.lang.reflect.Type;
+
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
-@ActiveProfiles("test")
-@Import(BeanConfiguration.class)
-@SpringBootTest(
-    classes = Application.class,
-    webEnvironment = DEFINED_PORT
-)
-public class WebMvcConfigurator {
-
-    @Autowired
-    protected WebApplicationContext context;
-
-    @Autowired
-    protected HawaiiFilters filters;
+/**
+ * This class is used to configure the WebMvc environment for the tests.
+ */
+public class WebMvcConfigurator extends TestContextInitializer {
 
     @BeforeEach
     public void setUpMockMvc() {
@@ -51,11 +32,12 @@ public class WebMvcConfigurator {
         );
 
         final MockMvc mockMvc = MockMvcBuilders
-            .webAppContextSetup(this.context)
+            .webAppContextSetup(applicationContext)
             .apply(springSecurity())
-            .addFilters(filters.getFilters())
+            .addFilters(hawaiiFilters.getFilters())
             .build();
 
         RestAssuredMockMvc.mockMvc(mockMvc);
     }
+
 }
