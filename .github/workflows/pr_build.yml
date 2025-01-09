@@ -6,6 +6,8 @@ on:
     - cron: '0 9 * * *'
   pull_request:
     branches: [ master, develop ]
+  push:
+    branches: [ master, develop ]
 
 jobs:
   build-client:
@@ -16,18 +18,44 @@ jobs:
         working-directory: ./client
     env:
       SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
+      NODE_ENV: production
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Bun version manager
         uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            ./client/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
       - name: Build project
         run: bun install --frozen-lockfile && bun run build
+
+      - name: Upload client build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-build-artifacts-${{ github.sha }}
+          path: |
+            ./client/build
+            ./client/.svelte-kit
+            ./client/package.json
+            ./client/bun.lockb
+          retention-days: 7
+          if-no-files-found: error
 
   build-server:
     name: Build the Server
@@ -39,6 +67,7 @@ jobs:
       SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
       TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
       TESTCONTAINERS_RYUK_DISABLED: true
+      GRADLE_OPTS: "-Xmx4g -Xms1g -Dorg.gradle.daemon=false"
 
     services:
       docker:
@@ -48,6 +77,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 21 Temurin
         uses: actions/setup-java@v4
@@ -67,11 +98,26 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean build --no-daemon --stacktrace
+        continue-on-error: false
 
-      - name: Upload Build Directory
+      - name: Upload build artifacts and reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-${{ github.run_number }}
-          path: ./build/
-          retention-days: 30
+          name: server-build-artifacts-${{ github.sha }}
+          path: |
+            ./server/build/reports
+            ./server/build/test-results
+            ./server/build/libs
+          retention-days: 7
+          if-no-files-found: error
 
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.sha }}
+          path: |
+            ./server/**/build/test-results
+          retention-days: 7
+          if-no-files-found: warn
