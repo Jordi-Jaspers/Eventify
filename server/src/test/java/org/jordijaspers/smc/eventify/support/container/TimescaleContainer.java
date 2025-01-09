@@ -8,21 +8,23 @@ import java.time.temporal.ChronoUnit;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
 /**
  * Timescale container configuration.
  */
 @Slf4j
-@TestConfiguration(proxyBeanMethods = false)
+@TestConfiguration
 public class TimescaleContainer {
 
-    public static final String DATABASE_NAME = "tst_eventify";
+    public static final String DATABASE_NAME = "tst_db";
 
-    @ServiceConnection
-    private static final PostgreSQLContainer<?> timescaleContainer;
+    @Container
+    public static final PostgreSQLContainer<?> timescaleContainer;
 
     static {
         final DockerImageName image = DockerImageName.parse("timescale/timescaledb-ha:pg17")
@@ -47,8 +49,9 @@ public class TimescaleContainer {
     }
 
     @Bean
-    PostgreSQLContainer<?> timescaleContainer() {
+    @Primary
+    @ServiceConnection
+    public PostgreSQLContainer<?> getTimescaleContainer() {
         return timescaleContainer;
     }
-
 }

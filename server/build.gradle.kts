@@ -90,7 +90,9 @@ dependencies {
 
     // ======= IMPLEMENTATION DEPENDENCIES =======
     // Open API documentation generation.
+    implementation("org.springframework.retry", "spring-retry", retrieve("springRetryVersion"))
     implementation("org.springdoc", "springdoc-openapi-starter-webmvc-ui", retrieve("springdocVersion"))
+
 
     // provides the core of hawaii framework such as the response entity exception handling.
     implementation("org.hawaiiframework", "hawaii-starter-rest", retrieve("hawaiiFrameworkVersion"))

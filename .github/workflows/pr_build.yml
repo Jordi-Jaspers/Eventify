@@ -114,7 +114,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-report-${{ github.sha }}
+          name: server-build-report-${{ github.sha }}
           path: |
             ./server/build/reports
           retention-days: 7

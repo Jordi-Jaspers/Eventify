@@ -9,7 +9,7 @@ cd server
 
 echo "Current directory: $(pwd)"
 echo "Running Gradle 'spotless, checkstyle, PMD and spotbugs' tasks..."
-if ! ./gradlew spotlessCheck checkQualityMain -xcyclonedxBom -xspotbugsMain; then
+if ! ./gradlew spotlessCheck checkQualityMain -xspotbugsMain; then
   echo "Gradle code quality checks failed. Please fix the issues and try again."
   exit 1
 fi
