@@ -1,4 +1,4 @@
-name: Pull Request Clean Build
+name: Run Integration Tests & Build Artifacts
 
 on:
   workflow_dispatch:

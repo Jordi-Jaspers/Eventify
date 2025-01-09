@@ -79,11 +79,7 @@ All the extra help is welcome! Just follow the steps in the [**CONTRIBUTING**](C
 
 #### Any more ideas for features?
 
-Feel free to create an issue and we can discuss it further or contact me directly.
-
-#### Current Contributors
-
-- [Giuseppe Collura](https://github.com/GiuseppeCollura "Github Page")
+Feel free to create an issue, and we can discuss it further or contact me directly.
 
 ## Stack 🛠️
 

@@ -1,4 +1,4 @@
-name: Pull Request Quality Check
+name: Run Quality Checks
 on:
   workflow_dispatch:
   pull_request:
