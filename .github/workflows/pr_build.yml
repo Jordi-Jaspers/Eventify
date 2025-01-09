@@ -1,4 +1,4 @@
-name: Run Integration Tests & Build Artifacts
+name: Integration Tests
 
 on:
   workflow_dispatch:
@@ -67,3 +67,11 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean build --no-daemon --stacktrace
+
+      - name: Upload Build Directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_number }}
+          path: ./build/
+          retention-days: 30
+
