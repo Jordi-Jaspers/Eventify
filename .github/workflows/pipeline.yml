@@ -11,15 +11,15 @@ on:
 
 jobs:
   client-quality:
-    uses: ./.github/workflows/client-quality.yml
+    uses: ./.github/workflows/client-quality-check.yml
 
   server-quality:
-    uses: ./.github/workflows/server-quality.yml
+    uses: ./.github/workflows/server-quality-check.yml
 
   client-build:
     needs: client-quality
-    uses: ./.github/workflows/client-build.yml
+    uses: ./.github/workflows/client-build-artifacts.yml
 
   server-build:
     needs: server-quality
-    uses: ./.github/workflows/server-build.yml
+    uses: ./.github/workflows/server-build-artifacts.yml
