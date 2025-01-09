@@ -3,6 +3,10 @@
 </p>
 <p align="center">Eventify.io - An intuitive tool to manage and monitor your services via intelligent event creation.</p>
 <p align="center">
+    <img src="https://github.com/Jordi-Jaspers/Eventify/actions/workflows/pr_build.yml/badge.svg?branch=develop" alt="Integration Tests" >    
+    <img src="https://github.com/Jordi-Jaspers/Eventify/actions/workflows/pr_quality.yml/badge.svg?branch=develop" alt="Quality Check" >
+</p>
+<p align="center">
     <img alt="license" src="https://img.shields.io/github/license/Jordi-Jaspers/Eventify"> 
     <img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/Jordi-Jaspers/Eventify?sort=semver">
     <img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/Jordi-Jaspers/Eventify?color=red">

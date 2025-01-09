@@ -37,6 +37,13 @@ jobs:
         working-directory: ./server
     env:
       SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+      TESTCONTAINERS_RYUK_DISABLED: true
+
+    services:
+      docker:
+        image: docker:20.10.24
+        options: --privileged
 
     steps:
       - name: Checkout repository
@@ -51,6 +58,12 @@ jobs:
           cache-dependency-path: |
             server/*.gradle*
             server/**/gradle-wrapper.properties
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build with Gradle
         run: ./gradlew clean build --no-daemon --stacktrace
