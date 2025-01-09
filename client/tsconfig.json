@@ -6,7 +6,7 @@
 		"allowUnusedLabels": false,
 		"declaration": true,
 		"checkJs": true,
-		"esModuleInterop": true,
+		"esModuleInterop": false,
 		"isolatedModules": true,
 		"lib": ["dom", "dom.iterable", "esnext"],
 		"forceConsistentCasingInFileNames": true,
@@ -18,7 +18,7 @@
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"pretty": true,
-		"allowImportingTsExtension": true,
+		"allowImportingTsExtensions": true,
 		"incremental": true,
 		"moduleResolution": "bundler"
 	}

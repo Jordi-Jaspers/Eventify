@@ -1,5 +1,5 @@
 <script lang="ts">
-import {user} from "$lib/store/global.js";
+	import { user } from '$lib/store/global.js';
 </script>
 
 {#if user}

@@ -17,3 +17,7 @@ export function debounce<T extends (...args: any[]) => any>(func: T, waitFor: nu
 		timeout = setTimeout(() => func(...args), waitFor);
 	};
 }
+
+export function toMap(obj: Record<string, any>): Map<string, any> {
+	return new Map(Object.entries(obj));
+}

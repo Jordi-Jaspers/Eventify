@@ -10,6 +10,6 @@ export class Options {
 	}
 
 	getAuthorityOptions(): string[] {
-		return this._options.authorities ?? [];
+		return this._options.get('authorities') ?? [];
 	}
 }

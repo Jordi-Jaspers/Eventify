@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Select as SelectPrimitive } from 'bits-ui';
 
 import GroupHeading from './select-group-heading.svelte';

@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Logo from '$lib/assets/images/404.webp?enhanced';
-	import {CLIENT_ROUTES} from "$lib/config/paths";
-	import {goto} from "$app/navigation";
+	import { CLIENT_ROUTES } from '$lib/config/paths';
+	import { goto } from '$app/navigation';
 
 	function routeHomepage() {
 		goto(CLIENT_ROUTES.LOGIN_PAGE.path);
 	}
 </script>
 
-{#if $page.status === 404}
+{#if page.status === 404}
 	<div class="flex h-screen flex-col items-center justify-center space-y-4">
 		<div class="w-max-[350px] mx-auto flex flex-col justify-center space-y-6">
 			<enhanced:img src={Logo} alt="Eventify Logo" />

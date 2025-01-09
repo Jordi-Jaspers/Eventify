@@ -13,6 +13,8 @@
 		"preview": "vite preview",
 		"prepare": "cd .. && husky client/.husky",
 		"pre-commit": "lint-staged",
+		"format": "prettier --write .",
+		"format-check": "prettier --check .",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},

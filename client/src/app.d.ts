@@ -1,9 +1,7 @@
-declare global {
-	declare module '*.png?enhanced';
-	namespace App {
-		interface Locals {
-			user?: UserDetailsResponse;
-		}
+declare module '*.png?enhanced';
+declare namespace App {
+	interface Locals {
+		user: UserDetailsResponse | null;
 	}
 }
 
