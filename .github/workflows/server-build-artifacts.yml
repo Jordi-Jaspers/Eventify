@@ -12,6 +12,11 @@ on:
     paths:
       - 'server/**'
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build-server:
     name: Build the Server
@@ -80,10 +85,8 @@ jobs:
 
       - name: Upload reports
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           name: server-build-report-${{ github.sha }}
-          path: |
-            ./server/build/reports
+          path: ./server/build/reports
           retention-days: 7
-          if-no-files-found: warn
