@@ -78,8 +78,8 @@ jobs:
 
       - name: Create indexes
         run: |
-          main-branch/.github/scripts/create-indexes.sh "${{ steps.build_info.outputs.run_id }}"
-          main-branch/.github/scripts/create-main-indexes.sh "${{ steps.build_info.outputs.run_id }}"
+          "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-indexes.sh" "${{ steps.build_info.outputs.run_id }}"
+          "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-main-indexes.sh" "${{ steps.build_info.outputs.run_id }}"
         working-directory: gh-pages
 
       - name: Commit and push changes
