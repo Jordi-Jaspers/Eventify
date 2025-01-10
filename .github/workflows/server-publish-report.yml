@@ -21,23 +21,31 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Download Quality Report
+        if: always()
         uses: actions/download-artifact@v4
         with:
           name: server-quality-report-${{ github.sha }}
           path: artifact/quality
+        continue-on-error: true
 
       - name: Download Test Report
+        if: always()
         uses: actions/download-artifact@v4
         with:
           name: server-test-report-${{ github.sha }}
           path: artifact/tests
-        continue-on-error: true  # In case build step didn't run
+        continue-on-error: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: artifact
 
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
       - name: Print deployment URL
+        if: success() && steps.deployment.outputs.page_url != ''
         run: |
-          echo "📊 Report deployed to: ${{ steps.deployment.outputs.page_url }}"
+          echo "::notice title=📊 Report URL::${{ steps.deployment.outputs.page_url }}"
