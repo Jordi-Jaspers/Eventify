@@ -22,12 +22,12 @@ import static org.jordijaspers.eventify.common.constants.Constants.Email.OWASP_E
 public class AuthenticationValidator implements Validator<Object> {
 
     // Error messages
-    private static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
-    private static final String EMAIL_MUST_NOT_BE_EMPTY = "email must not be empty";
-    private static final String EMAIL_MUST_CONTAIN_AN_AT = "email must contain an @";
-    private static final String EMAIL_MUST_BE_A_VALID_EMAIL_ADDRESS = "email is not a valid email address";
-    private static final String PASSWORD_MUST_NOT_BE_EMPTY = "password cannot be empty";
-    private static final String PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION = "Password does not match the confirmation";
+    public static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
+    public static final String EMAIL_MUST_NOT_BE_EMPTY = "email must not be empty";
+    public static final String EMAIL_MUST_CONTAIN_AN_AT = "email must contain an @";
+    public static final String EMAIL_MUST_BE_A_VALID_EMAIL_ADDRESS = "email is not a valid email address";
+    public static final String PASSWORD_MUST_NOT_BE_EMPTY = "password cannot be empty";
+    public static final String PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION = "Password does not match the confirmation";
 
     // Fields
     private static final String EMAIL = "email";

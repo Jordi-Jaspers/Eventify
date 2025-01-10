@@ -1,6 +1,11 @@
 package org.jordijaspers.smc.eventify.support;
 
 import org.jordijaspers.eventify.Application;
+import org.jordijaspers.eventify.api.authentication.service.AuthenticationService;
+import org.jordijaspers.eventify.api.token.repository.TokenRepository;
+import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;
+import org.jordijaspers.eventify.api.user.repository.UserRepository;
+import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.smc.eventify.support.config.BeanConfiguration;
 import org.jordijaspers.smc.eventify.support.container.TimescaleContainer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,4 +48,18 @@ public class TestContextInitializer {
 
     // ========================= APPLICATION =========================
 
+    @Autowired
+    protected AuthenticationService authenticationService;
+
+    @Autowired
+    protected UserMapper userMapper;
+
+    @Autowired
+    protected UserRepository userRepository;
+
+    @Autowired
+    protected UserService userService;
+
+    @Autowired
+    protected TokenRepository tokenRepository;
 }

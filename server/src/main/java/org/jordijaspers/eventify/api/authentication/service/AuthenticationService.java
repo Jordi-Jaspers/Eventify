@@ -12,6 +12,7 @@ import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.common.exception.AuthorizationException;
 import org.jordijaspers.eventify.common.exception.InvalidJwtException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.token.model.TokenType.REFRESH_TOKEN;
 import static org.jordijaspers.eventify.api.token.model.TokenType.USER_VALIDATION_TOKEN;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.INVALID_CREDENTIALS;
+import static org.jordijaspers.eventify.common.exception.ApiErrorCode.USER_LOCKED_ERROR;
 
 /**
  * A service to manage authentication.
@@ -125,8 +127,8 @@ public class AuthenticationService {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         } catch (final AuthenticationException exception) {
             log.error("Authorization failed for specified user '{}'", username);
-            if (exception.getCause() instanceof AuthorizationException) {
-                throw (AuthorizationException) exception.getCause();
+            if (exception instanceof LockedException) {
+                throw new AuthorizationException(USER_LOCKED_ERROR, exception);
             }
             throw new AuthorizationException(INVALID_CREDENTIALS, exception);
         }

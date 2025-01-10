@@ -137,7 +137,6 @@ dependencies {
 
     testImplementation("io.rest-assured", "rest-assured", retrieve("restAssuredVersion"))
     testImplementation("io.rest-assured", "spring-mock-mvc", retrieve("restAssuredVersion"))
-
     // ======= LIQUIBASE PLUGIN DEPENDENCIES =======
     liquibaseRuntime("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
     liquibaseRuntime("info.picocli", "picocli", retrieve("picocliVersion"))

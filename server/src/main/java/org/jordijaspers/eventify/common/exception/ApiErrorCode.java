@@ -33,9 +33,9 @@ public enum ApiErrorCode implements ApiError {
         "ERR-0006",
         "Invalid Credentials: Username or password is incorrect."
     ),
-    USER_DISABLED_ERROR(
+    USER_LOCKED_ERROR(
         "ERR-0007",
-        "Authorization failed: your account has been disabled."
+        "Authorization failed: your account has been locked by the admin."
     ),
     USER_UNVALIDATED_ERROR(
         "ERR-0008",

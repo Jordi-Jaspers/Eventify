@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,4 +41,15 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             """
     )
     Optional<Token> findByValue(String token);
+
+    @Transactional
+    @Query(
+        """
+            FROM Token t
+                LEFT JOIN FETCH t.user user
+                LEFT JOIN FETCH user.teams teams
+                WHERE t.expiresAt > CURRENT_TIMESTAMP AND user.email = :email
+            """
+    )
+    Optional<Token> findByEmail(@NonNull String email);
 }

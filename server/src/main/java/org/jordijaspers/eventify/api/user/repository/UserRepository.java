@@ -2,6 +2,7 @@ package org.jordijaspers.eventify.api.user.repository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,10 +44,26 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(@NonNull String email);
 
     /**
+     * Find all users by email containing a certain string.
+     *
+     * @param testEmail the string to search for.
+     * @return the users.
+     */
+    @Query("""
+        FROM User u
+        LEFT JOIN FETCH u.role
+        LEFT JOIN FETCH u.teams
+        WHERE u.email LIKE %:testEmail%
+        """)
+    List<User> findAllByEmailContaining(@NonNull String testEmail);
+
+    /**
      * Delete unvalidated accounts that are older than 1 month.
      */
     @Modifying
     @Transactional
     @Query("DELETE FROM User u WHERE u.validated = false AND u.created <= :limit")
     void deleteUnvalidatedAccounts(@NonNull LocalDateTime limit);
+
+
 }

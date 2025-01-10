@@ -5,9 +5,7 @@ import io.restassured.module.mockmvc.response.MockMvcResponse;
 import java.io.IOException;
 
 import org.jordijaspers.smc.eventify.support.IntegrationTest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -19,6 +17,8 @@ import static org.jordijaspers.smc.eventify.support.container.TimescaleContainer
 /**
  * Test class to verify the context is loaded correctly.
  */
+@Order(1)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ApplicationContextTest extends IntegrationTest {
 
     @Test

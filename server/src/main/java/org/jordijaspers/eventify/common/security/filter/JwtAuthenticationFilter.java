@@ -100,7 +100,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final User user = userService.loadUserByUsername(email);
 
             if (tokenService.isValidAccessToken(jwt, user)) {
-                if (!isUserRestricted(user, request, response)) {
+                if (!isUserRestricted(user, response)) {
                     log.debug("Authentication successful for user '{}'. Setting security context.", user.getUsername());
                     SecurityContextHolder.getContext().setAuthentication(getAuthentication(user, request));
                 } else {
@@ -153,14 +153,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return authentication;
     }
 
-    private boolean isUserRestricted(
-        final User user,
-        final HttpServletRequest request,
-        final HttpServletResponse response) throws IOException {
-
+    private boolean isUserRestricted(final User user, final HttpServletResponse response) {
         if (!user.isEnabled()) {
             log.debug("User '{}' is disabled.", user.getUsername());
-            respondWithError(response, ApiErrorCode.USER_DISABLED_ERROR, HttpStatus.FORBIDDEN, "User account is disabled.");
+            respondWithError(response, ApiErrorCode.USER_LOCKED_ERROR, HttpStatus.FORBIDDEN, "User account is disabled.");
             return true;
         }
 
