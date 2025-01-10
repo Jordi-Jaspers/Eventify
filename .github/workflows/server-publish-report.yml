@@ -25,6 +25,7 @@ jobs:
         run: |
           echo "timestamp=$(date +%Y-%m-%d_%H-%M-%S)" >> $GITHUB_OUTPUT
           echo "run_id=${{ github.run_id }}" >> $GITHUB_OUTPUT
+          echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
       - name: Configure Git
         run: |
@@ -103,7 +104,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: gh-pages
+          path: gh-pages/reports
 
       - name: Deploy to GitHub Pages
         id: deployment
