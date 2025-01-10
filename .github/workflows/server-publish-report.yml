@@ -26,18 +26,38 @@ jobs:
           echo "timestamp=$(date +%Y-%m-%d_%H-%M-%S)" >> $GITHUB_OUTPUT
           echo "run_id=${{ github.run_id }}" >> $GITHUB_OUTPUT
 
-      - name: Checkout repository
+      # First checkout main branch for scripts
+      - name: Checkout main for scripts
         uses: actions/checkout@v4
         with:
-          sparse-checkout: |
-            .github
+          ref: ${{ github.ref }}
+          path: main-branch
 
-      - name: Create reports directory
+      # Then checkout gh-pages for reports
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-branch
+        continue-on-error: true
+
+      - name: Create reports directory and preserve existing reports
         run: |
+          # Initialize reports directory
           mkdir -p reports
-          if [ -d "gh-pages" ]; then
-            cp -r gh-pages/* reports/ || true
+          
+          # If gh-pages exists and has content, copy everything except the current run
+          if [ -d "gh-pages-branch" ] && [ -d "gh-pages-branch/reports" ]; then
+            echo "Found existing reports, preserving them..."
+            cp -r gh-pages-branch/reports/* reports/ || true
           fi
+          
+          # Ensure the new run directory exists
+          mkdir -p reports/${{ steps.build_info.outputs.run_id }}
+          
+          # Debug output
+          echo "Current reports directory structure:"
+          ls -la reports/
 
       - name: Download Quality Report
         if: always()
@@ -55,19 +75,16 @@ jobs:
           path: reports/${{ steps.build_info.outputs.run_id }}/tests
         continue-on-error: true
 
-      - name: Debug
-        run: |
-          ls -la .
-
       - name: Make scripts executable
         run: |
-          chmod +x .github/scripts/create-indexes.sh
-          chmod +x .github/scripts/create-main-indexes.sh
+          chmod +x main-branch/.github/scripts/create-indexes.sh
+          chmod +x main-branch/.github/scripts/create-main-indexes.sh
 
       - name: Create indexes
         run: |
-          .github/scripts/create-indexes.sh "${{ steps.build_info.outputs.run_id }}"
-          .github/scripts/create-main-indexes.sh "${{ steps.build_info.outputs.run_id }}"
+          main-branch/.github/scripts/create-indexes.sh "${{ steps.build_info.outputs.run_id }}"
+          main-branch/.github/scripts/create-main-indexes.sh "${{ steps.build_info.outputs.run_id }}"
+        working-directory: .
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
