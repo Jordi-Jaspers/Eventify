@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -30,45 +30,36 @@ jobs:
       - name: Checkout main for scripts
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
           path: main-branch
 
-      # Then checkout gh-pages for reports
-      - name: Checkout gh-pages
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: gh-pages-branch
-        continue-on-error: true
 
-      - name: Create reports directory and preserve existing reports
+      # Configure Git
+      - name: Configure Git
         run: |
-          # Initialize reports directory
-          mkdir -p reports
-          
-          # Debug output
-          echo "Current reports directory structure:"
-          ls -la gh-pages-branch/ 
-          
-          # If gh-pages exists and has content, copy everything except the current run
-          if [ -d "gh-pages-branch" ] && [ -d "gh-pages-branch/reports" ]; then
-            echo "Found existing reports, preserving them..."
-            cp -r gh-pages-branch/reports/* reports/ || true
-          fi
-          
-          # Ensure the new run directory exists
-          mkdir -p reports/${{ steps.build_info.outputs.run_id }}
-          
-          # Debug output
-          echo "Current reports directory structure:"
-          ls -la reports/
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Initialize and checkout gh-pages
+      - name: Setup gh-pages branch
+        run: |
+          # Clone the repository again for gh-pages
+          git clone --single-branch --branch gh-pages https://github.com/${{ github.repository }}.git gh-pages || {
+            # If gh-pages doesn't exist, create it
+            git clone https://github.com/${{ github.repository }}.git gh-pages
+            cd gh-pages
+            git checkout --orphan gh-pages
+            git reset --hard
+            git commit --allow-empty -m "Initialize gh-pages branch"
+            git push origin gh-pages
+            cd ..
+          }
 
       - name: Download Quality Report
         if: always()
         uses: actions/download-artifact@v4
         with:
           name: server-quality-report
-          path: reports/${{ steps.build_info.outputs.run_id }}/quality
+          path: gh-pages/reports/${{ steps.build_info.outputs.run_id }}/quality
         continue-on-error: true
 
       - name: Download Test Report
@@ -76,7 +67,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: server-test-report
-          path: reports/${{ steps.build_info.outputs.run_id }}/tests
+          path: gh-pages/reports/${{ steps.build_info.outputs.run_id }}/tests
         continue-on-error: true
 
       - name: Make scripts executable
@@ -88,12 +79,21 @@ jobs:
         run: |
           main-branch/.github/scripts/create-indexes.sh "${{ steps.build_info.outputs.run_id }}"
           main-branch/.github/scripts/create-main-indexes.sh "${{ steps.build_info.outputs.run_id }}"
-        working-directory: .
+        working-directory: gh-pages
 
+      # Commit and push the new reports
+      - name: Commit and push changes
+        run: |
+          cd gh-pages
+          git add .
+          git commit -m "Add report for run ${{ steps.build_info.outputs.run_id }}" || echo "No changes to commit"
+          git push https://${{ github.actor }}:${{ github.token }}@github.com/${{ github.repository }}.git gh-pages
+
+      # Now deploy to GitHub Pages
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: reports
+          path: gh-pages/reports
 
       - name: Deploy to GitHub Pages
         id: deployment
