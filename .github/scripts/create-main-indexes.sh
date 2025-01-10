@@ -12,17 +12,79 @@ create_main_indexes() {
 <head>
   <title>Build Report - Run $run_id</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 2em; }
-    .back-link { margin-bottom: 2em; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .back-link {
+      margin-bottom: 2em;
+      display: inline-block;
+      padding: 0.5em 1em;
+      color: #666;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #f0f0f0;
+    }
+    .back-link:before {
+      content: '←';
+      margin-right: 0.5em;
+    }
+    h1 {
+      color: #2c3e50;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.5em;
+    }
+    h2 {
+      color: #34495e;
+      margin-top: 2em;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 0.5em 0;
+    }
+    li a {
+      display: inline-block;
+      padding: 0.5em;
+      color: #2980b9;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    li a:hover {
+      background-color: #f7f9fb;
+    }
+    .report-link {
+      display: inline-block;
+      padding: 0.7em 1.2em;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .report-link:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
 <body>
-  <div class="back-link"><a href="../">← Back to all reports</a></div>
+  <a class="back-link" href="../">Back to all reports</a>
   <h1>Build Report - Run $run_id</h1>
-  <h2>Reports:</h2>
+  <h2>Available Reports</h2>
   <ul>
-    <li><a href="quality/">Quality Reports</a></li>
-    <li><a href="tests/">Test Reports</a></li>
+    <li><a href="quality/" class="report-link">Quality Reports</a></li>
+    <li><a href="tests/" class="report-link">Test Results</a></li>
   </ul>
 </body>
 </html>
@@ -35,13 +97,42 @@ EOF
 <head>
   <title>Build Reports</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 2em; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #2c3e50;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.5em;
+    }
+    h2 {
+      color: #34495e;
+      margin-top: 2em;
+    }
+    .build-link {
+      display: inline-block;
+      padding: 0.7em 1.2em;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .build-link:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
 <body>
   <h1>Build Reports</h1>
-  <h2>Latest Build:</h2>
-  <p><a href="$run_id/">Run $run_id</a></p>
+  <h2>Latest Build</h2>
+  <p><a href="$run_id/" class="build-link">Run $run_id</a></p>
 </body>
 </html>
 EOF

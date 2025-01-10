@@ -56,114 +56,15 @@ jobs:
           path: reports/${{ steps.build_info.outputs.run_id }}/tests
         continue-on-error: true
 
-      - name: Create index files for reports
+      - name: Make scripts executable
         run: |
-          # Function to create index for a directory
-          create_index() {
-            local dir=$1
-            local title=$2
-            local index_file="$dir/index.html"
-          
-            # Get list of subdirectories and files
-            local items=($(find "$dir" -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | sort))
-            local files=($(find "$dir" -maxdepth 1 -mindepth 1 -type f -name "*.html" ! -name "index.html" -printf "%f\n" | sort))
-          
-            # Create index file
-            cat > "$index_file" << EOF
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>$title</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 2em; }
-              .back-link { margin-bottom: 2em; }
-            </style>
-          </head>
-          <body>
-            <div class="back-link"><a href="../">← Back to parent directory</a></div>
-            <h1>$title</h1>
-          EOF
-          
-            # Add directories
-            if [ ${#items[@]} -gt 0 ]; then
-              echo "<h2>Directories:</h2><ul>" >> "$index_file"
-              for item in "${items[@]}"; do
-                echo "<li><a href=\"$item/\">$item</a></li>" >> "$index_file"
-              done
-              echo "</ul>" >> "$index_file"
-            fi
-          
-            # Add files
-            if [ ${#files[@]} -gt 0 ]; then
-              echo "<h2>Reports:</h2><ul>" >> "$index_file"
-              for file in "${files[@]}"; do
-                echo "<li><a href=\"$file\">$file</a></li>" >> "$index_file"
-              done
-              echo "</ul>" >> "$index_file"
-            fi
-          
-            # Close HTML
-            echo "</body></html>" >> "$index_file"
-          }
+          chmod +x .github/scripts/create-indexes.sh
+          chmod +x .github/scripts/create-main-indexes.sh
 
-          # Create indexes for quality report directories
-          if [ -d "reports/${{ steps.build_info.outputs.run_id }}/quality" ]; then
-            # Main quality index
-            create_index "reports/${{ steps.build_info.outputs.run_id }}/quality" "Quality Reports"
-          
-            # Create index for each subdirectory in quality
-            for dir in reports/${{ steps.build_info.outputs.run_id }}/quality/*/; do
-              if [ -d "$dir" ]; then
-                create_index "$dir" "$(basename "$dir") Report"
-              fi
-            done
-          fi
-
-          # Create index for test reports
-          if [ -d "reports/${{ steps.build_info.outputs.run_id }}/tests" ]; then
-            create_index "reports/${{ steps.build_info.outputs.run_id }}/tests" "Test Reports"
-          fi
-
-          # Create build-specific index
-          cat > reports/${{ steps.build_info.outputs.run_id }}/index.html << EOF
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>Build Report - Run ${{ steps.build_info.outputs.run_id }}</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 2em; }
-              .back-link { margin-bottom: 2em; }
-            </style>
-          </head>
-          <body>
-            <div class="back-link"><a href="../">← Back to all reports</a></div>
-            <h1>Build Report - Run ${{ steps.build_info.outputs.run_id }}</h1>
-            <h2>Reports:</h2>
-            <ul>
-              <li><a href="quality/">Quality Reports</a></li>
-              <li><a href="tests/">Test Reports</a></li>
-            </ul>
-          </body>
-          </html>
-          EOF
-
-          # Create main index
-          cat > reports/index.html << EOF
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>Build Reports</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 2em; }
-            </style>
-          </head>
-          <body>
-            <h1>Build Reports</h1>
-            <h2>Latest Build:</h2>
-            <p><a href="${{ steps.build_info.outputs.run_id }}/">Run ${{ steps.build_info.outputs.run_id }}</a></p>
-          </body>
-          </html>
-          EOF
+      - name: Create indexes
+        run: |
+          .github/scripts/create-indexes.sh "${{ steps.build_info.outputs.run_id }}"
+          .github/scripts/create-main-indexes.sh "${{ steps.build_info.outputs.run_id }}"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
