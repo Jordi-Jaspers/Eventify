@@ -30,5 +30,22 @@ jobs:
             server/*.gradle*
             server/**/gradle-wrapper.properties
 
-      - name: Run quality checks
-        run: ./gradlew checkQualityMain
+      - name: Run Quality Checks
+        run: ./gradlew spotlessCheck checkQualityMain
+
+      - name: Check Quality report Availability
+        id: check_reports
+        run: |
+          if [ -d "./build/reports" ]; then
+            echo "has_reports=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_reports=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Quality report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-quality-report-${{ github.sha }}
+          path: ./server/build/reports
+          retention-days: 7

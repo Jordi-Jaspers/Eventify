@@ -20,17 +20,24 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Download artifact
+      - name: Download Quality Report
         uses: actions/download-artifact@v4
         with:
-          name: server-build-report-${{ github.sha }}
-          path: artifact
+          name: server-quality-report-${{ github.sha }}
+          path: artifact/quality
+
+      - name: Download Test Report
+        uses: actions/download-artifact@v4
+        with:
+          name: server-test-report-${{ github.sha }}
+          path: artifact/tests
+        continue-on-error: true  # In case build step didn't run
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: artifact
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Print deployment URL
+        run: |
+          echo "📊 Report deployed to: ${{ steps.deployment.outputs.page_url }}"

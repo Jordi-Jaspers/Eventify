@@ -25,5 +25,6 @@ jobs:
     uses: ./.github/workflows/server-build-artifacts.yml
 
   server-publish-report:
-    needs: server-build-artifacts
+    if: always()  # This ensures it runs even if previous jobs fail
+    needs: [server-quality-check, server-build-artifacts]  # Need both to access artifacts
     uses: ./.github/workflows/server-publish-report.yml
