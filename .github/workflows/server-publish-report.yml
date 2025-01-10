@@ -50,10 +50,14 @@ jobs:
             cd gh-pages
             git checkout --orphan gh-pages
             git reset --hard
+            mkdir -p reports  # Create reports directory
             git commit --allow-empty -m "Initialize gh-pages branch"
             git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gh-pages
             cd ..
           }
+          
+          # Ensure reports directory exists
+          mkdir -p gh-pages/reports
 
       - name: Download Quality Report
         if: always()
@@ -78,9 +82,16 @@ jobs:
 
       - name: Create indexes
         run: |
+          # Ensure we're in the correct directory
+          cd gh-pages/reports
+          
+          # Debug current location and content
+          pwd
+          ls -R
+          
+          # Create indexes using absolute paths to scripts
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-indexes.sh" "${{ steps.build_info.outputs.run_id }}"
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-main-indexes.sh" "${{ steps.build_info.outputs.run_id }}"
-        working-directory: gh-pages
 
       - name: Commit and push changes
         run: |

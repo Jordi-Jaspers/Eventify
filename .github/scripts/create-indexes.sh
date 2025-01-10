@@ -170,7 +170,7 @@ EOF
 # Create all necessary indexes
 create_all_indexes() {
   local run_id=$1
-  local reports_dir="reports/$run_id"
+  local base_dir="$run_id"
 
   # Create reports directory if it doesn't exist
   mkdir -p "$reports_dir"
