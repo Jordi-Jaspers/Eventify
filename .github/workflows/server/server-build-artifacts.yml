@@ -1,4 +1,4 @@
-name: Build Server & Run Tests
+name: Build Server Artifacts & Run Tests
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: Build Client & Run Tests
+name: Build Client Artifacts & Run Tests
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: Server Quality Check
+name: Check Server Code Quality
 
 on:
   workflow_call:
