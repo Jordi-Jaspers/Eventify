@@ -46,6 +46,10 @@ jobs:
           # Initialize reports directory
           mkdir -p reports
           
+          # Debug output
+          echo "Current reports directory structure:"
+          ls -la gh-pages-branch/ 
+          
           # If gh-pages exists and has content, copy everything except the current run
           if [ -d "gh-pages-branch" ] && [ -d "gh-pages-branch/reports" ]; then
             echo "Found existing reports, preserving them..."
