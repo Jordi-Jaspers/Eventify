@@ -55,12 +55,6 @@ jobs:
             cd ..
           }
 
-      - name: Debug Log
-        run: |
-          echo "Run ID: ${{ steps.build_info.outputs.run_id }}"
-          echo "Timestamp: ${{ steps.build_info.outputs.timestamp }}"
-          ls -la gh-pages/reports/
-
       - name: Download Quality Report
         if: always()
         uses: actions/download-artifact@v4
