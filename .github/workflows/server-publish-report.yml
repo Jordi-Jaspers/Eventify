@@ -32,7 +32,6 @@ jobs:
         with:
           path: main-branch
 
-
       # Configure Git
       - name: Configure Git
         run: |
@@ -42,15 +41,20 @@ jobs:
       # Initialize and checkout gh-pages
       - name: Setup gh-pages branch
         run: |
-          # Clone the repository again for gh-pages
-          git clone --single-branch --branch gh-pages https://github.com/${{ github.repository }}.git gh-pages || {
-            # If gh-pages doesn't exist, create it
-            git clone https://github.com/${{ github.repository }}.git gh-pages
+          # Configure git with token-based authentication
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Try to clone gh-pages branch
+          git clone --single-branch --branch gh-pages "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gh-pages || {
+            echo "gh-pages branch not found, creating it..."
+            # Create and initialize gh-pages branch
+            git clone "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gh-pages
             cd gh-pages
             git checkout --orphan gh-pages
             git reset --hard
             git commit --allow-empty -m "Initialize gh-pages branch"
-            git push origin gh-pages
+            git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gh-pages
             cd ..
           }
 
@@ -85,9 +89,10 @@ jobs:
       - name: Commit and push changes
         run: |
           cd gh-pages
+          mkdir -p reports
           git add .
           git commit -m "Add report for run ${{ steps.build_info.outputs.run_id }}" || echo "No changes to commit"
-          git push https://${{ github.actor }}:${{ github.token }}@github.com/${{ github.repository }}.git gh-pages
+          git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gh-pages
 
       # Now deploy to GitHub Pages
       - name: Upload Pages artifact
