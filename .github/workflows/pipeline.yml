@@ -24,6 +24,6 @@ jobs:
     needs: server-quality
     uses: ./.github/workflows/server-build-artifacts.yml
 
-  server-deploy-artifacts:
+  server-deploy-report:
     needs: server-build
-    uses: ./.github/workflows/server-build-artifacts.yml
+    uses: ./.github/workflows/server-deploy-report.yml
