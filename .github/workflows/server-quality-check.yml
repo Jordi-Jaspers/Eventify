@@ -34,6 +34,7 @@ jobs:
         run: ./gradlew spotlessCheck checkQualityMain
 
       - name: Check Quality report Availability
+        if: always()
         id: check_reports
         run: |
           if [ -d "./build/reports" ]; then
@@ -43,7 +44,7 @@ jobs:
           fi
 
       - name: Upload Quality report
-        if: success()
+        if: always() && steps.check_reports.outputs.has_reports == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: server-quality-report-${{ github.sha }}

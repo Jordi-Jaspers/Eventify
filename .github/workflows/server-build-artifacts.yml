@@ -64,6 +64,7 @@ jobs:
           if-no-files-found: error
 
       - name: Check Test Report Availability
+        if: always()
         id: check_reports
         run: |
           if [ -d "./build/reports/tests" ]; then
@@ -73,7 +74,7 @@ jobs:
           fi
 
       - name: Upload Test Reports
-        if: success()
+        if: always() && steps.check_reports.outputs.has_reports == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: server-test-report-${{ github.sha }}
