@@ -1,4 +1,4 @@
-name: Deploy Server Report
+name: Publish Server Report
 
 on:
   workflow_call:
@@ -26,12 +26,11 @@ jobs:
           name: server-build-report-${{ github.sha }}
           path: artifact
 
-      - name: Debug
-        run: |
-          ls ./artifact    
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifact
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: artifact
