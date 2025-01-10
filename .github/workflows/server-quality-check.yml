@@ -47,6 +47,6 @@ jobs:
         if: always() && steps.check_reports.outputs.has_reports == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: server-quality-report-${{ github.sha }}
+          name: server-quality-report
           path: ./server/build/reports
           retention-days: 7
