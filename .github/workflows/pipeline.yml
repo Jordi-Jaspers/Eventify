@@ -11,19 +11,19 @@ on:
 
 jobs:
   client-quality:
-    uses: ./.github/workflows/client/client-quality-check.yml
+    uses: ./.github/workflows/client-quality-check.yml
 
   client-build:
     needs: client-quality
-    uses: ./.github/workflows/client/client-build-artifacts.yml
+    uses: ./.github/workflows/client-build-artifacts.yml
 
   server-quality:
-    uses: ./.github/workflows/server/server-quality-check.yml
+    uses: ./.github/workflows/server-quality-check.yml
 
   server-build:
     needs: server-quality
-    uses: ./.github/workflows/server/server-build-artifacts.yml
+    uses: ./.github/workflows/server-build-artifacts.yml
 
   server-deploy-artifacts:
     needs: server-build
-    uses: ./.github/workflows/server/server-build-artifacts.yml
+    uses: ./.github/workflows/server-build-artifacts.yml
