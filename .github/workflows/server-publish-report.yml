@@ -28,8 +28,7 @@ jobs:
 
       - name: Debug
         run: |
-          ls -R .
-          ls -R ./artifact    
+          ls ./artifact    
 
       - name: Deploy to GitHub Pages
         id: deployment
