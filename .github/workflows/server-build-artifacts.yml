@@ -79,7 +79,7 @@ jobs:
           fi
 
       - name: Upload reports
-        if: steps.check_reports.outputs.has_reports == 'true'
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: server-build-report-${{ github.sha }}

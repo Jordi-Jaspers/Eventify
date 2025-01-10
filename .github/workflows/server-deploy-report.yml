@@ -15,35 +15,35 @@ on:
 jobs:
   deploy-reports:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     permissions:
       contents: write
 
     steps:
-      - name: Clean old reports
-        run: |
-          cd gh-pages/test-reports
-          # Keep only the last 30 days of reports
-          find . -maxdepth 1 -type d -mtime +30 -exec rm -rf {} +
-        continue-on-error: true
-
-      - name: Download reports artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: server-build-report-${{ github.event.workflow_run.head_sha }}
-          path: reports
-
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
 
+      - name: Download reports artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: server-build-report-${{ github.sha }}
+          path: reports
+
+      - name: Clean old reports
+        run: |
+          if [ -d "gh-pages/test-reports" ]; then
+            cd gh-pages/test-reports
+            # Keep only the last 30 days of reports
+            find . -maxdepth 1 -type d -mtime +30 -exec rm -rf {} +
+          fi
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./reports
-          destination_dir: test-reports/${{ github.event.workflow_run.head_sha }}
+          destination_dir: test-reports/${{ github.sha }}
           keep_files: true
