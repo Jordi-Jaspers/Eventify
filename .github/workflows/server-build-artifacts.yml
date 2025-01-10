@@ -77,7 +77,7 @@ jobs:
 
       - name: Upload reports
         if: success()
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: server-build-report-${{ github.sha }}
           path: ./server/build/reports
