@@ -6,7 +6,6 @@ import org.jordijaspers.smc.eventify.support.container.TimescaleContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -32,16 +31,13 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 public class TestContextInitializer {
 
     // ========================= CONTAINERS =========================
-    @NonNull
     @Autowired
     protected PostgreSQLContainer<?> timescaleContainer;
 
     // ========================= CONTEXT =========================
-    @NonNull
     @Autowired
     protected WebApplicationContext applicationContext;
 
-    @NonNull
     @Autowired
     protected HawaiiFilters hawaiiFilters;
 
