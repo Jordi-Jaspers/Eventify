@@ -83,7 +83,6 @@ jobs:
         run: |
           main-branch/.github/scripts/create-indexes.sh "${{ steps.build_info.outputs.run_id }}"
           main-branch/.github/scripts/create-main-indexes.sh "${{ steps.build_info.outputs.run_id }}"
-        working-directory: gh-pages
 
       # Commit and push the new reports
       - name: Commit and push changes
