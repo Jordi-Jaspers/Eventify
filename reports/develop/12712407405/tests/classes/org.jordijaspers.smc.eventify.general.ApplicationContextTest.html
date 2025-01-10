@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - ApplicationContextTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>ApplicationContextTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/org.jordijaspers.smc.eventify.general.html">org.jordijaspers.smc.eventify.general</a> &gt; ApplicationContextTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">5</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">2.071s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+<li>
+<a href="#tab2">Standard error</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Method name</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">Spring context loads successfully</td>
+<td class="success">contextLoads()</td>
+<td class="success">0.010s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Health endpoint returns OK</td>
+<td class="success">healthEndpoint()</td>
+<td class="success">0.903s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Database connection is established with Timescale</td>
+<td class="success">testDatabaseConnection()</td>
+<td class="success">1.126s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Timescale container is loaded and running</td>
+<td class="success">testDatabaseContainer()</td>
+<td class="success">0.017s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Hawaii filters are loaded</td>
+<td class="success">testHawaiiFilters()</td>
+<td class="success">0.015s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>15:32:03,972 |-INFO in ch.qos.logback.classic.LoggerContext[default] - This is logback-classic version 1.5.12
+15:32:03,975 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - Here is a list of configurators discovered as a service, by rank: 
+15:32:03,975 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 -   org.springframework.boot.logging.logback.RootLogLevelConfigurator
+15:32:03,975 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - They will be invoked in order until ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY is returned.
+15:32:03,975 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - Constructed configurator of type class org.springframework.boot.logging.logback.RootLogLevelConfigurator
+15:32:03,983 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - org.springframework.boot.logging.logback.RootLogLevelConfigurator.configure() call lasted 0 milliseconds. ExecutionStatus=INVOKE_NEXT_IF_ANY
+15:32:03,983 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - Trying to configure with ch.qos.logback.classic.joran.SerializedModelConfigurator
+15:32:03,984 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - Constructed configurator of type class ch.qos.logback.classic.joran.SerializedModelConfigurator
+15:32:03,986 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback-test.scmo]
+15:32:03,986 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback.scmo]
+15:32:03,987 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - ch.qos.logback.classic.joran.SerializedModelConfigurator.configure() call lasted 2 milliseconds. ExecutionStatus=INVOKE_NEXT_IF_ANY
+15:32:03,987 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - Trying to configure with ch.qos.logback.classic.util.DefaultJoranConfigurator
+15:32:03,987 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - Constructed configurator of type class ch.qos.logback.classic.util.DefaultJoranConfigurator
+15:32:03,988 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback-test.xml]
+15:32:03,988 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback.xml]
+15:32:03,988 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - ch.qos.logback.classic.util.DefaultJoranConfigurator.configure() call lasted 1 milliseconds. ExecutionStatus=INVOKE_NEXT_IF_ANY
+15:32:03,988 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - Trying to configure with ch.qos.logback.classic.BasicConfigurator
+15:32:03,989 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - Constructed configurator of type class ch.qos.logback.classic.BasicConfigurator
+15:32:03,989 |-INFO in ch.qos.logback.classic.BasicConfigurator@144ab54 - Setting up default configuration.
+15:32:04,000 |-INFO in ch.qos.logback.classic.util.ContextInitializer@12968227 - ch.qos.logback.classic.BasicConfigurator.configure() call lasted 11 milliseconds. ExecutionStatus=NEUTRAL
+15:32:04,611 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@2cfa2c4f - value &quot;HUMANREADABLE&quot; substituted for &quot;${LOG_APPENDER:-HUMANREADABLE}&quot;
+15:32:04,612 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - Processing appender named [HUMANREADABLE]
+15:32:04,612 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - About to instantiate appender of type [ch.qos.logback.core.ConsoleAppender]
+15:32:04,630 |-WARN in ch.qos.logback.core.model.processor.AppenderModelHandler - Appender named [LOGSTASHENCODER] not referenced. Skipping further processing.
+15:32:04,630 |-WARN in ch.qos.logback.core.model.processor.AppenderModelHandler - Appender named [KIBANA] not referenced. Skipping further processing.
+15:32:04,630 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.keycloak] to DEBUG
+15:32:04,630 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating DEBUG level on Logger[org.keycloak] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [com.zaxxer] to INFO
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[com.zaxxer] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [javax.net.ssl] to INFO
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[javax.net.ssl] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hibernate.sql] to INFO
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.hibernate.sql] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hibernate.orm.connections.pooling] to ERROR
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating ERROR level on Logger[org.hibernate.orm.connections.pooling] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework] to INFO
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.springframework] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.web] to INFO
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.springframework.web] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.security] to INFO
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.springframework.security] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.security.access.intercept] to INFO
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.springframework.security.access.intercept] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.context.support] to ERROR
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating ERROR level on Logger[org.springframework.context.support] onto the JUL framework
+15:32:04,631 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.beans] to INFO
+15:32:04,631 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.springframework.beans] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.web.socket] to INFO
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.springframework.web.socket] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.web.socket.handler] to INFO
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.springframework.web.socket.handler] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.data.repository.config] to WARN
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating WARN level on Logger[org.springframework.data.repository.config] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.springframework.security.web.FilterChainProxy] to INFO
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.springframework.security.web.FilterChainProxy] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework] to DEBUG
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating DEBUG level on Logger[org.hawaiiframework] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.async] to DEBUG
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating DEBUG level on Logger[org.hawaiiframework.async] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.security] to DEBUG
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating DEBUG level on Logger[org.hawaiiframework.security] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.web.filter] to DEBUG
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating DEBUG level on Logger[org.hawaiiframework.web.filter] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.logging] to DEBUG
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating DEBUG level on Logger[org.hawaiiframework.logging] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.logging.web.filter] to INFO
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.hawaiiframework.logging.web.filter] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.logging.web.filter.KibanaLogCleanupFilter] to ERROR
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating ERROR level on Logger[org.hawaiiframework.logging.web.filter.KibanaLogCleanupFilter] onto the JUL framework
+15:32:04,632 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.logging.web.filter.TransactionTypeFilter] to INFO
+15:32:04,632 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[org.hawaiiframework.logging.web.filter.TransactionTypeFilter] onto the JUL framework
+15:32:04,633 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.logging.config.MediaTypeVoter] to ERROR
+15:32:04,633 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating ERROR level on Logger[org.hawaiiframework.logging.config.MediaTypeVoter] onto the JUL framework
+15:32:04,633 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.logging.LoggingClientHttpRequestInterceptor] to DEBUG
+15:32:04,633 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating DEBUG level on Logger[org.hawaiiframework.logging.LoggingClientHttpRequestInterceptor] onto the JUL framework
+15:32:04,633 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.hawaiiframework.logging.sql.StatementLoggerQueryExecutionListener] to ERROR
+15:32:04,633 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating ERROR level on Logger[org.hawaiiframework.logging.sql.StatementLoggerQueryExecutionListener] onto the JUL framework
+15:32:04,633 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@2cfa2c4f - value &quot;DEBUG&quot; substituted for &quot;${APPLICATION_LOG_LEVEL:-DEBUG}&quot;
+15:32:04,633 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [org.jordijaspers] to DEBUG
+15:32:04,633 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating DEBUG level on Logger[org.jordijaspers] onto the JUL framework
+15:32:04,633 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@2cfa2c4f - value &quot;INFO&quot; substituted for &quot;${SQL_LOG_LEVEL:-INFO}&quot;
+15:32:04,633 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [net.ttddyy.dsproxy.listener] to INFO
+15:32:04,633 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[net.ttddyy.dsproxy.listener] onto the JUL framework
+15:32:04,633 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@2cfa2c4f - value &quot;INFO&quot; substituted for &quot;${ROOT_LOG_LEVEL:-INFO}&quot;
+15:32:04,633 |-INFO in ch.qos.logback.classic.model.processor.RootLoggerModelHandler - Setting level of ROOT logger to INFO
+15:32:04,633 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6ecab872 - Propagating INFO level on Logger[ROOT] onto the JUL framework
+15:32:04,633 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@2cfa2c4f - value &quot;HUMANREADABLE&quot; substituted for &quot;${LOG_APPENDER:-HUMANREADABLE}&quot;
+15:32:04,633 |-INFO in ch.qos.logback.core.model.processor.AppenderRefModelHandler - Attaching appender named [HUMANREADABLE] to Logger[ROOT]
+15:32:04,634 |-INFO in ch.qos.logback.core.model.processor.DefaultProcessor@48eb9836 - End of configuration.
+15:32:04,634 |-INFO in org.springframework.boot.logging.logback.SpringBootJoranConfigurator@6c518474 - Registering current configuration as safe fallback point
+
+2025-01-10 15:32:04.691 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:background-preinit?[0;39m] [?[36mL:org.hibernate.validator.internal.util.Version:21?[0;39m] -
+                
+HV000001: Hibernate Validator 8.0.1.Final
+
+2025-01-10 15:32:04.774 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.smc.eventify.general.ApplicationContextTest:53?[0;39m] -
+                
+Starting ApplicationContextTest using Java 21.0.5 with PID 2126 (started by runner in /home/runner/work/Eventify/Eventify/server)
+
+2025-01-10 15:32:04.775 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.smc.eventify.general.ApplicationContextTest:54?[0;39m] -
+                
+Running with Spring Boot v3.4.1, Spring v6.2.1
+
+2025-01-10 15:32:04.778 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.smc.eventify.general.ApplicationContextTest:658?[0;39m] -
+                
+The following 2 profiles are active: &quot;development&quot;, &quot;test&quot;
+
+2025-01-10 15:32:06.688 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.testcontainers.images.PullPolicy:59?[0;39m] -
+                
+Image pull policy will be performed by: DefaultPullPolicy()
+
+2025-01-10 15:32:06.690 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.testcontainers.utility.ImageNameSubstitutor:55?[0;39m] -
+                
+Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+
+2025-01-10 15:32:06.697 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.testcontainers.DockerClientFactory:150?[0;39m] -
+                
+Testcontainers version: 1.20.4
+
+2025-01-10 15:32:07.074 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.testcontainers.dockerclient.DockerClientProviderStrategy:290?[0;39m] -
+                
+Found Docker environment with Environment variables, system properties and defaults. Resolved dockerHost=unix:///var/run/docker.sock
+
+2025-01-10 15:32:07.075 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.testcontainers.DockerClientFactory:208?[0;39m] -
+                
+Docker host IP address is localhost
+
+2025-01-10 15:32:07.093 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.testcontainers.DockerClientFactory:241?[0;39m] -
+                
+Connected to docker: 
+  Server Version: 26.1.3
+  API Version: 1.45
+  Operating System: Ubuntu 24.04.1 LTS
+  Total Memory: 15990 MB
+
+2025-01-10 15:32:07.096 ?[31mWARN?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.testcontainers.utility.ResourceReaper:89?[0;39m] -
+                
+
+********************************************************************************
+Ryuk has been disabled. This can cause unexpected behavior in your environment.
+********************************************************************************
+
+2025-01-10 15:32:07.112 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:84?[0;39m] -
+                
+Pulling docker image: timescale/timescaledb-ha:pg17. Please be patient; this may take some time but only needs to be done once.
+
+2025-01-10 15:32:08.174 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:docker-java-stream--602567843?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:47?[0;39m] -
+                
+Starting to pull image
+
+2025-01-10 15:32:08.190 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:docker-java-stream--602567843?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:93?[0;39m] -
+                
+Pulling image layers:  0 pending,  0 downloaded,  0 extracted, (0 bytes/0 bytes)
+
+2025-01-10 15:32:08.691 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:docker-java-stream--602567843?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:93?[0;39m] -
+                
+Pulling image layers:  1 pending,  1 downloaded,  0 extracted, (32 bytes/? MB)
+
+2025-01-10 15:32:12.406 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:docker-java-stream--602567843?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:93?[0;39m] -
+                
+Pulling image layers:  0 pending,  2 downloaded,  0 extracted, (656 MB/662 MB)
+
+2025-01-10 15:32:32.515 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:docker-java-stream--602567843?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:93?[0;39m] -
+                
+Pulling image layers:  0 pending,  2 downloaded,  1 extracted, (662 MB/662 MB)
+
+2025-01-10 15:32:34.373 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:docker-java-stream--602567843?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:93?[0;39m] -
+                
+Pulling image layers:  0 pending,  2 downloaded,  2 extracted, (662 MB/662 MB)
+
+2025-01-10 15:32:34.380 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:docker-java-stream--602567843?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:116?[0;39m] -
+                
+Pull complete. 2 layers, pulled in 26s (downloaded 662 MB at 25 MB/s)
+
+2025-01-10 15:32:34.380 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:124?[0;39m] -
+                
+Image timescale/timescaledb-ha:pg17 pull took PT27.267979456S
+
+2025-01-10 15:32:34.404 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:379?[0;39m] -
+                
+Creating container for image: timescale/timescaledb-ha:pg17
+
+2025-01-10 15:32:34.491 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:443?[0;39m] -
+                
+Container timescale/timescaledb-ha:pg17 is starting: 51867f4f546175fa5593d2f35b46d2302823ffe13b85c11b6886c81b09713356
+
+2025-01-10 15:32:35.908 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:533?[0;39m] -
+                
+Container timescale/timescaledb-ha:pg17 started in PT1.504010067S
+
+2025-01-10 15:32:35.909 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:tc.timescale/timescaledb-ha:pg17:220?[0;39m] -
+                
+Container is started (JDBC URL: jdbc:postgresql://localhost:32768/tst_db?sslmode=disable&amp;loggerLevel=OFF)
+
+2025-01-10 15:32:35.924 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.smc.eventify.support.container.TimescaleContainer:48?[0;39m] -
+                
+using nss-wrapper
+********************************************************************************
+WARNING: POSTGRES_HOST_AUTH_METHOD has been set to &quot;trust&quot;. This will allow
+         anyone with access to the Postgres port to access your database without
+         a password, even if POSTGRES_PASSWORD is set. See PostgreSQL
+         documentation about &quot;trust&quot;:
+         https://www.postgresql.org/docs/current/auth-trust.html
+         In Docker's default configuration, this is effectively any other
+         container on the same system.
+
+         It is not recommended to use POSTGRES_HOST_AUTH_METHOD=trust. Replace
+         it with &quot;-e POSTGRES_PASSWORD=password&quot; instead to set a password in
+         &quot;docker run&quot;.
+********************************************************************************
+The files belonging to this database system will be owned by user &quot;postgres&quot;.
+This user must also own the server process.
+
+The database cluster will be initialized with locale &quot;C.UTF-8&quot;.
+The default database encoding has accordingly been set to &quot;UTF8&quot;.
+The default text search configuration will be set to &quot;english&quot;.
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /home/postgres/pgdata/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default &quot;max_connections&quot; ... 100
+selecting default &quot;shared_buffers&quot; ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+initdb: warning: enabling &quot;trust&quot; authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+syncing data to disk ... ok
+
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /home/postgres/pgdata/data -l logfile start
+
+waiting for server to start....2025-01-10 15:32:35.896 UTC [41] LOG:  starting PostgreSQL 17.2 (Ubuntu 17.2-1.pgdg22.04+1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, 64-bit
+2025-01-10 15:32:35.896 UTC [41] LOG:  listening on Unix socket &quot;/var/run/postgresql/.s.PGSQL.5432&quot;
+2025-01-10 15:32:35.899 UTC [44] LOG:  database system was shut down at 2025-01-10 15:32:35 UTC
+2025-01-10 15:32:35.903 UTC [41] LOG:  database system is ready to accept connections
+2025-01-10 15:32:35.904 UTC [47] LOG:  TimescaleDB background worker launcher connected to shared catalogs
+
+
+2025-01-10 15:32:37.108 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.boot.web.embedded.tomcat.TomcatWebServer:111?[0;39m] -
+                
+Tomcat initialized with port 0 (http)
+
+2025-01-10 15:32:37.124 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.coyote.http11.Http11NioProtocol:173?[0;39m] -
+                
+Initializing ProtocolHandler [&quot;http-nio-auto-1&quot;]
+
+2025-01-10 15:32:37.128 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.StandardService:173?[0;39m] -
+                
+Starting service [Tomcat]
+
+2025-01-10 15:32:37.129 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.StandardEngine:173?[0;39m] -
+                
+Starting Servlet engine: [Apache Tomcat/10.1.34]
+
+2025-01-10 15:32:37.206 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m] -
+                
+Initializing Spring embedded WebApplicationContext
+
+2025-01-10 15:32:37.208 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext:296?[0;39m] -
+                
+Root WebApplicationContext: initialization completed in 32210 ms
+
+2025-01-10 15:32:37.315 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.config.RequestVoter:45?[0;39m] -
+                
+Excluded paths '[org.hawaiiframework.logging.model.PathDefinition@73973e77]'.
+
+2025-01-10 15:32:37.864 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.datasource.DatasourceProxyConfiguration:34?[0;39m] -
+                
+Enabling datasource proxy to log queries for datasource named 'eventify'
+
+2025-01-10 15:32:38.111 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.database:37?[0;39m] -
+                
+Set default schema name to public
+
+2025-01-10 15:32:38.201 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+INFO: The drop-all command may result in unrecoverable destructive changes to objects at 'jdbc:postgresql://localhost:32768/tst_db?sslmode=disable&amp;loggerLevel=OFF'.
+To protect against unwanted drops, set --requireForce=true, which will require a --force=true flag on the command.
+Learn more at https://docs.liquibase.com/dropall.
+
+
+2025-01-10 15:32:38.251 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.snapshot:37?[0;39m] -
+                
+Creating snapshot
+
+2025-01-10 15:32:38.313 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.lockservice:37?[0;39m] -
+                
+Successfully acquired change log lock
+
+2025-01-10 15:32:38.320 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.command:37?[0;39m] -
+                
+Dropping Database Objects in schema: tst_db.public
+
+2025-01-10 15:32:38.326 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.snapshot:37?[0;39m] -
+                
+Creating snapshot
+
+2025-01-10 15:32:40.407 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.snapshot:37?[0;39m] -
+                
+Creating snapshot
+
+2025-01-10 15:32:40.479 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.database:37?[0;39m] -
+                
+Successfully deleted all supported object types in schema tst_db.public.
+
+2025-01-10 15:32:40.483 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.snapshot:37?[0;39m] -
+                
+Creating snapshot
+
+2025-01-10 15:32:40.494 ?[31mWARN?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.lockservice:37?[0;39m] -
+                
+Failed to release change log lock
+
+2025-01-10 15:32:40.499 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.snapshot:37?[0;39m] -
+                
+Creating snapshot
+
+2025-01-10 15:32:40.507 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+All objects dropped from tst_db@jdbc:postgresql://localhost:32768/tst_db?sslmode=disable&amp;loggerLevel=OFF
+
+2025-01-10 15:32:40.508 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.command:37?[0;39m] -
+                
+Command execution complete
+
+2025-01-10 15:32:40.950 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Reading resource: db/changelog/changesets/202411122200-PRD-initial-tables-user-management.xml
+
+2025-01-10 15:32:41.367 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Reading resource: db/changelog/changesets/202411122300-PRD-dashboard-components-for-monitoring.xml
+
+2025-01-10 15:32:41.401 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Reading resource: db/changelog/changesets/202411122400-PRD-event-hypertable-optimizations.xml
+
+2025-01-10 15:32:41.425 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Reading resource: db/changelog/changesets/202411130100-TST-accounts-teams-dashboards.xml
+
+2025-01-10 15:32:41.457 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Creating database history table with name: public.databasechangelog
+
+2025-01-10 15:32:41.465 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Reading from public.databasechangelog
+
+2025-01-10 15:32:41.472 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.snapshot:37?[0;39m] -
+                
+Creating snapshot
+
+2025-01-10 15:32:41.524 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.lockservice:37?[0;39m] -
+                
+Successfully acquired change log lock
+
+2025-01-10 15:32:41.525 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.command:37?[0;39m] -
+                
+Using deploymentId: 6523161525
+
+2025-01-10 15:32:41.527 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Reading from public.databasechangelog
+
+2025-01-10 15:32:41.542 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-1::jordi.jaspers
+
+2025-01-10 15:32:41.558 ?[31mWARN?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.executor:37?[0;39m] -
+                
+extension &quot;timescaledb&quot; already exists, skipping
+
+2025-01-10 15:32:41.560 ?[31mWARN?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.executor:37?[0;39m] -
+                
+extension &quot;timescaledb_toolkit&quot; already exists, skipping
+
+2025-01-10 15:32:41.567 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.569 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-1::jordi.jaspers ran successfully in 25ms
+
+2025-01-10 15:32:41.573 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-2::jordi.jaspers
+
+2025-01-10 15:32:41.606 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.607 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-2::jordi.jaspers ran successfully in 33ms
+
+2025-01-10 15:32:41.610 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-3::jordi.jaspers
+
+2025-01-10 15:32:41.614 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.615 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-3::jordi.jaspers ran successfully in 4ms
+
+2025-01-10 15:32:41.617 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-4::jordi.jaspers
+
+2025-01-10 15:32:41.628 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.629 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-4::jordi.jaspers ran successfully in 12ms
+
+2025-01-10 15:32:41.631 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-5::jordi.jaspers
+
+2025-01-10 15:32:41.657 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.658 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122200-PRD-initial-tables-user-management.xml::202411122200-PRD-initial-tables-user-management-5::jordi.jaspers ran successfully in 26ms
+
+2025-01-10 15:32:41.661 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122300-PRD-dashboard-components-for-monitoring.xml::202411122300-PRD-dashboard-components-for-monitoring-1::jordi.jaspers
+
+2025-01-10 15:32:41.663 ?[31mWARN?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.executor:37?[0;39m] -
+                
+extension &quot;pg_trgm&quot; already exists, skipping
+
+2025-01-10 15:32:41.664 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.664 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122300-PRD-dashboard-components-for-monitoring.xml::202411122300-PRD-dashboard-components-for-monitoring-1::jordi.jaspers ran successfully in 2ms
+
+2025-01-10 15:32:41.666 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122300-PRD-dashboard-components-for-monitoring.xml::202411122300-PRD-dashboard-components-for-monitoring-2::jordi.jaspers
+
+2025-01-10 15:32:41.674 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.675 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122300-PRD-dashboard-components-for-monitoring.xml::202411122300-PRD-dashboard-components-for-monitoring-2::jordi.jaspers ran successfully in 8ms
+
+2025-01-10 15:32:41.678 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122300-PRD-dashboard-components-for-monitoring.xml::202411122300-PRD-dashboard-components-for-monitoring-3::jordi.jaspers
+
+2025-01-10 15:32:41.708 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.709 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122300-PRD-dashboard-components-for-monitoring.xml::202411122300-PRD-dashboard-components-for-monitoring-3::jordi.jaspers ran successfully in 31ms
+
+2025-01-10 15:32:41.712 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122300-PRD-dashboard-components-for-monitoring.xml::202411122300-PRD-dashboard-components-for-monitoring-4::jordi.jaspers
+
+2025-01-10 15:32:41.732 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.733 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122300-PRD-dashboard-components-for-monitoring.xml::202411122300-PRD-dashboard-components-for-monitoring-4::jordi.jaspers ran successfully in 21ms
+
+2025-01-10 15:32:41.736 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122400-PRD-event-hypertable-optimizations.xml::202411122400-PRD-event-hypertable-optimizations-1::jordi.jaspers
+
+2025-01-10 15:32:41.751 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.752 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122400-PRD-event-hypertable-optimizations.xml::202411122400-PRD-event-hypertable-optimizations-1::jordi.jaspers ran successfully in 16ms
+
+2025-01-10 15:32:41.754 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411122400-PRD-event-hypertable-optimizations.xml::202411122400-PRD-event-hypertable-optimizations-2::jordi.jaspers
+
+2025-01-10 15:32:41.762 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.763 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411122400-PRD-event-hypertable-optimizations.xml::202411122400-PRD-event-hypertable-optimizations-2::jordi.jaspers ran successfully in 8ms
+
+2025-01-10 15:32:41.766 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-1::jordi.jaspers
+
+2025-01-10 15:32:41.780 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.781 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-1::jordi.jaspers ran successfully in 15ms
+
+2025-01-10 15:32:41.784 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-2::jordi.jaspers
+
+2025-01-10 15:32:41.791 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.792 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-2::jordi.jaspers ran successfully in 8ms
+
+2025-01-10 15:32:41.794 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-3::jordi.jaspers
+
+2025-01-10 15:32:41.799 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.800 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-3::jordi.jaspers ran successfully in 5ms
+
+2025-01-10 15:32:41.802 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-4::jordi.jaspers
+
+2025-01-10 15:32:41.814 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:41.815 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-4::jordi.jaspers ran successfully in 13ms
+
+2025-01-10 15:32:41.818 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Running Changeset: 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-5::jordi.jaspers
+
+2025-01-10 15:32:44.831 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+Custom SQL executed
+
+2025-01-10 15:32:44.844 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.changelog:37?[0;39m] -
+                
+ChangeSet 202411130100-TST-accounts-teams-dashboards.xml::202411130100-TST-accounts-teams-dashboards-5::jordi.jaspers ran successfully in 3026ms
+
+2025-01-10 15:32:44.851 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.util:37?[0;39m] -
+                
+UPDATE SUMMARY
+
+2025-01-10 15:32:44.851 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.util:37?[0;39m] -
+                
+Run:                         16
+
+2025-01-10 15:32:44.851 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.util:37?[0;39m] -
+                
+Previously run:               0
+
+2025-01-10 15:32:44.852 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.util:37?[0;39m] -
+                
+Filtered out:                 0
+
+2025-01-10 15:32:44.852 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.util:37?[0;39m] -
+                
+-------------------------------
+
+2025-01-10 15:32:44.852 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.util:37?[0;39m] -
+                
+Total change sets:           16
+
+2025-01-10 15:32:44.853 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.util:37?[0;39m] -
+                
+Update summary generated
+
+2025-01-10 15:32:44.855 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.command:37?[0;39m] -
+                
+Update command completed successfully.
+
+2025-01-10 15:32:44.856 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.ui:37?[0;39m] -
+                
+Liquibase: Update has been successful. Rows affected: 322624
+
+2025-01-10 15:32:44.859 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.lockservice:37?[0;39m] -
+                
+Successfully released change log lock
+
+2025-01-10 15:32:44.860 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:liquibase.command:37?[0;39m] -
+                
+Command execution complete
+
+2025-01-10 15:32:44.951 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:com.zaxxer.hikari.HikariDataSource:109?[0;39m] -
+                
+eventify - Starting...
+
+2025-01-10 15:32:44.970 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:com.zaxxer.hikari.pool.HikariPool:554?[0;39m] -
+                
+eventify - Added connection org.postgresql.jdbc.PgConnection@184218af
+
+2025-01-10 15:32:45.336 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:com.zaxxer.hikari.HikariDataSource:122?[0;39m] -
+                
+eventify - Start completed.
+
+2025-01-10 15:32:45.399 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hibernate.jpa.internal.util.LogHelper:31?[0;39m] -
+                
+HHH000204: Processing PersistenceUnitInfo [name: default]
+
+2025-01-10 15:32:45.446 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hibernate.Version:44?[0;39m] -
+                
+HHH000412: Hibernate ORM core version 6.6.0.Final
+
+2025-01-10 15:32:45.469 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hibernate.cache.internal.RegionFactoryInitiator:50?[0;39m] -
+                
+HHH000026: Second-level cache disabled
+
+2025-01-10 15:32:45.751 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo:87?[0;39m] -
+                
+No LoadTimeWeaver setup: ignoring JPA class transformer
+
+2025-01-10 15:32:46.907 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator:59?[0;39m] -
+                
+HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+
+2025-01-10 15:32:46.910 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean:447?[0;39m] -
+                
+Initialized JPA EntityManagerFactory for persistence unit 'default'
+
+2025-01-10 15:32:47.177 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.rsa.RSAKeyGenerator:34?[0;39m] -
+                
+Attempting to configure public and private keys for the application
+
+2025-01-10 15:32:47.374 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.rsa.RSAKeyGenerator:43?[0;39m] -
+                
+No RSA key found in the database, generating a new one..
+
+2025-01-10 15:32:48.015 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.data.jpa.repository.query.QueryEnhancerFactory:49?[0;39m] -
+                
+Hibernate is in classpath; If applicable, HQL parser will be used.
+
+2025-01-10 15:32:48.815 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.boot.actuate.endpoint.web.ServletEndpointRegistrar:108?[0;39m] -
+                
+Registered '/api/public/actuator/jolokia' to jolokia-actuator-endpoint
+
+2025-01-10 15:32:48.831 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.oidc.OidcLogFilter:240?[0;39m] -
+                
+Filter 'oidcLogFilterRegistration' configured for use
+
+2025-01-10 15:32:48.833 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:240?[0;39m] -
+                
+Filter 'jwtAuthenticationFilter' configured for use
+
+2025-01-10 15:32:48.917 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.security.config.annotation.authentication.configuration.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer:80?[0;39m] -
+                
+Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+
+2025-01-10 15:32:48.919 ?[31mWARN?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer:73?[0;39m] -
+                
+Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+
+2025-01-10 15:32:49.912 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver:60?[0;39m] -
+                
+Exposing 4 endpoints beneath base path '/api/public/actuator'
+
+2025-01-10 15:32:50.473 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.beans.factory.support.DefaultListableBeanFactory:256?[0;39m] -
+                
+Creating singleton bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration' in thread &quot;Test worker&quot; while other thread holds singleton lock for other beans []
+
+2025-01-10 15:32:50.706 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.beans.factory.support.DefaultListableBeanFactory:256?[0;39m] -
+                
+Creating singleton bean 'org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration' in thread &quot;Test worker&quot; while other thread holds singleton lock for other beans []
+
+2025-01-10 15:32:50.966 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.coyote.http11.Http11NioProtocol:173?[0;39m] -
+                
+Starting ProtocolHandler [&quot;http-nio-auto-1&quot;]
+
+2025-01-10 15:32:50.974 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.boot.web.embedded.tomcat.TomcatWebServer:243?[0;39m] -
+                
+Tomcat started on port 40283 (http) with context path '/'
+
+2025-01-10 15:32:51.007 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.smc.eventify.general.ApplicationContextTest:59?[0;39m] -
+                
+Started ApplicationContextTest in 46.731 seconds (process running for 47.768)
+
+2025-01-10 15:32:51.016 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.config.DataProvisioningConfiguration:31?[0;39m] -
+                
+Application context for has been started, provisioning data...
+
+2025-01-10 15:32:51.078 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.config.DataProvisioningConfiguration:37?[0;39m] -
+                
+[Permissions] Role 'USER' already exists, updating details.
+
+2025-01-10 15:32:51.127 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.config.DataProvisioningConfiguration:37?[0;39m] -
+                
+[Permissions] Role 'MANAGER' already exists, updating details.
+
+2025-01-10 15:32:51.134 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.config.DataProvisioningConfiguration:37?[0;39m] -
+                
+[Permissions] Role 'ADMIN' already exists, updating details.
+
+2025-01-10 15:32:51.139 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.config.DataProvisioningConfiguration:44?[0;39m] -
+                
+Data provisioning completed successfully. Eventify (0.0.0-SNAPSHOT) is ready to use.
+
+2025-01-10 15:32:51.951 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:pool-1-thread-1?[0;39m] [?[36mL:org.springdoc.api.AbstractOpenApiResource:409?[0;39m] -
+                
+Init duration for springdoc-openapi is: 1496 ms
+
+2025-01-10 15:32:52.161 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m] -
+                
+Initializing Spring TestDispatcherServlet ''
+
+2025-01-10 15:32:52.161 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:532?[0;39m] -
+                
+Initializing Servlet ''
+
+2025-01-10 15:32:52.165 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:554?[0;39m] -
+                
+Completed initialization in 3 ms
+
+2025-01-10 15:32:52.285 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m] -
+                
+Initializing Spring TestDispatcherServlet ''
+
+2025-01-10 15:32:52.285 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:532?[0;39m] -
+                
+Initializing Servlet ''
+
+2025-01-10 15:32:52.288 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:554?[0;39m] -
+                
+Completed initialization in 3 ms
+
+2025-01-10 15:32:52.305 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m] -
+                
+Initializing Spring TestDispatcherServlet ''
+
+2025-01-10 15:32:52.306 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:532?[0;39m] -
+                
+Initializing Servlet ''
+
+2025-01-10 15:32:52.309 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:554?[0;39m] -
+                
+Completed initialization in 3 ms
+
+2025-01-10 15:32:52.321 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m] -
+                
+Initializing Spring TestDispatcherServlet ''
+
+2025-01-10 15:32:52.321 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:532?[0;39m] -
+                
+Initializing Servlet ''
+
+2025-01-10 15:32:52.324 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:554?[0;39m] -
+                
+Completed initialization in 2 ms
+
+2025-01-10 15:32:52.425 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:6d557669-5e90-4b71-b4b7-424abeaecb9c?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:140?[0;39m] -
+                
+Invoked 'GET /api/public/actuator/health' with content type 'null' and size of '-1' bytes.
+
+2025-01-10 15:32:52.426 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:6d557669-5e90-4b71-b4b7-424abeaecb9c?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:147?[0;39m] -
+                
+Request is:
+  GET /api/public/actuator/health HTTP/1.1
+  
+
+2025-01-10 15:32:52.476 ?[34mINFO?[0;39m [?[32mTX:4ac2f9de-83e8-40c0-b8ce-1a376c7fb979?[0;39m/?[33mREQ:6d557669-5e90-4b71-b4b7-424abeaecb9c?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:243?[0;39m] -
+                
+Response '/api/public/actuator/health' is '200 OK' with content type 'application/vnd.spring-boot.actuator.v3+json' and size of '15' bytes.
+
+2025-01-10 15:32:52.477 ?[39mDEBUG?[0;39m [?[32mTX:4ac2f9de-83e8-40c0-b8ce-1a376c7fb979?[0;39m/?[33mREQ:6d557669-5e90-4b71-b4b7-424abeaecb9c?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:250?[0;39m] -
+                
+Response is:
+  HTTP/1.1 200 OK
+  Content-Type: application/vnd.spring-boot.actuator.v3+json
+  Vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+  X-Hawaii-Request-Id: 6d557669-5e90-4b71-b4b7-424abeaecb9c
+  X-Hawaii-Tx-Id: 4ac2f9de-83e8-40c0-b8ce-1a376c7fb979
+  
+  {&quot;status&quot;:&quot;UP&quot;}
+
+2025-01-10 15:32:52.478 ?[34mINFO?[0;39m [?[32mTX:4ac2f9de-83e8-40c0-b8ce-1a376c7fb979?[0;39m/?[33mREQ:6d557669-5e90-4b71-b4b7-424abeaecb9c?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.web.filter.RequestDurationFilter:95?[0;39m] -
+                
+Duration '60.04' ms.
+
+2025-01-10 15:32:53.225 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m] -
+                
+Initializing Spring TestDispatcherServlet ''
+
+2025-01-10 15:32:53.225 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:532?[0;39m] -
+                
+Initializing Servlet ''
+
+2025-01-10 15:32:53.227 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:554?[0;39m] -
+                
+Completed initialization in 2 ms
+
+</pre>
+</span>
+</div>
+<div id="tab2" class="tab">
+<h2>Standard error</h2>
+<span class="code">
+<pre>Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 8.12</a> at Jan 10, 2025, 3:32:53 PM</p>
+</div>
+</div>
+</body>
+</html>
