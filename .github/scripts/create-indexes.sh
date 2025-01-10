@@ -17,85 +17,154 @@ create_index() {
 <head>
   <title>$title</title>
   <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 2rem;
-      line-height: 1.6;
-      color: #333;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .back-link {
-      margin-bottom: 2em;
-      display: inline-block;
-      padding: 0.5em 1em;
-      color: #666;
-      text-decoration: none;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-    }
-    .back-link:hover {
-      background-color: #f0f0f0;
-    }
-    .back-link:before {
-      content: '←';
-      margin-right: 0.5em;
-    }
-    h1 {
-      color: #2c3e50;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 0.5em;
-    }
-    h2 {
-      color: #34495e;
-      margin-top: 2em;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      margin: 0.5em 0;
-    }
-    li a {
-      display: inline-block;
-      padding: 0.5em;
-      color: #2980b9;
-      text-decoration: none;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-    }
-    li a:hover {
-      background-color: #f7f9fb;
-    }
-  </style>
+      :root {
+        --primary-color: #3498db;
+        --primary-dark: #2980b9;
+        --text-color: #2c3e50;
+        --background-hover: #f7f9fb;
+        --spacing-unit: 1rem;
+        --link-color: #2980b9;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: calc(var(--spacing-unit) * 3);
+        line-height: 1.6;
+        color: var(--text-color);
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #fafafa;
+      }
+
+      .container {
+        background-color: white;
+        padding: calc(var(--spacing-unit) * 2);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+
+      .back-link {
+        margin-bottom: calc(var(--spacing-unit) * 2);
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75em 1.25em;
+        color: var(--text-color);
+        text-decoration: none;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        background-color: white;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      }
+
+      .back-link:hover {
+        background-color: var(--background-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .back-link:before {
+        content: '←';
+        margin-right: 0.75em;
+        font-size: 1.1em;
+      }
+
+      h1 {
+        color: var(--text-color);
+        border-bottom: 2px solid #eef2f7;
+        padding-bottom: 0.75em;
+        margin-top: 0;
+        font-size: 1.75rem;
+      }
+
+      h2 {
+        color: var(--text-color);
+        margin-top: calc(var(--spacing-unit) * 2.5);
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: calc(var(--spacing-unit) * 1.5);
+        margin-top: calc(var(--spacing-unit) * 1.5);
+      }
+
+      .report-item {
+        margin: 0;
+        background-color: var(--background-hover);
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .report-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+
+      .report-link {
+        display: flex;
+        align-items: center;
+        padding: 1em 1.25em;
+        color: var(--link-color);
+        text-decoration: none;
+        font-weight: 500;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        position: relative;
+      }
+
+      .report-link:after {
+        content: '→';
+        margin-left: auto;
+        opacity: 0;
+        transition: all 0.2s ease;
+      }
+
+      .report-item:hover .report-link:after {
+        opacity: 1;
+        transform: translateX(4px);
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: var(--spacing-unit);
+        }
+
+        .container {
+          padding: var(--spacing-unit);
+        }
+
+        .report-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
 </head>
 <body>
-  <a class="back-link" href="../">Back to parent directory</a>
-  <h1>$title</h1>
+  <div class="container">
+      <a class="back-link" href="../">Back to parent directory</a
+      <h1>$title</h1>
 EOF
 
   # Add directories
   if [ ${#items[@]} -gt 0 ]; then
-    echo "<h2>Quality Check Reports</h2><ul>" >> "$index_file"
+    echo "<h2>Quality Check Reports</h2>" >> "$index_file"
+    echo "<div class=\"report-grid\">" >> "$index_file"
     for item in "${items[@]}"; do
-      echo "<li><a href=\"$item/\">$item</a></li>" >> "$index_file"
+      echo "<div class=\"report-item\">" >> "$index_file"
+      echo "<a class=\"report-link\" href=\"$item/\">$item</a>" >> "$index_file"
+      echo "</div>" >> "$index_file"
     done
-    echo "</ul>" >> "$index_file"
+    echo "</div>" >> "$index_file"
   fi
 
-  # Add files
-  if [ ${#files[@]} -gt 0 ]; then
-    echo "<h2>Reports</h2><ul>" >> "$index_file"
-    for file in "${files[@]}"; do
-      echo "<li><a href=\"$file\">$file</a></li>" >> "$index_file"
-    done
-    echo "</ul>" >> "$index_file"
-  fi
-
-  # Close HTML
-  echo "</body></html>" >> "$index_file"
+  echo "</div>" >> "$index_file"
+  echo "</body>" >> "$index_file"
+  echo "</html>" >> "$index_file"
 }
 
 # Create all necessary indexes

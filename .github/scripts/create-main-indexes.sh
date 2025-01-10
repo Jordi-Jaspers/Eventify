@@ -12,73 +12,124 @@ create_main_indexes() {
 <head>
   <title>Build Report - Run $run_id</title>
   <style>
+    :root {
+      --primary-color: #3498db;
+      --primary-dark: #2980b9;
+      --text-color: #2c3e50;
+      --background-hover: #f7f9fb;
+      --spacing-unit: 1rem;
+    }
+
     body {
       font-family: system-ui, -apple-system, sans-serif;
       margin: 0;
-      padding: 2rem;
+      padding: calc(var(--spacing-unit) * 3);
       line-height: 1.6;
-      color: #333;
-      max-width: 1200px;
+      color: var(--text-color);
+      max-width: 900px;
       margin: 0 auto;
+      background-color: #fafafa;
     }
+
+    .container {
+      background-color: white;
+      padding: calc(var(--spacing-unit) * 2);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
     .back-link {
-      margin-bottom: 2em;
-      display: inline-block;
-      padding: 0.5em 1em;
-      color: #666;
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75em 1.25em;
+      color: var(--text-color);
       text-decoration: none;
-      border-radius: 4px;
-      transition: background-color 0.2s;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      background-color: white;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
+
     .back-link:hover {
-      background-color: #f0f0f0;
+      background-color: var(--background-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+
     .back-link:before {
       content: '←';
-      margin-right: 0.5em;
+      margin-right: 0.75em;
+      font-size: 1.1em;
     }
+
     h1 {
-      color: #2c3e50;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 0.5em;
+      color: var(--text-color);
+      border-bottom: 2px solid #eef2f7;
+      padding-bottom: 0.75em;
+      margin-top: 0;
+      font-size: 1.75rem;
     }
+
     h2 {
-      color: #34495e;
-      margin-top: 2em;
+      color: var(--text-color);
+      margin-top: calc(var(--spacing-unit) * 2.5);
+      font-size: 1.25rem;
+      font-weight: 600;
     }
+
     ul {
       list-style: none;
       padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-unit);
+      margin-top: calc(var(--spacing-unit) * 1.5);
     }
+
     li {
-      margin: 0.5em 0;
+      margin: 0;
     }
-    li a {
-      display: inline-block;
-      padding: 0.5em;
-      color: #2980b9;
-      text-decoration: none;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-    }
-    li a:hover {
-      background-color: #f7f9fb;
-    }
+
     .report-link {
-      display: inline-block;
-      padding: 0.7em 1.2em;
-      background-color: #3498db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1em 1.5em;
+      background-color: var(--primary-color);
       color: white;
       text-decoration: none;
-      border-radius: 4px;
-      transition: background-color 0.2s;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      height: 100%;
+      text-align: center;
     }
+
     .report-link:hover {
-      background-color: #2980b9;
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: var(--spacing-unit);
+      }
+
+      .container {
+        padding: var(--spacing-unit);
+      }
+
+      ul {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
+<div class="container">
   <a class="back-link" href="../">Back to all reports</a>
   <h1>Build Report - Run $run_id</h1>
   <h2>Available Reports</h2>
@@ -86,6 +137,7 @@ create_main_indexes() {
     <li><a href="quality/" class="report-link">Quality Reports</a></li>
     <li><a href="tests/" class="report-link">Test Results</a></li>
   </ul>
+</div>
 </body>
 </html>
 EOF
@@ -97,42 +149,116 @@ EOF
 <head>
   <title>Build Reports</title>
   <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 2rem;
-      line-height: 1.6;
-      color: #333;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    h1 {
-      color: #2c3e50;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 0.5em;
-    }
-    h2 {
-      color: #34495e;
-      margin-top: 2em;
-    }
-    .build-link {
-      display: inline-block;
-      padding: 0.7em 1.2em;
-      background-color: #3498db;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-    }
-    .build-link:hover {
-      background-color: #2980b9;
-    }
+   :root {
+           --primary-color: #3498db;
+           --primary-dark: #2980b9;
+           --text-color: #2c3e50;
+           --background-hover: #f7f9fb;
+           --spacing-unit: 1rem;
+         }
+
+         body {
+           font-family: system-ui, -apple-system, sans-serif;
+           margin: 0;
+           padding: calc(var(--spacing-unit) * 3);
+           line-height: 1.6;
+           color: var(--text-color);
+           max-width: 900px;
+           margin: 0 auto;
+           background-color: #fafafa;
+         }
+
+         .container {
+           background-color: white;
+           padding: calc(var(--spacing-unit) * 2);
+           border-radius: 8px;
+           box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+         }
+
+         h1 {
+           color: var(--text-color);
+           border-bottom: 2px solid #eef2f7;
+           padding-bottom: 0.75em;
+           margin-top: 0;
+           font-size: 1.75rem;
+         }
+
+         h2 {
+           color: var(--text-color);
+           margin-top: calc(var(--spacing-unit) * 2.5);
+           font-size: 1.25rem;
+           font-weight: 600;
+         }
+
+         .builds-grid {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+           gap: var(--spacing-unit);
+           margin-top: calc(var(--spacing-unit) * 1.5);
+         }
+
+         .build-item {
+           margin: 0;
+         }
+
+         .build-link {
+           display: flex;
+           align-items: center;
+           padding: 1em 1.5em;
+           background-color: var(--primary-color);
+           color: white;
+           text-decoration: none;
+           border-radius: 6px;
+           transition: all 0.2s ease;
+           font-weight: 500;
+           position: relative;
+           overflow: hidden;
+         }
+
+         .build-link:before {
+           content: '';
+           position: absolute;
+           left: 0;
+           top: 0;
+           height: 100%;
+           width: 4px;
+           background-color: rgba(255, 255, 255, 0.2);
+         }
+
+         .build-link:hover {
+           background-color: var(--primary-dark);
+           transform: translateY(-2px);
+           box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+         }
+
+         .build-number {
+           margin-left: auto;
+           opacity: 0.8;
+           font-size: 0.9em;
+         }
+
+         @media (max-width: 600px) {
+           body {
+             padding: var(--spacing-unit);
+           }
+
+           .container {
+             padding: var(--spacing-unit);
+           }
+
+           .builds-grid {
+             grid-template-columns: 1fr;
+           }
+         }
   </style>
 </head>
 <body>
+<div class="container">
   <h1>Build Reports</h1>
   <h2>Latest Build</h2>
-  <p><a href="$run_id/" class="build-link">Run $run_id</a></p>
+  <p class="build-item">
+    <a href="$run_id/" class="build-link">Run $run_id</a>
+  </p>
 </body>
 </html>
 EOF
