@@ -94,7 +94,7 @@ jobs:
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-run-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-branch-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-main-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
-          
+
       - name: Commit and push changes
         run: |
           cd gh-pages
