@@ -29,9 +29,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
-          fetch-depth: 1
-        continue-on-error: true
+          sparse-checkout: |
+            .github
 
       - name: Create reports directory
         run: |
@@ -55,6 +54,10 @@ jobs:
           name: server-test-report
           path: reports/${{ steps.build_info.outputs.run_id }}/tests
         continue-on-error: true
+
+      - name: Debug
+        run: |
+          ls -la .
 
       - name: Make scripts executable
         run: |
