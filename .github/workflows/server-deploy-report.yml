@@ -20,11 +20,8 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout gh-pages branch
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: gh-pages
 
       - name: Download reports artifact
         uses: actions/download-artifact@v4
@@ -32,13 +29,29 @@ jobs:
           name: server-build-report-${{ github.sha }}
           path: reports
 
+      - name: Initialize gh-pages branch
+        run: |
+          # Check if gh-pages branch exists
+          if ! git ls-remote --heads origin gh-pages | grep gh-pages > /dev/null; then
+            # Create and initialize gh-pages branch
+            git checkout --orphan gh-pages
+            git reset --hard
+            git commit --allow-empty -m "Initialize gh-pages branch"
+            git push origin gh-pages
+          fi
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
       - name: Clean old reports
         run: |
-          if [ -d "gh-pages/test-reports" ]; then
-            cd gh-pages/test-reports
-            # Keep only the last 30 days of reports
-            find . -maxdepth 1 -type d -mtime +30 -exec rm -rf {} +
-          fi
+          mkdir -p gh-pages/test-reports
+          cd gh-pages/test-reports
+          # Keep only the last 30 days of reports
+          find . -maxdepth 1 -type d -mtime +30 -exec rm -rf {} + || true
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -47,3 +60,6 @@ jobs:
           publish_dir: ./reports
           destination_dir: test-reports/${{ github.sha }}
           keep_files: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'docs: update test reports'
