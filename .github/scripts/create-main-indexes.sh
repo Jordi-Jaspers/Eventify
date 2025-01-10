@@ -3,7 +3,10 @@
 # .github/scripts/create-main-indexes.sh
 create_main_indexes() {
   local run_id=$1
-  local reports_dir="reports"
+  local reports_dir="gh-pages/reports"
+
+  # Ensure reports directory exists
+  mkdir -p "$reports_dir"
 
   # Create build-specific index
   cat > "$reports_dir/$run_id/index.html" << EOF

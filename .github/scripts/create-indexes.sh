@@ -172,6 +172,9 @@ create_all_indexes() {
   local run_id=$1
   local reports_dir="reports/$run_id"
 
+  # Create reports directory if it doesn't exist
+  mkdir -p "$reports_dir"
+
   # Create indexes for quality report directories only
   if [ -d "$reports_dir/quality" ]; then
     create_index "$reports_dir/quality" "Quality Reports"

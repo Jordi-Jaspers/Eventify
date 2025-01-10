@@ -5,9 +5,9 @@ on:
   schedule:
     - cron: '0 9 * * *'
   pull_request:
-    branches: [ master, develop ]
+    branches: [ develop ]
   push:
-    branches: [ master, develop ]
+    branches: [ develop ]
 
 jobs:
   client-quality-check:
@@ -25,6 +25,6 @@ jobs:
     uses: ./.github/workflows/server-build-artifacts.yml
 
   server-publish-report:
-    if: always()  # This ensures it runs even if previous jobs fail
-    needs: [server-quality-check, server-build-artifacts]  # Need both to access artifacts
+    if: always()
+    needs: [ server-quality-check, server-build-artifacts ]
     uses: ./.github/workflows/server-publish-report.yml
