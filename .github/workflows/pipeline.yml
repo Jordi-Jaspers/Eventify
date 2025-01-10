@@ -5,9 +5,9 @@ on:
   schedule:
     - cron: '0 9 * * *'
   pull_request:
-    branches: [ develop ]
+    branches: [ master, develop ]
   push:
-    branches: [ develop ]
+    branches: [ master, develop ]
 
 jobs:
   client-quality-check:

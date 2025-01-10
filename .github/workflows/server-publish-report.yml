@@ -65,7 +65,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: server-quality-report
-          path: gh-pages/reports/${{ steps.build_info.outputs.run_id }}/quality
+          path: gh-pages/reports/${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}/quality
         continue-on-error: true
 
       - name: Download Test Report
@@ -73,17 +73,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: server-test-report
-          path: gh-pages/reports/${{ steps.build_info.outputs.run_id }}/tests
+          path: gh-pages/reports/${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}/tests
         continue-on-error: true
 
       - name: Make scripts executable
         run: |
-          chmod +x main-branch/.github/scripts/create-indexes.sh
-          chmod +x main-branch/.github/scripts/create-main-indexes.sh
+          chmod +x main-branch/.github/scripts/create-run-index.sh
+          chmod +x main-branch/.github/scripts/create-branch-index.sh
+          chmod +x main-branch/.github/scripts/create-main-index.sh
 
       - name: Create indexes
         run: |
-          # Ensure we're in the correct directory
           cd gh-pages/reports
           
           # Debug current location and content
@@ -91,9 +91,10 @@ jobs:
           ls -R
           
           # Create indexes using absolute paths to scripts
-          "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-indexes.sh" "${{ steps.build_info.outputs.run_id }}"
-          "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-main-indexes.sh" "${{ steps.build_info.outputs.run_id }}"
-
+          "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-run-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
+          "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-branch-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
+          "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-main-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
+          
       - name: Commit and push changes
         run: |
           cd gh-pages
@@ -113,4 +114,4 @@ jobs:
       - name: Print deployment URL
         if: success() && steps.deployment.outputs.page_url != ''
         run: |
-          echo "::notice title=📊 Report URL::${{ steps.deployment.outputs.page_url }}${{ steps.build_info.outputs.run_id }}"
+          echo "::notice title=📊 Report URL::${{ steps.deployment.outputs.page_url }}reports/${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
