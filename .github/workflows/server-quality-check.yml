@@ -3,14 +3,6 @@ name: Check Server Code Quality
 on:
   workflow_call:
   workflow_dispatch:
-  pull_request:
-    branches: [ master, develop ]
-    paths:
-      - 'server/**'
-  push:
-    branches: [ master, develop ]
-    paths:
-      - 'server/**'
 
 jobs:
   backend-quality:

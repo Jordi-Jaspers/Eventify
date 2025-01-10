@@ -3,14 +3,6 @@ name: Build Server Artifacts & Run Tests
 on:
   workflow_call:
   workflow_dispatch:
-  pull_request:
-    branches: [ master, develop ]
-    paths:
-      - 'server/**'
-  push:
-    branches: [ master, develop ]
-    paths:
-      - 'server/**'
 
 permissions:
   contents: read

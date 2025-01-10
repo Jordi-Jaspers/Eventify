@@ -3,14 +3,6 @@ name: Check Client Code Quality
 on:
   workflow_call:
   workflow_dispatch:
-  pull_request:
-    branches: [ master, develop ]
-    paths:
-      - 'client/**'
-  push:
-    branches: [ master, develop ]
-    paths:
-      - 'client/**'
 
 jobs:
   frontend-quality:

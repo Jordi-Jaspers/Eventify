@@ -10,16 +10,20 @@ on:
     branches: [ master, develop ]
 
 jobs:
-  client-quality:
+  client-quality-check:
     uses: ./.github/workflows/client-quality-check.yml
 
-  client-build:
-    needs: client-quality
+  client-build-artifacts:
+    needs: client-quality-check
     uses: ./.github/workflows/client-build-artifacts.yml
 
-  server-quality:
+  server-quality-check:
     uses: ./.github/workflows/server-quality-check.yml
 
-  server-build:
-    needs: server-quality
+  server-build-artifacts:
+    needs: server-quality-check
     uses: ./.github/workflows/server-build-artifacts.yml
+
+  server-publish-report:
+    needs: server-build-artifacts
+    uses: ./.github/workflows/server-publish-report.yml

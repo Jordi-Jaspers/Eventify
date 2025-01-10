@@ -3,10 +3,6 @@ name: Deploy Server Report
 on:
   workflow_call:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Build Server Artifacts & Run Tests"]
-    types:
-      - completed
 
 permissions:
   contents: read
@@ -14,27 +10,19 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  deploy-report:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
     steps:
-      - name: Download artifact
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          run_id: ${{ github.event.workflow_run.id }}
-          name: server-build-report-${{ github.event.workflow_run.head_sha }}
-          path: artifact
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Download artifact
+        uses: actions/download-artifact@v4
         with:
+          name: server-build-report-${{ github.sha }}
           path: artifact
 
       - name: Deploy to GitHub Pages
