@@ -8,14 +8,22 @@ create_quality_index() {
   if [ ! -d "$quality_path" ]; then
     echo "Quality directory not found at: $quality_path"
     return 1
-  fi  # Changed '}' to 'fi'
+  fi
 
   # Find all report directories in the quality folder
   local reports=$(find "$quality_path" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
 
-  # Create report links HTML
+  # Create report links HTML and rename HTML files
   local report_links=""
   for report in $reports; do
+    local report_dir="$quality_path/$report"
+
+    # Find first HTML file and rename it to index.html
+    local first_html=$(find "$report_dir" -maxdepth 1 -name "*.html" | head -n 1)
+    if [ ! -z "$first_html" ] && [ ! -f "$report_dir/index.html" ]; then
+      mv "$first_html" "$report_dir/index.html"
+    fi
+
     report_links+="    <p class=\"report-item\">
       <a href=\"$report/\" class=\"report-link\">$report</a>
     </p>
