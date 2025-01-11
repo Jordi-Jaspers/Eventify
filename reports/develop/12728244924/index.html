@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Build Reports - develop branch</title>
+  <title>Build Report - develop/12728244924</title>
   <style>
     :root {
       --primary-color: #3498db;
@@ -63,20 +63,30 @@
       font-size: 1.75rem;
     }
 
-    .builds-grid {
+    h2 {
+      color: var(--text-color);
+      margin-top: calc(var(--spacing-unit) * 2.5);
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: var(--spacing-unit);
       margin-top: calc(var(--spacing-unit) * 1.5);
     }
 
-    .build-item {
+    li {
       margin: 0;
     }
 
-    .build-link {
+    .report-link {
       display: flex;
       align-items: center;
+      justify-content: center;
       padding: 1em 1.5em;
       background-color: var(--primary-color);
       color: white;
@@ -84,66 +94,41 @@
       border-radius: 6px;
       transition: all 0.2s ease;
       font-weight: 500;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .build-link:before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
       height: 100%;
-      width: 4px;
-      background-color: rgba(255, 255, 255, 0.2);
+      text-align: center;
     }
 
-    .build-link:hover {
+    .report-link:hover {
       background-color: var(--primary-dark);
       transform: translateY(-2px);
       box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: var(--spacing-unit);
+      }
+
+      .container {
+        padding: var(--spacing-unit);
+      }
+
+      ul {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <a class="back-link" href="../">Back to all branches</a>
-  <h1>Build Reports - develop branch</h1>
-  <div class="builds-grid">
-    <p class="build-item">
-      <a href="12728244924/" class="build-link">Run 12728244924</a>
-    </p>
-    <p class="build-item">
-      <a href="12725966244/" class="build-link">Run 12725966244</a>
-    </p>
-    <p class="build-item">
-      <a href="12725437399/" class="build-link">Run 12725437399</a>
-    </p>
-    <p class="build-item">
-      <a href="12724727089/" class="build-link">Run 12724727089</a>
-    </p>
-    <p class="build-item">
-      <a href="12724464319/" class="build-link">Run 12724464319</a>
-    </p>
-    <p class="build-item">
-      <a href="12722888131/" class="build-link">Run 12722888131</a>
-    </p>
-    <p class="build-item">
-      <a href="12718900009/" class="build-link">Run 12718900009</a>
-    </p>
-    <p class="build-item">
-      <a href="12718843497/" class="build-link">Run 12718843497</a>
-    </p>
-    <p class="build-item">
-      <a href="12718786791/" class="build-link">Run 12718786791</a>
-    </p>
-    <p class="build-item">
-      <a href="12712407405/" class="build-link">Run 12712407405</a>
-    </p>
-    <p class="build-item">
-      <a href="12712299201/" class="build-link">Run 12712299201</a>
-    </p>
-
+  <a class="back-link" href="../">Back to branch reports</a>
+  <h1>Build Report - develop/12728244924</h1>
+  <div class="report-grid">
+    <h2>Available Reports</h2>
+    <ul>
+      <li><a href="quality/" class="report-link">Quality Report</a></li>
+      <li><a href="tests/" class="report-link">Test Report</a></li>
+    </ul>
   </div>
 </div>
 </body>
