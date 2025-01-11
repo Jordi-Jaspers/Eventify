@@ -2,9 +2,7 @@ name: Cleanup Reports
 
 on:
   workflow_dispatch:  # Manual trigger
-  schedule:
-    - cron: '0 0 * * 0'  # Run at midnight every Sunday
-
+  
 permissions:
   contents: write
 
