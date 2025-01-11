@@ -85,13 +85,7 @@ jobs:
 
       - name: Create indexes
         run: |
-          cd gh-pages/reports
-          
-          # Debug current location and content
-          pwd
-          ls -R
-          
-          # Create indexes using absolute paths to scripts
+          cd gh-pages/reports          
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-run-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-run-quality-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-branch-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"

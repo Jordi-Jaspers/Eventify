@@ -8,7 +8,7 @@ create_quality_index() {
   if [ ! -d "$quality_path" ]; then
     echo "Quality directory not found at: $quality_path"
     return 1
-  }
+  fi  # Changed '}' to 'fi'
 
   # Find all report directories in the quality folder
   local reports=$(find "$quality_path" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
