@@ -1,19 +1,25 @@
-#!/bin/bash
-
 create_main_index() {
   local path=$1  # Receives "branch/run_id"
 
-  # Find all branches (directories that contain runs)
-  local branches=$(find . -mindepth 1 -maxdepth 1 -type d -not -name ".*" -exec basename {} \;)
+  # Find all unique branch paths (handling deeper structures like refs/pull/16)
+  # Using awk to get unique directory paths that contain runs
+  local branches=$(find . -type d -name "quality" -o -name "tests" |
+    sed -E 's#\./##; s#/(quality|tests|[0-9]+).*##' |
+    sort -u)
 
   # Create branch links HTML
   local branch_links=""
-  for branch in $branches; do
+  while IFS= read -r branch; do
+    # Skip empty lines
+    [ -z "$branch" ] && continue
+
+    # Create properly formatted link path and display name
+    local display_name="${branch//\// / }"  # Replace / with spaces for display
     branch_links+="    <p class=\"branch-item\">
-      <a href=\"$branch/\" class=\"branch-link\">$branch</a>
+      <a href=\"$branch/\" class=\"branch-link\">$display_name</a>
     </p>
 "
-  done
+  done <<< "$branches"
 
   # Create or update main index with all branches
   cat > "index.html" << EOF
@@ -96,15 +102,13 @@ create_main_index() {
       transform: translateY(-2px);
       box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
     }
-  </style>
+</style>
 </head>
 <body>
 <div class="container">
   <h1>Build Reports - All Branches</h1>
   <div class="branches-grid">
-    <p class="branch-item">
-      <a href="$branch_name/" class="branch-link">$branch_name</a>
-    </p>
+${branch_links}
   </div>
 </div>
 </body>
