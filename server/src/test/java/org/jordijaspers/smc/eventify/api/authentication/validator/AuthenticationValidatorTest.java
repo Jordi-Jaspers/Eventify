@@ -5,20 +5,19 @@ import org.jordijaspers.eventify.api.authentication.model.request.LoginRequest;
 import org.jordijaspers.eventify.api.authentication.model.request.RegisterUserRequest;
 import org.jordijaspers.eventify.api.authentication.model.validator.AuthenticationValidator;
 import org.jordijaspers.eventify.api.authentication.model.validator.CustomPasswordValidator;
+import org.jordijaspers.smc.eventify.support.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.passay.RuleResult;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-public class AuthenticationValidatorTest {
+@DisplayName("ChangePasswordValidator")
+public class AuthenticationValidatorTest extends UnitTest {
 
     private static final String VALID_EMAIL = "test@example.com";
     private static final String VALID_PASSWORD = "ValidPass1!";

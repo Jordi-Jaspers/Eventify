@@ -6,7 +6,11 @@ import java.util.UUID;
 import org.hawaiiframework.repository.DataNotFoundException;
 import org.jordijaspers.eventify.api.authentication.model.request.RegisterUserRequest;
 import org.jordijaspers.eventify.api.token.model.Token;
+import org.jordijaspers.eventify.api.token.model.TokenType;
 import org.jordijaspers.eventify.api.user.model.User;
+import org.jordijaspers.eventify.api.user.model.request.ForgotPasswordRequest;
+import org.jordijaspers.eventify.api.user.model.request.UpdatePasswordRequest;
+import org.jordijaspers.smc.eventify.support.util.WebMvcConfigurator;
 import org.junit.jupiter.api.AfterEach;
 
 import static org.jordijaspers.eventify.api.token.model.TokenType.REFRESH_TOKEN;
@@ -22,6 +26,11 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected static final String LAST_NAME = "User";
     protected static final String TEST_EMAIL = "eventify.user@integration.test";
     protected static final String TEST_PASSWORD = "Test123!@#";
+
+    protected static final String NEW_PASSWORD = "NewTest123!@#";
+    protected static final String NEW_PASSWORD_CONFIRMATION = "NewTest123!@#";
+    protected static final String INVALID_PASSWORD = "weak";
+
 
     @AfterEach
     public void tearDown() {
@@ -53,15 +62,43 @@ public class IntegrationTest extends WebMvcConfigurator {
             .setLastName(LAST_NAME);
     }
 
+    protected static ForgotPasswordRequest aForgotPasswordRequest() {
+        final ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setNewPassword(NEW_PASSWORD);
+        request.setConfirmPassword(NEW_PASSWORD_CONFIRMATION);
+        request.setToken(UUID.randomUUID().toString());
+        return request;
+    }
+
+    protected static UpdatePasswordRequest anUpdatePasswordRequest() {
+        final UpdatePasswordRequest request = new UpdatePasswordRequest();
+        request.setOldPassword(TEST_PASSWORD);
+        request.setNewPassword(NEW_PASSWORD);
+        request.setConfirmPassword(NEW_PASSWORD_CONFIRMATION);
+        return request;
+    }
+
+    protected Token getPasswordResetToken(final User user) {
+        return tokenRepository.findByEmail(user.getEmail())
+            .stream()
+            .filter(token -> token.getType().equals(TokenType.RESET_PASSWORD_TOKEN))
+            .findFirst()
+            .orElseThrow(() -> new DataNotFoundException(TOKEN_NOT_FOUND_ERROR));
+    }
+
     protected Token getValidationToken(final User user) {
         return tokenRepository.findByEmail(user.getEmail())
+            .stream()
             .filter(entry -> entry.getType().equals(USER_VALIDATION_TOKEN))
+            .findFirst()
             .orElseThrow(() -> new DataNotFoundException(TOKEN_NOT_FOUND_ERROR));
     }
 
     protected Token getRefreshToken(final User user) {
         return tokenRepository.findByEmail(user.getEmail())
+            .stream()
             .filter(entry -> entry.getType().equals(REFRESH_TOKEN))
+            .findFirst()
             .orElseThrow(() -> new DataNotFoundException(TOKEN_NOT_FOUND_ERROR));
     }
 

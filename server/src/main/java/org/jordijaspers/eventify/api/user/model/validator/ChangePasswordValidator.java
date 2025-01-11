@@ -13,22 +13,22 @@ import org.springframework.stereotype.Component;
 import static java.util.Objects.isNull;
 
 /**
- * {@inheritDoc}.
+ * A custom password validator.
  */
 @Component
 @RequiredArgsConstructor
 public class ChangePasswordValidator implements Validator<PasswordRequest> {
 
     // Error messages
-    private static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
-    private static final String PASSWORD_MUST_NOT_BE_EMPTY = "password cannot not be empty";
-    private static final String PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION = "Password does not match the confirmation";
-    private static final String PASSWORD_IS_NOT_STRONG_ENOUGH = "Password is not strong enough";
+    public static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
+    public static final String PASSWORD_MUST_NOT_BE_EMPTY = "password cannot not be empty";
+    public static final String PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION = "Password does not match the confirmation";
+    public static final String PASSWORD_IS_NOT_STRONG_ENOUGH = "Password is not strong enough";
 
     // Fields
-    private static final String PASSWORD = "password";
-    private static final String NEW_PASSWORD = "newPassword";
-    private static final String CONFIRM_PASSWORD = "confirmPassword";
+    public static final String PASSWORD = "password";
+    public static final String NEW_PASSWORD = "newPassword";
+    public static final String CONFIRM_PASSWORD = "confirmPassword";
 
     // Constraints
     private final CustomPasswordValidator passwordValidator;

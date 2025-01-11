@@ -1,4 +1,4 @@
-package org.jordijaspers.smc.eventify.api.authentication;
+package org.jordijaspers.smc.eventify.api.authentication.controller;
 
 import io.restassured.module.mockmvc.response.MockMvcResponse;
 

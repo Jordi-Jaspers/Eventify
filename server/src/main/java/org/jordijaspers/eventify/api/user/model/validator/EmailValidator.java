@@ -10,19 +10,19 @@ import org.springframework.stereotype.Component;
 import static org.jordijaspers.eventify.common.constants.Constants.Email.OWASP_EMAIL_REGEX;
 
 /**
- * {@inheritDoc}.
+ * A custom email validator.
  */
 @Component
 @RequiredArgsConstructor
 public class EmailValidator implements Validator<UpdateEmailRequest> {
 
     // Error messages
-    private static final String EMAIL_MUST_NOT_BE_EMPTY = "email cannot not be empty";
-    private static final String EMAIL_MUST_CONTAIN_AN_AT = "email must contain an @";
-    private static final String EMAIL_MUST_BE_A_VALID_EMAIL_ADDRESS = "email is not a valid email address";
+    public static final String EMAIL_MUST_NOT_BE_EMPTY = "email cannot not be empty";
+    public static final String EMAIL_MUST_CONTAIN_AN_AT = "email must contain an @";
+    public static final String EMAIL_MUST_BE_A_VALID_EMAIL_ADDRESS = "email is not a valid email address";
 
     // Fields
-    private static final String EMAIL = "email";
+    public static final String EMAIL = "email";
 
     /**
      * {@inheritDoc}

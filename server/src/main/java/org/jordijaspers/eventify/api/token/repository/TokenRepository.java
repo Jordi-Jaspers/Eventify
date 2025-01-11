@@ -51,5 +51,5 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
                 WHERE t.expiresAt > CURRENT_TIMESTAMP AND user.email = :email
             """
     )
-    Optional<Token> findByEmail(@NonNull String email);
+    List<Token> findByEmail(@NonNull String email);
 }

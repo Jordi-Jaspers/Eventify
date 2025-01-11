@@ -1,4 +1,4 @@
-package org.jordijaspers.smc.eventify.support;
+package org.jordijaspers.smc.eventify.support.util;
 
 import java.util.ArrayList;
 import java.util.List;

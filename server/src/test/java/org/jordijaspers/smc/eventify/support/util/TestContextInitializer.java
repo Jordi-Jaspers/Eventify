@@ -1,4 +1,4 @@
-package org.jordijaspers.smc.eventify.support;
+package org.jordijaspers.smc.eventify.support.util;
 
 import org.jordijaspers.eventify.Application;
 import org.jordijaspers.eventify.api.authentication.service.AuthenticationService;

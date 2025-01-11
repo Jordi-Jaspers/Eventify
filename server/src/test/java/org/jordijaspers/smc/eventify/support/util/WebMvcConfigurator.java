@@ -1,4 +1,4 @@
-package org.jordijaspers.smc.eventify.support;
+package org.jordijaspers.smc.eventify.support.util;
 
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;

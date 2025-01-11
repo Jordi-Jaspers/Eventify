@@ -12,28 +12,28 @@ import org.springframework.stereotype.Component;
 import static java.util.Objects.isNull;
 
 /**
- * {@inheritDoc}.
+ * A custom dashboard validator.
  */
 @Component
 @RequiredArgsConstructor
 public class DashboardValidator implements Validator<Object> {
 
     // Error messages
-    private static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
-    private static final String NAME_MUST_NOT_BE_EMPTY = "Name must not be empty";
-    private static final String NAME_TOO_LONG = "Name is too long, maximum length is 255 characters";
-    private static final String DESCRIPTION_MUST_NOT_BE_EMPTY = "Description must not be empty";
-    private static final String DESCRIPTION_TOO_LONG = "Description is too long, maximum length is 500 characters";
+    public static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
+    public static final String NAME_MUST_NOT_BE_EMPTY = "Name must not be empty";
+    public static final String NAME_TOO_LONG = "Name is too long, maximum length is 255 characters";
+    public static final String DESCRIPTION_MUST_NOT_BE_EMPTY = "Description must not be empty";
+    public static final String DESCRIPTION_TOO_LONG = "Description is too long, maximum length is 500 characters";
 
     // Fields
-    private static final String NAME = "name";
-    private static final String DESCRIPTION = "description";
-    private static final String GLOBAL = "global";
-    private static final String CONFIGURATION = "configuration";
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
+    public static final String GLOBAL = "global";
+    public static final String CONFIGURATION = "configuration";
 
     // Constraints
-    private static final int MAX_NAME_LENGTH = 255;
-    private static final int MAX_DESCRIPTION_LENGTH = 500;
+    public static final int MAX_NAME_LENGTH = 255;
+    public static final int MAX_DESCRIPTION_LENGTH = 500;
 
     /**
      * {@inheritDoc}

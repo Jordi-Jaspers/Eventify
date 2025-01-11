@@ -15,18 +15,18 @@ import org.springframework.stereotype.Component;
 public class TeamValidator implements Validator<TeamRequest> {
 
     // Error messages
-    private static final String NAME_MUST_NOT_BE_EMPTY = "Name cannot be empty, because it is required.";
-    private static final String MAX_CHARACTERS_NAME = "The maximum number of characters is 255.";
-    private static final String DESCRIPTION_MUST_NOT_BE_EMPTY = "Description cannot be empty, because it is required.";
-    private static final String MAX_CHARACTERS_DESCRIPTION = "The description cannot exceed 4000 characters.";
+    public static final String NAME_MUST_NOT_BE_EMPTY = "Name cannot be empty, because it is required.";
+    public static final String MAX_CHARACTERS_NAME = "The maximum number of characters is 255.";
+    public static final String DESCRIPTION_MUST_NOT_BE_EMPTY = "Description cannot be empty, because it is required.";
+    public static final String MAX_CHARACTERS_DESCRIPTION = "The description cannot exceed 4000 characters.";
 
     // Constraints
-    private static final int MAX_NAME_LENGTH = 255;
-    private static final int MAX_DESCRIPTION_LENGTH = 4000;
+    public static final int MAX_NAME_LENGTH = 255;
+    public static final int MAX_DESCRIPTION_LENGTH = 4000;
 
     // Fields
-    private static final String NAME = "name";
-    private static final String DESCRIPTION = "description";
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
 
     /**
      * {@inheritDoc}
