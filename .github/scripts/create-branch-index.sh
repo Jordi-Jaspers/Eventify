@@ -3,9 +3,20 @@
 create_branch_index() {
   local path=$1  # Receives "branch/run_id"
   local branch_name=$(dirname "$path")
-  local run_id=$(basename "$path")
 
-  # Create branch index
+  # Find all run directories for this branch
+  local runs=$(find "$branch_name" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort -r)
+
+  # Create run links HTML
+  local run_links=""
+  for run in $runs; do
+    run_links+="    <p class=\"build-item\">
+      <a href=\"$run/\" class=\"build-link\">Run $run</a>
+    </p>
+"
+  done
+
+  # Create branch index with all runs
   cat > "$branch_name/index.html" << EOF
 <!DOCTYPE html>
 <html>
@@ -119,9 +130,7 @@ create_branch_index() {
   <a class="back-link" href="../">Back to all branches</a>
   <h1>Build Reports - $branch_name branch</h1>
   <div class="builds-grid">
-    <p class="build-item">
-      <a href="$run_id/" class="build-link">Run $run_id</a>
-    </p>
+${run_links}
   </div>
 </div>
 </body>

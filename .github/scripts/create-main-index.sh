@@ -1,11 +1,21 @@
 #!/bin/bash
 
-# .github/scripts/create-main-index.sh
 create_main_index() {
   local path=$1  # Receives "branch/run_id"
-  local branch_name=$(dirname "$path")
 
-  # Create or update main index
+  # Find all branches (directories that contain runs)
+  local branches=$(find . -mindepth 1 -maxdepth 1 -type d -not -name ".*" -exec basename {} \;)
+
+  # Create branch links HTML
+  local branch_links=""
+  for branch in $branches; do
+    branch_links+="    <p class=\"branch-item\">
+      <a href=\"$branch/\" class=\"branch-link\">$branch</a>
+    </p>
+"
+  done
+
+  # Create or update main index with all branches
   cat > "index.html" << EOF
 <!DOCTYPE html>
 <html>
