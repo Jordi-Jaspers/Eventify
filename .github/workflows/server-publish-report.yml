@@ -79,6 +79,7 @@ jobs:
       - name: Make scripts executable
         run: |
           chmod +x main-branch/.github/scripts/create-run-index.sh
+          chmod +x main-branch/.github/scripts/create-run-quality-index.sh
           chmod +x main-branch/.github/scripts/create-branch-index.sh
           chmod +x main-branch/.github/scripts/create-main-index.sh
 
@@ -92,6 +93,7 @@ jobs:
           
           # Create indexes using absolute paths to scripts
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-run-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
+          "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-run-quality-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-branch-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
           "${GITHUB_WORKSPACE}/main-branch/.github/scripts/create-main-index.sh" "${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
 
