@@ -110,4 +110,4 @@ jobs:
       - name: Print deployment URL
         if: success() && steps.deployment.outputs.page_url != ''
         run: |
-          echo "::notice title=📊 Report URL::${{ steps.deployment.outputs.page_url }}reports/${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
+          echo "::notice title=📊 Report URL::${{ steps.deployment.outputs.page_url }}/${{ steps.build_info.outputs.branch_name }}/${{ steps.build_info.outputs.run_id }}"
