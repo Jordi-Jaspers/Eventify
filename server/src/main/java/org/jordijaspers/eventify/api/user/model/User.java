@@ -7,11 +7,12 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jordijaspers.eventify.api.authentication.model.Role;
 import org.jordijaspers.eventify.api.team.model.Team;
@@ -47,7 +48,6 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NaturalId
     @Column(
         name = "email",
         unique = true

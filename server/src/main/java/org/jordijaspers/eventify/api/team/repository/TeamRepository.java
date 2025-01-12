@@ -14,17 +14,28 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long> {
 
-    @Query("""
+    @NonNull
+    @Override
+    @Query("FROM Team t LEFT JOIN FETCH t.members")
+    List<Team> findAll();
+
+    @Query(
+        """
             FROM Team t
             LEFT JOIN FETCH t.members
             WHERE t.id = :id
-        """)
+            """
+    )
     Optional<Team> findByIdWithMembers(@Param("id") Long id);
 
-    @Override
-    @NonNull
-    @Query("FROM Team t LEFT JOIN FETCH t.members")
-    List<Team> findAll();
+    @Query(
+        """
+            FROM Team t
+            LEFT JOIN FETCH t.members
+            WHERE t.name = :name
+            """
+    )
+    List<Team> findAllByNameContaining(@NonNull String name);
 
     @Override
     @Modifying

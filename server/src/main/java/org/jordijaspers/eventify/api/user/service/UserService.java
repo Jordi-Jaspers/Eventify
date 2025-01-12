@@ -84,7 +84,9 @@ public class UserService implements UserDetailsService {
      * @param lockUser true to lock the user, false to unlock the user
      */
     public User lockUser(final Long id, final boolean lockUser) {
-        final User user = userRepository.findById(id).orElseThrow();
+        final User user = userRepository.findById(id)
+            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+
         user.setEnabled(!lockUser);
         return userRepository.save(user);
     }
