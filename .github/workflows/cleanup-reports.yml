@@ -5,19 +5,28 @@ on:
   schedule:
     - cron: '0 0 * * 0'  # Run at midnight every Sunday
 
+run-name: Cleanup Reports (${{ github.ref_name }})
+
 permissions:
   contents: write
   pages: write
   id-token: write
 
+# Force scheduled runs to use the develop branch
+concurrency:
+  group: cleanup-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout main for scripts
         uses: actions/checkout@v4
         with:
           path: main-branch
+          ref: develop  # Ensure we checkout develop branch
 
       - name: Checkout gh-pages
         uses: actions/checkout@v4
@@ -41,4 +50,11 @@ jobs:
           git push origin gh-pages
 
       - name: Print completion message
+        if: success()
         run: echo "::notice title=🧹 Cleanup completed::Reports have been cleaned up successfully"
+
+      - name: Print error message
+        if: failure() && github.ref != 'refs/heads/develop'
+        run: |
+          echo "::error::This workflow can only be run from the develop branch"
+          exit 1
