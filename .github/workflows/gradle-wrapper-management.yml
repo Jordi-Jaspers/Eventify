@@ -1,0 +1,45 @@
+name: "Gradle Wrapper Management"
+
+on:
+  schedule:
+    - cron: "0 9 * * *"  # Runs at 9:00 AM UTC daily
+  push:
+    branches:
+      - develop
+    paths:
+      - 'server/gradle/**'
+      - 'server/gradlew'
+      - 'server/gradlew.bat'
+  pull_request:
+    paths:
+      - 'server/gradle/**'
+      - 'server/gradlew'
+      - 'server/gradlew.bat'
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  validation:
+    name: "Validate Wrapper"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/wrapper-validation@v3
+
+  update:
+    name: "Update Wrapper"
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update Gradle Wrapper
+        uses: gradle-update/update-gradle-wrapper-action@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          target-branch: develop
+          base-branch: develop
+          labels: dependencies
+          reviewers: jordi-jaspers
+          paths: server/**
+          paths-ignore: client/**

@@ -1,49 +1,58 @@
 version: 2
 updates:
-  # Update dependencies for Client using NPM.
+  # Client (SvelteKit + Bun) dependencies
   - package-ecosystem: "npm"
     directory: "/client"
-    target-branch: develop
+    target-branch: "develop"
     labels:
       - "dependencies"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Brussels"
     commit-message:
-      prefix: "[npm] bump: "
+      prefix: "chore(deps)"
       include: "scope"
     reviewers:
       - "jordi-jaspers"
-    versioning-strategy: increase
+    versioning-strategy: "auto"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      separator: "-"
     version-update:
       ignore:
         - dependency-name: "*"
           update-types: ["version-update:semver-major"]
-    security-updates:
-      pull-requests: true
+    post-update:
+      commands:
+        - ".github/scripts/update-bun-lockfile.sh"
     groups:
       all:
         patterns:
           - "*"
 
-  # Update dependencies for Server using Gradle.
+  # Server (Spring Boot) dependencies
   - package-ecosystem: "gradle"
     directory: "/server"
-    target-branch: develop
+    target-branch: "develop"
     labels:
       - "dependencies"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Brussels"
     commit-message:
-      prefix: "[spring] bump: "
+      prefix: "chore(deps)"
       include: "scope"
     reviewers:
       - "jordi-jaspers"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      separator: "-"
     version-update:
       ignore:
         - dependency-name: "*"
           update-types: ["version-update:semver-major"]
-    security-updates:
-      pull-requests: true
     groups:
       all:
         patterns:
