@@ -324,4 +324,52 @@ public class AuthenticationControllerTest extends IntegrationTest {
         assertThat(refreshedUserResponse.getAccessToken(), notNullValue());
         assertThat(refreshedUserResponse.getRefreshToken(), notNullValue());
     }
+
+    @Test
+    @DisplayName("A user cannot refresh their access token with an invalid refresh token")
+    public void refreshTokenWithInvalidTokenFails() {
+        // Given: An invalid refresh token
+        final RefreshTokenRequest request = new RefreshTokenRequest()
+            .setRefreshToken("invalid-token");
+
+        // When: Refreshing the access token with invalid refresh token
+        final MockMvcResponse response = given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .body(request)
+            .when()
+            .post(TOKEN_PATH)
+            .andReturn();
+
+        // Then: The response should be BAD_REQUEST
+        response.then().statusCode(SC_BAD_REQUEST);
+
+        // And: The response should contain an error message
+        response.then().body("apiErrorReason", is(ApiErrorCode.INVALID_TOKEN_ERROR.getReason()));
+    }
+
+    @Test
+    @DisplayName("An unvalidated user can request a new validation token")
+    public void requestNewValidationTokenSuccess() {
+        // Given: An unvalidated user
+        final User user = anUnvalidatedUser();
+
+        // And: The user has a validation token
+        final Token validationToken = getValidationToken(user);
+        assertThat(validationToken, notNullValue());
+
+        // When: Requesting a new validation token
+        final MockMvcResponse response = given()
+            .param("email", user.getEmail())
+            .when()
+            .post(RESEND_EMAIL_VERIFICATION_PATH)
+            .andReturn();
+
+        // Then: The response should be NO_CONTENT
+        response.then().statusCode(SC_NO_CONTENT);
+
+        // And: The user should have a new validation token
+        final Token newValidationToken = getValidationToken(user);
+        assertThat(newValidationToken, notNullValue());
+        assertThat(newValidationToken, not(equalTo(validationToken)));
+    }
 }
