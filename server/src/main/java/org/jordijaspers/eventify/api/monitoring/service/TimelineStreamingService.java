@@ -26,9 +26,9 @@ public class TimelineStreamingService {
 
     private final DashboardService dashboardService;
 
-    private final TimelineEventHandler timelineEventHandler;
-
     private final TimelineInitializer timelineInitializer;
+
+    private final TimelineEventHandler timelineEventHandler;
 
     private final Map<SubscriptionKey, DashboardSubscription> dashboardSubscriptions = new ConcurrentHashMap<>();
 
