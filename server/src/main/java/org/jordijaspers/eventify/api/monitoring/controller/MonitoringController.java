@@ -10,6 +10,7 @@ import org.jordijaspers.eventify.api.monitoring.service.TimelineStreamingService
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import static org.jordijaspers.eventify.api.Paths.MONITORING_STREAM_PATH;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -22,7 +23,7 @@ public class MonitoringController {
     @ResponseStatus(OK)
     @Operation(summary = "Subscribe to real-time monitoring data for a specific dashboard.")
     @GetMapping(
-        path = "/api/dashboard/{id}/monitoring/stream",
+        path = MONITORING_STREAM_PATH,
         produces = APPLICATION_JSON_VALUE
     )
     public SseEmitter streamDashboard(@PathVariable final Long id, @RequestParam(required = false) final Duration window) {
