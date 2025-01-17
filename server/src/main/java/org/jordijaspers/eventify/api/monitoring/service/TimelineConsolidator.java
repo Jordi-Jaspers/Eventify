@@ -4,6 +4,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 
 import org.jordijaspers.eventify.api.event.model.Status;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineDurationResponse;
@@ -20,6 +21,16 @@ public final class TimelineConsolidator {
     /* Private constructor to prevent instantiation */
     private TimelineConsolidator() {
         throw new UnsupportedOperationException("This class cannot be instantiated");
+    }
+
+    /**
+     * Consolidates multiple timelines into a single timeline representing the worst status at any given moment.
+     *
+     * @param timelines List of timelines to consolidate
+     * @param setter    Consumer to set the consolidated timeline
+     */
+    public static void consolidateTimeline(final List<TimelineResponse> timelines, final Consumer<TimelineResponse> setter) {
+        setter.accept(TimelineConsolidator.consolidateTimelines(timelines));
     }
 
     /**
