@@ -33,8 +33,8 @@ public class DashboardConfigurationController {
         path = DASHBOARD_CONFIGURATION_PATH,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAuthority('READ_DASHBOARDS')")
-    public ResponseEntity<DashboardResponse> getDashboardConfiguration(@PathVariable Long id) {
+    @PreAuthorize("hasAuthority('READ_DASHBOARDS') and @dashboardSecurityService.hasDashboardAccess(#id)")
+    public ResponseEntity<DashboardResponse> getDashboardConfiguration(@PathVariable final Long id) {
         final Dashboard dashboard = dashboardService.getDashboardConfiguration(id);
         return ResponseEntity.status(OK).body(dashboardMapper.toDashboardResponse(dashboard));
     }
@@ -42,10 +42,9 @@ public class DashboardConfigurationController {
     @ResponseStatus(OK)
     @Operation(summary = "Configure an existing dashboard.")
     @PutMapping(DASHBOARD_CONFIGURATION_PATH)
-    @PreAuthorize("hasAuthority('WRITE_DASHBOARDS')")
-    public ResponseEntity<DashboardResponse> configureDashboard(
-        @PathVariable Long id,
-        @RequestBody DashboardConfigurationRequest request) {
+    @PreAuthorize("hasAuthority('WRITE_DASHBOARDS') and @dashboardSecurityService.hasDashboardAccess(#id)")
+    public ResponseEntity<DashboardResponse> configureDashboard(@PathVariable final Long id,
+        @RequestBody final DashboardConfigurationRequest request) {
         final Dashboard dashboard = dashboardService.configureDashboard(id, request);
         return ResponseEntity.status(OK).body(dashboardMapper.toDashboardResponse(dashboard));
     }

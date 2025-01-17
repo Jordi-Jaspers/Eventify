@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.jordijaspers.eventify.api.source.model.request.CreateSourceRequest;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 
@@ -46,4 +47,15 @@ public class Source implements Serializable {
         orphanRemoval = true
     )
     private ApiKey apiKey;
+
+    /**
+     * A constructor to create a persistent Source object.
+     *
+     * @param request The request to create a Source object.
+     */
+    public Source(final CreateSourceRequest request) {
+        this.name = request.getName();
+        this.description = request.getDescription();
+        this.apiKey = new ApiKey();
+    }
 }

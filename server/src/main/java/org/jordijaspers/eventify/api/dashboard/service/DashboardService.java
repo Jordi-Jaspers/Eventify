@@ -16,13 +16,11 @@ import org.jordijaspers.eventify.api.dashboard.model.request.UpdateDashboardDeta
 import org.jordijaspers.eventify.api.dashboard.repository.DashboardRepository;
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.user.model.User;
-import org.jordijaspers.eventify.common.exception.InvalidAccessException;
 import org.jordijaspers.eventify.common.exception.UserNotPartOfTeamException;
 import org.jordijaspers.eventify.common.util.SecurityUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.jordijaspers.eventify.common.exception.ApiErrorCode.CANNOT_ACCESS_DASHBOARD;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.DASHBOARD_NOT_FOUND_ERROR;
 
 @Service
@@ -40,18 +38,8 @@ public class DashboardService {
      */
     @Transactional(readOnly = true)
     public Dashboard getDashboardConfiguration(final Long dashboardId) {
-        final User user = SecurityUtil.getLoggedInUser();
-        final Dashboard dashboard = dashboardRepository.findByIdWithConfiguration(dashboardId)
+        return dashboardRepository.findByIdWithConfiguration(dashboardId)
             .orElseThrow(() -> new DataNotFoundException(DASHBOARD_NOT_FOUND_ERROR));
-
-        if (!dashboard.isGlobal()) {
-            user.getTeams().stream()
-                .filter(team -> team.getId().equals(dashboard.getTeam().getId()))
-                .findFirst()
-                .orElseThrow(() -> new InvalidAccessException(CANNOT_ACCESS_DASHBOARD));
-        }
-
-        return dashboard;
     }
 
     /**
@@ -87,7 +75,7 @@ public class DashboardService {
             .filter(team -> team.getId().equals(request.getTeamId()))
             .findFirst()
             .orElseThrow(UserNotPartOfTeamException::new);
-        return save(new Dashboard(request, user, selectedTeam));
+        return save(new Dashboard(request, user.getEmail(), selectedTeam));
     }
 
     /**
@@ -123,20 +111,38 @@ public class DashboardService {
         return save(dashboard);
     }
 
-    private Dashboard save(final Dashboard dashboard) {
+    /**
+     * Saves the dashboard and updates the last updated timestamp and the updated by field.
+     *
+     * @param dashboard The dashboard to save.
+     * @return The saved dashboard.
+     */
+    public Dashboard save(final Dashboard dashboard) {
         dashboard.setUpdatedBy(SecurityUtil.getLoggedInUser().getUsername());
         dashboard.setLastUpdated(LocalDateTime.now());
         return dashboardRepository.save(dashboard);
     }
 
-    private static void configureUngroupedChecks(final DashboardConfigurationRequest request, final Dashboard dashboard) {
+    /**
+     * Configures the ungrouped checks.
+     *
+     * @param request   The configuration request.
+     * @param dashboard The dashboard to configure.
+     */
+    public static void configureUngroupedChecks(final DashboardConfigurationRequest request, final Dashboard dashboard) {
         int displayOrder = 1000;
         for (Long checkId : request.getUngroupedCheckIds()) {
             dashboard.addCheck(new Check(checkId), null, displayOrder++);
         }
     }
 
-    private static void configureGroupedChecks(final List<DashboardGroupRequest> requests, final Dashboard dashboard) {
+    /**
+     * Configures the grouped checks.
+     *
+     * @param requests  The group requests.
+     * @param dashboard The dashboard to configure.
+     */
+    public static void configureGroupedChecks(final List<DashboardGroupRequest> requests, final Dashboard dashboard) {
         int groupOrder = 1;
         for (final DashboardGroupRequest request : requests) {
             final DashboardGroup group = new DashboardGroup(dashboard, request.getName(), groupOrder++);

@@ -2,6 +2,13 @@ package org.jordijaspers.eventify.support.util;
 
 import org.jordijaspers.eventify.Application;
 import org.jordijaspers.eventify.api.authentication.service.AuthenticationService;
+import org.jordijaspers.eventify.api.check.service.CheckService;
+import org.jordijaspers.eventify.api.dashboard.repository.DashboardRepository;
+import org.jordijaspers.eventify.api.dashboard.service.DashboardService;
+import org.jordijaspers.eventify.api.event.repository.EventRepository;
+import org.jordijaspers.eventify.api.event.service.EventService;
+import org.jordijaspers.eventify.api.monitoring.service.TimelineStreamingService;
+import org.jordijaspers.eventify.api.source.service.SourceService;
 import org.jordijaspers.eventify.api.team.repository.TeamRepository;
 import org.jordijaspers.eventify.api.team.service.TeamService;
 import org.jordijaspers.eventify.api.token.repository.TokenRepository;
@@ -17,6 +24,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -48,6 +57,9 @@ public class TestContextInitializer {
     @Autowired
     protected HawaiiFilters hawaiiFilters;
 
+    @Autowired
+    protected ObjectMapper objectMapper;
+
     // ========================= APPLICATION =========================
 
     @Autowired
@@ -70,4 +82,25 @@ public class TestContextInitializer {
 
     @Autowired
     protected TeamService teamService;
+
+    @Autowired
+    protected TimelineStreamingService timelineStreamingService;
+
+    @Autowired
+    protected DashboardRepository dashboardRepository;
+
+    @Autowired
+    protected DashboardService dashboardService;
+
+    @Autowired
+    protected SourceService sourceService;
+
+    @Autowired
+    protected CheckService checkService;
+
+    @Autowired
+    protected EventService eventService;
+
+    @Autowired
+    protected EventRepository eventRepository;
 }

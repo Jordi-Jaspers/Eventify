@@ -19,7 +19,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.jordijaspers.eventify.api.check.model.Check;
 import org.jordijaspers.eventify.api.dashboard.model.request.CreateDashboardRequest;
 import org.jordijaspers.eventify.api.team.model.Team;
-import org.jordijaspers.eventify.api.user.model.User;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -91,15 +90,16 @@ public class Dashboard implements Serializable {
      * A constructor to create a new dashboard.
      *
      * @param request The request to create the dashboard.
-     * @param user    The user creating the dashboard.
+     * @param email   The email of the user creating the dashboard.
+     * @param team    The team the dashboard belongs to.
      */
-    public Dashboard(final CreateDashboardRequest request, final User user, final Team team) {
+    public Dashboard(final CreateDashboardRequest request, final String email, final Team team) {
         this.name = request.getName();
         this.description = request.getDescription();
         this.global = request.isGlobal();
         this.team = team;
 
-        this.updatedBy = user.getUsername();
+        this.updatedBy = email;
         this.lastUpdated = LocalDateTime.now();
         this.created = LocalDateTime.now();
     }

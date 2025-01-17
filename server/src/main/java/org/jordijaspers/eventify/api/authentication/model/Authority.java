@@ -15,6 +15,11 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public enum Authority {
 
+    NONE(
+        "None",
+        "The default authority for a user with no permissions.",
+        Set.of()
+    ),
     USER(
         "User",
         "The default authority for a user with limited permissions.",

@@ -2,6 +2,8 @@ package org.jordijaspers.eventify.api.event.model.request;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +17,9 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
  * The EventRequest class represents the request payload for creating an event.
  */
 @Data
+@ToString
 @NoArgsConstructor
+@Accessors(chain = true)
 public class EventRequest implements Serializable {
 
     @Serial

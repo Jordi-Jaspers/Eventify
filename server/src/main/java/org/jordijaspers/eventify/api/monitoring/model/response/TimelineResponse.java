@@ -8,12 +8,25 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jordijaspers.eventify.api.event.model.Status;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TimelineResponse {
 
     private List<TimelineDurationResponse> durations = new ArrayList<>();
+
+    /**
+     * Creates a timeline with a single UNKNOWN duration for the given time window.
+     *
+     * @param windowStart The start of the time window
+     * @param windowEnd   The end of the time window
+     * @param status      The status of the duration
+     */
+    public TimelineResponse(final ZonedDateTime windowStart, final ZonedDateTime windowEnd, final Status status) {
+        this.durations = List.of(new TimelineDurationResponse(windowStart, windowEnd, status));
+    }
 
     /**
      * Get the start time of the timeline.

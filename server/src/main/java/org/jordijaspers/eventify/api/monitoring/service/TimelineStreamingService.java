@@ -74,7 +74,23 @@ public class TimelineStreamingService {
 
     }
 
-    private DashboardSubscription initializeSubscription(final SseEmitter emitter, final SubscriptionKey key) {
+    /**
+     * Get the number of active subscriptions.
+     *
+     * @return The number of active subscriptions
+     */
+    public int getSubscriptions() {
+        return dashboardSubscriptions.size();
+    }
+
+    /**
+     * Initialize a new subscription for the given dashboard and time window.
+     *
+     * @param emitter The emitter to use for the subscription
+     * @param key     The key of the subscription
+     * @return The initialized subscription
+     */
+    protected DashboardSubscription initializeSubscription(final SseEmitter emitter, final SubscriptionKey key) {
         setupEmitterCallbacks(key, emitter);
 
         final Dashboard dashboard = dashboardService.getDashboardConfiguration(key.getDashboardId());
@@ -84,13 +100,24 @@ public class TimelineStreamingService {
         return subscription;
     }
 
-    private void setupEmitterCallbacks(final SubscriptionKey key, final SseEmitter emitter) {
+    /**
+     * Setup the emitter callbacks for the given subscription key and emitter.
+     *
+     * @param key     The key of the subscription
+     * @param emitter The emitter to setup the callbacks for
+     */
+    protected void setupEmitterCallbacks(final SubscriptionKey key, final SseEmitter emitter) {
         emitter.onCompletion(() -> removeSubscription(key));
         emitter.onTimeout(() -> removeSubscription(key));
         emitter.onError(e -> removeSubscription(key));
     }
 
-    private void removeSubscription(final SubscriptionKey key) {
+    /**
+     * Remove the subscription for the given key.
+     *
+     * @param key The key of the subscription to remove
+     */
+    protected void removeSubscription(final SubscriptionKey key) {
         dashboardSubscriptions.remove(key);
     }
 }

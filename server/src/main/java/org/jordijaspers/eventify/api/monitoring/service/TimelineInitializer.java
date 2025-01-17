@@ -53,6 +53,6 @@ public class TimelineInitializer {
                 .toList()
         );
 
-        consolidateTimelines(allTimelines);
+        subscription.setTimeline(consolidateTimelines(allTimelines));
     }
 }
