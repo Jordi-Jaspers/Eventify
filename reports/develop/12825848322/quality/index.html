@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Build Reports - develop branch</title>
+  <title>Quality Reports</title>
   <style>
     :root {
       --primary-color: #3498db;
@@ -63,18 +63,18 @@
       font-size: 1.75rem;
     }
 
-    .builds-grid {
+    .reports-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: var(--spacing-unit);
       margin-top: calc(var(--spacing-unit) * 1.5);
     }
 
-    .build-item {
+    .report-item {
       margin: 0;
     }
 
-    .build-link {
+    .report-link {
       display: flex;
       align-items: center;
       padding: 1em 1.5em;
@@ -86,9 +86,10 @@
       font-weight: 500;
       position: relative;
       overflow: hidden;
+      text-transform: capitalize;
     }
 
-    .build-link:before {
+    .report-link:before {
       content: '';
       position: absolute;
       left: 0;
@@ -98,7 +99,7 @@
       background-color: rgba(255, 255, 255, 0.2);
     }
 
-    .build-link:hover {
+    .report-link:hover {
       background-color: var(--primary-dark);
       transform: translateY(-2px);
       box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
@@ -107,44 +108,20 @@
 </head>
 <body>
 <div class="container">
-  <a class="back-link" href="../">Back to all branches</a>
-  <h1>Build Reports - develop branch</h1>
-  <div class="builds-grid">
-    <p class="build-item">
-      <a href="12825848322/" class="build-link">Run 12825848322</a>
+  <a class="back-link" href="../">Back to run summary</a>
+  <h1>Quality Reports</h1>
+  <div class="reports-grid">
+    <p class="report-item">
+      <a href="checkstyle/" class="report-link">checkstyle</a>
     </p>
-    <p class="build-item">
-      <a href="12805406444/" class="build-link">Run 12805406444</a>
+    <p class="report-item">
+      <a href="pmd/" class="report-link">pmd</a>
     </p>
-    <p class="build-item">
-      <a href="12784837770/" class="build-link">Run 12784837770</a>
+    <p class="report-item">
+      <a href="problems/" class="report-link">problems</a>
     </p>
-    <p class="build-item">
-      <a href="12764270966/" class="build-link">Run 12764270966</a>
-    </p>
-    <p class="build-item">
-      <a href="12743777789/" class="build-link">Run 12743777789</a>
-    </p>
-    <p class="build-item">
-      <a href="12743230921/" class="build-link">Run 12743230921</a>
-    </p>
-    <p class="build-item">
-      <a href="12736722443/" class="build-link">Run 12736722443</a>
-    </p>
-    <p class="build-item">
-      <a href="12736100576/" class="build-link">Run 12736100576</a>
-    </p>
-    <p class="build-item">
-      <a href="12733019438/" class="build-link">Run 12733019438</a>
-    </p>
-    <p class="build-item">
-      <a href="12733019434/" class="build-link">Run 12733019434</a>
-    </p>
-    <p class="build-item">
-      <a href="12733019433/" class="build-link">Run 12733019433</a>
-    </p>
-    <p class="build-item">
-      <a href="12732983946/" class="build-link">Run 12732983946</a>
+    <p class="report-item">
+      <a href="spotbugs/" class="report-link">spotbugs</a>
     </p>
 
   </div>
