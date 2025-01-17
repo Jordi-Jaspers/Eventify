@@ -85,6 +85,12 @@ public final class Paths {
 
     public static final String DASHBOARD_CONFIGURATION_PATH = DASHBOARD_PATH + "/configuration";
 
+    /* ------------------------------- MONITORING ENDPOINTS ------------------------------- */
+
+    public static final String MONITORING_PATH = DASHBOARD_PATH + "/monitoring";
+
+    public static final String MONITORING_STREAM_PATH = MONITORING_PATH + "/stream";
+
     /* ------------------------------- CHECKS ENDPOINTS ------------------------------- */
 
     public static final String CHECK_PATH = BASE_PATH + "/check";

@@ -80,6 +80,14 @@ public enum ApiErrorCode implements ApiError {
     UNAUTHORIZED_ERROR(
         "ERR-0018",
         "You are not authorized to access this content."
+    ),
+    CHECK_NOT_FOUND_ERROR(
+        "ERR-0019",
+        "The requested check does not exist."
+    ),
+    DASHBOARD_STREAMING_ERROR(
+        "ERR-0020",
+        "An error occurred while streaming the dashboard."
     );
 
     /**

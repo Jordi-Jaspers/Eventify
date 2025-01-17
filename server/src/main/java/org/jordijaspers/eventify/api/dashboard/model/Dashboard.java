@@ -9,7 +9,9 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,6 +21,8 @@ import org.jordijaspers.eventify.api.dashboard.model.request.CreateDashboardRequ
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.user.model.User;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 
 @Data
@@ -120,4 +124,31 @@ public class Dashboard implements Serializable {
         groups.clear();
     }
 
+    /**
+     * Retrieve all ungrouped checks in the dashboard.
+     *
+     * @return The ungrouped checks.
+     */
+    public Set<Check> getUngroupedChecks() {
+        return dashboardChecks.stream()
+            .filter(dashboardChecks -> isNull(dashboardChecks.getGroup()))
+            .map(DashboardCheck::getCheck)
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * Retrieve grouped checks in the dashboard. The checks are grouped by the group they belong to.
+     *
+     * @return The grouped checks.
+     */
+    public Map<DashboardGroup, Set<Check>> getGroupedChecks() {
+        return dashboardChecks.stream()
+            .filter(dashboardCheck -> nonNull(dashboardCheck.getGroup()))
+            .collect(
+                Collectors.groupingBy(
+                    DashboardCheck::getGroup,
+                    Collectors.mapping(DashboardCheck::getCheck, Collectors.toSet())
+                )
+            );
+    }
 }

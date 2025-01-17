@@ -60,6 +60,9 @@ plugins {
 /** Configure the dependencies required within the project. */
 dependencies {
     // ======= ANNOTATION PROCESSORS =======
+    // lombok is used to reduce boilerplate code for model classes.
+    annotationProcessor("org.projectlombok", "lombok")
+
     // annotation processor that generates metadata about classes in your application that are annotated with @ConfigurationProperties.
     annotationProcessor("org.springframework.boot", "spring-boot-configuration-processor")
 
@@ -90,9 +93,7 @@ dependencies {
 
     // ======= IMPLEMENTATION DEPENDENCIES =======
     // Open API documentation generation.
-    implementation("org.springframework.retry", "spring-retry", retrieve("springRetryVersion"))
     implementation("org.springdoc", "springdoc-openapi-starter-webmvc-ui", retrieve("springdocVersion"))
-
 
     // provides the core of hawaii framework such as the response entity exception handling.
     implementation("org.hawaiiframework", "hawaii-starter-rest", retrieve("hawaiiFrameworkVersion"))
@@ -137,6 +138,7 @@ dependencies {
 
     testImplementation("io.rest-assured", "rest-assured", retrieve("restAssuredVersion"))
     testImplementation("io.rest-assured", "spring-mock-mvc", retrieve("restAssuredVersion"))
+
     // ======= LIQUIBASE PLUGIN DEPENDENCIES =======
     liquibaseRuntime("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
     liquibaseRuntime("info.picocli", "picocli", retrieve("picocliVersion"))
@@ -249,7 +251,7 @@ when {
         project.ext["dbPassword"] = "tst_eventify"
         project.ext["contexts"] = "test"
         project.ext["outputFile"] = "build/liquibase/updateSQL.sql"
-        project.ext["changelogFile"] = "src/main/resources/db/changelog/db.changelog-master.yaml"
+        project.ext["changelogFile"] = "src/main/resources/db/changelog/db.changelog-plugin.yaml"
     }
 }
 
