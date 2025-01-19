@@ -191,7 +191,7 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     protected static RegisterUserRequest aRegisterRequest() {
         return new RegisterUserRequest()
-            .setEmail(INTEGRATION_PREFIX + " - " + UUID.randomUUID() + " - " + TEST_EMAIL)
+            .setEmail(TEST_EMAIL)
             .setPassword(TEST_PASSWORD)
             .setPasswordConfirmation(TEST_PASSWORD)
             .setFirstName(FIRST_NAME)
