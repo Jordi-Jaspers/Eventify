@@ -35,4 +35,14 @@ public class EventRequest implements Serializable {
 
     private String correlationId;
 
+    /**
+     * Constructs a new EventRequest instance.
+     *
+     * @param checkId the check id
+     * @param status  the status
+     */
+    public EventRequest(final Long checkId, final Status status) {
+        this.checkId = checkId;
+        this.status = status;
+    }
 }

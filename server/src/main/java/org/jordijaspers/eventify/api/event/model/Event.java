@@ -7,10 +7,12 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import static java.time.ZoneOffset.UTC;
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 
 @Data
@@ -49,4 +51,30 @@ public class Event implements Serializable {
     )
     private LocalDateTime created;
 
+    /**
+     * Returns the timestamp located in the embedded id.
+     *
+     * @return the timestamp
+     */
+    public LocalDateTime getTimestamp() {
+        return this.id.getTimestamp();
+    }
+
+    /**
+     * Returns the zoned timestamp located in the embedded id.
+     *
+     * @return the zoned timestamp
+     */
+    public ZonedDateTime getZonedTimestamp() {
+        return this.id.getTimestamp().atZone(UTC);
+    }
+
+    /**
+     * Returns the check id located in the embedded id.
+     *
+     * @return the check id
+     */
+    public Long getCheckId() {
+        return this.id.getCheckId();
+    }
 }

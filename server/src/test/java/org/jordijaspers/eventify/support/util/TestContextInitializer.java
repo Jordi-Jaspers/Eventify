@@ -16,6 +16,7 @@ import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;
 import org.jordijaspers.eventify.api.user.repository.UserRepository;
 import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.support.config.BeanConfiguration;
+import org.jordijaspers.eventify.support.container.RabbitContainer;
 import org.jordijaspers.eventify.support.container.TimescaleContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +24,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +37,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Import(
     {
         BeanConfiguration.class,
-        TimescaleContainer.class
+        TimescaleContainer.class,
+        RabbitContainer.class
     }
 )
 @Testcontainers
@@ -49,6 +52,9 @@ public class TestContextInitializer {
     // ========================= CONTAINERS =========================
     @Autowired
     protected PostgreSQLContainer<?> timescaleContainer;
+
+    @Autowired
+    protected RabbitMQContainer rabbitContainer;
 
     // ========================= CONTEXT =========================
     @Autowired

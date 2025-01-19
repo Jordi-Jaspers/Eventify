@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,11 +14,15 @@ import org.jordijaspers.eventify.api.dashboard.service.DashboardService;
 import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.monitoring.model.DashboardSubscription;
 import org.jordijaspers.eventify.api.monitoring.model.SubscriptionKey;
+import org.jordijaspers.eventify.api.monitoring.model.response.TimelineResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.calculateTimeline;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Slf4j
 @Service
@@ -60,27 +65,29 @@ public class TimelineStreamingService {
     }
 
     /**
-     * Event handler for incoming events. This will process the event and update the timeline for all relevant subscriptions.
+     * Process a batch of events for a single check and update relevant subscriptions. Events in the batch are assumed to be ordered by
+     * timestamp.
      *
-     * @param event The event to process
+     * @param events  A sorted list of events to process.
+     * @param checkId The id of the check to process the events for
      */
-    public void handleEvent(final EventRequest event) {
-        dashboardSubscriptions.values().stream()
-            .filter(subscription -> subscription.isEventRelevant(event))
-            .forEach(subscription -> {
-                timelineEventHandler.processEvent(event, subscription);
+    @SuppressWarnings("ReturnCount")
+    public void updateTimelineForCheck(final List<EventRequest> events, final Long checkId) {
+        final List<DashboardSubscription> relevantSubscriptions = getRelevantSubscriptions(checkId, events.getFirst());
+        if (isEmpty(relevantSubscriptions)) {
+            return;
+        }
+
+        final TimelineResponse timeline = calculateTimeline(events);
+        if (isNull(timeline)) {
+            return;
+        }
+
+        relevantSubscriptions.forEach(subscription -> {
+            if (timelineEventHandler.processTimeline(timeline, checkId, subscription)) {
                 subscription.emitEvent("UPDATED");
-            });
-
-    }
-
-    /**
-     * Get the number of active subscriptions.
-     *
-     * @return The number of active subscriptions
-     */
-    public int getSubscriptions() {
-        return dashboardSubscriptions.size();
+            }
+        });
     }
 
     /**
@@ -119,5 +126,29 @@ public class TimelineStreamingService {
      */
     protected void removeSubscription(final SubscriptionKey key) {
         dashboardSubscriptions.remove(key);
+    }
+
+    /**
+     * Get the number of active subscriptions.
+     *
+     * @return The number of active subscriptions
+     */
+    protected int getActiveSubscriptions() {
+        return dashboardSubscriptions.size();
+    }
+
+    /**
+     * Get the relevant subscriptions for the given check and event.
+     *
+     * @param checkId The id of the check to get the subscriptions for
+     * @param event   The event to get the subscriptions for
+     * @return The relevant subscriptions
+     */
+    protected List<DashboardSubscription> getRelevantSubscriptions(final Long checkId, final EventRequest event) {
+        return dashboardSubscriptions.values()
+            .stream()
+            .filter(subscription -> subscription.containsCheck(checkId))
+            .filter(subscription -> subscription.isInWindow(event))
+            .toList();
     }
 }

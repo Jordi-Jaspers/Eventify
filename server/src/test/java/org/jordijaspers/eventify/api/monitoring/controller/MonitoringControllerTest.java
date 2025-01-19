@@ -4,6 +4,7 @@ import io.restassured.module.mockmvc.response.MockMvcResponse;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +28,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static jakarta.servlet.http.HttpServletResponse.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.jordijaspers.eventify.api.Paths.MONITORING_STREAM_PATH;
 import static org.jordijaspers.eventify.api.event.model.Status.CRITICAL;
 import static org.jordijaspers.eventify.api.event.model.Status.OK;
@@ -181,7 +183,7 @@ class MonitoringControllerTest extends IntegrationTest {
 
         // When: An event occurs
         final EventRequest event = anEventRequest(check.getId(), OK);
-        timelineStreamingService.handleEvent(event);
+        timelineStreamingService.updateTimelineForCheck(List.of(event), check.getId());
 
         // Then: Should contain the updated timelines. under the event type "update"
         final Map<String, String> eventData = parseStream(response.body().asString());

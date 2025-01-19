@@ -25,6 +25,15 @@ public enum Status {
     private final int severity;
 
     /**
+     * Check if the status is OK.
+     *
+     * @return True if the status is OK, false otherwise
+     */
+    public boolean isNotOk() {
+        return this != OK;
+    }
+
+    /**
      * Get the worst status of two statuses based on severity and consideration flags.
      *
      * @param a The first status

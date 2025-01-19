@@ -59,6 +59,23 @@ spring:
   liquibase:
     enabled: false
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        prefetch: 250
+        concurrency: 4
+        max-concurrency: 8
+    connection-timeout: 5000
+    template:
+      reply-timeout: 5000
+    cache:
+      channel:
+        size: 25
+
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     hikari:

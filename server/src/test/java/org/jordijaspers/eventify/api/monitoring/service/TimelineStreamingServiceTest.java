@@ -69,7 +69,7 @@ public class TimelineStreamingServiceTest extends UnitTest {
             verify(timelineInitializer, times(1)).initializeTimelines(any(DashboardSubscription.class));
 
             // And: There is only one active subscription
-            assertThat(timelineStreamingService.getSubscriptions()).isEqualTo(1);
+            assertThat(timelineStreamingService.getActiveSubscriptions()).isEqualTo(1);
         }
 
         @Test
@@ -92,7 +92,7 @@ public class TimelineStreamingServiceTest extends UnitTest {
             verify(timelineInitializer, times(2)).initializeTimelines(any(DashboardSubscription.class));
 
             // And: There are two active subscriptions
-            assertThat(timelineStreamingService.getSubscriptions()).isEqualTo(2);
+            assertThat(timelineStreamingService.getActiveSubscriptions()).isEqualTo(2);
         }
 
         @Test
@@ -102,13 +102,13 @@ public class TimelineStreamingServiceTest extends UnitTest {
             timelineStreamingService.subscribe(DASHBOARD_ID, Optional.of(DEFAULT_WINDOW));
 
             // And: The emitter is active
-            assertThat(timelineStreamingService.getSubscriptions()).isEqualTo(1);
+            assertThat(timelineStreamingService.getActiveSubscriptions()).isEqualTo(1);
 
             // When: Emitter completes
             timelineStreamingService.removeSubscription(new SubscriptionKey(DASHBOARD_ID, DEFAULT_WINDOW));
 
             // Then: the cleanup method should be called
-            assertThat(timelineStreamingService.getSubscriptions()).isEqualTo(0);
+            assertThat(timelineStreamingService.getActiveSubscriptions()).isEqualTo(0);
         }
 
         @Test

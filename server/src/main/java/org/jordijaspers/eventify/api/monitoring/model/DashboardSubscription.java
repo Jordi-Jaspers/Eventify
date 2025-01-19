@@ -110,32 +110,34 @@ public class DashboardSubscription {
     /**
      * Find the check that is affected by the event.
      *
-     * @param event The event to find the check for
+     * @param checkId The ID of the check to find
      * @return The check that is affected
      */
-    public CheckTimelineResponse findAffectedCheck(final EventRequest event) {
+    public CheckTimelineResponse findAffectedCheck(final Long checkId) {
         return getAllChecks().stream()
-            .filter(check -> check.getId().equals(event.getCheckId()))
+            .filter(check -> check.getId().equals(checkId))
             .findFirst()
             .orElseThrow(() -> new DataNotFoundException(CHECK_NOT_FOUND_ERROR));
     }
 
     /**
-     * Check if the event is relevant for the subscription. The event is relevant if it is part of the subscription and within the window.
+     * Check if the subscription contains the check with the given ID.
+     *
+     * @param checkId The ID of the check to check for
+     * @return True if the check is in the subscription, false otherwise
+     */
+    public boolean containsCheck(final Long checkId) {
+        return this.getAllChecks().stream()
+            .anyMatch(check -> check.getId().equals(checkId));
+    }
+
+    /**
+     * Check if the event is within the subscription window.
      *
      * @param event The event to check
-     * @return True if the event is relevant, false otherwise
+     * @return True if the event is within the window, false otherwise
      */
-    public boolean isEventRelevant(final EventRequest event) {
-        return containsCheck(event) && isInWindow(event);
-    }
-
-    private boolean containsCheck(final EventRequest event) {
-        return this.getAllChecks().stream()
-            .anyMatch(check -> check.getId().equals(event.getCheckId()));
-    }
-
-    private boolean isInWindow(final EventRequest event) {
+    public boolean isInWindow(final EventRequest event) {
         final ZonedDateTime eventTime = event.getTimestamp();
         final ZonedDateTime windowStart = ZonedDateTime.now().minus(this.window);
         return !eventTime.isBefore(windowStart);

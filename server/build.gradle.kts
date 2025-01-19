@@ -77,6 +77,8 @@ dependencies {
     runtimeOnly("org.jolokia", "jolokia-support-spring", retrieve("jolokiaVersion"))
 
     // ======= SPRINGBOOT DEPENDENCIES =======
+    // Spring AMQP (includes RabbitMQ)
+    implementation("org.springframework.boot", "spring-boot-starter-amqp")
     implementation("org.springframework.boot", "spring-boot-starter-webflux")
     implementation("org.springframework.boot", "spring-boot-starter-actuator")
     implementation("org.springframework.boot", "spring-boot-starter-web")
@@ -125,6 +127,7 @@ dependencies {
     implementation("net.logstash.logback", "logstash-logback-encoder", retrieve("logstashEncoderVersion"))
 
     // ======= TEST DEPENDENCIES =======
+    testImplementation("org.springframework.amqp", "spring-rabbit-test")
     testImplementation("org.springframework.boot", "spring-boot-test")
     testImplementation("org.springframework.boot", "spring-boot-testcontainers")
     testImplementation("org.springframework.boot", "spring-boot-starter-test") {
@@ -133,6 +136,7 @@ dependencies {
 
     testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))
     testImplementation("org.testcontainers", "postgresql", retrieve("testContainerVersion"))
+    testImplementation("org.testcontainers", "rabbitmq", retrieve("testContainerVersion"))
     testImplementation("org.testcontainers", "junit-jupiter", retrieve("testContainerVersion"))
     testImplementation("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
 

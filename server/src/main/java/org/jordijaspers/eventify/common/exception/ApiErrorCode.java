@@ -88,6 +88,14 @@ public enum ApiErrorCode implements ApiError {
     DASHBOARD_STREAMING_ERROR(
         "ERR-0020",
         "An error occurred while streaming the dashboard."
+    ),
+    CANNOT_PUBLISH_EVENT(
+        "ERR-0021",
+        "Could not publish the event to the RabbitMQ message bus."
+    ),
+    CANNOT_PROCESS_EVENT(
+        "ERR-0022",
+        "Could not process the event from the RabbitMQ message bus."
     );
 
     /**

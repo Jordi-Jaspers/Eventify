@@ -53,6 +53,14 @@ public class ApplicationContextTest extends IntegrationTest {
 
     @Test
     @Order(5)
+    @DisplayName("RabbitMQ container is loaded and running")
+    public void testRabbitContainer() {
+        assertThat(rabbitContainer, is(notNullValue()));
+        assertThat(rabbitContainer.isRunning(), is(true));
+    }
+
+    @Test
+    @Order(6)
     @DisplayName("Health endpoint returns OK")
     public void healthEndpoint() {
         // When: The health endpoint is invoked

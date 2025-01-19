@@ -17,7 +17,8 @@ import org.springframework.stereotype.Service;
 
 import static java.util.Objects.isNull;
 import static java.util.stream.Stream.concat;
-import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.consolidateTimeline;
+import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.consolidateAndSetTimeline;
+import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.consolidateTimelines;
 
 @Slf4j
 @Service
@@ -31,10 +32,9 @@ public class TimelineEventHandler {
      * @param event        The event to process
      * @param subscription The subscription to update
      */
-    public void processEvent(final EventRequest event, final DashboardSubscription subscription) {
-        final CheckTimelineResponse affectedCheck = subscription.findAffectedCheck(event);
-
-        if (updateTimeline(affectedCheck.getTimelineResponse(), event)) {
+    public boolean processEvent(final EventRequest event, final DashboardSubscription subscription) {
+        final CheckTimelineResponse affectedCheck = subscription.findAffectedCheck(event.getCheckId());
+        if (updateTimeline(affectedCheck, event)) {
             final Optional<GroupTimelineResponse> affectedGroup = subscription.findAffectedGroup(event.getCheckId());
 
             if (affectedGroup.isPresent()) {
@@ -42,11 +42,42 @@ public class TimelineEventHandler {
             } else {
                 updateDashboardTimeline(subscription);
             }
+            return true;
         }
+        return false;
     }
 
-    private boolean updateTimeline(TimelineResponse timeline, final EventRequest event) {
-        final TimelineResponse currentTimeline = Optional.ofNullable(timeline)
+    /**
+     * Process the timeline and update timelines hierarchically. Updates only propagate if the check's timeline actually changes. For
+     * ungrouped checks, only the dashboard timeline is updated.
+     *
+     * @param timeline     The timeline to process
+     * @param checkId      The check id to update
+     * @param subscription The subscription to update
+     * @return True if the timeline was updated, false otherwise
+     */
+    public boolean processTimeline(final TimelineResponse timeline, final Long checkId, final DashboardSubscription subscription) {
+        final CheckTimelineResponse affectedCheck = subscription.findAffectedCheck(checkId);
+        final TimelineResponse current = affectedCheck.getTimelineResponse();
+
+        final TimelineResponse combinedTimeline = consolidateTimelines(List.of(current, timeline));
+        if (current.getDurations().size() == combinedTimeline.getDurations().size()) {
+            return false;
+        }
+
+        affectedCheck.setTimelineResponse(combinedTimeline);
+
+        final Optional<GroupTimelineResponse> affectedGroup = subscription.findAffectedGroup(checkId);
+        if (affectedGroup.isPresent()) {
+            updateGroupedCheckHierarchy(affectedGroup.get(), subscription);
+        } else {
+            updateDashboardTimeline(subscription);
+        }
+        return true;
+    }
+
+    private boolean updateTimeline(final CheckTimelineResponse checkTimeline, final EventRequest event) {
+        final TimelineResponse currentTimeline = Optional.ofNullable(checkTimeline.getTimelineResponse())
             .orElseGet(TimelineResponse::new);
 
         final List<TimelineDurationResponse> durations = currentTimeline.getDurations();
@@ -57,8 +88,10 @@ public class TimelineEventHandler {
                 durations.getLast().setEndTime(event.getTimestamp());
             }
             durations.add(new TimelineDurationResponse(event.getTimestamp(), event.getStatus()));
+            currentTimeline.setDurations(durations);
         }
 
+        checkTimeline.setTimelineResponse(currentTimeline);
         return shouldUpdate;
     }
 
@@ -67,7 +100,7 @@ public class TimelineEventHandler {
             .map(CheckTimelineResponse::getTimelineResponse)
             .toList();
 
-        consolidateTimeline(checkTimelines, group::setTimelineResponse);
+        consolidateAndSetTimeline(checkTimelines, group::setTimelineResponse);
         updateDashboardTimeline(subscription);
     }
 
@@ -78,6 +111,6 @@ public class TimelineEventHandler {
         final Stream<TimelineResponse> ungroupedTimelines = subscription.getUngroupedChecks().stream()
             .map(CheckTimelineResponse::getTimelineResponse);
 
-        consolidateTimeline(concat(groupTimelines, ungroupedTimelines).toList(), subscription::setTimeline);
+        consolidateAndSetTimeline(concat(groupTimelines, ungroupedTimelines).toList(), subscription::setTimeline);
     }
 }

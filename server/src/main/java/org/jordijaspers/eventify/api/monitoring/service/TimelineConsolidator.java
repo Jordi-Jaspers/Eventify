@@ -1,17 +1,21 @@
 package org.jordijaspers.eventify.api.monitoring.service;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import org.jordijaspers.eventify.api.event.model.Status;
+import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineDurationResponse;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineResponse;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * The TimelineConsolidator class consolidates multiple timelines into a single timeline representing the worst status at any given moment.
@@ -29,7 +33,7 @@ public final class TimelineConsolidator {
      * @param timelines List of timelines to consolidate
      * @param setter    Consumer to set the consolidated timeline
      */
-    public static void consolidateTimeline(final List<TimelineResponse> timelines, final Consumer<TimelineResponse> setter) {
+    public static void consolidateAndSetTimeline(final List<TimelineResponse> timelines, final Consumer<TimelineResponse> setter) {
         setter.accept(TimelineConsolidator.consolidateTimelines(timelines));
     }
 
@@ -82,6 +86,36 @@ public final class TimelineConsolidator {
     }
 
     /**
+     * Process a batch of events into a timeline where only status changes introduce a new durations.
+     */
+    public static TimelineResponse calculateTimeline(final List<EventRequest> events) {
+        if (isEmpty(events)) {
+            return null;
+        }
+
+        final List<TimelineDurationResponse> durations = events.stream()
+            .reduce(
+                new ArrayList<>(),
+                (accumulator, event) -> {
+                    final TimelineDurationResponse lastDuration = isNotEmpty(accumulator)
+                        ? accumulator.getLast()
+                        : null;
+
+                    if (shouldCreateNewDuration(lastDuration, event)) {
+                        accumulator.add(new TimelineDurationResponse(event.getTimestamp(), event.getStatus()));
+                    }
+
+                    return accumulator;
+                },
+                (a, b) -> {
+                    throw new IllegalStateException("Parallel processing not supported");
+                }
+            );
+
+        return new TimelineResponse(durations);
+    }
+
+    /**
      * Calculates the worst status across all timelines at a specific point in time.
      *
      * @param timelines List of timelines to evaluate
@@ -118,5 +152,12 @@ public final class TimelineConsolidator {
      */
     private static boolean isTimeInDuration(final TimelineDurationResponse duration, final ZonedDateTime timePoint) {
         return !timePoint.isBefore(duration.getStartTime()) && (isNull(duration.getEndTime()) || !timePoint.isAfter(duration.getEndTime()));
+    }
+
+    /**
+     * Indicates if a new duration should be created based on the last duration and the current event.
+     */
+    private static boolean shouldCreateNewDuration(final TimelineDurationResponse lastDuration, final EventRequest event) {
+        return isNull(lastDuration) || !lastDuration.getStatus().equals(event.getStatus());
     }
 }
