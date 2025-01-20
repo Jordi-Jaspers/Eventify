@@ -5,7 +5,7 @@ HOST='localhost'
 PORT='5432'
 SCHEMA='tst_eventify'
 PASSWORD='postgres'
-CONTEXTS='test'
+CONTEXTS='dev'
 
 # Parse command-line options
 while getopts ":n:h:p:P:c:" opt; do

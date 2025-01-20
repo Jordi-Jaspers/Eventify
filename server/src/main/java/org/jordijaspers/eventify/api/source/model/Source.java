@@ -7,9 +7,12 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.jordijaspers.eventify.api.check.model.Check;
 import org.jordijaspers.eventify.api.source.model.request.CreateSourceRequest;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
@@ -47,6 +50,14 @@ public class Source implements Serializable {
         orphanRemoval = true
     )
     private ApiKey apiKey;
+
+    @OneToMany(
+        mappedBy = "source",
+        cascade = CascadeType.ALL,
+        fetch = FetchType.LAZY,
+        orphanRemoval = true
+    )
+    private List<Check> checks = new ArrayList<>();
 
     /**
      * A constructor to create a persistent Source object.

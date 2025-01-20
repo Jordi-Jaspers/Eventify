@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@DisplayName("AuthenticationController Integration Tests")
 public class AuthenticationControllerTest extends IntegrationTest {
 
     @Test

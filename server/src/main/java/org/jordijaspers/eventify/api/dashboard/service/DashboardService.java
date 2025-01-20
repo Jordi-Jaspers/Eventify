@@ -59,7 +59,12 @@ public class DashboardService {
      * @param id The id of the dashboard.
      */
     public void deleteDashboard(final Long id) {
+        final User user = SecurityUtil.getLoggedInUser();
         final Dashboard dashboard = getDashboardConfiguration(id);
+        if (!user.getTeams().contains(dashboard.getTeam())) {
+            throw new UserNotPartOfTeamException();
+        }
+
         dashboardRepository.deleteById(dashboard.getId());
     }
 

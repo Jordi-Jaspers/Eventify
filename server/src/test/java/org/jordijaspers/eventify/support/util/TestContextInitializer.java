@@ -8,6 +8,7 @@ import org.jordijaspers.eventify.api.dashboard.service.DashboardService;
 import org.jordijaspers.eventify.api.event.repository.EventRepository;
 import org.jordijaspers.eventify.api.event.service.EventService;
 import org.jordijaspers.eventify.api.monitoring.service.TimelineStreamingService;
+import org.jordijaspers.eventify.api.source.repository.SourceRepository;
 import org.jordijaspers.eventify.api.source.service.SourceService;
 import org.jordijaspers.eventify.api.team.repository.TeamRepository;
 import org.jordijaspers.eventify.api.team.service.TeamService;
@@ -76,6 +77,9 @@ public class TestContextInitializer {
 
     @Autowired
     protected UserRepository userRepository;
+
+    @Autowired
+    protected SourceRepository sourceRepository;
 
     @Autowired
     protected UserService userService;

@@ -3,9 +3,9 @@
                    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
-                   logicalFilePath="202411130100-TST-accounts-teams-dashboards.xml">
+                   logicalFilePath="202411130100-DEV-accounts-teams-dashboards.xml">
 
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-1" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-1" author="jordi.jaspers" context="dev">
         <ext:documentation>
             Creating some user accounts and teams for testing purposes.
         </ext:documentation>
@@ -50,7 +50,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-2" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-2" author="jordi.jaspers" context="dev">
     <ext:documentation>
         Initializing a couple dashboards for each team.
     </ext:documentation>
@@ -103,7 +103,7 @@
         );
     </sql>
     </changeSet>
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-3" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-3" author="jordi.jaspers" context="dev">
     <ext:documentation>
         Initializing a source with api key for the public dashboard.
     </ext:documentation>
@@ -127,7 +127,7 @@
     </sql>
     </changeSet>
 
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-4" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-4" author="jordi.jaspers" context="dev">
     <ext:documentation>
         Initializing a checks and groups for the public dashboard.
     </ext:documentation>
@@ -174,7 +174,7 @@
     </sql>
     </changeSet>
 
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-5" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-5" author="jordi.jaspers" context="dev">
     <ext:documentation>
         Adding events to the created checks to support monitoring.
     </ext:documentation>

@@ -26,7 +26,7 @@ import org.jordijaspers.eventify.api.token.model.TokenType;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.model.request.*;
 import org.jordijaspers.eventify.support.util.WebMvcConfigurator;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.jordijaspers.eventify.api.dashboard.service.DashboardService.configureGroupedChecks;
 import static org.jordijaspers.eventify.api.dashboard.service.DashboardService.configureUngroupedChecks;
@@ -46,19 +46,20 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected static final String TEST_PASSWORD = "Test123!@#";
     protected static final String INTEGRATION_PREFIX = "[Integration Test] - ";
 
-    protected static final String TEAM_NAME = "Team: Web Integration Test";
+    protected static final String TEAM_NAME = "Web Integration Test Team";
     protected static final String TEAM_DESCRIPTION = "Description for the Web Integration Test Team";
 
     protected static final String NEW_PASSWORD = "NewTest123!@#";
     protected static final String NEW_PASSWORD_CONFIRMATION = "NewTest123!@#";
-    protected static final String INVALID_PASSWORD = "weak";
 
     protected static final String CHECK_NAME = "Generated Check";
     protected static final String SOURCE_NAME = "ITEST Source";
     protected static final String DASHBOARD_NAME = "ITEST Dashboard";
 
-    @AfterEach
-    public void tearDown() {
+    @BeforeEach
+    public void cleanUp() {
+        deleteAllSources();
+        deleteAllTestDashboard();
         deleteAllTestTeams();
         deleteAllTestUsers();
     }
@@ -97,18 +98,27 @@ public class IntegrationTest extends WebMvcConfigurator {
         return dashboardRepository.save(dashboard);
     }
 
-    protected Dashboard aValidDashboard(final Team team) {
-        final CreateDashboardRequest request = new CreateDashboardRequest()
+    protected CreateDashboardRequest aValidCreateDashboardRequest(final Team team) {
+        return new CreateDashboardRequest()
             .setName(UUID.randomUUID() + "-" + DASHBOARD_NAME)
             .setDescription("Description for the global dashboard")
             .setTeamId(team.getId())
             .setGlobal(false);
+    }
+
+    protected Dashboard aValidDashboard(final Team team, final boolean global) {
+        final CreateDashboardRequest request = aValidCreateDashboardRequest(team);
+        request.setGlobal(global);
 
         final Dashboard dashboard = new Dashboard(request, TEST_EMAIL, team);
         dashboard.setUpdatedBy(TEST_EMAIL);
         dashboard.setLastUpdated(LocalDateTime.now());
 
         return dashboardRepository.save(dashboard);
+    }
+
+    protected Dashboard aValidDashboard(final Team team) {
+        return aValidDashboard(team, false);
     }
 
     protected Source aValidSource() {
@@ -139,7 +149,7 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected User aValidatedUserWithAuthority(final Authority authority) {
         final User user = aValidatedUser();
         updateUserAuthority(user, authority);
-        return user;
+        return authenticationService.refresh(user.getRefreshToken().getValue());
     }
 
     protected void updateUserAuthority(final User user, final Authority authority) {
@@ -185,13 +195,14 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     protected static TeamRequest aTeamRequest() {
         return new TeamRequest()
-            .setName(INTEGRATION_PREFIX + " - " + UUID.randomUUID() + " - " + TEAM_NAME)
+            .setName(INTEGRATION_PREFIX + UUID.randomUUID() + " - " + TEAM_NAME)
             .setDescription(TEAM_DESCRIPTION);
     }
 
     protected static RegisterUserRequest aRegisterRequest() {
+        final String prefix = UUID.randomUUID().toString().substring(0, 5);
         return new RegisterUserRequest()
-            .setEmail(TEST_EMAIL)
+            .setEmail(prefix + "." + TEST_EMAIL)
             .setPassword(TEST_PASSWORD)
             .setPasswordConfirmation(TEST_PASSWORD)
             .setFirstName(FIRST_NAME)
@@ -221,8 +232,9 @@ public class IntegrationTest extends WebMvcConfigurator {
     }
 
     protected UpdateEmailRequest anUpdateEmailRequest() {
+        final String prefix = UUID.randomUUID().toString().substring(0, 5);
         return new UpdateEmailRequest()
-            .setEmail(UUID.randomUUID() + "-" + TEST_EMAIL);
+            .setEmail(prefix + TEST_EMAIL);
     }
 
     protected Token getPasswordResetToken(final User user) {
@@ -253,6 +265,11 @@ public class IntegrationTest extends WebMvcConfigurator {
         return userService.loadUserByUsername(email);
     }
 
+    private void deleteAllSources() {
+        final List<Source> sources = sourceRepository.findAllByNameContaining(SOURCE_NAME);
+        sourceRepository.deleteAll(sources);
+    }
+
     private void deleteAllTestUsers() {
         final List<User> users = userRepository.findAllByEmailContaining(TEST_EMAIL);
         userRepository.deleteAll(users);
@@ -261,5 +278,10 @@ public class IntegrationTest extends WebMvcConfigurator {
     private void deleteAllTestTeams() {
         final List<Team> teams = teamRepository.findAllByNameContaining(TEAM_NAME);
         teamRepository.deleteAll(teams);
+    }
+
+    private void deleteAllTestDashboard() {
+        final List<Dashboard> dashboards = dashboardRepository.findAllByNameContaining(DASHBOARD_NAME);
+        dashboardRepository.deleteAll(dashboards);
     }
 }
