@@ -13,7 +13,7 @@ public class CheckTimelineResponse {
 
     private String name;
 
-    private TimelineResponse timelineResponse;
+    private TimelineResponse timeline;
 
     /**
      * A default constructor to create an existing check timeline.

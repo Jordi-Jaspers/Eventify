@@ -34,25 +34,25 @@ public class TimelineInitializer {
         final Set<Long> checkIds = subscription.getAllCheckIds();
         final Map<Long, TimelineResponse> checkTimelines = timelineService.getTimelinesForChecks(checkIds, subscription.getWindow());
 
-        subscription.getAllChecks().forEach(check -> check.setTimelineResponse(checkTimelines.get(check.getId())));
+        subscription.getAllChecks().forEach(check -> check.setTimeline(checkTimelines.get(check.getId())));
         subscription.getGroupedChecks().forEach(group -> {
             final List<TimelineResponse> groupTimelines = group.getChecks().stream()
-                .map(CheckTimelineResponse::getTimelineResponse)
+                .map(CheckTimelineResponse::getTimeline)
                 .toList();
 
-            group.setTimelineResponse(consolidateTimelines(groupTimelines));
+            consolidateTimelines(groupTimelines, group::setTimeline);
         });
 
         final List<TimelineResponse> allTimelines = subscription.getGroupedChecks().stream()
-            .map(GroupTimelineResponse::getTimelineResponse)
+            .map(GroupTimelineResponse::getTimeline)
             .collect(Collectors.toList());
 
         allTimelines.addAll(
             subscription.getUngroupedChecks().stream()
-                .map(CheckTimelineResponse::getTimelineResponse)
+                .map(CheckTimelineResponse::getTimeline)
                 .toList()
         );
 
-        subscription.setTimeline(consolidateTimelines(allTimelines));
+        consolidateTimelines(allTimelines, subscription::setTimeline);
     }
 }

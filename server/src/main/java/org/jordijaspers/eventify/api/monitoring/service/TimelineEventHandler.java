@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import static java.util.Objects.isNull;
 import static java.util.stream.Stream.concat;
-import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.consolidateAndSetTimeline;
 import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.consolidateTimelines;
 
 @Slf4j
@@ -58,14 +57,14 @@ public class TimelineEventHandler {
      */
     public boolean processTimeline(final TimelineResponse timeline, final Long checkId, final DashboardSubscription subscription) {
         final CheckTimelineResponse affectedCheck = subscription.findAffectedCheck(checkId);
-        final TimelineResponse current = affectedCheck.getTimelineResponse();
+        final TimelineResponse current = affectedCheck.getTimeline();
 
         final TimelineResponse combinedTimeline = consolidateTimelines(List.of(current, timeline));
         if (current.getDurations().size() == combinedTimeline.getDurations().size()) {
             return false;
         }
 
-        affectedCheck.setTimelineResponse(combinedTimeline);
+        affectedCheck.setTimeline(combinedTimeline);
 
         final Optional<GroupTimelineResponse> affectedGroup = subscription.findAffectedGroup(checkId);
         if (affectedGroup.isPresent()) {
@@ -77,7 +76,7 @@ public class TimelineEventHandler {
     }
 
     private boolean updateTimeline(final CheckTimelineResponse checkTimeline, final EventRequest event) {
-        final TimelineResponse currentTimeline = Optional.ofNullable(checkTimeline.getTimelineResponse())
+        final TimelineResponse currentTimeline = Optional.ofNullable(checkTimeline.getTimeline())
             .orElseGet(TimelineResponse::new);
 
         final List<TimelineDurationResponse> durations = currentTimeline.getDurations();
@@ -91,26 +90,26 @@ public class TimelineEventHandler {
             currentTimeline.setDurations(durations);
         }
 
-        checkTimeline.setTimelineResponse(currentTimeline);
+        checkTimeline.setTimeline(currentTimeline);
         return shouldUpdate;
     }
 
     private void updateGroupedCheckHierarchy(final GroupTimelineResponse group, final DashboardSubscription subscription) {
         final List<TimelineResponse> checkTimelines = group.getChecks().stream()
-            .map(CheckTimelineResponse::getTimelineResponse)
+            .map(CheckTimelineResponse::getTimeline)
             .toList();
 
-        consolidateAndSetTimeline(checkTimelines, group::setTimelineResponse);
+        TimelineConsolidator.consolidateTimelines(checkTimelines, group::setTimeline);
         updateDashboardTimeline(subscription);
     }
 
     private void updateDashboardTimeline(final DashboardSubscription subscription) {
         final Stream<TimelineResponse> groupTimelines = subscription.getGroupedChecks().stream()
-            .map(GroupTimelineResponse::getTimelineResponse);
+            .map(GroupTimelineResponse::getTimeline);
 
         final Stream<TimelineResponse> ungroupedTimelines = subscription.getUngroupedChecks().stream()
-            .map(CheckTimelineResponse::getTimelineResponse);
+            .map(CheckTimelineResponse::getTimeline);
 
-        consolidateAndSetTimeline(concat(groupTimelines, ungroupedTimelines).toList(), subscription::setTimeline);
+        TimelineConsolidator.consolidateTimelines(concat(groupTimelines, ungroupedTimelines).toList(), subscription::setTimeline);
     }
 }

@@ -7,7 +7,6 @@ server:
 # ======= LIQUIBASE CONFIGURATION =======
 spring:
   liquibase:
-
     enabled: true
     drop-first: true
     contexts: test

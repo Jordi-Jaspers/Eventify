@@ -80,8 +80,8 @@ class MonitoringControllerTest extends IntegrationTest {
             .get(MONITORING_STREAM_PATH, dashboard.getId())
             .andReturn();
 
-        // Then: Should return SC_BAD_REQUEST
-        response.then().statusCode(SC_BAD_REQUEST);
+        // Then: Should return Forbidden
+        response.then().statusCode(SC_FORBIDDEN);
     }
 
     @Test
@@ -153,9 +153,11 @@ class MonitoringControllerTest extends IntegrationTest {
         assertThat(init.getDashboardId(), equalTo(dashboard.getId()));
         assertThat(init.getWindow(), equalTo(DEFAULT_WINDOW));
         assertThat(init.getUngroupedChecks().size(), equalTo(1));
+
+        // And: The data should contain the timeline
+        assertThat(init.getUngroupedChecks().getFirst().getTimeline().getDurations().size(), greaterThanOrEqualTo(3));
         assertThat(init.getTimeline().getDurations().size(), greaterThanOrEqualTo(3));
     }
-
 
     @Test
     @DisplayName("Should receive updates for subscribed dashboard")

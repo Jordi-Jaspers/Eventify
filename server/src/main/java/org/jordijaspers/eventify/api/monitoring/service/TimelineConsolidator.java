@@ -12,6 +12,7 @@ import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineDurationResponse;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineResponse;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -33,7 +34,7 @@ public final class TimelineConsolidator {
      * @param timelines List of timelines to consolidate
      * @param setter    Consumer to set the consolidated timeline
      */
-    public static void consolidateAndSetTimeline(final List<TimelineResponse> timelines, final Consumer<TimelineResponse> setter) {
+    public static void consolidateTimelines(final List<TimelineResponse> timelines, final Consumer<TimelineResponse> setter) {
         setter.accept(TimelineConsolidator.consolidateTimelines(timelines));
     }
 
@@ -54,9 +55,9 @@ public final class TimelineConsolidator {
             .map(TimelineResponse::getEndTime)
             .filter(Objects::nonNull)
             .max(ZonedDateTime::compareTo)
-            .orElse(null);
+            .orElse(ZonedDateTime.now(UTC));
 
-        if (isNull(startTime) || isNull(endTime)) {
+        if (isNull(startTime)) {
             return new TimelineResponse();
         }
 

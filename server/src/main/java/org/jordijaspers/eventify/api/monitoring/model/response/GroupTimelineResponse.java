@@ -16,7 +16,7 @@ public class GroupTimelineResponse {
 
     private String name;
 
-    private TimelineResponse timelineResponse;
+    private TimelineResponse timeline;
 
     private List<CheckTimelineResponse> checks = new ArrayList<>();
 
