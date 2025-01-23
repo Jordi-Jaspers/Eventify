@@ -47,6 +47,8 @@ public class EventService {
     @Async("eventStorageExecutor")
     public void storeEventBatch(final List<EventRequest> events, final Long checkId) {
         final Event lastStoredEvent = getLastStoredEvent(checkId);
+
+        // TODO: Maybe better to just store all events and delete unnecessary ones afterwards
         final List<Event> eventsToStore = filterEventsForStorage(events, lastStoredEvent);
         eventRepository.saveAll(eventsToStore);
     }

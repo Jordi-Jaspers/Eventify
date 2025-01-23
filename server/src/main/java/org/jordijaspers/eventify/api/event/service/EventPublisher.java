@@ -17,6 +17,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.jordijaspers.eventify.common.config.RabbitMQConfig.*;
 
 @Slf4j
@@ -41,15 +42,19 @@ public class EventPublisher {
         );
 
         if (!queue.offer(event)) {
+            // TODO: Backpressure mechanism to handle full queue??
             log.warn("Queue full for check '{}', dropping event", event.getCheckId());
         }
     }
 
     /**
-     * Publish all events in the queues to the RabbitMQ exchange. The events will be published in batches of 1000 events.
-     * The batch will be published every second, regardless of the number of events in the queue.
+     * Publish all events in the queues to the RabbitMQ exchange. The events will be published in batches of 1000 events. The batch will be
+     * published every second, regardless of the number of events in the queue.
      */
-    @Scheduled(fixedRate = 100)
+    @Scheduled(
+        fixedRate = 1,
+        timeUnit = SECONDS
+    )
     public void publishBatches() {
         checkQueues.forEach((checkId, queue) -> {
             final List<EventRequest> batch = new ArrayList<>(BATCH_SIZE);

@@ -37,6 +37,7 @@ public class EventConsumer {
     public void consume(final EventBatch batch) {
         final Event lastStoredEvent = eventService.getLastStoredEvent(batch.getCheckId());
         final List<EventRequest> sortedEvents = batch.getEvents().stream()
+            // TODO: Not really sure if we should only accepts events that are after the last stored event
             .filter(event -> isNull(event) || event.getTimestamp().isAfter(lastStoredEvent.getZonedTimestamp()))
             .sorted(Comparator.comparing(EventRequest::getTimestamp))
             .toList();

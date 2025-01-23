@@ -162,6 +162,7 @@ class MonitoringControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should receive updates for subscribed dashboard")
     void shouldReceiveUpdatesForSubscribedDashboard() throws JsonProcessingException {
+        // TODO: This test is flaky and needs to be fixed
         // Given: A dashboard exists with team member
         final Team team = aValidTeam();
         final Dashboard dashboard = aValidDashboard(team);
