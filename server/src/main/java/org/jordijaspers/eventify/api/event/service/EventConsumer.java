@@ -6,14 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Comparator;
 import java.util.List;
 
-import org.jordijaspers.eventify.api.event.model.Event;
 import org.jordijaspers.eventify.api.event.model.EventBatch;
 import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.monitoring.service.TimelineStreamingService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
-import static java.util.Objects.isNull;
 
 @Slf4j
 @Service
@@ -35,10 +33,7 @@ public class EventConsumer {
         containerFactory = "rabbitListenerContainerFactory"
     )
     public void consume(final EventBatch batch) {
-        final Event lastStoredEvent = eventService.getLastStoredEvent(batch.getCheckId());
         final List<EventRequest> sortedEvents = batch.getEvents().stream()
-            // TODO: Not really sure if we should only accepts events that are after the last stored event
-            .filter(event -> isNull(event) || event.getTimestamp().isAfter(lastStoredEvent.getZonedTimestamp()))
             .sorted(Comparator.comparing(EventRequest::getTimestamp))
             .toList();
 

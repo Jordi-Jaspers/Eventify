@@ -3,6 +3,7 @@ package org.jordijaspers.eventify.api.event.service;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.transaction.Transactional;
@@ -22,7 +23,7 @@ import static org.jordijaspers.eventify.api.event.model.Status.UNKNOWN;
 @RequiredArgsConstructor
 public class EventService {
 
-    private static final Duration STORAGE_THRESHOLD = Duration.ofDays(30);
+    private static final Duration CHECKPOINT_INTERVAL = Duration.ofDays(30);
 
     private final EventRepository eventRepository;
 
@@ -39,6 +40,16 @@ public class EventService {
     }
 
     /**
+     * Retrieves the last stored event for the provided check id.
+     *
+     * @param checkId the check id to retrieve the last stored event for
+     * @return the last stored event for the provided check id
+     */
+    public Event getRecentEventSince(final Long checkId, final LocalDateTime since) {
+        return eventRepository.findRecentEventSince(checkId, since).orElse(null);
+    }
+
+    /**
      * Processes and stores a batch of events.
      *
      * @param events  the events to store
@@ -46,10 +57,8 @@ public class EventService {
      */
     @Async("eventStorageExecutor")
     public void storeEventBatch(final List<EventRequest> events, final Long checkId) {
-        final Event lastStoredEvent = getLastStoredEvent(checkId);
-
-        // TODO: Maybe better to just store all events and delete unnecessary ones afterwards
-        final List<Event> eventsToStore = filterEventsForStorage(events, lastStoredEvent);
+        final Event recentEvent = getRecentEventSince(checkId, events.getFirst().getTimestamp().toLocalDateTime());
+        final List<Event> eventsToStore = determineEventsToStore(events, recentEvent);
         eventRepository.saveAll(eventsToStore);
     }
 
@@ -65,7 +74,7 @@ public class EventService {
      * @param lastStoredEvent the last stored event for the check
      * @return the events that should be stored
      */
-    public List<Event> filterEventsForStorage(final List<EventRequest> sortedEvents, final Event lastStoredEvent) {
+    private List<Event> determineEventsToStore(final List<EventRequest> sortedEvents, final Event lastStoredEvent) {
         final List<Event> result = new ArrayList<>();
         EventRequest previousEvent = nonNull(lastStoredEvent)
             ? eventMapper.toEventRequest(lastStoredEvent)
@@ -82,26 +91,16 @@ public class EventService {
     }
 
     /**
-     * Retrieves the last stored event for the provided check id.
+     * Determines if the current event should be stored based on the previous event.
      *
-     * @param checkId the check id to retrieve the last stored event for
-     * @return the last stored event for the provided check id
+     * @param currentEvent  the current event
+     * @param previousEvent the previous event
+     * @return true if the event should be stored, false otherwise
      */
-    public Event getLastStoredEvent(final Long checkId) {
-        return eventRepository.findLastEventForCheckId(checkId).orElse(null);
-    }
-
     private boolean shouldStoreEvent(final EventRequest currentEvent, final EventRequest previousEvent) {
-        if (currentEvent.getStatus().isNotOk()) {
-            return true;
-        }
-
-        final boolean statusChanged = previousEvent.getStatus().isNotOk();
-        final boolean exceededTimeThreshold = Duration.between(
-            previousEvent.getTimestamp(),
-            currentEvent.getTimestamp()
-        ).compareTo(STORAGE_THRESHOLD) >= 0;
-
-        return statusChanged || exceededTimeThreshold;
+        return previousEvent.getStatus().equals(UNKNOWN)
+            || currentEvent.getStatus().isNotOk()
+            || !previousEvent.getStatus().equals(currentEvent.getStatus())
+            || Duration.between(previousEvent.getTimestamp(), currentEvent.getTimestamp()).compareTo(CHECKPOINT_INTERVAL) >= 0;
     }
 }

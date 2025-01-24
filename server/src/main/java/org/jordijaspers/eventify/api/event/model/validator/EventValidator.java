@@ -21,6 +21,7 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class EventValidator implements Validator<EventRequest> {
 
+    // TODO: Create unit tests for this class
     // Error messages
     public static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
     public static final String CHECK_ID_IS_MISSING = "Check ID is required";

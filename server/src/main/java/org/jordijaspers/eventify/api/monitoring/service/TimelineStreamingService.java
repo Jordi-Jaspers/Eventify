@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jordijaspers.eventify.api.dashboard.model.Dashboard;
@@ -46,10 +45,8 @@ public class TimelineStreamingService {
      * @return The emitter to use for the subscription
      */
     @Transactional(readOnly = true)
-    public SseEmitter subscribe(final Long dashboardId, final Optional<Duration> window) {
-        final Duration timeWindow = window.orElse(Duration.ofHours(72));
-        final SubscriptionKey key = new SubscriptionKey(dashboardId, timeWindow);
-
+    public SseEmitter subscribe(final Long dashboardId, final Duration window) {
+        final SubscriptionKey key = new SubscriptionKey(dashboardId, window);
         final DashboardSubscription existingSubscription = dashboardSubscriptions.get(key);
         if (nonNull(existingSubscription)) {
             log.info("Reusing existing subscription for dashboard '{}'", dashboardId);
