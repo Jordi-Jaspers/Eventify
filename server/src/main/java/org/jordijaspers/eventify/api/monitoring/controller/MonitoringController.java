@@ -34,11 +34,11 @@ public class MonitoringController {
         }
     )
     @PreAuthorize("hasAuthority('READ_DASHBOARDS') and @dashboardSecurityService.hasDashboardAccess(#id)")
-    public SseEmitter streamDashboard(@PathVariable final Long id,
-        @RequestParam(
-            required = false,
-            defaultValue = "PT2H"
-        ) final Duration window) {
+    public SseEmitter streamDashboard(@RequestParam(
+        required = false,
+        defaultValue = "PT2H"
+    ) final Duration window,
+        @PathVariable final Long id) {
         windowValidator.validateAndThrow(window);
         return streamingService.subscribe(id, window);
     }

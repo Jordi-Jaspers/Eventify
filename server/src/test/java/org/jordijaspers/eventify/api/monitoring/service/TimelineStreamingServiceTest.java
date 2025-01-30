@@ -1,7 +1,6 @@
 package org.jordijaspers.eventify.api.monitoring.service;
 
 import java.time.Duration;
-import java.util.Optional;
 
 import org.jordijaspers.eventify.api.dashboard.model.Dashboard;
 import org.jordijaspers.eventify.api.dashboard.service.DashboardService;
@@ -36,7 +35,6 @@ public class TimelineStreamingServiceTest extends UnitTest {
     @InjectMocks
     private TimelineStreamingService timelineStreamingService;
 
-
     @Nested
     @DisplayName("Subscribe Tests")
     public class SubscribeTests {
@@ -54,10 +52,10 @@ public class TimelineStreamingServiceTest extends UnitTest {
         @DisplayName("Should reuse existing subscription for same dashboard and window")
         public void shouldReuseExistingSubscriptionForSameDashboardAndWindow() {
             // Given: Initial subscription exists
-            final SseEmitter firstEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, Optional.of(DEFAULT_WINDOW));
+            final SseEmitter firstEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, DEFAULT_WINDOW);
 
             // When: Creating second subscription with same parameters
-            final SseEmitter secondEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, Optional.of(DEFAULT_WINDOW));
+            final SseEmitter secondEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, DEFAULT_WINDOW);
 
             // Then: Same emitter should be returned
             assertThat(secondEmitter).isSameAs(firstEmitter);
@@ -76,11 +74,11 @@ public class TimelineStreamingServiceTest extends UnitTest {
         @DisplayName("Should create new subscription for different window")
         public void shouldCreateNewSubscriptionForDifferentWindow() {
             // Given: Initial subscription exists
-            final SseEmitter firstEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, Optional.of(DEFAULT_WINDOW));
+            final SseEmitter firstEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, DEFAULT_WINDOW);
 
             // When: Creating subscription with different window
             final Duration differentWindow = Duration.ofHours(2);
-            final SseEmitter secondEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, Optional.of(differentWindow));
+            final SseEmitter secondEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, differentWindow);
 
             // Then: Different emitter should be returned
             assertThat(secondEmitter).isNotSameAs(firstEmitter);
@@ -99,7 +97,7 @@ public class TimelineStreamingServiceTest extends UnitTest {
         @DisplayName("Should cleanup subscription on completion")
         public void shouldCleanupSubscriptionOnCompletion() {
             // Given: A subscription exists
-            timelineStreamingService.subscribe(DASHBOARD_ID, Optional.of(DEFAULT_WINDOW));
+            timelineStreamingService.subscribe(DASHBOARD_ID, DEFAULT_WINDOW);
 
             // And: The emitter is active
             assertThat(timelineStreamingService.getActiveSubscriptions()).isEqualTo(1);
@@ -109,20 +107,6 @@ public class TimelineStreamingServiceTest extends UnitTest {
 
             // Then: the cleanup method should be called
             assertThat(timelineStreamingService.getActiveSubscriptions()).isEqualTo(0);
-        }
-
-        @Test
-        @DisplayName("Should use default window when none provided")
-        public void shouldUseDefaultWindowWhenNoneProvided() {
-            // When: Creating subscription without window
-            timelineStreamingService.subscribe(DASHBOARD_ID, Optional.empty());
-
-            // Then: Default window should be used (72 hours)
-            verify(timelineInitializer).initializeTimelines(
-                argThat(
-                    subscription -> subscription.getWindow().equals(Duration.ofHours(72))
-                )
-            );
         }
     }
 }

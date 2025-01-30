@@ -42,7 +42,6 @@ public class EventPublisher {
         );
 
         if (!queue.offer(event)) {
-            // TODO: Backpressure mechanism to handle full queue??
             log.warn("Queue full for check '{}', dropping event", event.getCheckId());
         }
     }
@@ -52,7 +51,7 @@ public class EventPublisher {
      * published every second, regardless of the number of events in the queue.
      */
     @Scheduled(
-        fixedRate = 1,
+        fixedRate = 5,
         timeUnit = SECONDS
     )
     public void publishBatches() {

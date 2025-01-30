@@ -10,6 +10,7 @@ import org.jordijaspers.eventify.api.event.service.EventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static org.jordijaspers.eventify.api.Paths.EVENTS_PATH;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -24,7 +25,7 @@ public class EventController {
 
     @Operation(summary = "Submit a new monitoring event")
     @PostMapping(
-        path = "/api/events",
+        path = EVENTS_PATH,
         consumes = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Void> submitEvent(@RequestBody final EventRequest event) {

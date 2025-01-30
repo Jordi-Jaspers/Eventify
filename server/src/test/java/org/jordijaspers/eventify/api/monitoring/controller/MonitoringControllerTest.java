@@ -28,11 +28,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static jakarta.servlet.http.HttpServletResponse.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.*;
 import static org.jordijaspers.eventify.api.Paths.MONITORING_STREAM_PATH;
 import static org.jordijaspers.eventify.api.event.model.Status.CRITICAL;
 import static org.jordijaspers.eventify.api.event.model.Status.OK;
+import static org.jordijaspers.eventify.api.monitoring.model.validator.WindowValidator.WINDOW;
+import static org.jordijaspers.eventify.api.monitoring.model.validator.WindowValidator.WINDOW_MUST_BE_IN_HOURS;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
@@ -201,6 +202,35 @@ class MonitoringControllerTest extends IntegrationTest {
     }
 
     @Test
+    @DisplayName("Should not accept subscription with custom window not in hours")
+    void shouldNotAcceptSubscriptionWithCustomWindowNotInHours() {
+        // Given: A dashboard exists with team member
+        final Team team = aValidTeam();
+        final Dashboard dashboard = aValidDashboard(team);
+
+        // And: Add the user to the team
+        final User user = aValidatedUser();
+        addUserToTeam(user, team);
+
+        // When: Subscribing with custom window
+        final Duration customWindow = Duration.ofMinutes(30);
+        final MockMvcResponse response = given()
+            .accept(APPLICATION_JSON, TEXT_EVENT_STREAM)
+            .header(AUTHORIZATION, "Bearer " + user.getAccessToken().getValue())
+            .queryParam("window", customWindow.toString())
+            .when()
+            .get(MONITORING_STREAM_PATH, dashboard.getId())
+            .andReturn();
+
+        // Then: Should return bad request
+        response.then().statusCode(SC_BAD_REQUEST);
+
+        // And: Should return correct error code
+        response.then().body("errors.field", hasItem(WINDOW));
+        response.then().body("errors.find { error -> error.field == 'window' }.code", equalTo(WINDOW_MUST_BE_IN_HOURS));
+    }
+
+    @Test
     @DisplayName("Should handle subscription with custom window")
     void shouldHandleSubscriptionWithCustomWindow() {
         // Given: A dashboard exists with team member
@@ -212,7 +242,7 @@ class MonitoringControllerTest extends IntegrationTest {
         addUserToTeam(user, team);
 
         // When: Subscribing with custom window
-        final Duration customWindow = Duration.ofMinutes(30);
+        final Duration customWindow = Duration.ofHours(2);
         final MockMvcResponse response = given()
             .accept(APPLICATION_JSON, TEXT_EVENT_STREAM)
             .header(AUTHORIZATION, "Bearer " + user.getAccessToken().getValue())
