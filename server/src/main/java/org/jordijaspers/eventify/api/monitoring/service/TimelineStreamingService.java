@@ -21,6 +21,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.calculateTimeline;
+import static org.jordijaspers.eventify.common.constants.Constants.ServerEvents.INITIALIZED;
+import static org.jordijaspers.eventify.common.constants.Constants.ServerEvents.UPDATED;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Slf4j
@@ -56,7 +58,7 @@ public class TimelineStreamingService {
         final SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         final DashboardSubscription subscription = initializeSubscription(emitter, key);
         timelineInitializer.initializeTimelines(subscription);
-        subscription.emitEvent("INITIALIZED");
+        subscription.emitEvent(INITIALIZED);
 
         return emitter;
     }
@@ -82,7 +84,7 @@ public class TimelineStreamingService {
 
         relevantSubscriptions.forEach(subscription -> {
             if (timelineEventHandler.processTimeline(timeline, checkId, subscription)) {
-                subscription.emitEvent("UPDATED");
+                subscription.emitEvent(UPDATED);
             }
         });
     }

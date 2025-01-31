@@ -21,6 +21,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
  */
 public class WebMvcConfigurator extends TestContextInitializer {
 
+    protected MockMvc mockMvc;
+
     @BeforeEach
     public void setUpMockMvc() {
         RestAssuredMockMvc.config = RestAssuredMockMvcConfig.config().objectMapperConfig(
@@ -33,7 +35,7 @@ public class WebMvcConfigurator extends TestContextInitializer {
             })
         );
 
-        final MockMvc mockMvc = MockMvcBuilders
+        mockMvc = MockMvcBuilders
             .webAppContextSetup(applicationContext)
             .apply(springSecurity())
             .addFilters(hawaiiFilters.getFilters())

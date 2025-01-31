@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import static org.jordijaspers.eventify.api.Paths.MONITORING_STREAM_PATH;
+import static org.jordijaspers.eventify.api.monitoring.model.validator.WindowValidator.DEFAULT_WINDOW;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
@@ -36,7 +37,7 @@ public class MonitoringController {
     @PreAuthorize("hasAuthority('READ_DASHBOARDS') and @dashboardSecurityService.hasDashboardAccess(#id)")
     public SseEmitter streamDashboard(@RequestParam(
         required = false,
-        defaultValue = "PT2H"
+        defaultValue = DEFAULT_WINDOW
     ) final Duration window,
         @PathVariable final Long id) {
         windowValidator.validateAndThrow(window);

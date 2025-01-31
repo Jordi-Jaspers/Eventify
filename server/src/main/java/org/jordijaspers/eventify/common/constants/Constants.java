@@ -9,6 +9,13 @@ import java.time.format.DateTimeFormatter;
  */
 public final class Constants {
 
+    public static final class ServerEvents {
+
+        public static final String INITIALIZED = "INITIALIZED";
+        public static final String UPDATED = "UPDATED";
+    }
+
+
     /**
      * Constants used in percentages.
      */

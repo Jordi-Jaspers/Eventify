@@ -1,5 +1,4 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.jvm.toolchain.JavaLanguageVersion.of
@@ -134,6 +133,7 @@ dependencies {
         exclude("com.vaadin.external.google", module = "android-json")
     }
 
+    testImplementation("io.projectreactor","reactor-test", retrieve("reactorTestVersion"))
     testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))
     testImplementation("org.testcontainers", "postgresql", retrieve("testContainerVersion"))
     testImplementation("org.testcontainers", "rabbitmq", retrieve("testContainerVersion"))
@@ -148,27 +148,6 @@ dependencies {
     liquibaseRuntime("info.picocli", "picocli", retrieve("picocliVersion"))
     liquibaseRuntime("org.yaml", "snakeyaml", retrieve("snakeyaml"))
     liquibaseRuntime("org.postgresql", "postgresql", retrieve("postgresVersion"))
-}
-
-/**
- * Removing vulnerability by persisting to a specified version.
- * Note: Remove once they are patched in the parent dependency.
- */
-configurations.all {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.apache.logging.log4j") {
-            useVersion("2.17.1")
-            because("Apache Log4j2 vulnerable to RCE via JDBC Appender when attacker controls configuration.")
-        }
-        if (requested.group == "org.yaml" && requested.name == "snakeyaml") {
-            useVersion("2.2")
-            because("Vulnerability in SnakeYAML 1.33: CVE-2022-1471")
-        }
-        if (requested.group == "com.jayway.jsonpath" && requested.name == "json-path") {
-            useVersion("2.9.0")
-            because("Vulnerability in jsonpath 2.7.0: CVE-2023-51074")
-        }
-    }
 }
 
 // ============== PLUGIN CONFIGURATION ================
@@ -306,11 +285,6 @@ tasks.withType<ProcessResources> {
             line.replace("APPLICATION_VERSION", version as String)
         }
     }
-}
-
-tasks.withType<DependencyUpdatesTask> {
-    checkForGradleUpdate = true
-    gradleReleaseChannel = "current"
 }
 
 tasks.withType<JavaCompile> {

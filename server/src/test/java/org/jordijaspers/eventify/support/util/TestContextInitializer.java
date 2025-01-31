@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -66,6 +67,9 @@ public class TestContextInitializer {
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @Autowired
+    protected WebTestClient reactiveClient;
 
     // ========================= APPLICATION =========================
 

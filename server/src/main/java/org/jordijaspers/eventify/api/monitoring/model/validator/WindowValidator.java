@@ -24,6 +24,9 @@ public class WindowValidator implements Validator<Duration> {
     // Field names
     public static final String WINDOW = "window";
 
+    // Default
+    public static final String DEFAULT_WINDOW = "PT2H";
+
     /**
      * {@inheritDoc}
      */
