@@ -10,27 +10,30 @@ import org.jordijaspers.eventify.common.exception.ApiErrorCode;
 import org.jordijaspers.eventify.support.IntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static jakarta.servlet.http.HttpServletResponse.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.jordijaspers.eventify.api.Paths.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public class UserManagementControllerTest extends IntegrationTest {
 
     @Test
-    @WithMockUser(authorities = "WRITE_USERS")
     @DisplayName("Should lock user successfully")
     public void shouldLockUserSuccessfully() {
+        // Given: A Logged in admin
+        final User admin = aValidatedUserWithAuthority(Authority.ADMIN);
+
         // Given: A validated user
         final User user = aValidatedUser();
 
         // When: Locking the user
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + admin.getAccessToken().getValue())
             .when()
             .post(LOCK_USER_PATH, user.getId())
             .andReturn();
@@ -46,15 +49,18 @@ public class UserManagementControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_USERS")
     @DisplayName("Should unlock user successfully")
     public void shouldUnlockUserSuccessfully() {
-        // Given: A locked user
+        // Given: A Logged in admin
+        final User admin = aValidatedUserWithAuthority(Authority.ADMIN);
+
+        // And: A locked user
         final User user = aLockedUser();
 
         // When: Unlocking the user
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + admin.getAccessToken().getValue())
             .when()
             .post(UNLOCK_USER_PATH, user.getId())
             .andReturn();
@@ -70,17 +76,17 @@ public class UserManagementControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_USERS")
     @DisplayName("Should return error when locking non-existing user")
     public void shouldReturnErrorWhenLockingNonExistingUser() {
-        // Given: A non-existing user id
-        final Long nonExistingId = 99999L;
+        // Given: A Logged in admin
+        final User admin = aValidatedUserWithAuthority(Authority.ADMIN);
 
         // When: Trying to lock the non-existing user
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + admin.getAccessToken().getValue())
             .when()
-            .post(LOCK_USER_PATH, nonExistingId)
+            .post(LOCK_USER_PATH, 99999L)
             .andReturn();
 
         // Then: Should return a BAD_REQUEST error
@@ -91,10 +97,12 @@ public class UserManagementControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "READ_USERS")
     @DisplayName("Should update user authority successfully")
     public void shouldUpdateUserAuthoritySuccessfully() {
-        // Given: A validated user
+        // Given: A Logged in admin
+        final User admin = aValidatedUserWithAuthority(Authority.ADMIN);
+
+        // And: A validated user
         final User user = aValidatedUser();
 
         // And: An authority update request
@@ -103,6 +111,7 @@ public class UserManagementControllerTest extends IntegrationTest {
         // When: Updating the user's authority
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + admin.getAccessToken().getValue())
             .body(request)
             .when()
             .post(USER_PATH, user.getId())
@@ -117,11 +126,10 @@ public class UserManagementControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "READ_USERS")
     @DisplayName("Should return error when updating authority for non-existing user")
     public void shouldReturnErrorWhenUpdatingAuthorityForNonExistingUser() {
-        // Given: A non-existing user id
-        final Long nonExistingId = 99999L;
+        // Given: A Logged in admin
+        final User admin = aValidatedUserWithAuthority(Authority.ADMIN);
 
         // And: An authority update request
         final UpdateAuthorityRequest request = anUpdateAuthorityRequest(Authority.ADMIN);
@@ -129,9 +137,10 @@ public class UserManagementControllerTest extends IntegrationTest {
         // When: Trying to update authority of non-existing user
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + admin.getAccessToken().getValue())
             .body(request)
             .when()
-            .post(USER_PATH, nonExistingId)
+            .post(USER_PATH, 99999L)
             .andReturn();
 
         // Then: Should return a BAD_REQUEST error

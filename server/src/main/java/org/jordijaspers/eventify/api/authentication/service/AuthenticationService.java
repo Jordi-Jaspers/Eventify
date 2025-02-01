@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 
-import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.service.TokenService;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.common.exception.AuthorizationException;
-import org.jordijaspers.eventify.common.exception.InvalidJwtException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -100,14 +98,7 @@ public class AuthenticationService {
      * @return the user with refreshed tokens
      */
     public User refresh(final String refreshToken) {
-        final Token token = tokenService.findAuthorizationTokenByValue(refreshToken);
-        if (nonNull(token)) {
-            final User user = token.getUser();
-            log.info("Refreshing tokens for user '{}'", user.getUsername());
-            return tokenService.generateAuthorizationTokens(user);
-        } else {
-            throw new InvalidJwtException();
-        }
+        return tokenService.refresh(refreshToken);
     }
 
     /**

@@ -9,10 +9,25 @@ import java.time.format.DateTimeFormatter;
  */
 public final class Constants {
 
+    /**
+     * Constants used for SSE emitter events.
+     */
     public static final class ServerEvents {
 
         public static final String INITIALIZED = "INITIALIZED";
         public static final String UPDATED = "UPDATED";
+    }
+
+
+    /**
+     * Constants used for security.
+     */
+    public static final class Security {
+
+        public static final String BEARER = "Bearer";
+        public static final String BASIC = "Basic";
+        public static final String ACCESS_TOKEN_COOKIE = "EVENTIFY_ACCESS_TOKEN";
+        public static final String REFRESH_TOKEN_COOKIE = "EVENTIFY_REFRESH_TOKEN";
     }
 
 

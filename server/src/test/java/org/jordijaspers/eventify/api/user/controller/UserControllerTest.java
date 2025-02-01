@@ -2,6 +2,7 @@ package org.jordijaspers.eventify.api.user.controller;
 
 import io.restassured.module.mockmvc.response.MockMvcResponse;
 
+import org.jordijaspers.eventify.api.authentication.model.Authority;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.model.request.UpdateEmailRequest;
 import org.jordijaspers.eventify.api.user.model.request.UpdateUserDetailsRequest;
@@ -9,7 +10,6 @@ import org.jordijaspers.eventify.common.exception.ApiErrorCode;
 import org.jordijaspers.eventify.support.IntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
@@ -22,9 +22,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class UserControllerTest extends IntegrationTest {
 
     @Test
-    @WithMockUser(authorities = "READ_USERS")
     @DisplayName("Should return all users when requested")
     public void shouldReturnAllUsersWhenRequested() {
+        // Given: An authenticated user with manager authority
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
         // Given: Multiple users exist
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
@@ -32,6 +34,7 @@ public class UserControllerTest extends IntegrationTest {
         // When: Requesting all users
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + user.getAccessToken().getValue())
             .when()
             .get(USERS_PATH)
             .andReturn();
@@ -46,7 +49,6 @@ public class UserControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser
     @DisplayName("Should return user details for authenticated user")
     public void shouldReturnUserDetailsForAuthenticatedUser() {
         // Given: An authenticated user
@@ -70,7 +72,6 @@ public class UserControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser
     @DisplayName("Should update user details successfully")
     public void shouldUpdateUserDetailsSuccessfully() {
         // Given: An authenticated user
@@ -97,7 +98,6 @@ public class UserControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser
     @DisplayName("Should update user email successfully")
     public void shouldUpdateUserEmailSuccessfully() {
         // Given: An authenticated user
@@ -124,7 +124,6 @@ public class UserControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser
     @DisplayName("Should not update email when email is already in use")
     public void shouldNotUpdateEmailWhenEmailIsAlreadyInUse() {
         // Given: Two validated users

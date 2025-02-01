@@ -5,36 +5,82 @@ import io.restassured.module.mockmvc.response.MockMvcResponse;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jordijaspers.eventify.api.authentication.model.Authority;
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.team.model.request.TeamMemberRequest;
 import org.jordijaspers.eventify.api.team.model.request.TeamRequest;
+import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.common.exception.ApiErrorCode;
 import org.jordijaspers.eventify.support.IntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static jakarta.servlet.http.HttpServletResponse.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.jordijaspers.eventify.api.Paths.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@DisplayName("TeamController Integration Tests")
 public class TeamControllerTest extends IntegrationTest {
 
     @Test
-    @WithMockUser(authorities = "READ_TEAMS")
+    @DisplayName("Should return unauthorized when requesting all teams without authentication")
+    public void shouldReturnUnauthorizedWhenRequestedWithoutAuthentication() {
+        // When: Requesting all teams without authentication
+        final MockMvcResponse response = given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .when()
+            .get(TEAMS_PATH)
+            .andReturn();
+
+        // Then: Response should be unauthorized
+        response.then().statusCode(SC_UNAUTHORIZED);
+    }
+
+    @Test
+    @DisplayName("Should return forbidden when requesting all teams with invalid authority")
+    public void shouldReturnForbiddenWhenRequestedWithInvalidAuthority() {
+        // Given: authenticated user
+        final User user = aValidatedUserWithAuthority(Authority.NONE);
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
+
+        // When: Requesting all teams with invalid authority
+        final MockMvcResponse response = given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
+            .when()
+            .get(TEAMS_PATH)
+            .andReturn();
+
+        // Then: Response should be forbidden
+        response.then().statusCode(SC_FORBIDDEN);
+    }
+
+    @Test
     @DisplayName("Should return all teams when requested")
     public void shouldReturnAllTeamsWhenRequested() {
-        // Given: Multiple teams exist
+        // Given: authenticated user
+        final User user = aValidatedUser();
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
+
+        // And: Multiple teams exist
         final Team team1 = aValidTeam();
         final Team team2 = aValidTeam();
 
         // When: Requesting all teams
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
             .when()
             .get(TEAMS_PATH)
             .andReturn();
@@ -49,15 +95,22 @@ public class TeamControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_TEAMS")
     @DisplayName("Should create team successfully")
     public void shouldCreateTeamSuccessfully() {
-        // Given: A valid team request
+        // Given: authenticated user
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
+
+        // And: A valid team request
         final TeamRequest request = aTeamRequest();
 
         // When: Creating a new team
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
             .body(request)
             .when()
             .post(TEAMS_PATH)
@@ -73,10 +126,16 @@ public class TeamControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_TEAMS")
     @DisplayName("Should not create team with duplicate name")
     public void shouldNotCreateTeamWithDuplicateName() {
-        // Given: An existing team
+        // Given: authenticated user
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
+
+        // And: An existing team
         final Team existingTeam = aValidTeam();
 
         // And: A team request with the same name
@@ -86,6 +145,7 @@ public class TeamControllerTest extends IntegrationTest {
         // When: Creating a team with the same name
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
             .body(request)
             .when()
             .post(TEAMS_PATH)
@@ -99,10 +159,16 @@ public class TeamControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_TEAMS")
     @DisplayName("Should update team successfully")
     public void shouldUpdateTeamSuccessfully() {
-        // Given: An existing team
+        // Given: authenticated user
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
+
+        // And: An existing team
         final Team team = aValidTeam();
 
         // And: A team request to update the team
@@ -111,6 +177,7 @@ public class TeamControllerTest extends IntegrationTest {
         // When: Updating the team
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
             .body(updateRequest)
             .when()
             .put(TEAM_PATH, team.getId())
@@ -125,15 +192,22 @@ public class TeamControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_TEAMS")
     @DisplayName("Should delete team successfully")
     public void shouldDeleteTeamSuccessfully() {
-        // Given: An existing team
+        // Given: authenticated user
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
+
+        // And: An existing team
         final Team team = aValidTeam();
 
         // When: Deleting the team
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
             .when()
             .delete(TEAM_PATH, team.getId())
             .andReturn();
@@ -146,10 +220,16 @@ public class TeamControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_TEAMS")
     @DisplayName("Should add members to team successfully")
     public void shouldAddMembersToTeamSuccessfully() {
-        // Given: A team and users
+        // Given: authenticated user
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
+
+        // And: A team and users
         final Team team = aValidTeam();
 
         // And: Two validated users
@@ -163,6 +243,7 @@ public class TeamControllerTest extends IntegrationTest {
         // When: Adding members to the team
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
             .body(request)
             .when()
             .put(TEAM_MEMBERS_PATH, team.getId())
@@ -177,10 +258,16 @@ public class TeamControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_TEAMS")
     @DisplayName("Should remove members from team successfully")
     public void shouldRemoveMembersFromTeamSuccessfully() {
-        // Given: A team with members
+        // Given: authenticated user
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
+
+        // And: A team with members
         final Team team = AValidTeamWithMembers(2);
         final Set<Long> memberIds = team.getMembers().stream()
             .map(User::getId)
@@ -193,6 +280,7 @@ public class TeamControllerTest extends IntegrationTest {
         // When: Removing members from the team
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
             .body(request)
             .when()
             .delete(TEAM_MEMBERS_PATH, team.getId())
@@ -206,10 +294,16 @@ public class TeamControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_TEAMS")
     @DisplayName("Should return an error deleting a non-existing member")
     public void shouldReturnErrorDeletingNonExistingMember() {
-        // Given: A team with members
+        // Given: authenticated user
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
+
+        // And: A team with members
         final Team team = AValidTeamWithMembers(2);
 
         // And: A request to remove a non-existing member from the team
@@ -219,6 +313,7 @@ public class TeamControllerTest extends IntegrationTest {
         // When: Removing the non-existing member from the team
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
             .body(request)
             .when()
             .delete(TEAM_MEMBERS_PATH, team.getId())
@@ -232,11 +327,14 @@ public class TeamControllerTest extends IntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WRITE_TEAMS")
     @DisplayName("Should return an error for non-existent team")
     public void shouldReturnNotFoundForNonExistentTeam() {
-        // Given: A non-existent team ID
-        final Long nonExistentId = 99999L;
+        // Given: authenticated user
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
+        // And: The user is logged in
+        final Token accessToken = user.getAccessToken();
+        assertThat(accessToken.getValue(), notNullValue());
 
         // And: A team request
         final TeamRequest request = aTeamRequest();
@@ -244,9 +342,10 @@ public class TeamControllerTest extends IntegrationTest {
         // When: Trying to update the non-existent team
         final MockMvcResponse response = given()
             .contentType(APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION, "Bearer " + accessToken.getValue())
             .body(request)
             .when()
-            .put(TEAM_PATH, nonExistentId)
+            .put(TEAM_PATH, 99999L)
             .andReturn();
 
         // Then: Should return a BAD_REQUEST error

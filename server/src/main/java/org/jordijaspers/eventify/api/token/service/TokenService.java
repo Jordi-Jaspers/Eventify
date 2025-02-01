@@ -12,6 +12,7 @@ import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.model.TokenType;
 import org.jordijaspers.eventify.api.token.repository.TokenRepository;
 import org.jordijaspers.eventify.api.user.model.User;
+import org.jordijaspers.eventify.common.exception.InvalidJwtException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +54,23 @@ public class TokenService {
         user.setRefreshToken(refreshToken);
         user.setAccessToken(accessToken);
         return user;
+    }
+
+    /**
+     * Refreshes the access token using the refresh token.
+     *
+     * @param refreshToken the refresh token
+     * @return the user with refreshed tokens
+     */
+    public User refresh(final String refreshToken) {
+        final Token token = findAuthorizationTokenByValue(refreshToken);
+        if (nonNull(token)) {
+            final User user = token.getUser();
+            log.info("Refreshing tokens for user '{}'", user.getUsername());
+            return generateAuthorizationTokens(user);
+        } else {
+            throw new InvalidJwtException();
+        }
     }
 
     /**
