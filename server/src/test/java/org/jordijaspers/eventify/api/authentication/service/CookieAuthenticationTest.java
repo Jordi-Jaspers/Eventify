@@ -8,10 +8,8 @@ import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.support.IntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
@@ -87,13 +85,10 @@ public class CookieAuthenticationTest extends IntegrationTest {
         // Then: They should have access
         response.andExpect(status().is(SC_OK));
 
-        // Wait for async operations to complete
-        final MvcResult result = response.andDo(MockMvcResultHandlers.print()).andReturn();
-
         // And: Should receive new auth cookies
         Cookie newAccessToken = null;
         Cookie newRefreshToken = null;
-        for (final Cookie cookie : result.getResponse().getCookies()) {
+        for (final Cookie cookie : response.andReturn().getResponse().getCookies()) {
             if (cookie.getName().equals(ACCESS_TOKEN_COOKIE) && !cookie.getValue().isEmpty()) {
                 newAccessToken = cookie;
             }
