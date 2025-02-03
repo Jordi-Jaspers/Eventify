@@ -97,6 +97,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         configuration.setAllowedMethods(List.of(WILDCARD));
         configuration.setAllowedHeaders(List.of(WILDCARD));
         configuration.setExposedHeaders(List.of(WILDCARD));
+        configuration.setAllowCredentials(true);
 
         final var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration(WILDCARD_PART, configuration);

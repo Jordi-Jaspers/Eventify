@@ -15,14 +15,26 @@ export class ApiService {
 		let lastErrorResponse: Response | null = null;
 		const apiResponse = new ServerResponse(options.method || 'GET', url, options.headers);
 
+		const defaultOptions: RequestInit = {
+			...options,
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				...options.headers
+			}
+		};
+
 		for (let attempts: number = 0; attempts < retries; attempts++) {
 			const start: number = performance.now();
 			try {
 				const response: Response = await fetch(url, {
-					...options,
-					credentials: 'include',
+					...defaultOptions,
 					signal: AbortSignal.timeout(timeout)
 				});
+
+				if (response.status === 401) {
+					return this.handleErrorResponse(response, apiResponse, start, retries);
+				}
 
 				if (!response.ok) {
 					lastErrorResponse = response;
@@ -34,6 +46,7 @@ export class ApiService {
 				if (attempts === retries - 1) {
 					return this.handleErrorResponse(lastErrorResponse, apiResponse, start, retries);
 				}
+				await new Promise((resolve) => setTimeout(resolve, 1000 * attempts));
 			}
 		}
 		throw new Error(`Unexpected fetch failure for ${url}`);

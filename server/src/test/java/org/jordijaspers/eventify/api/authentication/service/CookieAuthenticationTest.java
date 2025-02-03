@@ -15,10 +15,8 @@ import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.jordijaspers.eventify.api.Paths.LOGIN_PATH;
-import static org.jordijaspers.eventify.api.Paths.OPTIONS_PATH;
-import static org.jordijaspers.eventify.common.constants.Constants.Security.ACCESS_TOKEN_COOKIE;
-import static org.jordijaspers.eventify.common.constants.Constants.Security.REFRESH_TOKEN_COOKIE;
+import static org.jordijaspers.eventify.api.Paths.*;
+import static org.jordijaspers.eventify.common.constants.Constants.Security.*;
 import static org.jordijaspers.eventify.support.util.ObjectMapperUtil.toJson;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -136,7 +134,7 @@ public class CookieAuthenticationTest extends IntegrationTest {
         assertThat(refreshToken.getValue(), notNullValue());
 
         // When: Accessing a protected resource
-        final MockHttpServletRequestBuilder request = get(OPTIONS_PATH)
+        final MockHttpServletRequestBuilder request = get(USER_DETAILS)
             .cookie(new Cookie(ACCESS_TOKEN_COOKIE, accessToken.getValue()))
             .cookie(new Cookie(REFRESH_TOKEN_COOKIE, refreshToken.getValue()))
             .contentType(APPLICATION_JSON);

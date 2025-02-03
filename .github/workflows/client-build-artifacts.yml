@@ -37,12 +37,12 @@ jobs:
           path: |
             ~/.bun/install/cache
             ./client/node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
       - name: Build project
-        run: bun install --frozen-lockfile && bun run build
+        run: bun install --frozen-lockfile --save-text-lockfile && bun run build
 
       - name: Upload client build artifacts
         if: always()
@@ -53,6 +53,6 @@ jobs:
             ./client/build
             ./client/.svelte-kit
             ./client/package.json
-            ./client/bun.lockb
+            ./client/bun.lock
           retention-days: 7
           if-no-files-found: error
