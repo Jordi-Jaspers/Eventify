@@ -26,8 +26,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
+import static jakarta.servlet.http.HttpServletResponse.*;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -37,6 +36,7 @@ import static org.jordijaspers.eventify.api.event.model.Status.OK;
 import static org.jordijaspers.eventify.api.monitoring.model.validator.WindowValidator.*;
 import static org.jordijaspers.eventify.common.constants.Constants.ServerEvents.INITIALIZED;
 import static org.jordijaspers.eventify.common.constants.Constants.ServerEvents.UPDATED;
+import static org.jordijaspers.eventify.support.util.ObjectMapperUtil.fromJson;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
@@ -59,7 +59,7 @@ public class MonitoringControllerTest extends IntegrationTest {
         final ResultActions response = subscribeToStream(dashboard.getId(), null);
 
         // Then: Should return Unauthorized
-        response.andExpect(status().isUnauthorized());
+        response.andExpect(status().is(SC_UNAUTHORIZED));
     }
 
 
@@ -77,7 +77,7 @@ public class MonitoringControllerTest extends IntegrationTest {
         final ResultActions response = subscribeToStream(dashboard.getId(), user.getAccessToken().getValue());
 
         // Then: Should return Forbidden
-        response.andExpect(status().isForbidden());
+        response.andExpect(status().is(SC_FORBIDDEN));
     }
 
     @Test
@@ -94,11 +94,11 @@ public class MonitoringControllerTest extends IntegrationTest {
         final ResultActions response = subscribeToStream(dashboard.getId(), user.getAccessToken().getValue());
 
         // Then: Should return SC_BAD_REQUEST
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().is(SC_BAD_REQUEST));
 
         // And: Should return correct error code
         final String object = response.andReturn().getResponse().getContentAsString();
-        final ApiErrorResponseResource errorResponse = readValue(object, ApiErrorResponseResource.class);
+        final ApiErrorResponseResource errorResponse = fromJson(object, ApiErrorResponseResource.class);
         assertThat(errorResponse.getApiErrorReason(), equalTo(ApiErrorCode.CANNOT_ACCESS_DASHBOARD.getReason()));
     }
 
@@ -126,7 +126,7 @@ public class MonitoringControllerTest extends IntegrationTest {
         final ResultActions response = subscribeToStream(dashboard.getId(), user.getAccessToken().getValue());
 
         // Then: The stream should be started.
-        response.andExpect(status().isOk());
+        response.andExpect(status().is(SC_OK));
         final MvcResult mvcResult = response.andExpect(request().asyncStarted()).andReturn();
 
         // And: Collect the events
@@ -139,7 +139,7 @@ public class MonitoringControllerTest extends IntegrationTest {
             .orElseThrow(() -> new AssertionError("No initialization event found"));
 
         // And: Verify subscription details
-        final DashboardSubscription init = readValue(initEvent.get("data"), DashboardSubscription.class);
+        final DashboardSubscription init = fromJson(initEvent.get("data"), DashboardSubscription.class);
         assertThat(init.getDashboardId(), equalTo(dashboard.getId()));
         assertThat(init.getWindow().toString(), equalTo(DEFAULT_WINDOW));
         assertThat(init.getUngroupedChecks().size(), equalTo(1));
@@ -171,7 +171,7 @@ public class MonitoringControllerTest extends IntegrationTest {
         final ResultActions response = subscribeToStream(dashboard.getId(), user.getAccessToken().getValue());
 
         // And: The stream should be started.
-        response.andExpect(status().isOk());
+        response.andExpect(status().is(SC_OK));
         final MvcResult mvcResult = response.andExpect(request().asyncStarted()).andReturn();
 
         // And: Trigger an event
@@ -185,7 +185,7 @@ public class MonitoringControllerTest extends IntegrationTest {
             .findFirst()
             .orElseThrow(() -> new AssertionError("No update event found"));
 
-        final DashboardSubscription update = readValue(updateEvent.get("data"), DashboardSubscription.class);
+        final DashboardSubscription update = fromJson(updateEvent.get("data"), DashboardSubscription.class);
         assertThat(update.getDashboardId(), equalTo(dashboard.getId()));
         assertThat(update.getWindow().toString(), equalTo(DEFAULT_WINDOW));
         assertThat(update.getUngroupedChecks().size(), equalTo(1));
@@ -208,11 +208,12 @@ public class MonitoringControllerTest extends IntegrationTest {
         final ResultActions response = subscribeToStream(dashboard.getId(), user.getAccessToken().getValue(), customWindow);
 
         // Then: Should return bad request
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().is(SC_BAD_REQUEST));
 
         // And: Should return correct error code
         final String object = response.andReturn().getResponse().getContentAsString();
-        final ValidationErrorResponseResource errorResponse = readValue(object, ValidationErrorResponseResource.class);
+        final ValidationErrorResponseResource errorResponse = fromJson(object, ValidationErrorResponseResource.class);
+
         assertThat(errorResponse, notNullValue());
         errorResponse.getErrors()
             .stream()
@@ -240,7 +241,7 @@ public class MonitoringControllerTest extends IntegrationTest {
         final ResultActions response = subscribeToStream(dashboard.getId(), user.getAccessToken().getValue(), customWindow);
 
         // Then: The stream should be started
-        response.andExpect(status().isOk());
+        response.andExpect(status().is(SC_OK));
         final MvcResult mvcResult = response.andExpect(request().asyncStarted()).andReturn();
 
         // And: Collect the events
@@ -253,7 +254,7 @@ public class MonitoringControllerTest extends IntegrationTest {
             .orElseThrow(() -> new AssertionError("No initialization event found"));
 
         // And: Verify subscription details
-        final DashboardSubscription init = readValue(initEvent.get("data"), DashboardSubscription.class);
+        final DashboardSubscription init = fromJson(initEvent.get("data"), DashboardSubscription.class);
         assertThat(init.getDashboardId(), equalTo(dashboard.getId()));
         assertThat(init.getWindow(), equalTo(customWindow));
     }
@@ -268,11 +269,12 @@ public class MonitoringControllerTest extends IntegrationTest {
         final ResultActions response = subscribeToStream(999L, user.getAccessToken().getValue());
 
         // Then: Should return a Bad Request
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().is(SC_BAD_REQUEST));
 
         // And: Should return correct error code
         final String object = response.andReturn().getResponse().getContentAsString();
-        final ApiErrorResponseResource errorResponse = readValue(object, ApiErrorResponseResource.class);
+        final ApiErrorResponseResource errorResponse = fromJson(object, ApiErrorResponseResource.class);
+
         assertThat(errorResponse.getApiErrorReason(), equalTo(ApiErrorCode.DASHBOARD_NOT_FOUND_ERROR.getReason()));
     }
 
@@ -292,7 +294,7 @@ public class MonitoringControllerTest extends IntegrationTest {
         final ResultActions response = subscribeToStream(dashboard.getId(), user.getAccessToken().getValue(), null);
 
         // And: The response should be OK
-        response.andExpect(status().isOk());
+        response.andExpect(status().is(SC_OK));
 
         // And: The connection should be async and alive
         final MvcResult mvcResult = response.andExpect(request().asyncStarted()).andReturn();
@@ -307,7 +309,8 @@ public class MonitoringControllerTest extends IntegrationTest {
             .orElseThrow(() -> new AssertionError("No initialization event found"));
 
         // And: Verify subscription details
-        final DashboardSubscription init = readValue(initEvent.get("data"), DashboardSubscription.class);
+        final DashboardSubscription init = fromJson(initEvent.get("data"), DashboardSubscription.class);
+
         assertThat(init.getDashboardId(), equalTo(dashboard.getId()));
         assertThat(init.getWindow().toString(), equalTo(DEFAULT_WINDOW));
     }
@@ -333,14 +336,6 @@ public class MonitoringControllerTest extends IntegrationTest {
             return mockMvc.perform(request);
         } catch (final Exception exception) {
             throw new AssertionError("There was an error subscribing to the stream", exception);
-        }
-    }
-
-    private <T> T readValue(final String object, final Class<T> clazz) {
-        try {
-            return objectMapper.readValue(object, clazz);
-        } catch (final JsonProcessingException exception) {
-            throw new RuntimeException(exception);
         }
     }
 }

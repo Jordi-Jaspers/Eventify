@@ -29,6 +29,16 @@ public class CookieService {
         response.addCookie(createSecureCookie(REFRESH_TOKEN_COOKIE, refreshToken.getValue(), refreshToken.getExpiresAt()));
     }
 
+    /**
+     * Clears the access and refresh token cookies in the response.
+     *
+     * @param response the response to clear the cookies in
+     */
+    public void clearAuthCookies(final HttpServletResponse response) {
+        response.addCookie(createSecureCookie(ACCESS_TOKEN_COOKIE, "", LocalDateTime.now().minusDays(1)));
+        response.addCookie(createSecureCookie(REFRESH_TOKEN_COOKIE, "", LocalDateTime.now().minusDays(1)));
+    }
+
     private Cookie createSecureCookie(final String name, final String value, final LocalDateTime expiresAt) {
         final Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);

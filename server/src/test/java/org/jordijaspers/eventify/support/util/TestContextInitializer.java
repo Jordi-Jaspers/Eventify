@@ -13,6 +13,7 @@ import org.jordijaspers.eventify.api.source.service.SourceService;
 import org.jordijaspers.eventify.api.team.repository.TeamRepository;
 import org.jordijaspers.eventify.api.team.service.TeamService;
 import org.jordijaspers.eventify.api.token.repository.TokenRepository;
+import org.jordijaspers.eventify.api.token.service.TokenService;
 import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;
 import org.jordijaspers.eventify.api.user.repository.UserRepository;
 import org.jordijaspers.eventify.api.user.service.UserService;
@@ -22,8 +23,8 @@ import org.jordijaspers.eventify.support.container.TimescaleContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -51,25 +52,25 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 )
 public class TestContextInitializer {
 
+    // ========================= CONTEXT =========================
+    @NonNull
+    @Autowired
+    protected WebApplicationContext applicationContext;
+
+    @NonNull
+    @Autowired
+    protected HawaiiFilters hawaiiFilters;
+
+    @NonNull
+    @Autowired
+    protected ObjectMapper objectMapper;
+
     // ========================= CONTAINERS =========================
     @Autowired
     protected PostgreSQLContainer<?> timescaleContainer;
 
     @Autowired
     protected RabbitMQContainer rabbitContainer;
-
-    // ========================= CONTEXT =========================
-    @Autowired
-    protected WebApplicationContext applicationContext;
-
-    @Autowired
-    protected HawaiiFilters hawaiiFilters;
-
-    @Autowired
-    protected ObjectMapper objectMapper;
-
-    @Autowired
-    protected WebTestClient reactiveClient;
 
     // ========================= APPLICATION =========================
 
@@ -117,4 +118,7 @@ public class TestContextInitializer {
 
     @Autowired
     protected EventRepository eventRepository;
+
+    @Autowired
+    protected TokenService tokenService;
 }

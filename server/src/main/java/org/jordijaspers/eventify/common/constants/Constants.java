@@ -24,7 +24,7 @@ public final class Constants {
      */
     public static final class Security {
 
-        public static final String BEARER = "Bearer";
+        public static final String BEARER = "Bearer ";
         public static final String BASIC = "Basic";
         public static final String ACCESS_TOKEN_COOKIE = "EVENTIFY_ACCESS_TOKEN";
         public static final String REFRESH_TOKEN_COOKIE = "EVENTIFY_REFRESH_TOKEN";

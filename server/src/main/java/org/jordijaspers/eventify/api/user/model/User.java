@@ -35,7 +35,8 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 @ToString(
     exclude = {
         "password",
-        "role"
+        "role",
+        "tokens"
     }
 )
 public class User implements UserDetails {

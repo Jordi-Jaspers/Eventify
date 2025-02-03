@@ -3,6 +3,8 @@ package org.jordijaspers.eventify.api.authentication.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.jordijaspers.eventify.api.authentication.model.request.LoginRequest;
 import org.jordijaspers.eventify.api.authentication.model.request.RefreshTokenRequest;
 import org.jordijaspers.eventify.api.authentication.model.request.RegisterUserRequest;
@@ -10,6 +12,7 @@ import org.jordijaspers.eventify.api.authentication.model.response.RegisterRespo
 import org.jordijaspers.eventify.api.authentication.model.response.UserResponse;
 import org.jordijaspers.eventify.api.authentication.model.validator.AuthenticationValidator;
 import org.jordijaspers.eventify.api.authentication.service.AuthenticationService;
+import org.jordijaspers.eventify.api.authentication.service.CookieService;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;
 import org.jordijaspers.eventify.common.security.principal.UserTokenPrincipal;
@@ -29,6 +32,8 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     private final AuthenticationValidator validator;
+
+    private final CookieService cookieService;
 
     private final UserMapper userMapper;
 
@@ -52,26 +57,29 @@ public class AuthenticationController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<UserResponse> authorize(@RequestBody final LoginRequest request) {
+    public ResponseEntity<UserResponse> authorize(@RequestBody final LoginRequest request, final HttpServletResponse response) {
         validator.validateLoginRequest(request);
         final User user = authenticationService.authorize(request.getEmail(), request.getPassword());
+        cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
         return ResponseEntity.status(OK).body(userMapper.toUserResponse(user));
     }
 
     @ResponseStatus(OK)
     @Operation(summary = "Refresh the access token by exchanging the refresh token.")
     @PostMapping(path = TOKEN_PATH)
-    public ResponseEntity<UserResponse> refreshTokens(@RequestBody final RefreshTokenRequest request) {
+    public ResponseEntity<UserResponse> refreshTokens(@RequestBody final RefreshTokenRequest request, final HttpServletResponse response) {
         final User user = authenticationService.refresh(request.getRefreshToken());
+        cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
         return ResponseEntity.status(OK).body(userMapper.toUserResponse(user));
     }
 
     @ResponseStatus(NO_CONTENT)
     @Operation(summary = "Revoke the refresh token and log out the user.")
     @GetMapping(path = LOGOUT_PATH)
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal final UserTokenPrincipal principal) {
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal final UserTokenPrincipal principal, final HttpServletResponse response) {
         if (nonNull(principal)) {
             authenticationService.logout(principal.getUser());
+            cookieService.clearAuthCookies(response);
         }
         return ResponseEntity.status(NO_CONTENT).build();
     }

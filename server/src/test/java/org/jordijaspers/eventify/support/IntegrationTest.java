@@ -1,5 +1,7 @@
 package org.jordijaspers.eventify.support;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -38,6 +40,7 @@ import static org.jordijaspers.eventify.common.exception.ApiErrorCode.TOKEN_NOT_
 /**
  * Base class for integration tests. This class is used to create helper methods for integration tests.
  */
+@Slf4j
 public class IntegrationTest extends WebMvcConfigurator {
 
     protected static final String FIRST_NAME = "Eventify";

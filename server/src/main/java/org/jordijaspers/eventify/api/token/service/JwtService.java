@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.token.model.Token;
@@ -58,6 +59,7 @@ public class JwtService {
 
         final TokenProperties properties = securityProperties.getAccessToken();
         final JwtClaimsSet claimsSet = JwtClaimsSet.builder()
+            .id(UUID.randomUUID().toString())
             .subject(user.getUsername())
             .issuer(applicationProperties.getUrl())
             .issuedAt(now.toInstant(UTC))
@@ -89,6 +91,7 @@ public class JwtService {
         final LocalDateTime now = LocalDateTime.now();
         final TokenProperties properties = securityProperties.getRefreshToken();
         final JwtClaimsSet claimsSet = JwtClaimsSet.builder()
+            .id(UUID.randomUUID().toString())
             .subject(user.getUsername())
             .issuer(applicationProperties.getUrl())
             .issuedAt(now.toInstant(UTC))
@@ -146,7 +149,8 @@ public class JwtService {
      */
     public <T extends UserDetails> boolean isTokenValid(final String token, final T principal) {
         final String email = extractSubject(token);
-        return principal.getUsername().equalsIgnoreCase(email) && !isTokenExpired(token);
+        return principal.getUsername().equalsIgnoreCase(email)
+            && !isTokenExpired(token);
     }
 
     /**

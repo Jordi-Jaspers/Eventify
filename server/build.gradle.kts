@@ -126,22 +126,19 @@ dependencies {
     implementation("net.logstash.logback", "logstash-logback-encoder", retrieve("logstashEncoderVersion"))
 
     // ======= TEST DEPENDENCIES =======
-    testImplementation("org.springframework.amqp", "spring-rabbit-test")
     testImplementation("org.springframework.boot", "spring-boot-test")
+    testImplementation("org.springframework.amqp", "spring-rabbit-test")
     testImplementation("org.springframework.boot", "spring-boot-testcontainers")
     testImplementation("org.springframework.boot", "spring-boot-starter-test") {
         exclude("com.vaadin.external.google", module = "android-json")
     }
 
-    testImplementation("io.projectreactor","reactor-test", retrieve("reactorTestVersion"))
     testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))
+
+    testImplementation("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
     testImplementation("org.testcontainers", "postgresql", retrieve("testContainerVersion"))
     testImplementation("org.testcontainers", "rabbitmq", retrieve("testContainerVersion"))
     testImplementation("org.testcontainers", "junit-jupiter", retrieve("testContainerVersion"))
-    testImplementation("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
-
-    testImplementation("io.rest-assured", "rest-assured", retrieve("restAssuredVersion"))
-    testImplementation("io.rest-assured", "spring-mock-mvc", retrieve("restAssuredVersion"))
 
     // ======= LIQUIBASE PLUGIN DEPENDENCIES =======
     liquibaseRuntime("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
