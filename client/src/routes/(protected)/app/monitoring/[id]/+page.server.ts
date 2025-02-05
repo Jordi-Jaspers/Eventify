@@ -1,16 +1,14 @@
 import { SERVER_ROUTES } from '$lib/config/paths';
 import { ApiService } from '$lib/utils/api.service';
-import { CookieService } from '$lib/utils/cookie.service';
 
-export async function load({ cookies, params }) {
+export async function load({ params, request }) {
 	const getDashboard = async () => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const id: string = params.id;
 		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.DASHBOARD_CONFIGURATION.path.replace('{id}', id), {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: request.headers.get('cookie') || ''
 			}
 		});
 

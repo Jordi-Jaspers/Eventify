@@ -15,7 +15,6 @@ import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.common.exception.InvalidJwtException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Objects.nonNull;
@@ -47,7 +46,6 @@ public class TokenService {
     /**
      * Generate an access token for a user. The access token is valid for 15 minutes.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User generateAuthorizationTokens(final User user) {
         invalidateTokensForUser(user, ACCESS_TOKEN, REFRESH_TOKEN);
 
@@ -66,7 +64,6 @@ public class TokenService {
      * @param refreshToken the refresh token
      * @return the user with refreshed tokens
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User refresh(final String refreshToken) {
         final Token token = findAuthorizationTokenByValue(refreshToken);
         if (nonNull(token)) {
@@ -121,7 +118,6 @@ public class TokenService {
     /**
      * Returns token details for the given token value if it exists.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Token findAuthorizationTokenByValue(final String token) {
         log.info("Searching jwt token with value '{}'", token);
         return tokenRepository.findByValue(token)

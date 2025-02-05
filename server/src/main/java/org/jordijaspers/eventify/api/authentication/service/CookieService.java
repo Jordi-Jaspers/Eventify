@@ -1,5 +1,7 @@
 package org.jordijaspers.eventify.api.authentication.service;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.LocalDateTime;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +16,7 @@ import static org.jordijaspers.eventify.common.constants.Constants.Security.REFR
 /**
  * A service to manage cookies.
  */
+@Slf4j
 @Service
 public class CookieService {
 
@@ -25,7 +28,29 @@ public class CookieService {
      * @param refreshToken the refresh token
      */
     public void setAuthCookies(final HttpServletResponse response, final Token accessToken, final Token refreshToken) {
+        setAccessTokenCookie(response, accessToken);
+        setRefreshTokenCookie(response, refreshToken);
+    }
+
+    /**
+     * Sets the access token as a cookie in the response.
+     *
+     * @param response    the response to set the cookie in
+     * @param accessToken the access token
+     */
+    public void setAccessTokenCookie(final HttpServletResponse response, final Token accessToken) {
+        log.debug("Setting access token cookie with value: {}", accessToken.getValue());
         response.addCookie(createSecureCookie(ACCESS_TOKEN_COOKIE, accessToken.getValue(), accessToken.getExpiresAt()));
+    }
+
+    /**
+     * Sets the refresh token as a cookie in the response.
+     *
+     * @param response     the response to set the cookie in
+     * @param refreshToken the refresh token
+     */
+    public void setRefreshTokenCookie(final HttpServletResponse response, final Token refreshToken) {
+        log.debug("Setting refresh token cookie with value: {}", refreshToken.getValue());
         response.addCookie(createSecureCookie(REFRESH_TOKEN_COOKIE, refreshToken.getValue(), refreshToken.getExpiresAt()));
     }
 
@@ -45,6 +70,7 @@ public class CookieService {
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge((int) LocalDateTime.now().until(expiresAt, SECONDS));
+        cookie.setAttribute("SameSite", "Lax");
         return cookie;
     }
 }

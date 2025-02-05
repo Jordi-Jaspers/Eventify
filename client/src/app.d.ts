@@ -13,6 +13,7 @@ interface RetryConfig {
 interface ApiResponse {
 	success: boolean;
 	status: number;
+	headers: Map<string, string>;
 	message: string;
 	data: any;
 }

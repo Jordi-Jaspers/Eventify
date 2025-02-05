@@ -1,6 +1,6 @@
-import type { Actions } from '../../../../../../.svelte-kit/types/src/routes/(public)/login/$types';
 import { SERVER_ROUTES } from '$lib/config/paths';
 import { ApiService } from '$lib/utils/api.service';
+import type { Actions } from '@sveltejs/kit';
 
 export const actions: Actions = {
 	default: async ({ request }) => {

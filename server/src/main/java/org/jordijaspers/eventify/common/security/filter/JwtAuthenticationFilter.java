@@ -86,6 +86,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (final ApiException apiException) {
             SecurityContextHolder.clearContext();
+            cookieService.clearAuthCookies(response);
             respondWithError(response, ApiErrorCode.INVALID_TOKEN_ERROR, HttpStatus.UNAUTHORIZED, apiException.getMessage());
         }
     }
@@ -97,7 +98,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Prefer header token over cookie if both exist
         final String tokenToUse = hasText(accessToken) ? accessToken : accessTokenFromCookie;
-
         if (hasText(tokenToUse)) {
             final User authenticatedUser = tryAuthenticateWithAccessToken(tokenToUse);
             if (nonNull(authenticatedUser) && !isUserRestricted(authenticatedUser, response)) {

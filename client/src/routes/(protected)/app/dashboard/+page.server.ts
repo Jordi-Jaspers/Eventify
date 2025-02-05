@@ -3,14 +3,13 @@ import { ApiService } from '$lib/utils/api.service';
 import { CookieService } from '$lib/utils/cookie.service';
 import { type Actions, fail } from '@sveltejs/kit';
 
-export async function load({ cookies }) {
+export async function load({ cookies, request }) {
 	const getDashboards = async () => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.DASHBOARDS.path, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: request.headers.get('cookie') || ''
 			}
 		});
 
@@ -24,7 +23,6 @@ export async function load({ cookies }) {
 
 export const actions: Actions = {
 	createDashboard: async ({ request, cookies }) => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const data: FormData = await request.formData();
 		const input: DashboardCreationRequest = {
 			name: data.get('name') as string,
@@ -37,7 +35,7 @@ export const actions: Actions = {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: request.headers.get('cookie') || ''
 			},
 			body: JSON.stringify(input)
 		});
@@ -45,7 +43,6 @@ export const actions: Actions = {
 		return response.success ? { response: response } : fail(response.status, { response: response });
 	},
 	deleteDashboard: async ({ request, cookies }) => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const data: FormData = await request.formData();
 		const id: string = data.get('id') as string;
 
@@ -53,14 +50,13 @@ export const actions: Actions = {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: request.headers.get('cookie') || ''
 			}
 		});
 
 		return response.success ? { response: response } : fail(response.status, { response: response });
 	},
 	updateDashboard: async ({ request, cookies }) => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const data: FormData = await request.formData();
 		const id: string = data.get('id') as string;
 		const input: DashboardUpdateRequest = {
@@ -74,7 +70,7 @@ export const actions: Actions = {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: request.headers.get('cookie') || ''
 			},
 			body: JSON.stringify(input)
 		});

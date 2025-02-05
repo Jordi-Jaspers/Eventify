@@ -1,7 +1,6 @@
 import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { CLIENT_ROUTES, SERVER_ROUTES } from '$lib/config/paths';
-import { CookieService } from '$lib/utils/cookie.service';
 import { ApiService } from '$lib/utils/api.service';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -18,20 +17,22 @@ export const actions: Actions = {
 			password: data.get('password') as string
 		};
 
-		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.LOGIN.path, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(input)
-		});
+		const response: ApiResponse = await ApiService.fetchFromServer(
+			SERVER_ROUTES.LOGIN.path,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(input)
+			},
+			{
+				retries: 1,
+				timeout: 60_000,
+				cookies: cookies
+			}
+		);
 
 		if (response.success) {
 			const authorizeResponse: AuthorizeResponse = await response.data;
-			const tokenPair: TokenPair = {
-				accessToken: authorizeResponse.accessToken,
-				refreshToken: authorizeResponse.refreshToken
-			};
-
-			CookieService.setAuthCookies(cookies, tokenPair);
 			locals.user = authorizeResponse;
 
 			if (authorizeResponse?.validated && authorizeResponse?.enabled) {

@@ -1,6 +1,8 @@
 import { LoggerService } from '$lib/utils/logger.service';
 import { ServerResponse } from '$lib/models/server-response.svelte.js';
 import { Exception } from '$lib/models/exception.error';
+import { CookieService } from '$lib/utils/cookie.service.ts';
+import type { Cookies } from '@sveltejs/kit';
 
 export class ApiService {
 	/**
@@ -10,8 +12,12 @@ export class ApiService {
 	 * @param config Configuration for retries and timeout
 	 * @returns {Promise<{response?: Response; error?: string}>}
 	 */
-	static async fetchFromServer(url: string, options: RequestInit = {}, config: RetryConfig = {}): Promise<ApiResponse> {
-		const { retries = 3, timeout = 60_000 } = config;
+	static async fetchFromServer(
+		url: string,
+		options: RequestInit = {},
+		config: RetryConfig & { cookies?: Cookies } = {}
+	): Promise<ApiResponse> {
+		const { retries = 3, timeout = 60_000, cookies } = config;
 		let lastErrorResponse: Response | null = null;
 		const apiResponse = new ServerResponse(options.method || 'GET', url, options.headers);
 
@@ -33,6 +39,9 @@ export class ApiService {
 				});
 
 				if (response.status === 401) {
+					if (cookies) {
+						await CookieService.handleResponseCookies(cookies, response);
+					}
 					return this.handleErrorResponse(response, apiResponse, start, retries);
 				}
 
@@ -41,6 +50,9 @@ export class ApiService {
 					throw new Error(`HTTP error! Status: ${response.status}`);
 				}
 
+				if (cookies) {
+					await CookieService.handleResponseCookies(cookies, response);
+				}
 				return this.handleSuccessResponse(response, apiResponse, start);
 			} catch (error) {
 				if (attempts === retries - 1) {
@@ -78,12 +90,10 @@ export class ApiService {
 				apiResponse.message = exception.message;
 				apiResponse.data = exception.throwable;
 			} catch {
-				// Fallback if JSON parsing fails
 				apiResponse.status = 500;
 				apiResponse.message = `Failed to parse error response from ${apiResponse.method} ${apiResponse.path}`;
 			}
 		} else {
-			// Generic network error
 			apiResponse.status = 500;
 			apiResponse.message = `Failed to fetch ${apiResponse.method} ${apiResponse.path} after ${retries} attempts`;
 		}
@@ -93,9 +103,16 @@ export class ApiService {
 		return apiResponse.toApiResponse();
 	}
 
-	private static extractHeaders(response: Response): Map<string, string> {
-		const headersMap = new Map<string, string>();
-		response.headers.forEach((value, key) => headersMap.set(key, value));
+	private static extractHeaders(response: Response): Map<string, string[]> {
+		const headersMap = new Map<string, string[]>();
+		response.headers.forEach((value, key) => {
+			const existing = headersMap.get(key);
+			if (existing) {
+				existing.push(value);
+			} else {
+				headersMap.set(key, [value]);
+			}
+		});
 		return headersMap;
 	}
 }

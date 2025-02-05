@@ -93,6 +93,7 @@ public class UserControllerTest extends IntegrationTest {
         assertThat(userDetails.getEmail(), is(user.getEmail()));
         assertThat(userDetails.getFirstName(), is(user.getFirstName()));
         assertThat(userDetails.getLastName(), is(user.getLastName()));
+        assertThat(userDetails.getPermissions(), not(empty()));
     }
 
     @Test

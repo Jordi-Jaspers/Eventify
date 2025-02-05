@@ -1,46 +1,15 @@
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '$lib/config/constants';
 import type { Cookies } from '@sveltejs/kit';
-import { JwtService } from '$lib/utils/jwt.service';
 import { CLIENT_ROUTES } from '$lib/config/paths';
+import type { CookieSerializeOptions } from 'cookie';
+
+interface ParsedCookie {
+	name: string;
+	value: string;
+	options: CookieSerializeOptions;
+}
 
 export class CookieService {
-	/**
-	 * Sets authentication cookies with proper security settings
-	 */
-	static setAuthCookies(cookies: Cookies, tokens: TokenPair): void {
-		const accessExpiry = JwtService.getTimeUntilExpiry(tokens.accessToken);
-		const refreshExpiry = JwtService.getTimeUntilExpiry(tokens.refreshToken);
-		cookies.set(ACCESS_TOKEN_COOKIE, tokens.accessToken, {
-			httpOnly: true,
-			secure: true,
-			sameSite: 'strict',
-			path: CLIENT_ROUTES.LANDING_PAGE.path,
-			maxAge: accessExpiry
-		});
-
-		cookies.set(REFRESH_TOKEN_COOKIE, tokens.refreshToken, {
-			httpOnly: true,
-			secure: true,
-			sameSite: 'strict',
-			path: CLIENT_ROUTES.LANDING_PAGE.path,
-			maxAge: refreshExpiry
-		});
-	}
-
-	/**
-	 * Updates just the access token cookie
-	 */
-	static updateAccessToken(cookies: Cookies, accessToken: string): void {
-		const expiry = JwtService.getTimeUntilExpiry(accessToken);
-		cookies.set(ACCESS_TOKEN_COOKIE, accessToken, {
-			httpOnly: true,
-			secure: true,
-			sameSite: 'strict',
-			path: CLIENT_ROUTES.LANDING_PAGE.path,
-			maxAge: expiry
-		});
-	}
-
 	/**
 	 * Retrieves both tokens from cookies
 	 */
@@ -52,17 +21,88 @@ export class CookieService {
 	}
 
 	/**
-	 * Clears the access token cookie.
-	 */
-	static clearAccessToken(cookies: Cookies): void {
-		cookies.delete(ACCESS_TOKEN_COOKIE, { path: CLIENT_ROUTES.LANDING_PAGE.path });
-	}
-
-	/**
 	 * Clears authentication cookies
 	 */
 	static clearAuthCookies(cookies: Cookies): void {
 		cookies.delete(ACCESS_TOKEN_COOKIE, { path: CLIENT_ROUTES.LANDING_PAGE.path });
 		cookies.delete(REFRESH_TOKEN_COOKIE, { path: CLIENT_ROUTES.LANDING_PAGE.path });
+	}
+
+	/**
+	 * Parse Set-Cookie headers into structured cookie objects
+	 */
+	static parseSetCookieHeaders(setCookieHeaders: string[]): ParsedCookie[] {
+		if (!Array.isArray(setCookieHeaders)) {
+			return [];
+		}
+
+		return setCookieHeaders.map((cookieStr) => {
+			const [nameValuePair, ...parts] = cookieStr.split(';').map((p) => p.trim());
+			const [name, value] = nameValuePair.split('=').map((p) => p.trim());
+
+			const cookie: ParsedCookie = {
+				name,
+				value: decodeURIComponent(value),
+				options: {}
+			};
+
+			parts.forEach((part) => {
+				const [key, val] = part.split('=').map((p) => p.trim());
+				const lowerKey = key.toLowerCase();
+
+				switch (lowerKey) {
+					case 'expires':
+						cookie.options.expires = new Date(val);
+						break;
+					case 'max-age':
+						cookie.options.maxAge = parseInt(val, 10);
+						break;
+					case 'domain':
+						cookie.options.domain = val;
+						break;
+					case 'path':
+						cookie.options.path = val;
+						break;
+					case 'samesite':
+						cookie.options.sameSite = val.toLowerCase() as 'lax' | 'strict' | 'none';
+						break;
+					case 'secure':
+						cookie.options.secure = true;
+						break;
+					case 'httponly':
+						cookie.options.httpOnly = true;
+						break;
+					case 'partitioned':
+						cookie.options.partitioned = true;
+						break;
+				}
+			});
+
+			return cookie;
+		});
+	}
+
+	/**
+	 * Set multiple cookies from Set-Cookie headers
+	 */
+	static setFromHeaders(cookies: Cookies, setCookieHeaders: string[]): void {
+		const parsedCookies = this.parseSetCookieHeaders(setCookieHeaders);
+		parsedCookies.forEach(({ name, value, options }) => {
+			const finalOptions = {
+				...options,
+				path: options.path || CLIENT_ROUTES.LANDING_PAGE.path
+			};
+			cookies.set(name, value, finalOptions);
+		});
+	}
+
+	/**
+	 * Handle cookies from a Response object
+	 */
+	static async handleResponseCookies(cookies: Cookies, response: Response): Promise<ParsedCookie[]> {
+		const setCookieHeaders = response.headers.getSetCookie();
+		const parsedCookies = this.parseSetCookieHeaders(setCookieHeaders);
+		this.setFromHeaders(cookies, setCookieHeaders);
+		return parsedCookies;
 	}
 }

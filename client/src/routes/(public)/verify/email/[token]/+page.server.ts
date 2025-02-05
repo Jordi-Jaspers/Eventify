@@ -1,6 +1,5 @@
 import { SERVER_ROUTES } from '$lib/config/paths';
 import { ApiService } from '$lib/utils/api.service';
-import { CookieService } from '$lib/utils/cookie.service';
 
 export async function load({ params, locals, cookies }) {
 	const verifyEmail: () => Promise<ApiResponse> = async (): Promise<ApiResponse> => {
@@ -13,20 +12,15 @@ export async function load({ params, locals, cookies }) {
 			},
 			{
 				retries: 1,
-				timeout: 60_000
+				timeout: 60_000,
+				cookies
 			}
 		);
 
 		if (response.success) {
-			const authorizeResponse: AuthorizeResponse = await response.data;
-			const tokenPair: TokenPair = {
-				accessToken: authorizeResponse.accessToken,
-				refreshToken: authorizeResponse.refreshToken
-			};
-
-			CookieService.setAuthCookies(cookies, tokenPair);
-			locals.user = authorizeResponse;
+			locals.user = (await response.data) as AuthorizeResponse;
 		}
+
 		return response;
 	};
 

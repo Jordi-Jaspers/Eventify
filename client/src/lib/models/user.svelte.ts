@@ -55,6 +55,7 @@ export class User {
 	}
 
 	setDetails(details: UserDetailsResponse) {
+		console.log('User.setDetails', details);
 		this._user = details;
 	}
 

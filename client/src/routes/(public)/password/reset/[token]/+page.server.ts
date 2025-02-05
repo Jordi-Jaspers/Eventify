@@ -1,8 +1,6 @@
-import type { Actions, PageServerLoad } from './$types';
+import type { Actions } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { CLIENT_ROUTES, SERVER_ROUTES } from '$lib/config/paths';
-import { CookieService } from '$lib/utils/cookie.service';
-import { Exception } from '$lib/models/exception.error';
 import { ApiService } from '$lib/utils/api.service';
 
 export const actions: Actions = {

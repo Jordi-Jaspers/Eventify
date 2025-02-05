@@ -31,7 +31,6 @@
 		isLoading = true;
 		return async ({ result }) => {
 			isLoading = false;
-			console.log(result);
 			if (result.type === 'failure' && result.data) {
 				const apiResponse: ServerResponse = result.data.response;
 				toast.error(apiResponse.message);
