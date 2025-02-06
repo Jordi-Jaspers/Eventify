@@ -50,7 +50,7 @@ public class MonitoringControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("Should reject unauthenticated user")
-    void shouldRejectUnauthenticatedUser() throws Exception {
+    public void shouldRejectUnauthenticatedUser() throws Exception {
         // Given: A dashboard exists
         final Team team = aValidTeam();
         final Dashboard dashboard = aValidDashboard(team);
@@ -65,7 +65,7 @@ public class MonitoringControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("Should reject user without READ_DASHBOARDS authority")
-    void shouldRejectUserWithoutReadDashboardsAuthority() throws Exception {
+    public void shouldRejectUserWithoutReadDashboardsAuthority() throws Exception {
         // Given: A dashboard and user without proper authority exist
         final Team team = aValidTeam();
         final Dashboard dashboard = aValidDashboard(team);
@@ -82,7 +82,7 @@ public class MonitoringControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("Should reject user not in dashboard team")
-    void shouldRejectUserNotInDashboardTeam() throws Exception {
+    public void shouldRejectUserNotInDashboardTeam() throws Exception {
         // Given: A dashboard exists
         final Team team = aValidTeam();
         final Dashboard dashboard = aValidDashboard(team);
@@ -104,7 +104,7 @@ public class MonitoringControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("Should allow team member to subscribe to dashboard")
-    void shouldAllowTeamMemberToSubscribeToDashboard() throws Exception {
+    public void shouldAllowTeamMemberToSubscribeToDashboard() throws Exception {
         // Given: A dashboard exists
         final Team team = aValidTeam();
         final Dashboard dashboard = aValidDashboard(team);
@@ -141,7 +141,7 @@ public class MonitoringControllerTest extends IntegrationTest {
         // And: Verify subscription details
         final DashboardSubscription init = fromJson(initEvent.get("data"), DashboardSubscription.class);
         assertThat(init.getDashboardId(), equalTo(dashboard.getId()));
-        assertThat(init.getWindow().toString(), equalTo(DEFAULT_WINDOW));
+        assertThat(init.getWindow(), equalTo(Duration.parse(DEFAULT_WINDOW).toMinutes()));
         assertThat(init.getUngroupedChecks().size(), equalTo(1));
         assertThat(init.getUngroupedChecks().getFirst().getTimeline().getDurations().size(), greaterThanOrEqualTo(3));
         assertThat(init.getTimeline().getDurations().size(), greaterThanOrEqualTo(3));
@@ -187,14 +187,14 @@ public class MonitoringControllerTest extends IntegrationTest {
 
         final DashboardSubscription update = fromJson(updateEvent.get("data"), DashboardSubscription.class);
         assertThat(update.getDashboardId(), equalTo(dashboard.getId()));
-        assertThat(update.getWindow().toString(), equalTo(DEFAULT_WINDOW));
+        assertThat(update.getWindow(), equalTo(Duration.parse(DEFAULT_WINDOW).toMinutes()));
         assertThat(update.getUngroupedChecks().size(), equalTo(1));
         assertThat(update.getTimeline().getDurations().size(), greaterThanOrEqualTo(4));
     }
 
     @Test
     @DisplayName("Should not accept subscription with custom window not in hours")
-    void shouldNotAcceptSubscriptionWithCustomWindowNotInHours() throws Exception {
+    public void shouldNotAcceptSubscriptionWithCustomWindowNotInHours() throws Exception {
         // Given: A dashboard exists with team member
         final Team team = aValidTeam();
         final Dashboard dashboard = aValidDashboard(team);
@@ -227,7 +227,7 @@ public class MonitoringControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("Should handle subscription with custom window")
-    void shouldHandleSubscriptionWithCustomWindow() throws Exception {
+    public void shouldHandleSubscriptionWithCustomWindow() throws Exception {
         // Given: A dashboard exists with team member
         final Team team = aValidTeam();
         final Dashboard dashboard = aValidDashboard(team);
@@ -256,12 +256,12 @@ public class MonitoringControllerTest extends IntegrationTest {
         // And: Verify subscription details
         final DashboardSubscription init = fromJson(initEvent.get("data"), DashboardSubscription.class);
         assertThat(init.getDashboardId(), equalTo(dashboard.getId()));
-        assertThat(init.getWindow(), equalTo(customWindow));
+        assertThat(init.getWindow(), equalTo(customWindow.toMinutes()));
     }
 
     @Test
     @DisplayName("Should not subscribe to non-existing dashboard")
-    void shouldNotSubscribeToNonExistingDashboard() throws Exception {
+    public void shouldNotSubscribeToNonExistingDashboard() throws Exception {
         // Given: A team member exists
         final User user = aValidatedUser();
 
@@ -280,7 +280,7 @@ public class MonitoringControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("Should subscribe to global dashboard without being in the team")
-    void shouldSubscribeToGlobalDashboardWithoutBeingInTheTeam() throws Exception {
+    public void shouldSubscribeToGlobalDashboardWithoutBeingInTheTeam() throws Exception {
         // Given: A global dashboard exists
         final Team team = aValidTeam();
         final Dashboard dashboard = aValidDashboard(team);
@@ -312,7 +312,76 @@ public class MonitoringControllerTest extends IntegrationTest {
         final DashboardSubscription init = fromJson(initEvent.get("data"), DashboardSubscription.class);
 
         assertThat(init.getDashboardId(), equalTo(dashboard.getId()));
-        assertThat(init.getWindow().toString(), equalTo(DEFAULT_WINDOW));
+        assertThat(init.getWindow(), equalTo(Duration.parse(DEFAULT_WINDOW).toMinutes()));
+    }
+
+    @Test
+    @DisplayName("Should subscribe to an existing subscription if another user requests the same dashboard")
+    public void shouldSubscribeToExistingSubscriptionIfAnotherUserRequestsTheSameDashboard() throws Exception {
+        // Given: A dashboard exists
+        final Team team = aValidTeam();
+        final Dashboard dashboard = aValidDashboard(team);
+
+        // And: The dashboard has a check
+        final Check check = aValidCheck(aValidSource());
+        final DashboardConfigurationRequest request = new DashboardConfigurationRequest()
+            .setUngroupedCheckIds(Set.of(check.getId()));
+        configureDashboard(dashboard.getId(), request);
+
+        // And: Generate some events
+        generateEvents(check.getId(), OK, CRITICAL, OK, OK, CRITICAL);
+
+        // And: A team member exists
+        final User user = aValidatedUser();
+        addUserToTeam(user, team);
+
+        // When: Subscribe to the SSE stream
+        final ResultActions response = subscribeToStream(dashboard.getId(), user.getAccessToken().getValue());
+
+        // And: The stream should be started.
+        response.andExpect(status().is(SC_OK));
+        final MvcResult mvcResult = response.andExpect(request().asyncStarted()).andReturn();
+
+        // And: Collect the events
+        final List<Map<String, String>> events = SseTestUtils.collectEvents(mvcResult, INITIALIZED, Duration.ofSeconds(5));
+
+        // And: Get the initialization event
+        final Map<String, String> initEvent = events.stream()
+            .filter(e -> INITIALIZED.equals(e.get("event")))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("No initialization event found"));
+
+        // And: Verify subscription details
+        final DashboardSubscription init = fromJson(initEvent.get("data"), DashboardSubscription.class);
+        assertThat(init.getDashboardId(), equalTo(dashboard.getId()));
+        assertThat(init.getWindow(), equalTo(Duration.parse(DEFAULT_WINDOW).toMinutes()));
+
+        // And: Another user from the same team
+        final User anotherUser = aValidatedUser();
+        addUserToTeam(anotherUser, team);
+
+        // When: Subscribe to the SSE stream
+        final ResultActions anotherResponse = subscribeToStream(dashboard.getId(), anotherUser.getAccessToken().getValue());
+
+        // And: The stream should be started.
+        anotherResponse.andExpect(status().is(SC_OK));
+        final MvcResult anotherMvcResult = anotherResponse.andExpect(request().asyncStarted()).andReturn();
+
+        // And: Collect the events
+        final List<Map<String, String>> anotherEvents = SseTestUtils.collectEvents(anotherMvcResult, INITIALIZED, Duration.ofSeconds(5));
+
+        // And: Get the initialization event
+        final Map<String, String> anotherInitEvent = anotherEvents.stream()
+            .filter(e -> INITIALIZED.equals(e.get("event")))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("No initialization event found"));
+
+        // And: Verify subscription details
+        final DashboardSubscription anotherInit = fromJson(anotherInitEvent.get("data"), DashboardSubscription.class);
+        assertThat(anotherInit.getDashboardId(), equalTo(dashboard.getId()));
+
+        // And: The subscription should be the same
+        assertThat(anotherInit, equalTo(init));
     }
 
     private ResultActions subscribeToStream(final Long dashboardId, final String token) {

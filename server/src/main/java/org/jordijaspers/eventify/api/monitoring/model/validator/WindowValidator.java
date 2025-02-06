@@ -8,7 +8,6 @@ import org.hawaiiframework.validation.ValidationResult;
 import org.hawaiiframework.validation.Validator;
 import org.springframework.stereotype.Component;
 
-
 /**
  * A custom dashboard validator.
  */

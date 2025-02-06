@@ -12,6 +12,7 @@ import org.jordijaspers.eventify.api.dashboard.model.Dashboard;
 import org.jordijaspers.eventify.api.dashboard.service.DashboardService;
 import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.monitoring.model.DashboardSubscription;
+import org.jordijaspers.eventify.api.monitoring.model.SubscriptionData;
 import org.jordijaspers.eventify.api.monitoring.model.SubscriptionKey;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineResponse;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class TimelineStreamingService {
 
     private final TimelineEventHandler timelineEventHandler;
 
-    private final Map<SubscriptionKey, DashboardSubscription> dashboardSubscriptions = new ConcurrentHashMap<>();
+    private final Map<SubscriptionKey, SubscriptionData> activeSubscriptions = new ConcurrentHashMap<>();
 
     /**
      * Subscribe to a dashboard and receive real-time updates. The subscription will be kept alive until the client disconnects and the
@@ -49,16 +50,26 @@ public class TimelineStreamingService {
     @Transactional(readOnly = true)
     public SseEmitter subscribe(final Long dashboardId, final Duration window) {
         final SubscriptionKey key = new SubscriptionKey(dashboardId, window);
-        final DashboardSubscription existingSubscription = dashboardSubscriptions.get(key);
-        if (nonNull(existingSubscription)) {
-            log.info("Reusing existing subscription for dashboard '{}'", dashboardId);
-            return existingSubscription.getEmitter();
-        }
-
         final SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-        final DashboardSubscription subscription = initializeSubscription(emitter, key);
-        timelineInitializer.initializeTimelines(subscription);
-        subscription.emitEvent(INITIALIZED);
+
+        final SubscriptionData subscriptionData = activeSubscriptions.compute(
+            key,
+            (subscriptionKey, data) -> {
+                if (nonNull(data)) {
+                    log.info("Adding emitter to existing subscription for dashboardId: '{}'", dashboardId);
+                    data.addEmitter(emitter);
+                    return data;
+                } else {
+                    log.info("Creating new subscription for dashboardId: '{}'", dashboardId);
+                    final DashboardSubscription subscription = initializeSubscription(subscriptionKey);
+                    timelineInitializer.initializeTimelines(subscription);
+                    return new SubscriptionData(emitter, subscription);
+                }
+            }
+        );
+
+        setupEmitterCallbacks(key, emitter, subscriptionData);
+        subscriptionData.emitEvents(INITIALIZED);
 
         return emitter;
     }
@@ -72,7 +83,7 @@ public class TimelineStreamingService {
      */
     @SuppressWarnings("ReturnCount")
     public void updateTimelineForCheck(final List<EventRequest> events, final Long checkId) {
-        final List<DashboardSubscription> relevantSubscriptions = getRelevantSubscriptions(checkId, events.getFirst());
+        final List<SubscriptionData> relevantSubscriptions = getRelevantSubscriptions(checkId, events.getFirst());
         if (isEmpty(relevantSubscriptions)) {
             return;
         }
@@ -82,9 +93,11 @@ public class TimelineStreamingService {
             return;
         }
 
-        relevantSubscriptions.forEach(subscription -> {
+        relevantSubscriptions.forEach(data -> {
+            final DashboardSubscription subscription = data.getSubscription();
             if (timelineEventHandler.processTimeline(timeline, checkId, subscription)) {
-                subscription.emitEvent(UPDATED);
+                data.setSubscription(subscription);
+                data.emitEvents(UPDATED);
             }
         });
     }
@@ -92,48 +105,49 @@ public class TimelineStreamingService {
     /**
      * Initialize a new subscription for the given dashboard and time window.
      *
-     * @param emitter The emitter to use for the subscription
-     * @param key     The key of the subscription
+     * @param key The key of the subscription
      * @return The initialized subscription
      */
-    protected DashboardSubscription initializeSubscription(final SseEmitter emitter, final SubscriptionKey key) {
-        setupEmitterCallbacks(key, emitter);
-
+    protected DashboardSubscription initializeSubscription(final SubscriptionKey key) {
         final Dashboard dashboard = dashboardService.getDashboardConfiguration(key.getDashboardId());
-        final DashboardSubscription subscription = new DashboardSubscription(dashboard, key.getWindow(), emitter);
-        dashboardSubscriptions.put(key, subscription);
-
-        return subscription;
+        return new DashboardSubscription(dashboard, key.getWindow());
     }
 
     /**
-     * Setup the emitter callbacks for the given subscription key and emitter.
+     * Set up the emitter callbacks for the given subscription key and emitter.
      *
      * @param key     The key of the subscription
-     * @param emitter The emitter to setup the callbacks for
+     * @param emitter The emitter to set up the callbacks for
+     * @param data    The subscription data to use for the callbacks
      */
-    protected void setupEmitterCallbacks(final SubscriptionKey key, final SseEmitter emitter) {
-        emitter.onCompletion(() -> removeSubscription(key));
-        emitter.onTimeout(() -> removeSubscription(key));
-        emitter.onError(e -> removeSubscription(key));
+    protected void setupEmitterCallbacks(final SubscriptionKey key, final SseEmitter emitter, final SubscriptionData data) {
+        emitter.onCompletion(() -> {
+            log.info("SSE connection completed for dashboardId: {}", key.getDashboardId());
+            removeEmitter(key, emitter, data);
+        });
+        emitter.onTimeout(() -> {
+            log.warn("SSE connection timed out for dashboardId: {}", key.getDashboardId());
+            removeEmitter(key, emitter, data);
+        });
+        emitter.onError(exception -> {
+            log.error("SSE error for dashboardId: {}", key.getDashboardId(), exception);
+            removeEmitter(key, emitter, data);
+        });
     }
 
     /**
-     * Remove the subscription for the given key.
+     * Remove the emitter from the subscription data and remove the subscription data if no emitters are left.
      *
-     * @param key The key of the subscription to remove
+     * @param key              The key of the subscription
+     * @param emitter          The emitter to remove
+     * @param subscriptionData The subscription data to remove the emitter from
      */
-    protected void removeSubscription(final SubscriptionKey key) {
-        dashboardSubscriptions.remove(key);
-    }
-
-    /**
-     * Get the number of active subscriptions.
-     *
-     * @return The number of active subscriptions
-     */
-    protected int getActiveSubscriptions() {
-        return dashboardSubscriptions.size();
+    protected void removeEmitter(final SubscriptionKey key, final SseEmitter emitter, final SubscriptionData subscriptionData) {
+        subscriptionData.removeEmitter(emitter);
+        if (subscriptionData.hasNoEmitters()) {
+            activeSubscriptions.remove(key);
+            log.info("Removed subscription data for dashboardId: {}", key.getDashboardId());
+        }
     }
 
     /**
@@ -143,11 +157,29 @@ public class TimelineStreamingService {
      * @param event   The event to get the subscriptions for
      * @return The relevant subscriptions
      */
-    protected List<DashboardSubscription> getRelevantSubscriptions(final Long checkId, final EventRequest event) {
-        return dashboardSubscriptions.values()
+    protected List<SubscriptionData> getRelevantSubscriptions(final Long checkId, final EventRequest event) {
+        return activeSubscriptions.values()
             .stream()
-            .filter(subscription -> subscription.containsCheck(checkId))
-            .filter(subscription -> subscription.isInWindow(event))
+            .filter(data -> data.getSubscription().containsCheck(checkId))
+            .filter(data -> data.getSubscription().isInWindow(event))
             .toList();
+    }
+
+    /**
+     * Remove the subscription for the given key.
+     *
+     * @param key The key of the subscription to remove
+     */
+    protected void removeSubscription(final SubscriptionKey key) {
+        activeSubscriptions.remove(key);
+    }
+
+    /**
+     * Get the number of active subscriptions.
+     *
+     * @return The number of active subscriptions
+     */
+    protected int getActiveSubscriptions() {
+        return activeSubscriptions.size();
     }
 }

@@ -91,6 +91,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return http.build();
     }
 
+
     private UrlBasedCorsConfigurationSource corsConfigurationSource(final String... origins) {
         final var configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(origins));

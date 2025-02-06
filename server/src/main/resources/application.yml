@@ -22,7 +22,7 @@ security:
     lifetime: ${JWT_REFRESH_LIFETIME_SECONDS:7}
     time-unit: ${JWT_REFRESH_LIFETIME_TIME_UNIT:DAYS}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
 # ======= MANAGEMENT ENDPOINTS =======
 management:

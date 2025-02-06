@@ -3,7 +3,6 @@ package org.jordijaspers.eventify.api.monitoring.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -32,11 +31,11 @@ public class TimelineService {
      * If the check does not have any events within the given window, a duration will be created with the UNKNOWN status.
      *
      * @param checkIds The check IDs to get the timelines for
-     * @param window   The window to get the timelines for
+     * @param window   The window to get the timelines for in minutes
      * @return the timelines for the given checks, guaranteed to have at least one duration for each check
      */
-    public Map<Long, TimelineResponse> getTimelinesForChecks(final Set<Long> checkIds, final Duration window) {
-        final LocalDateTime startTime = LocalDateTime.now().minus(window);
+    public Map<Long, TimelineResponse> getTimelinesForChecks(final Set<Long> checkIds, final Long window) {
+        final LocalDateTime startTime = LocalDateTime.now().minusMinutes(window);
         final ZonedDateTime windowStart = ZonedDateTime.of(startTime, UTC);
         final ZonedDateTime now = ZonedDateTime.now(UTC);
 

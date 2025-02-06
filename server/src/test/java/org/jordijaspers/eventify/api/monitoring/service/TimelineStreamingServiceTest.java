@@ -49,7 +49,7 @@ public class TimelineStreamingServiceTest extends UnitTest {
         }
 
         @Test
-        @DisplayName("Should reuse existing subscription for same dashboard and window")
+        @DisplayName("Should reuse existing subscription for same dashboard and window with a different emitter")
         public void shouldReuseExistingSubscriptionForSameDashboardAndWindow() {
             // Given: Initial subscription exists
             final SseEmitter firstEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, DEFAULT_WINDOW);
@@ -58,7 +58,7 @@ public class TimelineStreamingServiceTest extends UnitTest {
             final SseEmitter secondEmitter = timelineStreamingService.subscribe(DASHBOARD_ID, DEFAULT_WINDOW);
 
             // Then: Same emitter should be returned
-            assertThat(secondEmitter).isSameAs(firstEmitter);
+            assertThat(secondEmitter).isNotSameAs(firstEmitter);
 
             // And: Dashboard service should only be called once
             verify(dashboardService, times(1)).getDashboardConfiguration(DASHBOARD_ID);

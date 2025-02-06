@@ -97,6 +97,10 @@ export const SERVER_ROUTES = {
 	CHECK_SEARCH: {
 		path: `${SERVER_BASE_URL}/check`,
 		type: RouteType.PRIVATE
+	},
+	MONITORING: {
+		path: `${SERVER_BASE_URL}/dashboard/{id}/monitoring/stream`,
+		type: RouteType.PRIVATE
 	}
 };
 

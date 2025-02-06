@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -18,8 +17,6 @@ import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.monitoring.model.response.CheckTimelineResponse;
 import org.jordijaspers.eventify.api.monitoring.model.response.GroupTimelineResponse;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineResponse;
-import org.jordijaspers.eventify.common.exception.DashboardStreamingException;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.CHECK_NOT_FOUND_ERROR;
 
@@ -28,11 +25,9 @@ import static org.jordijaspers.eventify.common.exception.ApiErrorCode.CHECK_NOT_
 @NoArgsConstructor
 public class DashboardSubscription {
 
-    private SseEmitter emitter;
-
     private Long dashboardId;
 
-    private Duration window;
+    private Long window;
 
     private TimelineResponse timeline;
 
@@ -45,28 +40,12 @@ public class DashboardSubscription {
      *
      * @param dashboard  The dashboard to subscribe to
      * @param timeWindow The time window to use for the subscription
-     * @param emitter    The emitter to use for the subscription
      */
-    public DashboardSubscription(final Dashboard dashboard, final Duration timeWindow, final SseEmitter emitter) {
-        this.emitter = emitter;
-        this.window = timeWindow;
+    public DashboardSubscription(final Dashboard dashboard, final Duration timeWindow) {
+        this.window = timeWindow.toMinutes();
         this.dashboardId = dashboard.getId();
         this.groupedChecks = mapGroupedChecks(dashboard.getGroupedChecks());
         this.ungroupedChecks = mapUngroupedChecks(dashboard.getUngroupedChecks());
-    }
-
-    /**
-     * Send an event with the given name to the dashboard subscription.
-     *
-     * @param name The name of the event to send
-     */
-    public void emitEvent(final String name) {
-        try {
-            this.emitter.send(SseEmitter.event().name(name).data(this));
-        } catch (final IOException exception) {
-            log.error("Failed to emit the event for dashboard subscription '{}'", this.dashboardId, exception);
-            throw new DashboardStreamingException();
-        }
     }
 
     /**
@@ -139,7 +118,7 @@ public class DashboardSubscription {
      */
     public boolean isInWindow(final EventRequest event) {
         final ZonedDateTime eventTime = event.getTimestamp();
-        final ZonedDateTime windowStart = ZonedDateTime.now().minus(this.window);
+        final ZonedDateTime windowStart = ZonedDateTime.now().minusHours(this.window);
         return !eventTime.isBefore(windowStart);
     }
 
