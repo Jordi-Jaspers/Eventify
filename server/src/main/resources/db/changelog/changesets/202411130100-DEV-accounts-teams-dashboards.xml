@@ -184,9 +184,9 @@
             c.id AS check_id,
             (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
             event_time,
-            (ARRAY ['OK','OK','OK','OK','WARNING','CRITICAL','CRITICAL'])[round(random() * 6) + 1] as "check_result",
+            (ARRAY ['OK','OK','OK','OK','OK','OK','OK','OK','WARNING','CRITICAL'])[round(random() * 9) + 1] as "check_result",
             'This is a random message for the event occurring at ' || event_time
-        FROM generate_series((CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 WEEK', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), '15 SECOND'::interval) as event_time
+        FROM generate_series((CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 WEEK', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), '30 SECOND'::interval) as event_time
         JOIN "check" AS c ON c.name IN (
             'Server CPU',
             'Server Memory',

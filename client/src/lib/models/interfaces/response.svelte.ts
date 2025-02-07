@@ -83,20 +83,10 @@ interface CheckResponse {
 	created: Date;
 }
 
-enum Status {
-	OK = 'bg-emerald-500',
-	WARNING = 'bg-amber-500',
-	CRITICAL = 'bg-red-500',
-	DEGRADED = 'bg-orange-500',
-	MAINTENANCE = 'bg-blue-500',
-	DETACHED = 'bg-slate-500',
-	UNKNOWN = 'bg-gray-300'
-}
-
 interface TimelineDurationResponse {
 	startTime: Date;
 	endTime: Date;
-	status: Status;
+	status: string;
 }
 
 interface TimelineResponse {

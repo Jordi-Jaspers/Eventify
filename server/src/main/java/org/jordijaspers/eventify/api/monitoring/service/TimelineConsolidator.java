@@ -73,14 +73,29 @@ public final class TimelineConsolidator {
         }));
 
         final TimelineResponse consolidatedTimeline = new TimelineResponse();
-
         ZonedDateTime previousTimePoint = null;
+        Status previousStatus = null;
+        TimelineDurationResponse currentDuration = null;
+
         for (final ZonedDateTime timePoint : timePoints) {
             if (nonNull(previousTimePoint)) {
                 final Status worstStatus = calculateWorstStatusAtTime(timelines, previousTimePoint);
-                consolidatedTimeline.addDuration(new TimelineDurationResponse(previousTimePoint, timePoint, worstStatus));
+
+                if (currentDuration == null || !worstStatus.equals(previousStatus)) {
+                    // Create new duration if this is the first one or if status changed
+                    currentDuration = new TimelineDurationResponse(previousTimePoint, timePoint, worstStatus);
+                    consolidatedTimeline.addDuration(currentDuration);
+                } else {
+                    // Extend current duration if status is the same
+                    currentDuration.setEndTime(timePoint);
+                }
+                previousStatus = worstStatus;
             }
             previousTimePoint = timePoint;
+        }
+
+        if (!consolidatedTimeline.getDurations().isEmpty()) {
+            consolidatedTimeline.getDurations().getLast().setEndTime(null);
         }
 
         return consolidatedTimeline;

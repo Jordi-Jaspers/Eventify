@@ -1,7 +1,1 @@
-<script lang="ts">
-	import { user } from '$lib/store/global.js';
-</script>
-
-{#if user}
-	Hello {user.fullName} watch monitoring!
-{/if}
+<h2>Go to Dashboards and select whatever you like to monitor.</h2>

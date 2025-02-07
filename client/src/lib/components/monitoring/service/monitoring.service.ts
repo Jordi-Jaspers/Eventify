@@ -10,8 +10,43 @@ interface MonitoringHandlers {
 	onError: (message: string) => void;
 }
 
+enum Status {
+	OK,
+	WARNING,
+	CRITICAL,
+	DEGRADED,
+	MAINTENANCE,
+	DETACHED,
+	UNKNOWN
+}
+
 export class MonitoringService {
 	private static readonly EVENTS: EventType[] = ['INITIALIZED', 'UPDATED'];
+
+	/**
+	 * Returns the background color for a given status.
+	 * @param status The status to get the background color for
+	 */
+	public static getStatusBackgroundColor(status: string): string {
+		switch (status) {
+			case 'OK':
+				return 'bg-green-500';
+			case 'WARNING':
+				return 'bg-yellow-500';
+			case 'CRITICAL':
+				return 'bg-red-600';
+			case 'DEGRADED':
+				return 'bg-orange-500';
+			case 'MAINTENANCE':
+				return 'bg-blue-500';
+			case 'DETACHED':
+				return 'bg-gray-500';
+			case 'UNKNOWN':
+				return 'bg-slate-400';
+			default:
+				return 'bg-white';
+		}
+	}
 
 	/**
 	 * Subscribes to a dashboard and returns a function to unsubscribe from the dashboard.

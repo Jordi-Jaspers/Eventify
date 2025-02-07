@@ -12,6 +12,8 @@ import org.jordijaspers.eventify.common.exception.DashboardStreamingException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import static java.util.Objects.nonNull;
+import static org.jordijaspers.eventify.common.constants.Constants.ServerEvents.INITIALIZED;
+import static org.jordijaspers.eventify.common.constants.Constants.ServerEvents.UPDATED;
 
 @Data
 @Slf4j
@@ -35,17 +37,22 @@ public class SubscriptionData {
 
     /**
      * Send an event with the given name to the dashboard subscription.
-     *
-     * @param name The name of the event to send
      */
-    public void emitEvents(final String name) {
-        try {
-            for (final SseEmitter emitter : emitters) {
-                emitter.send(SseEmitter.event().name(name).data(this.subscription));
-            }
-        } catch (final IOException exception) {
-            log.error("Failed to emit the event for dashboard subscription '{}'", this.subscription.getDashboardId(), exception);
-            throw new DashboardStreamingException();
+    public void emitUpdate(final DashboardSubscription subscription) {
+        this.subscription = subscription;
+        for (final SseEmitter emitter : emitters) {
+            emitEvent(emitter, UPDATED);
+        }
+    }
+
+    /**
+     * Send the initialized event to the dashboard subscription.
+     *
+     * @param emitter The emitter to send the event to
+     */
+    public void emitInitialized(final SseEmitter emitter) {
+        if (nonNull(emitter) && emitters.contains(emitter)) {
+            emitEvent(emitter, INITIALIZED);
         }
     }
 
@@ -78,5 +85,20 @@ public class SubscriptionData {
      */
     public boolean hasNoEmitters() {
         return emitters.isEmpty();
+    }
+
+    /**
+     * Emit an event with the given name to the given emitter.
+     *
+     * @param emitter The emitter to send the event to
+     * @param name    The name of the event to send
+     */
+    public void emitEvent(final SseEmitter emitter, final String name) {
+        try {
+            emitter.send(SseEmitter.event().name(name).data(this.subscription));
+        } catch (final IOException exception) {
+            log.error("Failed to emit the event for dashboard subscription '{}'", this.subscription.getDashboardId());
+            throw new DashboardStreamingException();
+        }
     }
 }
