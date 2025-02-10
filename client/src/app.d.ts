@@ -2,6 +2,7 @@ declare module '*.png?enhanced';
 declare namespace App {
 	interface Locals {
 		user: UserDetailsResponse | null;
+		dashboards: DashboardResponse[];
 	}
 }
 

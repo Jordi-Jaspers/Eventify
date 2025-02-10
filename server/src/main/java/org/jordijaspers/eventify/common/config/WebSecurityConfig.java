@@ -3,7 +3,9 @@ package org.jordijaspers.eventify.common.config;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jordijaspers.eventify.api.authentication.model.Permission;
 import org.jordijaspers.eventify.common.security.converter.JwtAuthenticationConverter;
+import org.jordijaspers.eventify.common.security.filter.ApiKeyAuthenticationFilter;
 import org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter;
 import org.jordijaspers.eventify.common.security.filter.UnauthorizedHandler;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,12 +46,14 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain filterChain(@Value("${security.cors.allowed-origins}") final String[] allowedOrigins,
         final JwtAuthenticationFilter jwtAuthenticationFilter,
+        final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
         final JwtAuthenticationConverter jwtAuthenticationConverter,
         final UnauthorizedHandler unauthorizedHandler,
         final HttpSecurity http) throws Exception {
 
         // Adding a once per request filter to check the JWT token.
-        http.addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(jwtAuthenticationFilter, ApiKeyAuthenticationFilter.class);
 
         // Configure Session Management.
         http.sessionManagement(sessionConfiguration -> sessionConfiguration.sessionCreationPolicy(STATELESS));
@@ -83,6 +87,8 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             accessManagement.requestMatchers(AUTH_PATH + WILDCARD_PART).permitAll();
             accessManagement.requestMatchers(OPENAPI_PATH + WILDCARD_PART).permitAll();
             accessManagement.requestMatchers(ERROR_PATH).permitAll();
+
+            accessManagement.requestMatchers(EXTERNAL_BASE_PATH + WILDCARD_PART).hasAnyRole(Permission.ACCESS_EXTERNAL.name());
 
             accessManagement.requestMatchers(LOGOUT_PATH).authenticated();
             accessManagement.anyRequest().authenticated();

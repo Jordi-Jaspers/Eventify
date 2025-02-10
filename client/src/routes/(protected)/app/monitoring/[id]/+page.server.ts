@@ -15,7 +15,20 @@ export async function load({ params, request }) {
 		return response.data;
 	};
 
+	const getDashboards = async () => {
+		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.DASHBOARDS.path, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				Cookie: request.headers.get('cookie') || ''
+			}
+		});
+
+		return response.data;
+	};
+
 	return {
-		dashboard: await getDashboard()
+		dashboard: await getDashboard(),
+		dashboards: await getDashboards()
 	};
 }

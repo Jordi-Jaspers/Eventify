@@ -96,6 +96,22 @@ public enum ApiErrorCode implements ApiError {
     CANNOT_PROCESS_EVENT(
         "ERR-0022",
         "Could not process the event from the RabbitMQ message bus."
+    ),
+    API_KEY_DISABLED_ERROR(
+        "ERR-0023",
+        "The provided API key is disabled, please contact the administrator."
+    ),
+    API_KEY_EXPIRED_ERROR(
+        "ERR-0024",
+        "The provided API key has expired, please request a new one."
+    ),
+    INVALID_API_KEY_ERROR(
+        "ERR-0025",
+        "The provided credentials are incorrect."
+    ),
+    SOURCE_NOT_FOUND_ERROR(
+        "ERR-0026",
+        "The requested source does not exist."
     );
 
     /**

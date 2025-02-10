@@ -20,7 +20,7 @@ import org.jordijaspers.eventify.api.dashboard.model.request.DashboardConfigurat
 import org.jordijaspers.eventify.api.event.model.Status;
 import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.source.model.Source;
-import org.jordijaspers.eventify.api.source.model.request.CreateSourceRequest;
+import org.jordijaspers.eventify.api.source.model.request.SourceRequest;
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.team.model.request.TeamRequest;
 import org.jordijaspers.eventify.api.token.model.Token;
@@ -125,7 +125,7 @@ public class IntegrationTest extends WebMvcConfigurator {
     }
 
     protected Source aValidSource() {
-        final CreateSourceRequest request = new CreateSourceRequest()
+        final SourceRequest request = new SourceRequest()
             .setName(UUID.randomUUID() + "-" + SOURCE_NAME)
             .setDescription("Test Source");
 

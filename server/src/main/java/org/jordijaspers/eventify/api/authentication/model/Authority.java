@@ -18,7 +18,17 @@ public enum Authority {
     NONE(
         "None",
         "The default authority for a user with no permissions.",
-        Set.of()
+        Set.of(
+            Permission.ACCESS_APPLICATION
+        )
+    ),
+    SOURCE(
+        "Source",
+        "The default authority for a source system.",
+        Set.of(
+            Permission.ACCESS_EXTERNAL,
+            Permission.WRITE_EVENTS
+        )
     ),
     USER(
         "User",
@@ -38,6 +48,8 @@ public enum Authority {
             Permission.WRITE_DASHBOARDS,
             Permission.READ_TEAMS,
             Permission.WRITE_TEAMS,
+            Permission.READ_SOURCE,
+            Permission.WRITE_SOURCE,
             Permission.READ_USERS
         )
     ),
@@ -51,7 +63,9 @@ public enum Authority {
             Permission.READ_TEAMS,
             Permission.WRITE_TEAMS,
             Permission.READ_USERS,
-            Permission.WRITE_USERS
+            Permission.WRITE_USERS,
+            Permission.READ_SOURCE,
+            Permission.WRITE_SOURCE
         )
     );
 

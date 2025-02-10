@@ -23,11 +23,9 @@ export function toMap(obj: Record<string, any>): Map<string, any> {
 }
 
 export function formatTime(date: Date): string {
-	return new Date(date).toLocaleTimeString(navigator.language, {
-		hour: '2-digit',
-		minute: '2-digit',
-		second: '2-digit'
-	});
+	const timeString: string = new Date(date).toLocaleTimeString(navigator.language);
+	const dateString: string = new Date(date).toLocaleDateString(navigator.language);
+	return `${timeString} ${dateString}`;
 }
 
 export function formatDuration(startTime: Date, endTime: Date): string {

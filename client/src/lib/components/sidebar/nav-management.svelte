@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Separator, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '$lib/components/ui/sidebar';
-	import { UserRoundCog, UsersRound } from 'lucide-svelte';
+	import { ServerCog, UserRoundCog, UsersRound } from 'lucide-svelte';
 	import { CLIENT_ROUTES } from '$lib/config/paths';
 	import { user } from '$lib/store/global.js';
 
@@ -16,6 +16,12 @@
 			url: CLIENT_ROUTES.TEAM_MANAGEMENT_PAGE.path,
 			icon: UsersRound,
 			permission: 'WRITE_TEAMS'
+		},
+		{
+			title: 'Source Systems',
+			url: CLIENT_ROUTES.SOURCE_SYSTEMS_MANAGEMENT_PAGE.path,
+			icon: ServerCog,
+			permission: 'WRITE_SOURCE'
 		}
 	];
 

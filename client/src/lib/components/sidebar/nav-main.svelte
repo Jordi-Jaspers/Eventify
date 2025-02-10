@@ -5,14 +5,14 @@
 
 	const navigations = [
 		{
-			title: 'Monitoring',
-			url: CLIENT_ROUTES.MONITORING_PAGE.path,
-			icon: SquareActivity
-		},
-		{
 			title: 'Dashboards',
 			url: CLIENT_ROUTES.DASHBOARDS_PAGE.path,
 			icon: List
+		},
+		{
+			title: 'Monitoring',
+			url: CLIENT_ROUTES.MONITORING_PAGE.path,
+			icon: SquareActivity
 		}
 	];
 </script>

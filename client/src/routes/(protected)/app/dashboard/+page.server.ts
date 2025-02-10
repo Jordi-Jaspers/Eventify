@@ -1,6 +1,5 @@
 import { SERVER_ROUTES } from '$lib/config/paths';
 import { ApiService } from '$lib/utils/api.service';
-import { CookieService } from '$lib/utils/cookie.service';
 import { type Actions, fail } from '@sveltejs/kit';
 
 export async function load({ cookies, request }) {
@@ -22,7 +21,7 @@ export async function load({ cookies, request }) {
 }
 
 export const actions: Actions = {
-	createDashboard: async ({ request, cookies }) => {
+	createDashboard: async ({ request }) => {
 		const data: FormData = await request.formData();
 		const input: DashboardCreationRequest = {
 			name: data.get('name') as string,

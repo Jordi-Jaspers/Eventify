@@ -25,6 +25,16 @@ public final class Paths {
 
     public static final String ID_PART = "/{id}";
 
+    public static final String LOCK_PART = "/lock";
+
+    public static final String UNLOCK_PART = "/unlock";
+
+    /* ------------------------------- EXTERNAL ENDPOINTS (API-KEY) ------------------------------- */
+
+    public static final String EXTERNAL_BASE_PATH = BASE_PATH + "/external";
+
+    public static final String EVENTS_PATH = EXTERNAL_BASE_PATH + "/event";
+
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
     public static final String PUBLIC_ACTUATOR_PATH = PUBLIC_PATH + "/actuator";
@@ -61,9 +71,9 @@ public final class Paths {
 
     public static final String USER_PATH = USERS_PATH + ID_PART;
 
-    public static final String LOCK_USER_PATH = USER_PATH + "/lock";
+    public static final String LOCK_USER_PATH = USER_PATH + LOCK_PART;
 
-    public static final String UNLOCK_USER_PATH = USER_PATH + "/unlock";
+    public static final String UNLOCK_USER_PATH = USER_PATH + UNLOCK_PART;
 
     public static final String USER_DETAILS = USERS_PATH + "/details";
 
@@ -95,9 +105,19 @@ public final class Paths {
 
     public static final String CHECK_PATH = BASE_PATH + "/check";
 
-    /* ------------------------------- EVENT ENDPOINTS ------------------------------- */
+    /* ------------------------------- SOURCE ENDPOINTS ------------------------------- */
 
-    public static final String EVENTS_PATH = BASE_PATH + "/event";
+    public static final String SOURCES_PATH = BASE_PATH + "/source";
+
+    public static final String SOURCE_PATH = SOURCES_PATH + ID_PART;
+
+    public static final String API_KEY_PATH = SOURCE_PATH + "/key";
+
+    public static final String REGENERATE_API_KEY_PATH = API_KEY_PATH + "/regenerate";
+
+    public static final String LOCK_API_KEY_PATH = API_KEY_PATH + LOCK_PART;
+
+    public static final String UNLOCK_API_KEY_PATH = API_KEY_PATH + UNLOCK_PART;
 
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 

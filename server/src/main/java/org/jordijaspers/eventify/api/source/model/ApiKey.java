@@ -66,17 +66,35 @@ public class ApiKey implements Serializable {
      * A constructor to create a new API key.
      */
     public ApiKey() {
-        initialize();
+        initialize(LocalDateTime.now().plusYears(100));
     }
 
-    private void initialize() {
+    /**
+     * A constructor to create a new API key with an expiration date.
+     *
+     * @param expiresAt The expiration date of the API key.
+     */
+    public ApiKey(final LocalDateTime expiresAt) {
+        initialize(expiresAt);
+    }
+
+    /**
+     * Checks if the API key is expired.
+     *
+     * @return true if the API key is expired, false otherwise.
+     */
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(this.expiresAt);
+    }
+
+    private void initialize(final LocalDateTime expiresAt) {
         if (nonNull(this.id)) {
             return;
         }
 
         this.key = UUID.randomUUID().toString();
         this.createdBy = getLoggedInUsername();
-        this.expiresAt = LocalDateTime.now().plusYears(1);
+        this.expiresAt = expiresAt;
         this.lastUsed = LocalDateTime.now();
         this.enabled = true;
     }

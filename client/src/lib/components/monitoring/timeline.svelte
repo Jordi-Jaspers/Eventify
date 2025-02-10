@@ -2,6 +2,7 @@
 	import { HoverCard, HoverCardContent, HoverCardTrigger } from '$lib/components/ui/hover-card';
 	import { MonitoringService } from '$lib/components/monitoring/service/monitoring.service.js';
 	import { formatDuration, formatTime } from '$lib/utils.ts';
+	import { CalendarArrowDown, CalendarArrowUp } from 'lucide-svelte';
 
 	let { timeline = $bindable(null), window = $bindable(120) } = $props<{
 		timeline: TimelineResponse;
@@ -57,8 +58,15 @@
 			<HoverCardContent>
 				<div class="space-y-1">
 					<div class="font-medium">{duration.status}</div>
-					<div class="text-sm text-gray-500">
-						{formatTime(duration.startTime)} - {duration.endTime ? formatTime(duration.visualEnd) : 'Now'}
+					<div class="flex flex-col text-sm text-gray-500">
+						<span class="flex items-center">
+							<CalendarArrowUp class="mr-1 h-4 w-4" />
+							{formatTime(duration.startTime)}
+						</span>
+						<span class="flex items-center">
+							<CalendarArrowDown class="mr-1 h-4 w-4" />
+							{duration.endTime ? formatTime(duration.visualEnd) : 'Now'}
+						</span>
 					</div>
 					<div class="text-xs text-gray-400">
 						Duration: {formatDuration(duration.startTime, duration.visualEnd)}

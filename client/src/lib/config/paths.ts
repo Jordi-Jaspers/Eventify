@@ -172,6 +172,14 @@ export const CLIENT_ROUTES = {
 	PROXY_CHECK_SEARCH: {
 		path: '/proxy/check',
 		type: RouteType.PRIVATE
+	},
+	SOURCE_SYSTEMS_MANAGEMENT_PAGE: {
+		path: '/app/management/source',
+		type: RouteType.PRIVATE
+	},
+	SOURCE_SYSTEM_MANAGEMENT_PAGE: {
+		path: '/app/management/source/{id}',
+		type: RouteType.PRIVATE
 	}
 };
 

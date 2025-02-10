@@ -28,7 +28,7 @@ public class UserTokenPrincipal implements OAuth2Token {
      * @param user       The user to wrap.
      * @param tokenValue The token value to wrap.
      */
-    public UserTokenPrincipal(User user, String tokenValue) {
+    public UserTokenPrincipal(final User user, final String tokenValue) {
         this.user = user;
         this.jwt = Jwt.withTokenValue(tokenValue)
             .header("typ", "JWT")

@@ -1,1 +1,2 @@
-<h2>Go to Dashboards and select whatever you like to monitor.</h2>
+<h2>Favorited Dashboards</h2>
+<p>Quickly access your favorite dashboards here. coming soon..</p>

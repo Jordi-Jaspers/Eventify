@@ -13,7 +13,7 @@ import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.jordijaspers.eventify.api.check.model.Check;
-import org.jordijaspers.eventify.api.source.model.request.CreateSourceRequest;
+import org.jordijaspers.eventify.api.source.model.request.SourceRequest;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 
@@ -64,9 +64,18 @@ public class Source implements Serializable {
      *
      * @param request The request to create a Source object.
      */
-    public Source(final CreateSourceRequest request) {
+    public Source(final SourceRequest request) {
         this.name = request.getName();
         this.description = request.getDescription();
         this.apiKey = new ApiKey();
+    }
+
+    /**
+     * Sets the API key enabled or disabled.
+     *
+     * @param enabled true if the API key is enabled, false otherwise.
+     */
+    public void setApiKeyEnabled(boolean enabled) {
+        this.apiKey.setEnabled(enabled);
     }
 }
