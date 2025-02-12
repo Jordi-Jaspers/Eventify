@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.Optional;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +18,6 @@ import org.jordijaspers.eventify.common.exception.AuthorizationException;
 import org.jordijaspers.eventify.common.security.principal.SourceTokenPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import static java.util.Objects.isNull;
 import static org.jordijaspers.eventify.common.config.RequestMatcherConfig.getExternalApiMatcher;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -38,107 +35,79 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings("ReturnCount")
 public final class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String BEARER_PREFIX = "Bearer ";
+    public static final String API_KEY_HEADER = "X-API-Key";
 
     private final SourceRepository sourceRepository;
 
-    /**
-     * Filter out the requests that are not external API requests.
-     *
-     * @param request current HTTP request
-     * @return true if the request should not be filtered, false otherwise
-     */
     @Override
-    public boolean shouldNotFilter(@NonNull final HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NonNull final HttpServletRequest request) {
         return getExternalApiMatcher().stream().noneMatch(matcher -> matcher.matches(request));
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param request  The request to filter.
-     * @param response The response to filter.
-     * @param chain    The filter chain to continue the request with.
-     * @throws ServletException If the request could not be processed.
-     * @throws IOException      If the request could not be processed.
-     */
     @Override
-    protected void doFilterInternal(@NonNull final HttpServletRequest request,
+    protected void doFilterInternal(
+        @NonNull final HttpServletRequest request,
         @NonNull final HttpServletResponse response,
         @NonNull final FilterChain chain) throws ServletException, IOException {
-        final String headerValue = request.getHeader(AUTHORIZATION);
-        if (isNull(headerValue) || !headerValue.startsWith(BEARER_PREFIX)) {
+
+        try {
+            final String token = request.getHeader(API_KEY_HEADER);
+            if (isNull(token)) {
+                chain.doFilter(request, response);
+                return;
+            }
+
+            authenticateSourceWithToken(token);
             chain.doFilter(request, response);
-            return;
-        }
-
-        final String token = headerValue.substring(BEARER_PREFIX.length());
-        final Optional<Source> source = sourceRepository.findByToken(token);
-        if (source.isEmpty()) {
+        } catch (final AuthorizationException ex) {
             SecurityContextHolder.clearContext();
-            respondWithError(response, ApiErrorCode.INVALID_API_KEY_ERROR, HttpStatus.UNAUTHORIZED, "No valid authentication found.");
-            return;
+            handleAuthorizationError(response, ex);
         }
-
-        final Source sourceValue = source.get();
-        if (!isSourceRestricted(sourceValue, response)) {
-            return;
-        }
-
-        authenticateRequest(sourceValue);
-        chain.doFilter(request, response);
     }
 
-    private void authenticateRequest(final Source source) {
+    private void authenticateSourceWithToken(final String token) throws AuthorizationException {
         try {
+            final Source source = sourceRepository.findByToken(token)
+                .orElseThrow(() -> new AuthorizationException(ApiErrorCode.INVALID_API_KEY_ERROR));
+
+            validateSource(source);
             final SourceTokenPrincipal authentication = new SourceTokenPrincipal(source);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (final AuthenticationException ex) {
-            log.error("Authentication request failed: {}", ex.getMessage());
-            SecurityContextHolder.clearContext();
+
+            log.debug("Successfully authenticated source: {}", source.getName());
+        } catch (final Exception ex) {
+            throw new AuthorizationException(ApiErrorCode.INVALID_API_KEY_ERROR);
         }
     }
 
-    private boolean isSourceRestricted(final Source source, final HttpServletResponse response) {
+    private void validateSource(final Source source) {
         final ApiKey apiKey = source.getApiKey();
         if (!apiKey.isEnabled()) {
-            log.debug("Source '{}' is disabled.", source.getName());
-            respondWithError(response, ApiErrorCode.API_KEY_DISABLED_ERROR, HttpStatus.FORBIDDEN, "API key is disabled.");
-            return true;
+            throw new AuthorizationException(ApiErrorCode.API_KEY_DISABLED_ERROR);
         }
 
         if (apiKey.isExpired()) {
-            log.debug("Source '{}' is expired.", source.getName());
-            respondWithError(response, ApiErrorCode.API_KEY_EXPIRED_ERROR, HttpStatus.FORBIDDEN, "API key is expired.");
-            return true;
+            throw new AuthorizationException(ApiErrorCode.API_KEY_EXPIRED_ERROR);
         }
-
-        return false;
     }
 
-    private void respondWithError(
-        final HttpServletResponse response,
-        final ApiErrorCode errorCode,
-        final HttpStatus status,
-        final String message) {
-
+    private void handleAuthorizationError(final HttpServletResponse response, final AuthorizationException authorizationException) {
         try {
-            final ErrorResponseResource errorResponse = new ErrorResponseResource(new AuthorizationException(errorCode));
-            errorResponse.setErrorMessage(message);
-            errorResponse.setStatusCode(status.value());
-            errorResponse.setStatusMessage(status.getReasonPhrase());
+            final ErrorResponseResource errorResponse = new ErrorResponseResource(authorizationException);
+            errorResponse.setErrorMessage(authorizationException.getMessage());
+            errorResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+            errorResponse.setStatusMessage(HttpStatus.UNAUTHORIZED.getReasonPhrase());
             errorResponse.setContentType(APPLICATION_JSON_VALUE);
 
-            response.setStatus(status.value());
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(APPLICATION_JSON_VALUE);
 
             final ObjectWriter writer = new ObjectMapper().writer().withDefaultPrettyPrinter();
             response.getWriter().write(writer.writeValueAsString(errorResponse));
-        } catch (final IOException ex) {
-            log.error("Error while writing the error response: {}", ex.getMessage(), ex);
+        } catch (final IOException exception) {
+            log.error("Error while writing the error response: {}", exception.getMessage(), exception);
         }
     }
 }

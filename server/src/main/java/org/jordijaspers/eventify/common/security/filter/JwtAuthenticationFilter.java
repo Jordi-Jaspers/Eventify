@@ -34,6 +34,8 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.jordijaspers.eventify.api.Paths.LOGOUT_PATH;
+import static org.jordijaspers.eventify.common.config.RequestMatcherConfig.getExternalApiMatcher;
 import static org.jordijaspers.eventify.common.config.RequestMatcherConfig.getPublicMatchers;
 import static org.jordijaspers.eventify.common.constants.Constants.Security.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -58,8 +60,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(@NonNull final HttpServletRequest request) {
-        return getPublicMatchers().stream()
-            .anyMatch(matcher -> matcher.matches(request));
+        final boolean isPublic = getPublicMatchers().stream().anyMatch(matcher -> matcher.matches(request));
+        final boolean isExternal = getExternalApiMatcher().stream().anyMatch(matcher -> matcher.matches(request));
+        final boolean isLogout = request.getRequestURI().startsWith(LOGOUT_PATH);
+        return (isPublic || isExternal) && !isLogout;
     }
 
     @Override
@@ -69,9 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         @NonNull final FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            // Try to authenticate the request
             final User authenticatedUser = authenticateRequest(request, response);
-
             if (nonNull(authenticatedUser)) {
                 if (!isUserRestricted(authenticatedUser, response)) {
                     filterChain.doFilter(request, response);
@@ -80,7 +82,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // No valid authentication found
             log.debug("No valid authentication found. Clearing security context.");
             SecurityContextHolder.clearContext();
             filterChain.doFilter(request, response);
@@ -173,8 +174,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void setSecurityContext(final User user, final String tokenValue, final HttpServletRequest request) {
         final UserTokenPrincipal principal = new UserTokenPrincipal(user, tokenValue);
 
-        final JwtUserPrincipalAuthenticationToken authentication =
-            new JwtUserPrincipalAuthenticationToken(principal, user.getAuthorities());
+        final JwtUserPrincipalAuthenticationToken authentication = new JwtUserPrincipalAuthenticationToken(
+            principal,
+            user.getAuthorities()
+        );
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -15,7 +15,6 @@ import static org.jordijaspers.eventify.api.Paths.EVENTS_PATH;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-// TODO: Create Integration tests + unit test for the validator.
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +30,7 @@ public class EventController {
         path = EVENTS_PATH,
         consumes = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAuthority('WRITE_EVENTS')")
+    @PreAuthorize("hasAnyAuthority('WRITE_EVENTS') and @checkSecurityService.hasCheckPermission(#event.checkId)")
     public ResponseEntity<Void> submitEvent(@RequestBody final EventRequest event) {
         eventValidator.validateAndThrow(event);
         eventPublisher.publish(event);

@@ -101,6 +101,6 @@ public class EventService {
         return previousEvent.getStatus().equals(UNKNOWN)
             || currentEvent.getStatus().isNotOk()
             || !previousEvent.getStatus().equals(currentEvent.getStatus())
-            || Duration.between(previousEvent.getTimestamp(), currentEvent.getTimestamp()).compareTo(CHECKPOINT_INTERVAL) >= 0;
+            || Duration.between(previousEvent.getTimestamp(), currentEvent.getTimestamp()).compareTo(CHECKPOINT_INTERVAL) > 0;
     }
 }

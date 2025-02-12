@@ -7,6 +7,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	let { accessToken, refreshToken } = CookieService.getAuthTokens(event.cookies);
 	if (refreshToken || accessToken) {
 		await getUserDetails(event);
+		({ accessToken } = CookieService.getAuthTokens(event.cookies));
 	}
 
 	if (isPublicPath(event.url.pathname)) {
@@ -16,6 +17,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (!accessToken) {
 		throw redirect(303, CLIENT_ROUTES.LOGIN_PAGE.path);
 	}
+
 	return resolve(event);
 };
 

@@ -3,6 +3,7 @@ package org.jordijaspers.eventify.api.source.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -21,6 +22,7 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 @Entity
 @NoArgsConstructor
 @Table(name = "source")
+@ToString(exclude = "checks")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Source implements Serializable {
 

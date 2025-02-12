@@ -29,4 +29,16 @@ public interface SourceRepository extends JpaRepository<Source, Long> {
             """
     )
     Optional<Source> findByToken(@Param("token") String token);
+
+    @Query(
+        """
+            SELECT EXISTS (
+                SELECT 1
+                FROM Source s
+                JOIN s.checks c
+                WHERE s.id = :sourceId AND c.id = :checkId
+            )
+            """
+    )
+    boolean existsBySourceAndCheck(@Param("sourceId") Long sourceId, @Param("checkId") Long checkId);
 }

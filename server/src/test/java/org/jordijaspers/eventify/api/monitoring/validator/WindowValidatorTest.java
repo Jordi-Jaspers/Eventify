@@ -22,7 +22,6 @@ public class WindowValidatorTest extends UnitTest {
 
     private final ValidationResult validationResult = new ValidationResult();
 
-
     @Nested
     @DisplayName("When validating duration format")
     public class FormatValidation {

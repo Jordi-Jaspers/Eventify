@@ -65,9 +65,9 @@ public enum ApiErrorCode implements ApiError {
         "ERR-0014",
         "A team with that name already exists."
     ),
-    USER_NOT_LOGGED_IN(
+    NO_SECURITY_CONTEXT_ERROR(
         "ERR-0015",
-        "No user is logged in. Cannot perform action without authorization."
+        "No security context found. There is no user or source logged in."
     ),
     USER_NOT_PART_OF_TEAM(
         "ERR-0016",
@@ -112,6 +112,10 @@ public enum ApiErrorCode implements ApiError {
     SOURCE_NOT_FOUND_ERROR(
         "ERR-0026",
         "The requested source does not exist."
+    ),
+    CANNOT_ACCESS_CHECK(
+        "ERR-0027",
+        "You do not have the required permissions to access this check."
     );
 
     /**

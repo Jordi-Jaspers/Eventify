@@ -45,6 +45,7 @@
 			},
 			onUpdate: (data) => {
 				subscription = data;
+				toast.success('Dashboard updated');
 			},
 			onError: () => {
 				connectionStatus = 'error';
@@ -147,6 +148,7 @@
 					</Pane>
 				</ResizablePaneGroup>
 			</div>
+			<pre>{JSON.stringify(subscription, null, 2)}</pre>
 		{/if}
 	</div>
 </div>

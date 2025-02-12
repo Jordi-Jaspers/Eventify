@@ -21,6 +21,17 @@ export class CookieService {
 	}
 
 	/**
+	 * Retrieves the access token from cookies
+	 * @param cookies The cookies object
+	 */
+	static getCookies(cookies: Cookies): string {
+		return cookies
+			.getAll()
+			.map((cookie) => `${cookie.name}=${cookie.value}`)
+			.join('; ');
+	}
+
+	/**
 	 * Clears authentication cookies
 	 */
 	static clearAuthCookies(cookies: Cookies): void {

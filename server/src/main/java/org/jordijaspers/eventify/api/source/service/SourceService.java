@@ -98,4 +98,15 @@ public class SourceService {
         source.setApiKeyEnabled(!lock);
         return sourceRepository.save(source);
     }
+
+    /**
+     * Checks if a source contains a check.
+     *
+     * @param sourceId The id of the source.
+     * @param checkId  The id of the check.
+     * @return True if the source contains the check, false otherwise.
+     */
+    public boolean containsCheck(final Long sourceId, final Long checkId) {
+        return sourceRepository.existsBySourceAndCheck(sourceId, checkId);
+    }
 }

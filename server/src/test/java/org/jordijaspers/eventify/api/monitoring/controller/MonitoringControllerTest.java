@@ -20,7 +20,6 @@ import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.common.exception.ApiErrorCode;
 import org.jordijaspers.eventify.support.IntegrationTest;
 import org.jordijaspers.eventify.support.util.SseTestUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MvcResult;
@@ -149,7 +148,6 @@ public class MonitoringControllerTest extends IntegrationTest {
     }
 
     @Test
-    @Disabled("NOT SUPPORTED YET")
     @DisplayName("Should receive updates for subscribed dashboard")
     public void shouldReceiveUpdatesForSubscribedDashboard() throws Exception {
         // Given: A dashboard exists with team member

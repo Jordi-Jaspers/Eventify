@@ -1,23 +1,24 @@
-package org.jordijaspers.eventify.api.team.validator;
+package org.jordijaspers.eventify.api.source.validator;
 
 import java.util.List;
 
 import org.hawaiiframework.validation.ValidationError;
 import org.hawaiiframework.validation.ValidationResult;
-import org.jordijaspers.eventify.api.team.model.request.TeamRequest;
-import org.jordijaspers.eventify.api.team.model.validator.TeamValidator;
+import org.jordijaspers.eventify.api.source.model.request.SourceRequest;
+import org.jordijaspers.eventify.api.source.model.validator.SourceValidator;
 import org.jordijaspers.eventify.support.UnitTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jordijaspers.eventify.api.team.model.validator.TeamValidator.*;
+import static org.jordijaspers.eventify.api.source.model.validator.SourceValidator.*;
 
-@DisplayName("Team Validator Unit Tests")
-public class TeamValidatorTest extends UnitTest {
+@DisplayName("Source Validator Unit Tests")
+public final class SourceValidatorTest extends UnitTest {
 
-    private final TeamValidator validator = new TeamValidator();
+    private final SourceValidator validator = new SourceValidator();
+
     private final ValidationResult validationResult = new ValidationResult();
 
     @Nested
@@ -26,7 +27,7 @@ public class TeamValidatorTest extends UnitTest {
 
         @Test
         public void shouldRejectWhenNameIsNull() {
-            final TeamRequest request = aTeamRequestWithName(null);
+            final SourceRequest request = aSourceRequestWithName(null);
             validator.validate(request, validationResult);
 
             final List<ValidationError> errors = validationResult.getErrors();
@@ -40,7 +41,7 @@ public class TeamValidatorTest extends UnitTest {
 
         @Test
         public void shouldRejectWhenNameIsEmpty() {
-            final TeamRequest request = aTeamRequestWithName("");
+            final SourceRequest request = aSourceRequestWithName("");
             validator.validate(request, validationResult);
 
             final List<ValidationError> errors = validationResult.getErrors();
@@ -54,7 +55,7 @@ public class TeamValidatorTest extends UnitTest {
 
         @Test
         public void shouldRejectWhenNameIsBlank() {
-            final TeamRequest request = aTeamRequestWithName("   ");
+            final SourceRequest request = aSourceRequestWithName("   ");
             validator.validate(request, validationResult);
 
             final List<ValidationError> errors = validationResult.getErrors();
@@ -68,7 +69,7 @@ public class TeamValidatorTest extends UnitTest {
 
         @Test
         public void shouldRejectWhenNameExceedsMaxLength() {
-            final TeamRequest request = aTeamRequestWithName("a".repeat(MAX_NAME_LENGTH + 1));
+            final SourceRequest request = aSourceRequestWithName("a".repeat(MAX_NAME_LENGTH + 1));
             validator.validate(request, validationResult);
 
             final List<ValidationError> errors = validationResult.getErrors();
@@ -88,7 +89,7 @@ public class TeamValidatorTest extends UnitTest {
 
         @Test
         public void shouldRejectWhenDescriptionIsNull() {
-            final TeamRequest request = aTeamRequestWithDescription(null);
+            final SourceRequest request = aSourceRequestWithDescription(null);
             validator.validate(request, validationResult);
 
             final List<ValidationError> errors = validationResult.getErrors();
@@ -102,7 +103,7 @@ public class TeamValidatorTest extends UnitTest {
 
         @Test
         public void shouldRejectWhenDescriptionIsEmpty() {
-            final TeamRequest request = aTeamRequestWithDescription("");
+            final SourceRequest request = aSourceRequestWithDescription("");
             validator.validate(request, validationResult);
 
             final List<ValidationError> errors = validationResult.getErrors();
@@ -116,7 +117,7 @@ public class TeamValidatorTest extends UnitTest {
 
         @Test
         public void shouldRejectWhenDescriptionIsBlank() {
-            final TeamRequest request = aTeamRequestWithDescription("   ");
+            final SourceRequest request = aSourceRequestWithDescription("   ");
             validator.validate(request, validationResult);
 
             final List<ValidationError> errors = validationResult.getErrors();
@@ -130,7 +131,7 @@ public class TeamValidatorTest extends UnitTest {
 
         @Test
         public void shouldRejectWhenDescriptionExceedsMaxLength() {
-            final TeamRequest request = aTeamRequestWithDescription("a".repeat(MAX_DESCRIPTION_LENGTH + 1));
+            final SourceRequest request = aSourceRequestWithDescription("a".repeat(MAX_DESCRIPTION_LENGTH + 1));
             validator.validate(request, validationResult);
 
             final List<ValidationError> errors = validationResult.getErrors();
@@ -145,27 +146,27 @@ public class TeamValidatorTest extends UnitTest {
 
     @Test
     public void shouldValidateSuccessfullyWhenAllFieldsAreValid() {
-        final TeamRequest request = aValidTeamRequest();
+        final SourceRequest request = aValidSourceRequest();
         validator.validate(request, validationResult);
 
         assertThat(validationResult.hasErrors()).isFalse();
     }
 
-    private static TeamRequest aValidTeamRequest() {
-        return new TeamRequest()
-            .setName("Valid Team Name")
-            .setDescription("Valid Team Description");
+    private static SourceRequest aValidSourceRequest() {
+        return new SourceRequest()
+            .setName("Valid Source Name")
+            .setDescription("Valid Source Description");
     }
 
-    private static TeamRequest aTeamRequestWithName(final String name) {
-        return new TeamRequest()
+    private static SourceRequest aSourceRequestWithName(final String name) {
+        return new SourceRequest()
             .setName(name)
-            .setDescription("Valid Team Description");
+            .setDescription("Valid Source Description");
     }
 
-    private static TeamRequest aTeamRequestWithDescription(final String description) {
-        return new TeamRequest()
-            .setName("Valid Team Name")
+    private static SourceRequest aSourceRequestWithDescription(final String description) {
+        return new SourceRequest()
+            .setName("Valid Source Name")
             .setDescription(description);
     }
 }

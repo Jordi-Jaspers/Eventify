@@ -15,12 +15,11 @@ import org.jordijaspers.eventify.api.authentication.service.AuthenticationServic
 import org.jordijaspers.eventify.api.authentication.service.CookieService;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;
-import org.jordijaspers.eventify.common.security.principal.UserTokenPrincipal;
+import org.jordijaspers.eventify.common.security.principal.JwtUserPrincipalAuthenticationToken;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.Paths.*;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -76,11 +75,10 @@ public class AuthenticationController {
     @ResponseStatus(NO_CONTENT)
     @Operation(summary = "Revoke the refresh token and log out the user.")
     @GetMapping(path = LOGOUT_PATH)
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal final UserTokenPrincipal principal, final HttpServletResponse response) {
-        if (nonNull(principal)) {
-            authenticationService.logout(principal.getUser());
-            cookieService.clearAuthCookies(response);
-        }
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal final JwtUserPrincipalAuthenticationToken principal,
+        final HttpServletResponse response) {
+        authenticationService.logout();
+        cookieService.clearAuthCookies(response);
         return ResponseEntity.status(NO_CONTENT).build();
     }
 

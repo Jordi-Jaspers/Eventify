@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import static org.jordijaspers.eventify.api.Paths.*;
 import static org.springframework.http.HttpStatus.*;
 
-// TODO: Write Integration tests + unit test for the validator.
 @RestController
 @RequiredArgsConstructor
 public class SourceController {
@@ -41,7 +40,7 @@ public class SourceController {
 
     @ResponseStatus(CREATED)
     @Operation(summary = "Create a new source with its own API key.")
-    @GetMapping(path = SOURCES_PATH)
+    @PostMapping(path = SOURCES_PATH)
     @PreAuthorize("hasAuthority('WRITE_SOURCE')")
     public ResponseEntity<SourceResponse> createSource(@RequestBody final SourceRequest request) {
         sourceValidator.validateAndThrow(request);

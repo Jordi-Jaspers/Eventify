@@ -1,6 +1,7 @@
 import { SERVER_ROUTES } from '$lib/config/paths';
 import { ApiService } from '$lib/utils/api.service';
 import { type Actions, fail } from '@sveltejs/kit';
+import { CookieService } from '$lib/utils/cookie.service.ts';
 
 export async function load({ cookies, request }) {
 	const getDashboards = async () => {
@@ -8,7 +9,7 @@ export async function load({ cookies, request }) {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				Cookie: request.headers.get('cookie') || ''
+				Cookie: CookieService.getCookies(cookies)
 			}
 		});
 
@@ -21,7 +22,7 @@ export async function load({ cookies, request }) {
 }
 
 export const actions: Actions = {
-	createDashboard: async ({ request }) => {
+	createDashboard: async ({ request, cookies }) => {
 		const data: FormData = await request.formData();
 		const input: DashboardCreationRequest = {
 			name: data.get('name') as string,
@@ -34,7 +35,7 @@ export const actions: Actions = {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Cookie: request.headers.get('cookie') || ''
+				Cookie: CookieService.getCookies(cookies)
 			},
 			body: JSON.stringify(input)
 		});
@@ -49,7 +50,7 @@ export const actions: Actions = {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
-				Cookie: request.headers.get('cookie') || ''
+				Cookie: CookieService.getCookies(cookies)
 			}
 		});
 
@@ -69,7 +70,7 @@ export const actions: Actions = {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				Cookie: request.headers.get('cookie') || ''
+				Cookie: CookieService.getCookies(cookies)
 			},
 			body: JSON.stringify(input)
 		});

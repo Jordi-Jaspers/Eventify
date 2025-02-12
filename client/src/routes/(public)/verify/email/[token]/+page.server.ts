@@ -1,5 +1,6 @@
 import { SERVER_ROUTES } from '$lib/config/paths';
 import { ApiService } from '$lib/utils/api.service';
+import { CookieService } from '$lib/utils/cookie.service.ts';
 
 export async function load({ params, locals, cookies }) {
 	const verifyEmail: () => Promise<ApiResponse> = async (): Promise<ApiResponse> => {
@@ -8,7 +9,10 @@ export async function load({ params, locals, cookies }) {
 			url,
 			{
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' }
+				headers: {
+					'Content-Type': 'application/json',
+					Cookie: CookieService.getCookies(cookies)
+				}
 			},
 			{
 				retries: 1,
