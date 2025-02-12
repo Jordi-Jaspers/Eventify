@@ -1,0 +1,342 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta charset="UTF-8"/>
+      <title>SpotBugs Report</title>
+      <style type="text/css">
+		.tablerow0 {
+			background: #EEEEEE;
+		}
+
+		.tablerow1 {
+			background: white;
+		}
+
+		.detailrow0 {
+			background: #EEEEEE;
+		}
+
+		.detailrow1 {
+			background: white;
+		}
+
+		.tableheader {
+			background: #b9b9fe;
+			font-size: larger;
+		}
+
+		.tablerow0:hover, .tablerow1:hover {
+			background: #aaffaa;
+		}
+
+		.priority-1 {
+				color: red;
+				font-weight: bold;
+		}
+		.priority-2 {
+				color: orange;
+				font-weight: bold;
+		}
+		.priority-3 {
+				color: green;
+				font-weight: bold;
+		}
+		.priority-4 {
+				color: blue;
+				font-weight: bold;
+		}
+		</style>
+      <script type="text/javascript">
+			function toggleRow(elid) {
+				if (document.getElementById) {
+					element = document.getElementById(elid);
+					if (element) {
+						if (element.style.display == 'none') {
+							element.style.display = 'block';
+							//window.status = 'Toggle on!';
+						} else {
+							element.style.display = 'none';
+							//window.status = 'Toggle off!';
+						}
+					}
+				}
+			}
+		</script>
+   </head>
+   <body>
+      <h1>
+         <a href="https://spotbugs.github.io/">SpotBugs</a> Report</h1>
+      <h2>Project Information</h2>
+      <p>Project: 
+		eventify-server (spotbugsMain)</p>
+      <p>SpotBugs version: 4.9.0</p>
+      <p>Code analyzed:</p>
+      <ul>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/converter/JwtAuthenticationConverter.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/filter/JwtAuthenticationFilter.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/filter/UnauthorizedHandler.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/filter/CheckSecurityService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/filter/DashboardSecurityService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/filter/ApiKeyAuthenticationFilter.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/principal/SourceTokenPrincipal.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/principal/JwtUserPrincipalAuthenticationToken.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/principal/UserTokenPrincipal.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/rsa/RSAKeyGenerator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/rsa/config/RSAKeyProperties.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/rsa/model/RSAKey.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/security/rsa/repository/RSAKeyRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/mapper/config/SharedMapperConfig.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/mapper/DateTimeMapperImpl.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/mapper/DateTimeMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/DataProvisioningConfiguration.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/OpenAPIConfig.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/WebSecurityConfig.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/properties/ApplicationProperties.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/properties/SecurityProperties.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/properties/TokenProperties.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/RabbitMQConfig.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/AsyncConfig.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/RequestMatcherConfig.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/config/AuthenticationConfig.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/constants/Constants$Email.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/constants/Constants$ServerEvents.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/constants/Constants$Percentages.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/constants/Constants.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/constants/Constants$DateTime.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/constants/Constants$Security.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/constants/Constants$Encoder.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/constants/Constants$Time.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/util/DateTimeUtil.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/util/SecurityUtil.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/util/logging/LogExecutionTime.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/util/logging/TimerAspect.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/util/ResourceLoaderUtil.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/TeamAlreadyExistsException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/PasswordIncorrectException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/DashboardStreamingException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/UserAlreadyExistsException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/InvalidAccessException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/AuthorizationException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/UserNotPartOfTeamException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/InternalServerException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/EventProcessingException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/InvalidJwtException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/CouldNotLoadResourceException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/EventPublishingException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/handler/enricher/HttpErrorWithMessageResponseEnricher.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/handler/enricher/ApiErrorWithMessageResponseEnricher.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/handler/ResponseEntityExceptionHandler.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/GeneralDatabaseException.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/exception/ApiErrorCode.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/datasource/PrettyQueryEntryCreator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/common/datasource/DatasourceProxyConfiguration.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/controller/PasswordController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/controller/UserController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/controller/UserManagementController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/request/UpdateEmailRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/request/UpdateAuthorityRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/request/ForgotPasswordRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/request/UpdateUserDetailsRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/request/UpdatePasswordRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/request/PasswordRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/mapper/UserMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/mapper/UserMapperImpl.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/User.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/validator/EmailValidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/model/validator/ChangePasswordValidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/repository/UserRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/service/PasswordService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/user/service/UserService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/controller/AuthenticationController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/request/RefreshTokenRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/request/RegisterUserRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/request/LoginRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/Role.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/Permission.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/Authority.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/validator/AuthenticationValidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/validator/CustomPasswordValidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/response/UserDetailsResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/response/UserResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/model/response/RegisterResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/repository/RoleRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/service/CookieService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/authentication/service/AuthenticationService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/controller/EventController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/model/request/EventRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/model/mapper/EventMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/model/mapper/EventMapperImpl.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/model/Event.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/model/EventId.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/model/Status.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/model/EventBatch.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/model/validator/EventValidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/repository/EventRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/service/EventConsumer.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/service/EventPublisher.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/event/service/EventService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/controller/DashboardController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/controller/DashboardConfigurationController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/request/CreateDashboardRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/request/DashboardConfigurationRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/request/UpdateDashboardDetailsRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/request/DashboardGroupRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/mapper/DashboardConfigurationMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/mapper/DashboardMapperImpl.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/mapper/DashboardMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/DashboardGroup.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/DashboardCheckId.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/Dashboard.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/DashboardCheck.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/validator/DashboardValidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/response/DashboardGroupResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/response/DashboardConfigurationResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/model/response/DashboardResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/repository/DashboardCheckRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/repository/DashboardRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/repository/DashboardGroupRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/dashboard/service/DashboardService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/controller/TeamController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/request/TeamMemberRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/request/TeamRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/Team.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/mapper/TeamMemberMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/mapper/TeamMemberMapperImpl.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/mapper/TeamMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/mapper/TeamMapperImpl.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/validator/TeamValidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/response/TeamResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/model/response/TeamMemberResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/repository/TeamRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/team/service/TeamService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/token/model/TokenType.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/token/model/Token.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/token/model/Token$TokenBuilder.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/token/model/response/AuthenticationTokenResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/token/model/JWTClaimNames.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/token/repository/TokenRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/token/service/TokenService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/token/service/JwtService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/controller/MonitoringController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/DashboardSubscription.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/TimelineDuration.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/mapper/TimelineDurationMapperImpl.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/mapper/TimelineDurationMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/SubscriptionData.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/TimelineDurationId.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/SubscriptionKey.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/validator/WindowValidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/response/CheckTimelineResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/response/TimelineResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/response/TimelineDurationResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/model/response/GroupTimelineResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/repository/TimelineDurationRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/service/TimelineEventHandler.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/service/TimelineInitializer.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/service/TimelineStreamingService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/service/TimelineService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/monitoring/service/TimelineConsolidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/check/controller/CheckController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/check/model/mapper/CheckMapperImpl.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/check/model/mapper/CheckMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/check/model/Check.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/check/model/response/CheckResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/check/repository/CheckRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/check/service/CheckService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/options/controller/OptionsController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/controller/SourceController.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/request/ApiKeyRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/request/SourceRequest.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/mapper/SourceMapperImpl.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/mapper/SourceMapper.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/Source.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/ApiKey.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/validator/SourceValidator.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/response/DetailedSourceResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/response/ApiKeyResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/model/response/SourceResponse.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/repository/ApiKeyRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/repository/SourceRepository.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/source/service/SourceService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/api/Paths.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/email/config/EmailConfiguration.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/email/config/properties/EmailProperties.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/email/model/MailMessage.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/email/service/sender/DevelopmentEmailService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/email/service/sender/EmailService.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/email/service/message/MailMessageFactory.class</li>
+         <li>/home/runner/work/Eventify/Eventify/server/build/classes/java/main/org/jordijaspers/eventify/Application.class</li>
+      </ul>
+      <p>
+         <br/>
+         <br/>
+      </p>
+      <h2>Metrics</h2>
+      <p>4796 lines of code analyzed,
+	in 194 classes, 
+	in 88 packages.</p>
+      <table width="500" cellpadding="5" cellspacing="2">
+         <tr class="tableheader">
+            <th align="left">Metric</th>
+            <th align="right">Total</th>
+            <th align="right">Density*</th>
+         </tr>
+         <tr class="tablerow0">
+            <td>High Priority Warnings</td>
+            <td align="right"/>
+            <td align="right">0.00</td>
+         </tr>
+         <tr class="tablerow1">
+            <td>Medium Priority Warnings</td>
+            <td align="right"/>
+            <td align="right">0.00</td>
+         </tr>
+         <tr class="$totalClass">
+            <td>
+               <b>Total Warnings</b>
+            </td>
+            <td align="right">
+               <b>0</b>
+            </td>
+            <td align="right">
+               <b>0.00</b>
+            </td>
+         </tr>
+      </table>
+      <p>
+         <i>(* Defects per Thousand lines of non-commenting source statements)</i>
+      </p>
+      <p>
+         <br/>
+         <br/>
+      </p>
+      <h2>Contents</h2>
+      <ul>
+         <li>
+            <a href="#Details">Details</a>
+         </li>
+      </ul>
+      <h1>Summary</h1>
+      <table width="500" cellpadding="5" cellspacing="2">
+         <tr class="tableheader">
+            <th align="left">Warning Type</th>
+            <th align="right">Number</th>
+         </tr>
+         <tr class="tablerow0">
+            <td>
+               <b>Total</b>
+            </td>
+            <td align="right">
+               <b>0</b>
+            </td>
+         </tr>
+      </table>
+      <h1>Warnings</h1>
+      <p>Click on a warning row to see full context information.</p>
+      <h1>
+         <a name="Details">Details</a>
+      </h1>
+   </body>
+</html>
