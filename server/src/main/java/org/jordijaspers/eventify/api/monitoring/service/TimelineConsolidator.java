@@ -1,26 +1,23 @@
 package org.jordijaspers.eventify.api.monitoring.service;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Consumer;
 
 import org.jordijaspers.eventify.api.event.model.Status;
 import org.jordijaspers.eventify.api.event.model.request.EventRequest;
+import org.jordijaspers.eventify.api.monitoring.model.TimePoint;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineDurationResponse;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineResponse;
 
-import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * The TimelineConsolidator class consolidates multiple timelines into a single timeline representing the worst status at any given moment.
  */
+//TODO: simplify this class
 public final class TimelineConsolidator {
 
     /* Private constructor to prevent instantiation */
@@ -29,151 +26,165 @@ public final class TimelineConsolidator {
     }
 
     /**
-     * Consolidates multiple timelines into a single timeline representing the worst status at any given moment.
+     * Calculates a timeline from a list of events.
      *
-     * @param timelines List of timelines to consolidate
-     * @param setter    Consumer to set the consolidated timeline
+     * @param events The list of events to calculate the timeline from.
+     * @return A TimelineResponse representing the calculated timeline.
+     */
+    public static TimelineResponse calculateTimeline(final List<EventRequest> events) {
+        if (events == null || events.isEmpty()) {
+            return new TimelineResponse();
+        }
+
+        final List<EventRequest> sortedEvents = new ArrayList<>(events);
+        sortedEvents.sort(Comparator.comparing(EventRequest::getTimestamp));
+
+        final List<TimelineDurationResponse> durations = new ArrayList<>();
+        for (int i = 0; i < sortedEvents.size(); i++) {
+            final EventRequest current = sortedEvents.get(i);
+            final ZonedDateTime start = current.getTimestamp();
+            final ZonedDateTime end = (i < sortedEvents.size() - 1) ? sortedEvents.get(i + 1).getTimestamp() : null;
+            final Status status = current.getStatus();
+            durations.add(new TimelineDurationResponse(start, end, status));
+        }
+
+        return mergeDurations(durations);
+    }
+
+    /**
+     * Consolidates multiple timelines into a single timeline and sets the result using the provided setter.
+     *
+     * @param timelines The list of timelines to consolidate.
+     * @param setter    The setter to set the consolidated timeline.
      */
     public static void consolidateTimelines(final List<TimelineResponse> timelines, final Consumer<TimelineResponse> setter) {
         setter.accept(TimelineConsolidator.consolidateTimelines(timelines));
     }
 
     /**
-     * Consolidates multiple timelines into a single timeline representing the worst status at any given moment.
+     * Consolidates multiple timelines into a single timeline.
      *
-     * @param timelines List of timelines to consolidate
-     * @return A new timeline containing the consolidated status durations
+     * @param timelines The list of timelines to consolidate.
+     * @return A TimelineResponse representing the consolidated timeline.
      */
+    @SuppressWarnings("ReturnCount")
     public static TimelineResponse consolidateTimelines(final List<TimelineResponse> timelines) {
-        final ZonedDateTime startTime = timelines.stream()
-            .map(TimelineResponse::getStartTime)
-            .filter(Objects::nonNull)
-            .min(ZonedDateTime::compareTo)
-            .orElse(null);
-
-        final ZonedDateTime endTime = timelines.stream()
-            .map(TimelineResponse::getEndTime)
-            .filter(Objects::nonNull)
-            .max(ZonedDateTime::compareTo)
-            .orElse(ZonedDateTime.now(UTC));
-
-        if (isNull(startTime)) {
+        if (isEmpty(timelines)) {
             return new TimelineResponse();
         }
 
-        final TreeSet<ZonedDateTime> timePoints = new TreeSet<>();
-        timePoints.add(startTime);
-        timePoints.add(endTime);
+        if (timelines.size() == 1) {
+            return timelines.getFirst();
+        }
 
-        timelines.forEach(timeline -> timeline.getDurations().forEach(duration -> {
-            timePoints.add(duration.getStartTime());
-            if (nonNull(duration.getEndTime())) {
-                timePoints.add(duration.getEndTime());
+        // Collect all durations from all timelines
+        final List<TimelineDurationResponse> allDurations = timelines.stream()
+            .flatMap(t -> t.getDurations().stream())
+            .toList();
+
+        // Create a list of time points (start and end times) with their associated status changes
+        final List<TimePoint> timePoints = new ArrayList<>();
+        for (final TimelineDurationResponse duration : allDurations) {
+            timePoints.add(new TimePoint(duration.getStartTime(), duration.getStatus(), true));
+            if (duration.getEndTime() != null) {
+                timePoints.add(new TimePoint(duration.getEndTime(), duration.getStatus(), false));
             }
-        }));
+        }
 
-        final TimelineResponse consolidatedTimeline = new TimelineResponse();
-        ZonedDateTime previousTimePoint = null;
-        Status previousStatus = null;
-        TimelineDurationResponse currentDuration = null;
+        // Sort time points by time
+        timePoints.sort(Comparator.comparing(TimePoint::getTime));
 
-        for (final ZonedDateTime timePoint : timePoints) {
-            if (nonNull(previousTimePoint)) {
-                final Status worstStatus = calculateWorstStatusAtTime(timelines, previousTimePoint);
-
-                if (currentDuration == null || !worstStatus.equals(previousStatus)) {
-                    // Create new duration if this is the first one or if status changed
-                    currentDuration = new TimelineDurationResponse(previousTimePoint, timePoint, worstStatus);
-                    consolidatedTimeline.addDuration(currentDuration);
-                } else {
-                    // Extend current duration if status is the same
-                    currentDuration.setEndTime(timePoint);
-                }
-                previousStatus = worstStatus;
+        // Process time points to merge overlapping durations
+        ZonedDateTime currentIntervalStart = null;
+        final List<TimelineDurationResponse> mergedDurations = new ArrayList<>();
+        final Map<Status, Integer> statusCounts = new HashMap<>();
+        for (final TimePoint timePoint : timePoints) {
+            if (isNull(currentIntervalStart)) {
+                currentIntervalStart = timePoint.getTime();
+                updateStatusCounts(statusCounts, timePoint);
+                continue;
             }
-            previousTimePoint = timePoint;
+
+            final ZonedDateTime intervalStart = currentIntervalStart;
+            final ZonedDateTime intervalEnd = timePoint.getTime();
+            final Status worstStatus = getWorstStatus(statusCounts);
+            if (nonNull(worstStatus)) {
+                mergedDurations.add(new TimelineDurationResponse(intervalStart, intervalEnd, worstStatus));
+            }
+
+            currentIntervalStart = timePoint.getTime();
+            updateStatusCounts(statusCounts, timePoint);
         }
 
-        if (!consolidatedTimeline.getDurations().isEmpty()) {
-            consolidatedTimeline.getDurations().getLast().setEndTime(null);
+        // Handle the last interval if there are active statuses
+        final Status worstStatus = getWorstStatus(statusCounts);
+        if (worstStatus != null) {
+            mergedDurations.add(new TimelineDurationResponse(currentIntervalStart, null, worstStatus));
         }
 
-        return consolidatedTimeline;
+        return mergeDurations(mergedDurations);
     }
 
     /**
-     * Process a batch of events into a timeline where only status changes introduce a new durations.
+     * Updates the status counts map based on the time point.
+     *
+     * @param statusCounts The map of status counts.
+     * @param timePoint    The time point to process.
      */
-    public static TimelineResponse calculateTimeline(final List<EventRequest> events) {
-        if (isEmpty(events)) {
-            return null;
+    private static void updateStatusCounts(final Map<Status, Integer> statusCounts, final TimePoint timePoint) {
+        if (timePoint.isStart()) {
+            statusCounts.put(timePoint.getStatus(), statusCounts.getOrDefault(timePoint.getStatus(), 0) + 1);
+        } else {
+            final int count = statusCounts.getOrDefault(timePoint.getStatus(), 0) - 1;
+            if (count <= 0) {
+                statusCounts.remove(timePoint.getStatus());
+            } else {
+                statusCounts.put(timePoint.getStatus(), count);
+            }
+        }
+    }
+
+    /**
+     * Gets the worst status from the status counts map.
+     *
+     * @param statusCounts The map of status counts.
+     * @return The worst status.
+     */
+    private static Status getWorstStatus(final Map<Status, Integer> statusCounts) {
+        return statusCounts.keySet().stream()
+            .filter(Status::isConsiderForWorst)
+            .max(Comparator.comparingInt(Status::getSeverity))
+            .orElse(null);
+    }
+
+    /**
+     * Merges consecutive durations with the same status.
+     *
+     * @param durations The list of durations to merge.
+     * @return A TimelineResponse with merged durations.
+     */
+    private static TimelineResponse mergeDurations(final List<TimelineDurationResponse> durations) {
+        if (durations.isEmpty()) {
+            return new TimelineResponse();
         }
 
-        final List<TimelineDurationResponse> durations = events.stream()
-            .reduce(
-                new ArrayList<>(),
-                (accumulator, event) -> {
-                    final TimelineDurationResponse lastDuration = isNotEmpty(accumulator)
-                        ? accumulator.getLast()
-                        : null;
+        final List<TimelineDurationResponse> merged = new ArrayList<>();
+        TimelineDurationResponse current = durations.getFirst();
+        for (int i = 1; i < durations.size(); i++) {
+            final TimelineDurationResponse next = durations.get(i);
+            if (current.getStatus() == next.getStatus() && Objects.equals(current.getEndTime(), next.getStartTime())) {
+                current = new TimelineDurationResponse(
+                    current.getStartTime(),
+                    next.getEndTime(),
+                    current.getStatus()
+                );
+            } else {
+                merged.add(current);
+                current = next;
+            }
+        }
 
-                    if (shouldCreateNewDuration(lastDuration, event)) {
-                        accumulator.add(new TimelineDurationResponse(event.getTimestamp(), event.getStatus()));
-                    }
-
-                    return accumulator;
-                },
-                (a, b) -> {
-                    throw new IllegalStateException("Parallel processing not supported");
-                }
-            );
-
-        return new TimelineResponse(durations);
-    }
-
-    /**
-     * Calculates the worst status across all timelines at a specific point in time.
-     *
-     * @param timelines List of timelines to evaluate
-     * @param timePoint The point in time to evaluate
-     * @return The worst status at the given time point
-     */
-    private static Status calculateWorstStatusAtTime(final List<TimelineResponse> timelines, final ZonedDateTime timePoint) {
-        return timelines.stream()
-            .map(timeline -> findStatusAtTime(timeline, timePoint))
-            .reduce(Status.OK, Status::worst);
-    }
-
-    /**
-     * Finds the status of a single timeline at a specific point in time.
-     *
-     * @param timeline  The timeline to evaluate
-     * @param timePoint The point in time to evaluate
-     * @return The status at the given time point
-     */
-    private static Status findStatusAtTime(final TimelineResponse timeline, final ZonedDateTime timePoint) {
-        return timeline.getDurations().stream()
-            .filter(duration -> isTimeInDuration(duration, timePoint))
-            .findFirst()
-            .map(TimelineDurationResponse::getStatus)
-            .orElse(Status.UNKNOWN);
-    }
-
-    /**
-     * Checks if a given time point falls within a duration.
-     *
-     * @param duration  The duration to check
-     * @param timePoint The point in time to check
-     * @return true if the time point is within the duration
-     */
-    private static boolean isTimeInDuration(final TimelineDurationResponse duration, final ZonedDateTime timePoint) {
-        return !timePoint.isBefore(duration.getStartTime()) && (isNull(duration.getEndTime()) || !timePoint.isAfter(duration.getEndTime()));
-    }
-
-    /**
-     * Indicates if a new duration should be created based on the last duration and the current event.
-     */
-    private static boolean shouldCreateNewDuration(final TimelineDurationResponse lastDuration, final EventRequest event) {
-        return isNull(lastDuration) || !lastDuration.getStatus().equals(event.getStatus());
+        merged.add(current);
+        return new TimelineResponse(merged);
     }
 }

@@ -44,6 +44,6 @@ public enum Status {
         return Stream.of(a, b)
             .filter(status -> status.considerForWorst)
             .max(Comparator.comparingInt(status -> status.severity))
-            .orElseGet(() -> a.considerForWorst ? a : b);
+            .orElseGet(() -> b);
     }
 }
