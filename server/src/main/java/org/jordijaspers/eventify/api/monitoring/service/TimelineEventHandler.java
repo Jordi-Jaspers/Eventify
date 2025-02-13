@@ -25,28 +25,6 @@ import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolida
 public class TimelineEventHandler {
 
     /**
-     * Process the event and update timelines hierarchically. Updates only propagate if the check's timeline actually changes. For ungrouped
-     * checks, only the dashboard timeline is updated.
-     *
-     * @param event        The event to process
-     * @param subscription The subscription to update
-     */
-    public boolean processEvent(final EventRequest event, final DashboardSubscription subscription) {
-        final CheckTimelineResponse affectedCheck = subscription.findAffectedCheck(event.getCheckId());
-        if (updateTimeline(affectedCheck, event)) {
-            final Optional<GroupTimelineResponse> affectedGroup = subscription.findAffectedGroup(event.getCheckId());
-
-            if (affectedGroup.isPresent()) {
-                updateGroupedCheckHierarchy(affectedGroup.get(), subscription);
-            } else {
-                updateDashboardTimeline(subscription);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Process the timeline and update timelines hierarchically. Updates only propagate if the check's timeline actually changes. For
      * ungrouped checks, only the dashboard timeline is updated.
      *

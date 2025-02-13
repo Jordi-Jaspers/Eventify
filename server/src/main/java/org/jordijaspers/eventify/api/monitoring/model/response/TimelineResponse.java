@@ -2,20 +2,19 @@ package org.jordijaspers.eventify.api.monitoring.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jordijaspers.eventify.api.event.model.Status;
 
+import static java.time.ZoneOffset.UTC;
+
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class TimelineResponse {
 
-    private List<TimelineDurationResponse> durations = new ArrayList<>();
+    private List<TimelineDurationResponse> durations;
 
     /**
      * Creates a timeline with a single UNKNOWN duration for the given time window.
@@ -26,6 +25,13 @@ public class TimelineResponse {
      */
     public TimelineResponse(final ZonedDateTime windowStart, final ZonedDateTime windowEnd, final Status status) {
         this.durations = List.of(new TimelineDurationResponse(windowStart, windowEnd, status));
+    }
+
+    /**
+     * Creates a timeline with a single UNKNOWN duration for the current time.
+     */
+    public TimelineResponse() {
+        this.durations = List.of(new TimelineDurationResponse(ZonedDateTime.now(UTC), Status.UNKNOWN));
     }
 
     /**

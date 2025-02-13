@@ -2,7 +2,6 @@ package org.jordijaspers.eventify.api.monitoring.service;
 
 import java.util.List;
 
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineDurationResponse;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineResponse;
@@ -201,11 +200,15 @@ public class TimelineConsolidatorTest extends UnitTest {
             final TimelineResponse result = TimelineConsolidator.consolidateTimelines(timelines);
 
             // Then: The result should be an empty timeline
-            assertThat(result)
+            assertThat(result.getDurations())
                 .isNotNull()
-                .extracting(TimelineResponse::getDurations)
-                .asInstanceOf(InstanceOfAssertFactories.LIST)
-                .isEmpty();
+                .hasSize(1)
+                .first()
+                .satisfies(duration -> {
+                    assertThat(duration.getStartTime()).isNotNull();
+                    assertThat(duration.getEndTime()).isNull();
+                    assertThat(duration.getStatus()).isEqualTo(UNKNOWN);
+                });
         }
 
         @Test
@@ -218,11 +221,15 @@ public class TimelineConsolidatorTest extends UnitTest {
             final TimelineResponse result = TimelineConsolidator.consolidateTimelines(timelines);
 
             // Then: The result should be an empty timeline
-            assertThat(result)
+            assertThat(result.getDurations())
                 .isNotNull()
-                .extracting(TimelineResponse::getDurations)
-                .asInstanceOf(InstanceOfAssertFactories.LIST)
-                .isEmpty();
+                .hasSize(1)
+                .first()
+                .satisfies(duration -> {
+                    assertThat(duration.getStartTime()).isNotNull();
+                    assertThat(duration.getEndTime()).isNull();
+                    assertThat(duration.getStatus()).isEqualTo(UNKNOWN);
+                });
         }
 
         @Test
@@ -321,11 +328,15 @@ public class TimelineConsolidatorTest extends UnitTest {
             final TimelineResponse result = TimelineConsolidator.calculateTimeline(events);
 
             // Then: the result should be an empty timeline
-            assertThat(result)
+            assertThat(result.getDurations())
                 .isNotNull()
-                .extracting(TimelineResponse::getDurations)
-                .asInstanceOf(InstanceOfAssertFactories.LIST)
-                .isEmpty();
+                .hasSize(1)
+                .first()
+                .satisfies(duration -> {
+                    assertThat(duration.getStartTime()).isNotNull();
+                    assertThat(duration.getEndTime()).isNull();
+                    assertThat(duration.getStatus()).isEqualTo(UNKNOWN);
+                });
         }
 
         @Test
@@ -338,11 +349,15 @@ public class TimelineConsolidatorTest extends UnitTest {
             final TimelineResponse result = TimelineConsolidator.calculateTimeline(events);
 
             // Then: the result should be an empty timeline
-            assertThat(result)
+            assertThat(result.getDurations())
                 .isNotNull()
-                .extracting(TimelineResponse::getDurations)
-                .asInstanceOf(InstanceOfAssertFactories.LIST)
-                .isEmpty();
+                .hasSize(1)
+                .first()
+                .satisfies(duration -> {
+                    assertThat(duration.getStartTime()).isNotNull();
+                    assertThat(duration.getEndTime()).isNull();
+                    assertThat(duration.getStatus()).isEqualTo(UNKNOWN);
+                });
         }
     }
 }

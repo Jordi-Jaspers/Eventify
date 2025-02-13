@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.calculateTimeline;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -87,10 +86,6 @@ public class TimelineStreamingService {
         }
 
         final TimelineResponse timeline = calculateTimeline(events);
-        if (isNull(timeline)) {
-            return;
-        }
-
         relevantSubscriptions.forEach(data -> {
             final DashboardSubscription subscription = data.getSubscription();
             if (timelineEventHandler.processTimeline(timeline, checkId, subscription)) {
