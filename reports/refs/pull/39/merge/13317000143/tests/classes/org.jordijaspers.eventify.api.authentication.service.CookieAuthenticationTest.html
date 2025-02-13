@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - Cookie Authentication Integration Tests</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>Cookie Authentication Integration Tests</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/org.jordijaspers.eventify.api.authentication.service.html">org.jordijaspers.eventify.api.authentication.service</a> &gt; CookieAuthenticationTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">4</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.552s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Method name</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">Should access protected resource with valid cookies</td>
+<td class="success">shouldAccessProtectedResourceWithValidCookies()</td>
+<td class="success">0.145s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Should automatically refresh token when access token is expired</td>
+<td class="success">shouldAutoRefreshExpiredAccessToken()</td>
+<td class="success">0.157s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Should fail when both tokens are invalid</td>
+<td class="success">shouldFailWhenBothTokensAreInvalid()</td>
+<td class="success">0.029s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Should set auth cookies when login is successful</td>
+<td class="success">shouldSetAuthCookiesOnSuccessfulLogin()</td>
+<td class="success">0.221s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>21:06:26.504 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m]:
+                
+Initializing Spring TestDispatcherServlet ''
+
+21:06:26.504 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:532?[0;39m]:
+                
+Initializing Servlet ''
+
+21:06:26.505 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:554?[0;39m]:
+                
+Completed initialization in 1 ms
+
+21:06:26.517 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:46?[0;39m]:
+                
+Registering new user '8c9a1.eventify.user@integration.test'.
+
+21:06:26.517 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.user.service.UserService:183?[0;39m]:
+                
+Attempting to register new user '8c9a1.eventify.user@integration.test'
+
+21:06:26.602 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.user.service.UserService:195?[0;39m]:
+                
+User has been registered, sending email to validate account.
+
+21:06:26.604 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:89?[0;39m]:
+                
+Generated 'USER_VALIDATION_TOKEN' token for user '8c9a1.eventify.user@integration.test'
+
+21:06:26.606 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.email.service.sender.DevelopmentEmailService:41?[0;39m]:
+                
+Sending user validation email with token 'ac758805-bf6b-48dc-8b3e-664a42e7a380' to user '8c9a1.eventify.user@integration.test'.
+
+21:06:26.608 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.email.service.sender.DevelopmentEmailService:68?[0;39m]:
+                
+Sending email to user '8c9a1.eventify.user@integration.test' with content: 
+MailMessage(from=no-reply@localhost, subject=[Eventify.io] Validate your account, body=&lt;!doctype html&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; xmlns:v=&quot;urn:schemas-microsoft-com:vml&quot; xmlns:o=&quot;urn:schemas-microsoft-com:office:office&quot;&gt;
+
+&lt;head&gt;
+  &lt;title&gt; Your account has been created &lt;/title&gt;
+  &lt;!--[if !mso]&gt;&lt;!--&gt;
+  &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
+  &lt;!--&lt;![endif]--&gt;
+  &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    #outlook a {
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    table,
+    td {
+      border-collapse: collapse;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    img {
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+      -ms-interpolation-mode: bicubic;
+    }
+
+    p {
+      display: block;
+      margin: 13px 0;
+    }
+  &lt;/style&gt;
+  &lt;!--[if mso]&gt;
+  &lt;noscript&gt;
+    &lt;xml&gt;
+      &lt;o:OfficeDocumentSettings&gt;
+        &lt;o:AllowPNG/&gt;
+        &lt;o:PixelsPerInch&gt;96&lt;/o:PixelsPerInch&gt;
+      &lt;/o:OfficeDocumentSettings&gt;
+    &lt;/xml&gt;
+  &lt;/noscript&gt;
+  &lt;![endif]--&gt;
+  &lt;!--[if lte mso 11]&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    .mj-outlook-group-fix { width:100% !important; }
+  &lt;/style&gt;
+  &lt;![endif]--&gt;
+  &lt;!--[if !mso]&gt;&lt;!--&gt;
+  &lt;link href=&quot;https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    @import url(https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700);
+  &lt;/style&gt;
+  &lt;!--&lt;![endif]--&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    @media only screen and (min-width:480px) {
+      .mj-column-per-100 {
+        width: 100% !important;
+        max-width: 100%;
+      }
+
+      .mj-column-px-500 {
+        width: 500px !important;
+        max-width: 500px;
+      }
+
+      .mj-column-px-600 {
+        width: 600px !important;
+        max-width: 600px;
+      }
+    }
+  &lt;/style&gt;
+  &lt;style media=&quot;screen and (min-width:480px)&quot;&gt;
+    .moz-text-html .mj-column-per-100 {
+      width: 100% !important;
+      max-width: 100%;
+    }
+
+    .moz-text-html .mj-column-px-500 {
+      width: 500px !important;
+      max-width: 500px;
+    }
+
+    .moz-text-html .mj-column-px-600 {
+      width: 600px !important;
+      max-width: 600px;
+    }
+  &lt;/style&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+  &lt;/style&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;word-spacing:normal;&quot;&gt;
+&lt;div style=&quot;&quot;&gt;
+  &lt;!--[if mso | IE]&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:600px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-per-100 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;vertical-align:top;&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td align=&quot;left&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                  &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:20px;line-height:1;text-align:left;color:#E60000;&quot;&gt;Aniflix.stream&lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:600px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-per-100 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;vertical-align:top;&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td align=&quot;center&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                  &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:32px;line-height:1;text-align:center;color:#000000;&quot;&gt;Account Created&lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:500px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-px-500 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td style=&quot;background-color:#ffffff;border-radius:8px;vertical-align:top;padding:12px;&quot;&gt;
+                  &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;&quot; width=&quot;100%&quot;&gt;
+                    &lt;tbody&gt;
+                    &lt;tr&gt;
+                      &lt;td align=&quot;center&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                        &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:14px;font-weight:300;line-height:1;text-align:center;color:#000000;&quot;&gt;You have created an account on Aniflix. The only thing left before you can enjoy your anime to the fullest is to verify your account. Click the button to proceed.&lt;/div&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                      &lt;td align=&quot;center&quot; vertical-align=&quot;middle&quot; style=&quot;font-size:0px;padding:10px 25px;padding-top:16px;padding-bottom:16px;word-break:break-word;&quot;&gt;
+                        &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;border-collapse:separate;line-height:100%;&quot;&gt;
+                          &lt;tr&gt;
+                            &lt;td align=&quot;center&quot; bgcolor=&quot;#E60000&quot; role=&quot;presentation&quot; style=&quot;border:none;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#E60000;&quot; valign=&quot;middle&quot;&gt;
+                              &lt;p style=&quot;display:inline-block;background:#E60000;color:#ffffff;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;font-weight:normal;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;&quot;&gt;
+                                &lt;a href=&quot;http://localhost:5173/validate/ac758805-bf6b-48dc-8b3e-664a42e7a380&quot;&gt;Click Here&lt;/a&gt;
+                              &lt;/p&gt;
+                            &lt;/td&gt;
+                          &lt;/tr&gt;
+                        &lt;/table&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                      &lt;td align=&quot;left&quot; style=&quot;font-size:0px;padding:10px 25px;padding-top:32px;padding-bottom:16px;word-break:break-word;&quot;&gt;
+                        &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:1;text-align:left;color:#000000;&quot;&gt;The Aniflix Team&lt;/div&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;/tbody&gt;
+                  &lt;/table&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:600px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-px-600 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;vertical-align:top;&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td align=&quot;center&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                  &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:10px;line-height:1;text-align:center;color:#000000;&quot;&gt;Copyright © Aniflix 2024, All rights reserved.&lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+, html=true)
+
+21:06:26.610 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:74?[0;39m]:
+                
+Attempting to validate user with token 'ac758805-bf6b-48dc-8b3e-664a42e7a380'
+
+21:06:26.611 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:112?[0;39m]:
+                
+Searching validation token with value 'ac758805-bf6b-48dc-8b3e-664a42e7a380'
+
+21:06:26.613 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:97?[0;39m]:
+                
+Invalidating '[USER_VALIDATION_TOKEN]' token for user '8c9a1.eventify.user@integration.test'
+
+21:06:26.619 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:81?[0;39m]:
+                
+User '8c9a1.eventify.user@integration.test' successfully validated
+
+21:06:26.619 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:97?[0;39m]:
+                
+Invalidating '[ACCESS_TOKEN, REFRESH_TOKEN]' token for user '8c9a1.eventify.user@integration.test'
+
+21:06:26.626 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:54?[0;39m]:
+                
+Generated Access &amp; Refresh tokens for user '8c9a1.eventify.user@integration.test'
+
+21:06:26.628 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:167?[0;39m]:
+                
+JWT token found in cookie: EVENTIFY_ACCESS_TOKEN
+
+21:06:26.633 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:184?[0;39m]:
+                
+Authentication successful for user '8c9a1.eventify.user@integration.test'. Setting security context.
+
+21:06:26.635 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:67545569-3e95-4e69-84e0-e689db528627?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:140?[0;39m]:
+                
+Invoked 'GET /api/user/details' with content type 'application/json' and size of '-1' bytes.
+
+21:06:26.635 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:67545569-3e95-4e69-84e0-e689db528627?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:147?[0;39m]:
+                
+Request is:
+  GET /api/user/details HTTP/1.1
+  Content-Type: application/json;charset=UTF-8
+  Cookie: EVENTIFY_ACCESS_TOKEN=eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI4YzlhMS5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJ0ZWFtcyI6W10sImxhc3RfbG9naW4iOjE3Mzk0ODA3ODYsImNyZWF0ZWQiOjE3Mzk0ODA3ODYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3MyIsImxhc3RfbmFtZSI6IlVzZXIiLCJlbmFibGVkIjp0cnVlLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJ2YWxpZGF0ZWQiOnRydWUsInBlcm1pc3Npb25zIjpbIlJFQURfREFTSEJPQVJEUyIsIkFDQ0VTU19BUFBMSUNBVElPTiIsIlJFQURfVEVBTVMiXSwiYXV0aG9yaXR5IjoiVVNFUiIsImV4cCI6MTczOTQ4MTY4NiwiaWF0IjoxNzM5NDgwNzg2LCJmaXJzdF9uYW1lIjoiRXZlbnRpZnkiLCJqdGkiOiJkMmMzNWQ3OC1hNTk0LTRlODYtYjNiNS0wYjNlZTU1NmVkMDgifQ.vbTAgEy5Se6xcRmtrFHCY-ohBBz1Qc6a7pRpf1sFGSnZLwjoXk3FxW0twB4Ge9gs00ZnbC3fbPXF0o4QOKnhk-9fDgPJFfqPBMjU8AiPJpAS-ordIpmN_CIU_rELd2gOULjRNshB-A346vzlugUCz1D-epW-9503pD3FJ6Ge0jtR0UXgMcCOjwn_lxWsPiK8P3fKGaag8hsY8kHnB_bh-N1QZhEg093Zl7yK0_uNqBxn9kaCScL_MI_cHVrNuB3CDE_hBHuiF_Ly705Fcp49xc0AUlg9RpULEf-TfkzGM3lvu7auFK3MFM2DZnDiNJjN70N409HOToWt7gw6_wg8kA; EVENTIFY_REFRESH_TOKEN=eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJzdWIiOiI4YzlhMS5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NDAwODU1ODYsImlhdCI6MTczOTQ4MDc4NiwianRpIjoiMWMzNDBhMGEtOTQ3ZC00MDEyLWIzMGMtNmNiNWE1MGFmMGIyIn0.LUd8UI02Dm42APbnSEdvjsj8VAwGkrRMJ7meXYJP6nfkznSlvdiiB75rlxnnZOxJ6rBBZCyBCTz2EOsjPuaW99QvuVGA7spru0MCj8a7RD70acXPUVhtFLaNQtjTUewwldjYXGLObLdG5lXNA3u8nBFCp-7od4vkXDLCBwZLX3_4iQzOj8OwGJ-_8auZ6MJXPoVShMT0vLjebaz07Lr7GmeUs6KrcKe8dcufoeAo0qPHeTlA6KaBTlrtPaQBB86hGzx4Iv3xt2wPaTrZZOiZ2LwujbrPeXuxMbHMbyWHoqPS5WCH3e62UH7veeWM8UnaGCkxcmW_IAThr6L6BhJHRg
+  
+
+21:06:26.642 ?[34mINFO?[0;39m [?[32mTX:74f05118-62fc-409a-a51e-4b6a65670695?[0;39m/?[33mREQ:67545569-3e95-4e69-84e0-e689db528627?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:243?[0;39m]:
+                
+Response '/api/user/details' is '200 OK' with content type 'application/json;charset=UTF-8' and size of '309' bytes.
+
+21:06:26.642 ?[39mDEBUG?[0;39m [?[32mTX:74f05118-62fc-409a-a51e-4b6a65670695?[0;39m/?[33mREQ:67545569-3e95-4e69-84e0-e689db528627?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:250?[0;39m]:
+                
+Response is:
+  HTTP/1.1 200 OK
+  Content-Type: application/json;charset=UTF-8
+  Vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+  X-Hawaii-Request-Id: 67545569-3e95-4e69-84e0-e689db528627
+  X-Hawaii-Tx-Id: 74f05118-62fc-409a-a51e-4b6a65670695
+  
+  {&quot;id&quot;:11,&quot;email&quot;:&quot;8c9a1.eventify.user@integration.test&quot;,&quot;firstName&quot;:&quot;Eventify&quot;,&quot;lastName&quot;:&quot;User&quot;,&quot;lastLogin&quot;:&quot;2025-02-13T21:06:26.617972Z&quot;,&quot;created&quot;:&quot;2025-02-13T21:06:26.600546Z&quot;,&quot;authority&quot;:&quot;USER&quot;,&quot;permissions&quot;:[&quot;READ_DASHBOARDS&quot;,&quot;ACCESS_APPLICATION&quot;,&quot;READ_TEAMS&quot;],&quot;teams&quot;:[],&quot;enabled&quot;:true,&quot;validated&quot;:true}
+
+21:06:26.643 ?[34mINFO?[0;39m [?[32mTX:74f05118-62fc-409a-a51e-4b6a65670695?[0;39m/?[33mREQ:67545569-3e95-4e69-84e0-e689db528627?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.web.filter.RequestDurationFilter:95?[0;39m]:
+                
+Duration '8.15' ms.
+
+21:06:26.650 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m]:
+                
+Initializing Spring TestDispatcherServlet ''
+
+21:06:26.650 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:532?[0;39m]:
+                
+Initializing Servlet ''
+
+21:06:26.652 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:554?[0;39m]:
+                
+Completed initialization in 2 ms
+
+21:06:26.662 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:46?[0;39m]:
+                
+Registering new user 'bea28.eventify.user@integration.test'.
+
+21:06:26.662 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.user.service.UserService:183?[0;39m]:
+                
+Attempting to register new user 'bea28.eventify.user@integration.test'
+
+21:06:26.744 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.user.service.UserService:195?[0;39m]:
+                
+User has been registered, sending email to validate account.
+
+21:06:26.747 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:89?[0;39m]:
+                
+Generated 'USER_VALIDATION_TOKEN' token for user 'bea28.eventify.user@integration.test'
+
+21:06:26.749 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.email.service.sender.DevelopmentEmailService:41?[0;39m]:
+                
+Sending user validation email with token '6277148a-9688-4722-a167-32645a4e4c49' to user 'bea28.eventify.user@integration.test'.
+
+21:06:26.750 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.email.service.sender.DevelopmentEmailService:68?[0;39m]:
+                
+Sending email to user 'bea28.eventify.user@integration.test' with content: 
+MailMessage(from=no-reply@localhost, subject=[Eventify.io] Validate your account, body=&lt;!doctype html&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; xmlns:v=&quot;urn:schemas-microsoft-com:vml&quot; xmlns:o=&quot;urn:schemas-microsoft-com:office:office&quot;&gt;
+
+&lt;head&gt;
+  &lt;title&gt; Your account has been created &lt;/title&gt;
+  &lt;!--[if !mso]&gt;&lt;!--&gt;
+  &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
+  &lt;!--&lt;![endif]--&gt;
+  &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    #outlook a {
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    table,
+    td {
+      border-collapse: collapse;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    img {
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+      -ms-interpolation-mode: bicubic;
+    }
+
+    p {
+      display: block;
+      margin: 13px 0;
+    }
+  &lt;/style&gt;
+  &lt;!--[if mso]&gt;
+  &lt;noscript&gt;
+    &lt;xml&gt;
+      &lt;o:OfficeDocumentSettings&gt;
+        &lt;o:AllowPNG/&gt;
+        &lt;o:PixelsPerInch&gt;96&lt;/o:PixelsPerInch&gt;
+      &lt;/o:OfficeDocumentSettings&gt;
+    &lt;/xml&gt;
+  &lt;/noscript&gt;
+  &lt;![endif]--&gt;
+  &lt;!--[if lte mso 11]&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    .mj-outlook-group-fix { width:100% !important; }
+  &lt;/style&gt;
+  &lt;![endif]--&gt;
+  &lt;!--[if !mso]&gt;&lt;!--&gt;
+  &lt;link href=&quot;https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    @import url(https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700);
+  &lt;/style&gt;
+  &lt;!--&lt;![endif]--&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    @media only screen and (min-width:480px) {
+      .mj-column-per-100 {
+        width: 100% !important;
+        max-width: 100%;
+      }
+
+      .mj-column-px-500 {
+        width: 500px !important;
+        max-width: 500px;
+      }
+
+      .mj-column-px-600 {
+        width: 600px !important;
+        max-width: 600px;
+      }
+    }
+  &lt;/style&gt;
+  &lt;style media=&quot;screen and (min-width:480px)&quot;&gt;
+    .moz-text-html .mj-column-per-100 {
+      width: 100% !important;
+      max-width: 100%;
+    }
+
+    .moz-text-html .mj-column-px-500 {
+      width: 500px !important;
+      max-width: 500px;
+    }
+
+    .moz-text-html .mj-column-px-600 {
+      width: 600px !important;
+      max-width: 600px;
+    }
+  &lt;/style&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+  &lt;/style&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;word-spacing:normal;&quot;&gt;
+&lt;div style=&quot;&quot;&gt;
+  &lt;!--[if mso | IE]&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:600px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-per-100 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;vertical-align:top;&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td align=&quot;left&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                  &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:20px;line-height:1;text-align:left;color:#E60000;&quot;&gt;Aniflix.stream&lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:600px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-per-100 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;vertical-align:top;&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td align=&quot;center&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                  &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:32px;line-height:1;text-align:center;color:#000000;&quot;&gt;Account Created&lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:500px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-px-500 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td style=&quot;background-color:#ffffff;border-radius:8px;vertical-align:top;padding:12px;&quot;&gt;
+                  &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;&quot; width=&quot;100%&quot;&gt;
+                    &lt;tbody&gt;
+                    &lt;tr&gt;
+                      &lt;td align=&quot;center&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                        &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:14px;font-weight:300;line-height:1;text-align:center;color:#000000;&quot;&gt;You have created an account on Aniflix. The only thing left before you can enjoy your anime to the fullest is to verify your account. Click the button to proceed.&lt;/div&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                      &lt;td align=&quot;center&quot; vertical-align=&quot;middle&quot; style=&quot;font-size:0px;padding:10px 25px;padding-top:16px;padding-bottom:16px;word-break:break-word;&quot;&gt;
+                        &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;border-collapse:separate;line-height:100%;&quot;&gt;
+                          &lt;tr&gt;
+                            &lt;td align=&quot;center&quot; bgcolor=&quot;#E60000&quot; role=&quot;presentation&quot; style=&quot;border:none;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#E60000;&quot; valign=&quot;middle&quot;&gt;
+                              &lt;p style=&quot;display:inline-block;background:#E60000;color:#ffffff;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;font-weight:normal;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;&quot;&gt;
+                                &lt;a href=&quot;http://localhost:5173/validate/6277148a-9688-4722-a167-32645a4e4c49&quot;&gt;Click Here&lt;/a&gt;
+                              &lt;/p&gt;
+                            &lt;/td&gt;
+                          &lt;/tr&gt;
+                        &lt;/table&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                      &lt;td align=&quot;left&quot; style=&quot;font-size:0px;padding:10px 25px;padding-top:32px;padding-bottom:16px;word-break:break-word;&quot;&gt;
+                        &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:1;text-align:left;color:#000000;&quot;&gt;The Aniflix Team&lt;/div&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;/tbody&gt;
+                  &lt;/table&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:600px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-px-600 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;vertical-align:top;&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td align=&quot;center&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                  &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:10px;line-height:1;text-align:center;color:#000000;&quot;&gt;Copyright © Aniflix 2024, All rights reserved.&lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+, html=true)
+
+21:06:26.754 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:74?[0;39m]:
+                
+Attempting to validate user with token '6277148a-9688-4722-a167-32645a4e4c49'
+
+21:06:26.754 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:112?[0;39m]:
+                
+Searching validation token with value '6277148a-9688-4722-a167-32645a4e4c49'
+
+21:06:26.758 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:97?[0;39m]:
+                
+Invalidating '[USER_VALIDATION_TOKEN]' token for user 'bea28.eventify.user@integration.test'
+
+21:06:26.764 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:81?[0;39m]:
+                
+User 'bea28.eventify.user@integration.test' successfully validated
+
+21:06:26.764 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:97?[0;39m]:
+                
+Invalidating '[ACCESS_TOKEN, REFRESH_TOKEN]' token for user 'bea28.eventify.user@integration.test'
+
+21:06:26.772 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:54?[0;39m]:
+                
+Generated Access &amp; Refresh tokens for user 'bea28.eventify.user@integration.test'
+
+21:06:26.774 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:167?[0;39m]:
+                
+JWT token found in cookie: EVENTIFY_REFRESH_TOKEN
+
+21:06:26.775 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:122?[0;39m]:
+                
+Searching jwt token with value 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJzdWIiOiJiZWEyOC5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NDAwODU1ODYsImlhdCI6MTczOTQ4MDc4NiwianRpIjoiMmZmMDhiYmUtODMxZi00MmFiLTg2YWUtMzY4YTk2Zjc2Y2FlIn0.oCu9vbQHlugpqo3T1Adnpm0BdSL__mIMAgD9yQ5EReBGpZ4a91SeUi6g-Rl1OY5H2MK67YB0RZYQ7J6rRRN1VFKLS4jrVmgz3tfd6xdkeuGfAU4LU5G5CLWUvcSXlhcKKjPu2vEFx2Y6TtBKyHySFQPs5s1yXBIZDuPO7KhF03oUOBnpX9CMd6uypP8JIrSRh7z2WwMMV8ToRqnbM7ZDdADa6cQE6Aq3HkReM6X3GhylYxz9ZnpEqCIFqpW7bShRuB9IXF6FYSQEMqOL-FxMjaS8Ru5Dv37U98ZtJ9rL61HqX6TkZOXNunflUxgnaaby77ffC_wyCfI3_Tf14jijrA'
+
+21:06:26.777 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:71?[0;39m]:
+                
+Refreshing tokens for user 'bea28.eventify.user@integration.test'
+
+21:06:26.777 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:97?[0;39m]:
+                
+Invalidating '[ACCESS_TOKEN, REFRESH_TOKEN]' token for user 'bea28.eventify.user@integration.test'
+
+21:06:26.788 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:54?[0;39m]:
+                
+Generated Access &amp; Refresh tokens for user 'bea28.eventify.user@integration.test'
+
+21:06:26.789 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.CookieService:42?[0;39m]:
+                
+Setting access token cookie with value: eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiZWEyOC5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJ0ZWFtcyI6W10sImxhc3RfbG9naW4iOjE3Mzk0ODA3ODYsImNyZWF0ZWQiOjE3Mzk0ODA3ODYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3MyIsImxhc3RfbmFtZSI6IlVzZXIiLCJlbmFibGVkIjp0cnVlLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJ2YWxpZGF0ZWQiOnRydWUsInBlcm1pc3Npb25zIjpbIlJFQURfREFTSEJPQVJEUyIsIkFDQ0VTU19BUFBMSUNBVElPTiIsIlJFQURfVEVBTVMiXSwiYXV0aG9yaXR5IjoiVVNFUiIsImV4cCI6MTczOTQ4MTY4NiwiaWF0IjoxNzM5NDgwNzg2LCJmaXJzdF9uYW1lIjoiRXZlbnRpZnkiLCJqdGkiOiI5NmZlY2MwYS0yYmI3LTRjNzQtYWM5Yi0zZGYzMWUzNzI1ZmQifQ.kc1jDazZRkz3iXJCX1SDuBHuXikul_F2Mc2zyyFeYwHI-GZbSvdc00wdV7CrwNIbGrwaB-dR0vj74r4kpXSDjEfTWcSn3qJVPggPXXfj0rYQVzYDefn8dOwaFCoOI6wmrYfyfxdgn0mWCfxKeVKJ8rYjh7jD5R4x9-2RaRW5bS_-JFzC_Fi4JPZsSeRvydGYJkb3ZH5Q6z2RcylyaHM5dXmTppl64QTvOXmJNXQpfDMS_QMTpOdGkMZSkANBvihbDgz6dCSrEm4kGsZ0Rl1NKVKc_IKGYxseQbXCKYbAl63EmLuaPqYQCZdGAloOzUXJvj3PXRZhdXuHOHVXaM1obQ
+
+21:06:26.789 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.CookieService:53?[0;39m]:
+                
+Setting refresh token cookie with value: eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJzdWIiOiJiZWEyOC5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NDAwODU1ODYsImlhdCI6MTczOTQ4MDc4NiwianRpIjoiMGY5ZmNhYTItMTdmYi00Y2NiLTkzYjctY2QzZjc2MDE5NDYyIn0.TWLOfZ6wacUZpi_KfmsTm5zIrJ1HG9eP-eb7qmF90ekfFipFK54KSSAMZVawzbkawD5h1KcBkVMyMC1U9qoDWBoT6QqhKWDwQYDWS4ik_yqq3w7juSaGrRynkehP3PbpnIP5Vj6pMNqk1qcBCGY0czp2JO0kUq1ugMHRG8y7J9hWm4R2HPlGUITO8Pa0ACinLwut3WiBRYIdubaKHnEWJJYcV0KbyOsANJ6X0xsyVst0wSXyfylw6l2nRsycGjtmzul7LVQgwL4wm7o16ZGQ5kW1d87eIv022aaW9VrheUMArNp1zYh6-rQU9yGSEJuWG2h5-Fq_DrsMRcs3GlYb1Q
+
+21:06:26.789 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:184?[0;39m]:
+                
+Authentication successful for user 'bea28.eventify.user@integration.test'. Setting security context.
+
+21:06:26.790 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:974837d2-7fd6-4cf7-ada1-86e5f233609b?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:140?[0;39m]:
+                
+Invoked 'GET /api/options' with content type 'application/json' and size of '-1' bytes.
+
+21:06:26.791 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:974837d2-7fd6-4cf7-ada1-86e5f233609b?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:147?[0;39m]:
+                
+Request is:
+  GET /api/options HTTP/1.1
+  Content-Type: application/json;charset=UTF-8
+  Cookie: EVENTIFY_REFRESH_TOKEN=eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJzdWIiOiJiZWEyOC5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NDAwODU1ODYsImlhdCI6MTczOTQ4MDc4NiwianRpIjoiMmZmMDhiYmUtODMxZi00MmFiLTg2YWUtMzY4YTk2Zjc2Y2FlIn0.oCu9vbQHlugpqo3T1Adnpm0BdSL__mIMAgD9yQ5EReBGpZ4a91SeUi6g-Rl1OY5H2MK67YB0RZYQ7J6rRRN1VFKLS4jrVmgz3tfd6xdkeuGfAU4LU5G5CLWUvcSXlhcKKjPu2vEFx2Y6TtBKyHySFQPs5s1yXBIZDuPO7KhF03oUOBnpX9CMd6uypP8JIrSRh7z2WwMMV8ToRqnbM7ZDdADa6cQE6Aq3HkReM6X3GhylYxz9ZnpEqCIFqpW7bShRuB9IXF6FYSQEMqOL-FxMjaS8Ru5Dv37U98ZtJ9rL61HqX6TkZOXNunflUxgnaaby77ffC_wyCfI3_Tf14jijrA
+  
+
+21:06:26.795 ?[34mINFO?[0;39m [?[32mTX:0c88c1d2-d53d-4ffb-9f32-66f99b9a89ca?[0;39m/?[33mREQ:974837d2-7fd6-4cf7-ada1-86e5f233609b?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:243?[0;39m]:
+                
+Response '/api/options' is '200 OK' with content type 'application/json;charset=UTF-8' and size of '58' bytes.
+
+21:06:26.795 ?[39mDEBUG?[0;39m [?[32mTX:0c88c1d2-d53d-4ffb-9f32-66f99b9a89ca?[0;39m/?[33mREQ:974837d2-7fd6-4cf7-ada1-86e5f233609b?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:250?[0;39m]:
+                
+Response is:
+  HTTP/1.1 200 OK
+  Content-Type: application/json;charset=UTF-8
+  Set-Cookie: EVENTIFY_ACCESS_TOKEN=eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiZWEyOC5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJ0ZWFtcyI6W10sImxhc3RfbG9naW4iOjE3Mzk0ODA3ODYsImNyZWF0ZWQiOjE3Mzk0ODA3ODYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3MyIsImxhc3RfbmFtZSI6IlVzZXIiLCJlbmFibGVkIjp0cnVlLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJ2YWxpZGF0ZWQiOnRydWUsInBlcm1pc3Npb25zIjpbIlJFQURfREFTSEJPQVJEUyIsIkFDQ0VTU19BUFBMSUNBVElPTiIsIlJFQURfVEVBTVMiXSwiYXV0aG9yaXR5IjoiVVNFUiIsImV4cCI6MTczOTQ4MTY4NiwiaWF0IjoxNzM5NDgwNzg2LCJmaXJzdF9uYW1lIjoiRXZlbnRpZnkiLCJqdGkiOiI5NmZlY2MwYS0yYmI3LTRjNzQtYWM5Yi0zZGYzMWUzNzI1ZmQifQ.kc1jDazZRkz3iXJCX1SDuBHuXikul_F2Mc2zyyFeYwHI-GZbSvdc00wdV7CrwNIbGrwaB-dR0vj74r4kpXSDjEfTWcSn3qJVPggPXXfj0rYQVzYDefn8dOwaFCoOI6wmrYfyfxdgn0mWCfxKeVKJ8rYjh7jD5R4x9-2RaRW5bS_-JFzC_Fi4JPZsSeRvydGYJkb3ZH5Q6z2RcylyaHM5dXmTppl64QTvOXmJNXQpfDMS_QMTpOdGkMZSkANBvihbDgz6dCSrEm4kGsZ0Rl1NKVKc_IKGYxseQbXCKYbAl63EmLuaPqYQCZdGAloOzUXJvj3PXRZhdXuHOHVXaM1obQ; Path=/; Max-Age=899; Expires=Thu, 13 Feb 2025 21:21:25 GMT; Secure; HttpOnly, EVENTIFY_REFRESH_TOKEN=eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJzdWIiOiJiZWEyOC5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NDAwODU1ODYsImlhdCI6MTczOTQ4MDc4NiwianRpIjoiMGY5ZmNhYTItMTdmYi00Y2NiLTkzYjctY2QzZjc2MDE5NDYyIn0.TWLOfZ6wacUZpi_KfmsTm5zIrJ1HG9eP-eb7qmF90ekfFipFK54KSSAMZVawzbkawD5h1KcBkVMyMC1U9qoDWBoT6QqhKWDwQYDWS4ik_yqq3w7juSaGrRynkehP3PbpnIP5Vj6pMNqk1qcBCGY0czp2JO0kUq1ugMHRG8y7J9hWm4R2HPlGUITO8Pa0ACinLwut3WiBRYIdubaKHnEWJJYcV0KbyOsANJ6X0xsyVst0wSXyfylw6l2nRsycGjtmzul7LVQgwL4wm7o16ZGQ5kW1d87eIv022aaW9VrheUMArNp1zYh6-rQU9yGSEJuWG2h5-Fq_DrsMRcs3GlYb1Q; Path=/; Max-Age=604799; Expires=Thu, 20 Feb 2025 21:06:25 GMT; Secure; HttpOnly
+  Vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+  X-Hawaii-Request-Id: 974837d2-7fd6-4cf7-ada1-86e5f233609b
+  X-Hawaii-Tx-Id: 0c88c1d2-d53d-4ffb-9f32-66f99b9a89ca
+  
+  {&quot;authorities&quot;:[&quot;NONE&quot;,&quot;SOURCE&quot;,&quot;USER&quot;,&quot;MANAGER&quot;,&quot;ADMIN&quot;]}
+
+21:06:26.795 ?[34mINFO?[0;39m [?[32mTX:0c88c1d2-d53d-4ffb-9f32-66f99b9a89ca?[0;39m/?[33mREQ:974837d2-7fd6-4cf7-ada1-86e5f233609b?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.web.filter.RequestDurationFilter:95?[0;39m]:
+                
+Duration '5.14' ms.
+
+21:06:26.796 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:122?[0;39m]:
+                
+Searching jwt token with value 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJzdWIiOiJiZWEyOC5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NDAwODU1ODYsImlhdCI6MTczOTQ4MDc4NiwianRpIjoiMmZmMDhiYmUtODMxZi00MmFiLTg2YWUtMzY4YTk2Zjc2Y2FlIn0.oCu9vbQHlugpqo3T1Adnpm0BdSL__mIMAgD9yQ5EReBGpZ4a91SeUi6g-Rl1OY5H2MK67YB0RZYQ7J6rRRN1VFKLS4jrVmgz3tfd6xdkeuGfAU4LU5G5CLWUvcSXlhcKKjPu2vEFx2Y6TtBKyHySFQPs5s1yXBIZDuPO7KhF03oUOBnpX9CMd6uypP8JIrSRh7z2WwMMV8ToRqnbM7ZDdADa6cQE6Aq3HkReM6X3GhylYxz9ZnpEqCIFqpW7bShRuB9IXF6FYSQEMqOL-FxMjaS8Ru5Dv37U98ZtJ9rL61HqX6TkZOXNunflUxgnaaby77ffC_wyCfI3_Tf14jijrA'
+
+21:06:26.809 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m]:
+                
+Initializing Spring TestDispatcherServlet ''
+
+21:06:26.810 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:532?[0;39m]:
+                
+Initializing Servlet ''
+
+21:06:26.810 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:554?[0;39m]:
+                
+Completed initialization in 0 ms
+
+21:06:26.820 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:167?[0;39m]:
+                
+JWT token found in cookie: EVENTIFY_ACCESS_TOKEN
+
+21:06:26.820 ?[1;31mERROR?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.JwtService:140?[0;39m]:
+                
+An error occurred while attempting to decode the Jwt: Malformed token
+
+21:06:26.821 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:127?[0;39m]:
+                
+Access token authentication failed: null
+
+21:06:26.821 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:167?[0;39m]:
+                
+JWT token found in cookie: EVENTIFY_REFRESH_TOKEN
+
+21:06:26.821 ?[1;31mERROR?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.JwtService:140?[0;39m]:
+                
+An error occurred while attempting to decode the Jwt: Malformed token
+
+21:06:26.821 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:147?[0;39m]:
+                
+Token refresh failed: null
+
+21:06:26.821 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter:85?[0;39m]:
+                
+No valid authentication found. Clearing security context.
+
+21:06:26.825 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.common.security.filter.UnauthorizedHandler:33?[0;39m]:
+                
+Authentication failed: 'Full authentication is required to access this resource'.
+
+21:06:26.840 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]:173?[0;39m]:
+                
+Initializing Spring TestDispatcherServlet ''
+
+21:06:26.840 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:532?[0;39m]:
+                
+Initializing Servlet ''
+
+21:06:26.841 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.springframework.test.web.servlet.TestDispatcherServlet:554?[0;39m]:
+                
+Completed initialization in 1 ms
+
+21:06:26.848 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:46?[0;39m]:
+                
+Registering new user '2f4af.eventify.user@integration.test'.
+
+21:06:26.849 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.user.service.UserService:183?[0;39m]:
+                
+Attempting to register new user '2f4af.eventify.user@integration.test'
+
+21:06:26.928 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.user.service.UserService:195?[0;39m]:
+                
+User has been registered, sending email to validate account.
+
+21:06:26.931 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:89?[0;39m]:
+                
+Generated 'USER_VALIDATION_TOKEN' token for user '2f4af.eventify.user@integration.test'
+
+21:06:26.932 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.email.service.sender.DevelopmentEmailService:41?[0;39m]:
+                
+Sending user validation email with token 'f6321658-cb94-4a33-81f0-96eebbabe9f7' to user '2f4af.eventify.user@integration.test'.
+
+21:06:26.934 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.email.service.sender.DevelopmentEmailService:68?[0;39m]:
+                
+Sending email to user '2f4af.eventify.user@integration.test' with content: 
+MailMessage(from=no-reply@localhost, subject=[Eventify.io] Validate your account, body=&lt;!doctype html&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; xmlns:v=&quot;urn:schemas-microsoft-com:vml&quot; xmlns:o=&quot;urn:schemas-microsoft-com:office:office&quot;&gt;
+
+&lt;head&gt;
+  &lt;title&gt; Your account has been created &lt;/title&gt;
+  &lt;!--[if !mso]&gt;&lt;!--&gt;
+  &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
+  &lt;!--&lt;![endif]--&gt;
+  &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    #outlook a {
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    table,
+    td {
+      border-collapse: collapse;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    img {
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+      -ms-interpolation-mode: bicubic;
+    }
+
+    p {
+      display: block;
+      margin: 13px 0;
+    }
+  &lt;/style&gt;
+  &lt;!--[if mso]&gt;
+  &lt;noscript&gt;
+    &lt;xml&gt;
+      &lt;o:OfficeDocumentSettings&gt;
+        &lt;o:AllowPNG/&gt;
+        &lt;o:PixelsPerInch&gt;96&lt;/o:PixelsPerInch&gt;
+      &lt;/o:OfficeDocumentSettings&gt;
+    &lt;/xml&gt;
+  &lt;/noscript&gt;
+  &lt;![endif]--&gt;
+  &lt;!--[if lte mso 11]&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    .mj-outlook-group-fix { width:100% !important; }
+  &lt;/style&gt;
+  &lt;![endif]--&gt;
+  &lt;!--[if !mso]&gt;&lt;!--&gt;
+  &lt;link href=&quot;https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    @import url(https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700);
+  &lt;/style&gt;
+  &lt;!--&lt;![endif]--&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+    @media only screen and (min-width:480px) {
+      .mj-column-per-100 {
+        width: 100% !important;
+        max-width: 100%;
+      }
+
+      .mj-column-px-500 {
+        width: 500px !important;
+        max-width: 500px;
+      }
+
+      .mj-column-px-600 {
+        width: 600px !important;
+        max-width: 600px;
+      }
+    }
+  &lt;/style&gt;
+  &lt;style media=&quot;screen and (min-width:480px)&quot;&gt;
+    .moz-text-html .mj-column-per-100 {
+      width: 100% !important;
+      max-width: 100%;
+    }
+
+    .moz-text-html .mj-column-px-500 {
+      width: 500px !important;
+      max-width: 500px;
+    }
+
+    .moz-text-html .mj-column-px-600 {
+      width: 600px !important;
+      max-width: 600px;
+    }
+  &lt;/style&gt;
+  &lt;style type=&quot;text/css&quot;&gt;
+  &lt;/style&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;word-spacing:normal;&quot;&gt;
+&lt;div style=&quot;&quot;&gt;
+  &lt;!--[if mso | IE]&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:600px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-per-100 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;vertical-align:top;&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td align=&quot;left&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                  &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:20px;line-height:1;text-align:left;color:#E60000;&quot;&gt;Aniflix.stream&lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:600px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-per-100 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;vertical-align:top;&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td align=&quot;center&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                  &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:32px;line-height:1;text-align:center;color:#000000;&quot;&gt;Account Created&lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:500px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-px-500 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td style=&quot;background-color:#ffffff;border-radius:8px;vertical-align:top;padding:12px;&quot;&gt;
+                  &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;&quot; width=&quot;100%&quot;&gt;
+                    &lt;tbody&gt;
+                    &lt;tr&gt;
+                      &lt;td align=&quot;center&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                        &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:14px;font-weight:300;line-height:1;text-align:center;color:#000000;&quot;&gt;You have created an account on Aniflix. The only thing left before you can enjoy your anime to the fullest is to verify your account. Click the button to proceed.&lt;/div&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                      &lt;td align=&quot;center&quot; vertical-align=&quot;middle&quot; style=&quot;font-size:0px;padding:10px 25px;padding-top:16px;padding-bottom:16px;word-break:break-word;&quot;&gt;
+                        &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;border-collapse:separate;line-height:100%;&quot;&gt;
+                          &lt;tr&gt;
+                            &lt;td align=&quot;center&quot; bgcolor=&quot;#E60000&quot; role=&quot;presentation&quot; style=&quot;border:none;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#E60000;&quot; valign=&quot;middle&quot;&gt;
+                              &lt;p style=&quot;display:inline-block;background:#E60000;color:#ffffff;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;font-weight:normal;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;&quot;&gt;
+                                &lt;a href=&quot;http://localhost:5173/validate/f6321658-cb94-4a33-81f0-96eebbabe9f7&quot;&gt;Click Here&lt;/a&gt;
+                              &lt;/p&gt;
+                            &lt;/td&gt;
+                          &lt;/tr&gt;
+                        &lt;/table&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                      &lt;td align=&quot;left&quot; style=&quot;font-size:0px;padding:10px 25px;padding-top:32px;padding-bottom:16px;word-break:break-word;&quot;&gt;
+                        &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:1;text-align:left;color:#000000;&quot;&gt;The Aniflix Team&lt;/div&gt;
+                      &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;/tbody&gt;
+                  &lt;/table&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;&quot; style=&quot;width:600px;&quot; width=&quot;600&quot; bgcolor=&quot;#f5f5f5&quot; &gt;&lt;tr&gt;&lt;td style=&quot;line-height:0px;font-size:0px;mso-line-height-rule:exactly;&quot;&gt;&lt;![endif]--&gt;
+  &lt;div style=&quot;background:#f5f5f5;background-color:#f5f5f5;margin:0px auto;max-width:600px;&quot;&gt;
+    &lt;table align=&quot;center&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;background:#f5f5f5;background-color:#f5f5f5;width:100%;&quot;&gt;
+      &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td style=&quot;direction:ltr;font-size:0px;padding:20px 0;text-align:center;&quot;&gt;
+          &lt;!--[if mso | IE]&gt;&lt;table role=&quot;presentation&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td class=&quot;&quot; style=&quot;vertical-align:top;width:600px;&quot; &gt;&lt;![endif]--&gt;
+          &lt;div class=&quot;mj-column-px-600 mj-outlook-group-fix&quot; style=&quot;font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;&quot;&gt;
+            &lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;vertical-align:top;&quot; width=&quot;100%&quot;&gt;
+              &lt;tbody&gt;
+              &lt;tr&gt;
+                &lt;td align=&quot;center&quot; style=&quot;font-size:0px;padding:10px 25px;word-break:break-word;&quot;&gt;
+                  &lt;div style=&quot;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:10px;line-height:1;text-align:center;color:#000000;&quot;&gt;Copyright © Aniflix 2024, All rights reserved.&lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;!--[if mso | IE]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+, html=true)
+
+21:06:26.938 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:74?[0;39m]:
+                
+Attempting to validate user with token 'f6321658-cb94-4a33-81f0-96eebbabe9f7'
+
+21:06:26.939 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:112?[0;39m]:
+                
+Searching validation token with value 'f6321658-cb94-4a33-81f0-96eebbabe9f7'
+
+21:06:26.942 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:97?[0;39m]:
+                
+Invalidating '[USER_VALIDATION_TOKEN]' token for user '2f4af.eventify.user@integration.test'
+
+21:06:26.947 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:81?[0;39m]:
+                
+User '2f4af.eventify.user@integration.test' successfully validated
+
+21:06:26.948 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:97?[0;39m]:
+                
+Invalidating '[ACCESS_TOKEN, REFRESH_TOKEN]' token for user '2f4af.eventify.user@integration.test'
+
+21:06:26.956 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:54?[0;39m]:
+                
+Generated Access &amp; Refresh tokens for user '2f4af.eventify.user@integration.test'
+
+21:06:26.958 ?[34mINFO?[0;39m [?[32mTX:?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:140?[0;39m]:
+                
+Invoked 'POST /api/auth/login' with content type 'application/json' and size of '72' bytes.
+
+21:06:26.958 ?[39mDEBUG?[0;39m [?[32mTX:?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:147?[0;39m]:
+                
+Request is:
+  POST /api/auth/login HTTP/1.1
+  Content-Length: 72
+  Content-Type: application/json;charset=UTF-8
+  
+  {&quot;email&quot;:&quot;2f4af.eventify.user@integration.test&quot;,&quot;password&quot;:&quot;***&quot;}
+
+21:06:27.042 ?[34mINFO?[0;39m [?[32mTX:9a478b72-579c-4201-a669-c2a9f35af1f6?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.AuthenticationService:63?[0;39m]:
+                
+User '2f4af.eventify.user@integration.test' successfully authenticated
+
+21:06:27.042 ?[34mINFO?[0;39m [?[32mTX:9a478b72-579c-4201-a669-c2a9f35af1f6?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:97?[0;39m]:
+                
+Invalidating '[ACCESS_TOKEN, REFRESH_TOKEN]' token for user '2f4af.eventify.user@integration.test'
+
+21:06:27.049 ?[34mINFO?[0;39m [?[32mTX:9a478b72-579c-4201-a669-c2a9f35af1f6?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.token.service.TokenService:54?[0;39m]:
+                
+Generated Access &amp; Refresh tokens for user '2f4af.eventify.user@integration.test'
+
+21:06:27.050 ?[39mDEBUG?[0;39m [?[32mTX:9a478b72-579c-4201-a669-c2a9f35af1f6?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.CookieService:42?[0;39m]:
+                
+Setting access token cookie with value: eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyZjRhZi5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJ0ZWFtcyI6W10sImxhc3RfbG9naW4iOjE3Mzk0ODA3ODcsImNyZWF0ZWQiOjE3Mzk0ODA3ODYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3MyIsImxhc3RfbmFtZSI6IlVzZXIiLCJlbmFibGVkIjp0cnVlLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJ2YWxpZGF0ZWQiOnRydWUsInBlcm1pc3Npb25zIjpbIlJFQURfREFTSEJPQVJEUyIsIkFDQ0VTU19BUFBMSUNBVElPTiIsIlJFQURfVEVBTVMiXSwiYXV0aG9yaXR5IjoiVVNFUiIsImV4cCI6MTczOTQ4MTY4NywiaWF0IjoxNzM5NDgwNzg3LCJmaXJzdF9uYW1lIjoiRXZlbnRpZnkiLCJqdGkiOiI5ODg2MTBlYy05YTI3LTQ1MGQtODY0NC1mMmZjYTNlNThiZGQifQ.isWq3-RfCqfLaxfdFcG9SvYTFkY5NdrmYCL0JcD1UGqnmbH__fIcliR4XRipGeBW1L4do-hFd9UtpgrDsiCcrafnfeMu2WnM7Z9oJJ_7p__q9Ru2r3Dkqn5OW4ZNcN9h5gMzElNoH-cKjBW2FcZ8Zjqz7wGSyiag303V_u4aSDKXArEtIQpW6SLzthK6jdPgSkFQDqRB6sEm4TdoLTEMBhVQTmhI8Qpms3nL-EMmxil-GS2pqv-gNw9OcLxJt9mKQVvX2yyvA-bt6tocZGztmXTAwEHBAtNqRw1GwKaYropAJmrMG7aDFvll3t00A4kqbGwEqxYUcZRwrM6d2hENig
+
+21:06:27.050 ?[39mDEBUG?[0;39m [?[32mTX:9a478b72-579c-4201-a669-c2a9f35af1f6?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.jordijaspers.eventify.api.authentication.service.CookieService:53?[0;39m]:
+                
+Setting refresh token cookie with value: eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJzdWIiOiIyZjRhZi5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NDAwODU1ODcsImlhdCI6MTczOTQ4MDc4NywianRpIjoiMmEyY2I1YmYtZjM3My00OTAzLWIwN2YtMDI2MjA0NjU2OWMzIn0.kjT4zQfT04AzNlpooxQY39_uU3Roh_zzbJ7jkFxIBBnl6S9Rm2yFMpalEADtfoHgxf4rRE8TSp_V1J996up-vvna2rWWzYYXLOzoDPV5gYY9r7scXJx59DnBcHGFuD8hv-7ZiN7qTQuhup5ooOux-rx4wMzYjmVAI8gyu0IJi4cLra665RCT_ZqTPE5zSuXD390-NYW8t93TvTgrtmb934cNUmircXq_M_N3dJ3OwUwYLoV8fhqpJ_vR0V0nNJNpGESpTY9PTLZoTQNLOEAIPWbaFPSIAP1PpFHA6SxfGC0oxiV8adJl1b3uknLlgqLsJNw3L2xJ-kJL1PPFhe9yOw
+
+21:06:27.052 ?[34mINFO?[0;39m [?[32mTX:9a478b72-579c-4201-a669-c2a9f35af1f6?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:243?[0;39m]:
+                
+Response '/api/auth/login' is '200 OK' with content type 'application/json;charset=UTF-8' and size of '1747' bytes.
+
+21:06:27.052 ?[39mDEBUG?[0;39m [?[32mTX:9a478b72-579c-4201-a669-c2a9f35af1f6?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.http.DefaultHawaiiRequestResponseLogger:250?[0;39m]:
+                
+Response is:
+  HTTP/1.1 200 OK
+  Content-Type: application/json;charset=UTF-8
+  Set-Cookie: EVENTIFY_ACCESS_TOKEN=eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyZjRhZi5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJ0ZWFtcyI6W10sImxhc3RfbG9naW4iOjE3Mzk0ODA3ODcsImNyZWF0ZWQiOjE3Mzk0ODA3ODYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3MyIsImxhc3RfbmFtZSI6IlVzZXIiLCJlbmFibGVkIjp0cnVlLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJ2YWxpZGF0ZWQiOnRydWUsInBlcm1pc3Npb25zIjpbIlJFQURfREFTSEJPQVJEUyIsIkFDQ0VTU19BUFBMSUNBVElPTiIsIlJFQURfVEVBTVMiXSwiYXV0aG9yaXR5IjoiVVNFUiIsImV4cCI6MTczOTQ4MTY4NywiaWF0IjoxNzM5NDgwNzg3LCJmaXJzdF9uYW1lIjoiRXZlbnRpZnkiLCJqdGkiOiI5ODg2MTBlYy05YTI3LTQ1MGQtODY0NC1mMmZjYTNlNThiZGQifQ.isWq3-RfCqfLaxfdFcG9SvYTFkY5NdrmYCL0JcD1UGqnmbH__fIcliR4XRipGeBW1L4do-hFd9UtpgrDsiCcrafnfeMu2WnM7Z9oJJ_7p__q9Ru2r3Dkqn5OW4ZNcN9h5gMzElNoH-cKjBW2FcZ8Zjqz7wGSyiag303V_u4aSDKXArEtIQpW6SLzthK6jdPgSkFQDqRB6sEm4TdoLTEMBhVQTmhI8Qpms3nL-EMmxil-GS2pqv-gNw9OcLxJt9mKQVvX2yyvA-bt6tocZGztmXTAwEHBAtNqRw1GwKaYropAJmrMG7aDFvll3t00A4kqbGwEqxYUcZRwrM6d2hENig; Path=/; Max-Age=899; Expires=Thu, 13 Feb 2025 21:21:26 GMT; Secure; HttpOnly, EVENTIFY_REFRESH_TOKEN=eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJzdWIiOiIyZjRhZi5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NDAwODU1ODcsImlhdCI6MTczOTQ4MDc4NywianRpIjoiMmEyY2I1YmYtZjM3My00OTAzLWIwN2YtMDI2MjA0NjU2OWMzIn0.kjT4zQfT04AzNlpooxQY39_uU3Roh_zzbJ7jkFxIBBnl6S9Rm2yFMpalEADtfoHgxf4rRE8TSp_V1J996up-vvna2rWWzYYXLOzoDPV5gYY9r7scXJx59DnBcHGFuD8hv-7ZiN7qTQuhup5ooOux-rx4wMzYjmVAI8gyu0IJi4cLra665RCT_ZqTPE5zSuXD390-NYW8t93TvTgrtmb934cNUmircXq_M_N3dJ3OwUwYLoV8fhqpJ_vR0V0nNJNpGESpTY9PTLZoTQNLOEAIPWbaFPSIAP1PpFHA6SxfGC0oxiV8adJl1b3uknLlgqLsJNw3L2xJ-kJL1PPFhe9yOw; Path=/; Max-Age=604799; Expires=Thu, 20 Feb 2025 21:06:26 GMT; Secure; HttpOnly
+  Vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+  X-Hawaii-Request-Id: 7c5062e9-e336-4bdf-9512-df0beee1f83d
+  X-Hawaii-Tx-Id: 9a478b72-579c-4201-a669-c2a9f35af1f6
+  
+  {&quot;email&quot;:&quot;2f4af.eventify.user@integration.test&quot;,&quot;teams&quot;:[],&quot;authority&quot;:&quot;USER&quot;,&quot;lastLogin&quot;:&quot;2025-02-13T21:06:27.03817457Z&quot;,&quot;accessToken&quot;:&quot;eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyZjRhZi5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJ0ZWFtcyI6W10sImxhc3RfbG9naW4iOjE3Mzk0ODA3ODcsImNyZWF0ZWQiOjE3Mzk0ODA3ODYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3MyIsImxhc3RfbmFtZSI6IlVzZXIiLCJlbmFibGVkIjp0cnVlLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJ2YWxpZGF0ZWQiOnRydWUsInBlcm1pc3Npb25zIjpbIlJFQURfREFTSEJPQVJEUyIsIkFDQ0VTU19BUFBMSUNBVElPTiIsIlJFQURfVEVBTVMiXSwiYXV0aG9yaXR5IjoiVVNFUiIsImV4cCI6MTczOTQ4MTY4NywiaWF0IjoxNzM5NDgwNzg3LCJmaXJzdF9uYW1lIjoiRXZlbnRpZnkiLCJqdGkiOiI5ODg2MTBlYy05YTI3LTQ1MGQtODY0NC1mMmZjYTNlNThiZGQifQ.isWq3-RfCqfLaxfdFcG9SvYTFkY5NdrmYCL0JcD1UGqnmbH__fIcliR4XRipGeBW1L4do-hFd9UtpgrDsiCcrafnfeMu2WnM7Z9oJJ_7p__q9Ru2r3Dkqn5OW4ZNcN9h5gMzElNoH-cKjBW2FcZ8Zjqz7wGSyiag303V_u4aSDKXArEtIQpW6SLzthK6jdPgSkFQDqRB6sEm4TdoLTEMBhVQTmhI8Qpms3nL-EMmxil-GS2pqv-gNw9OcLxJt9mKQVvX2yyvA-bt6tocZGztmXTAwEHBAtNqRw1GwKaYropAJmrMG7aDFvll3t00A4kqbGwEqxYUcZRwrM6d2hENig&quot;,&quot;refreshToken&quot;:&quot;eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJzdWIiOiIyZjRhZi5ldmVudGlmeS51c2VyQGludGVncmF0aW9uLnRlc3QiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMiLCJleHAiOjE3NDAwODU1ODcsImlhdCI6MTczOTQ4MDc4NywianRpIjoiMmEyY2I1YmYtZjM3My00OTAzLWIwN2YtMDI2MjA0NjU2OWMzIn0.kjT4zQfT04AzNlpooxQY39_uU3Roh_zzbJ7jkFxIBBnl6S9Rm2yFMpalEADtfoHgxf4rRE8TSp_V1J996up-vvna2rWWzYYXLOzoDPV5gYY9r7scXJx59DnBcHGFuD8hv-7ZiN7qTQuhup5ooOux-rx4wMzYjmVAI8gyu0IJi4cLra665RCT_ZqTPE5zSuXD390-NYW8t93TvTgrtmb934cNUmircXq_M_N3dJ3OwUwYLoV8fhqpJ_vR0V0nNJNpGESpTY9PTLZoTQNLOEAIPWbaFPSIAP1PpFHA6SxfGC0oxiV8adJl1b3uknLlgqLsJNw3L2xJ-kJL1PPFhe9yOw&quot;,&quot;expiresAt&quot;:&quot;2025-02-13T21:21:27.044613412Z&quot;,&quot;enabled&quot;:true,&quot;validated&quot;:true}
+
+21:06:27.052 ?[34mINFO?[0;39m [?[32mTX:9a478b72-579c-4201-a669-c2a9f35af1f6?[0;39m/?[33mREQ:7c5062e9-e336-4bdf-9512-df0beee1f83d?[0;39m] [?[35mT:Test worker?[0;39m] [?[36mL:org.hawaiiframework.logging.web.filter.RequestDurationFilter:95?[0;39m]:
+                
+Duration '94.26' ms.
+
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 8.12.1</a> at Feb 13, 2025, 9:06:47 PM</p>
+</div>
+</div>
+</body>
+</html>
