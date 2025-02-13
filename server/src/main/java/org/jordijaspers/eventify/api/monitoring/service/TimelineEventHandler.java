@@ -7,15 +7,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.monitoring.model.DashboardSubscription;
 import org.jordijaspers.eventify.api.monitoring.model.response.CheckTimelineResponse;
 import org.jordijaspers.eventify.api.monitoring.model.response.GroupTimelineResponse;
-import org.jordijaspers.eventify.api.monitoring.model.response.TimelineDurationResponse;
 import org.jordijaspers.eventify.api.monitoring.model.response.TimelineResponse;
 import org.springframework.stereotype.Service;
 
-import static java.util.Objects.isNull;
 import static java.util.stream.Stream.concat;
 import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.consolidateTimelines;
 
@@ -38,7 +35,12 @@ public class TimelineEventHandler {
         final TimelineResponse current = affectedCheck.getTimeline();
 
         final TimelineResponse combinedTimeline = consolidateTimelines(List.of(current, timeline));
+        log.debug("current timeline: {}", current);
+        log.debug("timeline: {}", timeline);
+        log.debug("combined timeline: {}", combinedTimeline);
+
         if (current.getDurations().size() == combinedTimeline.getDurations().size()) {
+            log.debug("Timeline for check '{}' did not change, skipping update.", checkId);
             return false;
         }
 
@@ -50,26 +52,9 @@ public class TimelineEventHandler {
         } else {
             updateDashboardTimeline(subscription);
         }
+
+        log.debug("Timeline for check '{}' has been updated.", checkId);
         return true;
-    }
-
-    private boolean updateTimeline(final CheckTimelineResponse checkTimeline, final EventRequest event) {
-        final TimelineResponse currentTimeline = Optional.ofNullable(checkTimeline.getTimeline())
-            .orElseGet(TimelineResponse::new);
-
-        final List<TimelineDurationResponse> durations = currentTimeline.getDurations();
-        final boolean shouldUpdate = durations.isEmpty() || !event.getStatus().equals(durations.getLast().getStatus());
-
-        if (shouldUpdate) {
-            if (!durations.isEmpty() && isNull(durations.getLast().getEndTime())) {
-                durations.getLast().setEndTime(event.getTimestamp());
-            }
-            durations.add(new TimelineDurationResponse(event.getTimestamp(), event.getStatus()));
-            currentTimeline.setDurations(durations);
-        }
-
-        checkTimeline.setTimeline(currentTimeline);
-        return shouldUpdate;
     }
 
     private void updateGroupedCheckHierarchy(final GroupTimelineResponse group, final DashboardSubscription subscription) {

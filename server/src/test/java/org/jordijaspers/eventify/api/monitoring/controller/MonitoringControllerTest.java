@@ -62,7 +62,6 @@ public class MonitoringControllerTest extends IntegrationTest {
         response.andExpect(status().is(SC_UNAUTHORIZED));
     }
 
-
     @Test
     @DisplayName("Should reject user without READ_DASHBOARDS authority")
     public void shouldRejectUserWithoutReadDashboardsAuthority() throws Exception {
@@ -156,7 +155,7 @@ public class MonitoringControllerTest extends IntegrationTest {
 
         // And: Generate some events
         final Check check = aValidCheck(aValidSource());
-        generateEvents(check.getId(), OK, CRITICAL, OK, OK, CRITICAL);
+        generateEvents(check.getId(), OK, CRITICAL, OK, OK);
 
         // And: The dashboard has a check
         final DashboardConfigurationRequest request = new DashboardConfigurationRequest()
@@ -175,9 +174,11 @@ public class MonitoringControllerTest extends IntegrationTest {
         final MvcResult mvcResult = response.andExpect(request().asyncStarted()).andReturn();
 
         // And: Trigger an event
-        final List<Map<String, String>> events = SseTestUtils.collectEvents(mvcResult, UPDATED, Duration.ofSeconds(5));
         final EventRequest event = anEventRequest(check.getId(), CRITICAL);
         timelineStreamingService.updateTimelineForCheck(List.of(event), check.getId());
+
+        // And: Collect the events
+        final List<Map<String, String>> events = SseTestUtils.collectEvents(mvcResult, UPDATED, Duration.ofSeconds(5));
 
         // Then: Collect and verify update events
         final Map<String, String> updateEvent = events.stream()
