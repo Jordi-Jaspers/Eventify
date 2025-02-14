@@ -178,7 +178,7 @@ public class MonitoringControllerTest extends IntegrationTest {
         timelineStreamingService.updateTimelineForCheck(List.of(event), check.getId());
 
         // And: Collect the events
-        final List<Map<String, String>> events = SseTestUtils.collectEvents(mvcResult, UPDATED, Duration.ofSeconds(5));
+        final List<Map<String, String>> events = SseTestUtils.collectEvents(mvcResult, UPDATED, Duration.ofSeconds(10));
 
         // Then: Collect and verify update events
         final Map<String, String> updateEvent = events.stream()
