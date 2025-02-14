@@ -18,6 +18,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 /**
  * The TimelineConsolidator class consolidates multiple timelines into a single timeline representing the worst status at any given moment.
  */
+@SuppressWarnings("ReturnCount")
 public final class TimelineConsolidator {
 
     /* Private constructor to prevent instantiation */
@@ -74,7 +75,6 @@ public final class TimelineConsolidator {
      * @param timelines The list of timelines to consolidate.
      * @return A TimelineResponse representing the consolidated timeline.
      */
-    @SuppressWarnings("ReturnCount")
     public static TimelineResponse consolidateTimelines(final List<TimelineResponse> timelines) {
         if (isEmpty(timelines)) {
             return new TimelineResponse();
@@ -88,6 +88,44 @@ public final class TimelineConsolidator {
         final List<TimelineDurationResponse> timeline = processTimePoints(timePoints);
 
         return mergeDurations(timeline);
+    }
+
+    /**
+     * Combines multiple timelines into a single timeline, ensuring that the timeline is in chronological order. This method does not
+     * consider the worst status; it simply merges and recalculates the durations.
+     *
+     * @param timelines The list of timelines to combine.
+     * @return A TimelineResponse representing the combined timeline.
+     */
+    public static TimelineResponse combineTimelines(final List<TimelineResponse> timelines) {
+        if (isEmpty(timelines)) {
+            return new TimelineResponse();
+        }
+
+        if (timelines.size() == 1) {
+            return timelines.getFirst();
+        }
+
+        // Extract all durations from the timelines
+        final List<TimelineDurationResponse> allDurations = timelines.stream()
+            .flatMap(t -> t.getDurations().stream())
+            .sorted(Comparator.comparing(TimelineDurationResponse::getStartTime))
+            .toList();
+
+        // Recalculate the end times of the durations
+        final List<TimelineDurationResponse> recalculatedDurations = new ArrayList<>();
+        for (int i = 0; i < allDurations.size(); i++) {
+            final TimelineDurationResponse currentDuration = allDurations.get(i);
+            final ZonedDateTime startTime = currentDuration.getStartTime();
+            final ZonedDateTime endTime = (i < allDurations.size() - 1)
+                ? allDurations.get(i + 1).getStartTime()
+                : currentDuration.getEndTime();
+            final Status status = currentDuration.getStatus();
+
+            recalculatedDurations.add(new TimelineDurationResponse(startTime, endTime, status));
+        }
+
+        return mergeDurations(recalculatedDurations);
     }
 
     /**

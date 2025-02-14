@@ -44,5 +44,4 @@ public class TimelineDurationResponse {
         this.endTime = endTime;
         this.status = status;
     }
-
 }

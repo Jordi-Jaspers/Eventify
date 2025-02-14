@@ -151,17 +151,17 @@ public class TimelineConsolidatorTest extends UnitTest {
         @DisplayName("should handle non-overlapping timelines")
         public void shouldHandleNonOverlappingTimelines() {
             // Given: Two non-overlapping timelines
-            // Timeline 1: [09:00-09:30 OK]
+            // Timeline 1: [09:00-null OK]
             final TimelineResponse timeline1 = new TimelineResponse(
                 List.of(
-                    new TimelineDurationResponse(BASE_TIME, BASE_TIME.plusMinutes(30), OK)
+                    new TimelineDurationResponse(BASE_TIME, OK)
                 )
             );
 
-            // Timeline 2: [10:00-10:30 CRITICAL]
+            // Timeline 2: [10:00-null WARNING]
             final TimelineResponse timeline2 = new TimelineResponse(
                 List.of(
-                    new TimelineDurationResponse(BASE_TIME.plusMinutes(60), BASE_TIME.plusMinutes(90), CRITICAL)
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(60), WARNING)
                 )
             );
 
@@ -176,17 +176,17 @@ public class TimelineConsolidatorTest extends UnitTest {
                     assertDuration(
                         durations.get(0),
                         BASE_TIME,
-                        BASE_TIME.plusMinutes(30),
+                        BASE_TIME.plusMinutes(60),
                         OK
                     );
 
-                    // [10:00-10:30 CRITICAL]
-                    assertDuration(
-                        durations.get(1),
-                        BASE_TIME.plusMinutes(60),
-                        BASE_TIME.plusMinutes(90),
-                        CRITICAL
-                    );
+                    // [10:00-null WARNING]
+                    assertThat(durations.get(1))
+                        .satisfies(duration -> {
+                            assertThat(duration.getStartTime()).isEqualTo(BASE_TIME.plusMinutes(60));
+                            assertThat(duration.getEndTime()).isNull();
+                            assertThat(duration.getStatus()).isEqualTo(WARNING);
+                        });
                 });
         }
 
@@ -251,6 +251,196 @@ public class TimelineConsolidatorTest extends UnitTest {
 
             // Then: The result should be the same as the input
             assertThat(result).isSameAs(timeline);
+        }
+    }
+
+
+    @Nested
+    @DisplayName("Combine Timelines Test")
+    public class CombineTimelineTest {
+
+        @Test
+        @DisplayName("should correctly merge overlapping timelines with different statuses")
+        public void shouldCorrectlyMergeOverlappingTimelinesWithDifferentStatuses() {
+            // Given: Two timelines with overlapping periods
+            // Timeline 1: [09:00-09:30 OK] [09:30-10:00 WARNING] [10:00-10:05 OK] [10:05-10:15 CRITICAL] [10:15-null OK]
+            final TimelineResponse timeline1 = new TimelineResponse(
+                List.of(
+                    new TimelineDurationResponse(BASE_TIME, BASE_TIME.plusMinutes(30), OK),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(30), BASE_TIME.plusMinutes(60), WARNING),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(60), BASE_TIME.plusMinutes(65), OK),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(65), BASE_TIME.plusMinutes(75), CRITICAL),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(75), null, OK)
+                )
+            );
+
+            // Timeline 2: [09:15-09:45 CRITICAL] [09:45-10:10 OK] [10:10-null WARNING]
+            final TimelineResponse timeline2 = new TimelineResponse(
+                List.of(
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(15), BASE_TIME.plusMinutes(45), CRITICAL),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(45), BASE_TIME.plusMinutes(70), OK),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(70), null, WARNING)
+                )
+            );
+
+            // When: Combining the timelines
+            final TimelineResponse result = TimelineConsolidator.combineTimelines(List.of(timeline1, timeline2));
+
+            // Then: The timelines should be merged correctly
+            assertThat(result.getDurations())
+                .hasSize(7)
+                .satisfies(durations -> {
+                    // [09:00-09:15 OK]
+                    assertDuration(
+                        durations.getFirst(),
+                        BASE_TIME,
+                        BASE_TIME.plusMinutes(15),
+                        OK
+                    );
+
+                    // [09:15-09:30 CRITICAL]
+                    assertDuration(
+                        durations.get(1),
+                        BASE_TIME.plusMinutes(15),
+                        BASE_TIME.plusMinutes(30),
+                        CRITICAL
+                    );
+
+                    // [09:30-09:45 WARNING]
+                    assertDuration(
+                        durations.get(2),
+                        BASE_TIME.plusMinutes(30),
+                        BASE_TIME.plusMinutes(45),
+                        WARNING
+                    );
+
+                    // [09:45-10:05 OK]
+                    assertDuration(
+                        durations.get(3),
+                        BASE_TIME.plusMinutes(45),
+                        BASE_TIME.plusMinutes(65),
+                        OK
+                    );
+
+                    // [10:05-10:10 CRITICAL]
+                    assertDuration(
+                        durations.get(4),
+                        BASE_TIME.plusMinutes(65),
+                        BASE_TIME.plusMinutes(70),
+                        CRITICAL
+                    );
+
+                    // [10:10-10:15 WARNING]
+                    assertDuration(
+                        durations.get(5),
+                        BASE_TIME.plusMinutes(70),
+                        BASE_TIME.plusMinutes(75),
+                        WARNING
+                    );
+
+                    // [10:15-null OK]
+                    assertThat(durations.getLast())
+                        .satisfies(duration -> {
+                            assertThat(duration.getStartTime()).isEqualTo(BASE_TIME.plusMinutes(75));
+                            assertThat(duration.getEndTime()).isNull();
+                            assertThat(duration.getStatus()).isEqualTo(OK);
+                        });
+                });
+        }
+
+        @Test
+        @DisplayName("should handle multiple overlapping critical periods")
+        public void shouldHandleMultipleOverlappingCriticalPeriods() {
+            // Given: Two timelines with overlapping critical periods
+            // Timeline 1: [09:00-09:30 OK] [09:30-10:00 CRITICAL] [10:00-null OK]
+            final TimelineResponse timeline1 = new TimelineResponse(
+                List.of(
+                    new TimelineDurationResponse(BASE_TIME, BASE_TIME.plusMinutes(30), OK),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(30), BASE_TIME.plusMinutes(60), CRITICAL),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(60), null, OK)
+                )
+            );
+
+            // Timeline 2: [09:15-null CRITICAL]
+            final TimelineResponse timeline2 = new TimelineResponse(
+                List.of(
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(15), null, CRITICAL)
+                )
+            );
+
+            // When: Combining the timelines
+            final TimelineResponse result = TimelineConsolidator.combineTimelines(List.of(timeline1, timeline2));
+
+            // Then: The critical periods should be merged
+            assertThat(result.getDurations())
+                .hasSize(3)
+                .satisfies(durations -> {
+                    // [09:00-09:15 OK]
+                    assertDuration(
+                        durations.getFirst(),
+                        BASE_TIME,
+                        BASE_TIME.plusMinutes(15),
+                        OK
+                    );
+
+                    // [09:15-10:00 CRITICAL]
+                    assertDuration(
+                        durations.get(1),
+                        BASE_TIME.plusMinutes(15),
+                        BASE_TIME.plusMinutes(60),
+                        CRITICAL
+                    );
+
+                    // [10:00-null OK]
+                    assertThat(durations.getLast())
+                        .satisfies(duration -> {
+                            assertThat(duration.getStartTime()).isEqualTo(BASE_TIME.plusMinutes(60));
+                            assertThat(duration.getEndTime()).isNull();
+                            assertThat(duration.getStatus()).isEqualTo(OK);
+                        });
+                });
+        }
+
+        @Test
+        @DisplayName("should handle single timeline and return the same timeline")
+        public void shouldHandleSingleTimeline() {
+            // Given: A single timeline
+            final TimelineResponse timeline = new TimelineResponse(
+                List.of(
+                    new TimelineDurationResponse(BASE_TIME, BASE_TIME.plusMinutes(30), OK),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(30), BASE_TIME.plusMinutes(60), WARNING),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(60), BASE_TIME.plusMinutes(65), OK),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(65), BASE_TIME.plusMinutes(75), CRITICAL),
+                    new TimelineDurationResponse(BASE_TIME.plusMinutes(75), null, OK)
+                )
+            );
+
+            // When: Combining the timeline
+            final TimelineResponse result = TimelineConsolidator.combineTimelines(List.of(timeline));
+
+            // Then: The result should be the same as the input
+            assertThat(result).isSameAs(timeline);
+        }
+
+        @Test
+        @DisplayName("should handle empty list of timelines by returning an empty timeline with status UNKNOWN")
+        public void shouldHandleEmptyTimelines() {
+            // Given: No timelines -- empty list
+            final List<TimelineResponse> timelines = List.of();
+
+            // When: Combining the timelines
+            final TimelineResponse result = TimelineConsolidator.combineTimelines(timelines);
+
+            // Then: The result should be an empty timeline
+            assertThat(result.getDurations())
+                .isNotNull()
+                .hasSize(1)
+                .first()
+                .satisfies(duration -> {
+                    assertThat(duration.getStartTime()).isNotNull();
+                    assertThat(duration.getEndTime()).isNull();
+                    assertThat(duration.getStatus()).isEqualTo(UNKNOWN);
+                });
         }
     }
 

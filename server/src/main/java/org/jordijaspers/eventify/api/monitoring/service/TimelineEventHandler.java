@@ -14,7 +14,7 @@ import org.jordijaspers.eventify.api.monitoring.model.response.TimelineResponse;
 import org.springframework.stereotype.Service;
 
 import static java.util.stream.Stream.concat;
-import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.consolidateTimelines;
+import static org.jordijaspers.eventify.api.monitoring.service.TimelineConsolidator.combineTimelines;
 
 @Slf4j
 @Service
@@ -34,26 +34,20 @@ public class TimelineEventHandler {
         final CheckTimelineResponse affectedCheck = subscription.findAffectedCheck(checkId);
         final TimelineResponse current = affectedCheck.getTimeline();
 
-        final TimelineResponse combinedTimeline = consolidateTimelines(List.of(current, timeline));
-        log.debug("current timeline: {}", current);
-        log.debug("timeline: {}", timeline);
-        log.debug("combined timeline: {}", combinedTimeline);
-
+        final TimelineResponse combinedTimeline = combineTimelines(List.of(current, timeline));
         if (current.getDurations().size() == combinedTimeline.getDurations().size()) {
             log.debug("Timeline for check '{}' did not change, skipping update.", checkId);
             return false;
         }
+        log.debug("Timeline for check '{}' has been updated.", checkId);
 
         affectedCheck.setTimeline(combinedTimeline);
-
         final Optional<GroupTimelineResponse> affectedGroup = subscription.findAffectedGroup(checkId);
         if (affectedGroup.isPresent()) {
             updateGroupedCheckHierarchy(affectedGroup.get(), subscription);
         } else {
             updateDashboardTimeline(subscription);
         }
-
-        log.debug("Timeline for check '{}' has been updated.", checkId);
         return true;
     }
 

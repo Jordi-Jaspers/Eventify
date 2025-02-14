@@ -39,7 +39,6 @@ public class TimelineService {
         final ZonedDateTime windowStart = ZonedDateTime.of(startTime, UTC);
         final ZonedDateTime now = ZonedDateTime.now(UTC);
 
-
         final Map<Long, TimelineResponse> timelineMap = timelineDurationRepository
             .findDurationsForChecks(checkIds, startTime)
             .parallelStream()

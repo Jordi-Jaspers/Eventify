@@ -15,6 +15,7 @@ import org.jordijaspers.eventify.api.dashboard.model.Dashboard;
 import org.jordijaspers.eventify.api.dashboard.model.request.DashboardConfigurationRequest;
 import org.jordijaspers.eventify.api.event.model.request.EventRequest;
 import org.jordijaspers.eventify.api.monitoring.model.DashboardSubscription;
+import org.jordijaspers.eventify.api.monitoring.model.response.CheckTimelineResponse;
 import org.jordijaspers.eventify.api.team.model.Team;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.common.exception.ApiErrorCode;
@@ -31,8 +32,7 @@ import static java.util.Objects.nonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.jordijaspers.eventify.api.Paths.MONITORING_STREAM_PATH;
-import static org.jordijaspers.eventify.api.event.model.Status.CRITICAL;
-import static org.jordijaspers.eventify.api.event.model.Status.OK;
+import static org.jordijaspers.eventify.api.event.model.Status.*;
 import static org.jordijaspers.eventify.api.monitoring.model.validator.WindowValidator.*;
 import static org.jordijaspers.eventify.common.constants.Constants.ServerEvents.INITIALIZED;
 import static org.jordijaspers.eventify.common.constants.Constants.ServerEvents.UPDATED;
@@ -155,7 +155,7 @@ public class MonitoringControllerTest extends IntegrationTest {
 
         // And: Generate some events
         final Check check = aValidCheck(aValidSource());
-        generateEvents(check.getId(), OK, CRITICAL, OK, OK);
+        generateEvents(check.getId(), OK, CRITICAL, OK, OK, WARNING);
 
         // And: The dashboard has a check
         final DashboardConfigurationRequest request = new DashboardConfigurationRequest()
@@ -174,7 +174,7 @@ public class MonitoringControllerTest extends IntegrationTest {
         final MvcResult mvcResult = response.andExpect(request().asyncStarted()).andReturn();
 
         // And: Trigger an event
-        final EventRequest event = anEventRequest(check.getId(), CRITICAL);
+        final EventRequest event = anEventRequest(check.getId(), OK);
         timelineStreamingService.updateTimelineForCheck(List.of(event), check.getId());
 
         // And: Collect the events
@@ -186,11 +186,20 @@ public class MonitoringControllerTest extends IntegrationTest {
             .findFirst()
             .orElseThrow(() -> new AssertionError("No update event found"));
 
+        // And: Verify the update event
         final DashboardSubscription update = fromJson(updateEvent.get("data"), DashboardSubscription.class);
         assertThat(update.getDashboardId(), equalTo(dashboard.getId()));
         assertThat(update.getWindow(), equalTo(Duration.parse(DEFAULT_WINDOW).toMinutes()));
         assertThat(update.getUngroupedChecks().size(), equalTo(1));
-        assertThat(update.getTimeline().getDurations().size(), greaterThanOrEqualTo(4));
+
+        // And: Verify the updated check
+        final CheckTimelineResponse updatedCheck = update.getUngroupedChecks().stream()
+            .filter(c -> c.getId().equals(check.getId()))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("The updated check does not exists."));
+
+        assertThat(updatedCheck.getTimeline().getDurations().size(), greaterThanOrEqualTo(5));
+        assertThat(updatedCheck.getTimeline().getDurations().getLast().getStatus(), equalTo(OK));
     }
 
     @Test
