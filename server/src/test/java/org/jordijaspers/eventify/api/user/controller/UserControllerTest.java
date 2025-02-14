@@ -1,7 +1,10 @@
 package org.jordijaspers.eventify.api.user.controller;
 
-import io.restassured.module.mockmvc.response.MockMvcResponse;
+import java.util.List;
 
+import org.hawaiiframework.web.resource.ApiErrorResponseResource;
+import org.jordijaspers.eventify.api.authentication.model.Authority;
+import org.jordijaspers.eventify.api.authentication.model.response.UserDetailsResponse;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.model.request.UpdateEmailRequest;
 import org.jordijaspers.eventify.api.user.model.request.UpdateUserDetailsRequest;
@@ -9,70 +12,93 @@ import org.jordijaspers.eventify.common.exception.ApiErrorCode;
 import org.jordijaspers.eventify.support.IntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.jordijaspers.eventify.api.Paths.*;
+import static org.jordijaspers.eventify.common.constants.Constants.Security.BEARER;
+import static org.jordijaspers.eventify.support.util.ObjectMapperUtil.fromJson;
+import static org.jordijaspers.eventify.support.util.ObjectMapperUtil.toJson;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserControllerTest extends IntegrationTest {
 
     @Test
-    @WithMockUser(authorities = "READ_USERS")
     @DisplayName("Should return all users when requested")
-    public void shouldReturnAllUsersWhenRequested() {
-        // Given: Multiple users exist
+    public void shouldReturnAllUsersWhenRequested() throws Exception {
+        // Given: An authenticated user with manager authority
+        final User user = aValidatedUserWithAuthority(Authority.MANAGER);
+
+        // And: Multiple users exist
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
 
         // When: Requesting all users
-        final MockMvcResponse response = given()
-            .contentType(APPLICATION_JSON_VALUE)
-            .when()
-            .get(USERS_PATH)
-            .andReturn();
+        final MockHttpServletRequestBuilder request = get(USERS_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+
+        // And: Making the request
+        final ResultActions response = mockMvc.perform(request);
 
         // Then: Response should be successful
-        response.then().statusCode(SC_OK);
+        response.andExpect(status().is(SC_OK));
 
         // And: Response should contain all users
-        response.then().body("size()", greaterThanOrEqualTo(2));
-        response.then().body("findAll { it.id == " + user1.getId() + " }.email", hasItem(user1.getEmail()));
-        response.then().body("findAll { it.id == " + user2.getId() + " }.email", hasItem(user2.getEmail()));
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final List<UserDetailsResponse> usersList = fromJson(content, new TypeReference<>() {});
+        final List<UserDetailsResponse> users = usersList.stream()
+            .filter(u -> u.getId().equals(user1.getId()) || u.getId().equals(user2.getId()))
+            .toList();
+
+        assertThat(users.size(), equalTo(2));
+        users.forEach(u -> {
+            assertThat(u.getId(), anyOf(is(user1.getId()), is(user2.getId())));
+            assertThat(u.getEmail(), anyOf(is(user1.getEmail()), is(user2.getEmail())));
+        });
     }
 
     @Test
-    @WithMockUser
     @DisplayName("Should return user details for authenticated user")
-    public void shouldReturnUserDetailsForAuthenticatedUser() {
+    public void shouldReturnUserDetailsForAuthenticatedUser() throws Exception {
         // Given: An authenticated user
         final User user = aValidatedUser();
 
         // When: Requesting user details
-        final MockMvcResponse response = given()
-            .contentType(APPLICATION_JSON_VALUE)
-            .header(AUTHORIZATION, "Bearer " + user.getAccessToken().getValue())
-            .when()
-            .get(USER_DETAILS)
-            .andReturn();
+        final MockHttpServletRequestBuilder request = get(USER_DETAILS)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
 
         // Then: Response should be successful
-        response.then().statusCode(SC_OK);
+        response.andExpect(status().is(SC_OK));
 
         // And: Response should contain the user details
-        response.then().body("email", equalTo(user.getEmail()));
-        response.then().body("firstName", equalTo(user.getFirstName()));
-        response.then().body("lastName", equalTo(user.getLastName()));
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final UserDetailsResponse userDetails = fromJson(content, UserDetailsResponse.class);
+
+        assertThat(userDetails.getId(), is(user.getId()));
+        assertThat(userDetails.getEmail(), is(user.getEmail()));
+        assertThat(userDetails.getFirstName(), is(user.getFirstName()));
+        assertThat(userDetails.getLastName(), is(user.getLastName()));
+        assertThat(userDetails.getPermissions(), not(empty()));
     }
 
     @Test
-    @WithMockUser
     @DisplayName("Should update user details successfully")
-    public void shouldUpdateUserDetailsSuccessfully() {
+    public void shouldUpdateUserDetailsSuccessfully() throws Exception {
         // Given: An authenticated user
         final User user = aValidatedUser();
 
@@ -80,26 +106,28 @@ public class UserControllerTest extends IntegrationTest {
         final UpdateUserDetailsRequest request = anUpdateUserDetailsRequest();
 
         // When: Updating user details
-        final MockMvcResponse response = given()
-            .contentType(APPLICATION_JSON_VALUE)
-            .header(AUTHORIZATION, "Bearer " + user.getAccessToken().getValue())
-            .body(request)
-            .when()
-            .post(USER_DETAILS)
-            .andReturn();
+        final MockHttpServletRequestBuilder updateRequest = post(USER_DETAILS)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(updateRequest);
 
         // Then: Response should be successful
-        response.then().statusCode(SC_OK);
+        response.andExpect(status().is(SC_OK));
 
         // And: Response should contain updated user details
-        response.then().body("firstName", equalTo(request.getFirstName()));
-        response.then().body("lastName", equalTo(request.getLastName()));
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final UserDetailsResponse userDetails = fromJson(content, UserDetailsResponse.class);
+
+        assertThat(userDetails.getId(), is(user.getId()));
+        assertThat(userDetails.getFirstName(), is(request.getFirstName()));
+        assertThat(userDetails.getLastName(), is(request.getLastName()));
     }
 
     @Test
-    @WithMockUser
     @DisplayName("Should update user email successfully")
-    public void shouldUpdateUserEmailSuccessfully() {
+    public void shouldUpdateUserEmailSuccessfully() throws Exception {
         // Given: An authenticated user
         final User user = aValidatedUser();
 
@@ -107,26 +135,28 @@ public class UserControllerTest extends IntegrationTest {
         final UpdateEmailRequest request = anUpdateEmailRequest();
 
         // When: Updating user email
-        final MockMvcResponse response = given()
-            .contentType(APPLICATION_JSON_VALUE)
-            .header(AUTHORIZATION, "Bearer " + user.getAccessToken().getValue())
-            .body(request)
-            .when()
-            .post(USER_UPDATE_EMAIL_PATH)
-            .andReturn();
+        final MockHttpServletRequestBuilder updateRequest = post(USER_UPDATE_EMAIL_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(updateRequest);
 
         // Then: Response should be successful
-        response.then().statusCode(SC_OK);
+        response.andExpect(status().is(SC_OK));
 
         // And: Response should contain updated email
-        response.then().body("email", equalTo(request.getEmail()));
-        response.then().body("validated", is(false));
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final UserDetailsResponse userDetails = fromJson(content, UserDetailsResponse.class);
+
+        assertThat(userDetails.getId(), is(user.getId()));
+        assertThat(userDetails.getEmail(), is(request.getEmail()));
+        assertThat(userDetails.isValidated(), is(false));
     }
 
     @Test
-    @WithMockUser
     @DisplayName("Should not update email when email is already in use")
-    public void shouldNotUpdateEmailWhenEmailIsAlreadyInUse() {
+    public void shouldNotUpdateEmailWhenEmailIsAlreadyInUse() throws Exception {
         // Given: Two validated users
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
@@ -136,45 +166,45 @@ public class UserControllerTest extends IntegrationTest {
             .setEmail(user2.getEmail());
 
         // When: Updating user email
-        final MockMvcResponse response = given()
-            .contentType(APPLICATION_JSON_VALUE)
-            .header(AUTHORIZATION, "Bearer " + user1.getAccessToken().getValue())
-            .body(request)
-            .when()
-            .post(USER_UPDATE_EMAIL_PATH)
-            .andReturn();
+        final MockHttpServletRequestBuilder updateRequest = post(USER_UPDATE_EMAIL_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user1.getAccessToken().getValue())
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(updateRequest);
 
         // Then: Should return a BAD_REQUEST error
-        response.then().statusCode(SC_BAD_REQUEST);
+        response.andExpect(status().is(SC_BAD_REQUEST));
 
         // And: Response should contain the error message
-        response.then().body("apiErrorReason", is(ApiErrorCode.USER_ALREADY_EXISTS_ERROR.getReason()));
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final ApiErrorResponseResource error = fromJson(content, ApiErrorResponseResource.class);
+        assertThat(error.getApiErrorReason(), is(ApiErrorCode.USER_ALREADY_EXISTS_ERROR.getReason()));
     }
 
     @Test
     @DisplayName("Should validate email successfully")
-    public void shouldValidateEmailSuccessfully() {
+    public void shouldValidateEmailSuccessfully() throws Exception {
         // Given: An email validation request
         final UpdateEmailRequest request = anUpdateEmailRequest();
 
         // When: Validating email
-        final MockMvcResponse response = given()
-            .contentType(APPLICATION_JSON_VALUE)
-            .body(request)
-            .when()
-            .post(PUBLIC_VALIDATE_EMAIL_PATH)
-            .andReturn();
+        final MockHttpServletRequestBuilder validationRequest = post(PUBLIC_VALIDATE_EMAIL_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(validationRequest);
 
         // Then: Response should be successful
-        response.then().statusCode(SC_OK);
+        response.andExpect(status().is(SC_OK));
 
         // And: Response should indicate email is valid and not in use
-        response.then().body(equalTo("false"));
+        response.andExpect(content().string("false"));
     }
 
     @Test
     @DisplayName("Should indicate when email is already in use during validation")
-    public void shouldIndicateWhenEmailIsAlreadyInUseValidation() {
+    public void shouldIndicateWhenEmailIsAlreadyInUseValidation() throws Exception {
         // Given: An existing validated user
         final User user = aValidatedUser();
 
@@ -182,18 +212,18 @@ public class UserControllerTest extends IntegrationTest {
         final UpdateEmailRequest request = new UpdateEmailRequest()
             .setEmail(user.getEmail());
 
-        // When: Validating email
-        final MockMvcResponse response = given()
-            .contentType(APPLICATION_JSON_VALUE)
-            .body(request)
-            .when()
-            .post(PUBLIC_VALIDATE_EMAIL_PATH)
-            .andReturn();
+        // And: Validating email
+        final MockHttpServletRequestBuilder validationRequest = post(PUBLIC_VALIDATE_EMAIL_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request));
+
+        // When: Making the request
+        final ResultActions response = mockMvc.perform(validationRequest);
 
         // Then: Response should be successful
-        response.then().statusCode(SC_OK);
+        response.andExpect(status().is(SC_OK));
 
-        // And: Response should indicate is invalid - email is already in use
-        response.then().body(equalTo("false"));
+        // And: Response should indicate is invalid - email is already in use.
+        response.andExpect(content().string("false"));
     }
 }

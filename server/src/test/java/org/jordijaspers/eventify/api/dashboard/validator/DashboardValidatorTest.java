@@ -29,7 +29,7 @@ public class DashboardValidatorTest extends UnitTest {
                 final ValidationResult result = ((ValidationException) e).getValidationResult();
                 final List<ValidationError> errors = result.getErrors();
                 assertThat(errors).hasSize(1);
-                assertThat(errors.get(0).getCode()).isEqualTo(BODY_IS_MISSING);
+                assertThat(errors.getFirst().getCode()).isEqualTo(BODY_IS_MISSING);
             });
     }
 
@@ -45,7 +45,7 @@ public class DashboardValidatorTest extends UnitTest {
                     final ValidationResult result = ((ValidationException) e).getValidationResult();
                     final List<ValidationError> errors = result.getErrors();
                     assertThat(errors).hasSize(1);
-                    assertThat(errors.get(0).getCode()).isEqualTo(BODY_IS_MISSING);
+                    assertThat(errors.getFirst().getCode()).isEqualTo(BODY_IS_MISSING);
                 });
         }
 
@@ -171,7 +171,7 @@ public class DashboardValidatorTest extends UnitTest {
                     final ValidationResult result = ((ValidationException) e).getValidationResult();
                     final List<ValidationError> errors = result.getErrors();
                     assertThat(errors).hasSize(1);
-                    assertThat(errors.get(0).getCode()).isEqualTo(BODY_IS_MISSING);
+                    assertThat(errors.getFirst().getCode()).isEqualTo(BODY_IS_MISSING);
                 });
         }
 

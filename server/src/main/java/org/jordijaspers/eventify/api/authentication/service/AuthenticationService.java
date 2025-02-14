@@ -5,23 +5,21 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 
-import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.service.TokenService;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.common.exception.AuthorizationException;
-import org.jordijaspers.eventify.common.exception.InvalidJwtException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
-import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.token.model.TokenType.REFRESH_TOKEN;
 import static org.jordijaspers.eventify.api.token.model.TokenType.USER_VALIDATION_TOKEN;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.INVALID_CREDENTIALS;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.USER_LOCKED_ERROR;
+import static org.jordijaspers.eventify.common.util.SecurityUtil.getLoggedInUser;
 
 /**
  * A service to manage authentication.
@@ -100,25 +98,19 @@ public class AuthenticationService {
      * @return the user with refreshed tokens
      */
     public User refresh(final String refreshToken) {
-        final Token token = tokenService.findAuthorizationTokenByValue(refreshToken);
-        if (nonNull(token)) {
-            final User user = token.getUser();
-            log.info("Refreshing tokens for user '{}'", user.getUsername());
-            return tokenService.generateAuthorizationTokens(user);
-        } else {
-            throw new InvalidJwtException();
-        }
+        return tokenService.refresh(refreshToken);
     }
 
     /**
      * Logs out the user by invalidating all refresh tokens.
-     *
-     * @param user the user to log out
      */
-    public void logout(final User user) {
-        if (nonNull(user)) {
+    public void logout() {
+        try {
+            final User user = getLoggedInUser();
             tokenService.invalidateTokensForUser(user, REFRESH_TOKEN);
             log.debug("User '{}' successfully logged out", user.getUsername());
+        } catch (final AuthorizationException exception) {
+            log.warn("Cannot log out user, no user is logged in");
         }
     }
 

@@ -2,21 +2,35 @@ package org.jordijaspers.eventify.support.util;
 
 import org.jordijaspers.eventify.Application;
 import org.jordijaspers.eventify.api.authentication.service.AuthenticationService;
+import org.jordijaspers.eventify.api.check.service.CheckService;
+import org.jordijaspers.eventify.api.dashboard.repository.DashboardRepository;
+import org.jordijaspers.eventify.api.dashboard.service.DashboardService;
+import org.jordijaspers.eventify.api.event.repository.EventRepository;
+import org.jordijaspers.eventify.api.event.service.EventService;
+import org.jordijaspers.eventify.api.monitoring.service.TimelineStreamingService;
+import org.jordijaspers.eventify.api.source.repository.SourceRepository;
+import org.jordijaspers.eventify.api.source.service.SourceService;
 import org.jordijaspers.eventify.api.team.repository.TeamRepository;
 import org.jordijaspers.eventify.api.team.service.TeamService;
 import org.jordijaspers.eventify.api.token.repository.TokenRepository;
+import org.jordijaspers.eventify.api.token.service.TokenService;
 import org.jordijaspers.eventify.api.user.model.mapper.UserMapper;
 import org.jordijaspers.eventify.api.user.repository.UserRepository;
 import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.support.config.BeanConfiguration;
+import org.jordijaspers.eventify.support.container.RabbitContainer;
 import org.jordijaspers.eventify.support.container.TimescaleContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -26,7 +40,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Import(
     {
         BeanConfiguration.class,
-        TimescaleContainer.class
+        TimescaleContainer.class,
+        RabbitContainer.class
     }
 )
 @Testcontainers
@@ -37,16 +52,25 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 )
 public class TestContextInitializer {
 
+    // ========================= CONTEXT =========================
+    @NonNull
+    @Autowired
+    protected WebApplicationContext applicationContext;
+
+    @NonNull
+    @Autowired
+    protected HawaiiFilters hawaiiFilters;
+
+    @NonNull
+    @Autowired
+    protected ObjectMapper objectMapper;
+
     // ========================= CONTAINERS =========================
     @Autowired
     protected PostgreSQLContainer<?> timescaleContainer;
 
-    // ========================= CONTEXT =========================
     @Autowired
-    protected WebApplicationContext applicationContext;
-
-    @Autowired
-    protected HawaiiFilters hawaiiFilters;
+    protected RabbitMQContainer rabbitContainer;
 
     // ========================= APPLICATION =========================
 
@@ -60,6 +84,9 @@ public class TestContextInitializer {
     protected UserRepository userRepository;
 
     @Autowired
+    protected SourceRepository sourceRepository;
+
+    @Autowired
     protected UserService userService;
 
     @Autowired
@@ -70,4 +97,28 @@ public class TestContextInitializer {
 
     @Autowired
     protected TeamService teamService;
+
+    @Autowired
+    protected TimelineStreamingService timelineStreamingService;
+
+    @Autowired
+    protected DashboardRepository dashboardRepository;
+
+    @Autowired
+    protected DashboardService dashboardService;
+
+    @Autowired
+    protected SourceService sourceService;
+
+    @Autowired
+    protected CheckService checkService;
+
+    @Autowired
+    protected EventService eventService;
+
+    @Autowired
+    protected EventRepository eventRepository;
+
+    @Autowired
+    protected TokenService tokenService;
 }

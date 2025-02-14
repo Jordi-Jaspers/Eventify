@@ -12,6 +12,7 @@ import org.jordijaspers.eventify.api.token.model.Token;
 import org.jordijaspers.eventify.api.token.model.TokenType;
 import org.jordijaspers.eventify.api.token.repository.TokenRepository;
 import org.jordijaspers.eventify.api.user.model.User;
+import org.jordijaspers.eventify.common.exception.InvalidJwtException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,13 +47,32 @@ public class TokenService {
      * Generate an access token for a user. The access token is valid for 15 minutes.
      */
     public User generateAuthorizationTokens(final User user) {
-        tokenRepository.invalidateTokensWithTypeForUser(List.of(REFRESH_TOKEN, ACCESS_TOKEN), user);
+        invalidateTokensForUser(user, ACCESS_TOKEN, REFRESH_TOKEN);
+
         final Token accessToken = jwtService.generateAccessToken(user);
         final Token refreshToken = tokenRepository.save(jwtService.generateRefreshToken(user));
         log.info("Generated Access & Refresh tokens for user '{}'", user.getEmail());
+
         user.setRefreshToken(refreshToken);
         user.setAccessToken(accessToken);
         return user;
+    }
+
+    /**
+     * Refreshes the access token using the refresh token.
+     *
+     * @param refreshToken the refresh token
+     * @return the user with refreshed tokens
+     */
+    public User refresh(final String refreshToken) {
+        final Token token = findAuthorizationTokenByValue(refreshToken);
+        if (nonNull(token)) {
+            final User user = token.getUser();
+            log.info("Refreshing tokens for user '{}'", user.getUsername());
+            return generateAuthorizationTokens(user);
+        } else {
+            throw new InvalidJwtException();
+        }
     }
 
     /**
@@ -82,20 +102,7 @@ public class TokenService {
      * Check if the token is a valid access token for the given user.
      */
     public boolean isValidAccessToken(final String jwt, final User user) {
-        final Token entry = tokenRepository.findByValue(jwt).orElse(null);
-        return nonNull(entry)
-            && jwtService.isTokenValid(entry.getValue(), user)
-            && entry.getType().isAccessToken();
-    }
-
-    /**
-     * Check if the token is a valid refresh token for the given user.
-     */
-    public boolean isValidToken(final String jwt, final User user) {
-        final Token entry = tokenRepository.findByValue(jwt).orElse(null);
-        return nonNull(entry)
-            && jwtService.isTokenValid(entry.getValue(), user)
-            && (entry.getType().isRefreshToken() || entry.getType().isAccessToken());
+        return jwtService.isTokenValid(jwt, user);
     }
 
     /**

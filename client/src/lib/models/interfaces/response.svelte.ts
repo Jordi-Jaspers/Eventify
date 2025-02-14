@@ -23,34 +23,6 @@ interface RegisterResponse {
 	validated: boolean;
 }
 
-interface DashboardResponse {
-	id: number;
-	name: string;
-	description: string;
-	global: boolean;
-	created: Date;
-	lastUpdated: Date;
-	updatedBy: string;
-	team: TeamResponse;
-	configuration: DashboardConfigurationResponse;
-}
-
-interface DashboardConfigurationResponse {
-	groups: DashboardGroupResponse[];
-	ungroupedChecks: CheckResponse[];
-}
-
-interface DashboardGroupResponse {
-	name: string;
-	checks: CheckResponse[];
-}
-
-interface CheckResponse {
-	id: number;
-	name: string;
-	created: Date;
-}
-
 interface TeamResponse {
 	id: number;
 	name: string;
@@ -81,4 +53,63 @@ interface AuthorizeResponse extends UserDetailsResponse {
 	accessToken: string;
 	refreshToken: string;
 	expiresAt: Date;
+}
+
+interface DashboardResponse {
+	id: number;
+	name: string;
+	description: string;
+	global: boolean;
+	created: Date;
+	lastUpdated: Date;
+	updatedBy: string;
+	team: TeamResponse;
+	configuration: DashboardConfigurationResponse;
+}
+
+interface DashboardConfigurationResponse {
+	groups: DashboardGroupResponse[];
+	ungroupedChecks: CheckResponse[];
+}
+
+interface DashboardGroupResponse {
+	name: string;
+	checks: CheckResponse[];
+}
+
+interface CheckResponse {
+	id: number;
+	name: string;
+	created: Date;
+}
+
+interface TimelineDurationResponse {
+	startTime: Date;
+	endTime: Date;
+	status: string;
+}
+
+interface TimelineResponse {
+	durations: TimelineDurationResponse[];
+}
+
+interface CheckTimelineResponse {
+	id: number;
+	name: string;
+	timeline: TimelineResponse;
+}
+
+interface GroupedTimelineResponse {
+	id: number;
+	name: string;
+	timeline: TimelineResponse;
+	checks: CheckTimelineResponse[];
+}
+
+interface DashboardSubscriptionResponse {
+	dashboardId: number;
+	window: number;
+	timeline: TimelineResponse;
+	groupedChecks: GroupedTimelineResponse[];
+	ungroupedChecks: CheckTimelineResponse[];
 }

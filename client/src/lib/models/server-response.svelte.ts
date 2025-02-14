@@ -5,7 +5,7 @@ export class ServerResponse {
 	duration: number = 0;
 	method: string;
 	path: string;
-	headers: Map<string, string>;
+	headers: Map<string, string[]>;
 
 	token?: string;
 	data?: any;
@@ -13,7 +13,7 @@ export class ServerResponse {
 	constructor(method: string, path: string, requestHeaders: HeadersInit | undefined) {
 		this.method = method;
 		this.path = path;
-		this.headers = new Map<string, string>();
+		this.headers = new Map<string, string[]>();
 
 		if (requestHeaders) {
 			const headers: Headers = new Headers(requestHeaders);

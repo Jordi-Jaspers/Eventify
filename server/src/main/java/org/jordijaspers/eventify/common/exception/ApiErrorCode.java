@@ -65,9 +65,9 @@ public enum ApiErrorCode implements ApiError {
         "ERR-0014",
         "A team with that name already exists."
     ),
-    USER_NOT_LOGGED_IN(
+    NO_SECURITY_CONTEXT_ERROR(
         "ERR-0015",
-        "No user is logged in. Cannot perform action without authorization."
+        "No security context found. There is no user or source logged in."
     ),
     USER_NOT_PART_OF_TEAM(
         "ERR-0016",
@@ -75,11 +75,47 @@ public enum ApiErrorCode implements ApiError {
     ),
     CANNOT_ACCESS_DASHBOARD(
         "ERR-0017",
-        "The user does not have access to the specified dashboard."
+        "You do not have the required permissions to access this dashboard."
     ),
     UNAUTHORIZED_ERROR(
         "ERR-0018",
         "You are not authorized to access this content."
+    ),
+    CHECK_NOT_FOUND_ERROR(
+        "ERR-0019",
+        "The requested check does not exist."
+    ),
+    DASHBOARD_STREAMING_ERROR(
+        "ERR-0020",
+        "An error occurred while streaming the dashboard."
+    ),
+    CANNOT_PUBLISH_EVENT(
+        "ERR-0021",
+        "Could not publish the event to the RabbitMQ message bus."
+    ),
+    CANNOT_PROCESS_EVENT(
+        "ERR-0022",
+        "Could not process the event from the RabbitMQ message bus."
+    ),
+    API_KEY_DISABLED_ERROR(
+        "ERR-0023",
+        "The provided API key is disabled, please contact the administrator."
+    ),
+    API_KEY_EXPIRED_ERROR(
+        "ERR-0024",
+        "The provided API key has expired, please request a new one."
+    ),
+    INVALID_API_KEY_ERROR(
+        "ERR-0025",
+        "The provided credentials are incorrect."
+    ),
+    SOURCE_NOT_FOUND_ERROR(
+        "ERR-0026",
+        "The requested source does not exist."
+    ),
+    CANNOT_ACCESS_CHECK(
+        "ERR-0027",
+        "You do not have the required permissions to access this check."
     );
 
     /**

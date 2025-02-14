@@ -2,6 +2,7 @@ declare module '*.png?enhanced';
 declare namespace App {
 	interface Locals {
 		user: UserDetailsResponse | null;
+		dashboards: DashboardResponse[];
 	}
 }
 
@@ -13,6 +14,7 @@ interface RetryConfig {
 interface ApiResponse {
 	success: boolean;
 	status: number;
+	headers: Map<string, string>;
 	message: string;
 	data: any;
 }

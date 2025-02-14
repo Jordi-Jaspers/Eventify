@@ -31,6 +31,22 @@ services:
     volumes:
       - inbucket_data:/data  # Persistent storage for Inbucket's data.
 
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:4-management
+    restart: unless-stopped
+    networks:
+      - internal
+    ports:
+      - "5672:5672"    # AMQP protocol port
+      - "15672:15672"  # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: root
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq  # Persistent storage for RabbitMQ data
+
 volumes:
   timescaledb_data:  # Volume for TimescaleDB
   inbucket_data:     # Volume for Inbucket
+  rabbitmq_data:     # Volume for RabbitMQ

@@ -13,7 +13,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 
 /**
  * The repository for the {@link Token} entity.
@@ -21,17 +23,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface TokenRepository extends JpaRepository<Token, Long> {
 
-    @Modifying
-    @Transactional
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Query("DELETE Token t WHERE t.type IN (:types) AND t.user = :user")
     void invalidateTokensWithTypeForUser(@Param("types") List<TokenType> types, @Param("user") User user);
 
-    @Modifying
-    @Transactional
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Query("DELETE FROM Token t WHERE t.expiresAt <= CURRENT_TIMESTAMP")
     void deleteExpiredTokens();
 
-    @Transactional
     @Query(
         """
             FROM Token t
@@ -42,7 +49,6 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
     )
     Optional<Token> findByValue(String token);
 
-    @Transactional
     @Query(
         """
             FROM Token t

@@ -2,20 +2,22 @@ package org.jordijaspers.eventify.api.source.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
+import static org.jordijaspers.eventify.common.util.SecurityUtil.getLoggedInUsername;
 
 @Data
 @Entity
-@NoArgsConstructor
 @Table(name = "api_key")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ApiKey implements Serializable {
@@ -53,10 +55,47 @@ public class ApiKey implements Serializable {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
+    @UpdateTimestamp
     @Column(name = "last_used")
     private LocalDateTime lastUsed;
 
     @Column(name = "enabled")
     private boolean enabled;
 
+    /**
+     * A constructor to create a new API key.
+     */
+    public ApiKey() {
+        initialize(LocalDateTime.now().plusYears(100));
+    }
+
+    /**
+     * A constructor to create a new API key with an expiration date.
+     *
+     * @param expiresAt The expiration date of the API key.
+     */
+    public ApiKey(final LocalDateTime expiresAt) {
+        initialize(expiresAt);
+    }
+
+    /**
+     * Checks if the API key is expired.
+     *
+     * @return true if the API key is expired, false otherwise.
+     */
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(this.expiresAt);
+    }
+
+    private void initialize(final LocalDateTime expiresAt) {
+        if (nonNull(this.id)) {
+            return;
+        }
+
+        this.key = UUID.randomUUID().toString();
+        this.createdBy = getLoggedInUsername();
+        this.expiresAt = expiresAt;
+        this.lastUsed = LocalDateTime.now();
+        this.enabled = true;
+    }
 }

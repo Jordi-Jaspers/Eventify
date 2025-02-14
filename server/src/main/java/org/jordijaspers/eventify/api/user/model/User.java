@@ -3,7 +3,6 @@ package org.jordijaspers.eventify.api.user.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
@@ -32,12 +31,6 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 @NoArgsConstructor
 @Table(name = "\"user\"")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(
-    exclude = {
-        "password",
-        "role"
-    }
-)
 public class User implements UserDetails {
 
     @Serial

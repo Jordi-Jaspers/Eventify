@@ -2,11 +2,12 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import moment from 'moment/moment';
 
-	let { name, global, lastUpdated, updatedBy } = $props<{
+	let { name, global, lastUpdated, updatedBy, description } = $props<{
 		name: string;
 		global: boolean;
 		lastUpdated: Date;
-		updatedBy: string;
+		updatedBy?: string;
+		description?: string;
 	}>();
 </script>
 
@@ -17,7 +18,13 @@
 			<Badge variant="secondary">Public</Badge>
 		{/if}
 	</h2>
-	<p class="text-sm italic text-muted-foreground">
-		Updated: {moment(lastUpdated).fromNow()} by {updatedBy}
-	</p>
+	{#if updatedBy}
+		<p class="text-sm italic text-muted-foreground">
+			Updated: {moment(lastUpdated).fromNow()} by {updatedBy}
+		</p>
+	{/if}
+
+	{#if description}
+		<p class="text-muted-foreground">{description}</p>
+	{/if}
 </div>

@@ -16,16 +16,15 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 
 @Data
 @Entity
+@EqualsAndHashCode
 @NoArgsConstructor
 @Table(name = "\"check\"")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Check implements Serializable {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -39,6 +38,7 @@ public class Check implements Serializable {
     )
     private LocalDateTime created;
 
+    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "source_id",

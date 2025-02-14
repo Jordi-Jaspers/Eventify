@@ -1,5 +1,4 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.jvm.toolchain.JavaLanguageVersion.of
@@ -60,6 +59,9 @@ plugins {
 /** Configure the dependencies required within the project. */
 dependencies {
     // ======= ANNOTATION PROCESSORS =======
+    // lombok is used to reduce boilerplate code for model classes.
+    annotationProcessor("org.projectlombok", "lombok")
+
     // annotation processor that generates metadata about classes in your application that are annotated with @ConfigurationProperties.
     annotationProcessor("org.springframework.boot", "spring-boot-configuration-processor")
 
@@ -74,6 +76,8 @@ dependencies {
     runtimeOnly("org.jolokia", "jolokia-support-spring", retrieve("jolokiaVersion"))
 
     // ======= SPRINGBOOT DEPENDENCIES =======
+    // Spring AMQP (includes RabbitMQ)
+    implementation("org.springframework.boot", "spring-boot-starter-amqp")
     implementation("org.springframework.boot", "spring-boot-starter-webflux")
     implementation("org.springframework.boot", "spring-boot-starter-actuator")
     implementation("org.springframework.boot", "spring-boot-starter-web")
@@ -90,9 +94,7 @@ dependencies {
 
     // ======= IMPLEMENTATION DEPENDENCIES =======
     // Open API documentation generation.
-    implementation("org.springframework.retry", "spring-retry", retrieve("springRetryVersion"))
     implementation("org.springdoc", "springdoc-openapi-starter-webmvc-ui", retrieve("springdocVersion"))
-
 
     // provides the core of hawaii framework such as the response entity exception handling.
     implementation("org.hawaiiframework", "hawaii-starter-rest", retrieve("hawaiiFrameworkVersion"))
@@ -125,44 +127,24 @@ dependencies {
 
     // ======= TEST DEPENDENCIES =======
     testImplementation("org.springframework.boot", "spring-boot-test")
+    testImplementation("org.springframework.amqp", "spring-rabbit-test")
     testImplementation("org.springframework.boot", "spring-boot-testcontainers")
     testImplementation("org.springframework.boot", "spring-boot-starter-test") {
         exclude("com.vaadin.external.google", module = "android-json")
     }
 
     testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))
-    testImplementation("org.testcontainers", "postgresql", retrieve("testContainerVersion"))
-    testImplementation("org.testcontainers", "junit-jupiter", retrieve("testContainerVersion"))
-    testImplementation("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
 
-    testImplementation("io.rest-assured", "rest-assured", retrieve("restAssuredVersion"))
-    testImplementation("io.rest-assured", "spring-mock-mvc", retrieve("restAssuredVersion"))
+    testImplementation("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
+    testImplementation("org.testcontainers", "postgresql", retrieve("testContainerVersion"))
+    testImplementation("org.testcontainers", "rabbitmq", retrieve("testContainerVersion"))
+    testImplementation("org.testcontainers", "junit-jupiter", retrieve("testContainerVersion"))
+
     // ======= LIQUIBASE PLUGIN DEPENDENCIES =======
     liquibaseRuntime("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
     liquibaseRuntime("info.picocli", "picocli", retrieve("picocliVersion"))
     liquibaseRuntime("org.yaml", "snakeyaml", retrieve("snakeyaml"))
     liquibaseRuntime("org.postgresql", "postgresql", retrieve("postgresVersion"))
-}
-
-/**
- * Removing vulnerability by persisting to a specified version.
- * Note: Remove once they are patched in the parent dependency.
- */
-configurations.all {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.apache.logging.log4j") {
-            useVersion("2.17.1")
-            because("Apache Log4j2 vulnerable to RCE via JDBC Appender when attacker controls configuration.")
-        }
-        if (requested.group == "org.yaml" && requested.name == "snakeyaml") {
-            useVersion("2.2")
-            because("Vulnerability in SnakeYAML 1.33: CVE-2022-1471")
-        }
-        if (requested.group == "com.jayway.jsonpath" && requested.name == "json-path") {
-            useVersion("2.9.0")
-            because("Vulnerability in jsonpath 2.7.0: CVE-2023-51074")
-        }
-    }
 }
 
 // ============== PLUGIN CONFIGURATION ================
@@ -249,7 +231,7 @@ when {
         project.ext["dbPassword"] = "tst_eventify"
         project.ext["contexts"] = "test"
         project.ext["outputFile"] = "build/liquibase/updateSQL.sql"
-        project.ext["changelogFile"] = "src/main/resources/db/changelog/db.changelog-master.yaml"
+        project.ext["changelogFile"] = "src/main/resources/db/changelog/db.changelog-plugin.yaml"
     }
 }
 
@@ -300,11 +282,6 @@ tasks.withType<ProcessResources> {
             line.replace("APPLICATION_VERSION", version as String)
         }
     }
-}
-
-tasks.withType<DependencyUpdatesTask> {
-    checkForGradleUpdate = true
-    gradleReleaseChannel = "current"
 }
 
 tasks.withType<JavaCompile> {

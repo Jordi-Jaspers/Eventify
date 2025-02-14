@@ -3,7 +3,9 @@ package org.jordijaspers.eventify.common.config;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jordijaspers.eventify.api.authentication.model.Permission;
 import org.jordijaspers.eventify.common.security.converter.JwtAuthenticationConverter;
+import org.jordijaspers.eventify.common.security.filter.ApiKeyAuthenticationFilter;
 import org.jordijaspers.eventify.common.security.filter.JwtAuthenticationFilter;
 import org.jordijaspers.eventify.common.security.filter.UnauthorizedHandler;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +15,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -21,7 +23,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.jordijaspers.eventify.api.Paths.*;
-import static org.jordijaspers.eventify.api.token.model.JWTClaimNames.PERMISSIONS;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 /**
@@ -44,12 +45,14 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain filterChain(@Value("${security.cors.allowed-origins}") final String[] allowedOrigins,
         final JwtAuthenticationFilter jwtAuthenticationFilter,
+        final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
         final JwtAuthenticationConverter jwtAuthenticationConverter,
         final UnauthorizedHandler unauthorizedHandler,
         final HttpSecurity http) throws Exception {
 
         // Adding a once per request filter to check the JWT token.
         http.addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class);
 
         // Configure Session Management.
         http.sessionManagement(sessionConfiguration -> sessionConfiguration.sessionCreationPolicy(STATELESS));
@@ -66,15 +69,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource(allowedOrigins)));
 
         // Configure OAuth2 Resource Server.
-        http.oauth2ResourceServer(oAuth2Configurer -> {
-            oAuth2Configurer.jwt(jwtConfigurer -> {
-                final JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-                converter.setAuthorityPrefix("");
-                converter.setAuthoritiesClaimName(PERMISSIONS);
-                jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(converter);
-                jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter);
-            });
-        });
+        http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::disable);
 
         // Configure Endpoints
         http.authorizeHttpRequests(accessManagement -> {
@@ -84,6 +79,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             accessManagement.requestMatchers(OPENAPI_PATH + WILDCARD_PART).permitAll();
             accessManagement.requestMatchers(ERROR_PATH).permitAll();
 
+            accessManagement.requestMatchers(EXTERNAL_BASE_PATH + WILDCARD_PART).hasAuthority(Permission.ACCESS_EXTERNAL.name());
             accessManagement.requestMatchers(LOGOUT_PATH).authenticated();
             accessManagement.anyRequest().authenticated();
         });
@@ -91,12 +87,14 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return http.build();
     }
 
+
     private UrlBasedCorsConfigurationSource corsConfigurationSource(final String... origins) {
         final var configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(origins));
         configuration.setAllowedMethods(List.of(WILDCARD));
         configuration.setAllowedHeaders(List.of(WILDCARD));
         configuration.setExposedHeaders(List.of(WILDCARD));
+        configuration.setAllowCredentials(true);
 
         final var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration(WILDCARD_PART, configuration);
