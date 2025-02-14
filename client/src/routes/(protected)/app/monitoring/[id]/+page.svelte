@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DisconnectedState, Timeline } from '$lib/components/monitoring';
+	import { DisconnectedState, Legend, Timeline } from '$lib/components/monitoring';
 	import { MonitoringService } from '$lib/components/monitoring/service/monitoring.service.ts';
 	import { DashboardConfigurationHeader } from '$lib/configuration';
 	import { ChevronRight, CornerDownRight, EllipsisVertical, Folder, FolderRoot, HardDrive, Info } from 'lucide-svelte';
@@ -16,6 +16,7 @@
 	let connectionStatus = $state<'connecting' | 'connected' | 'error'>('connecting');
 
 	let collapsedGroups = $state<Record<string, boolean>>({});
+
 	function toggleGroup(groupId: number) {
 		collapsedGroups[groupId] = !collapsedGroups[groupId];
 	}
@@ -45,7 +46,6 @@
 			},
 			onUpdate: (data) => {
 				subscription = data;
-				toast.success('Dashboard updated');
 			},
 			onError: () => {
 				connectionStatus = 'error';
@@ -68,10 +68,12 @@
 			description={dashboard.description}
 		/>
 		<div class="space-x-2">
-			<button class="btn btn-primary">
-				<Info />
-			</button>
-			<button class="btn btn-primary">
+			<Legend>
+				<button class="btn btn-primary">
+					<Info />
+				</button>
+			</Legend>
+			<button class="btn btn-primary" disabled>
 				<EllipsisVertical />
 			</button>
 		</div>
