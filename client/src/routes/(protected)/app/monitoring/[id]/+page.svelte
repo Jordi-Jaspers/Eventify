@@ -148,7 +148,6 @@
 					</Pane>
 				</ResizablePaneGroup>
 			</div>
-			<pre>{JSON.stringify(subscription, null, 2)}</pre>
 		{/if}
 	</div>
 </div>
