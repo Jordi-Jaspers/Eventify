@@ -54,7 +54,7 @@ public class DashboardController {
         produces = APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasAuthority('WRITE_DASHBOARDS')")
-    public ResponseEntity<DashboardResponse> createDashboard(@RequestBody CreateDashboardRequest request) {
+    public ResponseEntity<DashboardResponse> createDashboard(@RequestBody final CreateDashboardRequest request) {
         dashboardValidator.validateCreateDashboardRequest(request);
         final Dashboard dashboard = dashboardService.createDashboard(request);
         return ResponseEntity.status(CREATED).body(dashboardMapper.toDashboardResponse(dashboard));
@@ -67,8 +67,9 @@ public class DashboardController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAuthority('WRITE_DASHBOARDS')")
-    public ResponseEntity<DashboardResponse> updateDashboard(@PathVariable Long id, @RequestBody UpdateDashboardDetailsRequest request) {
+    @PreAuthorize("hasAuthority('WRITE_DASHBOARDS') and @dashboardSecurityService.hasDashboardAccess(#id)")
+    public ResponseEntity<DashboardResponse> updateDashboard(@PathVariable final Long id,
+        @RequestBody final UpdateDashboardDetailsRequest request) {
         dashboardValidator.validateUpdateDashboardDetailsRequest(request);
         final Dashboard dashboard = dashboardService.updateDashboard(id, request);
         return ResponseEntity.status(OK).body(dashboardMapper.toDashboardResponse(dashboard));
@@ -77,8 +78,8 @@ public class DashboardController {
     @ResponseStatus(NO_CONTENT)
     @Operation(summary = "Delete a specific dashboard.")
     @DeleteMapping(path = DASHBOARD_PATH)
-    @PreAuthorize("hasAuthority('WRITE_DASHBOARDS')")
-    public ResponseEntity<Void> deleteDashboard(@PathVariable Long id) {
+    @PreAuthorize("hasAuthority('WRITE_DASHBOARDS') and @dashboardSecurityService.hasDashboardAccess(#id)")
+    public ResponseEntity<Void> deleteDashboard(@PathVariable final Long id) {
         dashboardService.deleteDashboard(id);
         return ResponseEntity.status(NO_CONTENT).build();
     }

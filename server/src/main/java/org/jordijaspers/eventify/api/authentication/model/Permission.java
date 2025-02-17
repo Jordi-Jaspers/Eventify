@@ -15,12 +15,21 @@ import java.util.stream.Stream;
 public enum Permission {
 
     ACCESS_APPLICATION("The permission to access the application."),
+    ACCESS_EXTERNAL("The permission to access external API."),
+
     READ_DASHBOARDS("The permission to view all dashboards."),
     WRITE_DASHBOARDS("The permission to edit all dashboards."),
+
     READ_TEAMS("The permission to view all teams."),
     WRITE_TEAMS("The permission to edit all teams."),
+
     READ_USERS("The permission to view all users."),
-    WRITE_USERS("The permission to edit all users.");
+    WRITE_USERS("The permission to edit all users."),
+
+    READ_SOURCE("The permission to view all sources systems."),
+    WRITE_SOURCE("The permission to edit all sources systems."),
+
+    WRITE_EVENTS("The permission to send events to the Eventify API.");
 
     private final String description;
 

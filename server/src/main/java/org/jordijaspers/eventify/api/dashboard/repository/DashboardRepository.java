@@ -9,6 +9,7 @@ import org.jordijaspers.eventify.api.team.model.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -35,4 +36,14 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         ORDER BY d.created DESC
         """)
     List<Dashboard> findAllPermittedDashboards(@Param("teams") List<Team> teams);
+
+    @Query(
+        """
+            SELECT DISTINCT d FROM Dashboard d
+            LEFT JOIN FETCH d.team t
+            WHERE d.name LIKE %:name%
+            """
+    )
+    List<Dashboard> findAllByNameContaining(@NonNull String name);
+
 }

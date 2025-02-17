@@ -1,16 +1,15 @@
 import { SERVER_ROUTES } from '$lib/config/paths';
 import { ApiService } from '$lib/utils/api.service';
-import { CookieService } from '$lib/utils/cookie.service';
 import { type Actions, fail } from '@sveltejs/kit';
+import { CookieService } from '$lib/utils/cookie.service.ts';
 
 export async function load({ cookies }) {
 	const getTeams = async () => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.TEAMS.path, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: CookieService.getCookies(cookies)
 			}
 		});
 
@@ -18,12 +17,11 @@ export async function load({ cookies }) {
 	};
 
 	const getUsers = async () => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.USERS.path, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: CookieService.getCookies(cookies)
 			}
 		});
 
@@ -37,8 +35,7 @@ export async function load({ cookies }) {
 }
 
 export const actions: Actions = {
-	createTeam: async ({ request, cookies }) => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
+	createTeam: async ({ cookies, request }) => {
 		const data: FormData = await request.formData();
 		const input: TeamRequest = {
 			name: data.get('name') as string,
@@ -49,15 +46,14 @@ export const actions: Actions = {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: CookieService.getCookies(cookies)
 			},
 			body: JSON.stringify(input)
 		});
 
 		return response.success ? { response: response } : fail(response.status, { response: response });
 	},
-	updateTeam: async ({ request, cookies }) => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
+	updateTeam: async ({ cookies, request }) => {
 		const data: FormData = await request.formData();
 
 		const id: string = data.get('id') as string;
@@ -70,15 +66,14 @@ export const actions: Actions = {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: CookieService.getCookies(cookies)
 			},
 			body: JSON.stringify(input)
 		});
 
 		return response.success ? { response: response } : fail(response.status, { response: response });
 	},
-	deleteTeam: async ({ request, cookies }) => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
+	deleteTeam: async ({ cookies, request }) => {
 		const data: FormData = await request.formData();
 		const id: string = data.get('id') as string;
 
@@ -86,14 +81,13 @@ export const actions: Actions = {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: CookieService.getCookies(cookies)
 			}
 		});
 
 		return response.success ? { response: response } : fail(response.status, { response: response });
 	},
 	assignMember: async ({ request, cookies }) => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
 		const data: FormData = await request.formData();
 		const teamId: string = data.get('team_id') as string;
 		const userId: string = data.get('user_id') as string;
@@ -105,15 +99,14 @@ export const actions: Actions = {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: CookieService.getCookies(cookies)
 			},
 			body: JSON.stringify(teamMemberRequest)
 		});
 
 		return response.success ? { response: response } : fail(response.status, { response: response });
 	},
-	unassignMember: async ({ request, cookies }) => {
-		const { accessToken } = CookieService.getAuthTokens(cookies);
+	unassignMember: async ({ cookies, request }) => {
 		const data: FormData = await request.formData();
 		const teamId: string = data.get('team_id') as string;
 		const userId: string = data.get('user_id') as string;
@@ -125,7 +118,7 @@ export const actions: Actions = {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
+				Cookie: CookieService.getCookies(cookies)
 			},
 			body: JSON.stringify(teamMemberRequest)
 		});

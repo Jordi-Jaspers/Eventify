@@ -3,9 +3,9 @@
                    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
-                   logicalFilePath="202411130100-TST-accounts-teams-dashboards.xml">
+                   logicalFilePath="202411130100-DEV-accounts-teams-dashboards.xml">
 
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-1" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-1" author="jordi.jaspers" context="dev">
         <ext:documentation>
             Creating some user accounts and teams for testing purposes.
         </ext:documentation>
@@ -50,7 +50,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-2" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-2" author="jordi.jaspers" context="dev">
     <ext:documentation>
         Initializing a couple dashboards for each team.
     </ext:documentation>
@@ -103,7 +103,7 @@
         );
     </sql>
     </changeSet>
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-3" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-3" author="jordi.jaspers" context="dev">
     <ext:documentation>
         Initializing a source with api key for the public dashboard.
     </ext:documentation>
@@ -112,7 +112,7 @@
         (
          '98a957b1-8ee7-4108-9912-c680555d72fb',
          'jordijaspers@gmail.com',
-         (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 MONTH',
+         (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '1 YEAR',
          (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 DAY',
          true
         );
@@ -127,7 +127,7 @@
     </sql>
     </changeSet>
 
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-4" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-4" author="jordi.jaspers" context="dev">
     <ext:documentation>
         Initializing a checks and groups for the public dashboard.
     </ext:documentation>
@@ -174,7 +174,7 @@
     </sql>
     </changeSet>
 
-    <changeSet id="202411130100-TST-accounts-teams-dashboards-5" author="jordi.jaspers" context="test">
+    <changeSet id="202411130100-DEV-accounts-teams-dashboards-5" author="jordi.jaspers" context="dev">
     <ext:documentation>
         Adding events to the created checks to support monitoring.
     </ext:documentation>
@@ -183,10 +183,10 @@
         SELECT
             c.id AS check_id,
             (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-            event_time,
-            (ARRAY ['OK','OK','OK','OK','WARNING','CRITICAL','CRITICAL'])[round(random() * 6) + 1] as "check_result",
-            'This is a random message for the event occurring at ' || event_time
-        FROM generate_series((CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 WEEK', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), '15 SECOND'::interval) as event_time
+            event_time AT TIME ZONE 'UTC',
+            (ARRAY ['OK','OK','OK','OK','OK','OK','OK','OK','WARNING','CRITICAL'])[round(random() * 9) + 1] as "check_result",
+            'This is a random message for the event occurring at ' || event_time AT TIME ZONE 'UTC'
+        FROM generate_series((CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 WEEK', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), '30 SECOND'::interval) as event_time
         JOIN "check" AS c ON c.name IN (
             'Server CPU',
             'Server Memory',

@@ -1,18 +1,19 @@
 package org.jordijaspers.eventify.general;
 
-import io.restassured.module.mockmvc.response.MockMvcResponse;
-
 import java.io.IOException;
 
 import org.jordijaspers.eventify.support.IntegrationTest;
 import org.junit.jupiter.api.*;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static org.apache.http.HttpStatus.SC_OK;
+import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.jordijaspers.eventify.api.Paths.PUBLIC_HEALTH_PATH;
 import static org.jordijaspers.eventify.support.container.TimescaleContainer.DATABASE_NAME;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class to verify the context is loaded correctly.
@@ -37,6 +38,14 @@ public class ApplicationContextTest extends IntegrationTest {
 
     @Test
     @Order(3)
+    @DisplayName("RabbitMQ container is loaded and running")
+    public void testRabbitContainer() {
+        assertThat(rabbitContainer, is(notNullValue()));
+        assertThat(rabbitContainer.isRunning(), is(true));
+    }
+
+    @Test
+    @Order(4)
     @DisplayName("Timescale container is loaded and running")
     public void testDatabaseContainer() {
         assertThat(timescaleContainer, is(notNullValue()));
@@ -44,7 +53,7 @@ public class ApplicationContextTest extends IntegrationTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     @DisplayName("Database connection is established with Timescale")
     public void testDatabaseConnection() throws IOException, InterruptedException {
         assertThat(timescaleContainer.getJdbcUrl(), not(emptyString()));
@@ -52,21 +61,28 @@ public class ApplicationContextTest extends IntegrationTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
+    @DisplayName("Database is running in timezone UTC")
+    public void testDatabaseTimezone() throws IOException, InterruptedException {
+        final String timezone = timescaleContainer.execInContainer("psql", "-U", DATABASE_NAME, "-c", "SHOW TIMEZONE;").getStdout();
+        assertThat(timezone, containsString("UTC"));
+    }
+
+    @Test
+    @Order(7)
     @DisplayName("Health endpoint returns OK")
-    public void healthEndpoint() {
+    public void healthEndpoint() throws Exception {
+        // Given: The request for the health endpoint
+        final MockHttpServletRequestBuilder healthRequest = get(PUBLIC_HEALTH_PATH);
+
         // When: The health endpoint is invoked
-        // @formatter:off
-        final MockMvcResponse response = given()
-            .when()
-                .get(PUBLIC_HEALTH_PATH)
-                .andReturn();
-        // @formatter:on
+        final ResultActions response = mockMvc.perform(healthRequest);
 
         // Then: The response is 200 - OK
-        response.then().statusCode(SC_OK);
+        response.andExpect(status().is(SC_OK));
 
         // And: The response body contains the status UP
-        response.then().body("status", equalTo("UP"));
+        final String responseBody = response.andReturn().getResponse().getContentAsString();
+        assertThat(responseBody, containsString("UP"));
     }
 }

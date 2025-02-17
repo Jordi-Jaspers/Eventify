@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jordijaspers.eventify.api.check.model.Check;
 import org.jordijaspers.eventify.api.check.repository.CheckRepository;
+import org.jordijaspers.eventify.api.source.model.Source;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -49,5 +50,19 @@ public class CheckService {
         );
 
         return new PageImpl<>(checks, PageRequest.of(page, size), total);
+    }
+
+    /**
+     * Creates a new check and links it to the given source.
+     *
+     * @param name   The name of the check.
+     * @param source The source for the check.
+     * @return The created check.
+     */
+    public Check createCheck(final String name, final Source source) {
+        final Check check = new Check();
+        check.setName(name);
+        check.setSource(source);
+        return checkRepository.save(check);
     }
 }

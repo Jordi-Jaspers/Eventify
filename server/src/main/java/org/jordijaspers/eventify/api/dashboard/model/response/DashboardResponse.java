@@ -1,6 +1,8 @@
 package org.jordijaspers.eventify.api.dashboard.model.response;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.time.ZonedDateTime;
 
@@ -10,6 +12,8 @@ import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
  * A response model for a dashboard.
  */
 @Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class DashboardResponse {
 
     private Long id;

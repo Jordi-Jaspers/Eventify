@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import jakarta.persistence.*;
@@ -43,7 +43,7 @@ public class Team implements Serializable {
         name = "created",
         updatable = false
     )
-    private LocalDateTime created;
+    private OffsetDateTime created;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

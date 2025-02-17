@@ -32,7 +32,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
         """
             FROM Team t
             LEFT JOIN FETCH t.members
-            WHERE t.name = :name
+            WHERE t.name LIKE %:name%
             """
     )
     List<Team> findAllByNameContaining(@NonNull String name);

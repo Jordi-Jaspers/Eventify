@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.dashboard.model.response;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +12,12 @@ import org.jordijaspers.eventify.api.check.model.response.CheckResponse;
  * Response object for a dashboard group.
  */
 @Data
+@NoArgsConstructor
 public class DashboardGroupResponse {
 
-    private final String name;
+    private String name;
 
-    private final List<CheckResponse> checks = new ArrayList<>();
+    private List<CheckResponse> checks = new ArrayList<>();
 
     /**
      * A default constructor to create an existing dashboard group.

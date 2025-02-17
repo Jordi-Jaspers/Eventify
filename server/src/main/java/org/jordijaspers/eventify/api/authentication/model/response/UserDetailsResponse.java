@@ -4,8 +4,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.jordijaspers.eventify.api.authentication.model.Permission;
 import org.jordijaspers.eventify.api.team.model.response.TeamResponse;
 
 /**
@@ -29,7 +33,9 @@ public class UserDetailsResponse {
 
     private String authority;
 
-    private List<TeamResponse> teams;
+    private Set<Permission> permissions = new HashSet<>();
+
+    private List<TeamResponse> teams = new ArrayList<>();
 
     private boolean enabled;
 

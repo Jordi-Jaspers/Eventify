@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.Objects;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -12,15 +13,17 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.hawaiiframework.exception.ApiException;
 import org.hawaiiframework.web.resource.ErrorResponseResource;
+import org.jordijaspers.eventify.api.authentication.service.CookieService;
 import org.jordijaspers.eventify.api.token.service.JwtService;
 import org.jordijaspers.eventify.api.token.service.TokenService;
 import org.jordijaspers.eventify.api.user.model.User;
 import org.jordijaspers.eventify.api.user.service.UserService;
 import org.jordijaspers.eventify.common.exception.ApiErrorCode;
 import org.jordijaspers.eventify.common.exception.AuthorizationException;
+import org.jordijaspers.eventify.common.security.principal.JwtUserPrincipalAuthenticationToken;
+import org.jordijaspers.eventify.common.security.principal.UserTokenPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -30,7 +33,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.jordijaspers.eventify.api.Paths.LOGOUT_PATH;
+import static org.jordijaspers.eventify.common.config.RequestMatcherConfig.getExternalApiMatcher;
 import static org.jordijaspers.eventify.common.config.RequestMatcherConfig.getPublicMatchers;
+import static org.jordijaspers.eventify.common.constants.Constants.Security.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.StringUtils.hasText;
@@ -46,96 +53,117 @@ import static org.springframework.util.StringUtils.hasText;
 @SuppressWarnings("ReturnCount")
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String BEARER = "Bearer ";
-
-    private static final String ACCESS_TOKEN_COOKIE = "EVENTIFY_ACCESS_TOKEN";
-
     private final JwtService jwtService;
-
     private final TokenService tokenService;
-
     private final UserService userService;
+    private final CookieService cookieService;
 
-    /**
-     * The matchers to exclude from the filter.
-     *
-     * @param request current HTTP request
-     * @return true if the filter should not be applied, false otherwise
-     */
     @Override
     protected boolean shouldNotFilter(@NonNull final HttpServletRequest request) {
-        return getPublicMatchers().stream()
-            .anyMatch(matcher -> matcher.matches(request));
+        final boolean isPublic = getPublicMatchers().stream().anyMatch(matcher -> matcher.matches(request));
+        final boolean isExternal = getExternalApiMatcher().stream().anyMatch(matcher -> matcher.matches(request));
+        final boolean isLogout = request.getRequestURI().startsWith(LOGOUT_PATH);
+        return (isPublic || isExternal) && !isLogout;
     }
 
-    /**
-     * The filter implementation. It extracts the JWT token from the request and sets the security context when the token.
-     *
-     * @param request     The inbound HTTP request.
-     * @param response    The Outbound HTTP response.
-     * @param filterChain The spring filter chain.
-     * @throws ServletException When something goes wrong in the servlet.
-     * @throws IOException      When something goes wrong in the IO.
-     * @throws ApiException     When something goes wrong in the API.
-     */
     @Override
     protected void doFilterInternal(
         @NonNull final HttpServletRequest request,
         @NonNull final HttpServletResponse response,
         @NonNull final FilterChain filterChain) throws ServletException, IOException {
-        String jwt = extractJwtFromHeader(request);
-        if (!hasText(jwt)) {
-            jwt = extractJwtFromCookies(request);
-        }
-
-        if (!hasText(jwt)) {
-            log.debug("No JWT token found in the request headers or cookies.");
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         try {
-            log.debug("Validating JWT token.");
-            final String email = jwtService.extractSubject(jwt);
-            final User user = userService.loadUserByUsername(email);
-
-            if (tokenService.isValidAccessToken(jwt, user)) {
-                if (!isUserRestricted(user, response)) {
-                    log.debug("Authentication successful for user '{}'. Setting security context.", user.getUsername());
-                    SecurityContextHolder.getContext().setAuthentication(getAuthentication(user, request));
-                } else {
-                    log.debug("User '{}' is restricted. Authentication skipped.", user.getUsername());
+            final User authenticatedUser = authenticateRequest(request, response);
+            if (nonNull(authenticatedUser)) {
+                if (!isUserRestricted(authenticatedUser, response)) {
+                    filterChain.doFilter(request, response);
                     return;
                 }
-            } else {
-                log.debug("JWT token validation failed for user '{}'.", email);
-                SecurityContextHolder.clearContext();
+                return;
             }
-        } catch (final ApiException ex) {
-            log.warn("Authentication failed due to exception: {}", ex.getMessage());
-            SecurityContextHolder.clearContext();
-            respondWithError(response, ApiErrorCode.INVALID_TOKEN_ERROR, HttpStatus.UNAUTHORIZED, "Invalid token.");
-            return;
-        }
 
-        filterChain.doFilter(request, response);
+            log.debug("No valid authentication found. Clearing security context.");
+            SecurityContextHolder.clearContext();
+            filterChain.doFilter(request, response);
+        } catch (final ApiException apiException) {
+            SecurityContextHolder.clearContext();
+            cookieService.clearAuthCookies(response);
+            respondWithError(response, ApiErrorCode.INVALID_TOKEN_ERROR, HttpStatus.UNAUTHORIZED, apiException.getMessage());
+        }
     }
 
-    private String extractJwtFromHeader(final HttpServletRequest request) {
-        final String authorizationHeader = request.getHeader(AUTHORIZATION);
-        if (hasText(authorizationHeader) && authorizationHeader.startsWith(BEARER)) {
-            return authorizationHeader.substring(BEARER.length()).trim();
+    private User authenticateRequest(final HttpServletRequest request, final HttpServletResponse response) {
+        // Try both auth methods
+        final String accessToken = extractJwtFromHeader(request);
+        final String accessTokenFromCookie = extractJwtFromCookies(request, ACCESS_TOKEN_COOKIE);
+
+        // Prefer header token over cookie if both exist
+        final String tokenToUse = hasText(accessToken) ? accessToken : accessTokenFromCookie;
+        if (hasText(tokenToUse)) {
+            final User authenticatedUser = tryAuthenticateWithAccessToken(tokenToUse);
+            if (nonNull(authenticatedUser) && !isUserRestricted(authenticatedUser, response)) {
+                setSecurityContext(authenticatedUser, tokenToUse, request);
+                return authenticatedUser;
+            }
+        }
+
+        // Try refresh token if access token failed
+        final String refreshToken = extractJwtFromCookies(request, REFRESH_TOKEN_COOKIE);
+        if (hasText(refreshToken)) {
+            return tryRefreshTokens(refreshToken, response, request);
+        }
+
+        return null;
+    }
+
+    private User tryAuthenticateWithAccessToken(final String accessToken) {
+        try {
+            final String email = jwtService.extractSubject(accessToken);
+            final User user = userService.loadUserByUsername(email);
+            if (tokenService.isValidAccessToken(accessToken, user)) {
+                return user;
+            }
+        } catch (final ApiException ex) {
+            log.debug("Access token authentication failed: {}", ex.getMessage());
         }
         return null;
     }
 
-    private String extractJwtFromCookies(final HttpServletRequest request) {
+    private User tryRefreshTokens(final String refreshToken, final HttpServletResponse response, final HttpServletRequest request) {
+        try {
+            if (!jwtService.isTokenExpired(refreshToken)) {
+                final User refreshedUser = tokenService.refresh(refreshToken);
+                if (nonNull(refreshedUser)) {
+                    cookieService.setAuthCookies(
+                        response,
+                        refreshedUser.getAccessToken(),
+                        refreshedUser.getRefreshToken()
+                    );
+                    setSecurityContext(refreshedUser, refreshedUser.getAccessToken().getValue(), request);
+                    return refreshedUser;
+                }
+            }
+        } catch (final ApiException apiException) {
+            log.debug("Token refresh failed: {}", apiException.getMessage());
+        }
+        return null;
+    }
+
+    private String extractJwtFromHeader(final HttpServletRequest request) {
+        final String authHeader = request.getHeader(AUTHORIZATION);
+        if (hasText(authHeader) && authHeader.startsWith(BEARER)) {
+            return authHeader.substring(BEARER.length()).trim();
+        }
+        return null;
+    }
+
+    private String extractJwtFromCookies(final HttpServletRequest request, final String cookieName) {
         if (isNull(request.getCookies())) {
             return null;
         }
 
         for (final Cookie cookie : request.getCookies()) {
-            if (ACCESS_TOKEN_COOKIE.equals(cookie.getName())) {
+            if (Objects.equals(cookie.getName(), cookieName)) {
                 log.debug("JWT token found in cookie: {}", cookie.getName());
                 return cookie.getValue();
             }
@@ -143,14 +171,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private UsernamePasswordAuthenticationToken getAuthentication(final User user, final HttpServletRequest request) {
-        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            user,
-            user.getRole(),
+    private void setSecurityContext(final User user, final String tokenValue, final HttpServletRequest request) {
+        final UserTokenPrincipal principal = new UserTokenPrincipal(user, tokenValue);
+
+        final JwtUserPrincipalAuthenticationToken authentication = new JwtUserPrincipalAuthenticationToken(
+            principal,
             user.getAuthorities()
         );
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        return authentication;
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.debug("Authentication successful for user '{}'. Setting security context.", user.getUsername());
     }
 
     private boolean isUserRestricted(final User user, final HttpServletResponse response) {
@@ -187,7 +218,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             final ObjectWriter writer = new ObjectMapper().writer().withDefaultPrettyPrinter();
             response.getWriter().write(writer.writeValueAsString(errorResponse));
-
         } catch (final IOException ex) {
             log.error("Error while writing the error response: {}", ex.getMessage(), ex);
         }

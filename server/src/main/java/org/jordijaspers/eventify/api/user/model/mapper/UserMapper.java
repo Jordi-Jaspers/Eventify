@@ -1,7 +1,9 @@
 package org.jordijaspers.eventify.api.user.model.mapper;
 
 import java.util.List;
+import java.util.Set;
 
+import org.jordijaspers.eventify.api.authentication.model.Permission;
 import org.jordijaspers.eventify.api.authentication.model.Role;
 import org.jordijaspers.eventify.api.authentication.model.request.RegisterUserRequest;
 import org.jordijaspers.eventify.api.authentication.model.response.RegisterResponse;
@@ -67,6 +69,10 @@ public abstract class UserMapper {
         target = "teams",
         qualifiedByName = "toTeamResponsesWithoutMembers"
     )
+    @Mapping(
+        target = "permissions",
+        expression = "java(mapRoleToPermissions(user.getRole()))"
+    )
     @Named("toUserDetailsResponse")
     public abstract UserDetailsResponse toUserDetailsResponse(User user);
 
@@ -75,5 +81,9 @@ public abstract class UserMapper {
 
     public String mapRoleToAuthority(final Role role) {
         return role.getAuthority();
+    }
+
+    public Set<Permission> mapRoleToPermissions(final Role role) {
+        return role.getPermissions();
     }
 }

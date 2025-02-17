@@ -3,10 +3,9 @@ package org.jordijaspers.eventify.api.user.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.io.Serial;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,7 +22,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 
-
 /**
  * The user entity.
  */
@@ -32,12 +30,6 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 @NoArgsConstructor
 @Table(name = "\"user\"")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(
-    exclude = {
-        "password",
-        "role"
-    }
-)
 public class User implements UserDetails {
 
     @Serial
@@ -71,14 +63,14 @@ public class User implements UserDetails {
 
     @UpdateTimestamp
     @Column(name = "last_login")
-    private LocalDateTime lastLogin;
+    private OffsetDateTime lastLogin;
 
     @CreationTimestamp
     @Column(
         name = "created",
         updatable = false
     )
-    private LocalDateTime created;
+    private OffsetDateTime created;
 
     @ManyToMany(
         mappedBy = "members",

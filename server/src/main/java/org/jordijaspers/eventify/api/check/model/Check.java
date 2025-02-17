@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,16 +16,15 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 
 @Data
 @Entity
+@EqualsAndHashCode
 @NoArgsConstructor
 @Table(name = "\"check\"")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Check implements Serializable {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -37,8 +36,9 @@ public class Check implements Serializable {
         name = "created",
         updatable = false
     )
-    private LocalDateTime created;
+    private OffsetDateTime created;
 
+    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "source_id",

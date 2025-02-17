@@ -20,7 +20,7 @@ public class DateTimeMapper {
     /**
      * Converts a LocalDateTime to a ZonedDateTime, assuming zone UTC.
      */
-    public ZonedDateTime oUTCZonedDateTimeFromLocal(final LocalDateTime localDateTime) {
+    public ZonedDateTime toUTCZonedDateTimeFromLocal(final LocalDateTime localDateTime) {
         return isNull(localDateTime)
             ? null
             : ZonedDateTime.of(localDateTime, UTC);
@@ -56,7 +56,7 @@ public class DateTimeMapper {
     /**
      * Converts a ZonedDateTime to an Instant.
      */
-    public Instant oInstantFromZone(final ZonedDateTime zonedDateTime) {
+    public Instant toInstantFromZone(final ZonedDateTime zonedDateTime) {
         return isNull(zonedDateTime)
             ? null
             : zonedDateTime.toInstant();

@@ -1,8 +1,8 @@
 import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { CLIENT_ROUTES, SERVER_ROUTES } from '$lib/config/paths';
-import { CookieService } from '$lib/utils/cookie.service';
 import { ApiService } from '$lib/utils/api.service';
+import { CookieService } from '$lib/utils/cookie.service.ts';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.user && locals.user.validated && locals.user.enabled) {
@@ -18,20 +18,25 @@ export const actions: Actions = {
 			password: data.get('password') as string
 		};
 
-		const response: ApiResponse = await ApiService.fetchFromServer(SERVER_ROUTES.LOGIN.path, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(input)
-		});
+		const response: ApiResponse = await ApiService.fetchFromServer(
+			SERVER_ROUTES.LOGIN.path,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Cookie: CookieService.getCookies(cookies)
+				},
+				body: JSON.stringify(input)
+			},
+			{
+				retries: 1,
+				timeout: 60_000,
+				cookies: cookies
+			}
+		);
 
 		if (response.success) {
 			const authorizeResponse: AuthorizeResponse = await response.data;
-			const tokenPair: TokenPair = {
-				accessToken: authorizeResponse.accessToken,
-				refreshToken: authorizeResponse.refreshToken
-			};
-
-			CookieService.setAuthCookies(cookies, tokenPair);
 			locals.user = authorizeResponse;
 
 			if (authorizeResponse?.validated && authorizeResponse?.enabled) {
@@ -40,7 +45,7 @@ export const actions: Actions = {
 		}
 		return response.success ? { response: response } : fail(response.status, { response: response });
 	},
-	register: async ({ request }) => {
+	register: async ({ request, cookies }) => {
 		const data = await request.formData();
 		const input: RegisterRequest = {
 			firstName: data.get('firstName') as string,
@@ -54,12 +59,16 @@ export const actions: Actions = {
 			SERVER_ROUTES.REGISTER.path,
 			{
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+					Cookie: CookieService.getCookies(cookies)
+				},
 				body: JSON.stringify(input)
 			},
 			{
 				retries: 1,
-				timeout: 60_000
+				timeout: 60_000,
+				cookies: cookies
 			}
 		);
 

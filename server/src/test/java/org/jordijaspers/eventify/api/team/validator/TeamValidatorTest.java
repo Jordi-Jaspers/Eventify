@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jordijaspers.eventify.api.team.model.validator.TeamValidator.*;
 
-@DisplayName("TeamValidator")
+@DisplayName("Team Validator Unit Tests")
 public class TeamValidatorTest extends UnitTest {
 
     private final TeamValidator validator = new TeamValidator();

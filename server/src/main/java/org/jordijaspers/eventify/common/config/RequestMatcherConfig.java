@@ -11,6 +11,7 @@ import static org.jordijaspers.eventify.api.Paths.*;
  */
 public final class RequestMatcherConfig {
 
+    private static final AntPathRequestMatcher EXTERNAL_MATCHER = new AntPathRequestMatcher(EXTERNAL_BASE_PATH + WILDCARD_PART);
     private static final AntPathRequestMatcher ACTUATOR_MATCHER = new AntPathRequestMatcher(PUBLIC_ACTUATOR_PATH + WILDCARD_PART);
     private static final AntPathRequestMatcher PUBLIC_MATCHER = new AntPathRequestMatcher(PUBLIC_PATH + WILDCARD_PART);
     private static final AntPathRequestMatcher AUTH_MATCHER = new AntPathRequestMatcher(AUTH_PATH + WILDCARD_PART);
@@ -32,5 +33,12 @@ public final class RequestMatcherConfig {
             OPENAPI_MATCHER,
             ERROR_MATCHER
         );
+    }
+
+    /**
+     * Retrieve the list of external API endpoints.
+     */
+    public static List<AntPathRequestMatcher> getExternalApiMatcher() {
+        return List.of(EXTERNAL_MATCHER);
     }
 }

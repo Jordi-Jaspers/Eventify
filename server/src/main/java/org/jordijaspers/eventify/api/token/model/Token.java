@@ -4,7 +4,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import jakarta.persistence.*;
 
 import org.jordijaspers.eventify.api.user.model.User;
@@ -42,7 +42,7 @@ public class Token implements Serializable {
     private TokenType type;
 
     @Column(name = "expires_at")
-    private LocalDateTime expiresAt;
+    private OffsetDateTime expiresAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
@@ -55,7 +55,7 @@ public class Token implements Serializable {
      * @param type      the type of the token
      * @param user      the user the token belongs to
      */
-    public Token(final String value, final LocalDateTime expiresAt, final TokenType type, final User user) {
+    public Token(final String value, final OffsetDateTime expiresAt, final TokenType type, final User user) {
         this.value = value;
         this.type = type;
         this.expiresAt = expiresAt;

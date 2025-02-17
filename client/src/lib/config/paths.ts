@@ -97,6 +97,10 @@ export const SERVER_ROUTES = {
 	CHECK_SEARCH: {
 		path: `${SERVER_BASE_URL}/check`,
 		type: RouteType.PRIVATE
+	},
+	MONITORING: {
+		path: `${SERVER_BASE_URL}/dashboard/{id}/monitoring/stream`,
+		type: RouteType.PRIVATE
 	}
 };
 
@@ -167,6 +171,14 @@ export const CLIENT_ROUTES = {
 	},
 	PROXY_CHECK_SEARCH: {
 		path: '/proxy/check',
+		type: RouteType.PRIVATE
+	},
+	SOURCE_SYSTEMS_MANAGEMENT_PAGE: {
+		path: '/app/management/source',
+		type: RouteType.PRIVATE
+	},
+	SOURCE_SYSTEM_MANAGEMENT_PAGE: {
+		path: '/app/management/source/{id}',
 		type: RouteType.PRIVATE
 	}
 };

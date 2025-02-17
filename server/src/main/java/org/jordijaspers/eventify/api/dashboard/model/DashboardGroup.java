@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -42,7 +42,7 @@ public class DashboardGroup implements Serializable {
         updatable = false,
         nullable = false
     )
-    private LocalDateTime created;
+    private OffsetDateTime created;
 
     @Column(name = "display_order")
     private int displayOrder;
