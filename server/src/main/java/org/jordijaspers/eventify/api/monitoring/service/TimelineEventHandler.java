@@ -34,6 +34,7 @@ public class TimelineEventHandler {
         final CheckTimelineResponse affectedCheck = subscription.findAffectedCheck(checkId);
         final TimelineResponse current = affectedCheck.getTimeline();
 
+        log.debug("Combining timeline the current timeline with the new timeline.\n '{}' <-> '{}'", current, timeline);
         final TimelineResponse combinedTimeline = combineTimelines(List.of(current, timeline));
         if (current.getDurations().size() == combinedTimeline.getDurations().size()) {
             log.debug("Timeline for check '{}' did not change, skipping update.", checkId);

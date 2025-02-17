@@ -32,15 +32,13 @@ public final class SseTestUtils {
     /**
      * Collects SSE events from a response stream until a specific event type is encountered or timeout occurs.
      *
-     * @param mvcResult         The MvcResult containing the SSE stream
-     * @param expectedEventType The event type to wait for
-     * @param timeout           Maximum duration to wait for the expected event
+     * @param mvcResult     The MvcResult containing the SSE stream
+     * @param expectedEvent The event type to wait for
+     * @param timeout       Maximum duration to wait for the expected event
      * @return List of collected events as key-value maps
      */
-    public static List<Map<String, String>> collectEvents(final MvcResult mvcResult,
-        final String expectedEventType,
-        final Duration timeout) {
-        final EventCollector collector = new EventCollector(expectedEventType);
+    public static List<Map<String, String>> collectEvents(final MvcResult mvcResult, final String expectedEvent, final Duration timeout) {
+        final EventCollector collector = new EventCollector(expectedEvent);
         return collector.collectEvents(mvcResult, timeout);
     }
 
