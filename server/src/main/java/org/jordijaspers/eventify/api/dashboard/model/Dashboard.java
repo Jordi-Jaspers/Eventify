@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +20,7 @@ import org.jordijaspers.eventify.api.check.model.Check;
 import org.jordijaspers.eventify.api.dashboard.model.request.CreateDashboardRequest;
 import org.jordijaspers.eventify.api.team.model.Team;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
@@ -53,7 +54,7 @@ public class Dashboard implements Serializable {
         name = "created",
         updatable = false
     )
-    private LocalDateTime created;
+    private OffsetDateTime created;
 
     @Column(
         name = "updated_by",
@@ -63,7 +64,7 @@ public class Dashboard implements Serializable {
 
     @UpdateTimestamp
     @Column(name = "last_updated")
-    private LocalDateTime lastUpdated;
+    private OffsetDateTime lastUpdated;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Team team;
@@ -100,8 +101,8 @@ public class Dashboard implements Serializable {
         this.team = team;
 
         this.updatedBy = email;
-        this.lastUpdated = LocalDateTime.now();
-        this.created = LocalDateTime.now();
+        this.lastUpdated = OffsetDateTime.now(UTC);
+        this.created = OffsetDateTime.now(UTC);
     }
 
     /**

@@ -2,13 +2,14 @@ package org.jordijaspers.eventify.api.authentication.service;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.jordijaspers.eventify.api.token.model.Token;
 import org.springframework.stereotype.Service;
 
+import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.jordijaspers.eventify.common.constants.Constants.Security.ACCESS_TOKEN_COOKIE;
 import static org.jordijaspers.eventify.common.constants.Constants.Security.REFRESH_TOKEN_COOKIE;
@@ -60,16 +61,16 @@ public class CookieService {
      * @param response the response to clear the cookies in
      */
     public void clearAuthCookies(final HttpServletResponse response) {
-        response.addCookie(createSecureCookie(ACCESS_TOKEN_COOKIE, "", LocalDateTime.now().minusDays(1)));
-        response.addCookie(createSecureCookie(REFRESH_TOKEN_COOKIE, "", LocalDateTime.now().minusDays(1)));
+        response.addCookie(createSecureCookie(ACCESS_TOKEN_COOKIE, "", OffsetDateTime.now(UTC).minusDays(1)));
+        response.addCookie(createSecureCookie(REFRESH_TOKEN_COOKIE, "", OffsetDateTime.now(UTC).minusDays(1)));
     }
 
-    private Cookie createSecureCookie(final String name, final String value, final LocalDateTime expiresAt) {
+    private Cookie createSecureCookie(final String name, final String value, final OffsetDateTime expiresAt) {
         final Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setMaxAge((int) LocalDateTime.now().until(expiresAt, SECONDS));
+        cookie.setMaxAge((int) OffsetDateTime.now(UTC).until(expiresAt, SECONDS));
         cookie.setAttribute("SameSite", "Lax");
         return cookie;
     }

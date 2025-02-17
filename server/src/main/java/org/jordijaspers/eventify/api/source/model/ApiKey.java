@@ -5,13 +5,15 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 import static org.jordijaspers.eventify.common.util.SecurityUtil.getLoggedInUsername;
@@ -50,14 +52,14 @@ public class ApiKey implements Serializable {
         updatable = false,
         nullable = false
     )
-    private LocalDateTime created;
+    private OffsetDateTime created;
 
     @Column(name = "expires_at")
-    private LocalDateTime expiresAt;
+    private OffsetDateTime expiresAt;
 
     @UpdateTimestamp
     @Column(name = "last_used")
-    private LocalDateTime lastUsed;
+    private OffsetDateTime lastUsed;
 
     @Column(name = "enabled")
     private boolean enabled;
@@ -66,7 +68,7 @@ public class ApiKey implements Serializable {
      * A constructor to create a new API key.
      */
     public ApiKey() {
-        initialize(LocalDateTime.now().plusYears(100));
+        initialize(OffsetDateTime.now(UTC).plusYears(100));
     }
 
     /**
@@ -74,8 +76,17 @@ public class ApiKey implements Serializable {
      *
      * @param expiresAt The expiration date of the API key.
      */
-    public ApiKey(final LocalDateTime expiresAt) {
+    public ApiKey(final OffsetDateTime expiresAt) {
         initialize(expiresAt);
+    }
+
+    /**
+     * A constructor to create a new API key with an expiration date.
+     *
+     * @param expiresAt The expiration date of the API key.
+     */
+    public ApiKey(final ZonedDateTime expiresAt) {
+        initialize(expiresAt.toOffsetDateTime());
     }
 
     /**
@@ -84,10 +95,10 @@ public class ApiKey implements Serializable {
      * @return true if the API key is expired, false otherwise.
      */
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(this.expiresAt);
+        return OffsetDateTime.now(UTC).isAfter(this.expiresAt);
     }
 
-    private void initialize(final LocalDateTime expiresAt) {
+    private void initialize(final OffsetDateTime expiresAt) {
         if (nonNull(this.id)) {
             return;
         }
@@ -95,7 +106,7 @@ public class ApiKey implements Serializable {
         this.key = UUID.randomUUID().toString();
         this.createdBy = getLoggedInUsername();
         this.expiresAt = expiresAt;
-        this.lastUsed = LocalDateTime.now();
+        this.lastUsed = OffsetDateTime.now(UTC);
         this.enabled = true;
     }
 }

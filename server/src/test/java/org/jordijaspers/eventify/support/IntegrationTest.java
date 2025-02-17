@@ -3,7 +3,7 @@ package org.jordijaspers.eventify.support;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +30,7 @@ import org.jordijaspers.eventify.api.user.model.request.*;
 import org.jordijaspers.eventify.support.util.WebMvcConfigurator;
 import org.junit.jupiter.api.BeforeEach;
 
+import static java.time.ZoneOffset.UTC;
 import static org.jordijaspers.eventify.api.dashboard.service.DashboardService.configureGroupedChecks;
 import static org.jordijaspers.eventify.api.dashboard.service.DashboardService.configureUngroupedChecks;
 import static org.jordijaspers.eventify.api.token.model.TokenType.REFRESH_TOKEN;
@@ -96,7 +97,7 @@ public class IntegrationTest extends WebMvcConfigurator {
         configureGroupedChecks(request.getGroups(), dashboard);
         configureUngroupedChecks(request, dashboard);
         dashboard.setUpdatedBy(TEST_EMAIL);
-        dashboard.setLastUpdated(LocalDateTime.now());
+        dashboard.setLastUpdated(OffsetDateTime.now(UTC));
 
         return dashboardRepository.save(dashboard);
     }
@@ -115,7 +116,7 @@ public class IntegrationTest extends WebMvcConfigurator {
 
         final Dashboard dashboard = new Dashboard(request, TEST_EMAIL, team);
         dashboard.setUpdatedBy(TEST_EMAIL);
-        dashboard.setLastUpdated(LocalDateTime.now());
+        dashboard.setLastUpdated(OffsetDateTime.now(UTC));
 
         return dashboardRepository.save(dashboard);
     }

@@ -3,7 +3,7 @@ package org.jordijaspers.eventify.api.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.hawaiiframework.repository.DataNotFoundException;
@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.authentication.model.Authority.USER;
@@ -74,7 +75,7 @@ public class UserService implements UserDetailsService {
      */
     @Scheduled(fixedDelay = 24 * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MILLIS_PER_SECOND)
     public void deleteUnvalidatedAccounts() {
-        userRepository.deleteUnvalidatedAccounts(LocalDateTime.now().minusMonths(1));
+        userRepository.deleteUnvalidatedAccounts(OffsetDateTime.now(UTC).minusMonths(1));
     }
 
     /**
@@ -139,7 +140,7 @@ public class UserService implements UserDetailsService {
 
         user.setEmail(email);
         user.setValidated(false);
-        user.setCreated(LocalDateTime.now());
+        user.setCreated(OffsetDateTime.now(UTC));
         tokenService.invalidateTokensForUser(user, TokenType.values());
 
         log.info("Email has been updated to '{}', sending email to validate account.", email);

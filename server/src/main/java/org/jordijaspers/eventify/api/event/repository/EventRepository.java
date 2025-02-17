@@ -1,7 +1,7 @@
 
 package org.jordijaspers.eventify.api.event.repository;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import org.jordijaspers.eventify.api.event.model.Event;
@@ -31,6 +31,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             ORDER BY e.id.timestamp
             """
     )
-    Optional<Event> findRecentEventSince(@Param("checkId") Long checkId, @Param("since") LocalDateTime since);
+    Optional<Event> findRecentEventSince(@Param("checkId") Long checkId, @Param("since") OffsetDateTime since);
 
 }

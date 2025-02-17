@@ -21,7 +21,7 @@ public abstract class EventMapper {
 
     @Mapping(
         target = "id",
-        expression = "java(new EventId(request.getCheckId(), request.getTimestamp().toLocalDateTime()))"
+        expression = "java(new EventId(request.getCheckId(), request.getTimestamp()))"
     )
     @Named("toEvent")
     public abstract Event toEvent(EventRequest request);

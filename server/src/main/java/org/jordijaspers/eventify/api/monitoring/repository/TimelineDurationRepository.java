@@ -1,6 +1,6 @@
 package org.jordijaspers.eventify.api.monitoring.repository;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -54,6 +54,6 @@ public interface TimelineDurationRepository extends JpaRepository<TimelineDurati
     )
     List<TimelineDuration> findDurationsForChecks(
         @Param("checkIds") Set<Long> checkIds,
-        @Param("startTime") LocalDateTime startTime
+        @Param("startTime") OffsetDateTime startTime
     );
 }

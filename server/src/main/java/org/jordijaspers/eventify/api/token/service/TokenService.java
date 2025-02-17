@@ -3,7 +3,7 @@ package org.jordijaspers.eventify.api.token.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.token.model.TokenType.*;
 import static org.jordijaspers.eventify.common.constants.Constants.Time.MILLIS_PER_SECOND;
@@ -83,7 +84,7 @@ public class TokenService {
         final Token token = Token.builder()
             .value(UUID.randomUUID().toString())
             .type(type)
-            .expiresAt(LocalDateTime.now().plusDays(1))
+            .expiresAt(OffsetDateTime.now(UTC).plusDays(1))
             .user(user)
             .build();
         log.info("Generated '{}' token for user '{}'", type, user.getEmail());

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,7 +47,7 @@ public class JwtService {
      * Generate a JWT access token for the user with the given claims.
      */
     public <T extends UserDetails> Token generateAccessToken(final T user) {
-        final LocalDateTime now = LocalDateTime.now();
+        final OffsetDateTime now = OffsetDateTime.now(UTC);
         final User userDetails = (User) user;
         final String[] permissions = user.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
@@ -62,9 +62,9 @@ public class JwtService {
             .id(UUID.randomUUID().toString())
             .subject(user.getUsername())
             .issuer(applicationProperties.getUrl())
-            .issuedAt(now.toInstant(UTC))
+            .issuedAt(now.toInstant())
             .audience(List.of(applicationProperties.getUrl()))
-            .expiresAt(now.plus(properties.getLifetime(), properties.getTimeUnit()).toInstant(UTC))
+            .expiresAt(now.plus(properties.getLifetime(), properties.getTimeUnit()).toInstant())
             .claim(AUTHORITY, userDetails.getRole().getAuthority())
             .claim(PERMISSIONS, permissions)
             .claim(TEAMS, teams)
@@ -72,13 +72,13 @@ public class JwtService {
             .claim(LAST_NAME, userDetails.getLastName())
             .claim(ENABLED, userDetails.isEnabled())
             .claim(VALIDATED, userDetails.isValidated())
-            .claim(LAST_LOGIN, userDetails.getLastLogin().toEpochSecond(UTC))
-            .claim(CREATED, userDetails.getCreated().toEpochSecond(UTC))
+            .claim(LAST_LOGIN, userDetails.getLastLogin().toEpochSecond())
+            .claim(CREATED, userDetails.getCreated().toEpochSecond())
             .build();
 
         return new Token(
             encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue(),
-            LocalDateTime.ofInstant(claimsSet.getExpiresAt(), UTC),
+            OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC),
             ACCESS_TOKEN,
             (User) user
         );
@@ -88,20 +88,20 @@ public class JwtService {
      * Generate a Refresh JWT token for a user with the given claims.
      */
     public <T extends UserDetails> Token generateRefreshToken(final T user) {
-        final LocalDateTime now = LocalDateTime.now();
+        final OffsetDateTime now = OffsetDateTime.now(UTC);
         final TokenProperties properties = securityProperties.getRefreshToken();
         final JwtClaimsSet claimsSet = JwtClaimsSet.builder()
             .id(UUID.randomUUID().toString())
             .subject(user.getUsername())
             .issuer(applicationProperties.getUrl())
-            .issuedAt(now.toInstant(UTC))
+            .issuedAt(now.toInstant())
             .audience(List.of(applicationProperties.getUrl()))
-            .expiresAt(now.plus(properties.getLifetime(), properties.getTimeUnit()).toInstant(UTC))
+            .expiresAt(now.plus(properties.getLifetime(), properties.getTimeUnit()).toInstant())
             .build();
 
         return new Token(
             encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue(),
-            LocalDateTime.ofInstant(claimsSet.getExpiresAt(), UTC),
+            OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC),
             REFRESH_TOKEN,
             (User) user
         );

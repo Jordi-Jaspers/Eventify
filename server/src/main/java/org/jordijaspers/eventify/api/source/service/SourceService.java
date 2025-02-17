@@ -83,7 +83,7 @@ public class SourceService {
     public Source regenerateApiKey(final Long id, final ApiKeyRequest request) {
         final Source source = getSource(id);
         apiKeyRepository.delete(source.getApiKey());
-        source.setApiKey(new ApiKey(request.getExpiresAt().toLocalDateTime()));
+        source.setApiKey(new ApiKey(request.getExpiresAt()));
         return sourceRepository.save(source);
     }
 

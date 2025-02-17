@@ -1,14 +1,15 @@
 package org.jordijaspers.eventify.api.event.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import jakarta.persistence.Embeddable;
 
+import static java.time.ZoneOffset.UTC;
 import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 
 /**
@@ -17,7 +18,6 @@ import static org.jordijaspers.eventify.Application.SERIAL_VERSION_UID;
 @Data
 @Embeddable
 @NoArgsConstructor
-@AllArgsConstructor
 public class EventId implements Serializable {
 
     @Serial
@@ -25,6 +25,27 @@ public class EventId implements Serializable {
 
     private Long checkId;
 
-    private LocalDateTime timestamp;
+    private OffsetDateTime timestamp;
 
+    /**
+     * Creates a new EventId instance with the provided check id and timestamp in their respective zone.
+     *
+     * @param checkId   the check id
+     * @param timestamp the timestamp in a certain zone.
+     */
+    public EventId(final Long checkId, final ZonedDateTime timestamp) {
+        this.checkId = checkId;
+        this.timestamp = timestamp.withZoneSameInstant(UTC).toOffsetDateTime();
+    }
+
+    /**
+     * Creates a new EventId instance with the provided check id and timestamp.
+     *
+     * @param checkId   the check id
+     * @param timestamp the timestamp
+     */
+    public EventId(final Long checkId, final OffsetDateTime timestamp) {
+        this.checkId = checkId;
+        this.timestamp = timestamp;
+    }
 }

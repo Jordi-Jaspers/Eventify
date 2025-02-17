@@ -7,7 +7,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.*;
@@ -45,7 +45,7 @@ public class Source implements Serializable {
         name = "created",
         updatable = false
     )
-    private LocalDateTime created;
+    private OffsetDateTime created;
 
     @OneToOne(
         cascade = CascadeType.ALL,

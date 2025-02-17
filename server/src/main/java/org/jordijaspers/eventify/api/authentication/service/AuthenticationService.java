@@ -3,7 +3,7 @@ package org.jordijaspers.eventify.api.authentication.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import org.jordijaspers.eventify.api.token.service.TokenService;
 import org.jordijaspers.eventify.api.user.model.User;
@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
+import static java.time.ZoneOffset.UTC;
 import static org.jordijaspers.eventify.api.token.model.TokenType.REFRESH_TOKEN;
 import static org.jordijaspers.eventify.api.token.model.TokenType.USER_VALIDATION_TOKEN;
 import static org.jordijaspers.eventify.common.exception.ApiErrorCode.INVALID_CREDENTIALS;
@@ -57,7 +58,7 @@ public class AuthenticationService {
     public User authorize(final String username, final String password) {
         authenticate(username, password);
         final User user = userService.loadUserByUsername(username);
-        user.setLastLogin(LocalDateTime.now());
+        user.setLastLogin(OffsetDateTime.now(UTC));
         userService.updateUserDetails(user);
 
         log.info("User '{}' successfully authenticated", username);

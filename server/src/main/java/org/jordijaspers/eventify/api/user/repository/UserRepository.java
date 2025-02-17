@@ -1,6 +1,6 @@
 package org.jordijaspers.eventify.api.user.repository;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -35,12 +35,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param email the email.
      * @return the user.
      */
-    @Query("""
-        FROM User u
-        LEFT JOIN FETCH u.role
-        LEFT JOIN FETCH u.teams
-        WHERE u.email = :email
-        """)
+    @Query(
+        """
+            FROM User u
+            LEFT JOIN FETCH u.role
+            LEFT JOIN FETCH u.teams
+            WHERE u.email = :email
+            """
+    )
     Optional<User> findByEmail(@NonNull String email);
 
     /**
@@ -49,12 +51,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param testEmail the string to search for.
      * @return the users.
      */
-    @Query("""
-        FROM User u
-        LEFT JOIN FETCH u.role
-        LEFT JOIN FETCH u.teams
-        WHERE u.email LIKE %:testEmail%
-        """)
+    @Query(
+        """
+            FROM User u
+            LEFT JOIN FETCH u.role
+            LEFT JOIN FETCH u.teams
+            WHERE u.email LIKE %:testEmail%
+            """
+    )
     List<User> findAllByEmailContaining(@NonNull String testEmail);
 
     /**
@@ -63,7 +67,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Transactional
     @Query("DELETE FROM User u WHERE u.validated = false AND u.created <= :limit")
-    void deleteUnvalidatedAccounts(@NonNull LocalDateTime limit);
+    void deleteUnvalidatedAccounts(@NonNull OffsetDateTime limit);
 
 
 }

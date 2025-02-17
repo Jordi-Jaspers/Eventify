@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.transaction.Transactional;
@@ -49,7 +49,7 @@ public class EventService {
      * @param checkId the check id to retrieve the last stored event for
      * @return the last stored event for the provided check id
      */
-    public Event getRecentEventSince(final Long checkId, final LocalDateTime since) {
+    public Event getRecentEventSince(final Long checkId, final OffsetDateTime since) {
         return eventRepository.findRecentEventSince(checkId, since).orElse(null);
     }
 
@@ -61,7 +61,7 @@ public class EventService {
      */
     @Async("eventStorageExecutor")
     public void storeEventBatch(final List<EventRequest> events, final Long checkId) {
-        final Event recentEvent = getRecentEventSince(checkId, events.getFirst().getTimestamp().toLocalDateTime());
+        final Event recentEvent = getRecentEventSince(checkId, events.getFirst().getTimestamp().toOffsetDateTime());
         final List<Event> eventsToStore = determineEventsToStore(events, recentEvent);
         eventRepository.saveAll(eventsToStore);
     }
