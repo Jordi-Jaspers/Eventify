@@ -61,7 +61,7 @@ public class ApplicationContextTest extends IntegrationTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     @DisplayName("Database is running in timezone UTC")
     public void testDatabaseTimezone() throws IOException, InterruptedException {
         final String timezone = timescaleContainer.execInContainer("psql", "-U", DATABASE_NAME, "-c", "SHOW TIMEZONE;").getStdout();

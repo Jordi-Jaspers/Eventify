@@ -1,6 +1,7 @@
 package org.jordijaspers.eventify.api.event.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import static java.util.Objects.nonNull;
 import static org.jordijaspers.eventify.api.event.model.Status.UNKNOWN;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -35,7 +37,9 @@ public class EventService {
      * @param eventRequest the {@link EventRequest} to create the event from
      */
     public void createEvent(final EventRequest eventRequest) {
+        log.info("Creating event with timestamp: '{}'", eventRequest.getTimestamp());
         final Event event = eventMapper.toEvent(eventRequest);
+        log.debug("Event created with timestamp: '{}'", event.getTimestamp());
         eventRepository.save(event);
     }
 
