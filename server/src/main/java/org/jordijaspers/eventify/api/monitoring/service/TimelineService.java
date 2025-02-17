@@ -35,7 +35,7 @@ public class TimelineService {
      * @return the timelines for the given checks, guaranteed to have at least one duration for each check
      */
     public Map<Long, TimelineResponse> getTimelinesForChecks(final Set<Long> checkIds, final Long window) {
-        final LocalDateTime startTime = LocalDateTime.now().minusMinutes(window);
+        final LocalDateTime startTime = LocalDateTime.now(UTC).minusMinutes(window);
         final ZonedDateTime windowStart = ZonedDateTime.of(startTime, UTC);
         final ZonedDateTime now = ZonedDateTime.now(UTC);
 

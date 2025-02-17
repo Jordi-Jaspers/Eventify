@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -35,7 +36,16 @@ public class TimescaleContainer {
             .withUsername(DATABASE_NAME)
             .withPassword(DATABASE_NAME)
             .withUrlParam("sslmode", "disable")
-            .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust");
+            .withEnv(
+                Map.of(
+                    "POSTGRES_HOST_AUTH_METHOD",
+                    "trust",
+                    "TZ",
+                    "UTC",
+                    "PGTZ",
+                    "UTC"
+                )
+            );
 
         timescaleContainer.setWaitStrategy(
             new LogMessageWaitStrategy()

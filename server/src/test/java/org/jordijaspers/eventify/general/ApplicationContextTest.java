@@ -38,6 +38,14 @@ public class ApplicationContextTest extends IntegrationTest {
 
     @Test
     @Order(3)
+    @DisplayName("RabbitMQ container is loaded and running")
+    public void testRabbitContainer() {
+        assertThat(rabbitContainer, is(notNullValue()));
+        assertThat(rabbitContainer.isRunning(), is(true));
+    }
+
+    @Test
+    @Order(4)
     @DisplayName("Timescale container is loaded and running")
     public void testDatabaseContainer() {
         assertThat(timescaleContainer, is(notNullValue()));
@@ -45,7 +53,7 @@ public class ApplicationContextTest extends IntegrationTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     @DisplayName("Database connection is established with Timescale")
     public void testDatabaseConnection() throws IOException, InterruptedException {
         assertThat(timescaleContainer.getJdbcUrl(), not(emptyString()));
@@ -54,14 +62,14 @@ public class ApplicationContextTest extends IntegrationTest {
 
     @Test
     @Order(5)
-    @DisplayName("RabbitMQ container is loaded and running")
-    public void testRabbitContainer() {
-        assertThat(rabbitContainer, is(notNullValue()));
-        assertThat(rabbitContainer.isRunning(), is(true));
+    @DisplayName("Database is running in timezone UTC")
+    public void testDatabaseTimezone() throws IOException, InterruptedException {
+        final String timezone = timescaleContainer.execInContainer("psql", "-U", DATABASE_NAME, "-c", "SHOW TIMEZONE;").getStdout();
+        assertThat(timezone, containsString("UTC"));
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     @DisplayName("Health endpoint returns OK")
     public void healthEndpoint() throws Exception {
         // Given: The request for the health endpoint
