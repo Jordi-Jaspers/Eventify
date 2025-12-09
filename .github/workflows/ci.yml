@@ -44,7 +44,7 @@ jobs:
           cache-read-only: false
 
       - name: Build
-        working-directory: ./client
+        working-directory: ./server
         run: |
           echo "=== Starting clean build ==="
           echo "Branch: ${GITHUB_REF#refs/heads/}"
