@@ -11,7 +11,8 @@
       "Bash(bun test:*)",
       "Bash(curl:*)",
       "Bash(pkill:*)",
-      "Bash(./gradlew test:*)"
+      "Bash(./gradlew test:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

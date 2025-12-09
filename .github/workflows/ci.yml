@@ -1,0 +1,81 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+      - develop
+    tags:
+      - '*.*.*'
+  pull_request:
+    branches:
+      - master
+      - develop
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') == false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read Java version
+        id: java-version
+        run: |
+          version=$(grep "^java" .tool-versions | awk '{print $2}' | sed 's/temurin-//')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Java version: $version"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ steps.java-version.outputs.version }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      - name: Build
+        working-directory: ./client
+        run: |
+          echo "=== Starting clean build ==="
+          echo "Branch: ${GITHUB_REF#refs/heads/}"
+          echo "Commit: ${GITHUB_SHA::7}"
+          ./gradlew clean build
+          echo "=== Build completed successfully ==="
+
+      - name: Read Bun version
+        id: bun-version
+        run: |
+          version=$(grep "^bun" .tool-versions | awk '{print $2}')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Bun version: $version"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ steps.bun-version.outputs.version }}
+
+      - name: Install frontend dependencies
+        working-directory: ./client
+        run: bun install
+
+      - name: Run type checks
+        working-directory: ./client
+        run: bun run check
+
+      - name: Run frontend tests
+        working-directory: ./client
+        run: bun test
+
+      - name: Build frontend
+        working-directory: ./client
+        run: bun run build
