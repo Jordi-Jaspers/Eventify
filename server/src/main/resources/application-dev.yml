@@ -1,0 +1,4 @@
+spring:
+  liquibase:
+    enabled: true
+    contexts: dev,test

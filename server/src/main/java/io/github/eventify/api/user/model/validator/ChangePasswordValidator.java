@@ -1,0 +1,67 @@
+package io.github.eventify.api.user.model.validator;
+
+import io.github.eventify.api.authentication.model.validator.CustomPasswordValidator;
+import io.github.eventify.api.user.model.request.PasswordRequest;
+import io.github.jframe.exception.core.ValidationException;
+import io.github.jframe.validation.ValidationResult;
+import io.github.jframe.validation.Validator;
+import lombok.RequiredArgsConstructor;
+
+import org.passay.RuleResult;
+import org.springframework.stereotype.Component;
+
+import static java.util.Objects.isNull;
+
+/**
+ * A custom password validator.
+ */
+@Component
+@RequiredArgsConstructor
+public class ChangePasswordValidator implements Validator<PasswordRequest> {
+
+    // Error messages
+    public static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
+    public static final String PASSWORD_MUST_NOT_BE_EMPTY = "password cannot not be empty";
+    public static final String PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION = "Password does not match the confirmation";
+    public static final String PASSWORD_IS_NOT_STRONG_ENOUGH = "Password is not strong enough";
+
+    // Fields
+    public static final String PASSWORD = "password";
+    public static final String NEW_PASSWORD = "newPassword";
+    public static final String CONFIRM_PASSWORD = "confirmPassword";
+
+    // Constraints
+    private final CustomPasswordValidator passwordValidator;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void validate(final PasswordRequest request, final ValidationResult result) {
+        if (isNull(request)) {
+            result.reject(BODY_IS_MISSING);
+            throw new ValidationException(result);
+        }
+
+        result.rejectField(NEW_PASSWORD, request.getNewPassword())
+            .whenNull(PASSWORD_MUST_NOT_BE_EMPTY)
+            .orWhen(String::isEmpty, PASSWORD_MUST_NOT_BE_EMPTY);
+
+        result.rejectField(CONFIRM_PASSWORD, request.getConfirmPassword())
+            .whenNull(PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION)
+            .orWhen(String::isEmpty, PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION)
+            .orWhen(confirmation -> !confirmation.equals(request.getNewPassword()), PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION);
+
+        if (result.hasErrors()) {
+            throw new ValidationException(result);
+        }
+
+        final RuleResult passwordValidationResult = passwordValidator.validatePassword(request.getNewPassword());
+        result.rejectField(PASSWORD, request.getNewPassword())
+            .when(password -> !passwordValidationResult.isValid(), PASSWORD_IS_NOT_STRONG_ENOUGH);
+
+        if (result.hasErrors()) {
+            throw new ValidationException(result);
+        }
+    }
+}

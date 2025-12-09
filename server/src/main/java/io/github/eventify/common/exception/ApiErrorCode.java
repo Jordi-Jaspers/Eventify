@@ -1,0 +1,114 @@
+package io.github.eventify.common.exception;
+
+
+import io.github.jframe.exception.ApiError;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Defines an error code and reason for any exception handling.
+ */
+@Getter
+@RequiredArgsConstructor
+public enum ApiErrorCode implements ApiError {
+
+    INTERNAL_SERVER_ERROR(
+        "ERR-0001",
+        "Uncaught Exception: You think I know what went wrong here? If I did, I would've caught this exception no?"
+    ),
+    DATABASE_ERROR(
+        "ERR-0002",
+        "Could not perform the requested action on the database. Contact administrator."
+    ),
+    APPLICATION_NOT_FOUND(
+        "ERR-0003",
+        "The application with the given global application id could not be found."
+    ),
+    ALARM_NOT_FOUND(
+        "ERR-0004",
+        "The alarm with the given id could not be found."
+    ),
+    INDEX_PATTERN_NOT_FOUND(
+        "ERR-0005",
+        "The index pattern with the given id could not be found."
+    ),
+    QUERY_INVALID_JSON(
+        "ERR-0006",
+        "The Elasticsearch query should be a valid JSON."
+    ),
+    CANNOT_RETRIEVE_RESOURCE(
+        "ERR-0007",
+        "Something went wrong while retrieving the resource."
+    ),
+    INVALID_TOKEN_ERROR(
+        "ERR-0008",
+        "The provided JWT token is invalid."
+    ),
+    TOKEN_NOT_FOUND_ERROR(
+        "ERR-0009",
+        "Provided token does not exist, double check the token."
+    ),
+    PASSWORD_DOES_NOT_MATCH(
+        "ERR-0010",
+        "The provided password does not match the current password."
+    ),
+    USER_LOCKED_ERROR(
+        "ERR-0011",
+        "Authorization failed: your account has been locked by the admin."
+    ),
+    INVALID_CREDENTIALS(
+        "ERR-0012",
+        "Invalid Credentials: Username or password is incorrect."
+    ),
+    USER_NOT_FOUND_ERROR(
+        "ERR-0013",
+        "Could not find requested user."
+    ),
+    NO_SECURITY_CONTEXT_ERROR(
+        "ERR-0014",
+        "No security context found. There is no user logged in."
+    ),
+    SQUAD_NOT_FOUND_ERROR(
+        "ERR-0015",
+        "The requested squad does not exist."
+    ),
+    SQUAD_ALREADY_EXISTS_ERROR(
+        "ERR-0016",
+        "A squad with that name already exists."
+    ),
+    CANNOT_ACCESS_APPLICATION(
+        "ERR-0017",
+        "You do not have access to the requested application."
+    ),
+    UNAUTHORIZED_ERROR(
+        "ERR-0018",
+        "You are not authorized to perform this action."
+    ),
+    ELASTICSEARCH_SSL_ERROR(
+        "ERR-0019",
+        "Cannot configure SSL for Elasticsearch. Please check your configuration."
+    ),
+    ELASTICSEARCH_CONNECTION_ERROR(
+        "ERR-0020",
+        "Cannot connect to Elasticsearch. Please check your configuration."
+    ),
+    DATA_CONSTRAINT_ERROR(
+        "ERR-0021",
+        "The request you made violates a data constraint. Please check your request."
+    ),
+    USER_ALREADY_EXISTS_ERROR(
+        "ERR-0022",
+        "User cannot be created: The provided email address is already in use."
+    ),
+    OAUTH2_AUTHENTICATION_ERROR(
+        "ERR-0023",
+        "OAuth2 authentication failed. Please try again or contact support."
+    );
+
+    /* The error code for this reason. */
+    private final String errorCode;
+
+    /* The reason why this error occurred. */
+    private final String reason;
+
+}
