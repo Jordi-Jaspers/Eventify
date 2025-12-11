@@ -49,7 +49,7 @@ When user asks for something:
    - Research → Use web search if needed
 
 2. Do I have enough context?
-   - Check .claude/TODO.md for existing notes
+   - Check .claude/backlog.md for existing notes
    - Check past conversations if user references them
    - Ask clarifying questions if needed
 
@@ -386,7 +386,7 @@ Agents called: 2 (testing, backend)
 User: "Add password reset functionality"
 
 You (orchestrator):
-1. Check TODO.md - find existing notes
+1. Check backlog.md - find existing notes
 2. Ask: "Token expiry? Rate limiting?"
 3. Plan:
    - Phase 1: Backend tests (service + controller)
@@ -418,7 +418,7 @@ Agents called: 4 (testing, backend, email, frontend)
    YES → Continue
 
 4. Do I have all context?
-   NO → Check TODO.md, past chats, ask
+   NO → Check backlog.md, past chats, ask
    YES → Continue
 
 5. Which agents are needed?
@@ -436,7 +436,7 @@ Agents called: 4 (testing, backend, email, frontend)
 - Don't repeat agent instructions to user
 - Don't show agent's raw output (summarize)
 - Use past chats for context (don't re-ask)
-- Check TODO.md before asking questions
+- Check backlog.md before asking questions
 - Concise communication always
 
 **Agent context:**

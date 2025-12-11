@@ -1,5 +1,5 @@
 ---
-description: Build a feature using test-driven orchestrator workflow. Checks TODO.md, gathers requirements, creates plan, executes with specialized agents.
+description: Build a feature using test-driven orchestrator workflow. Checks backlog.md, gathers requirements, creates plan, executes with specialized agents.
 argument-hint: <feature-description>
 allowed-tools: Read, Write, Grep, Glob, Bash
 model: sonnet
@@ -15,7 +15,7 @@ Trigger orchestrator to build a feature using test-driven workflow with speciali
 
 **Orchestrator executes:**
 
-1. **Check TODO.md** - Look for existing feature notes in `.claude/TODO.md`
+1. **Check backlog.md** - Look for existing feature notes in `.claude/backlog.md`
 2. **Gather requirements** - Ask clarifying questions if needed
 3. **Create plan** - Write implementation plan with agent assignments
 4. **Get approval** - Wait for user confirmation
@@ -28,8 +28,8 @@ You are orchestrating a feature build. Follow this process:
 ### Step 1: Check Existing Context
 
 ```bash
-# Check TODO.md for feature information
-cat .claude/TODO.md
+# Check backlog.md for feature information
+cat .claude/backlog.md
 ```
 
 Look for:
@@ -212,7 +212,7 @@ CONTEXT: [Related components]
 User: /new-feature password reset via email
 
 Orchestrator:
-1. Checks TODO.md - finds note "password reset needed"
+1. Checks backlog.md - finds note "password reset needed"
 2. Asks: "Token expiry? Rate limiting? Email template style?"
 3. User answers questions
 4. Creates plan with test-first approach
@@ -226,7 +226,7 @@ Orchestrator:
 
 ## Critical Reminders
 
-1. **Check TODO.md first** - Don't ask questions already answered
+1. **Check backlog.md first** - Don't ask questions already answered
 2. **Test-driven always** - Tests before implementation
 3. **Get approval before execution** - Never skip this gate
 4. **Structured context to agents** - Use task format above
