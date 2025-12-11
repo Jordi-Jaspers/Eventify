@@ -1,5 +1,6 @@
 package io.github.eventify.api.user.repository;
 
+import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
 
 import java.time.OffsetDateTime;
@@ -59,12 +60,26 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByEmailContaining(@NonNull String testEmail);
 
     /**
+     * Check if a user with the given role exists.
+     *
+     * @param role the role to check.
+     * @return true if a user with the given role exists, false otherwise.
+     */
+    @Query(
+        """
+            SELECT COUNT(u) > 0
+            FROM User u
+            WHERE u.role = :role
+            """
+    )
+    boolean existsByRole(@NonNull Role role);
+
+    /**
      * Delete unvalidated accounts that are older than 1 month.
      */
     @Modifying
     @Transactional
     @Query("DELETE FROM User u WHERE u.validated = false AND u.created <= :limit")
     void deleteUnvalidatedAccounts(@NonNull OffsetDateTime limit);
-
 
 }

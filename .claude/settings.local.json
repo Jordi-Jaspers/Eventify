@@ -12,7 +12,10 @@
       "Bash(curl:*)",
       "Bash(pkill:*)",
       "Bash(./gradlew test:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "SlashCommand(/build-feature:*)",
+      "Bash(./gradlew tasks:*)",
+      "Bash(./gradlew build:*)"
     ],
     "deny": [],
     "ask": []

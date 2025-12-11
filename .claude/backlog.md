@@ -2,20 +2,27 @@
 
 ## Stories:
 
-### Global Admin & User Identity
-**As a** system architect  
-**I want** user accounts with global admin capability  
+### Global Admin & User Identity ✅ COMPLETED
+**As a** system architect
+**I want** user accounts with global admin capability
 **So that** platform administrators can provision organizations
 
 **Acceptance Criteria:**
-- Email uniqueness 
-- User table with column `is_global_admin`
-- Bootstrap script to create first global admin (env var for email/password)
-- JWT includes `is_global_admin` flag
+- ✅ Email uniqueness (already enforced)
+- ✅ Global admin via `Role.ADMIN` enum value
+- ✅ Bootstrap listener creates first admin from ENV vars on startup
+- ✅ JWT includes `global_role` claim (renamed from `role`)
+- ✅ ApplicationStartedEvent listener checks for existing admin
+- ✅ ENV vars: GLOBAL_ADMIN_EMAIL, GLOBAL_ADMIN_PASSWORD, GLOBAL_ADMIN_FIRST_NAME, GLOBAL_ADMIN_LAST_NAME
+
+**Implementation Notes:**
+- Using `Role` enum (not separate boolean flag) for clean multi-tenant design
+- JWT claim renamed to `global_role` for clarity (later: `org_role` will be added)
+- Permission-based guards preferred over role checks (fine-grained, extensible)
 
 ### Organization Provisioning (Admin Only)
-**As a** global admin  
-**I want** to create organizations  
+**As a** global admin
+**I want** to create organizations
 **So that** I can onboard new clients/customers
 
 **Acceptance Criteria:**
@@ -23,7 +30,9 @@
 - POST `/admin/organizations` endpoint (global admin only)
 - Status: ACTIVE, SUSPENDED, TRIAL
 - Slug generation/validation
-- Guard: `@RequireGlobalAdmin` on endpoint
+- Security: Permission-based guard (e.g., `@RequirePermission(PROVISION_ORGANIZATIONS)`)
+  - Permission attached to `Role.ADMIN` (global admins)
+  - More fine-grained than role checks, extensible for future needs
 
 ### Organization Owner Assignment
 
@@ -40,8 +49,8 @@
 
 ### Global Admin Dashboard
 
-**As a** global admin  
-**I want** visibility into all organizations and users  
+**As a** global admin
+**I want** visibility into all organizations and users
 **So that** I can manage the platform effectively
 
 **Acceptance Criteria:**
@@ -51,6 +60,10 @@
 - Suspend/activate organizations
 - View platform-wide user list
 - Endpoints under `/admin/*` namespace
+- Security: Permission-based guards on all endpoints
+  - View operations: `@RequirePermission(VIEW_ALL_ORGANIZATIONS)`
+  - Modify operations: `@RequirePermission(MANAGE_ORGANIZATIONS)`
+  - Permissions attached to `Role.ADMIN` for fine-grained control
 
 ### Organization Membership Management
 
@@ -81,15 +94,20 @@
 
 ### User Context & Permissions
 
-**As the** system  
-**I want** layered permission validation (global → org → team)  
+**As the** system
+**I want** layered permission validation (global → org → team)
 **So that** access control is properly enforced
 
 **Acceptance Criteria:**
-- Permission service checking: is_global_admin → org_role → team_role
-- JWT structure: `{user_id, is_global_admin, org_id?, org_role?, team_ids[]}`
-- Guard annotations: `@RequireGlobalAdmin`, `@RequireOrgRole(ADMIN)`
-- Clear hierarchy: GLOBAL_ADMIN → OWNER → ADMIN → MEMBER
+- Permission service checking: global_role permissions → org_role → team_role
+- JWT structure: `{user_id, global_role, permissions[], org_id?, org_role?, team_ids[]}`
+- Guard annotations: `@RequirePermission(...)`, `@RequireOrgRole(...)`, `@RequireTeamRole(...)`
+- Permission-based approach (not role checks):
+  - Global: Check user has specific permission (e.g., PROVISION_ORGANIZATIONS)
+  - Org: Check user has org role + permission (e.g., MANAGE_ORG_MEMBERS)
+  - Team: Check user has team role + permission (e.g., ASSIGN_TASKS)
+- Clear hierarchy: Role.ADMIN (global) → OrganizationalRole.OWNER → ADMIN → MEMBER → TeamRole.LEAD → MEMBER
+- Permissions attached to roles, guards check permissions (fine-grained, extensible)
 
 ### Team Creation & Management
 

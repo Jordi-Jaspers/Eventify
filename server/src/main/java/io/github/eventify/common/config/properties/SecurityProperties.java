@@ -22,4 +22,6 @@ public class SecurityProperties {
 
     private TokenProperties refreshToken;
 
+    private BootstrapProperties bootstrap;
+
 }

@@ -30,6 +30,11 @@ public final class JWTClaimNames {
     public static final String ROLE = "role";
 
     /**
+     * A custom claim that contains the global role of the user.
+     */
+    public static final String GLOBAL_ROLE = "global_role";
+
+    /**
      * A custom claim that contains the permissions of the user.
      */
     public static final String PERMISSIONS = "permissions";

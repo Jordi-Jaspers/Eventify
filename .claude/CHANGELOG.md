@@ -1,8 +1,9 @@
 ## Features Index / Changelog
 
-| Date       | Feature(s) Added / Updated | Summary                                                                                          |
-|------------|----------------------------|--------------------------------------------------------------------------------------------------|
-| 2025-12-09 | Profile Page Optimization  | Eliminated duplicate user data fetch by creating currentUser derived store and refactoring profile page. |
-| 2025-12-09 | Auth Redirect Loop Fix     | Fixed infinite redirect loop between login/dashboard when cookies deleted but localStorage persists. |
-| 2025-11-25 | Profile Editing            | Added inline editing for user profile fields (first name, last name, email) on the profile page. |
-
+| Date       | Feature(s) Added / Updated             | Summary                                                                                                                                                                                                                                                        |
+|------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 2025-12-11 | Global Admin & User Identity           | Added global admin capability via Role.ADMIN, JWT claim renamed to "global_role", bootstrap listener for first admin creation from ENV vars. Permission-based security approach documented. [Details](.claude/features/20251211-global-admin-user-identity.md) |
+| 2025-12-11 | JWT Claim Rename - ROLE to GLOBAL_ROLE | Renamed JWT claim from ROLE to GLOBAL_ROLE in JwtService while maintaining backward compatibility. [Details](.claude/features/20251211-jwt-claim-rename-role-to-global-role.md)                                                                                |
+| 2025-12-09 | Profile Page Optimization              | Eliminated duplicate user data fetch by creating currentUser derived store and refactoring profile page. [Details](.claude/features/20251209-profile-page-optimization.md)                                                                                     |
+| 2025-12-09 | Auth Redirect Loop Fix                 | Fixed infinite redirect loop between login/dashboard when cookies deleted but localStorage persists. [Details](.claude/features/20251209-auth-redirect-loop-fix.md)                                                                                            |
+| 2025-11-25 | Profile Editing                        | Added inline editing for user profile fields (first name, last name, email) on the profile page. [Details](.claude/features/20251125-profile-editing.md)                                                                                                       |

@@ -30,14 +30,19 @@ email:
 
 # ======= SECURITY CONFIGURATION =======
 security:
-  rsa:
-    seed: ${RSA_SEED:default-seed}
+  bootstrap:
+    email: ${GLOBAL_ADMIN_EMAIL:jordijaspers@gmail.com}
+    password: ${GLOBAL_ADMIN_PASSWORD:admin123!}
+    first-name: ${GLOBAL_ADMIN_FIRST_NAME:Global}
+    last-name: ${GLOBAL_ADMIN_LAST_NAME:Admin}
   access-token:
     lifetime: ${JWT_LIFETIME_SECONDS:15}
     time-unit: ${JWT_LIFETIME_TIME_UNIT:MINUTES}
   refresh-token:
     lifetime: ${JWT_REFRESH_LIFETIME_SECONDS:7}
     time-unit: ${JWT_REFRESH_LIFETIME_TIME_UNIT:DAYS}
+  rsa:
+    seed: ${RSA_SEED:default-seed}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
