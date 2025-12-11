@@ -15,7 +15,12 @@
       "Bash(python3:*)",
       "SlashCommand(/build-feature:*)",
       "Bash(./gradlew tasks:*)",
-      "Bash(./gradlew build:*)"
+      "Bash(./gradlew build:*)",
+      "Bash(grep:*)",
+      "Bash(./gradlew:*)",
+      "Bash(./scripts/database-reset.sh:*)",
+      "Bash(tee:*)",
+      "Bash(docker exec:*)"
     ],
     "deny": [],
     "ask": []

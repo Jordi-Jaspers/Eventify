@@ -105,6 +105,10 @@ public final class Paths {
 
     public static final String USER_INVITATION_PATH = USERS_PATH + "/invite";
 
+    /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
+
+    public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PART + "/organizations";
+
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 
     public static final String OPTIONS_PATH = BASE_PATH + "/options";

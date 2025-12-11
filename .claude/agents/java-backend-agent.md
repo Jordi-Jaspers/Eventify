@@ -59,9 +59,12 @@ public void processUser(User user) {  // Missing final
 Controller → Service → Repository → Entity
 ```
 
-**1. Entities (JPA)** - Standard classes, no records
+**1. Entities (JPA)** - Standard classes, no records, lombok, explicit use of @Column, @Table
 ```java
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "users")
 public class User {
     @Id
@@ -71,14 +74,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
     
-    // Standard getters/setters (NO RECORDS)
-    public User() {}
-    
-    public Long getId() { return id; }
-    public void setId(final Long id) { this.id = id; }
-    
-    public String getEmail() { return email; }
-    public void setEmail(final String email) { this.email = email; }
 }
 ```
 
@@ -93,23 +88,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 }
 ```
 
-**3. Services** - Business logic, constructor injection
+**3. Services** - Business logic, constructor injection, lombok
 ```java
 @Service
+@RequiredArgsConstructor
 public class UserService {
+    
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
-    
-    // Constructor injection - NO @Autowired on fields
-    public UserService(
-            final UserRepository userRepository,
-            final PasswordEncoder passwordEncoder,
-            final EmailService emailService) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
-    }
     
     @Transactional
     public User registerUser(final String email, final String password) {
@@ -128,48 +115,170 @@ public class UserService {
 }
 ```
 
-**4. Controllers** - REST endpoints, validation
+**4. Controllers** - REST endpoints, mapstruct, validation via custom validators
 ```java
 @RestController
-@RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
+@Tag(
+    name = "User Profile",
+    description = "Endpoints for authenticated users to manage their own profile, including viewing and updating user details"
+)
 public class UserController {
+
     private final UserService userService;
-    
-    public UserController(final UserService userService) {
-        this.userService = userService;
+
+    private final UserMapper userMapper;
+
+    @ResponseStatus(OK)
+    @Operation(summary = "Get the details of the authenticated user.")
+    @GetMapping(
+        path = USER_DETAILS,
+        produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<UserDetailsResponse> getUserDetails(@AuthenticationPrincipal final UserTokenPrincipal principal) {
+        final UserDetailsResponse response = userMapper.toUserDetailsResponse(principal.getUser());
+        return ResponseEntity.status(OK).body(response);
     }
+}
+
+@RestController
+@RequiredArgsConstructor
+@Tag(
+    name = "Password Management",
+    description = "Endpoints for password-related operations including password reset requests, password resets, and password updates"
+)
+public class PasswordController {
+
+    private final PasswordService passwordService;
+
+    private final ChangePasswordValidator passwordValidator;
     
-    @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(
-            @Valid @RequestBody final RegisterRequest request) {
-        final User user = userService.registerUser(
-            request.getEmail(), 
-            request.getPassword()
-        );
-        return ResponseEntity.ok(toResponse(user));
+    @ResponseStatus(NO_CONTENT)
+    @Operation(summary = "Reset the password with the provided token.")
+    @PostMapping(
+        path = PUBLIC_RESET_PASSWORD_PATH,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> resetPassword(@RequestBody final ForgotPasswordRequest request) {
+        passwordValidator.validateAndThrow(request);
+        passwordService.changePassword(request.getNewPassword(), request.getToken());
+        return ResponseEntity.status(NO_CONTENT).build();
     }
+}
+
+/**
+ * A custom password validator.
+ */
+@Component
+@RequiredArgsConstructor
+public class ChangePasswordValidator implements io.github.jframe.validation.Validator<PasswordRequest> {
+
+    // Error messages
+    public static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
+    public static final String PASSWORD_MUST_NOT_BE_EMPTY = "password cannot not be empty";
+    public static final String PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION = "Password does not match the confirmation";
+    public static final String PASSWORD_IS_NOT_STRONG_ENOUGH = "Password is not strong enough";
+
+    // Fields
+    public static final String PASSWORD = "password";
+    public static final String NEW_PASSWORD = "newPassword";
+    public static final String CONFIRM_PASSWORD = "confirmPassword";
+
+    // Constraints
+    private final CustomPasswordValidator passwordValidator;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void validate(final PasswordRequest request, final ValidationResult result) {
+        if (isNull(request)) {
+            result.reject(BODY_IS_MISSING);
+            throw new ValidationException(result);
+        }
+
+        result.rejectField(NEW_PASSWORD, request.getNewPassword())
+            .whenNull(PASSWORD_MUST_NOT_BE_EMPTY)
+            .orWhen(String::isEmpty, PASSWORD_MUST_NOT_BE_EMPTY);
+
+        result.rejectField(CONFIRM_PASSWORD, request.getConfirmPassword())
+            .whenNull(PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION)
+            .orWhen(String::isEmpty, PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION)
+            .orWhen(confirmation -> !confirmation.equals(request.getNewPassword()), PASSWORD_DOES_NOT_MATCH_THE_CONFIRMATION);
+
+        if (result.hasErrors()) {
+            throw new ValidationException(result);
+        }
+
+        final RuleResult passwordValidationResult = passwordValidator.validatePassword(request.getNewPassword());
+        result.rejectField(PASSWORD, request.getNewPassword())
+            .when(password -> !passwordValidationResult.isValid(), PASSWORD_IS_NOT_STRONG_ENOUGH);
+
+        if (result.hasErrors()) {
+            throw new ValidationException(result);
+        }
+    }
+}
+
+```
+
+**5. DTOs** - Request/Response objects with lombok (no records)
+```java
+@Data
+@NoArgsConstructor
+public class RegisterRequest {
+
+    private String email;
+
+    private String password;
+    
 }
 ```
 
-**5. DTOs** - Request/Response objects (no records)
+**6. Custom exceptions** - For error handling with custom error codes
 ```java
-public class RegisterRequest {
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
-    private String email;
-    
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
-    private String password;
-    
-    // Constructors, getters, setters
-    public RegisterRequest() {}
-    
-    public String getEmail() { return email; }
-    public void setEmail(final String email) { this.email = email; }
-    
-    public String getPassword() { return password; }
-    public void setPassword(final String password) { this.password = password; }
+/**
+ * Exception thrown when parsing an invalid JWT.
+ */
+public class InvalidJwtException extends ApiException {
+
+    @Serial
+    private static final long serialVersionUID = SERIAL_VERSION_UID;
+
+    /**
+     * Default constructor.
+     */
+    public InvalidJwtException() {
+        super(INVALID_TOKEN_ERROR);
+    }
+
+    /**
+     * Default constructor with the original exception.
+     */
+    public InvalidJwtException(final Exception original) {
+        super(INVALID_TOKEN_ERROR, original);
+    }
+
+    /**
+     * Default constructor with the original exception.
+     */
+    public InvalidJwtException(final Exception original, final String message) {
+        super(INVALID_TOKEN_ERROR, original, message);
+    }
+}
+
+/**
+ * Defines an error code and reason for any exception handling.
+ */
+@Getter
+@RequiredArgsConstructor
+public enum ApiErrorCode implements ApiError {
+
+    INTERNAL_SERVER_ERROR(
+        "ERR-0001",
+        "Uncaught Exception: You think I know what went wrong here? If I did, I would've caught this exception no?"
+    );
 }
 ```
 

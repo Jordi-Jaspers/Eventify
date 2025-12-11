@@ -184,6 +184,11 @@ You don't write code, but you **validate** agents follow these:
 
 ### Java Standards
 - ✅ All variables `final`
+- ✅ Lombok for boilerplate (`@Getter`, `@Setter`, `@Builder`, etc.)
+- ✅ Lombok `@Accessors(chain=true)` for response objects
+- ✅ Custom validators using Jframe framework
+- ✅ Custom Exceptions using Jframe framework
+- ✅ Mapstruct for DTO-entity mapping
 - ✅ Explicit types (NEVER `var`)
 - ✅ Constructor injection (NO `@Autowired` fields)
 - ✅ NO Java records (standard classes only)
@@ -244,7 +249,7 @@ You don't write code, but you **validate** agents follow these:
 ### Security Patterns
 
 **Always required:**
-- Input validation with Bean Validation (`@Valid`)
+- Input validation with custom validators (need unit tests)
 - Rate limiting for sensitive operations
 - Token hashing before storage (never store plain tokens)
 - Audit logging for security events
