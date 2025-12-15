@@ -15,7 +15,8 @@ import java.util.stream.Stream;
 public enum Permission {
 
     ACCESS_APPLICATION("The permission to access the application."),
-    MANAGE_USERS("The permission to manage the user.");
+    MANAGE_USERS("The permission to manage the user."),
+    PROVISION_ORGANIZATIONS("The permission to provision new organizations.");
 
     private final String description;
 

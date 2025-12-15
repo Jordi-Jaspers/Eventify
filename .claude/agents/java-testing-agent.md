@@ -172,11 +172,201 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
 }
 ```
 
-### Test Independence
-- Each test sets up own data
-- No shared mutable state
-- No execution order dependencies
-- Cleanup in `@AfterEach` if needed
+### Controller Integration Test Style
+
+**Reference:** `AuthenticationControllerTest.java` is the style standard
+
+**✅ CORRECT Pattern:**
+```java
+@DisplayName("Integration Test - User Controller")
+public class UserControllerTest extends IntegrationTest {
+    // NO @SpringBootTest, @AutoConfigureMockMvc - already in IntegrationTest
+    // NO @Autowired MockMvc, ObjectMapper - use from parent
+    // NO @BeforeEach setup - create data in each test
+
+    @Test
+    @DisplayName("Should return user details for authenticated user")
+    public void getUserDetailsSuccess() throws Exception {
+        // Given: An authenticated user
+        final User user = aValidatedUser();
+
+        // When: Requesting user details
+        final MockHttpServletRequestBuilder request = get(USER_DETAILS)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Response should contain user details
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final UserDetailsResponse userDetails = fromJson(content, UserDetailsResponse.class);
+
+        assertThat(userDetails.getId(), is(user.getId()));
+        assertThat(userDetails.getEmail(), is(user.getEmail()));
+    }
+}
+```
+
+**❌ WRONG Pattern:**
+```java
+@SpringBootTest  // ❌ Redundant
+@AutoConfigureMockMvc  // ❌ Redundant
+@DisplayName("Integration Test - User Controller")
+public class UserControllerTest extends IntegrationTest {
+
+    @Autowired  // ❌ Use from parent
+    private MockMvc mockMvc;
+
+    @Autowired  // ❌ Use from parent
+    private ObjectMapper objectMapper;
+
+    private User user;
+
+    @BeforeEach  // ❌ Create data in each test instead
+    public void setUp() {
+        user = aValidatedUser();
+    }
+
+    @Test
+    @DisplayName("Should return 200 OK when requesting user details")
+    public void shouldReturn200OkWhenRequestingUserDetails() {  // ❌ Too verbose
+        // When: Requesting user details
+        mockMvc.perform(
+            get(USER_DETAILS)
+                .contentType(MediaType.APPLICATION_JSON)  // ❌ Use APPLICATION_JSON static import
+                .header("Authorization", "Bearer " + user.getAccessToken().getValue())  // ❌ Use BEARER constant
+        )
+            .andExpect(status().isOk());  // ❌ Use .is(SC_OK)
+    }
+}
+```
+
+**Controller Test Checklist:**
+- ✅ Extends `IntegrationTest` (no other annotations)
+- ✅ NO `@Autowired` fields (use `mockMvc` from parent)
+- ✅ NO `@BeforeEach` setup (create data inline)
+- ✅ Use `MockHttpServletRequestBuilder` variables
+- ✅ Use `ResultActions` variables
+- ✅ Use `toJson()` and `fromJson()` helpers
+- ✅ Static imports: `APPLICATION_JSON`, `BEARER`, `AUTHORIZATION`, `SC_*`
+- ✅ Deserialize to typed response objects (NOT string checking)
+- ✅ For non-auth controllers: Use `user.getAccessToken().getValue()`
+- ✅ Concise method names: `{action}{Condition}{Result}`
+- ✅ NO section headers (`// ===== Tests =====`)
+
+**Authentication Pattern:**
+```java
+// ✅ Authentication controller tests - Full login flow
+@Test
+public void loginSuccess() {
+    final User user = aValidatedUser();
+
+    final LoginRequest request = new LoginRequest()
+        .setEmail(user.getEmail())
+        .setPassword(TEST_PASSWORD);
+
+    final MockHttpServletRequestBuilder loginRequest = post(LOGIN_PATH)
+        .contentType(APPLICATION_JSON)
+        .content(toJson(request));
+
+    final ResultActions response = mockMvc.perform(loginRequest);
+    response.andExpect(status().is(SC_OK));
+
+    final String content = response.andReturn().getResponse().getContentAsString();
+    final AuthenticationResponse authResponse = fromJson(content, AuthenticationResponse.class);
+
+    assertThat(authResponse.getAccessToken(), notNullValue());
+}
+
+// ✅ Other controller tests - Use token from User object
+@Test
+public void createResourceSuccess() {
+    final User user = aValidatedUser();
+
+    final CreateRequest request = aValidCreateRequest();
+
+    final MockHttpServletRequestBuilder createRequest = post(RESOURCE_PATH)
+        .contentType(APPLICATION_JSON)
+        .content(toJson(request))
+        .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+
+    final ResultActions response = mockMvc.perform(createRequest);
+    response.andExpect(status().is(SC_CREATED));
+}
+```
+
+### Test Independence & Data Cleanup
+
+**CRITICAL: Integration tests MUST use proper cleanup patterns**
+
+IntegrationTest base class provides automatic cleanup via `@BeforeEach`:
+```java
+@BeforeEach
+public void cleanUp() {
+    deleteAllTestOrganizations();  // Deletes orgs with INTEGRATION_PREFIX
+    deleteAllTestUsers();           // Deletes users with TEST_EMAIL + orgs they created
+}
+```
+
+**Test Data Requirements:**
+- ✅ Each test sets up own data (NO `@BeforeEach` setup)
+- ✅ Use helper methods that create unique data (UUIDs in names/emails)
+- ✅ Organization names MUST start with `INTEGRATION_PREFIX` for auto-cleanup
+- ✅ User emails MUST contain `TEST_EMAIL` for auto-cleanup
+- ✅ No shared mutable state between tests
+- ✅ No execution order dependencies
+
+**Helper Methods Pattern:**
+```java
+// ✅ CORRECT - Uses helper that creates unique data
+@Test
+public void createOrganizationSuccess() {
+    final User admin = aValidatedUserWithRole(Role.ADMIN);  // Creates unique user
+    final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequest();  // Creates unique org name
+
+    // Test implementation...
+}
+
+// ❌ WRONG - Hardcoded data causes collisions
+@Test
+public void createOrganizationSuccess() {
+    final User admin = aValidatedUserWithRole(Role.ADMIN);
+    final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest()
+        .setName("Test Organization");  // ❌ Will collide with other tests!
+
+    // Test implementation...
+}
+```
+
+**How Cleanup Works:**
+```java
+// aValidProvisionOrganizationRequest() from IntegrationTest:
+protected ProvisionOrganizationRequest aValidProvisionOrganizationRequest() {
+    final String suffix = UUID.randomUUID().toString().substring(0, 5);
+    return new ProvisionOrganizationRequest()
+        .setName(INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix);
+    // Result: "[Integration Test] - Test Organization-a1b2c"
+}
+
+// aValidatedUser() from IntegrationTest:
+protected static RegisterUserRequest aRegisterRequest() {
+    final String prefix = UUID.randomUUID().toString().substring(0, 5);
+    return new RegisterUserRequest()
+        .setEmail(prefix + "." + TEST_EMAIL)  // "a1b2c.user@integration.test"
+        .setPassword(TEST_PASSWORD)
+        .setFirstName(FIRST_NAME)
+        .setLastName(LAST_NAME);
+}
+```
+
+**Why This Matters:**
+- Database constraint violations occur when tests reuse same names/emails
+- Each test run creates unique data that doesn't collide
+- Cleanup automatically removes all integration test data before each test
+- Tests can run in any order and won't interfere with each other
 
 ### Spring Boot Testing
 ```java

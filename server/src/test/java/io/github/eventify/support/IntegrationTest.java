@@ -2,6 +2,8 @@ package io.github.eventify.support;
 
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.authentication.model.request.RegisterUserRequest;
+import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.model.TokenType;
 import io.github.eventify.api.user.model.User;
@@ -42,6 +44,8 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected static final String TEST_PASSWORD = "Test123!@#";
     protected static final String INTEGRATION_PREFIX = "[Integration Test] - ";
 
+    protected static final String ORGANIZATION_NAME = "Test Organization";
+
     protected static final String NEW_PASSWORD = "NewTest123!@#";
     protected static final String NEW_PASSWORD_CONFIRMATION = "NewTest123!@#";
 
@@ -50,7 +54,14 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     @BeforeEach
     public void cleanUp() {
+        deleteAllTestOrganizations();
         deleteAllTestUsers();
+    }
+
+    protected ProvisionOrganizationRequest aValidProvisionOrganizationRequest() {
+        final String suffix = UUID.randomUUID().toString().substring(0, 5);
+        return new ProvisionOrganizationRequest()
+            .setName(INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix);
     }
 
     protected User aValidatedUserWithRole(final Role role) {
@@ -209,6 +220,14 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     private void deleteAllTestUsers() {
         final List<User> users = userRepository.findAllByEmailContaining(TEST_EMAIL);
+        organizationRepository.deleteAllByCreatedBy(
+            users.stream().map(User::getId).toList()
+        );
         userRepository.deleteAll(users);
+    }
+
+    private void deleteAllTestOrganizations() {
+        final List<Organization> organizations = organizationRepository.findAllByNameContaining(INTEGRATION_PREFIX);
+        organizationRepository.deleteAll(organizations);
     }
 }

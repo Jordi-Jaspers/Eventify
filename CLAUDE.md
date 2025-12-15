@@ -186,13 +186,36 @@ You don't write code, but you **validate** agents follow these:
 - ✅ All variables `final`
 - ✅ Lombok for boilerplate (`@Getter`, `@Setter`, `@Builder`, etc.)
 - ✅ Lombok `@Accessors(chain=true)` for response objects
-- ✅ Custom validators using Jframe framework
+- ✅ Custom validators using Jframe framework (separate @Component classes)
 - ✅ Custom Exceptions using Jframe framework
 - ✅ Mapstruct for DTO-entity mapping
 - ✅ Explicit types (NEVER `var`)
 - ✅ Constructor injection (NO `@Autowired` fields)
 - ✅ NO Java records (standard classes only)
 - ✅ Layered architecture (Controller → Service → Repository → Entity)
+
+### File Structure Patterns
+```
+api/{domain}/
+├── controller/          # REST controllers
+├── service/             # Business logic services
+├── repository/          # Data access (Spring Data JPA)
+└── model/
+    ├── {Domain}.java    # Entity class
+    ├── mapper/          # Mapstruct mappers (DTO ↔ Entity)
+    ├── request/         # Request DTOs
+    ├── response/        # Response DTOs
+    └── validator/       # Custom validators (@Component, implement Validator<T>)
+```
+
+**Validator Pattern:**
+- Separate @Component classes in `model/validator/`
+- Implement `Validator<RequestType>` from Jframe
+- Use `ValidationResult` for validation logic
+- Constructor injection for dependencies
+- **Each validator MUST have unit tests** in `test/.../model/validator/`
+- Example: `ChangePasswordValidator`, `AuthenticationValidator`
+- Services call validators, don't embed validation logic
 
 ### Testing Standards
 - ✅ Given-When-Then pattern with inline comments
@@ -202,6 +225,19 @@ You don't write code, but you **validate** agents follow these:
 - ✅ Factory methods for test data
 - ✅ Extend UnitTest or IntegrationTest
 - ✅ >90% line coverage, >85% branch coverage
+
+**Controller Test Standards:**
+- ✅ Extend IntegrationTest only (no `@SpringBootTest` or `@AutoConfigureMockMvc`)
+- ✅ Use `mockMvc` from parent (NO `@Autowired MockMvc`)
+- ✅ Create test data inline in each test (NO `@BeforeEach` setup)
+- ✅ Use `MockHttpServletRequestBuilder` and `ResultActions` variables
+- ✅ Use `toJson()` / `fromJson()` from `ObjectMappers`
+- ✅ Static imports: `APPLICATION_JSON`, `BEARER`, `AUTHORIZATION`, `SC_*` from `HttpServletResponse`
+- ✅ Deserialize responses to typed objects (NOT string checking)
+- ✅ For non-auth controllers: Use `user.getAccessToken().getValue()` (don't do full login)
+- ✅ Concise naming: `{action}{Condition}{Result}` (e.g., `loginSuccess`, `createUserWithInvalidEmailFails`)
+- ✅ NO section comment headers
+- ✅ Reference: `AuthenticationControllerTest.java`
 
 ### Frontend Standards
 - ✅ Explicit TypeScript types everywhere

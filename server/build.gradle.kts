@@ -9,7 +9,6 @@ import org.springframework.boot.loader.tools.LoaderImplementation.CLASSIC
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-
 group = retrieve("group")
 version = retrieve("version")
 
@@ -60,10 +59,6 @@ plugins {
 
     // Automatic lombok and delombok configuration.
     id("io.freefair.lombok")
-
-    // Note: Liquibase gradle plugin disabled due to Gradle 9 compatibility issues
-    // Using custom task instead
-    // id("org.liquibase.gradle")
 }
 
 /** Configure the dependencies required within the project. */

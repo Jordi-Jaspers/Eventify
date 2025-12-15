@@ -1,6 +1,7 @@
 package io.github.eventify.support;
 
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.model.TokenType;
 import io.github.eventify.api.user.model.User;
@@ -60,6 +61,16 @@ public class UnitTest {
     protected static final String APPLICATION_URL = "http://localhost:3000";
     protected static final String ACCESS_TOKEN_VALUE = "access-token-value";
     protected static final String REFRESH_TOKEN_VALUE = "refresh-token-value";
+
+    /**
+     * Helper method to create a valid organization provisioning request.
+     *
+     * @param name The name of the organization.
+     * @return A valid ProvisionOrganizationRequest object.
+     */
+    protected ProvisionOrganizationRequest aValidOrganizationRequest(final String name) {
+        return new ProvisionOrganizationRequest().setName(name);
+    }
 
     /**
      * Helper method to create a valid test user.

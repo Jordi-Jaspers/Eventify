@@ -20,7 +20,9 @@
       "Bash(./gradlew:*)",
       "Bash(./scripts/database-reset.sh:*)",
       "Bash(tee:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(find:*)",
+      "Bash(claude chat:*)"
     ],
     "deny": [],
     "ask": []

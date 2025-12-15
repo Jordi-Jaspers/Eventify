@@ -27,7 +27,8 @@ public enum Role {
         "The authority for a user with all permissions.",
         Set.of(
             Permission.ACCESS_APPLICATION,
-            Permission.MANAGE_USERS
+            Permission.MANAGE_USERS,
+            Permission.PROVISION_ORGANIZATIONS
         )
     );
 

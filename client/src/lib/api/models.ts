@@ -13,3 +13,5 @@ export type ApiErrorResponseResource = components['schemas']['ApiErrorResponseRe
 export type ValidationErrorResponseResource = components['schemas']['ValidationErrorResponseResource'];
 export type ValidationErrorResource = components['schemas']['ValidationErrorResource'];
 
+export type ProvisionOrganizationRequest = components['schemas']['ProvisionOrganizationRequest'];
+export type OrganizationResponse = components['schemas']['OrganizationResponse'];

@@ -20,19 +20,48 @@
 - JWT claim renamed to `global_role` for clarity (later: `org_role` will be added)
 - Permission-based guards preferred over role checks (fine-grained, extensible)
 
-### Organization Provisioning (Admin Only)
+---
+
+### Organization Provisioning (Admin Only) ✅ COMPLETED
 **As a** global admin
 **I want** to create organizations
 **So that** I can onboard new clients/customers
 
 **Acceptance Criteria:**
-- Organization table (id, name, slug, status, created_by, created_at)
-- POST `/admin/organizations` endpoint (global admin only)
-- Status: ACTIVE, SUSPENDED, TRIAL
-- Slug generation/validation
-- Security: Permission-based guard (e.g., `@RequirePermission(PROVISION_ORGANIZATIONS)`)
-  - Permission attached to `Role.ADMIN` (global admins)
-  - More fine-grained than role checks, extensible for future needs
+- ✅ Organization table (id, name, slug, status, created_by, created_at)
+- ✅ POST `/admin/organizations` endpoint (global admin only)
+- ✅ Status: ACTIVE, SUSPENDED, TRIAL
+- ✅ Slug generation/validation
+- ✅ Security: Permission-based guard (e.g., `@RequirePermission(PROVISION_ORGANIZATIONS)`)
+  - ✅ Permission attached to `Role.ADMIN` (global admins)
+  - ✅ More fine-grained than role checks, extensible for future needs
+
+---
+
+### Global Admin Dashboard
+
+**As a** global admin
+**I want** visibility into all organizations and users
+**So that** I can manage the platform effectively
+
+**Acceptance Criteria:**
+- Add hamburger menu item "Admin Dashboard" visible only to global admins
+- Basic stats:
+  - Total orgs
+  - Total users
+  - Active users
+  - Growth metrics (new orgs / users over time)
+- A table Listing all organizations with status/member counts
+- Search/filter organizations
+- View org details and memberships
+- Suspend/activate organizations
+- View platform-wide user list
+- Endpoints under `/admin/*` namespace
+- Security: Permission-based guards on all endpoints
+    - View operations: `VIEW_ALL_ORGANIZATIONS`
+    - Modify operations: `MANAGE_ORGANIZATIONS`
+    - Permissions attached to `Role.ADMIN` for fine-grained control
+---
 
 ### Organization Owner Assignment
 
@@ -47,23 +76,7 @@
 - Owner must be an existing user
 - Can reassign owner if needed
 
-### Global Admin Dashboard
-
-**As a** global admin
-**I want** visibility into all organizations and users
-**So that** I can manage the platform effectively
-
-**Acceptance Criteria:**
-- List all organizations with status/member counts
-- Search/filter organizations
-- View org details and memberships
-- Suspend/activate organizations
-- View platform-wide user list
-- Endpoints under `/admin/*` namespace
-- Security: Permission-based guards on all endpoints
-  - View operations: `@RequirePermission(VIEW_ALL_ORGANIZATIONS)`
-  - Modify operations: `@RequirePermission(MANAGE_ORGANIZATIONS)`
-  - Permissions attached to `Role.ADMIN` for fine-grained control
+---
 
 ### Organization Membership Management
 
@@ -79,6 +92,8 @@
 - Users can belong to multiple orgs
 - Permission: OWNER/ADMIN can invite
 
+---
+
 ### Tenant Context Filtering
 
 **As a** developer  
@@ -91,6 +106,8 @@
 - Global admins can bypass filter for platform operations
 - Applied automatically to all tenant-scoped entities
 - Integration tests proving isolation
+
+---
 
 ### User Context & Permissions
 
@@ -109,6 +126,8 @@
 - Clear hierarchy: Role.ADMIN (global) → OrganizationalRole.OWNER → ADMIN → MEMBER → TeamRole.LEAD → MEMBER
 - Permissions attached to roles, guards check permissions (fine-grained, extensible)
 
+---
+
 ### Team Creation & Management
 
 **As an** organization admin  
@@ -121,6 +140,8 @@
 - CRUD endpoints for teams
 - Permission: ADMIN/OWNER only
 - Automatic tenant filtering applied
+
+---
 
 ### Team Membership
 

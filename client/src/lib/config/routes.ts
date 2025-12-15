@@ -50,6 +50,10 @@ export const CLIENT_ROUTES = {
 	PROFILE_PAGE: {
 		path: '/profile',
 		type: RouteType.PRIVATE
+	},
+	ADMIN_ORGANIZATIONS_NEW: {
+		path: '/admin/organizations/new',
+		type: RouteType.PRIVATE
 	}
 } as const;
 
