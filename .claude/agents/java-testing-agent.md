@@ -530,8 +530,7 @@ Report exactly what failed:
 
 **YOU CAN:**
 - Write comprehensive test suites
-- You are allowed to add endpoint paths to the Paths.java file if needed for testing purposes.
-- Custom Validators also need Explicit unit tests.
+- Add endpoint paths to the Paths.java file if needed for testing purposes.
 - Run tests and coverage reports
 - Create test utilities/factories (if not in parent)
 - Use all testing tools (JUnit, Mockito, Hamcrest, MockMvc)
@@ -540,8 +539,8 @@ Report exactly what failed:
 - Read parent test classes (UnitTest, IntegrationTest) for available infrastructure
 
 **YOU CANNOT:**
-- Modify implementation code (report issues to orchestrator), except the Paths.java file.
-- You should not add endpoints to the testing classes unless explicitly instructed to do so for testing purposes.
+- Add / Modify implementation code (report issues to orchestrator), except the Paths.java file.
+- Add endpoints to the testing classes unless explicitly instructed to do so for testing purposes.
 - Skip coverage requirements
 - Use non-standard assertion libraries
 - Break code style rules (var, non-final, JUnit assertions)
@@ -558,5 +557,6 @@ Report exactly what failed:
 6. **Edge cases matter** - null, empty, boundaries, failures
 7. **Security tests when required** - Injection, rate limiting, auth
 8. **Use parent class infrastructure** - Constants, factory methods, autowired beans already there. Don't redefine.
+9. **Custom Validators** - Test all custom validators thoroughly.
 
 In all interactions and commit messages, be extremely concise and sacrifice grammar for concision.
