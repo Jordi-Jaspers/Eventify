@@ -33,71 +33,34 @@
 - ✅ Status: ACTIVE, SUSPENDED, TRIAL
 - ✅ Slug generation/validation
 - ✅ Security: Permission-based guard (e.g., `@RequirePermission(PROVISION_ORGANIZATIONS)`)
-  - ✅ Permission attached to `Role.ADMIN` (global admins)
-  - ✅ More fine-grained than role checks, extensible for future needs
+    - ✅ Permission attached to `Role.ADMIN` (global admins)
+    - ✅ More fine-grained than role checks, extensible for future needs
 
 ---
 
-### Global Admin Dashboard - Phase 1: Stats ✅ COMPLETED
+### Global Admin Dashboard
 
 **As a** global admin
-**I want** to view platform statistics
-**So that** I can monitor growth and activity
-
-**Acceptance Criteria:**
-- ✅ Add hamburger menu item "Admin Dashboard" visible only to global admins
-- ✅ Dashboard page at `/admin/dashboard`
-- ✅ Stats displayed:
-  - ✅ Total orgs, total users, active users
-  - ✅ New orgs/users (7d, 30d)
-  - ✅ Recent logins (7d), inactive users (>30d no login)
-- ✅ GET `/admin/dashboard/stats` endpoint
-- ✅ Security: `MANAGE_USERS` permission
-- ✅ Responsive stat cards with glassmorphism design
-
-**Implementation Notes:**
-- Backend: AdminStatsService + AdminDashboardController
-- Frontend: /admin/dashboard page with 9 stat cards
-- 19 tests passing (11 unit, 8 integration)
-- Details: `.claude/features/20251216-admin-dashboard-phase1-stats.md`
-
----
-
-### Global Admin Dashboard - Phase 2: Organization Table
-
-**As a** global admin
-**I want** to view and manage all organizations in a table
-**So that** I can see org details at a glance
-
-**Acceptance Criteria:**
-- Table listing all organizations with columns:
-  - Name, slug, status, created date, member count
-- Search/filter by name, status
-- Click org to view details
-- GET `/admin/organizations` endpoint with pagination
-- Security: `MANAGE_USERS` permission
-
-**Dependencies:** Phase 1 complete
-
----
-
-### Global Admin Dashboard - Phase 3: Actions & User List
-
-**As a** global admin
-**I want** to perform actions on organizations and view all users
+**I want** visibility into all organizations and users
 **So that** I can manage the platform effectively
 
 **Acceptance Criteria:**
-- Suspend/activate organizations
-- View platform-wide user list with search
+- Add hamburger menu item "Admin Dashboard" visible only to global admins
+- Basic stats:
+    - Total orgs
+    - Total users
+    - Active users
+    - Growth metrics (new orgs / users over time)
+- A table Listing all organizations with status/member counts
+- Search/filter organizations
 - View org details and memberships
-- POST `/admin/organizations/{id}/suspend` endpoint
-- POST `/admin/organizations/{id}/activate` endpoint
-- GET `/admin/users` endpoint with pagination
-- Security: `MANAGE_USERS` permission for all actions
-
-**Dependencies:** Phase 1 + 2 complete
-
+- Suspend/activate organizations
+- View platform-wide user list
+- Endpoints under `/admin/*` namespace
+- Security: Permission-based guards on all endpoints
+    - View operations: `VIEW_ALL_ORGANIZATIONS`
+    - Modify operations: `MANAGE_ORGANIZATIONS`
+    - Permissions attached to `Role.ADMIN` for fine-grained control
 ---
 
 ### Organization Owner Assignment
@@ -157,9 +120,9 @@
 - JWT structure: `{user_id, global_role, permissions[], org_id?, org_role?, team_ids[]}`
 - Guard annotations: `@RequirePermission(...)`, `@RequireOrgRole(...)`, `@RequireTeamRole(...)`
 - Permission-based approach (not role checks):
-  - Global: Check user has specific permission (e.g., PROVISION_ORGANIZATIONS)
-  - Org: Check user has org role + permission (e.g., MANAGE_ORG_MEMBERS)
-  - Team: Check user has team role + permission (e.g., ASSIGN_TASKS)
+    - Global: Check user has specific permission (e.g., PROVISION_ORGANIZATIONS)
+    - Org: Check user has org role + permission (e.g., MANAGE_ORG_MEMBERS)
+    - Team: Check user has team role + permission (e.g., ASSIGN_TASKS)
 - Clear hierarchy: Role.ADMIN (global) → OrganizationalRole.OWNER → ADMIN → MEMBER → TeamRole.LEAD → MEMBER
 - Permissions attached to roles, guards check permissions (fine-grained, extensible)
 
