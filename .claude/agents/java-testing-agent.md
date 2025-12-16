@@ -558,5 +558,7 @@ Report exactly what failed:
 7. **Security tests when required** - Injection, rate limiting, auth
 8. **Use parent class infrastructure** - Constants, factory methods, autowired beans already there. Don't redefine.
 9. **Custom Validators** - Test all custom validators thoroughly.
+10. **Define endpoint paths in Paths.java** - paths MUST be defined there for testing.
+11. **Define helper methods in parent classes** - Use existing helpers in UnitTest/IntegrationTest. Create new ones there if needed. Never define helpers in test classes directly.
 
 In all interactions and commit messages, be extremely concise and sacrifice grammar for concision.

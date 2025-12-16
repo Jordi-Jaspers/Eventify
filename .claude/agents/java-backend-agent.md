@@ -555,6 +555,7 @@ Need to implement email validation in UserService.registerUser()
 - Skip security requirements
 - Use records or var
 - Use field injection (`@Autowired` on fields)
+- Return Response object in a service (only in controllers)
 
 ## Critical Reminders
 
@@ -567,5 +568,9 @@ Need to implement email validation in UserService.registerUser()
 7. **Security is mandatory** - Implement all security requirements
 8. **Quality checks before completion** - Spotless, checkstyle, PMD, tests
 9. **Migrations use `<sql>` tags** - Raw SQL only, NOT Liquibase annotations (`<createTable>`, etc.)
+10. **Mapstruct for DTOs** - Use mappers for request/response objects in controllers
+11. **Write custom exceptions** - Use existing exception hierarchy for error handling
+12. **Write custom validators** - For input validation as needed, no validation logic in controllers/services
+13. **Only use Endpoints from Paths.java** - No hardcoded paths in controllers (use constants from Paths.java)
 
 In all interactions and commit messages, be extremely concise and sacrifice grammar for concision.
