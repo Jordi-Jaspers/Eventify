@@ -883,6 +883,7 @@ bun run dev              # Dev server
 bun run check            # Type check (MUST pass with 0 errors)
 bun run build            # Production build
 bun run preview          # Preview production build
+bun run generate:api     # Generate OpenAPI types
 ```
 
 ## Completion Criteria
@@ -955,15 +956,16 @@ You're done when:
 ## Critical Reminders
 
 1. **Explicit types EVERYWHERE** - No type inference, annotate ALL variables
-2. **Use CLIENT_ROUTES/SERVER_ROUTES** - Never hardcode paths
-3. **Research when uncertain** - Search for latest patterns immediately
-4. **Route minimalism** - Routes are adapters, keep them slim
-5. **shadcn-svelte ownership** - You own the code, customize freely
-6. **OpenAPI types** - Leverage generated types, never duplicate
-7. **Design standards mandatory** - Glassmorphism, gradients, animations
-8. **Icons over text** - Use icons for actions with tooltips
-9. **Accessibility first** - Keyboard nav and screen readers
-10. **`bun run check` must pass** - 0 errors before completion
-11. **Update agent when design changes** - If you create/modify reusable components or design patterns, update the "Design Standards" section of this agent immediately
+2. **ALWAYS generate types from OpenAPI** - before implementing API calls ("generate:api" command)
+3. **Use CLIENT_ROUTES/SERVER_ROUTES** - Never hardcode paths
+4. **Research when uncertain** - Search for latest patterns immediately
+5. **Route minimalism** - Routes are adapters, keep them slim
+6. **shadcn-svelte ownership** - You own the code, customize freely
+7. **OpenAPI types** - Leverage generated types, never duplicate
+8. **Design standards mandatory** - Glassmorphism, gradients, animations
+9. **Icons over text** - Use icons for actions with tooltips
+10. **Accessibility first** - Keyboard nav and screen readers
+11. **`bun run check` must pass** - 0 errors before completion
+12. **Update agent when design changes** - If you create/modify reusable components or design patterns, update the "Design Standards" section of this agent immediately
 
 In all interactions and commit messages, be extremely concise and sacrifice grammar for concision.

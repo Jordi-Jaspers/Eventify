@@ -38,29 +38,66 @@
 
 ---
 
-### Global Admin Dashboard
+### Global Admin Dashboard - Phase 1: Stats ✅ COMPLETED
 
 **As a** global admin
-**I want** visibility into all organizations and users
+**I want** to view platform statistics
+**So that** I can monitor growth and activity
+
+**Acceptance Criteria:**
+- ✅ Add hamburger menu item "Admin Dashboard" visible only to global admins
+- ✅ Dashboard page at `/admin/dashboard`
+- ✅ Stats displayed:
+  - ✅ Total orgs, total users, active users
+  - ✅ New orgs/users (7d, 30d)
+  - ✅ Recent logins (7d), inactive users (>30d no login)
+- ✅ GET `/admin/dashboard/stats` endpoint
+- ✅ Security: `MANAGE_USERS` permission
+- ✅ Responsive stat cards with glassmorphism design
+
+**Implementation Notes:**
+- Backend: AdminStatsService + AdminDashboardController
+- Frontend: /admin/dashboard page with 9 stat cards
+- 19 tests passing (11 unit, 8 integration)
+- Details: `.claude/features/20251216-admin-dashboard-phase1-stats.md`
+
+---
+
+### Global Admin Dashboard - Phase 2: Organization Table
+
+**As a** global admin
+**I want** to view and manage all organizations in a table
+**So that** I can see org details at a glance
+
+**Acceptance Criteria:**
+- Table listing all organizations with columns:
+  - Name, slug, status, created date, member count
+- Search/filter by name, status
+- Click org to view details
+- GET `/admin/organizations` endpoint with pagination
+- Security: `MANAGE_USERS` permission
+
+**Dependencies:** Phase 1 complete
+
+---
+
+### Global Admin Dashboard - Phase 3: Actions & User List
+
+**As a** global admin
+**I want** to perform actions on organizations and view all users
 **So that** I can manage the platform effectively
 
 **Acceptance Criteria:**
-- Add hamburger menu item "Admin Dashboard" visible only to global admins
-- Basic stats:
-  - Total orgs
-  - Total users
-  - Active users
-  - Growth metrics (new orgs / users over time)
-- A table Listing all organizations with status/member counts
-- Search/filter organizations
-- View org details and memberships
 - Suspend/activate organizations
-- View platform-wide user list
-- Endpoints under `/admin/*` namespace
-- Security: Permission-based guards on all endpoints
-    - View operations: `VIEW_ALL_ORGANIZATIONS`
-    - Modify operations: `MANAGE_ORGANIZATIONS`
-    - Permissions attached to `Role.ADMIN` for fine-grained control
+- View platform-wide user list with search
+- View org details and memberships
+- POST `/admin/organizations/{id}/suspend` endpoint
+- POST `/admin/organizations/{id}/activate` endpoint
+- GET `/admin/users` endpoint with pagination
+- Security: `MANAGE_USERS` permission for all actions
+
+**Dependencies:** Phase 1 + 2 complete
+
 ---
 
 ### Organization Owner Assignment

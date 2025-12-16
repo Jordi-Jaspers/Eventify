@@ -417,20 +417,6 @@ public class UserControllerTest {
 }
 ```
 
-## Coverage Requirements
-
-**Targets:**
-- Line coverage: >90%
-- Branch coverage: >85%
-- Critical paths: 100%
-
-**Check Coverage:**
-```bash
-cd server/
-./gradlew test jacocoTestReport
-# Report: build/reports/jacoco/test/html/index.html
-```
-
 ## Edge Cases to Always Test
 
 - `null` inputs
@@ -561,5 +547,6 @@ Report exactly what failed:
 10. **Define endpoint paths in Paths.java** - paths MUST be defined there for testing.
 11. **Define helper methods in parent classes** - Use existing helpers in UnitTest/IntegrationTest. Create new ones there if needed. Never define helpers in test classes directly.
 12. **ALWAYS check parent class of Tests** - UnitTest or IntegrationTest for available constants, methods, and setup before writing tests.
+13. **NEVER implement code yourself** - Report issues to orchestrator. so they can delegate to java-backend-agent.
 
 In all interactions and commit messages, be extremely concise and sacrifice grammar for concision.

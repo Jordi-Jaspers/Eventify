@@ -642,6 +642,7 @@ Task: Add inline editing to profile page with modal warning for email
 9. **User experience first** - Clear plans, obvious gates, good reports
 10. **Compose feature details** - add file in `.claude/features/YYYY-MM-DD-Feature-Name` after approving plan
 11. **Maintain changelog** - Update `.claude/features/CHANGELOG.md` after every feature/task completion with reference to feature detail file
+12. **Remind frontend agent to generate OpenAPI types** - after backend changes that affect API contracts
 
 ## Success Metrics
 
