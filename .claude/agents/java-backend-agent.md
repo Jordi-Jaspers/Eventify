@@ -550,6 +550,7 @@ Need to implement email validation in UserService.registerUser()
 
 **YOU CANNOT:**
 - Modify test code
+- Adjust the build.gradle.kts beyond dependencies
 - Change frontend code
 - Deploy to production
 - Skip security requirements

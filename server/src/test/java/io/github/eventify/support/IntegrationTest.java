@@ -8,6 +8,8 @@ import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.model.TokenType;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.request.*;
+import io.github.eventify.common.security.principal.JwtUserPrincipalAuthenticationToken;
+import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import io.github.eventify.support.util.WebMvcConfigurator;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -49,13 +51,24 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected static final String NEW_PASSWORD = "NewTest123!@#";
     protected static final String NEW_PASSWORD_CONFIRMATION = "NewTest123!@#";
 
-    @Autowired
-    protected PasswordEncoder passwordEncoder;
+    protected User admin;
 
     @BeforeEach
     public void cleanUp() {
         deleteAllTestOrganizations();
         deleteAllTestUsers();
+
+        admin = aValidatedUserWithRole(Role.ADMIN);
+        final JwtUserPrincipalAuthenticationToken authentication = new JwtUserPrincipalAuthenticationToken(
+            new UserTokenPrincipal(admin),
+            admin.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     protected ProvisionOrganizationRequest aValidProvisionOrganizationRequest() {

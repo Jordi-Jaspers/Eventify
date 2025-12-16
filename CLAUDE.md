@@ -430,7 +430,7 @@ You (orchestrator):
 1. Check backlog.md - find existing notes
 2. Ask: "Token expiry? Rate limiting?"
 3. Plan:
-   - Phase 1: Backend tests (service + controller)
+   - Phase 1: Backend tests (service + controller + validators)
    - Phase 2: Backend implementation
    - Phase 3: Email template
    - Phase 4: Frontend UI

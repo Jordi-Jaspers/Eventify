@@ -22,7 +22,8 @@
       "Bash(tee:*)",
       "Bash(docker exec:*)",
       "Bash(find:*)",
-      "Bash(claude chat:*)"
+      "Bash(claude chat:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
