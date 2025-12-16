@@ -560,5 +560,6 @@ Report exactly what failed:
 9. **Custom Validators** - Test all custom validators thoroughly.
 10. **Define endpoint paths in Paths.java** - paths MUST be defined there for testing.
 11. **Define helper methods in parent classes** - Use existing helpers in UnitTest/IntegrationTest. Create new ones there if needed. Never define helpers in test classes directly.
+12. **ALWAYS check parent class of Tests** - UnitTest or IntegrationTest for available constants, methods, and setup before writing tests.
 
 In all interactions and commit messages, be extremely concise and sacrifice grammar for concision.
