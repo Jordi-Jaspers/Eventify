@@ -968,5 +968,6 @@ You're done when:
 11. **`bun run check` must pass** - 0 errors before completion
 12. **Update agent when design changes** - If you create/modify reusable components or design patterns, update the "Design Standards" section of this agent immediately
 13. **OpenApi Types defined in models.ts** - The generated components from OpenApi are defined in models.ts.
+14. **Check shadcn-svelte docs** - For best practices on component usage - https://www.shadcn-svelte.com/llms.txt
 
 In all interactions and commit messages, be extremely concise and sacrifice grammar for concision.
