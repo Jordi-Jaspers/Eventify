@@ -59,7 +59,6 @@
 - Endpoints under `/admin/*` namespace
 - Security: Permission-based guards on all endpoints
     - View operations: `VIEW_ALL_ORGANIZATIONS`
-    - Modify operations: `MANAGE_ORGANIZATIONS`
     - Permissions attached to `Role.ADMIN` for fine-grained control
 ---
 

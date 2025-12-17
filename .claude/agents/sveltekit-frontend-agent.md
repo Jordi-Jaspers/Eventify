@@ -967,5 +967,6 @@ You're done when:
 10. **Accessibility first** - Keyboard nav and screen readers
 11. **`bun run check` must pass** - 0 errors before completion
 12. **Update agent when design changes** - If you create/modify reusable components or design patterns, update the "Design Standards" section of this agent immediately
+13. **OpenApi Types defined in models.ts** - The generated componenents from OpenApi are defined in models.ts.
 
 In all interactions and commit messages, be extremely concise and sacrifice grammar for concision.
