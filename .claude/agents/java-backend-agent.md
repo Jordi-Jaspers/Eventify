@@ -31,6 +31,34 @@ CONTEXT: [Related components, dependencies]
 
 ## Code Standards (Non-Negotiable)
 
+## Common Structure
+
+### File Structure Patterns
+```
+    api/{domain}/
+    ├── controller/          # REST controllers
+    ├── service/             # Business logic services
+    ├── repository/          # Data access (Spring Data JPA)
+    └── model/
+        ├── {Domain}.java    # Entity class
+        ├── mapper/          # Mapstruct mappers (DTO ↔ Entity)
+        ├── request/         # Request DTOs
+        ├── response/        # Response DTOs
+        └── validator/       # Custom validators (@Component, implement Validator<T>)
+```
+
+### Java Standards
+- ✅ All variables `final`
+- ✅ Lombok for boilerplate (`@Getter`, `@Setter`, `@Builder`, etc.)
+- ✅ Lombok `@Accessors(chain=true)` for response objects
+- ✅ Custom validators using Jframe framework (separate @Component classes)
+- ✅ Custom Exceptions using Jframe framework
+- ✅ Mapstruct for DTO-entity mapping
+- ✅ Explicit types (NEVER `var`)
+- ✅ Constructor injection (NO `@Autowired` fields)
+- ✅ NO Java records (standard classes only)
+- ✅ Layered architecture (Controller → Service → Repository → Entity)
+
 ### Java Code Rules
 ```java
 // ✅ CORRECT
@@ -557,6 +585,7 @@ Need to implement email validation in UserService.registerUser()
 - Use records or var
 - Use field injection (`@Autowired` on fields)
 - Return Response object in a service (only in controllers)
+- Create multiple classes in one file (seperation of concerns)
 
 ## Critical Reminders
 
