@@ -63,7 +63,6 @@
 - [Details](.claude/features/20251217-admin-dashboard.md)
 
 ---
-![img.png](img.png)
 ### Add daily percentage growth to Admin Dashboard 
 
 **As a** global admin
