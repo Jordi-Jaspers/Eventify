@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 
@@ -62,7 +63,7 @@ public class AdminStatsService {
             .stream()
             .collect(Collectors.toMap(DailyGrowthData::getDate, Function.identity()));
 
-        return startDate.datesUntil(today.plusDays(1))
+        final List<GrowthDataPoint> dataPoints = startDate.datesUntil(today.plusDays(1))
             .map(date -> {
                 final DailyGrowthData userCount = userCounts.get(date);
                 final DailyGrowthData orgCount = orgCounts.get(date);
@@ -76,5 +77,34 @@ public class AdminStatsService {
                     .build();
             })
             .toList();
+
+        applyGrowthPercentages(dataPoints);
+        return dataPoints;
+    }
+
+    private void applyGrowthPercentages(final List<GrowthDataPoint> dataPoints) {
+        IntStream.range(0, dataPoints.size())
+            .forEach(i -> {
+                final GrowthDataPoint currentDay = dataPoints.get(i);
+                final GrowthDataPoint previousDay = i > 0 ? dataPoints.get(i - 1) : null;
+
+                currentDay.setNewUsersGrowthPercentage(
+                    previousDay != null
+                        ? calculateGrowthPercentage(previousDay.getTotalUsers(), currentDay.getTotalUsers())
+                        : null
+                );
+
+                currentDay.setNewOrganizationsGrowthPercentage(
+                    previousDay != null
+                        ? calculateGrowthPercentage(previousDay.getTotalOrganizations(), currentDay.getTotalOrganizations())
+                        : null
+                );
+            });
+    }
+
+    private double calculateGrowthPercentage(final int previousValue, final int currentValue) {
+        return previousValue != 0
+            ? ((currentValue - previousValue) / (double) previousValue) * 100.0
+            : 0;
     }
 }

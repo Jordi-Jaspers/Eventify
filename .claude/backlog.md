@@ -63,17 +63,37 @@
 - [Details](.claude/features/20251217-admin-dashboard.md)
 
 ---
-### Add daily percentage growth to Admin Dashboard 
+### Add daily percentage growth to Admin Dashboard ✅ COMPLETED
 
 **As a** global admin
 **I want** to see daily percentage growth in new organizations and users
 **So that** I can better understand platform growth trends
 
 **Acceptance Criteria:**
-- Daily percentage growth displayed alongside total new orgs/users
-- Calculation: ((today's count - yesterday's count) / yesterday's count) * 100
-- Should be green for positive growth, red for negative
-- Add legend to growth chart explaining the graphs
+- ✅ Daily percentage growth displayed alongside total new orgs/users
+- ✅ Calculation: ((today's count - yesterday's count) / yesterday's count) * 100
+- ✅ Should be green for positive growth, red for negative
+- ✅ Add legend to growth chart explaining the graphs
+
+**Implementation Notes:**
+- Backend: Added percentage fields to GrowthDataPoint, calculation in AdminStatsService
+- Frontend: "New Today" section with color-coded badges, chart legend
+- Edge cases: division by zero (null), first day (null), negative growth supported
+- [Details](.claude/features/20251217-daily-percentage-growth.md)
+
+---
+
+### Refactor navigation menu to support a hamburger menu.
+**As a** user
+**I want** a hamburger menu for navigation
+**So that** I can easily access different sections of the application
+
+**Acceptance Criteria:**
+- Hamburger menu icon in the top-right corner
+- Menu expands/collapses on click
+- Current navigation items included
+- Must have a fancy animation when opening/closing
+- Check Shadcn UI docs for best practices
 
 ---
 

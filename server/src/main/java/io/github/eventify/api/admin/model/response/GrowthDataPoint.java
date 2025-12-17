@@ -29,4 +29,8 @@ public class GrowthDataPoint {
     // Relative change (daily)
     private int newUsers;
     private int newOrganizations;
+
+    // Growth percentages (daily)
+    private Double newUsersGrowthPercentage;
+    private Double newOrganizationsGrowthPercentage;
 }

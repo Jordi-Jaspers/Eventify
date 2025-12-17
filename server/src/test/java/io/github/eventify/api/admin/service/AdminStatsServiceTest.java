@@ -319,4 +319,463 @@ public class AdminStatsServiceTest extends UnitTest {
         // Then: Active users should be <= total users
         assertThat(stats.getActiveUsers(), is(lessThanOrEqualTo(stats.getTotalUsers())));
     }
+
+    // ==================== Percentage Growth Tests ====================
+
+    @Test
+    @DisplayName("Should calculate positive growth percentage when users increase")
+    public void shouldCalculatePositiveGrowthPercentageWhenUsersIncrease() {
+        // Given: Yesterday 10 new users, today 15 new users (50% growth)
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(yesterday, 90L, 10L),
+            createMockGrowthData(today, 105L, 15L)
+        );
+
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(yesterday, 48L, 2L),
+            createMockGrowthData(today, 50L, 2L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: Today's growth percentage should be 50%
+        final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(todayData.isPresent(), is(true));
+        if (todayData.isPresent()) {
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(notNullValue()));
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(equalTo(50.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should calculate negative growth percentage when users decrease")
+    public void shouldCalculateNegativeGrowthPercentageWhenUsersDecrease() {
+        // Given: Yesterday 20 new users, today 15 new users (-25% growth)
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(yesterday, 100L, 20L),
+            createMockGrowthData(today, 115L, 15L)
+        );
+
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(yesterday, 48L, 2L),
+            createMockGrowthData(today, 50L, 2L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: Today's growth percentage should be -25%
+        final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(todayData.isPresent(), is(true));
+        if (todayData.isPresent()) {
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(notNullValue()));
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(equalTo(-25.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should handle zero growth percentage when counts are equal")
+    public void shouldHandleZeroGrowthPercentageWhenCountsAreEqual() {
+        // Given: Yesterday 10 new users, today 10 new users (0% growth)
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(yesterday, 90L, 10L),
+            createMockGrowthData(today, 100L, 10L)
+        );
+
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(yesterday, 48L, 2L),
+            createMockGrowthData(today, 50L, 2L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: Today's growth percentage should be 0%
+        final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(todayData.isPresent(), is(true));
+        if (todayData.isPresent()) {
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(notNullValue()));
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(equalTo(0.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should handle division by zero gracefully when previous day had zero new users")
+    public void shouldHandleDivisionByZeroGracefullyWhenPreviousDayHadZeroNewUsers() {
+        // Given: Yesterday 0 new users, today 5 new users (cannot calculate percentage)
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(yesterday, 90L, 0L),
+            createMockGrowthData(today, 95L, 5L)
+        );
+
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(yesterday, 48L, 0L),
+            createMockGrowthData(today, 50L, 2L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: Today's growth percentage should be null or 0.0 (handle gracefully)
+        final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(todayData.isPresent(), is(true));
+        if (todayData.isPresent()) {
+            // Either null (no calculation possible) or 0.0 (default value)
+            final Double growthPercentage = todayData.get().getNewUsersGrowthPercentage();
+            assertThat(growthPercentage, anyOf(nullValue(), equalTo(0.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should calculate organizations growth percentage independently from users")
+    public void shouldCalculateOrganizationsGrowthPercentageIndependentlyFromUsers() {
+        // Given: Organizations with different growth metrics than users
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        // Users: 10 yesterday -> 15 today (50% growth)
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(yesterday, 90L, 10L),
+            createMockGrowthData(today, 105L, 15L)
+        );
+
+        // Organizations: 2 yesterday -> 4 today (100% growth)
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(yesterday, 48L, 2L),
+            createMockGrowthData(today, 52L, 4L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: Both metrics should be calculated independently
+        final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(todayData.isPresent(), is(true));
+        if (todayData.isPresent()) {
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(notNullValue()));
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(equalTo(50.0)));
+            assertThat(todayData.get().getNewOrganizationsGrowthPercentage(), is(notNullValue()));
+            assertThat(todayData.get().getNewOrganizationsGrowthPercentage(), is(equalTo(100.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should calculate negative organizations growth percentage")
+    public void shouldCalculateNegativeOrganizationsGrowthPercentage() {
+        // Given: Organizations declining from 4 to 3 (-25% growth)
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(yesterday, 90L, 5L),
+            createMockGrowthData(today, 100L, 10L)
+        );
+
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(yesterday, 50L, 4L),
+            createMockGrowthData(today, 53L, 3L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: Organizations growth percentage should be -25%
+        final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(todayData.isPresent(), is(true));
+        if (todayData.isPresent()) {
+            assertThat(todayData.get().getNewOrganizationsGrowthPercentage(), is(notNullValue()));
+            assertThat(todayData.get().getNewOrganizationsGrowthPercentage(), is(equalTo(-25.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should have no growth percentage for first day (no previous day)")
+    public void shouldHaveNoGrowthPercentageForFirstDay() {
+        // Given: Only one day of data (first day, no previous day)
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+
+        // Only provide data for today, no yesterday
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(today, 100L, 10L)
+        );
+
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(today, 50L, 2L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: First day should have null or 0.0 growth percentage
+        final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(todayData.isPresent(), is(true));
+        if (todayData.isPresent()) {
+            final Double userGrowth = todayData.get().getNewUsersGrowthPercentage();
+            final Double orgGrowth = todayData.get().getNewOrganizationsGrowthPercentage();
+            // Should be null (no previous day) or 0.0 (default)
+            assertThat(userGrowth, anyOf(nullValue(), equalTo(0.0)));
+            assertThat(orgGrowth, anyOf(nullValue(), equalTo(0.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should calculate precise percentage with decimal values")
+    public void shouldCalculatePrecisePercentageWithDecimalValues() {
+        // Given: Data that results in decimal percentage (100 -> 150 = 50%, 5 -> 8 = 60%)
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(yesterday, 90L, 100L),
+            createMockGrowthData(today, 140L, 150L)
+        );
+
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(yesterday, 48L, 5L),
+            createMockGrowthData(today, 52L, 8L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: Percentages should be precise
+        final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(todayData.isPresent(), is(true));
+        if (todayData.isPresent()) {
+            // Users: (150 - 100) / 100 * 100 = 50%
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(equalTo(50.0)));
+            // Organizations: (8 - 5) / 5 * 100 = 60%
+            assertThat(todayData.get().getNewOrganizationsGrowthPercentage(), is(equalTo(60.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should handle organizations with zero previous day growth gracefully")
+    public void shouldHandleOrganizationsWithZeroPreviousDayGrowthGracefully() {
+        // Given: Organizations with zero growth yesterday, some growth today
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(yesterday, 90L, 5L),
+            createMockGrowthData(today, 100L, 10L)
+        );
+
+        // Organizations: 0 yesterday -> 3 today (cannot calculate percentage)
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(yesterday, 48L, 0L),
+            createMockGrowthData(today, 51L, 3L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: Organizations growth should handle zero gracefully
+        final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(todayData.isPresent(), is(true));
+        if (todayData.isPresent()) {
+            // Should either be null or 0.0
+            final Double orgGrowth = todayData.get().getNewOrganizationsGrowthPercentage();
+            assertThat(orgGrowth, anyOf(nullValue(), equalTo(0.0)));
+            // Users growth should still calculate correctly
+            assertThat(todayData.get().getNewUsersGrowthPercentage(), is(equalTo(100.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should calculate multiple days of growth percentages correctly")
+    public void shouldCalculateMultipleDaysOfGrowthPercentagesCorrectly() {
+        // Given: Data spanning 3 days with varying growth patterns
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+        final LocalDate twoDaysAgo = today.minusDays(2);
+
+        // Users: Day 1: 10, Day 2: 15 (50%), Day 3: 12 (-20%)
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(twoDaysAgo, 80L, 10L),
+            createMockGrowthData(yesterday, 95L, 15L),
+            createMockGrowthData(today, 107L, 12L)
+        );
+
+        // Organizations: Day 1: 2, Day 2: 3 (50%), Day 3: 3 (0%)
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(twoDaysAgo, 48L, 2L),
+            createMockGrowthData(yesterday, 51L, 3L),
+            createMockGrowthData(today, 54L, 3L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: All percentages should be calculated correctly
+        final Optional<GrowthDataPoint> yesterdayPoint = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(yesterday))
+            .findFirst();
+        final Optional<GrowthDataPoint> todayPoint = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(today))
+            .findFirst();
+
+        assertThat(yesterdayPoint.isPresent(), is(true));
+        assertThat(todayPoint.isPresent(), is(true));
+
+        if (yesterdayPoint.isPresent()) {
+            assertThat(yesterdayPoint.get().getNewUsersGrowthPercentage(), is(equalTo(50.0)));
+            assertThat(yesterdayPoint.get().getNewOrganizationsGrowthPercentage(), is(equalTo(50.0)));
+        }
+
+        if (todayPoint.isPresent()) {
+            assertThat(todayPoint.get().getNewUsersGrowthPercentage(), is(equalTo(-20.0)));
+            assertThat(todayPoint.get().getNewOrganizationsGrowthPercentage(), is(equalTo(0.0)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should include percentage fields in all growth data points")
+    public void shouldIncludePercentageFieldsInAllGrowthDataPoints() {
+        // Given: Data for multiple days
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(yesterday, 90L, 5L),
+            createMockGrowthData(today, 100L, 10L)
+        );
+
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(yesterday, 48L, 2L),
+            createMockGrowthData(today, 50L, 2L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+
+        // Then: Every data point should have percentage fields (not null, even if 0 or null)
+        for (final GrowthDataPoint point : stats.getGrowthData()) {
+            // Percentage fields should either exist and be a number, or be null
+            // They should not be missing/uninitialized
+            if (point.getNewUsersGrowthPercentage() != null) {
+                assertThat(point.getNewUsersGrowthPercentage(), is(instanceOf(Double.class)));
+            }
+            if (point.getNewOrganizationsGrowthPercentage() != null) {
+                assertThat(point.getNewOrganizationsGrowthPercentage(), is(instanceOf(Double.class)));
+            }
+        }
+    }
 }

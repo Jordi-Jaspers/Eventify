@@ -601,6 +601,10 @@ export interface components {
             newUsers?: number;
             /** Format: int32 */
             newOrganizations?: number;
+            /** Format: double */
+            newUsersGrowthPercentage?: number;
+            /** Format: double */
+            newOrganizationsGrowthPercentage?: number;
         };
     };
     responses: never;

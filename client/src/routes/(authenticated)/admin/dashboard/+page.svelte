@@ -2,6 +2,7 @@
     import {onMount} from 'svelte';
     import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '$lib/components/ui/card';
     import {Alert, AlertDescription} from '$lib/components/ui/alert';
+    import {Badge} from '$lib/components/ui/badge';
     import Button from '$lib/components/ui/button/button.svelte';
     import * as Chart from '$lib/components/ui/chart';
     import {AreaChart, Tooltip} from 'layerchart';
@@ -67,6 +68,8 @@
         totalOrganizations: number;
         totalUsers: number;
         dateStr: string;
+        newUsersGrowthPercentage?: number | null;
+        newOrganizationsGrowthPercentage?: number | null;
     }
 
     function formatChartData(growthData: GrowthDataPoint[]): ChartDataPoint[] {
@@ -79,7 +82,9 @@
                 date,
                 totalOrganizations: point.totalOrganizations || 0,
                 totalUsers: point.totalUsers || 0,
-                dateStr: `${month} ${day}`
+                dateStr: `${month} ${day}`,
+                newUsersGrowthPercentage: point.newUsersGrowthPercentage,
+                newOrganizationsGrowthPercentage: point.newOrganizationsGrowthPercentage
             };
         });
     }
@@ -96,6 +101,22 @@
             day: 'numeric',
             year: 'numeric'
         });
+    }
+
+    function formatPercentage(value: number | null | undefined): string {
+        if (value === null || value === undefined) return '0%';
+        const sign: string = value > 0 ? '+' : '';
+        return `${sign}${value.toFixed(1)}%`;
+    }
+
+    function getBadgeVariant(value: number | null | undefined): 'default' | 'success' | 'destructive' {
+        if (value === null || value === undefined || value === 0) return 'default';
+        return value > 0 ? 'success' : 'destructive';
+    }
+
+    function getLatestGrowth(): GrowthDataPoint | null {
+        if (!stats?.growthData || stats.growthData.length === 0) return null;
+        return stats.growthData[stats.growthData.length - 1];
     }
 </script>
 
@@ -151,10 +172,17 @@
                     {#if loading}
                         <div class="h-12 bg-muted/50 rounded animate-pulse"></div>
                     {:else}
-                        <div
-                                class="text-3xl font-bold bg-gradient-to-r from-purple-500 to-purple-400 bg-clip-text text-transparent"
-                        >
-                            {stats?.totalOrganizations?.toLocaleString() || '0'}
+                        <div class="flex items-end gap-3">
+                            <div
+                                    class="text-3xl font-bold bg-gradient-to-r from-purple-500 to-purple-400 bg-clip-text text-transparent"
+                            >
+                                {stats?.totalOrganizations?.toLocaleString() || '0'}
+                            </div>
+                            {#if getLatestGrowth()?.newOrganizationsGrowthPercentage !== null && getLatestGrowth()?.newOrganizationsGrowthPercentage !== undefined}
+                                <Badge variant={getBadgeVariant(getLatestGrowth()?.newOrganizationsGrowthPercentage)} class="mb-1">
+                                    {formatPercentage(getLatestGrowth()?.newOrganizationsGrowthPercentage)}
+                                </Badge>
+                            {/if}
                         </div>
                     {/if}
                 </CardContent>
@@ -177,10 +205,17 @@
                     {#if loading}
                         <div class="h-12 bg-muted/50 rounded animate-pulse"></div>
                     {:else}
-                        <div
-                                class="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-400 bg-clip-text text-transparent"
-                        >
-                            {stats?.totalUsers?.toLocaleString() || '0'}
+                        <div class="flex items-end gap-3">
+                            <div
+                                    class="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-400 bg-clip-text text-transparent"
+                            >
+                                {stats?.totalUsers?.toLocaleString() || '0'}
+                            </div>
+                            {#if getLatestGrowth()?.newUsersGrowthPercentage !== null && getLatestGrowth()?.newUsersGrowthPercentage !== undefined}
+                                <Badge variant={getBadgeVariant(getLatestGrowth()?.newUsersGrowthPercentage)} class="mb-1">
+                                    {formatPercentage(getLatestGrowth()?.newUsersGrowthPercentage)}
+                                </Badge>
+                            {/if}
                         </div>
                     {/if}
                 </CardContent>
@@ -234,6 +269,7 @@
                 {#if loading}
                     <div class="h-80 bg-muted/50 rounded animate-pulse"></div>
                 {:else if stats?.growthData && stats.growthData.length > 0}
+                    <!-- Chart -->
                     <Chart.Container config={chartConfig} class="h-80">
                         <AreaChart
                                 data={formatChartData(stats.growthData)}
@@ -287,6 +323,11 @@
                                                     <span class="text-sm font-medium ml-auto"
                                                     >{data.totalOrganizations.toLocaleString()}</span
                                                     >
+                                                    {#if data.newOrganizationsGrowthPercentage !== null && data.newOrganizationsGrowthPercentage !== undefined}
+                                                        <Badge variant={getBadgeVariant(data.newOrganizationsGrowthPercentage)} class="text-xs px-1.5 py-0">
+                                                            {formatPercentage(data.newOrganizationsGrowthPercentage)}
+                                                        </Badge>
+                                                    {/if}
                                                 </div>
                                                 <div class="flex items-center gap-2">
                                                     <div
@@ -297,6 +338,11 @@
                                                     <span class="text-sm font-medium ml-auto"
                                                     >{data.totalUsers.toLocaleString()}</span
                                                     >
+                                                    {#if data.newUsersGrowthPercentage !== null && data.newUsersGrowthPercentage !== undefined}
+                                                        <Badge variant={getBadgeVariant(data.newUsersGrowthPercentage)} class="text-xs px-1.5 py-0">
+                                                            {formatPercentage(data.newUsersGrowthPercentage)}
+                                                        </Badge>
+                                                    {/if}
                                                 </div>
                                             </div>
                                         </div>
@@ -305,6 +351,24 @@
                             {/snippet}
                         </AreaChart>
                     </Chart.Container>
+
+                    <!-- Chart Legend -->
+                    <div class="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-border/50">
+                        <div class="flex items-center gap-2">
+                            <div
+                                    class="h-3 w-3 rounded-full"
+                                    style="background-color: {chartConfig.totalOrganizations.color}"
+                            ></div>
+                            <span class="text-sm text-muted-foreground">Organizations</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div
+                                    class="h-3 w-3 rounded-full"
+                                    style="background-color: {chartConfig.totalUsers.color}"
+                            ></div>
+                            <span class="text-sm text-muted-foreground">Users</span>
+                        </div>
+                    </div>
                 {:else}
                     <div class="h-80 flex items-center justify-center text-muted-foreground">
                         <div class="text-center">
