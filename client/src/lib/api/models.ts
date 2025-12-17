@@ -15,3 +15,7 @@ export type ValidationErrorResource = components['schemas']['ValidationErrorReso
 
 export type ProvisionOrganizationRequest = components['schemas']['ProvisionOrganizationRequest'];
 export type OrganizationResponse = components['schemas']['OrganizationResponse'];
+
+export type AdminStatsResponse = components['schemas']['AdminStatsResponse'];
+export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
+

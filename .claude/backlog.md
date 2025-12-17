@@ -38,28 +38,76 @@
 
 ---
 
-### Global Admin Dashboard
+### Global Admin Dashboard - Phase 1 ✅ COMPLETED
 
 **As a** global admin
-**I want** visibility into all organizations and users
-**So that** I can manage the platform effectively
+**I want** visibility into platform statistics and trends
+**So that** I can monitor platform health
 
 **Acceptance Criteria:**
-- Add hamburger menu item "Admin Dashboard" visible only to global admins
-- Basic stats:
-    - Total orgs
-    - Total users
-    - Active users
-    - Growth metrics (new orgs / users over time)
-- A table Listing all organizations with status/member counts
-- Search/filter organizations
-- View org details and memberships
-- Suspend/activate organizations
-- View platform-wide user list
-- Endpoints under `/admin/*` namespace
-- Security: Permission-based guards on all endpoints
-    - View operations: `VIEW_ALL_ORGANIZATIONS`
-    - Permissions attached to `Role.ADMIN` for fine-grained control
+- ✅ Add hamburger menu item "Admin Dashboard" visible only to global admins
+- ✅ Basic stats:
+    - ✅ Total orgs
+    - ✅ Total users
+    - ✅ Active users
+    - ✅ Growth metrics (new orgs / users over time - 30 days)
+- ✅ Backend: AdminStatsService + AdminDashboardController
+- ✅ Frontend: Dashboard page with stats cards and growth chart
+- ✅ Endpoints under `/admin/*` namespace
+- ✅ Security: Permission-based guards (VIEW_PLATFORM_STATS)
+
+**Implementation Notes:**
+- Chart.js for growth visualization
+- Glassmorphism design
+- Quick action buttons for future features
+- [Details](.claude/features/20251217-admin-dashboard.md)
+
+---
+![img.png](img.png)
+### Add daily percentage growth to Admin Dashboard 
+
+**As a** global admin
+**I want** to see daily percentage growth in new organizations and users
+**So that** I can better understand platform growth trends
+
+**Acceptance Criteria:**
+- Daily percentage growth displayed alongside total new orgs/users
+- Calculation: ((today's count - yesterday's count) / yesterday's count) * 100
+- Should be green for positive growth, red for negative
+- Add legend to growth chart explaining the graphs
+
+---
+
+### Global Admin Dashboard - Phase 3 (Enhanced Org Management)
+
+**As a** global admin
+**I want** to view, search, and manage all organizations
+**So that** I can administer the platform effectively
+
+**Acceptance Criteria:**
+- Table listing all organizations with:
+    - Name, slug, status
+    - Member count per org
+    - Created date
+    - Actions (view, suspend/activate)
+- Search/filter organizations by name, status
+- Pagination support
+- View org details modal with memberships
+- Suspend/activate organizations action
+- Backend endpoints:
+    - GET `/admin/organizations` (list with pagination, search, filter)
+    - GET `/admin/organizations/{id}` (details with member list)
+    - POST `/admin/organizations/{id}/suspend` (suspend org)
+    - POST `/admin/organizations/{id}/activate` (activate org)
+- Security: Permission-based guards (MANAGE_ORGANIZATIONS)
+- View platform-wide user list (already exists via UserManagementController)
+
+**Technical Notes:**
+- Repository: Add pagination + search methods to OrganizationRepository
+- Service: OrganizationManagementService with CRUD operations
+- Frontend: Table component with filters, pagination, modals
+- Status transitions: ACTIVE ↔ SUSPENDED (TRIAL handled separately)
+
 ---
 
 ### Organization Owner Assignment

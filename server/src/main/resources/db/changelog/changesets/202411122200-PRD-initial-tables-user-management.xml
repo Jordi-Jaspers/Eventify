@@ -22,16 +22,16 @@
         <sql>
             CREATE TABLE IF NOT EXISTS "user"
             (
-                id         SERIAL PRIMARY KEY,
-                first_name TEXT        NULL,
-                last_name  TEXT        NULL,
-                email      TEXT        NOT NULL,
-                "role"     TEXT        NOT NULL,
-                password   TEXT        NOT NULL,
-                created    TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                last_login TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                enabled    BOOLEAN     NOT NULL DEFAULT TRUE,
-                validated  BOOLEAN     NOT NULL DEFAULT FALSE,
+                id              SERIAL PRIMARY KEY,
+                first_name      TEXT        NULL,
+                last_name       TEXT        NULL,
+                email           TEXT        NOT NULL,
+                "role"          TEXT        NOT NULL,
+                password        TEXT        NOT NULL,
+                created_at      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                last_login      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                enabled         BOOLEAN     NOT NULL DEFAULT TRUE,
+                validated       BOOLEAN     NOT NULL DEFAULT FALSE,
                 UNIQUE (email)
             );
 
@@ -66,7 +66,7 @@
             COMMENT ON COLUMN "user".email IS 'User''s email address, used for authentication and communication';
             COMMENT ON COLUMN "user".role IS 'Role assigned to the user for authorization purposes';
             COMMENT ON COLUMN "user".password IS 'Hashed password for user authentication';
-            COMMENT ON COLUMN "user".created IS 'Timestamp when the user account was created';
+            COMMENT ON COLUMN "user".created_at IS 'Timestamp when the user account was created';
             COMMENT ON COLUMN "user".last_login IS 'Timestamp of the user''s most recent login';
             COMMENT ON COLUMN "user".enabled IS 'Flag indicating if the user account is active';
             COMMENT ON COLUMN "user".validated IS 'Flag indicating if the user''s email has been verified';

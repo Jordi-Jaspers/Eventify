@@ -60,7 +60,7 @@ public class IntegrationTest extends WebMvcConfigurator {
 
         admin = aValidatedUserWithRole(Role.ADMIN);
         final JwtUserPrincipalAuthenticationToken authentication = new JwtUserPrincipalAuthenticationToken(
-            new UserTokenPrincipal(admin),
+            new UserTokenPrincipal(admin, admin.getAccessToken().getValue()),
             admin.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);

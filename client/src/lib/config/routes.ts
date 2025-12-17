@@ -51,10 +51,21 @@ export const CLIENT_ROUTES = {
 		path: '/profile',
 		type: RouteType.PRIVATE
 	},
+	ADMIN_DASHBOARD_PAGE: {
+		path: '/admin/dashboard',
+		type: RouteType.PRIVATE
+	},
 	ADMIN_ORGANIZATIONS_NEW: {
 		path: '/admin/organizations/new',
 		type: RouteType.PRIVATE
 	}
+} as const;
+
+/**
+ * Server routes (backend API endpoints)
+ */
+export const SERVER_ROUTES = {
+	ADMIN_STATS: '/admin/stats'
 } as const;
 
 /**

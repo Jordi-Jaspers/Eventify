@@ -68,10 +68,10 @@ public class User implements UserDetails {
 
     @CreationTimestamp
     @Column(
-        name = "created",
+        name = "created_at",
         updatable = false
     )
-    private OffsetDateTime created;
+    private OffsetDateTime createdAt;
 
     @Column(name = "\"role\"")
     @Enumerated(EnumType.STRING)

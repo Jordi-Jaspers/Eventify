@@ -28,7 +28,8 @@ public enum Role {
         Set.of(
             Permission.ACCESS_APPLICATION,
             Permission.MANAGE_USERS,
-            Permission.PROVISION_ORGANIZATIONS
+            Permission.PROVISION_ORGANIZATIONS,
+            Permission.VIEW_PLATFORM_STATS
         )
     );
 

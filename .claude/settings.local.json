@@ -24,7 +24,10 @@
       "Bash(find:*)",
       "Bash(claude chat:*)",
       "Bash(git checkout:*)",
-      "Bash(bun add:*)"
+      "Bash(bun add:*)",
+      "WebSearch",
+      "Bash(bun remove:*)",
+      "Bash(bunx shadcn-svelte@latest list:*)"
     ],
     "deny": [],
     "ask": []

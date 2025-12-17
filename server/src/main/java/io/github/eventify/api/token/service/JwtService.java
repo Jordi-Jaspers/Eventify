@@ -64,7 +64,7 @@ public class JwtService {
             .claim(FIRST_NAME, userDetails.getFirstName())
             .claim(LAST_NAME, userDetails.getLastName())
             .claim(LAST_LOGIN, userDetails.getLastLogin().toEpochSecond())
-            .claim(CREATED, userDetails.getCreated().toEpochSecond())
+            .claim(CREATED, userDetails.getCreatedAt().toEpochSecond())
             .claim(GLOBAL_ROLE, userDetails.getRole())
             .claim(PERMISSIONS, permissions)
             .claim(ENABLED, userDetails.isEnabled())

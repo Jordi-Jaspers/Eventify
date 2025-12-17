@@ -1,7 +1,9 @@
 package io.github.eventify.api.organization.repository;
 
+import io.github.eventify.api.admin.model.projection.DailyGrowthData;
 import io.github.eventify.api.organization.model.Organization;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,4 +72,30 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     @Override
     void deleteAll();
 
+    /**
+     * Find the count of new organizations created in the given date range.
+     *
+     * @param start the start date of the range.
+     * @param end   the end date of the range.
+     * @return the count of new organizations.
+     */
+    @Query(
+        value = """
+            SELECT
+                gs.date::date AS date,
+                (SELECT COUNT(*) FROM organization WHERE created_at < gs.date + INTERVAL '1 day') AS total,
+                (SELECT COUNT(*) FROM organization WHERE created_at >= gs.date AND created_at < gs.date + INTERVAL '1 day') AS new
+            FROM generate_series(
+                CAST(:start AS timestamp),
+                CAST(:end AS timestamp),
+                CAST('1 day' AS interval)
+            ) AS gs(date)
+            ORDER BY gs.date ASC
+            """,
+        nativeQuery = true
+    )
+    List<DailyGrowthData> findDailyGrowthCounts(
+        @Param("start") OffsetDateTime start,
+        @Param("end") OffsetDateTime end
+    );
 }
