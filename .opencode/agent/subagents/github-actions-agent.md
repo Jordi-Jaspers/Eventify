@@ -1,9 +1,16 @@
 ---
-name: github-actions-agent
 description: GitHub Actions CI/CD specialist. Creates secure, performant workflows with proper caching, parallelization, and best practices. Researches latest actions and patterns.
-tools: Read, Write, Bash, Web_Search, Web_Fetch
-model: sonnet
-color: orange
+temperature: 0.1
+mode: subagent
+model: github-copilot/claude-sonnet-4.5
+tools:
+  write: true
+  read: true
+  bash: true
+  grep: true
+  glob : true
+  list: true
+  webfetch: true
 ---
 
 # GitHub Actions Pipeline Agent

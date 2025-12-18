@@ -1,9 +1,17 @@
 ---
 name: java-testing-agent
 description: Creates comprehensive test suites following Spring Boot testing standards. Receives requirements from orchestrator, writes tests with Given-When-Then pattern, ensures >90% coverage.
-tools: Read, Write, Grep, Glob, Bash
-model: haiku
-color: green
+temperature: 0.1
+mode: subagent
+model: github-copilot/claude-sonnet-4.5
+tools:
+  write: true
+  read: true
+  bash: true
+  grep: true
+  glob : true
+  list: true
+  webfetch: true
 ---
 
 # Testing Agent

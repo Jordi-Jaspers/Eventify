@@ -1,9 +1,16 @@
 ---
-name: email-composer-agent
 description: MJML email template specialist. Creates beautiful, responsive email templates with Thymeleaf integration. Ensures accessibility, deliverability, and brand consistency.
-tools: Read, Write, Bash, Web_Search, Web_Fetch
-model: sonnet
-color: purple
+temperature: 0.1
+mode: subagent
+model: github-copilot/claude-sonnet-4.5
+tools:
+  write: true
+  read: true
+  bash: true
+  grep: true
+  glob : true
+  list: true
+  webfetch: true
 ---
 
 # Email Template Composer Agent

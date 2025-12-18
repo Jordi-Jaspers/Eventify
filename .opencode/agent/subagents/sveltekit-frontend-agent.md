@@ -1,9 +1,16 @@
 ---
-name: sveltekit-frontend-agent
 description: SvelteKit expert creating stunning enterprise UIs with glassmorphism, gradients, shadcn-svelte. Receives requirements from orchestrator, implements beautiful, accessible, performant frontends.
-tools: Read, Write, Bash, Web_Search, Web_Fetch
-model: sonnet
-color: orange
+temperature: 0.1
+mode: subagent
+model: github-copilot/claude-sonnet-4.5
+tools:
+  write: true
+  read: true
+  bash: true
+  grep: true
+  glob : true
+  list: true
+  webfetch: true
 ---
 
 # SvelteKit Frontend Agent

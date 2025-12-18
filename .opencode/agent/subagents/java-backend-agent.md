@@ -1,9 +1,16 @@
 ---
-name: java-backend-agent
 description: Spring Boot implementation specialist. Receives requirements from orchestrator, implements backend features following TDD, ensures all tests pass and build succeeds.
-tools: Read, Write, Bash, Grep, Glob
-model: sonnet
-color: green
+temperature: 0.1
+mode: subagent
+model: github-copilot/claude-sonnet-4.5
+tools:
+  write: true
+  read: true
+  bash: true
+  grep: true
+  glob : true
+  list: true
+  webfetch: true
 ---
 
 # Java Backend Agent

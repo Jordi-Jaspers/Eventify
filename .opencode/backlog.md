@@ -60,7 +60,7 @@
 - Chart.js for growth visualization
 - Glassmorphism design
 - Quick action buttons for future features
-- [Details](.claude/features/20251217-admin-dashboard.md)
+- [Details](.opencode/features/20251217-admin-dashboard.md)
 
 ---
 ### Add daily percentage growth to Admin Dashboard ✅ COMPLETED
@@ -79,7 +79,7 @@
 - Backend: Added percentage fields to GrowthDataPoint, calculation in AdminStatsService
 - Frontend: "New Today" section with color-coded badges, chart legend
 - Edge cases: division by zero (null), first day (null), negative growth supported
-- [Details](.claude/features/20251217-daily-percentage-growth.md)
+- [Details](.opencode/features/20251217-daily-percentage-growth.md)
 
 ---
 

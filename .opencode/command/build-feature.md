@@ -1,8 +1,15 @@
 ---
 description: Build a feature using test-driven orchestrator workflow. Checks backlog.md, gathers requirements, creates plan, executes with specialized agents.
 argument-hint: <feature-description>
-allowed-tools: Read, Write, Grep, Glob, Bash
-model: sonnet
+model: github-copilot/claude-opus-4.5
+tools:
+  write: true
+  read: true
+  bash: true
+  grep: true
+  glob : true
+  list: true
+  webfetch: true
 ---
 
 # Build Feature Command
@@ -15,7 +22,7 @@ Trigger orchestrator to build a feature using test-driven workflow with speciali
 
 **Orchestrator executes:**
 
-1. **Check backlog.md** - Look for existing feature notes in `.claude/backlog.md`
+1. **Check backlog.md** - Look for existing feature notes in `.opencode/backlog.md`
 2. **Gather requirements** - Ask clarifying questions if needed
 3. **Create plan** - Write implementation plan with agent assignments
 4. **Get approval** - Wait for user confirmation
@@ -29,7 +36,7 @@ You are orchestrating a feature build. Follow this process:
 
 ```bash
 # Check backlog.md for feature information
-cat .claude/backlog.md
+cat .opencode/backlog.md
 ```
 
 Look for:
