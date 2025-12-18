@@ -2,8 +2,6 @@
 
 ## Stories:
 
----
-
 ### Global Admin Dashboard (Enhanced Org Management)
 
 **As a** global admin
