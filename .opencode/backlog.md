@@ -83,17 +83,21 @@
 
 ---
 
-### Refactor navigation menu to support a hamburger menu.
+### Refactor navigation menu to a dashboard with sidebar ✅ COMPLETED
 **As a** user
-**I want** a hamburger menu for navigation
+**I want** a dashboard layout with a sidebar menu
 **So that** I can easily access different sections of the application
 
 **Acceptance Criteria:**
-- Hamburger menu icon in the top-right corner
-- Menu expands/collapses on click
-- Current navigation items included
-- Must have a fancy animation when opening/closing
-- Check Shadcn UI docs for best practices
+- ✅ Menu expands/collapses on click
+- ✅ Current navigation items included
+- ✅ Use the shadcn/ui sidebar component 
+
+**Implementation Notes:**
+- Collapsible to icons mode (not hidden)
+- Rail for hover expand
+- Admin items conditionally shown
+- [Details](.opencode/features/20251218-dashboard-sidebar-navigation.md)
 
 ---
 

@@ -106,7 +106,7 @@ Write a clear plan with:
 
 ### Phase 3: Frontend Implementation (if applicable)
 **Agent:** sveltekit-frontend-agent
-**Task:** Build UI components and pages
+**Task:** Build UI components and pages using shadcn
 **Deliverable:** Working frontend with type safety
 
 ### Phase 4: Additional Tasks (if needed)
