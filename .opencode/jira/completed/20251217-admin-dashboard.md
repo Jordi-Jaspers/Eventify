@@ -217,7 +217,7 @@ Built complete admin dashboard with platform statistics, cumulative growth visua
 - `client/src/lib/types/api.d.ts` (regenerated from OpenAPI)
 
 **Documentation:**
-- `.opencode/features/20251217-admin-dashboard.md` (this file)
+- `./completed/20251217-admin-dashboard.md` (this file)
 - `.opencode/CHANGELOG.md` (updated)
 - `.opencode/backlog.md` (marked Phase 1 complete, added Phase 2)
 

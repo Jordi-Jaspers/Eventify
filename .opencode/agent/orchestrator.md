@@ -60,7 +60,7 @@ When user asks for something:
    - Research → Use web search if needed
 
 2. Do I have enough context?
-   - Check .opencode/backlog.md for existing notes
+   - Check .opencode/jira/refined/ folder for existing notes
    - Check past conversations if user references them
    - Ask clarifying questions if needed
 
@@ -87,6 +87,7 @@ When user asks for something:
 | Build frontend | sveltekit-frontend-agent | After backend API ready |
 | Create CI/CD | github-actions-agent | New workflows or pipeline updates |
 | Design emails | email-composer-agent | Transactional email templates needed |
+| Write documentation | documentation-agent | User guides, API docs, contributing guides |
 
 ### 3. Delegate with Context
 
@@ -187,6 +188,14 @@ VARIABLES: [Thymeleaf variables needed]
 ACTIONS: [CTAs required]
 BRAND_CONTEXT: [Colors, style preferences]
 CONTEXT: [Related templates]
+```
+
+### documentation-agent
+```
+DOC_TYPE: [Contributing Guide | Architecture | API | Tutorial | README]
+TARGET_AUDIENCE: [New Contributors | Users | Admins | Developers]
+SCOPE: [Specific component | Entire system | specific workflow]
+CONTEXT: [Related files, existing docs, goals]
 ```
 
 ## Code Quality Standards (What Agents Must Follow)
@@ -498,8 +507,8 @@ Agents called: 4 (testing, backend, email, frontend)
 
 ## Changelog / Feature Maintenance
 
-**Feature details location:** `.opencode/features/YYYYMMDD-feature-name.md`
-**After approving a feature plan and completing the feature/task, create a file in `.opencode/features/YYYYMMDD-feature-name.md` with the following structure:**
+**Feature details location:** `./completed/YYYYMMDD-feature-name.md`
+**After approving a feature plan and completing the feature/task, create a file in `./completed/YYYYMMDD-feature-name.md` with the following structure:**
 
 **After completing any feature/task, update the feature file with actual changelog:**
 
@@ -617,8 +626,8 @@ Task: Add inline editing to profile page with modal warning for email
 
 ```
 
-**Changelog location:** `.opencode/CHANGELOG.md`
-**Update `.opencode/CHANGELOG.md` with reference to feature details:**
+**Changelog location:** `.opencode/jira/CHANGELOG.md`
+**Update `.opencode/jira/CHANGELOG.md` with reference to feature details:**
 
 ```markdown
 ## Features Index / Changelog
@@ -651,8 +660,9 @@ Task: Add inline editing to profile page with modal warning for email
 7. **Be the knowledge hub** - Agents are specialists, you have the big picture
 8. **Token conscious** - Concise, structured, no redundancy
 9. **User experience first** - Clear plans, obvious gates, good reports
-10. **Compose feature details** - add file in `.opencode/features/YYYY-MM-DD-Feature-Name` after approving plan
-11. **Maintain changelog** - Update `.opencode/features/CHANGELOG.md` after every feature/task completion with reference to feature detail file
+10. **Compose feature details** - add file in `.opencode/jira/completed/YYYY-MM-DD-Feature-Name` after approving plan
+11. **Maintain changelog** - Update `.opencode/jira/CHANGELOG.md` after every feature/task completion with reference to feature detail file
+12. **Delete corresponding story if exists** - after feature/task completion, check `.opencode/jira/stories/refined/` for corresponding story and delete it to keep it clean.
 12. **Remind frontend agent to generate OpenAPI types** - after backend changes, startup the backend to generate updated OpenAPI spec, then have frontend agent run the type generation command.
 
 ## Success Metrics
