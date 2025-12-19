@@ -69,7 +69,8 @@ If you create new reusable components (like AppLogo, OAuthButtons, AppNavbar), o
 **Layout Components:**
 - `<AppBackground>` - Animated grid + gradient orbs (used in layout)
 - `<AppLogo size="..." subtitle="..." />` - Logo/branding component
-- `<AppNavbar />` - Authenticated page navbar
+- `<AppSidebar currentPath="..." />` - Sidebar navigation for authenticated pages
+- `<AppNavbar />` - Top navbar (deprecated for authenticated pages, use AppSidebar)
 
 **Auth Components:**
 - `<OAuthButtons disabled={...} />` - Google/GitHub OAuth buttons
@@ -145,23 +146,72 @@ If you create new reusable components (like AppLogo, OAuthButtons, AppNavbar), o
 
 **Note:** Gradient overlay div is NOT used - simpler glassmorphism only
 
-### Navbar Pattern (Authenticated Pages)
+### Sidebar Pattern (Authenticated Pages)
 
-**Use AppNavbar component:**
+**Use AppSidebar component with SidebarProvider:**
 
 ```svelte
+<!-- Layout file: routes/(authenticated)/+layout.svelte -->
 <script lang="ts">
-    import AppNavbar from '$lib/components/layout/AppNavbar.svelte';
+    import { page } from '$app/stores';
+    import { browser } from '$app/environment';
+    import AppBackground from '$lib/components/layout/AppBackground.svelte';
+    import AppSidebar from '$lib/components/layout/AppSidebar.svelte';
+    import * as Sidebar from '$lib/components/ui/sidebar';
+
+    let { children } = $props();
+    const currentPath: string = $derived($page.url.pathname);
+
+    // Read sidebar state from cookie (default to collapsed)
+    let sidebarOpen: boolean = $state(false);
+    if (browser) {
+        const cookies: string = document.cookie;
+        const sidebarCookie: string | undefined = cookies
+            .split('; ')
+            .find((row: string) => row.startsWith('sidebar:state='));
+        if (sidebarCookie) {
+            sidebarOpen = sidebarCookie.split('=')[1] === 'true';
+        }
+    }
 </script>
 
-<AppNavbar />
+<Sidebar.Provider bind:open={sidebarOpen}>
+    <AppBackground>
+        <div class="flex min-h-screen w-full">
+            <AppSidebar {currentPath} />
+            <Sidebar.Inset class="flex-1 overflow-y-auto">
+                {@render children()}
+            </Sidebar.Inset>
+        </div>
+    </AppBackground>
+</Sidebar.Provider>
 
-<!-- Component provides:
-- Glassmorphism header bar
-- Logo with gradient (links to dashboard)
-- Logout button (icon-only with tooltip)
+<!-- Individual pages add SidebarTrigger: -->
+<script lang="ts">
+    import { SidebarTrigger } from '$lib/components/ui/sidebar';
+</script>
+
+<main class="container mx-auto px-4 py-8">
+    <div class="mb-4">
+        <SidebarTrigger />
+    </div>
+    <!-- Page content -->
+</main>
+
+<!-- AppSidebar provides:
+- Collapsible sidebar (icon mode by default)
+- Role-based navigation (MAIN + ADMINISTRATION sections)
+- User avatar with dropdown menu
+- Cookie-persisted state
+- Glassmorphism styling
 -->
 ```
+
+### Navbar Pattern (Public Pages Only)
+
+**AppNavbar is deprecated for authenticated pages - use AppSidebar instead.**
+
+For public pages without sidebar, AppNavbar is still available but not recommended for new authenticated pages.
 
 ### Alert Pattern
 

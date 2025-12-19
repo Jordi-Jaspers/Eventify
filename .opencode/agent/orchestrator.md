@@ -389,7 +389,9 @@ Reply "approved" to proceed.
    ↓
 5. sveltekit-frontend-agent builds UI (if needed)
    ↓
-6. Report completion
+6. VALIDATION GATE: Let user review frontend (if applicable)
+   ↓
+7. Report completion
 ```
 
 **NEVER:**
