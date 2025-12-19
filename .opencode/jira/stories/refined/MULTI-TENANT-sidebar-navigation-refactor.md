@@ -69,7 +69,7 @@ The current top navigation bar becomes limiting as the application grows with mo
 
 ## 4. Technical Requirements
 *   **Component Changes**:
-    *   Install shadcn-svelte `sidebar` component: `pnpm dlx shadcn-svelte@latest add sidebar`
+    *   Install shadcn-svelte `sidebar` component: `bunx shadcn-svelte@latest add sidebar-07`
     *   Create new `AppSidebar.svelte` component in `client/src/lib/components/layout/`
     *   Refactor `(authenticated)/+layout.svelte` to use `Sidebar.Provider` + `AppSidebar`
     *   Deprecate or repurpose `AppNavbar.svelte` (may keep for public pages if needed)
@@ -99,6 +99,8 @@ The current top navigation bar becomes limiting as the application grows with mo
     *   No additional API calls for navigation rendering
 
 ## 5. Design & UI/UX
+
+should look like the sidebar-07 example in shadcn-svelte docs, adapted to our branding and requirements.
 
 ### Sidebar Structure
 ```
