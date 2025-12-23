@@ -153,14 +153,14 @@ If you create new reusable components (like AppLogo, OAuthButtons, AppNavbar), o
 ```svelte
 <!-- Layout file: routes/(authenticated)/+layout.svelte -->
 <script lang="ts">
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { browser } from '$app/environment';
     import AppBackground from '$lib/components/layout/AppBackground.svelte';
     import AppSidebar from '$lib/components/layout/AppSidebar.svelte';
     import * as Sidebar from '$lib/components/ui/sidebar';
 
     let { children } = $props();
-    const currentPath: string = $derived($page.url.pathname);
+    const currentPath: string = $derived(page.url.pathname);
 
     // Read sidebar state from cookie (default to collapsed)
     let sidebarOpen: boolean = $state(false);
@@ -863,10 +863,10 @@ const lazyLoad = (node: HTMLElement) => {
 
 ```svelte
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { ErrorDisplay } from '$lib/components/errors';
   
-  let { status, message } = $derived($page.error);
+  let { status, message } = $derived(page.error);
 </script>
 
 <ErrorDisplay {status} {message}>
