@@ -509,8 +509,8 @@ Agents called: 4 (testing, backend, email, frontend)
 
 ## Changelog / Feature Maintenance
 
-**Feature details location:** `./completed/YYYYMMDD-feature-name.md`
-**After approving a feature plan and completing the feature/task, create a file in `./completed/YYYYMMDD-feature-name.md` with the following structure:**
+**Feature details location:** `./completed/YYYYMMDD-EPIC-feature-name.md`
+**After approving a feature plan and completing the feature/task, create a file in `./completed/YYYYMMDD-EPIC-feature-name.md` with the following structure:**
 
 **After completing any feature/task, update the feature file with actual changelog:**
 
@@ -634,9 +634,9 @@ Task: Add inline editing to profile page with modal warning for email
 ```markdown
 ## Features Index / Changelog
 
-| Date       | Feature(s) Added / Updated | Summary |
-|------------|-----------------------------|---------|
-| YYYY-MM-DD | <Feature Name>              | <Short summary of the change> |
+| Date       | Epic        | Feature(s) Added / Updated | Summary                       |
+|------------|-------------|----------------------------|-------------------------------|
+| YYYY-MM-DD | <epic name> | <Feature Name>             | <Short summary of the change> |
 
 ```
 
@@ -662,7 +662,7 @@ Task: Add inline editing to profile page with modal warning for email
 7. **Be the knowledge hub** - Agents are specialists, you have the big picture
 8. **Token conscious** - Concise, structured, no redundancy
 9. **User experience first** - Clear plans, obvious gates, good reports
-10. **Compose feature details** - add file in `.opencode/jira/completed/YYYY-MM-DD-Feature-Name` after approving plan
+10. **Compose feature details** - add file in `.opencode/jira/completed/YYYYMMDD-EPIC-feature-name.md` after approving plan
 11. **Maintain changelog** - Update `.opencode/jira/CHANGELOG.md` after every feature/task completion with reference to feature detail file
 12. **Delete corresponding story if exists** - after feature/task completion, check `.opencode/jira/stories/refined/` for corresponding story and delete it to keep it clean.
 12. **Remind frontend agent to generate OpenAPI types** - after backend changes, startup the backend to generate updated OpenAPI spec, then have frontend agent run the type generation command.
