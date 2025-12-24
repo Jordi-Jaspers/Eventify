@@ -103,6 +103,10 @@ public enum ApiErrorCode implements ApiError {
     OAUTH2_AUTHENTICATION_ERROR(
         "ERR-0023",
         "OAuth2 authentication failed. Please try again or contact support."
+    ),
+    NON_EXISTING_USER_ERROR(
+        "ERR-0024",
+        "In order to perform this action, the user must exist within the system."
     );
 
     /* The error code for this reason. */

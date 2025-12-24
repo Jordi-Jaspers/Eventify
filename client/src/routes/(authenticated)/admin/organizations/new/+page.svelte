@@ -14,6 +14,7 @@
     import {CLIENT_ROUTES} from '$lib/config/routes';
 
     let organizationName: string = $state('');
+    let ownerEmail: string = $state('');
     let isSubmitting: boolean = $state(false);
     let errors: Record<string, string> = $state({});
 
@@ -21,6 +22,7 @@
         errors = {};
 
         const trimmedName: string = organizationName.trim();
+        const trimmedEmail: string = ownerEmail.trim();
 
         if (!trimmedName) {
             errors.name = 'Organization name is required';
@@ -34,6 +36,18 @@
 
         if (trimmedName.length > 100) {
             errors.name = 'Organization name must not exceed 100 characters';
+            return false;
+        }
+
+        if (!trimmedEmail) {
+            errors.owner = 'Owner email is required';
+            return false;
+        }
+
+        // Simple email validation regex
+        const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(trimmedEmail)) {
+            errors.owner = 'Please enter a valid email address';
             return false;
         }
 
@@ -51,7 +65,10 @@
         errors = {};
 
         try {
-            const response: OrganizationResponse = await createOrganization(organizationName.trim());
+            const response: OrganizationResponse = await createOrganization(
+                organizationName.trim(),
+                ownerEmail.trim()
+            );
             toast.success(`Organization "${response.name}" created successfully`);
             // Navigate to dashboard or organizations list
             goto(CLIENT_ROUTES.DASHBOARD_PAGE.path);
@@ -120,6 +137,27 @@
                     {/if}
                     <p class="text-xs text-muted-foreground">
                         Must be between 3 and 100 characters
+                    </p>
+                </div>
+
+                <!-- Owner Email Field -->
+                <div class="space-y-2">
+                    <Label for="ownerEmail">Owner Email</Label>
+                    <Input
+                        id="ownerEmail"
+                        type="email"
+                        placeholder="Enter owner's email address"
+                        bind:value={ownerEmail}
+                        disabled={isSubmitting}
+                        class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        aria-invalid={!!errors.owner}
+                        required
+                    />
+                    {#if errors.owner}
+                        <p class="text-sm text-destructive mt-1">{errors.owner}</p>
+                    {/if}
+                    <p class="text-xs text-muted-foreground">
+                        The owner will have full control of the organization
                     </p>
                 </div>
 

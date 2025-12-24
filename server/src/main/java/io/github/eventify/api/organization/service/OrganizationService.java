@@ -9,8 +9,7 @@ import io.github.eventify.api.organization.repository.OrganizationMembershipRepo
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.repository.UserRepository;
-import io.github.jframe.exception.core.ValidationException;
-import io.github.jframe.validation.ValidationResult;
+import io.github.eventify.common.exception.NonExistingUserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,8 +19,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static io.github.eventify.api.organization.model.validator.OrganizationValidator.OWNER;
-import static io.github.eventify.api.organization.model.validator.OrganizationValidator.OWNER_NOT_FOUND;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 import static java.time.ZoneOffset.UTC;
 
@@ -49,20 +46,9 @@ public class OrganizationService {
      */
     @Transactional
     public Organization create(final ProvisionOrganizationRequest request) {
-        // Look up owner by email (owner is required, validated by OrganizationValidator)
-        final String ownerEmail = request.getOwner();
-        final Optional<User> ownerOpt = userRepository.findByEmail(ownerEmail);
-
-        // Validate owner exists and is enabled
-        final ValidationResult result = new ValidationResult();
-        result.rejectField(OWNER, ownerEmail)
-            .when(owner -> ownerOpt.isEmpty() || !ownerOpt.get().isEnabled(), OWNER_NOT_FOUND);
-
-        if (result.hasErrors()) {
-            throw new ValidationException(result);
-        }
-
-        final User owner = ownerOpt.get();
+        final User owner = userRepository.findByEmail(request.getOwner())
+            .filter(User::isEnabled)
+            .orElseThrow(NonExistingUserException::new);
 
         final String slug = generateUniqueSlug(request.getName());
 
@@ -86,16 +72,6 @@ public class OrganizationService {
 
         // Set transient owner field for response mapping
         savedOrganization.setOwner(owner);
-
-        log.info(
-            "Organization created: id={}, name={}, slug={}, createdBy={}, owner={}",
-            savedOrganization.getId(),
-            savedOrganization.getName(),
-            savedOrganization.getSlug(),
-            savedOrganization.getCreatedBy(),
-            owner.getEmail()
-        );
-
         return savedOrganization;
     }
 
@@ -107,15 +83,14 @@ public class OrganizationService {
      */
     private String generateUniqueSlug(final String name) {
         final String baseSlug = generateSlugFromName(name);
-
         final Optional<Organization> existingOrg = organizationRepository.findBySlug(baseSlug);
+
         if (existingOrg.isEmpty()) {
             return baseSlug;
         }
 
         int counter = 1;
         String candidateSlug = baseSlug + HYPHEN + counter;
-
         while (organizationRepository.findBySlug(candidateSlug).isPresent()) {
             counter++;
             candidateSlug = baseSlug + HYPHEN + counter;

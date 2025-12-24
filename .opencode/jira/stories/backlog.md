@@ -1,3 +1,18 @@
+# Epic: Multi-Tenant User & Organization Management
+
+- [ ] **User Search Endpoint with Owner Selector UI** (S):
+    - Backend: `GET /admin/users/search?query={email}` endpoint
+    - Returns enabled users matching query (min 3 chars)
+    - Response: `List<{ id, email, firstName, lastName }>`
+    - Requires ADMIN role
+    - Frontend: Replace owner text input with autocomplete/combobox component
+    - Displays user email + name in dropdown
+    - Debounced search (300ms)
+    - Max 10 results returned
+    - Used in: Organization provisioning form (`/admin/organizations/new`)
+
+---
+
 # Epic: Security Enhancements for Authentication
 
 - [ ] **Long-Lived Refresh Tokens**:
