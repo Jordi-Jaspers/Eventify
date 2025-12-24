@@ -4,17 +4,17 @@
     import {Label} from '$lib/components/ui/label';
     import {Button} from '$lib/components/ui/button';
     import {Alert, AlertDescription} from '$lib/components/ui/alert';
-    import AppNavbar from '$lib/components/layout/AppNavbar.svelte';
+    import UserSearchCombobox from '$lib/components/user/UserSearchCombobox.svelte';
     import {Building2, CircleAlert, LoaderCircle} from '@lucide/svelte';
     import {createOrganization} from '$lib/api/organization/OrganizationController';
-    import type {OrganizationResponse} from '$lib/api/models';
+    import type {OrganizationResponse, UserSearchResult} from '$lib/api/models';
     import {handleError} from '$lib/utils/error-handler';
     import {toast} from 'svelte-sonner';
     import {goto} from '$app/navigation';
     import {CLIENT_ROUTES} from '$lib/config/routes';
 
     let organizationName: string = $state('');
-    let ownerEmail: string = $state('');
+    let selectedOwner: UserSearchResult | undefined = $state(undefined);
     let isSubmitting: boolean = $state(false);
     let errors: Record<string, string> = $state({});
 
@@ -22,7 +22,6 @@
         errors = {};
 
         const trimmedName: string = organizationName.trim();
-        const trimmedEmail: string = ownerEmail.trim();
 
         if (!trimmedName) {
             errors.name = 'Organization name is required';
@@ -39,15 +38,8 @@
             return false;
         }
 
-        if (!trimmedEmail) {
-            errors.owner = 'Owner email is required';
-            return false;
-        }
-
-        // Simple email validation regex
-        const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(trimmedEmail)) {
-            errors.owner = 'Please enter a valid email address';
+        if (!selectedOwner) {
+            errors.owner = 'Please select an organization owner';
             return false;
         }
 
@@ -65,9 +57,14 @@
         errors = {};
 
         try {
+            if (!selectedOwner || !selectedOwner.email) {
+                throw new Error('Owner must be selected');
+            }
+            
+            const ownerEmail: string = selectedOwner.email;
             const response: OrganizationResponse = await createOrganization(
                 organizationName.trim(),
-                ownerEmail.trim()
+                ownerEmail
             );
             toast.success(`Organization "${response.name}" created successfully`);
             // Navigate to dashboard or organizations list
@@ -140,18 +137,14 @@
                     </p>
                 </div>
 
-                <!-- Owner Email Field -->
+                <!-- Owner Selection Field -->
                 <div class="space-y-2">
-                    <Label for="ownerEmail">Owner Email</Label>
-                    <Input
-                        id="ownerEmail"
-                        type="email"
-                        placeholder="Enter owner's email address"
-                        bind:value={ownerEmail}
+                    <Label for="ownerSearch">Organization Owner</Label>
+                    <UserSearchCombobox
+                        onSelect={(user: UserSearchResult) => { selectedOwner = user }}
+                        selectedUser={selectedOwner}
+                        placeholder="Search for organization owner..."
                         disabled={isSubmitting}
-                        class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                        aria-invalid={!!errors.owner}
-                        required
                     />
                     {#if errors.owner}
                         <p class="text-sm text-destructive mt-1">{errors.owner}</p>

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -117,5 +118,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
         @Param("start") OffsetDateTime start,
         @Param("end") OffsetDateTime end
     );
+
+    /**
+     * Search for enabled users by email, firstName, or lastName.
+     * Case-insensitive partial match.
+     *
+     * @param query    the search query
+     * @param pageable pagination information
+     * @return list of matching enabled users
+     */
+    @Query("""
+        FROM User u
+        WHERE u.enabled = true
+        AND (
+            LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
+            OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
+            OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))
+        )
+        ORDER BY u.email ASC
+        """)
+    List<User> searchUsers(@Param("query") String query, Pageable pageable);
 
 }

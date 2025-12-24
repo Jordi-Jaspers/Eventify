@@ -111,6 +111,8 @@ public final class Paths {
 
     public static final String ADMIN_STATS_PATH = ADMIN_PART + "/stats";
 
+    public static final String ADMIN_USERS_SEARCH_PATH = ADMIN_PART + "/users" + SEARCH_PART;
+
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 
     public static final String OPTIONS_PATH = BASE_PATH + "/options";

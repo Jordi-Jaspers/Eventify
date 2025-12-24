@@ -19,3 +19,4 @@ export type OrganizationResponse = components['schemas']['OrganizationResponse']
 export type AdminStatsResponse = components['schemas']['AdminStatsResponse'];
 export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
 
+export type UserSearchResult = components['schemas']['UserSearchResult'];
