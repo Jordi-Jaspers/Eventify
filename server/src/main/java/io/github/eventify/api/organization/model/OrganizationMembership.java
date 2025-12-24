@@ -9,43 +9,43 @@ import java.time.OffsetDateTime;
 import jakarta.persistence.*;
 
 /**
- * Entity representing an organization.
+ * Entity representing organization membership.
  */
 @Getter
 @Setter
 @Entity
 @NoArgsConstructor
-@Table(name = "organization")
-public class Organization {
+@Table(name = "organization_membership")
+public class OrganizationMembership {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(
-        name = "name",
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "user_id",
         nullable = false
     )
-    private String name;
+    private User user;
 
-    @Column(
-        name = "slug",
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "organization_id",
         nullable = false
     )
-    private String slug;
+    private Organization organization;
 
     @Column(
-        name = "status",
+        name = "role",
         nullable = false
     )
     @Enumerated(EnumType.STRING)
-    private OrganizationStatus status;
+    private OrganizationalRole role;
 
-    @Column(
-        name = "created_by",
-        nullable = false
-    )
-    private Long createdBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invited_by")
+    private User invitedBy;
 
     @Column(
         name = "created_at",
@@ -53,13 +53,4 @@ public class Organization {
         updatable = false
     )
     private OffsetDateTime createdAt;
-
-    @Column(name = "deleted_by")
-    private Long deletedBy;
-
-    @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
-
-    @Transient
-    private User owner;
 }

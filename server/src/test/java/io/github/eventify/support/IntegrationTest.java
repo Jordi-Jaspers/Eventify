@@ -73,8 +73,17 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     protected ProvisionOrganizationRequest aValidProvisionOrganizationRequest() {
         final String suffix = UUID.randomUUID().toString().substring(0, 5);
+        final User owner = aValidatedUser();
         return new ProvisionOrganizationRequest()
-            .setName(INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix);
+            .setName(INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix)
+            .setOwner(owner.getEmail());
+    }
+
+    protected ProvisionOrganizationRequest aValidProvisionOrganizationRequestWithOwner(final String ownerEmail) {
+        final String suffix = UUID.randomUUID().toString().substring(0, 5);
+        return new ProvisionOrganizationRequest()
+            .setName(INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix)
+            .setOwner(ownerEmail);
     }
 
     protected User aValidatedUserWithRole(final Role role) {

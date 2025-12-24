@@ -60,7 +60,7 @@ When user asks for something:
    - Research → Use web search if needed
 
 2. Do I have enough context?
-   - Check .opencode/jira/refined/ folder for existing notes
+   - Check .opencode/jira/stories/refined/ folder for existing notes
    - Check past conversations if user references them
    - Ask clarifying questions if needed
 

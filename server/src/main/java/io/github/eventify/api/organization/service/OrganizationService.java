@@ -1,9 +1,16 @@
 package io.github.eventify.api.organization.service;
 
 import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.OrganizationStatus;
+import io.github.eventify.api.organization.model.OrganizationalRole;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
+import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
+import io.github.eventify.api.user.model.User;
+import io.github.eventify.api.user.repository.UserRepository;
+import io.github.jframe.exception.core.ValidationException;
+import io.github.jframe.validation.ValidationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,6 +20,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static io.github.eventify.api.organization.model.validator.OrganizationValidator.OWNER;
+import static io.github.eventify.api.organization.model.validator.OrganizationValidator.OWNER_NOT_FOUND;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 import static java.time.ZoneOffset.UTC;
 
@@ -28,6 +37,10 @@ public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
 
+    private final UserRepository userRepository;
+
+    private final OrganizationMembershipRepository organizationMembershipRepository;
+
     /**
      * Create a new organization.
      *
@@ -36,6 +49,21 @@ public class OrganizationService {
      */
     @Transactional
     public Organization create(final ProvisionOrganizationRequest request) {
+        // Look up owner by email (owner is required, validated by OrganizationValidator)
+        final String ownerEmail = request.getOwner();
+        final Optional<User> ownerOpt = userRepository.findByEmail(ownerEmail);
+
+        // Validate owner exists and is enabled
+        final ValidationResult result = new ValidationResult();
+        result.rejectField(OWNER, ownerEmail)
+            .when(owner -> ownerOpt.isEmpty() || !ownerOpt.get().isEnabled(), OWNER_NOT_FOUND);
+
+        if (result.hasErrors()) {
+            throw new ValidationException(result);
+        }
+
+        final User owner = ownerOpt.get();
+
         final String slug = generateUniqueSlug(request.getName());
 
         final Organization organization = new Organization();
@@ -46,12 +74,26 @@ public class OrganizationService {
         organization.setCreatedAt(OffsetDateTime.now(UTC));
 
         final Organization savedOrganization = organizationRepository.save(organization);
+
+        // Create organization membership with OWNER role
+        final OrganizationMembership membership = new OrganizationMembership();
+        membership.setUser(owner);
+        membership.setOrganization(savedOrganization);
+        membership.setRole(OrganizationalRole.OWNER);
+        membership.setInvitedBy(null);
+        membership.setCreatedAt(OffsetDateTime.now(UTC));
+        organizationMembershipRepository.save(membership);
+
+        // Set transient owner field for response mapping
+        savedOrganization.setOwner(owner);
+
         log.info(
-            "Organization created: id={}, name={}, slug={}, createdBy={}",
+            "Organization created: id={}, name={}, slug={}, createdBy={}, owner={}",
             savedOrganization.getId(),
             savedOrganization.getName(),
             savedOrganization.getSlug(),
-            savedOrganization.getCreatedBy()
+            savedOrganization.getCreatedBy(),
+            owner.getEmail()
         );
 
         return savedOrganization;

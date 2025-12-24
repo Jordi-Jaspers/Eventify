@@ -15,4 +15,6 @@ import lombok.experimental.Accessors;
 public class ProvisionOrganizationRequest {
 
     private String name;
+
+    private String owner;
 }

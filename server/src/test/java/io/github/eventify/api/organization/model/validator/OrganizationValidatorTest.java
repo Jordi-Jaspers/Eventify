@@ -33,6 +33,7 @@ public class OrganizationValidatorTest extends UnitTest {
         // Given: Valid organization request
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest();
         request.setName("Acme Corp");
+        request.setOwner("owner@example.com");
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -193,6 +194,7 @@ public class OrganizationValidatorTest extends UnitTest {
         // Given: Request with name of exactly 3 characters
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest();
         request.setName("ABC");
+        request.setOwner("owner@example.com");
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -208,6 +210,7 @@ public class OrganizationValidatorTest extends UnitTest {
         // Given: Request with name of exactly 100 characters
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest();
         request.setName("A".repeat(100));
+        request.setOwner("owner@example.com");
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request

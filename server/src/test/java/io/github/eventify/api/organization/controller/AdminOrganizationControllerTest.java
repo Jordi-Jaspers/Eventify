@@ -146,9 +146,13 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         // Given: An admin user
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
+        // And: A valid owner
+        final User owner = aValidatedUser();
+
         // And: A request with blank name
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest();
         request.setName(BLANK_NAME);
+        request.setOwner(owner.getEmail());
 
         // When: Creating organization with blank name
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -168,9 +172,13 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         // Given: An admin user
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
+        // And: A valid owner
+        final User owner = aValidatedUser();
+
         // And: A request with null name
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest();
         request.setName(null);
+        request.setOwner(owner.getEmail());
 
         // When: Creating organization with null name
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -190,9 +198,13 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         // Given: An admin user
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
+        // And: A valid owner
+        final User owner = aValidatedUser();
+
         // And: A request with short name (2 characters)
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest();
         request.setName(SHORT_NAME);
+        request.setOwner(owner.getEmail());
 
         // When: Creating organization with short name
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -212,9 +224,13 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         // Given: An admin user
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
+        // And: A valid owner
+        final User owner = aValidatedUser();
+
         // And: A request with name exceeding 100 characters
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest();
         request.setName(LONG_NAME);
+        request.setOwner(owner.getEmail());
 
         // When: Creating organization with long name
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -234,9 +250,13 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         // Given: An admin user
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
+        // And: A valid owner
+        final User owner = aValidatedUser();
+
         // And: A request with 3-character name
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest();
         request.setName("ABC");
+        request.setOwner(owner.getEmail());
 
         // When: Creating organization
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -256,9 +276,13 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         // Given: An admin user
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
+        // And: A valid owner
+        final User owner = aValidatedUser();
+
         // And: A request with 100-character name
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest()
-            .setName("A".repeat(100));
+            .setName("A".repeat(100))
+            .setOwner(owner.getEmail());
 
         // When: Creating organization
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -278,9 +302,13 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         // Given: An admin user
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
+        // And: A valid owner
+        final User owner = aValidatedUser();
+
         // And: A request with special characters in name
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest()
-            .setName("Test & Co.");
+            .setName("Test & Co.")
+            .setOwner(owner.getEmail());
 
         // When: Creating organization
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -300,9 +328,13 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         // Given: An admin user
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
+        // And: A valid owner
+        final User owner = aValidatedUser();
+
         // And: A request with multiple spaces in name
         final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest()
-            .setName(VALID_ORG_NAME_WITH_SPACES);
+            .setName(VALID_ORG_NAME_WITH_SPACES)
+            .setOwner(owner.getEmail());
 
         // When: Creating organization
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -320,5 +352,130 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final OrganizationResponse organizationResponse = fromJson(content, OrganizationResponse.class);
 
         assertThat(organizationResponse.getSlug(), is("test-multiple-spaces"));
+    }
+
+    @Test
+    @DisplayName("Should create organization with owner successfully")
+    public void createOrganizationWithOwnerSuccess() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: A valid owner user
+        final User owner = aValidatedUser();
+
+        // And: A valid organization request with owner
+        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(owner.getEmail());
+
+        // When: Creating organization with owner
+        final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(createRequest);
+
+        // Then: The response should be CREATED
+        response.andExpect(status().is(SC_CREATED));
+
+        // And: The response should contain organization and owner details
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final OrganizationResponse organizationResponse = fromJson(content, OrganizationResponse.class);
+
+        assertThat(organizationResponse.getId(), notNullValue());
+        assertThat(organizationResponse.getName(), is(request.getName()));
+        assertThat(organizationResponse.getOwner(), notNullValue());
+        assertThat(organizationResponse.getOwner().getId(), is(owner.getId()));
+        assertThat(organizationResponse.getOwner().getEmail(), is(owner.getEmail()));
+        assertThat(organizationResponse.getOwner().getFirstName(), is(owner.getFirstName()));
+        assertThat(organizationResponse.getOwner().getLastName(), is(owner.getLastName()));
+    }
+
+    @Test
+    @DisplayName("Should not create organization without owner")
+    public void createOrganizationWithoutOwnerFails() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: A request without owner field
+        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(null);
+
+        // When: Creating organization without owner
+        final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(createRequest);
+
+        // Then: The response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should not create organization with non-existent owner")
+    public void createOrganizationWithNonExistentOwnerFails() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: A request with non-existent owner email
+        final String nonExistentEmail = "nonexistent@example.com";
+        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(nonExistentEmail);
+
+        // When: Creating organization with non-existent owner
+        final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(createRequest);
+
+        // Then: The response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should not create organization with disabled owner")
+    public void createOrganizationWithDisabledOwnerFails() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: A disabled owner user
+        final User disabledOwner = aLockedUser();
+
+        // And: A request with disabled owner
+        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(disabledOwner.getEmail());
+
+        // When: Creating organization with disabled owner
+        final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(createRequest);
+
+        // Then: The response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should not create organization with invalid owner email format")
+    public void createOrganizationWithInvalidOwnerEmailFails() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: A request with invalid email format
+        final String invalidEmail = "not-an-email";
+        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(invalidEmail);
+
+        // When: Creating organization with invalid owner email
+        final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(createRequest);
+
+        // Then: The response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
     }
 }

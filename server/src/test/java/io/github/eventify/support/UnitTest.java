@@ -69,6 +69,18 @@ public class UnitTest {
      * @return A valid ProvisionOrganizationRequest object.
      */
     protected ProvisionOrganizationRequest aValidOrganizationRequest(final String name) {
+        return new ProvisionOrganizationRequest()
+            .setName(name)
+            .setOwner(VALID_EMAIL);
+    }
+
+    /**
+     * Helper method to create an organization provisioning request without owner (for testing owner validation).
+     *
+     * @param name The name of the organization.
+     * @return A ProvisionOrganizationRequest object without owner.
+     */
+    protected ProvisionOrganizationRequest anOrganizationRequestWithoutOwner(final String name) {
         return new ProvisionOrganizationRequest().setName(name);
     }
 

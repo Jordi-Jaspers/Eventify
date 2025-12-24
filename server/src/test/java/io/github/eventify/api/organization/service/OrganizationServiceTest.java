@@ -3,8 +3,10 @@ package io.github.eventify.api.organization.service;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
+import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.security.SecurityUtil;
 import io.github.eventify.support.UnitTest;
 
@@ -39,17 +41,35 @@ public class OrganizationServiceTest extends UnitTest {
     @Mock
     private OrganizationRepository organizationRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private OrganizationMembershipRepository organizationMembershipRepository;
+
     @InjectMocks
     private OrganizationService organizationService;
 
     private MockedStatic<SecurityUtil> securityUtilMock;
     private User authenticatedUser;
+    private User ownerUser;
 
     @BeforeEach
     void setUp() {
         authenticatedUser = aValidUser();
+        authenticatedUser.setId(1L);
+
+        ownerUser = aValidUser();
+        ownerUser.setId(2L);
+        ownerUser.setEmail(VALID_EMAIL);
+        ownerUser.setEnabled(true);
+
         securityUtilMock = mockStatic(SecurityUtil.class);
         securityUtilMock.when(SecurityUtil::getLoggedInUser).thenReturn(authenticatedUser);
+
+        // Default mock for owner lookup
+        when(userRepository.findByEmail(VALID_EMAIL)).thenReturn(Optional.of(ownerUser));
+        lenient().when(organizationMembershipRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @AfterEach

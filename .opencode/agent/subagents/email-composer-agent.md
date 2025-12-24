@@ -2,7 +2,7 @@
 description: MJML email template specialist. Creates beautiful, responsive email templates with Thymeleaf integration. Ensures accessibility, deliverability, and brand consistency.
 temperature: 0.1
 mode: subagent
-model: github-copilot/claude-sonnet-4.5
+model: github-copilot/gemini-3-flash-preview
 tools:
   write: true
   read: true

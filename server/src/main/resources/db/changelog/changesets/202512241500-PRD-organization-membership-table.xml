@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202512241500-PRD-organization-membership-table.xml">
+
+    <changeSet id="202512241500-PRD-organization-membership-table-1" author="backend-agent">
+        <ext:documentation>
+            Creating organization_membership table for managing user memberships in organizations with roles.
+        </ext:documentation>
+        <sql>
+            CREATE TABLE organization_membership (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+                organization_id INTEGER NOT NULL REFERENCES organization(id) ON DELETE CASCADE,
+                role TEXT NOT NULL,
+                invited_by INTEGER REFERENCES "user"(id),
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                UNIQUE(user_id, organization_id)
+            );
+
+            CREATE INDEX idx_org_membership_org ON organization_membership(organization_id);
+            CREATE INDEX idx_org_membership_user ON organization_membership(user_id);
+        </sql>
+    </changeSet>
+</databaseChangeLog>

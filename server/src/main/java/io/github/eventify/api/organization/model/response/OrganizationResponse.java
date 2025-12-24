@@ -28,4 +28,6 @@ public class OrganizationResponse {
     private Long createdBy;
 
     private OffsetDateTime createdAt;
+
+    private OwnerResponse owner;
 }
