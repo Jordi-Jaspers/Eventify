@@ -5,7 +5,6 @@ import org.cyclonedx.Version
 import org.cyclonedx.gradle.CyclonedxDirectTask
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.springframework.boot.gradle.tasks.run.BootRun
-import org.springframework.boot.loader.tools.LoaderImplementation.CLASSIC
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -85,6 +84,7 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-web")
     implementation("org.springframework.boot", "spring-boot-starter-security")
     implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot", "spring-boot-starter-data-rest")
     implementation("org.springframework.boot", "spring-boot-starter-validation")
     implementation("org.springframework.boot", "spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot", "spring-boot-starter-mail")
@@ -196,7 +196,6 @@ fun retrieve(property: String): String {
 
 // ============== TASK CONFIGURATION ================
 tasks.getByName<BootJar>("bootJar") {
-    loaderImplementation = CLASSIC
     duplicatesStrategy = INCLUDE
     archiveVersion.set(project.version.toString())
     archiveBaseName.set(retrieve("artifactName"))
