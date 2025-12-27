@@ -272,9 +272,9 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.named<BootRun>("bootRun") {
-    systemProperty("smt.application.name", retrieve("artifactName"))
-    systemProperty("smt.application.group", retrieve("group"))
-    systemProperty("smt.application.version", retrieve("version"))
+    systemProperty("jframe.application.name", retrieve("artifactName"))
+    systemProperty("jframe.application.group", retrieve("group"))
+    systemProperty("jframe.application.version", retrieve("version"))
     jvmArgs(
         "-Xms512m",
         "-Xmx4096m",
