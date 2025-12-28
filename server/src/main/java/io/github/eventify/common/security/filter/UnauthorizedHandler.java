@@ -2,15 +2,14 @@ package io.github.eventify.common.security.filter;
 
 import io.github.jframe.exception.resource.ErrorResponseResource;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 

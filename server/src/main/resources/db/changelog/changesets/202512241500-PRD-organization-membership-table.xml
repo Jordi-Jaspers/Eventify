@@ -6,9 +6,7 @@
                    logicalFilePath="202512241500-PRD-organization-membership-table.xml">
 
     <changeSet id="202512241500-PRD-organization-membership-table-1" author="backend-agent">
-        <ext:documentation>
-            Creating organization_membership table for managing user memberships in organizations with roles.
-        </ext:documentation>
+        <comment>Creating organization_membership table for managing user memberships in organizations with roles.</comment>
         <sql>
             CREATE TABLE organization_membership (
                 id SERIAL PRIMARY KEY,

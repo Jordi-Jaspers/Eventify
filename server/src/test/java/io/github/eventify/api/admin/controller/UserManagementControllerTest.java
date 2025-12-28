@@ -7,6 +7,7 @@ import io.github.eventify.api.user.model.response.UserDetailsResponse;
 import io.github.eventify.common.exception.ApiErrorCode;
 import io.github.eventify.support.IntegrationTest;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
+import tools.jackson.core.type.TypeReference;
 
 import java.util.List;
 
@@ -14,8 +15,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import static io.github.eventify.api.Paths.*;
 import static io.github.eventify.api.authentication.model.Role.ADMIN;

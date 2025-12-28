@@ -12,18 +12,17 @@ import io.github.eventify.support.config.BeanConfiguration;
 import io.github.eventify.support.container.RabbitContainer;
 import io.github.eventify.support.container.TimescaleContainer;
 import io.github.jframe.autoconfigure.properties.ApplicationProperties;
+import tools.jackson.databind.ObjectMapper;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.jspecify.annotations.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 

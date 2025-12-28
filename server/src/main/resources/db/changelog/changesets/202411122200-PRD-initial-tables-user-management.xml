@@ -5,9 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202411122200-PRD-initial-tables-user-management.xml">
     <changeSet id="202411122200-PRD-initial-tables-user-management-1" author="jordi.jaspers">
-    <ext:documentation>
-        Adding the necessary extensions in order for TimescaleDB to work. These extensions must be executed with a superuser.
-    </ext:documentation>
+    <comment>Adding the necessary extensions in order for TimescaleDB to work. These extensions must be executed with a superuser.</comment>
     <sql>
         CREATE EXTENSION IF NOT EXISTS timescaledb;
         CREATE EXTENSION IF NOT EXISTS timescaledb_toolkit;
@@ -16,9 +14,7 @@
     </changeSet>
 
     <changeSet id="202411122200-PRD-initial-tables-user-management-2" author="jordi.jaspers">
-        <ext:documentation>
-            Creating the necessary tables user management, authority, and tokens.
-        </ext:documentation>
+        <comment>Creating the necessary tables user management, authority, and tokens.</comment>
         <sql>
             CREATE TABLE IF NOT EXISTS "user"
             (
@@ -55,9 +51,7 @@
     </changeSet>
 
     <changeSet id="202411122200-PRD-initial-tables-user-management-3" author="jordi.jaspers">
-        <ext:documentation>
-            Adding documentation for every table, column, and index.
-        </ext:documentation>
+        <comment>Adding documentation for every table, column, and index.</comment>
         <sql>
             COMMENT ON TABLE "user" IS 'Stores user account information and authentication details';
             COMMENT ON COLUMN "user".id IS 'Unique identifier for the user';

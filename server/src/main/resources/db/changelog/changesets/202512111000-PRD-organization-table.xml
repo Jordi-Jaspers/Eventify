@@ -6,9 +6,7 @@
                    logicalFilePath="202512111000-PRD-organization-table.xml">
 
     <changeSet id="202512111000-PRD-organization-table-1" author="backend-agent">
-        <ext:documentation>
-            Creating organization table for multi-tenant organization management.
-        </ext:documentation>
+        <comment>Creating organization table for multi-tenant organization management.</comment>
         <sql>
             CREATE TABLE IF NOT EXISTS organization
             (
@@ -31,9 +29,7 @@
     </changeSet>
 
     <changeSet id="202512111000-PRD-organization-table-2" author="backend-agent">
-        <ext:documentation>
-            Adding documentation for organization table, columns, and indexes.
-        </ext:documentation>
+        <comment>Adding documentation for organization table, columns, and indexes.</comment>
         <sql>
             COMMENT ON TABLE organization IS 'Stores organization information for multi-tenant functionality';
             COMMENT ON COLUMN organization.id IS 'Unique identifier for the organization';
