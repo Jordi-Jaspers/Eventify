@@ -128,9 +128,6 @@ spring:
         jdbc:
           batch_size: 1000
 
-  jackson:
-    property-naming-strategy: LOWER_CAMEL_CASE
-
   security:
     oauth2:
       client:
