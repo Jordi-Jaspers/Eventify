@@ -1,12 +1,12 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
-import org.gradle.plugins.ide.idea.model.IdeaModel
-import ru.vyarus.gradle.plugin.quality.QualityExtension
 import org.cyclonedx.Version
 import org.cyclonedx.gradle.CyclonedxDirectTask
-import org.springframework.boot.gradle.tasks.bundling.BootJar
-import org.springframework.boot.gradle.tasks.run.BootRun
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.springframework.boot.gradle.tasks.run.BootRun
+import ru.vyarus.gradle.plugin.quality.QualityExtension
 
 group = retrieve("group")
 version = retrieve("version")
@@ -77,18 +77,16 @@ dependencies {
     runtimeOnly("org.postgresql", "postgresql", retrieve("postgresVersion"))
 
     // ======= SPRINGBOOT DEPENDENCIES =======
-    // Spring AMQP (includes RabbitMQ)
-    implementation("org.springframework.boot", "spring-boot-starter-amqp")
-    implementation("org.springframework.boot", "spring-boot-starter-webflux")
+    implementation("org.springframework.boot", "spring-boot-starter-hateoas")
     implementation("org.springframework.boot", "spring-boot-starter-actuator")
-    implementation("org.springframework.boot", "spring-boot-starter-web")
     implementation("org.springframework.boot", "spring-boot-starter-security")
     implementation("org.springframework.boot", "spring-boot-starter-data-jpa")
     implementation("org.springframework.boot", "spring-boot-starter-data-rest")
     implementation("org.springframework.boot", "spring-boot-starter-validation")
     implementation("org.springframework.boot", "spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot", "spring-boot-starter-mail")
-    implementation("org.springframework.boot", "spring-boot-starter-security")
+    implementation("org.springframework.boot", "spring-boot-starter-amqp")
+    implementation("org.springframework.boot", "spring-boot-starter-liquibase")
     implementation("org.springframework.boot", "spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot", "spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot", "spring-boot-starter-jdbc") {
@@ -120,9 +118,6 @@ dependencies {
 
     // LogstashEncoder is used to encode log messages in logstash format
     implementation("net.logstash.logback", "logstash-logback-encoder", retrieve("logstashEncoderVersion"))
-
-    // Liquibase is used to manage database schema changes.
-    implementation("org.liquibase", "liquibase-core", retrieve("liquibaseVersion"))
 
     // ======= TEST DEPENDENCIES =======
     testImplementation("org.springframework.boot", "spring-boot-test")
@@ -216,7 +211,7 @@ tasks.withType<Test> {
     systemProperty("jframe.group", retrieve("group"))
     systemProperty("jframe.version", retrieve("version"))
     useJUnitPlatform()
-    jvmArgs( "-XX:+EnableDynamicAgentLoading")
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
     testLogging {
         showCauses = true
         showExceptions = true

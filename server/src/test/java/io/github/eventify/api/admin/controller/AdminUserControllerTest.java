@@ -4,6 +4,7 @@ import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.response.UserSearchResult;
 import io.github.eventify.support.IntegrationTest;
+import tools.jackson.core.type.TypeReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import static io.github.eventify.api.Paths.ADMIN_USERS_SEARCH_PATH;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
