@@ -437,6 +437,146 @@ log.error("Security violation: {}", details);
 ./gradlew bootRun
 ```
 
+## Jframe Search & Pagination Pattern
+
+**For searchable, paginated endpoints, use the Jframe pattern:**
+
+### 1. MetaData Component (Search/Sort Field Mapping)
+```java
+import io.github.jframe.datasource.search.SearchType;
+import io.github.jframe.datasource.search.model.AbstractSortSearchMetaData;
+
+import org.springframework.stereotype.Component;
+
+/**
+ * Contains search field mapping to column name and search types for Entity.
+ */
+@Component
+public class EntityMetaData extends AbstractSortSearchMetaData {
+
+    private static final String NAME = "name";
+    private static final String STATUS = "status";
+    private static final String CREATED_AT = "createdAt";
+
+    public EntityMetaData() {
+        super();
+        // addField(fieldName, columnName, searchType, sortable, defaultSort)
+        addField(NAME, NAME, SearchType.TEXT, true, false);
+        addField(STATUS, STATUS, SearchType.ENUM, EntityStatus.class, true, false);
+        addField(CREATED_AT, CREATED_AT, SearchType.DATE, true, true);  // Default sort
+    }
+}
+```
+
+### 2. Mapper (Extends PageMapper)
+```java
+import io.github.jframe.datasource.search.model.mapper.PageMapper;
+import io.github.jframe.datasource.search.model.resource.PageResource;
+
+@Mapper(config = SharedMapperConfig.class, uses = {DateTimeMapper.class})
+public abstract class EntityMapper extends PageMapper<EntityResponse, Entity> {
+    // toResourceObject() is abstract - MapStruct implements it
+    // toPageResource(Page<Entity>) is inherited from PageMapper
+}
+```
+
+### 3. Service Method
+```java
+import io.github.jframe.datasource.search.model.JpaSearchSpecification;
+import io.github.jframe.datasource.search.model.SearchCriterium;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
+
+@Transactional(readOnly = true)
+public Page<Entity> searchEntities(final SortablePageInput input) {
+    final Sort sort = entityMetaData.toSort(input.getSortOrder());
+    final Pageable pageable = PageRequest.of(input.getPageNumber(), input.getPageSize(), sort);
+
+    final List<SearchCriterium> criteria = entityMetaData.toSearchCriteria(input.getSearchInputs());
+    final Specification<Entity> spec = new JpaSearchSpecification<>(criteria);
+    return entityRepository.findAll(spec, pageable);
+}
+```
+
+### 4. Controller Endpoint
+```java
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import io.github.jframe.datasource.search.model.resource.PageResource;
+
+@ResponseStatus(OK)
+@PreAuthorize("hasAuthority('PERMISSION_NAME')")
+@Operation(summary = "Search entities with pagination and filtering")
+@PostMapping(
+    path = ENTITY_SEARCH_PATH,
+    consumes = APPLICATION_JSON_VALUE,
+    produces = APPLICATION_JSON_VALUE
+)
+public ResponseEntity<PageResource<EntityResponse>> searchEntities(@RequestBody final SortablePageInput input) {
+    final Page<Entity> page = entityService.searchEntities(input);
+    return ResponseEntity.status(OK).body(entityMapper.toPageResource(page));
+}
+```
+
+### 5. Repository (Must Extend JpaSpecificationExecutor)
+```java
+@Repository
+public interface EntityRepository extends JpaRepository<Entity, Long>, JpaSpecificationExecutor<Entity> {
+    // Standard query methods...
+}
+```
+
+### 6. Response DTO (Must Implement PageableItemResource)
+```java
+import io.github.jframe.datasource.search.model.resource.PageableItemResource;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
+public class EntityResponse implements PageableItemResource {
+    private Long id;
+    private String name;
+    // ... other fields
+}
+```
+
+### API Request Format
+```json
+POST /entities/search
+Content-Type: application/json
+
+{
+  "pageNumber": 0,
+  "pageSize": 10,
+  "sortOrder": [
+    {"column": "createdAt", "direction": "DESC"}
+  ],
+  "searchInputs": [
+    {"fieldName": "name", "textValue": "search term"},
+    {"fieldName": "status", "textValue": "ACTIVE"}
+  ]
+}
+```
+
+### API Response Format (PageResource<T>)
+```json
+{
+  "totalElements": 125,
+  "totalPages": 13,
+  "pageSize": 10,
+  "pageNumber": 0,
+  "content": [
+    { "id": 1, "name": "Entity 1", ... },
+    { "id": 2, "name": "Entity 2", ... }
+  ]
+}
+```
+
+**IMPORTANT Notes:**
+- `content` can be `null` when there are no results (not empty array)
+- Response uses primitives: `int` for pageSize/pageNumber/totalPages, `long` for totalElements
+- SearchType options: `TEXT`, `ENUM`, `DATE`, `NUMBER`, `BOOLEAN`
+- Always use `@Transactional(readOnly = true)` for read-only search operations
+
 ## Error Handling
 
 **Use custom exceptions:**
