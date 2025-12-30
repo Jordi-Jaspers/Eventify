@@ -1,20 +1,9 @@
-<!--
-  AppSidebarNav Component
-
-  Navigation menu for sidebar with role-based sections.
-
-  Props:
-  - currentPath: string - Current URL path for highlighting active items
-
-  Usage:
-  <AppSidebarNav currentPath={page.url.pathname} />
--->
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { currentUser } from '$lib/stores/auth';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { LayoutDashboard, Clock, Shield, Building2, Plus, ChevronDown } from '@lucide/svelte';
+	import { LayoutDashboard, Clock, Shield, Building2, Plus, ChevronUp, List } from '@lucide/svelte';
 
 	interface Props {
 		currentPath: string;
@@ -79,10 +68,19 @@
 						<Sidebar.MenuButton onclick={() => (isOrganizationsOpen = !isOrganizationsOpen)}>
 							<Building2 class="size-4" />
 							<span>Organizations</span>
-							<ChevronDown class="ml-auto size-4 transition-transform duration-200" style="transform: rotate({isOrganizationsOpen ? 180 : 0}deg)" />
+							<ChevronUp class="ml-auto size-4 transition-transform duration-200" style="transform: rotate({isOrganizationsOpen ? 180 : 0}deg)" />
 						</Sidebar.MenuButton>
 						{#if isOrganizationsOpen}
 							<Sidebar.MenuSub>
+								<Sidebar.MenuSubItem>
+									<Sidebar.MenuSubButton
+										onclick={() => goto(CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
+										isActive={isActive(CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
+									>
+										<List class="size-4" />
+										<span>View All</span>
+									</Sidebar.MenuSubButton>
+								</Sidebar.MenuSubItem>
 								<Sidebar.MenuSubItem>
 									<Sidebar.MenuSubButton
 										onclick={() => goto(CLIENT_ROUTES.ADMIN_ORGANIZATIONS_NEW.path)}

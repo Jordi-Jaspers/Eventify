@@ -5,6 +5,7 @@ import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.authentication.model.request.RegisterUserRequest;
 import io.github.eventify.api.authentication.model.response.AuthenticationResponse;
 import io.github.eventify.api.authentication.model.response.RegisterResponse;
+import io.github.eventify.api.organization.model.response.OwnerResponse;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.response.UserDetailsResponse;
 import io.github.jframe.util.mapper.DateTimeMapper;
@@ -27,6 +28,14 @@ import org.mapstruct.Named;
     uses = DateTimeMapper.class
 )
 public abstract class UserMapper {
+
+    /**
+     * Map User entity to OwnerResponse DTO.
+     *
+     * @param user the user entity
+     * @return the owner response DTO
+     */
+    public abstract OwnerResponse toOwnerResponse(User user);
 
     public abstract User toUser(RegisterUserRequest request);
 

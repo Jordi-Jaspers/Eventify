@@ -20,3 +20,38 @@ export type AdminStatsResponse = components['schemas']['AdminStatsResponse'];
 export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
 
 export type UserSearchResult = components['schemas']['UserSearchResult'];
+
+// Organization listing types
+export type OrganizationStatus = 'TRIAL' | 'ACTIVE' | 'SUSPENDED';
+
+// PageResponse wrapper for paginated results
+export interface PageResponseOrganizationResponse {
+	content?: OrganizationResponse[];
+	pageNumber?: number;
+	pageSize?: number;
+	totalElements?: number;
+	totalPages?: number;
+	first?: boolean;
+	last?: boolean;
+}
+
+// Jframe SortablePageInput types (for search endpoints)
+export interface SearchInput {
+	fieldName: string;
+	textValue?: string;
+	fromDateValue?: string;
+	toDateValue?: string;
+	textValueList?: string[];
+}
+
+export interface SortableColumn {
+	column: string;
+	direction: 'ASC' | 'DESC';
+}
+
+export interface SortablePageInput {
+	pageNumber: number;
+	pageSize: number;
+	sortOrder?: SortableColumn[];
+	searchInputs?: SearchInput[];
+}

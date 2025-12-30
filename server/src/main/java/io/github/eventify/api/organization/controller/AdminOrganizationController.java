@@ -6,10 +6,13 @@ import io.github.eventify.api.organization.model.request.ProvisionOrganizationRe
 import io.github.eventify.api.organization.model.response.OrganizationResponse;
 import io.github.eventify.api.organization.model.validator.OrganizationValidator;
 import io.github.eventify.api.organization.service.OrganizationService;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +21,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import static io.github.eventify.api.Paths.ADMIN_ORGANIZATIONS_PATH;
+import static io.github.eventify.api.Paths.ADMIN_ORGANIZATIONS_SEARCH_PATH;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -49,7 +54,20 @@ public class AdminOrganizationController {
     public ResponseEntity<OrganizationResponse> provisionOrganization(@RequestBody final ProvisionOrganizationRequest request) {
         validator.validateAndThrow(request);
         final Organization organization = organizationService.create(request);
-        final OrganizationResponse response = organizationMapper.toOrganizationResponse(organization);
+        final OrganizationResponse response = organizationMapper.toResourceObject(organization);
         return ResponseEntity.status(CREATED).body(response);
+    }
+
+    @ResponseStatus(OK)
+    @PreAuthorize("hasAuthority('MANAGE_ORGANIZATIONS')")
+    @Operation(summary = "Search organizations with pagination and filtering")
+    @PostMapping(
+        path = ADMIN_ORGANIZATIONS_SEARCH_PATH,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<PageResource<OrganizationResponse>> searchOrganizations(@RequestBody final SortablePageInput input) {
+        final Page<Organization> page = organizationService.searchOrganizations(input);
+        return ResponseEntity.status(OK).body(organizationMapper.toPageResource(page));
     }
 }

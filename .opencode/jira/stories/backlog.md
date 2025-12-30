@@ -1,3 +1,17 @@
+# Epic: General Improvements
+- [ ] **OpenApi annotations**:
+    - Add missing OpenApi annotations to request and response models for better API documentation.
+    - Ensure they all have proper descriptions, examples, and constraints.
+    - If there is javadoc on the field, use that as the description and remove the javadoc to avoid duplication.
+    - Example:
+    ```
+      @Schema(
+        description = "Name of the field to search on",
+        requiredMode = Schema.RequiredMode.REQUIRED,
+        example = "name"
+    )
+  ```
+
 # Epic: Security Enhancements for Authentication
 
 - [ ] **Long-Lived Refresh Tokens**:

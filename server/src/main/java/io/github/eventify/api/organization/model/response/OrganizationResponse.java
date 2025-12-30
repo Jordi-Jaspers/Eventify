@@ -1,6 +1,7 @@
 package io.github.eventify.api.organization.model.response;
 
 import io.github.eventify.api.organization.model.OrganizationStatus;
+import io.github.jframe.datasource.search.model.resource.PageableItemResource;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +16,7 @@ import java.time.OffsetDateTime;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class OrganizationResponse {
+public class OrganizationResponse implements PageableItemResource {
 
     private Long id;
 
@@ -30,4 +31,6 @@ public class OrganizationResponse {
     private OffsetDateTime createdAt;
 
     private OwnerResponse owner;
+
+    private int memberCount;
 }

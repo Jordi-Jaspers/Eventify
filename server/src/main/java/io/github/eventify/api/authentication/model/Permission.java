@@ -17,6 +17,7 @@ public enum Permission {
     ACCESS_APPLICATION("The permission to access the application."),
     MANAGE_USERS("The permission to manage the user."),
     PROVISION_ORGANIZATIONS("The permission to provision new organizations."),
+    MANAGE_ORGANIZATIONS("The permission to manage organizations."),
     VIEW_PLATFORM_STATS("The permission to view platform statistics.");
 
     private final String description;

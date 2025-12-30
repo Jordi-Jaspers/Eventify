@@ -11,8 +11,6 @@ public final class Paths {
 
     public static final String PUBLIC_PATH = BASE_PATH + "/public";
 
-    public static final String EXTERNAL_PATH = BASE_PATH + "/external";
-
     public static final String AUTH_PATH = BASE_PATH + "/auth";
 
     public static final String OPENAPI_PATH = "/v3/api-docs";
@@ -108,6 +106,8 @@ public final class Paths {
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PART + "/organizations";
+
+    public static final String ADMIN_ORGANIZATIONS_SEARCH_PATH = ADMIN_ORGANIZATIONS_PATH + SEARCH_PART;
 
     public static final String ADMIN_STATS_PATH = ADMIN_PART + "/stats";
 

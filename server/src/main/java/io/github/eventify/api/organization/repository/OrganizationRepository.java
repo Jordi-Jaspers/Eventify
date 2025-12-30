@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Repository for {@link Organization} entities.
  */
 @Repository
-public interface OrganizationRepository extends JpaRepository<Organization, Long> {
+public interface OrganizationRepository extends JpaRepository<Organization, Long>, JpaSpecificationExecutor<Organization> {
 
     /**
      * Find organization by slug excluding soft-deleted ones.
@@ -98,4 +99,13 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
         @Param("start") OffsetDateTime start,
         @Param("end") OffsetDateTime end
     );
+
+    /**
+     * Count members for an organization.
+     *
+     * @param orgId the organization id
+     * @return the member count
+     */
+    @Query("SELECT COUNT(m) FROM OrganizationMembership m WHERE m.organization.id = :orgId")
+    Integer countMembersByOrganizationId(@Param("orgId") Long orgId);
 }

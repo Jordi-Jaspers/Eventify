@@ -8,6 +8,8 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 import jakarta.persistence.*;
 
+import static java.time.ZoneOffset.UTC;
+
 /**
  * Entity representing organization membership.
  */
@@ -53,4 +55,18 @@ public class OrganizationMembership {
         updatable = false
     )
     private OffsetDateTime createdAt;
+
+    /**
+     * Constructs a new OrganizationMembership with the specified organization, user, and role.
+     *
+     * @param organization the organization
+     * @param owner        the user
+     * @param role         the organizational role
+     */
+    public OrganizationMembership(final Organization organization, final User owner, final OrganizationalRole role) {
+        this.organization = organization;
+        this.user = owner;
+        this.role = role;
+        this.createdAt = OffsetDateTime.now(UTC);
+    }
 }

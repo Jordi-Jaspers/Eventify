@@ -1,12 +1,16 @@
 package io.github.eventify.api.organization.model;
 
 import io.github.eventify.api.user.model.User;
+import io.github.jframe.datasource.search.model.PageableItem;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
 import jakarta.persistence.*;
+
+import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
+import static java.time.ZoneOffset.UTC;
 
 /**
  * Entity representing an organization.
@@ -16,7 +20,7 @@ import jakarta.persistence.*;
 @Entity
 @NoArgsConstructor
 @Table(name = "organization")
-public class Organization {
+public class Organization implements PageableItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +46,13 @@ public class Organization {
     private OrganizationStatus status;
 
     @Column(
+        name = "member_count",
+        insertable = false,
+        updatable = false
+    )
+    private Integer memberCount;
+
+    @Column(
         name = "created_by",
         nullable = false
     )
@@ -62,4 +73,19 @@ public class Organization {
 
     @Transient
     private User owner;
+
+    /**
+     * Constructor to create a new organization with the specified name and slug.
+     *
+     * @param name the name of the organization
+     * @param slug the slug of the organization
+     */
+    public Organization(final String name, final String slug) {
+        this.name = name;
+        this.slug = slug;
+        this.status = OrganizationStatus.TRIAL;
+        this.createdBy = getLoggedInUser().getId();
+        this.createdAt = OffsetDateTime.now(UTC);
+    }
+
 }

@@ -29,6 +29,7 @@ public enum Role {
             Permission.ACCESS_APPLICATION,
             Permission.MANAGE_USERS,
             Permission.PROVISION_ORGANIZATIONS,
+            Permission.MANAGE_ORGANIZATIONS,
             Permission.VIEW_PLATFORM_STATS
         )
     );

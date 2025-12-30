@@ -1,11 +1,18 @@
 package io.github.eventify.api.organization.controller;
 
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.organization.model.response.OrganizationResponse;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.model.PageResponse;
 import io.github.eventify.support.IntegrationTest;
+import io.github.jframe.datasource.search.model.input.SearchInput;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import tools.jackson.core.type.TypeReference;
+
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static io.github.eventify.api.Paths.ADMIN_ORGANIZATIONS_PATH;
+import static io.github.eventify.api.Paths.ADMIN_ORGANIZATIONS_SEARCH_PATH;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
 import static io.github.jframe.util.mapper.ObjectMappers.toJson;
@@ -477,5 +485,390 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // Then: The response should be BAD_REQUEST
         response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    // ============================= LIST ORGANIZATIONS TESTS =============================
+
+    @Test
+    @DisplayName("Should list organizations with default pagination")
+    public void listOrganizationsSuccess() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: Multiple test organizations
+        createOrganizationWithStatus("Alpha Corp", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Beta Inc", OrganizationStatus.ACTIVE);
+        createOrganizationWithStatus("Gamma LLC", OrganizationStatus.SUSPENDED);
+
+        // And: A search request with default pagination
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        // When: Listing organizations
+        final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The response should contain organizations
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+            content,
+            new TypeReference<PageResponse<OrganizationResponse>>() {}
+        );
+
+        assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(3)));
+        assertThat(pageResponse.getTotalElements(), greaterThanOrEqualTo(3L));
+    }
+
+    @Test
+    @DisplayName("Should list organizations with custom pagination")
+    public void listOrganizationsWithPagination() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: Five test organizations
+        for (int i = 0; i < 5; i++) {
+            createOrganizationWithStatus("Org " + i, OrganizationStatus.TRIAL);
+        }
+
+        // And: A search request with custom pagination
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(1);
+        searchInput.setPageSize(2);
+
+        // When: Requesting page 1 with size 2
+        final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The response should contain exactly 2 organizations
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+            content,
+            new TypeReference<PageResponse<OrganizationResponse>>() {}
+        );
+
+        assertThat(pageResponse.getContent(), hasSize(2));
+        assertThat(pageResponse.getPageNumber(), is(1));
+        assertThat(pageResponse.getPageSize(), is(2));
+        assertThat(pageResponse.getTotalElements(), greaterThanOrEqualTo(5L));
+    }
+
+    @Test
+    @DisplayName("Should search organizations by name case-insensitively")
+    public void searchOrganizationsByName() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: Organizations with similar names
+        createOrganizationWithStatus("TechCorp Solutions", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Medical Tech Inc", OrganizationStatus.ACTIVE);
+        createOrganizationWithStatus("Financial Services", OrganizationStatus.TRIAL);
+
+        // And: A search request for "tech"
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        final SearchInput nameFilter = new SearchInput();
+        nameFilter.setFieldName("name");
+        nameFilter.setTextValue("tech");
+        searchInput.getSearchInputs().add(nameFilter);
+
+        // When: Searching for "tech" (lowercase)
+        final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The response should only contain organizations with "tech" in name
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+            content,
+            new TypeReference<PageResponse<OrganizationResponse>>() {}
+        );
+
+        assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(2)));
+        pageResponse.getContent().forEach(
+            org -> assertThat(org.getName().toLowerCase(), containsString("tech"))
+        );
+    }
+
+    @Test
+    @DisplayName("Should filter organizations by status")
+    public void filterOrganizationsByStatus() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: Organizations with different statuses
+        createOrganizationWithStatus("Trial Org 1", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Trial Org 2", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Active Org", OrganizationStatus.ACTIVE);
+        createOrganizationWithStatus("Suspended Org", OrganizationStatus.SUSPENDED);
+
+        // And: A search request filtering by TRIAL status
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        final SearchInput statusFilter = new SearchInput();
+        statusFilter.setFieldName("status");
+        statusFilter.setTextValue("TRIAL");
+        searchInput.getSearchInputs().add(statusFilter);
+
+        // When: Filtering by TRIAL status
+        final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The response should only contain TRIAL organizations
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+            content,
+            new TypeReference<PageResponse<OrganizationResponse>>() {}
+        );
+
+        assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(2)));
+        pageResponse.getContent().forEach(
+            org -> assertThat(org.getStatus(), is(OrganizationStatus.TRIAL))
+        );
+    }
+
+    @Test
+    @DisplayName("Should combine search and status filter")
+    public void searchAndFilterCombined() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: Various organizations
+        createOrganizationWithStatus("Tech Alpha", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Tech Beta", OrganizationStatus.ACTIVE);
+        createOrganizationWithStatus("Tech Gamma", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Medical Alpha", OrganizationStatus.TRIAL);
+
+        // And: A search request with both name and status filters
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        final SearchInput nameFilter = new SearchInput();
+        nameFilter.setFieldName("name");
+        nameFilter.setTextValue("tech");
+        searchInput.getSearchInputs().add(nameFilter);
+
+        final SearchInput statusFilter = new SearchInput();
+        statusFilter.setFieldName("status");
+        statusFilter.setTextValue("TRIAL");
+        searchInput.getSearchInputs().add(statusFilter);
+
+        // When: Searching for "tech" AND filtering by TRIAL
+        final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The response should contain organizations matching both criteria
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+            content,
+            new TypeReference<PageResponse<OrganizationResponse>>() {}
+        );
+
+        assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(2)));
+        pageResponse.getContent().forEach(org -> {
+            assertThat(org.getName().toLowerCase(), containsString("tech"));
+            assertThat(org.getStatus(), is(OrganizationStatus.TRIAL));
+        });
+    }
+
+    @Test
+    @DisplayName("Should return organization with correct member count")
+    public void listOrganizationsWithMemberCount() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: An organization with owner
+        final User owner = aValidatedUser();
+        final ProvisionOrganizationRequest provisionRequest = aValidProvisionOrganizationRequestWithOwner(owner.getEmail());
+        createOrganization(provisionRequest);
+
+        // And: A search request filtering by organization name
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        final SearchInput nameFilter = new SearchInput();
+        nameFilter.setFieldName("name");
+        nameFilter.setTextValue(provisionRequest.getName());
+        searchInput.getSearchInputs().add(nameFilter);
+
+        // When: Listing organizations
+        final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The organization should have memberCount of 1
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+            content,
+            new TypeReference<PageResponse<OrganizationResponse>>() {}
+        );
+
+        assertThat(pageResponse.getContent(), hasSize(1));
+        final OrganizationResponse org = pageResponse.getContent().get(0);
+        assertThat(org.getMemberCount(), is(1));
+    }
+
+    @Test
+    @DisplayName("Should return empty result when no organizations match")
+    public void listOrganizationsEmptyResult() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: A search request for non-existent organization
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        final SearchInput nameFilter = new SearchInput();
+        nameFilter.setFieldName("name");
+        nameFilter.setTextValue("NonExistentOrganizationXYZ12345");
+        searchInput.getSearchInputs().add(nameFilter);
+
+        // When: Searching for non-existent organization
+        final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The response should be empty
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+            content,
+            new TypeReference<PageResponse<OrganizationResponse>>() {}
+        );
+
+        assertThat(pageResponse.getContent(), hasSize(0));
+        assertThat(pageResponse.getTotalElements(), is(0L));
+    }
+
+    @Test
+    @DisplayName("Should not list organizations without authentication")
+    public void listOrganizationsWithoutAuthenticationFails() throws Exception {
+        // Given: No authentication token
+        // And: A search request with default pagination
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        // When: Listing organizations without authorization header
+        final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: The response should be UNAUTHORIZED
+        response.andExpect(status().is(SC_UNAUTHORIZED));
+    }
+
+    @Test
+    @DisplayName("Should not list organizations without permission")
+    public void listOrganizationsWithoutPermissionFails() throws Exception {
+        // Given: A regular user without MANAGE_ORGANIZATIONS permission
+        final User regularUser = aValidatedUser();
+
+        // And: A search request with default pagination
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        // When: Regular user attempts to list organizations
+        final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + regularUser.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: The response should be FORBIDDEN
+        response.andExpect(status().is(SC_FORBIDDEN));
+    }
+
+    // ============================= HELPER METHODS =============================
+
+    /**
+     * Helper method to create an organization with specific status.
+     */
+    private Organization createOrganizationWithStatus(final String name, final OrganizationStatus status) {
+        final User owner = aValidatedUser();
+        final String suffix = UUID.randomUUID().toString().substring(0, 5);
+        final ProvisionOrganizationRequest request = new ProvisionOrganizationRequest()
+            .setName(INTEGRATION_PREFIX + name + "-" + suffix)
+            .setOwner(owner.getEmail());
+
+        final Organization org = createOrganization(request);
+        org.setStatus(status);
+        return organizationRepository.save(org);
+    }
+
+    /**
+     * Helper method to create an organization from a request.
+     */
+    private Organization createOrganization(final ProvisionOrganizationRequest request) {
+        try {
+            final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
+                .contentType(APPLICATION_JSON)
+                .content(toJson(request))
+                .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+            final ResultActions response = mockMvc.perform(createRequest);
+            final String content = response.andReturn().getResponse().getContentAsString();
+            final OrganizationResponse organizationResponse = fromJson(content, OrganizationResponse.class);
+
+            return organizationRepository.findById(organizationResponse.getId()).orElseThrow();
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to create organization", e);
+        }
     }
 }

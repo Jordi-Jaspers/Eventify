@@ -1,5 +1,12 @@
 import {client} from "$lib/api/client.ts";
-import type {OrganizationResponse} from "$lib/api/models.ts";
+import {SERVER_BASE_URL} from "$lib/config/constants.ts";
+import type {
+    OrganizationResponse,
+    OrganizationStatus,
+    PageResponseOrganizationResponse,
+    SortablePageInput,
+    SearchInput
+} from "$lib/api/models.ts";
 
 /**
  * Create a new organization (Admin only)
@@ -16,5 +23,57 @@ export async function createOrganization(name: string, owner: string): Promise<O
         throw error;
     }
 
+    return data;
+}
+
+export interface SearchOrganizationsParams {
+    page?: number;
+    size?: number;
+    search?: string;
+    status?: OrganizationStatus;
+}
+
+/**
+ * Search organizations with pagination and filtering (Admin only)
+ * Uses Jframe SortablePageInput pattern with POST request
+ */
+export async function searchOrganizations(params: SearchOrganizationsParams = {}): Promise<PageResponseOrganizationResponse> {
+    const searchInputs: SearchInput[] = [];
+
+    if (params.search) {
+        searchInputs.push({
+            fieldName: 'name',
+            textValue: params.search
+        });
+    }
+
+    if (params.status) {
+        searchInputs.push({
+            fieldName: 'status',
+            textValue: params.status
+        });
+    }
+
+    const requestBody: SortablePageInput = {
+        pageNumber: params.page ?? 0,
+        pageSize: params.size ?? 10,
+        searchInputs
+    };
+
+    const response: Response = await fetch(`${SERVER_BASE_URL}/admin/organizations/search`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+        const errorData: unknown = await response.json().catch(() => ({}));
+        throw errorData;
+    }
+
+    const data: PageResponseOrganizationResponse = await response.json();
     return data;
 }

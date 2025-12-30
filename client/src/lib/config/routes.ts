@@ -58,6 +58,10 @@ export const CLIENT_ROUTES = {
 	ADMIN_ORGANIZATIONS_NEW: {
 		path: '/admin/organizations/new',
 		type: RouteType.PRIVATE
+	},
+	ADMIN_ORGANIZATIONS_PAGE: {
+		path: '/admin/organizations',
+		type: RouteType.PRIVATE
 	}
 } as const;
 

@@ -5,19 +5,20 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202512111000-PRD-organization-table.xml">
 
-    <changeSet id="202512111000-PRD-organization-table-1" author="backend-agent">
+    <changeSet id="202512111000-PRD-organization-table-1" author="jordi.jaspers">
         <comment>Creating organization table for multi-tenant organization management.</comment>
         <sql>
             CREATE TABLE IF NOT EXISTS organization
             (
                 id         SERIAL PRIMARY KEY,
-                name       TEXT        NOT NULL,
-                slug       TEXT        NOT NULL,
-                status     TEXT        NOT NULL,
-                created_by INTEGER     NOT NULL,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                deleted_by INTEGER     NULL,
-                deleted_at TIMESTAMPTZ NULL,
+                name       TEXT             NOT NULL,
+                slug       TEXT             NOT NULL,
+                status     TEXT             NOT NULL,
+                member_count INTEGER    NOT NULL DEFAULT 0,
+                created_by INTEGER          NOT NULL,
+                created_at TIMESTAMPTZ      NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                deleted_by INTEGER          NULL,
+                deleted_at TIMESTAMPTZ      NULL,
                 FOREIGN KEY (created_by) REFERENCES "user" (id) ON DELETE RESTRICT,
                 FOREIGN KEY (deleted_by) REFERENCES "user" (id) ON DELETE RESTRICT
             );
@@ -28,7 +29,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202512111000-PRD-organization-table-2" author="backend-agent">
+    <changeSet id="202512111000-PRD-organization-table-2" author="jordi.jaspers">
         <comment>Adding documentation for organization table, columns, and indexes.</comment>
         <sql>
             COMMENT ON TABLE organization IS 'Stores organization information for multi-tenant functionality';
@@ -36,6 +37,7 @@
             COMMENT ON COLUMN organization.name IS 'Display name of the organization';
             COMMENT ON COLUMN organization.slug IS 'URL-friendly unique identifier for the organization';
             COMMENT ON COLUMN organization.status IS 'Current status of the organization (TRIAL, ACTIVE, SUSPENDED)';
+            COMMENT ON COLUMN organization.member_count IS 'Number of members in the organization';
             COMMENT ON COLUMN organization.created_by IS 'User ID who created the organization';
             COMMENT ON COLUMN organization.created_at IS 'Timestamp when the organization was created';
             COMMENT ON COLUMN organization.deleted_by IS 'User ID who deleted the organization (soft delete)';
