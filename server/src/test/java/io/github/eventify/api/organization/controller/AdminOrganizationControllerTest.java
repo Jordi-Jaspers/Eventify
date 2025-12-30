@@ -6,10 +6,10 @@ import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.organization.model.response.OrganizationResponse;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.common.model.PageResponse;
 import io.github.eventify.support.IntegrationTest;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import io.github.jframe.datasource.search.model.resource.PageResource;
 import tools.jackson.core.type.TypeReference;
 
 import java.util.UUID;
@@ -518,9 +518,9 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: The response should contain organizations
         final String content = response.andReturn().getResponse().getContentAsString();
-        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+        final PageResource<OrganizationResponse> pageResponse = fromJson(
             content,
-            new TypeReference<PageResponse<OrganizationResponse>>() {}
+            new TypeReference<PageResource<OrganizationResponse>>() {}
         );
 
         assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(3)));
@@ -556,9 +556,9 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: The response should contain exactly 2 organizations
         final String content = response.andReturn().getResponse().getContentAsString();
-        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+        final PageResource<OrganizationResponse> pageResponse = fromJson(
             content,
-            new TypeReference<PageResponse<OrganizationResponse>>() {}
+            new TypeReference<PageResource<OrganizationResponse>>() {}
         );
 
         assertThat(pageResponse.getContent(), hasSize(2));
@@ -601,9 +601,9 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: The response should only contain organizations with "tech" in name
         final String content = response.andReturn().getResponse().getContentAsString();
-        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+        final PageResource<OrganizationResponse> pageResponse = fromJson(
             content,
-            new TypeReference<PageResponse<OrganizationResponse>>() {}
+            new TypeReference<PageResource<OrganizationResponse>>() {}
         );
 
         assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(2)));
@@ -647,9 +647,9 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: The response should only contain TRIAL organizations
         final String content = response.andReturn().getResponse().getContentAsString();
-        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+        final PageResource<OrganizationResponse> pageResponse = fromJson(
             content,
-            new TypeReference<PageResponse<OrganizationResponse>>() {}
+            new TypeReference<PageResource<OrganizationResponse>>() {}
         );
 
         assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(2)));
@@ -698,9 +698,9 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: The response should contain organizations matching both criteria
         final String content = response.andReturn().getResponse().getContentAsString();
-        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+        final PageResource<OrganizationResponse> pageResponse = fromJson(
             content,
-            new TypeReference<PageResponse<OrganizationResponse>>() {}
+            new TypeReference<PageResource<OrganizationResponse>>() {}
         );
 
         assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(2)));
@@ -744,9 +744,9 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: The organization should have memberCount of 1
         final String content = response.andReturn().getResponse().getContentAsString();
-        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+        final PageResource<OrganizationResponse> pageResponse = fromJson(
             content,
-            new TypeReference<PageResponse<OrganizationResponse>>() {}
+            new TypeReference<PageResource<OrganizationResponse>>() {}
         );
 
         assertThat(pageResponse.getContent(), hasSize(1));
@@ -783,12 +783,12 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: The response should be empty
         final String content = response.andReturn().getResponse().getContentAsString();
-        final PageResponse<OrganizationResponse> pageResponse = fromJson(
+        final PageResource<OrganizationResponse> pageResponse = fromJson(
             content,
-            new TypeReference<PageResponse<OrganizationResponse>>() {}
+            new TypeReference<PageResource<OrganizationResponse>>() {}
         );
 
-        assertThat(pageResponse.getContent(), hasSize(0));
+        assertThat(pageResponse.getContent(), anyOf(nullValue(), hasSize(0)));
         assertThat(pageResponse.getTotalElements(), is(0L));
     }
 

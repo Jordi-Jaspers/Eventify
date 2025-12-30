@@ -2,6 +2,7 @@ package io.github.eventify.common.exception;
 
 
 import io.github.jframe.exception.ApiError;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
+@Schema(description = "ApiErrorCode")
 public enum ApiErrorCode implements ApiError {
 
     INTERNAL_SERVER_ERROR(

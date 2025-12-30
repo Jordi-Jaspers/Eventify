@@ -926,11 +926,27 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List all organizations with search and filter */
-        get: operations["listOrganizations"];
+        get?: never;
         put?: never;
         /** Provision a new organization (Admin only) */
         post: operations["provisionOrganization"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/organizations/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Search organizations with pagination and filtering */
+        post: operations["searchOrganizations"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1262,39 +1278,42 @@ export interface components {
         RepresentationModelObject: {
             _links?: components["schemas"]["Links"];
         };
-        EntityModelToken: {
-            value?: string;
-            /** @enum {string} */
-            type?: "ACCESS_TOKEN" | "REFRESH_TOKEN" | "USER_VALIDATION_TOKEN" | "RESET_PASSWORD_TOKEN";
+        EntityModelUser: {
+            email?: string;
+            firstName?: string;
+            lastName?: string;
+            password?: string;
+            enabled?: boolean;
+            validated?: boolean;
             /** Format: date-time */
-            expiresAt?: string;
+            lastLogin?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /**
+             * @description Role
+             * @enum {string}
+             */
+            role?: "USER" | "ADMIN";
+            accessToken?: components["schemas"]["Token"];
+            refreshToken?: components["schemas"]["Token"];
+            username?: string;
+            authorities?: components["schemas"]["GrantedAuthority"][];
+            accountNonExpired?: boolean;
+            accountNonLocked?: boolean;
+            credentialsNonExpired?: boolean;
             _links?: components["schemas"]["Links"];
         };
         GrantedAuthority: {
             authority?: string;
         };
-        PageMetadata: {
-            /** Format: int64 */
-            size?: number;
-            /** Format: int64 */
-            totalElements?: number;
-            /** Format: int64 */
-            totalPages?: number;
-            /** Format: int64 */
-            number?: number;
-        };
-        PagedModelEntityModelToken: {
-            _embedded?: {
-                tokens?: components["schemas"]["EntityModelToken"][];
-            };
-            _links?: components["schemas"]["Links"];
-            page?: components["schemas"]["PageMetadata"];
-        };
         Token: {
             /** Format: int64 */
             id?: number;
             value?: string;
-            /** @enum {string} */
+            /**
+             * @description TokenType
+             * @enum {string}
+             */
             type?: "ACCESS_TOKEN" | "REFRESH_TOKEN" | "USER_VALIDATION_TOKEN" | "RESET_PASSWORD_TOKEN";
             /** Format: date-time */
             expiresAt?: string;
@@ -1313,38 +1332,36 @@ export interface components {
             lastLogin?: string;
             /** Format: date-time */
             createdAt?: string;
-            /** @enum {string} */
+            /**
+             * @description Role
+             * @enum {string}
+             */
             role?: "USER" | "ADMIN";
             tokens?: components["schemas"]["Token"][];
             accessToken?: components["schemas"]["Token"];
             refreshToken?: components["schemas"]["Token"];
-            authorities?: components["schemas"]["GrantedAuthority"][];
             username?: string;
+            authorities?: components["schemas"]["GrantedAuthority"][];
             accountNonExpired?: boolean;
             accountNonLocked?: boolean;
             credentialsNonExpired?: boolean;
         };
-        EntityModelUser: {
-            email?: string;
-            firstName?: string;
-            lastName?: string;
-            password?: string;
-            enabled?: boolean;
-            validated?: boolean;
-            /** Format: date-time */
-            lastLogin?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** @enum {string} */
-            role?: "USER" | "ADMIN";
-            accessToken?: components["schemas"]["Token"];
-            refreshToken?: components["schemas"]["Token"];
-            authorities?: components["schemas"]["GrantedAuthority"][];
-            username?: string;
-            accountNonExpired?: boolean;
-            accountNonLocked?: boolean;
-            credentialsNonExpired?: boolean;
+        PageMetadata: {
+            /** Format: int64 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int64 */
+            totalPages?: number;
+            /** Format: int64 */
+            number?: number;
+        };
+        PagedModelEntityModelUser: {
+            _embedded?: {
+                users?: components["schemas"]["EntityModelUser"][];
+            };
             _links?: components["schemas"]["Links"];
+            page?: components["schemas"]["PageMetadata"];
         };
         CollectionModelObject: {
             _embedded?: {
@@ -1352,17 +1369,45 @@ export interface components {
             };
             _links?: components["schemas"]["Links"];
         };
-        CollectionModelEntityModelToken: {
+        CollectionModelToken: {
             _embedded?: {
-                tokens?: components["schemas"]["EntityModelToken"][];
+                tokens?: components["schemas"]["TokenResponse"][];
             };
             _links?: components["schemas"]["Links"];
+        };
+        CollectionModelEntityModelUser: {
+            _embedded?: {
+                users?: components["schemas"]["EntityModelUser"][];
+            };
+            _links?: components["schemas"]["Links"];
+        };
+        EntityModelOrganizationMembership: {
+            /**
+             * @description OrganizationalRole
+             * @enum {string}
+             */
+            role?: "OWNER" | "ADMIN" | "MEMBER";
+            /** Format: date-time */
+            createdAt?: string;
+            _links?: components["schemas"]["Links"];
+        };
+        PagedModelEntityModelOrganizationMembership: {
+            _embedded?: {
+                organizationMemberships?: components["schemas"]["EntityModelOrganizationMembership"][];
+            };
+            _links?: components["schemas"]["Links"];
+            page?: components["schemas"]["PageMetadata"];
         };
         EntityModelOrganization: {
             name?: string;
             slug?: string;
-            /** @enum {string} */
+            /**
+             * @description OrganizationStatus
+             * @enum {string}
+             */
             status?: "TRIAL" | "ACTIVE" | "SUSPENDED";
+            /** Format: int32 */
+            memberCount?: number;
             /** Format: int64 */
             createdBy?: number;
             /** Format: date-time */
@@ -1387,36 +1432,27 @@ export interface components {
             };
             _links?: components["schemas"]["Links"];
         };
-        EntityModelOrganizationMembership: {
-            /** @enum {string} */
-            role?: "OWNER" | "ADMIN" | "MEMBER";
+        EntityModelToken: {
+            value?: string;
+            /**
+             * @description TokenType
+             * @enum {string}
+             */
+            type?: "ACCESS_TOKEN" | "REFRESH_TOKEN" | "USER_VALIDATION_TOKEN" | "RESET_PASSWORD_TOKEN";
             /** Format: date-time */
-            createdAt?: string;
+            expiresAt?: string;
             _links?: components["schemas"]["Links"];
         };
-        PagedModelEntityModelOrganizationMembership: {
+        PagedModelEntityModelToken: {
             _embedded?: {
-                organizationMemberships?: components["schemas"]["EntityModelOrganizationMembership"][];
+                tokens?: components["schemas"]["EntityModelToken"][];
             };
             _links?: components["schemas"]["Links"];
             page?: components["schemas"]["PageMetadata"];
         };
-        PagedModelEntityModelUser: {
+        CollectionModelEntityModelToken: {
             _embedded?: {
-                users?: components["schemas"]["EntityModelUser"][];
-            };
-            _links?: components["schemas"]["Links"];
-            page?: components["schemas"]["PageMetadata"];
-        };
-        CollectionModelToken: {
-            _embedded?: {
-                tokens?: components["schemas"]["TokenResponse"][];
-            };
-            _links?: components["schemas"]["Links"];
-        };
-        CollectionModelEntityModelUser: {
-            _embedded?: {
-                users?: components["schemas"]["EntityModelUser"][];
+                tokens?: components["schemas"]["EntityModelToken"][];
             };
             _links?: components["schemas"]["Links"];
         };
@@ -1425,8 +1461,13 @@ export interface components {
             id?: number;
             name?: string;
             slug?: string;
-            /** @enum {string} */
+            /**
+             * @description OrganizationStatus
+             * @enum {string}
+             */
             status?: "TRIAL" | "ACTIVE" | "SUSPENDED";
+            /** Format: int32 */
+            memberCount?: number;
             /** Format: int64 */
             createdBy?: number;
             /** Format: date-time */
@@ -1442,7 +1483,10 @@ export interface components {
             id?: number;
             user?: string;
             organization?: string;
-            /** @enum {string} */
+            /**
+             * @description OrganizationalRole
+             * @enum {string}
+             */
             role?: "OWNER" | "ADMIN" | "MEMBER";
             invitedBy?: string;
             /** Format: date-time */
@@ -1452,7 +1496,10 @@ export interface components {
             /** Format: int64 */
             id?: number;
             value?: string;
-            /** @enum {string} */
+            /**
+             * @description TokenType
+             * @enum {string}
+             */
             type?: "ACCESS_TOKEN" | "REFRESH_TOKEN" | "USER_VALIDATION_TOKEN" | "RESET_PASSWORD_TOKEN";
             /** Format: date-time */
             expiresAt?: string;
@@ -1471,26 +1518,35 @@ export interface components {
             lastLogin?: string;
             /** Format: date-time */
             createdAt?: string;
-            /** @enum {string} */
+            /**
+             * @description Role
+             * @enum {string}
+             */
             role?: "USER" | "ADMIN";
             tokens?: string[];
             accessToken?: components["schemas"]["Token"];
             refreshToken?: components["schemas"]["Token"];
-            authorities?: components["schemas"]["GrantedAuthority"][];
             username?: string;
+            authorities?: components["schemas"]["GrantedAuthority"][];
             accountNonExpired?: boolean;
             accountNonLocked?: boolean;
             credentialsNonExpired?: boolean;
         };
         TokenResponse: {
             value?: string;
-            /** @enum {string} */
+            /**
+             * @description TokenType
+             * @enum {string}
+             */
             type?: "ACCESS_TOKEN" | "REFRESH_TOKEN" | "USER_VALIDATION_TOKEN" | "RESET_PASSWORD_TOKEN";
             /** Format: date-time */
             expiresAt?: string;
         };
         UpdateRoleRequest: {
-            /** @enum {string} */
+            /**
+             * @description Role
+             * @enum {string}
+             */
             role?: "USER" | "ADMIN";
         };
         UserDetailsResponse: {
@@ -1503,7 +1559,10 @@ export interface components {
             lastLogin?: string;
             /** Format: date-time */
             created?: string;
-            /** @enum {string} */
+            /**
+             * @description Role
+             * @enum {string}
+             */
             role?: "USER" | "ADMIN";
             permissions?: ("ACCESS_APPLICATION" | "MANAGE_USERS" | "PROVISION_ORGANIZATIONS" | "MANAGE_ORGANIZATIONS" | "VIEW_PLATFORM_STATS")[];
             enabled?: boolean;
@@ -1525,7 +1584,10 @@ export interface components {
         };
         AuthenticationResponse: {
             email?: string;
-            /** @enum {string} */
+            /**
+             * @description Role
+             * @enum {string}
+             */
             role?: "USER" | "ADMIN";
             accessToken?: string;
             refreshToken?: string;
@@ -1563,13 +1625,18 @@ export interface components {
             id?: number;
             name?: string;
             slug?: string;
-            /** @enum {string} */
+            /**
+             * @description OrganizationStatus
+             * @enum {string}
+             */
             status?: "TRIAL" | "ACTIVE" | "SUSPENDED";
             /** Format: int64 */
             createdBy?: number;
             /** Format: date-time */
             createdAt?: string;
             owner?: components["schemas"]["OwnerResponse"];
+            /** Format: int32 */
+            memberCount?: number;
         };
         OwnerResponse: {
             /** Format: int64 */
@@ -1577,6 +1644,108 @@ export interface components {
             email?: string;
             firstName?: string;
             lastName?: string;
+        };
+        KeyValuePair: {
+            /**
+             * @description Key of the key-value pair
+             * @example status
+             */
+            key: string;
+            /**
+             * @description Value of the key-value pair
+             * @example active
+             */
+            value: string;
+        };
+        SearchInput: {
+            /**
+             * @description Name of the field to search on
+             * @example name
+             */
+            fieldName: string;
+            /**
+             * @description Text value to search for
+             * @example John
+             */
+            textValue?: string;
+            /**
+             * @description From date value to search for (inclusive)
+             * @example 2023-01-01T00:00:00Z
+             */
+            fromDateValue?: string;
+            /**
+             * @description To date value to search for (inclusive)
+             * @example 2023-12-31T23:59:59Z
+             */
+            toDateValue?: string;
+            /**
+             * @description List of text values to search for
+             * @example [
+             *       "Value1",
+             *       "Value2"
+             *     ]
+             */
+            textValueList?: string[];
+            /** @description List of key-value pairs to search for */
+            objectValueList?: components["schemas"]["KeyValuePair"][];
+        };
+        SortableColumn: {
+            /**
+             * @description Name of the field to sort on
+             * @example name
+             */
+            name: string;
+            /**
+             * @description Direction to sort, either ASC or DESC
+             * @example ASC
+             */
+            direction: string;
+        };
+        SortablePageInput: {
+            /**
+             * Format: int32
+             * @description Page number to return
+             * @example 0
+             */
+            pageNumber: number;
+            /**
+             * Format: int32
+             * @description Number of items per page to return
+             * @example 25
+             */
+            pageSize: number;
+            /** @description List of properties to sort on, with direction */
+            sortOrder?: components["schemas"]["SortableColumn"][];
+            /** @description List of search criteria to filter results */
+            searchInputs?: components["schemas"]["SearchInput"][];
+        };
+        PageResourceOrganizationResponse: {
+            /**
+             * Format: int64
+             * @description Total number of elements available
+             * @example 125
+             */
+            totalElements: number;
+            /**
+             * Format: int32
+             * @description Total number of pages available
+             * @example 5
+             */
+            totalPages: number;
+            /**
+             * Format: int32
+             * @description Number of items per page
+             * @example 25
+             */
+            pageSize: number;
+            /**
+             * Format: int32
+             * @description Current page number (0-based)
+             * @example 0
+             */
+            pageNumber: number;
+            /** @description List of items on the current page */
+            content?: components["schemas"]["OrganizationResponse"][];
         };
         UserSearchResult: {
             /** Format: int64 */
@@ -1609,31 +1778,6 @@ export interface components {
             newUsersGrowthPercentage?: number;
             /** Format: double */
             newOrganizationsGrowthPercentage?: number;
-        };
-        OrganizationListResponse: {
-            /** Format: int64 */
-            id?: number;
-            name?: string;
-            slug?: string;
-            /** @enum {string} */
-            status?: "TRIAL" | "ACTIVE" | "SUSPENDED";
-            /** Format: int32 */
-            memberCount?: number;
-            /** Format: date-time */
-            createdAt?: string;
-        };
-        PageResponseOrganizationListResponse: {
-            content?: components["schemas"]["OrganizationListResponse"][];
-            /** Format: int32 */
-            pageNumber?: number;
-            /** Format: int32 */
-            pageSize?: number;
-            /** Format: int64 */
-            totalElements?: number;
-            /** Format: int32 */
-            totalPages?: number;
-            first?: boolean;
-            last?: boolean;
         };
         Links: {
             [key: string]: components["schemas"]["Link"];
@@ -5093,27 +5237,26 @@ export interface operations {
             };
         };
     };
-    listOrganizations: {
+    provisionOrganization: {
         parameters: {
-            query?: {
-                page?: number;
-                size?: number;
-                search?: string;
-                status?: "TRIAL" | "ACTIVE" | "SUSPENDED";
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProvisionOrganizationRequest"];
+            };
+        };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Created */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PageResponseOrganizationListResponse"];
+                    "application/json": components["schemas"]["OrganizationResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -5181,7 +5324,7 @@ export interface operations {
             };
         };
     };
-    provisionOrganization: {
+    searchOrganizations: {
         parameters: {
             query?: never;
             header?: never;
@@ -5190,17 +5333,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ProvisionOrganizationRequest"];
+                "application/json": components["schemas"]["SortablePageInput"];
             };
         };
         responses: {
-            /** @description Created */
-            201: {
+            /** @description OK */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrganizationResponse"];
+                    "application/json": components["schemas"]["PageResourceOrganizationResponse"];
                 };
             };
             /** @description Unauthorized */

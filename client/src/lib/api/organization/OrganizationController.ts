@@ -3,9 +3,9 @@ import {SERVER_BASE_URL} from "$lib/config/constants.ts";
 import type {
     OrganizationResponse,
     OrganizationStatus,
-    PageResponseOrganizationResponse,
-    SortablePageInput,
-    SearchInput
+    PageResourceOrganizationResponse,
+    SearchInput,
+    SortablePageInput
 } from "$lib/api/models.ts";
 
 /**
@@ -37,7 +37,7 @@ export interface SearchOrganizationsParams {
  * Search organizations with pagination and filtering (Admin only)
  * Uses Jframe SortablePageInput pattern with POST request
  */
-export async function searchOrganizations(params: SearchOrganizationsParams = {}): Promise<PageResponseOrganizationResponse> {
+export async function searchOrganizations(params: SearchOrganizationsParams = {}): Promise<PageResourceOrganizationResponse> {
     const searchInputs: SearchInput[] = [];
 
     if (params.search) {
@@ -74,6 +74,5 @@ export async function searchOrganizations(params: SearchOrganizationsParams = {}
         throw errorData;
     }
 
-    const data: PageResponseOrganizationResponse = await response.json();
-    return data;
+    return await response.json();
 }

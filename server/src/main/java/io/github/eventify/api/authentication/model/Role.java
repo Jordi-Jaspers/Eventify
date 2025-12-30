@@ -1,6 +1,7 @@
 package io.github.eventify.api.authentication.model;
 
 import io.github.eventify.api.authentication.model.response.RoleResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
  */
 @Getter
 @AllArgsConstructor
+@Schema(description = "Role")
 public enum Role {
 
     USER(

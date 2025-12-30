@@ -1,7 +1,5 @@
 import type {components} from "$lib/types/api";
 
-export type OAuthProvider = 'google' | 'github';
-
 export type LoginRequest = components['schemas']['LoginRequest'];
 export type RegisterRequest = components['schemas']['RegisterUserRequest'];
 export type AuthenticationResponse = components['schemas']['AuthenticationResponse'];
@@ -21,37 +19,22 @@ export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
 
 export type UserSearchResult = components['schemas']['UserSearchResult'];
 
-// Organization listing types
+export type SearchInput = components['schemas']['SearchInput'];
+export type SortableColumn = components['schemas']['SortableColumn'];
+export type SortablePageInput = components['schemas']['SortablePageInput'];
+
+// ================ Enums type ===================
+export type OAuthProvider = 'google' | 'github';
 export type OrganizationStatus = 'TRIAL' | 'ACTIVE' | 'SUSPENDED';
+export type SortDirection = 'ASC' | 'DESC';
 
-// PageResponse wrapper for paginated results
-export interface PageResponseOrganizationResponse {
-	content?: OrganizationResponse[];
-	pageNumber?: number;
-	pageSize?: number;
-	totalElements?: number;
-	totalPages?: number;
-	first?: boolean;
-	last?: boolean;
-}
-
-// Jframe SortablePageInput types (for search endpoints)
-export interface SearchInput {
-	fieldName: string;
-	textValue?: string;
-	fromDateValue?: string;
-	toDateValue?: string;
-	textValueList?: string[];
-}
-
-export interface SortableColumn {
-	column: string;
-	direction: 'ASC' | 'DESC';
-}
-
-export interface SortablePageInput {
-	pageNumber: number;
+// ================ Generic PageResource type ===================
+export interface PageResource<T> {
+	totalElements: number;
+	totalPages: number;
 	pageSize: number;
-	sortOrder?: SortableColumn[];
-	searchInputs?: SearchInput[];
+	pageNumber: number;
+	content?: T[];
 }
+
+export type PageResourceOrganizationResponse = PageResource<OrganizationResponse>;
