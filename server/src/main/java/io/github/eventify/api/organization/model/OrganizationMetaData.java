@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * Contains search field mapping to column name and search types for {@link Organization}.
  */
 @Component
-public class OrganisationMetaData extends AbstractSortSearchMetaData {
+public class OrganizationMetaData extends AbstractSortSearchMetaData {
 
     private static final String NAME = "name";
 
@@ -20,10 +20,10 @@ public class OrganisationMetaData extends AbstractSortSearchMetaData {
     /**
      * Constructor to build organization metadata / dictionary.
      */
-    public OrganisationMetaData() {
+    public OrganizationMetaData() {
         super();
-        addField(NAME, NAME, SearchType.TEXT, true, false);
-        addField(STATUS, STATUS, SearchType.ENUM, OrganizationStatus.class, true, false);
-        addField(MEMBER_COUNT, MEMBER_COUNT, SearchType.NUMBER, true, false);
+        addField(NAME, NAME, SearchType.FUZZY_TEXT, true);
+        addField(STATUS, STATUS, SearchType.MULTI_ENUM, OrganizationStatus.class, true);
+        addField(MEMBER_COUNT, MEMBER_COUNT, SearchType.NUMERIC, true);
     }
 }

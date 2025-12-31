@@ -1,8 +1,8 @@
 package io.github.eventify.api.organization.service;
 
-import io.github.eventify.api.organization.model.OrganisationMetaData;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
+import io.github.eventify.api.organization.model.OrganizationMetaData;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
@@ -39,7 +39,7 @@ public class OrganizationService {
 
     private final UserRepository userRepository;
 
-    private final OrganisationMetaData organizationMetaData;
+    private final OrganizationMetaData organizationMetaData;
 
     private final OrganizationRepository organizationRepository;
 

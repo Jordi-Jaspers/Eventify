@@ -2,7 +2,7 @@ package io.github.eventify.api.admin.controller;
 
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.api.user.model.response.UserSearchResult;
+import io.github.eventify.api.user.model.response.UserResponse;
 import io.github.eventify.support.IntegrationTest;
 import tools.jackson.core.type.TypeReference;
 
@@ -25,7 +25,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DisplayName("Integration Test - Admin User Controller")
+@DisplayName("Integration Test - Admin User Controller - Search Users")
 public class AdminUserControllerTest extends IntegrationTest {
 
     @Test
@@ -51,7 +51,7 @@ public class AdminUserControllerTest extends IntegrationTest {
 
         // And: Response should contain matching user
         final String content = response.andReturn().getResponse().getContentAsString();
-        final List<UserSearchResult> results = fromJson(content, new TypeReference<>() {});
+        final List<UserResponse> results = fromJson(content, new TypeReference<>() {});
 
         assertThat(results, is(notNullValue()));
         assertThat(results.size(), is(greaterThan(0)));
@@ -79,7 +79,7 @@ public class AdminUserControllerTest extends IntegrationTest {
 
         // And: Response should contain matching user
         final String content = response.andReturn().getResponse().getContentAsString();
-        final List<UserSearchResult> results = fromJson(content, new TypeReference<>() {});
+        final List<UserResponse> results = fromJson(content, new TypeReference<>() {});
 
         assertThat(results, is(notNullValue()));
         assertThat(results.size(), is(greaterThan(0)));
@@ -108,7 +108,7 @@ public class AdminUserControllerTest extends IntegrationTest {
 
         // And: Response should contain matching user
         final String content = response.andReturn().getResponse().getContentAsString();
-        final List<UserSearchResult> results = fromJson(content, new TypeReference<>() {});
+        final List<UserResponse> results = fromJson(content, new TypeReference<>() {});
 
         assertThat(results, is(notNullValue()));
         assertThat(results.size(), is(greaterThan(0)));
@@ -148,10 +148,10 @@ public class AdminUserControllerTest extends IntegrationTest {
 
         // And: Both searches should return same results
         final String uppercaseContent = uppercaseResponse.andReturn().getResponse().getContentAsString();
-        final List<UserSearchResult> uppercaseResults = fromJson(uppercaseContent, new TypeReference<>() {});
+        final List<UserResponse> uppercaseResults = fromJson(uppercaseContent, new TypeReference<>() {});
 
         final String lowercaseContent = lowercaseResponse.andReturn().getResponse().getContentAsString();
-        final List<UserSearchResult> lowercaseResults = fromJson(lowercaseContent, new TypeReference<>() {});
+        final List<UserResponse> lowercaseResults = fromJson(lowercaseContent, new TypeReference<>() {});
 
         assertThat(uppercaseResults.size(), is(equalTo(lowercaseResults.size())));
     }
@@ -178,7 +178,7 @@ public class AdminUserControllerTest extends IntegrationTest {
 
         // And: Disabled user should not be in results
         final String content = response.andReturn().getResponse().getContentAsString();
-        final List<UserSearchResult> results = fromJson(content, new TypeReference<>() {});
+        final List<UserResponse> results = fromJson(content, new TypeReference<>() {});
 
         final boolean disabledUserInResults = results.stream()
             .anyMatch(result -> result.getEmail().equals(disabledUser.getEmail()));
@@ -211,7 +211,7 @@ public class AdminUserControllerTest extends IntegrationTest {
 
         // And: Should return maximum 10 results
         final String content = response.andReturn().getResponse().getContentAsString();
-        final List<UserSearchResult> results = fromJson(content, new TypeReference<>() {});
+        final List<UserResponse> results = fromJson(content, new TypeReference<>() {});
 
         assertThat(results.size(), is(lessThanOrEqualTo(10)));
     }
@@ -305,7 +305,7 @@ public class AdminUserControllerTest extends IntegrationTest {
 
         // And: Response should contain empty list
         final String content = response.andReturn().getResponse().getContentAsString();
-        final List<UserSearchResult> results = fromJson(content, new TypeReference<>() {});
+        final List<UserResponse> results = fromJson(content, new TypeReference<>() {});
 
         assertThat(results, is(notNullValue()));
         assertThat(results, hasSize(0));
@@ -335,7 +335,7 @@ public class AdminUserControllerTest extends IntegrationTest {
 
         // And: Results should be sorted by email
         final String content = response.andReturn().getResponse().getContentAsString();
-        final List<UserSearchResult> results = fromJson(content, new TypeReference<>() {});
+        final List<UserResponse> results = fromJson(content, new TypeReference<>() {});
 
         assertThat(results, is(notNullValue()));
 

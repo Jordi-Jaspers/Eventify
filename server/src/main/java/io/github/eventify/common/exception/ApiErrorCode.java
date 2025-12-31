@@ -109,6 +109,42 @@ public enum ApiErrorCode implements ApiError {
     NON_EXISTING_USER_ERROR(
         "ERR-0024",
         "In order to perform this action, the user must exist within the system."
+    ),
+    ORGANIZATION_NOT_FOUND_ERROR(
+        "ERR-0025",
+        "The requested organization does not exist."
+    ),
+    MEMBERSHIP_NOT_FOUND_ERROR(
+        "ERR-0026",
+        "The requested organization membership does not exist."
+    ),
+    USER_ALREADY_MEMBER_ERROR(
+        "ERR-0027",
+        "User is already a member of this organization."
+    ),
+    CANNOT_ADD_DISABLED_USER_ERROR(
+        "ERR-0028",
+        "Cannot add disabled user to organization."
+    ),
+    CANNOT_SET_OWNER_ROLE_ERROR(
+        "ERR-0029",
+        "Cannot set role to OWNER. Use transfer ownership instead."
+    ),
+    CANNOT_CHANGE_OWNER_ROLE_ERROR(
+        "ERR-0030",
+        "Cannot change the role of the organization owner."
+    ),
+    CANNOT_REMOVE_OWNER_ERROR(
+        "ERR-0031",
+        "Cannot remove the organization owner."
+    ),
+    CANNOT_TRANSFER_TO_SELF_ERROR(
+        "ERR-0032",
+        "Cannot transfer ownership to yourself."
+    ),
+    NOT_ORGANIZATION_OWNER_ERROR(
+        "ERR-0033",
+        "Only the current owner can transfer ownership."
     );
 
     /* The error code for this reason. */

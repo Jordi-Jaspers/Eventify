@@ -31,8 +31,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DisplayName("Integration Test - User Management Controller")
-public class UserManagementControllerTest extends IntegrationTest {
+@DisplayName("Integration Test - Admin User Controller - Management")
+public class AdminUserManagementControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("Should return all users when requested")

@@ -1,4 +1,4 @@
-CREATE FUNCTION update_membership_count()
+CREATE OR REPLACE FUNCTION update_membership_count()
     RETURNS TRIGGER AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN

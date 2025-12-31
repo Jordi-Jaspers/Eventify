@@ -1,52 +1,94 @@
 package io.github.eventify.api.admin.controller;
 
-import io.github.eventify.api.admin.model.validator.UserSearchValidator;
-import io.github.eventify.api.admin.service.AdminUserService;
-import io.github.eventify.api.user.model.response.UserSearchResult;
+import io.github.eventify.api.user.model.User;
+import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
+import io.github.eventify.api.user.model.mapper.UserMapper;
+import io.github.eventify.api.user.model.request.UpdateRoleRequest;
+import io.github.eventify.api.user.model.response.UserDetailsResponse;
+import io.github.eventify.api.user.model.response.UserResponse;
+import io.github.eventify.api.user.service.UserService;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import static io.github.eventify.api.Paths.ADMIN_USERS_SEARCH_PATH;
+import static io.github.eventify.api.Paths.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
- * Controller for admin user management operations.
+ * The controller for the user endpoints.
  */
 @RestController
 @RequiredArgsConstructor
 @Tag(
-    name = "Admin User Management",
-    description = "Endpoints for admin user search and management"
+    name = "User Management (Admin)",
+    description = "Administrative endpoints for managing users, roles, and account status"
 )
 public class AdminUserController {
 
-    private final AdminUserService adminUserService;
+    private final UserService userService;
 
-    private final UserSearchValidator userSearchValidator;
+    private final UserDetailsMapper userDetailsMapper;
+
+    private final UserMapper userMapper;
 
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
     @Operation(summary = "Search for users by email or name")
-    @GetMapping(
+    @PostMapping(
         path = ADMIN_USERS_SEARCH_PATH,
-        produces = APPLICATION_JSON_VALUE
+        produces = APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<List<UserSearchResult>> searchUsers(
-        @RequestParam final String query
-    ) {
-        userSearchValidator.validateAndThrow(query);
-        final List<UserSearchResult> results = adminUserService.searchUsers(query);
-        return ResponseEntity.status(OK).body(results);
+    public ResponseEntity<PageResource<UserResponse>> searchUsers(@RequestBody final SortablePageInput input) {
+        final Page<User> page = userService.searchUsers(input);
+        return ResponseEntity.status(OK).body(userMapper.toPageResource(page));
+    }
+
+    @ResponseStatus(OK)
+    @Operation(summary = "Lock the specified user, so the user can't login anymore.")
+    @PostMapping(
+        path = LOCK_USER_PATH,
+        produces = APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasAnyAuthority('MANAGE_USERS')")
+    public ResponseEntity<UserDetailsResponse> lockUser(@PathVariable final Long id) {
+        final User user = userService.lockUser(id, true);
+        return ResponseEntity.status(OK).body(userDetailsMapper.toResourceObject(user));
+    }
+
+    @ResponseStatus(OK)
+    @Operation(summary = "Unlock the specified user, so the user can login again.")
+    @PostMapping(
+        path = UNLOCK_USER_PATH,
+        produces = APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasAnyAuthority('MANAGE_USERS')")
+    public ResponseEntity<UserDetailsResponse> unlockUser(@PathVariable final Long id) {
+        final User user = userService.lockUser(id, false);
+        return ResponseEntity.status(OK).body(userDetailsMapper.toResourceObject(user));
+    }
+
+    @ResponseStatus(OK)
+    @Operation(summary = "Update the authority of the specified user.")
+    @PostMapping(
+        path = USER_PATH,
+        produces = APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasAnyAuthority('MANAGE_USERS')")
+    public ResponseEntity<UserDetailsResponse> updateRole(@PathVariable final Long id,
+        @RequestBody final UpdateRoleRequest request) {
+        final User user = userService.updateAuthority(id, request.getRole());
+        return ResponseEntity.status(OK).body(userDetailsMapper.toResourceObject(user));
     }
 }

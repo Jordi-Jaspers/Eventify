@@ -2,10 +2,11 @@ package io.github.eventify.support.util;
 
 import io.github.eventify.Main;
 import io.github.eventify.api.authentication.service.AuthenticationService;
+import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.token.repository.TokenRepository;
 import io.github.eventify.api.token.service.TokenService;
-import io.github.eventify.api.user.model.mapper.UserMapper;
+import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.support.config.BeanConfiguration;
@@ -78,13 +79,16 @@ public class TestContextInitializer {
     protected AuthenticationService authenticationService;
 
     @Autowired
-    protected UserMapper userMapper;
+    protected UserDetailsMapper userDetailsMapper;
 
     @Autowired
     protected UserRepository userRepository;
 
     @Autowired
     protected OrganizationRepository organizationRepository;
+
+    @Autowired
+    protected OrganizationMembershipRepository organizationMembershipRepository;
 
     @Autowired
     protected UserService userService;

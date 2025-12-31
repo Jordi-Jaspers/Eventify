@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import jakarta.persistence.*;
 
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
@@ -70,6 +71,14 @@ public class Organization implements PageableItem {
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
+
+    @OneToMany(
+        mappedBy = "organization",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
+    private List<OrganizationMembership> organizations;
 
     @Transient
     private User owner;

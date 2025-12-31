@@ -1,5 +1,6 @@
 package io.github.eventify.api.user.model.response;
 
+import io.github.jframe.datasource.search.model.resource.PageableItemResource;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +13,7 @@ import lombok.experimental.Accessors;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class UserSearchResult {
+public class UserResponse implements PageableItemResource {
 
     private Long id;
 

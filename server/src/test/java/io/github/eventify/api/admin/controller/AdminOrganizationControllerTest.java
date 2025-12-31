@@ -1,4 +1,4 @@
-package io.github.eventify.api.organization.controller;
+package io.github.eventify.api.admin.controller;
 
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.organization.model.Organization;

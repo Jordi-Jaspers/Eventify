@@ -2,6 +2,7 @@ package io.github.eventify.api.user.model.response;
 
 import io.github.eventify.api.authentication.model.Permission;
 import io.github.eventify.api.authentication.model.Role;
+import io.github.jframe.datasource.search.model.resource.PageableItemResource;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +15,7 @@ import java.util.Set;
  */
 @Data
 @NoArgsConstructor
-public class UserDetailsResponse {
+public class UserDetailsResponse implements PageableItemResource {
 
     private Long id;
 

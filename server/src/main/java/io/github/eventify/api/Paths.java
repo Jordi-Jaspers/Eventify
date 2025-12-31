@@ -105,13 +105,31 @@ public final class Paths {
 
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
-    public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PART + "/organizations";
+    private static final String ORGANIZATIONS = "/organizations";
+
+    public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PART + ORGANIZATIONS;
 
     public static final String ADMIN_ORGANIZATIONS_SEARCH_PATH = ADMIN_ORGANIZATIONS_PATH + SEARCH_PART;
 
     public static final String ADMIN_STATS_PATH = ADMIN_PART + "/stats";
 
     public static final String ADMIN_USERS_SEARCH_PATH = ADMIN_PART + "/users" + SEARCH_PART;
+
+    /* ------------------------------- ORGANIZATION MEMBERSHIP ENDPOINTS ------------------------------- */
+
+    public static final String ORGANIZATIONS_PATH = BASE_PATH + ORGANIZATIONS;
+
+    public static final String ORGANIZATION_PATH = ORGANIZATIONS_PATH + "/{orgId}";
+
+    public static final String ORGANIZATION_MEMBERS_PATH = ORGANIZATION_PATH + "/members";
+
+    public static final String ORGANIZATION_MEMBER_PATH = ORGANIZATION_MEMBERS_PATH + "/{userId}";
+
+    public static final String ORGANIZATION_MEMBERS_SEARCH_PATH = ORGANIZATION_MEMBERS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_TRANSFER_OWNERSHIP_PATH = ORGANIZATION_PATH + "/transfer-ownership";
+
+    public static final String USER_ORGANIZATIONS_PATH = USERS_PATH + ORGANIZATIONS;
 
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 

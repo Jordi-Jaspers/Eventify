@@ -98,7 +98,7 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     protected User anUnvalidatedUser() {
         final RegisterUserRequest registerRequest = aRegisterRequest();
-        return authenticationService.register(userMapper.toUser(registerRequest), registerRequest.getPassword());
+        return authenticationService.register(userDetailsMapper.toUser(registerRequest), registerRequest.getPassword());
     }
 
     protected User aValidatedUser() {
@@ -251,5 +251,46 @@ public class IntegrationTest extends WebMvcConfigurator {
     private void deleteAllTestOrganizations() {
         final List<Organization> organizations = organizationRepository.findAllByNameContaining(INTEGRATION_PREFIX);
         organizationRepository.deleteAll(organizations);
+    }
+
+    /**
+     * Creates an organization with the specified owner.
+     *
+     * @param owner the owner of the organization
+     * @return the created organization
+     */
+    protected Organization createOrganization(final User owner) {
+        final String suffix = UUID.randomUUID().toString().substring(0, 5);
+        final Organization org = new Organization(
+            INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix,
+            "test-org-" + suffix
+        );
+        org.setCreatedBy(owner.getId());
+        final Organization savedOrg = organizationRepository.save(org);
+
+        // Create owner membership
+        final io.github.eventify.api.organization.model.OrganizationMembership ownerMembership =
+            new io.github.eventify.api.organization.model.OrganizationMembership(
+                savedOrg,
+                owner,
+                io.github.eventify.api.organization.model.OrganizationalRole.OWNER
+            );
+        organizationMembershipRepository.save(ownerMembership);
+
+        return savedOrg;
+    }
+
+    /**
+     * Adds a member to an organization with the specified role.
+     *
+     * @param organization the organization
+     * @param user         the user to add
+     * @param role         the organizational role
+     */
+    protected void addMemberToOrganization(final Organization organization, final User user,
+        final io.github.eventify.api.organization.model.OrganizationalRole role) {
+        final io.github.eventify.api.organization.model.OrganizationMembership membership =
+            new io.github.eventify.api.organization.model.OrganizationMembership(organization, user, role);
+        organizationMembershipRepository.save(membership);
     }
 }

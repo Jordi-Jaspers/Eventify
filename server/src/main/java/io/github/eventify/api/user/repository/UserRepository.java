@@ -13,6 +13,7 @@ import java.util.Set;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Repository
 @Transactional
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
     /**
      * Find all users by their ids.
@@ -120,23 +121,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
     );
 
     /**
-     * Search for enabled users by email, firstName, or lastName.
-     * Case-insensitive partial match.
+     * Search for enabled users by email, firstName, or lastName. Case-insensitive partial match.
      *
      * @param query    the search query
      * @param pageable pagination information
      * @return list of matching enabled users
      */
-    @Query("""
-        FROM User u
-        WHERE u.enabled = true
-        AND (
-            LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
-            OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
-            OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))
-        )
-        ORDER BY u.email ASC
-        """)
+    @Query(
+        """
+            FROM User u
+            WHERE u.enabled = true
+            AND (
+                LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))
+            )
+            ORDER BY u.email ASC
+            """
+    )
     List<User> searchUsers(@Param("query") String query, Pageable pageable);
 
 }

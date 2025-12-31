@@ -3,6 +3,7 @@ package io.github.eventify.api.user.model;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.common.security.oauth2.provider.OAuth2UserInfo;
+import io.github.jframe.datasource.search.model.PageableItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,7 @@ import static io.github.eventify.Main.SERIAL_VERSION_UID;
 @NoArgsConstructor
 @Table(name = "\"user\"")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class User implements UserDetails {
+public class User implements UserDetails, PageableItem {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;
