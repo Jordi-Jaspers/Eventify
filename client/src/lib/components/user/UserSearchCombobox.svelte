@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Search, X, LoaderCircle, User } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { searchUsers } from '$lib/api/admin/AdminUserController';
+	import { searchUsersByEmailAndName } from '$lib/api/admin/AdminUserController';
 	import type { UserSearchResult } from '$lib/api/models';
 
 	interface Props {
@@ -57,7 +57,7 @@
 		showDropdown = true;
 
 		try {
-			const results: UserSearchResult[] = await searchUsers(debouncedQuery);
+			const results: UserSearchResult[] = await searchUsersByEmailAndName(debouncedQuery);
 			searchResults = results;
 		} catch (error) {
 			console.error('Search error:', error);

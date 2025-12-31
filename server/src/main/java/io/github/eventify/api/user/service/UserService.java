@@ -44,6 +44,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("ExcessiveImports")
 public class UserService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;

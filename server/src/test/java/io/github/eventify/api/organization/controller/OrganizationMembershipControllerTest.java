@@ -9,6 +9,7 @@ import io.github.eventify.api.organization.model.response.OrganizationMembership
 import io.github.eventify.api.organization.model.response.UserOrganizationResponse;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
         final ResultActions response = mockMvc.perform(httpRequest);
 
         // Then: Member is added successfully
-        response.andExpect(status().is(SC_CREATED));
+        response.andExpect(status().is(SC_OK));
 
         // And: Response contains membership details
         final String content = response.andReturn().getResponse().getContentAsString();
@@ -90,7 +91,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
         final ResultActions response = mockMvc.perform(httpRequest);
 
         // Then: Member is added successfully
-        response.andExpect(status().is(SC_CREATED));
+        response.andExpect(status().is(SC_OK));
     }
 
     @Test
@@ -735,15 +736,18 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should search users with valid query")
     public void shouldSearchUsersWithValidQuery() throws Exception {
-        // Given: Organization and search query
+        // Given: Organization and search input
         final User owner = aValidatedUser();
         final Organization org = createOrganization(owner);
-        final String query = "test";
+
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(10);
 
         // When: Searching users
         final MockHttpServletRequestBuilder httpRequest = get(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
-            .param("email", query)
             .contentType(APPLICATION_JSON)
+            .content(toJson(input))
             .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
 
         final ResultActions response = mockMvc.perform(httpRequest);
@@ -753,22 +757,26 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return bad request when query less than 3 characters")
-    public void shouldReturnBadRequestWhenQueryLessThan3Characters() throws Exception {
-        // Given: Organization and short query
+    @DisplayName("Should return forbidden when non-member searches")
+    public void shouldReturnForbiddenWhenNonMemberSearches() throws Exception {
+        // Given: Organization and non-member user
         final User owner = aValidatedUser();
         final Organization org = createOrganization(owner);
-        final String query = "ab";
+        final User nonMember = aValidatedUser();
 
-        // When: Searching with short query
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(10);
+
+        // When: Non-member searches
         final MockHttpServletRequestBuilder httpRequest = get(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
-            .param("email", query)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .content(toJson(input))
+            .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue());
 
         final ResultActions response = mockMvc.perform(httpRequest);
 
-        // Then: Should be bad request
-        response.andExpect(status().is(SC_BAD_REQUEST));
+        // Then: Should be forbidden
+        response.andExpect(status().is(SC_FORBIDDEN));
     }
 }

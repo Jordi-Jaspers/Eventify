@@ -4,8 +4,11 @@ import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.request.UpdateRoleRequest;
 import io.github.eventify.api.user.model.response.UserDetailsResponse;
+import io.github.eventify.api.user.model.response.UserResponse;
 import io.github.eventify.common.exception.ApiErrorCode;
 import io.github.eventify.support.IntegrationTest;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
 import tools.jackson.core.type.TypeReference;
 
@@ -27,7 +30,6 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.anyOf;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,16 +40,22 @@ public class AdminUserManagementControllerTest extends IntegrationTest {
     @DisplayName("Should return all users when requested")
     public void shouldReturnAllUsersWhenRequested() throws Exception {
         // Given: An authenticated user with manager authority
-        final User user = aValidatedUserWithRole(Role.ADMIN);
+        final User adminUser = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Multiple users exist
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
 
-        // When: Requesting all users
-        final MockHttpServletRequestBuilder request = get(USERS_PATH)
+        // And: A search request with default pagination
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(100);
+
+        // When: Requesting all users via search endpoint
+        final MockHttpServletRequestBuilder request = post(ADMIN_USERS_SEARCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
 
         // And: Making the request
         final ResultActions response = mockMvc.perform(request);
@@ -57,8 +65,8 @@ public class AdminUserManagementControllerTest extends IntegrationTest {
 
         // And: Response should contain all users
         final String content = response.andReturn().getResponse().getContentAsString();
-        final List<UserDetailsResponse> usersList = fromJson(content, new TypeReference<>() {});
-        final List<UserDetailsResponse> users = usersList.stream()
+        final PageResource<UserResponse> pageResponse = fromJson(content, new TypeReference<>() {});
+        final List<UserResponse> users = pageResponse.getContent().stream()
             .filter(u -> u.getId().equals(user1.getId()) || u.getId().equals(user2.getId()))
             .toList();
 
@@ -75,9 +83,15 @@ public class AdminUserManagementControllerTest extends IntegrationTest {
         // Given: A validated user without manager authority
         final User user = aValidatedUser();
 
+        // And: A search request
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
         // When: Requesting all users without proper authorization
-        final MockHttpServletRequestBuilder request = get(USERS_PATH)
+        final MockHttpServletRequestBuilder request = post(ADMIN_USERS_SEARCH_PATH)
             .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
             .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
 
         // And: Making the request

@@ -8,6 +8,13 @@ import type {
     SortablePageInput
 } from "$lib/api/models.ts";
 
+export interface SearchOrganizationsParams {
+    page?: number;
+    size?: number;
+    search?: string;
+    status?: OrganizationStatus;
+}
+
 /**
  * Create a new organization (Admin only)
  */
@@ -24,13 +31,6 @@ export async function createOrganization(name: string, owner: string): Promise<O
     }
 
     return data;
-}
-
-export interface SearchOrganizationsParams {
-    page?: number;
-    size?: number;
-    search?: string;
-    status?: OrganizationStatus;
 }
 
 /**
@@ -50,7 +50,7 @@ export async function searchOrganizations(params: SearchOrganizationsParams = {}
     if (params.status) {
         searchInputs.push({
             fieldName: 'status',
-            textValue: params.status
+            textValueList: [params.status]
         });
     }
 

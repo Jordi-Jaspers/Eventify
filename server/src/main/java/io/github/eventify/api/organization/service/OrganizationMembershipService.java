@@ -78,10 +78,9 @@ public class OrganizationMembershipService {
     /**
      * Update a member's role in an organization.
      *
-     * @param orgId      the organization ID
-     * @param userId     the user ID
-     * @param role       the new role
-     * @param callerUser the user making the request
+     * @param orgId  the organization ID
+     * @param userId the user ID
+     * @param role   the new role
      * @return the updated membership entity
      */
     @Transactional
@@ -214,7 +213,7 @@ public class OrganizationMembershipService {
      *
      * @param input the sortable page input containing search parameters
      * @param orgId the organization ID
-     * @return list of users matching the query
+     * @return page of users matching the search criteria
      */
     @Transactional(readOnly = true)
     public Page<User> searchUsersForOrganization(final SortablePageInput input, final Long orgId) {

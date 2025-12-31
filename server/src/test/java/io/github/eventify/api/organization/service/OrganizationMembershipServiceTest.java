@@ -8,22 +8,29 @@ import io.github.eventify.api.organization.repository.OrganizationMembershipRepo
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.repository.UserRepository;
+import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.common.exception.DisabledUserException;
 import io.github.eventify.common.exception.OwnerRoleException;
 import io.github.eventify.common.exception.OwnershipTransferException;
 import io.github.eventify.common.exception.UserAlreadyMemberException;
+import io.github.eventify.common.security.SecurityUtil;
 import io.github.eventify.support.UnitTest;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.BadRequestException;
 import io.github.jframe.exception.core.DataNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -46,9 +53,13 @@ public class OrganizationMembershipServiceTest extends UnitTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private UserService userService;
+
     @InjectMocks
     private OrganizationMembershipService membershipService;
 
+    private MockedStatic<SecurityUtil> securityUtilMock;
     private User owner;
     private User member;
     private Organization organization;
@@ -66,6 +77,16 @@ public class OrganizationMembershipServiceTest extends UnitTest {
         organization.setId(100L);
         organization.setName("Test Org");
         organization.setSlug("test-org");
+
+        securityUtilMock = mockStatic(SecurityUtil.class);
+        securityUtilMock.when(SecurityUtil::getLoggedInUser).thenReturn(owner);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (securityUtilMock != null) {
+            securityUtilMock.close();
+        }
     }
 
     @Test
@@ -86,8 +107,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
         // When: Adding member to organization
         final OrganizationMembership result = membershipService.addMember(
             organization.getId(),
-            request,
-            owner
+            request
         );
 
         // Then: Membership should be created successfully
@@ -114,8 +134,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
         // When: Adding member to organization as admin
         final OrganizationMembership result = membershipService.addMember(
             organization.getId(),
-            request,
-            owner
+            request
         );
 
         // Then: Membership should be created with ADMIN role
@@ -142,8 +161,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             UserAlreadyMemberException.class,
             () -> membershipService.addMember(
                 organization.getId(),
-                request,
-                owner
+                request
             )
         );
 
@@ -165,8 +183,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             DataNotFoundException.class,
             () -> membershipService.addMember(
                 organization.getId(),
-                request,
-                owner
+                request
             )
         );
 
@@ -190,8 +207,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             DisabledUserException.class,
             () -> membershipService.addMember(
                 organization.getId(),
-                request,
-                owner
+                request
             )
         );
 
@@ -214,8 +230,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             DataNotFoundException.class,
             () -> membershipService.addMember(
                 organization.getId(),
-                request,
-                owner
+                request
             )
         );
 
@@ -243,8 +258,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
         final OrganizationMembership result = membershipService.updateMemberRole(
             organization.getId(),
             member.getId(),
-            OrganizationalRole.ADMIN,
-            owner
+            OrganizationalRole.ADMIN
         );
 
         // Then: Role should be updated to ADMIN
@@ -274,8 +288,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
         final OrganizationMembership result = membershipService.updateMemberRole(
             organization.getId(),
             member.getId(),
-            OrganizationalRole.MEMBER,
-            owner
+            OrganizationalRole.MEMBER
         );
 
         // Then: Role should be updated to MEMBER
@@ -295,8 +308,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             () -> membershipService.updateMemberRole(
                 organization.getId(),
                 member.getId(),
-                OrganizationalRole.OWNER,
-                owner
+                OrganizationalRole.OWNER
             )
         );
 
@@ -316,8 +328,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             () -> membershipService.updateMemberRole(
                 organization.getId(),
                 member.getId(),
-                OrganizationalRole.ADMIN,
-                owner
+                OrganizationalRole.ADMIN
             )
         );
 
@@ -338,8 +349,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             () -> membershipService.updateMemberRole(
                 organization.getId(),
                 owner.getId(),
-                OrganizationalRole.ADMIN,
-                owner
+                OrganizationalRole.ADMIN
             )
         );
 
@@ -595,80 +605,55 @@ public class OrganizationMembershipServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should search users by email with min 3 characters")
-    public void shouldSearchUsersByEmailWithMin3Characters() {
-        // Given: Search query with 3+ characters
-        final String query = "test";
-        final List<User> users = List.of(member);
+    @DisplayName("Should search users and delegate to user service")
+    public void shouldSearchUsersAndDelegateToUserService() {
+        // Given: Search input and users
+        final SortablePageInput input = new SortablePageInput();
+        final Page<User> userPage = new PageImpl<>(List.of(member));
 
-        when(userRepository.searchUsers(eq(query), any()))
-            .thenReturn(users);
-        when(membershipRepository.findAllByOrganizationIdWithUser(organization.getId()))
-            .thenReturn(List.of());
+        when(userService.searchUsers(any(SortablePageInput.class))).thenReturn(userPage);
 
         // When: Searching users
-        final List<User> results = membershipService.searchUsersForOrganization(organization.getId(), query);
+        final Page<User> results = membershipService.searchUsersForOrganization(input, organization.getId());
 
         // Then: Should return matching users
-        assertThat(results, hasSize(1));
-        assertThat(results.get(0).getId(), is(member.getId()));
-        assertThat(results.get(0).getEmail(), is(member.getEmail()));
+        assertThat(results.getContent(), hasSize(1));
+        assertThat(results.getContent().get(0).getId(), is(member.getId()));
+        assertThat(results.getContent().get(0).getEmail(), is(member.getEmail()));
+        verify(userService).searchUsers(any(SortablePageInput.class));
     }
 
     @Test
-    @DisplayName("Should exclude users already in organization")
-    public void shouldExcludeUsersAlreadyInOrganization() {
-        // Given: Search query with existing member
-        final String query = "test";
-        final OrganizationMembership existingMembership = new OrganizationMembership(organization, member, OrganizationalRole.MEMBER);
+    @DisplayName("Should set max page size to 10")
+    public void shouldSetMaxPageSizeTo10() {
+        // Given: Search input with larger page size
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageSize(50);
+        final Page<User> userPage = new PageImpl<>(List.of());
 
-        when(userRepository.searchUsers(eq(query), any()))
-            .thenReturn(List.of(member));
-        when(membershipRepository.findAllByOrganizationIdWithUser(organization.getId()))
-            .thenReturn(List.of(existingMembership));
+        when(userService.searchUsers(any(SortablePageInput.class))).thenReturn(userPage);
 
         // When: Searching users
-        final List<User> results = membershipService.searchUsersForOrganization(organization.getId(), query);
+        membershipService.searchUsersForOrganization(input, organization.getId());
 
-        // Then: Should exclude users already in organization
-        assertThat(results, is(empty()));
+        // Then: Should cap page size to 10
+        verify(userService).searchUsers(argThat(pageInput -> pageInput.getPageSize() == 10));
     }
 
     @Test
-    @DisplayName("Should return max 10 results")
-    public void shouldReturnMax10Results() {
-        // Given: Search query
-        final String query = "test";
+    @DisplayName("Should return empty page when no matches")
+    public void shouldReturnEmptyPageWhenNoMatches() {
+        // Given: Search input with no matching users
+        final SortablePageInput input = new SortablePageInput();
+        final Page<User> emptyPage = new PageImpl<>(List.of());
 
-        when(userRepository.searchUsers(eq(query), any()))
-            .thenReturn(List.of());
-        when(membershipRepository.findAllByOrganizationIdWithUser(organization.getId()))
-            .thenReturn(List.of());
+        when(userService.searchUsers(any(SortablePageInput.class))).thenReturn(emptyPage);
 
         // When: Searching users
-        membershipService.searchUsersForOrganization(organization.getId(), query);
+        final Page<User> results = membershipService.searchUsersForOrganization(input, organization.getId());
 
-        // Then: Should request max 10 results
-        verify(userRepository).searchUsers(eq(query), argThat(pageable -> pageable.getPageSize() == 10));
-    }
-
-    @Test
-    @DisplayName("Should be case-insensitive")
-    public void shouldBeCaseInsensitive() {
-        // Given: Search query with mixed case
-        final String query = "TeSt";
-        final List<User> users = List.of(member);
-
-        when(userRepository.searchUsers(eq(query), any()))
-            .thenReturn(users);
-        when(membershipRepository.findAllByOrganizationIdWithUser(organization.getId()))
-            .thenReturn(List.of());
-
-        // When: Searching users
-        final List<User> results = membershipService.searchUsersForOrganization(organization.getId(), query);
-
-        // Then: Should return matching users case-insensitively
-        assertThat(results, hasSize(1));
-        verify(userRepository).searchUsers(eq(query), any());
+        // Then: Should return empty page
+        assertThat(results.getContent(), is(empty()));
+        verify(userService).searchUsers(any(SortablePageInput.class));
     }
 }

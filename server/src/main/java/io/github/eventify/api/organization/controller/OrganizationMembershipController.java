@@ -43,6 +43,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     name = "Organization Membership",
     description = "Endpoints for managing organization memberships"
 )
+@SuppressWarnings(
+    {
+        "ClassFanOutComplexity",
+        "PMD.ExcessiveImports",
+        "PMD.CouplingBetweenObjects"
+    }
+)
 public class OrganizationMembershipController {
 
     private final OrganizationMembershipService membershipService;

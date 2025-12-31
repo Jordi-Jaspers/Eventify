@@ -3,8 +3,10 @@ import type {components} from "$lib/types/api";
 export type LoginRequest = components['schemas']['LoginRequest'];
 export type RegisterRequest = components['schemas']['RegisterUserRequest'];
 export type AuthenticationResponse = components['schemas']['AuthenticationResponse'];
-export type UserDetailsResponse = components['schemas']['UserDetailsResponse'];
 export type RegisterResponse = components['schemas']['RegisterResponse'];
+
+export type UserResponse = components['schemas']['UserResponse'];
+export type UserDetailsResponse = components['schemas']['UserDetailsResponse'];
 
 export type ErrorResponseResource = components['schemas']['ErrorResponseResource'];
 export type ApiErrorResponseResource = components['schemas']['ApiErrorResponseResource'];
@@ -12,12 +14,11 @@ export type ValidationErrorResponseResource = components['schemas']['ValidationE
 export type ValidationErrorResource = components['schemas']['ValidationErrorResource'];
 
 export type ProvisionOrganizationRequest = components['schemas']['ProvisionOrganizationRequest'];
+
 export type OrganizationResponse = components['schemas']['OrganizationResponse'];
 
 export type AdminStatsResponse = components['schemas']['AdminStatsResponse'];
 export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
-
-export type UserSearchResult = components['schemas']['UserSearchResult'];
 
 export type SearchInput = components['schemas']['SearchInput'];
 export type SortableColumn = components['schemas']['SortableColumn'];
@@ -38,3 +39,4 @@ export interface PageResource<T> {
 }
 
 export type PageResourceOrganizationResponse = PageResource<OrganizationResponse>;
+export type PageResourceUserResponse = PageResource<UserResponse>;

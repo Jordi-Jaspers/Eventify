@@ -1,6 +1,7 @@
 package io.github.eventify.api.user.model;
 
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.common.security.oauth2.provider.OAuth2UserInfo;
 import io.github.jframe.datasource.search.model.PageableItem;
@@ -85,6 +86,14 @@ public class User implements UserDetails, PageableItem {
         orphanRemoval = true
     )
     private List<Token> tokens = new ArrayList<>();
+
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        fetch = FetchType.LAZY,
+        orphanRemoval = true
+    )
+    private List<OrganizationMembership> organizations = new ArrayList<>();
 
     @Transient
     private Token accessToken;

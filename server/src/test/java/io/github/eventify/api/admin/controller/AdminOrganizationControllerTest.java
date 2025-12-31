@@ -12,6 +12,7 @@ import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
 import tools.jackson.core.type.TypeReference;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -631,7 +632,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         final SearchInput statusFilter = new SearchInput();
         statusFilter.setFieldName("status");
-        statusFilter.setTextValue("TRIAL");
+        statusFilter.setTextValueList(List.of("TRIAL"));
         searchInput.getSearchInputs().add(statusFilter);
 
         // When: Filtering by TRIAL status
@@ -682,7 +683,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         final SearchInput statusFilter = new SearchInput();
         statusFilter.setFieldName("status");
-        statusFilter.setTextValue("TRIAL");
+        statusFilter.setTextValueList(List.of("TRIAL"));
         searchInput.getSearchInputs().add(statusFilter);
 
         // When: Searching for "tech" AND filtering by TRIAL
