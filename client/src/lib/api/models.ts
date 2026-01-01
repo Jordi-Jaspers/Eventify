@@ -7,6 +7,7 @@ export type RegisterResponse = components['schemas']['RegisterResponse'];
 
 export type UserResponse = components['schemas']['UserResponse'];
 export type UserDetailsResponse = components['schemas']['UserDetailsResponse'];
+export type UserOrganizationResponse = components['schemas']['UserOrganizationResponse'];
 
 export type ErrorResponseResource = components['schemas']['ErrorResponseResource'];
 export type ApiErrorResponseResource = components['schemas']['ApiErrorResponseResource'];

@@ -48,7 +48,7 @@
 	<!-- Navigation -->
 	<AppSidebarNav {currentPath} />
 
-	<!-- User footer -->
+	<!-- Combined Org + User footer -->
 	<AppSidebarUser />
 
 	<!-- Rail for hover-expand -->

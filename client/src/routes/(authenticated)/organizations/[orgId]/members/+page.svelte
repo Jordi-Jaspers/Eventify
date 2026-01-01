@@ -54,10 +54,13 @@
 	let currentUserRole: OrganizationalRole | null = $derived(
 		members.find((m: OrganizationMembershipResponse) => m.userId === $currentUser?.id)?.role ?? null
 	);
+	// Global admins have full access (equivalent to owner)
+	let isGlobalAdmin: boolean = $derived($currentUser?.role === 'ADMIN');
 	let canManageMembers: boolean = $derived(
-		currentUserRole === 'OWNER' || currentUserRole === 'ADMIN'
+		isGlobalAdmin || currentUserRole === 'OWNER' || currentUserRole === 'ADMIN'
 	);
-	let isOwner: boolean = $derived(currentUserRole === 'OWNER');
+	// Global admins can do everything an owner can
+	let isOwner: boolean = $derived(isGlobalAdmin || currentUserRole === 'OWNER');
 
 	// Add Member Sheet
 	let showAddMemberSheet: boolean = $state(false);
@@ -572,8 +575,8 @@
 
 <!-- Add Member Sheet -->
 <Sheet.Root bind:open={showAddMemberSheet}>
-	<Sheet.Content class="bg-card/95 backdrop-blur-xl border-border/50">
-		<Sheet.Header>
+	<Sheet.Content class="bg-card/95 backdrop-blur-xl border-border/50 flex flex-col px-6">
+		<Sheet.Header class="pt-6">
 			<Sheet.Title class="flex items-center gap-2">
 				<UserPlus class="h-5 w-5 text-primary" />
 				Add Member
@@ -583,7 +586,42 @@
 			</Sheet.Description>
 		</Sheet.Header>
 
-		<div class="space-y-4 mt-6">
+		<div class="flex-1 space-y-4 py-6">
+			<!-- Role Selector -->
+			<div class="space-y-2">
+				<Label>Role</Label>
+				<div class="flex gap-2">
+					<Button
+							variant={addMemberRole === 'ADMIN' ? 'default' : 'outline'}
+							size="sm"
+							onclick={() => {
+							addMemberRole = 'ADMIN';
+						}}
+							disabled={addingMember}
+							class={addMemberRole === 'ADMIN'
+							? 'bg-gradient-to-r from-primary to-accent'
+							: 'bg-background/50 border-border/50'}
+					>
+						<Shield class="mr-2 h-4 w-4" />
+						ADMIN
+					</Button>
+					<Button
+							variant={addMemberRole === 'MEMBER' ? 'default' : 'outline'}
+							size="sm"
+							onclick={() => {
+							addMemberRole = 'MEMBER';
+						}}
+							disabled={addingMember}
+							class={addMemberRole === 'MEMBER'
+							? 'bg-gradient-to-r from-primary to-accent'
+							: 'bg-background/50 border-border/50'}
+					>
+						<UserIcon class="mr-2 h-4 w-4" />
+						MEMBER
+					</Button>
+				</div>
+			</div>
+
 			<!-- User Search -->
 			<div class="space-y-2">
 				<Label for="user-search">User</Label>
@@ -654,7 +692,7 @@
 					<!-- Search Dropdown -->
 					{#if showSearchDropdown}
 						<div
-							class="rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden mt-2"
+							class="rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden"
 						>
 							{#if searchQuery.length > 0 && searchQuery.length < 3}
 								<div class="p-4 text-center">
@@ -698,58 +736,23 @@
 					{/if}
 				{/if}
 			</div>
-
-			<!-- Role Selector -->
-			<div class="space-y-2">
-				<Label>Role</Label>
-				<div class="flex gap-2">
-					<Button
-						variant={addMemberRole === 'ADMIN' ? 'default' : 'outline'}
-						size="sm"
-						onclick={() => {
-							addMemberRole = 'ADMIN';
-						}}
-						disabled={addingMember}
-						class={addMemberRole === 'ADMIN'
-							? 'bg-gradient-to-r from-primary to-accent'
-							: 'bg-background/50 border-border/50'}
-					>
-						<Shield class="mr-2 h-4 w-4" />
-						ADMIN
-					</Button>
-					<Button
-						variant={addMemberRole === 'MEMBER' ? 'default' : 'outline'}
-						size="sm"
-						onclick={() => {
-							addMemberRole = 'MEMBER';
-						}}
-						disabled={addingMember}
-						class={addMemberRole === 'MEMBER'
-							? 'bg-gradient-to-r from-primary to-accent'
-							: 'bg-background/50 border-border/50'}
-					>
-						<UserIcon class="mr-2 h-4 w-4" />
-						MEMBER
-					</Button>
-				</div>
-			</div>
 		</div>
 
-		<Sheet.Footer class="mt-6">
+		<Sheet.Footer class="flex-row gap-2 sm:flex-row pb-6">
 			<Button
 				variant="outline"
 				onclick={() => {
 					showAddMemberSheet = false;
 				}}
 				disabled={addingMember}
-				class="bg-background/50 border-border/50"
+				class="flex-1 bg-background/50 border-border/50"
 			>
 				Cancel
 			</Button>
 			<Button
 				onclick={handleAddMember}
 				disabled={addingMember || !selectedUser}
-				class="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+				class="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
 			>
 				{#if addingMember}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
