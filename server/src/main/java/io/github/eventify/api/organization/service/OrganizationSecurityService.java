@@ -39,24 +39,6 @@ public class OrganizationSecurityService {
     }
 
     /**
-     * Check if user is owner or admin of the organization.
-     *
-     * @param orgId  the organization ID
-     * @param userId the user ID
-     * @return true if user is owner or admin, false otherwise
-     * @throws DataNotFoundException if organization does not exist
-     */
-    public boolean isOwnerOrAdmin(final Long orgId, final Long userId) {
-        if (!organizationRepository.existsById(orgId)) {
-            throw new DataNotFoundException(ORGANIZATION_NOT_FOUND_ERROR);
-        }
-        return membershipRepository.findByOrganizationIdAndUserId(orgId, userId)
-            .map(OrganizationMembership::getRole)
-            .map(role -> role == OrganizationalRole.OWNER || role == OrganizationalRole.ADMIN)
-            .orElse(false);
-    }
-
-    /**
      * Check if user is the owner of the organization.
      *
      * @param orgId  the organization ID
@@ -75,6 +57,24 @@ public class OrganizationSecurityService {
     }
 
     /**
+     * Check if user is owner or admin of the organization.
+     *
+     * @param orgId  the organization ID
+     * @param userId the user ID
+     * @return true if user is owner or admin, false otherwise
+     * @throws DataNotFoundException if organization does not exist
+     */
+    public boolean isAdmin(final Long orgId, final Long userId) {
+        if (!organizationRepository.existsById(orgId)) {
+            throw new DataNotFoundException(ORGANIZATION_NOT_FOUND_ERROR);
+        }
+        return membershipRepository.findByOrganizationIdAndUserId(orgId, userId)
+            .map(OrganizationMembership::getRole)
+            .map(role -> role == OrganizationalRole.ADMIN)
+            .orElse(false);
+    }
+
+    /**
      * Check if user can manage members (owner or admin).
      *
      * @param orgId  the organization ID
@@ -82,7 +82,7 @@ public class OrganizationSecurityService {
      * @return true if user can manage members, false otherwise
      * @throws DataNotFoundException if organization does not exist
      */
-    public boolean canManageMembers(final Long orgId, final Long userId) {
-        return isOwnerOrAdmin(orgId, userId);
+    public boolean isOwnerOrAdmin(final Long orgId, final Long userId) {
+        return isOwner(orgId, userId) || isAdmin(orgId, userId);
     }
 }

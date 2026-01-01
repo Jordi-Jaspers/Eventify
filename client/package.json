@@ -39,7 +39,7 @@
     "@types/d3-scale": "^4.0.9",
     "@vitest/ui": "^4.0.8",
     "autoprefixer": "^10.4.22",
-    "bits-ui": "^2.11.0",
+    "bits-ui": "^2.14.4",
     "layerchart": "^2.0.0-next.43",
     "openapi-typescript": "^7.10.1",
     "postcss": "^8.5.6",

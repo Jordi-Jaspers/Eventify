@@ -71,7 +71,7 @@ public class OrganizationMembershipController {
         path = ORGANIZATION_MEMBERS_SEARCH_PATH,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("@orgSecurity.canManageMembers(#orgId, principal.user.id)")
+    @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
     public ResponseEntity<PageResource<UserResponse>> searchUsers(@PathVariable final Long orgId,
         @RequestBody final SortablePageInput input,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
@@ -93,7 +93,7 @@ public class OrganizationMembershipController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("@orgSecurity.canManageMembers(#orgId, principal.user.id)")
+    @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
     public ResponseEntity<OrganizationMembershipResponse> addMember(
         @PathVariable final Long orgId,
         @RequestBody final AddMemberRequest request,
@@ -116,7 +116,7 @@ public class OrganizationMembershipController {
         path = ORGANIZATION_MEMBERS_PATH,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("@orgSecurity.isMember(#orgId, principal.user.id)")
+    @PreAuthorize("@orgSecurity.isMember(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
     public ResponseEntity<List<OrganizationMembershipResponse>> getOrganizationMembers(@PathVariable final Long orgId,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
         final List<OrganizationMembership> memberships = membershipService.getOrganizationMembers(orgId);
@@ -135,19 +135,18 @@ public class OrganizationMembershipController {
      * @param principal the authenticated user
      * @return the updated membership response
      */
-    @PreAuthorize("@orgSecurity.canManageMembers(#orgId, principal.user.id)")
     @Operation(summary = "Update a member's role")
     @PatchMapping(
         path = ORGANIZATION_MEMBER_PATH,
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
+    @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
     public ResponseEntity<OrganizationMembershipResponse> updateMemberRole(
         @PathVariable final Long orgId,
         @PathVariable final Long userId,
         @RequestBody final UpdateMemberRoleRequest request,
-        @AuthenticationPrincipal final UserTokenPrincipal principal
-    ) {
+        @AuthenticationPrincipal final UserTokenPrincipal principal) {
         updateRoleValidator.validateAndThrow(request);
         final OrganizationMembership membership = membershipService.updateMemberRole(orgId, userId, request.getRole());
         final OrganizationMembershipResponse response = membershipMapper.toMembershipResponse(membership);
@@ -161,12 +160,10 @@ public class OrganizationMembershipController {
      * @param userId    the user ID
      * @param principal the authenticated user
      */
-    @PreAuthorize("@orgSecurity.canManageMembers(#orgId, principal.user.id)")
     @Operation(summary = "Remove a member from an organization")
     @DeleteMapping(path = ORGANIZATION_MEMBER_PATH)
-    public ResponseEntity<Void> removeMember(
-        @PathVariable final Long orgId,
-        @PathVariable final Long userId,
+    @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
+    public ResponseEntity<Void> removeMember(@PathVariable final Long orgId, @PathVariable final Long userId,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
         membershipService.removeMember(orgId, userId, principal.getUser());
         return ResponseEntity.status(NO_CONTENT).build();
@@ -179,16 +176,14 @@ public class OrganizationMembershipController {
      * @param request   the transfer ownership request
      * @param principal the authenticated user
      */
-    @PreAuthorize("@orgSecurity.isOwner(#orgId, principal.user.id)")
     @Operation(summary = "Transfer ownership of an organization")
     @PostMapping(
         path = ORGANIZATION_TRANSFER_OWNERSHIP_PATH,
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Void> transferOwnership(
-        @PathVariable final Long orgId,
-        @RequestBody final TransferOwnershipRequest request,
+    @PreAuthorize("@orgSecurity.isOwner(#orgId, principal.user.id)")
+    public ResponseEntity<Void> transferOwnership(@PathVariable final Long orgId, @RequestBody final TransferOwnershipRequest request,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
         transferOwnershipValidator.validateAndThrow(request);
         membershipService.transferOwnership(orgId, principal.getUser().getId(), request.getNewOwnerUserId());
@@ -198,7 +193,6 @@ public class OrganizationMembershipController {
     /**
      * Get all organizations the authenticated user is a member of.
      *
-     * @param principal the authenticated user
      * @return list of user organizations
      */
     @Operation(summary = "Get all organizations for the authenticated user")
@@ -206,9 +200,8 @@ public class OrganizationMembershipController {
         path = USER_ORGANIZATIONS_PATH,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<List<UserOrganizationResponse>> getUserOrganizations(
-        @AuthenticationPrincipal final UserTokenPrincipal principal) {
-        final List<OrganizationMembership> memberships = membershipService.getUserOrganizations(principal.getUser().getId());
+    public ResponseEntity<List<UserOrganizationResponse>> getUserOrganizations() {
+        final List<OrganizationMembership> memberships = membershipService.getUserOrganizations();
         final List<UserOrganizationResponse> responses = memberships.stream()
             .map(membershipMapper::toUserOrganizationResponse)
             .toList();

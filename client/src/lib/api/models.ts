@@ -28,6 +28,7 @@ export type SortablePageInput = components['schemas']['SortablePageInput'];
 export type OAuthProvider = 'google' | 'github';
 export type OrganizationStatus = 'TRIAL' | 'ACTIVE' | 'SUSPENDED';
 export type SortDirection = 'ASC' | 'DESC';
+export type OrganizationalRole = 'OWNER' | 'ADMIN' | 'MEMBER';
 
 // ================ Generic PageResource type ===================
 export interface PageResource<T> {
@@ -40,3 +41,40 @@ export interface PageResource<T> {
 
 export type PageResourceOrganizationResponse = PageResource<OrganizationResponse>;
 export type PageResourceUserResponse = PageResource<UserResponse>;
+
+// ================ Organization Membership types ===================
+export interface OrganizationMembershipResponse {
+	id: number;
+	organizationId: number;
+	userId: number;
+	userEmail: string;
+	userFirstName: string;
+	userLastName: string;
+	role: OrganizationalRole;
+	joinedAt: string;
+}
+
+export interface AddMemberRequest {
+	email: string;
+	role: OrganizationalRole;
+}
+
+export interface UpdateMemberRoleRequest {
+	role: OrganizationalRole;
+}
+
+export interface TransferOwnershipRequest {
+	newOwnerUserId: number;
+}
+
+// UserSearchResult with id field (for search results)
+// Note: Backend doesn't return id in search, so we use email as unique identifier
+export interface UserSearchResult {
+	id?: number; // Optional since backend doesn't always return it
+	email?: string;
+	firstName?: string;
+	lastName?: string;
+	enabled?: boolean;
+	validated?: boolean;
+	role?: 'USER' | 'ADMIN';
+}

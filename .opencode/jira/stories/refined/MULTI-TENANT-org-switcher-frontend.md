@@ -61,6 +61,12 @@ Users who belong to multiple organizations (e.g., consultants, contractors, or e
     *   Then the invalid context is cleared
     *   And I'm either prompted to select an org or default to the first one
 
+*   [ ] **Scenario 9**: Navigate to organization members from sidebar
+    *   Given I am viewing the sidebar with my organizations
+    *   When I expand an organization
+    *   Then I see sub-items: Dashboard, Members, Settings (future)
+    *   And clicking "Members" navigates to `/organizations/[orgId]/members`
+
 ## 4. Technical Requirements
 *   **API Changes**:
     *   `GET /v1/user/organizations` — Get current user's organization memberships
@@ -80,16 +86,17 @@ Users who belong to multiple organizations (e.g., consultants, contractors, or e
     *   Refresh on login or manual trigger
 
 ## 5. Design & UI/UX
-*   **Location**: Sidebar, below the logo/app name area
-*   **Component**: Dropdown or popover showing:
+*   **Location**: Sidebar, below the logo/app name area (similar to Vercel/Linear)
+*   **Component**: Collapsible section showing:
     *   Current org with checkmark
     *   List of other orgs (show role badge: Owner, Admin, Member)
     *   Organization avatar/icon (first letter or uploaded logo - future)
+    *   Sub-navigation for each org: Dashboard, Members, Settings (future)
 *   **Visual States**:
     *   Loading: Skeleton while fetching orgs
     *   Empty: "No organizations" text
-    *   Single org: Static display (no dropdown)
-    *   Multiple orgs: Clickable dropdown
+    *   Single org: Static display with sub-nav (no dropdown)
+    *   Multiple orgs: Clickable dropdown with sub-nav for selected org
 *   **Transitions**: Smooth animation when switching
 *   **Mobile**: Full-width dropdown in mobile sidebar
 
@@ -107,10 +114,13 @@ Users who belong to multiple organizations (e.g., consultants, contractors, or e
     *   `client.ts` — Add interceptor for `X-Organization-Id` header
     *   `hooks.server.ts` — Read cookie on SSR for initial org context
 *   **Route Classification**:
-    *   Org-specific routes: `/dashboard`, `/settings`, `/members` (future)
+    *   Org-specific routes: `/dashboard`, `/settings`, `/organizations/[orgId]/members`
     *   User-private routes: `/profile`, `/account`
     *   Admin routes: `/admin/*`
     *   Logic needed to determine current route type for redirect behavior
 *   **Patterns to Follow**:
     *   Similar to Vercel's team switcher or Linear's workspace switcher
-    *   Use shadcn-svelte dropdown-menu component
+    *   Use shadcn-svelte dropdown-menu or collapsible component
+*   **Existing Route**:
+    *   `/organizations/[orgId]/members` page already exists (built 2026-01-01)
+    *   Add navigation link in org switcher sub-menu

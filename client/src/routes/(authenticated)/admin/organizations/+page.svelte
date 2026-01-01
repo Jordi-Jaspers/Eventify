@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
@@ -15,9 +16,17 @@
 		ChevronLeft,
 		ChevronRight,
 		CircleAlert,
-		Filter
+		Filter,
+		Users
 	} from '@lucide/svelte';
 	import type { OrganizationResponse, OrganizationStatus } from '$lib/api/models.ts';
+	import { CLIENT_ROUTES } from '$lib/config/routes';
+
+	function navigateToMembers(orgId: number | undefined): void {
+		if (orgId) {
+			goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(orgId).path);
+		}
+	}
 
 	let organizations: OrganizationResponse[] = $state([]);
 	let loading: boolean = $state(true);
@@ -131,10 +140,6 @@
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8">
-	<div class="mb-4">
-		<SidebarTrigger />
-	</div>
-
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
 		<div class="mb-8">
@@ -281,15 +286,16 @@
 							class="hidden md:grid md:grid-cols-12 gap-4 px-4 py-2 text-sm font-medium text-muted-foreground border-b border-border/50"
 						>
 							<div class="col-span-3">Name</div>
-							<div class="col-span-3">Slug</div>
+							<div class="col-span-2">Slug</div>
 							<div class="col-span-2">Status</div>
 							<div class="col-span-2">Members</div>
 							<div class="col-span-2">Created</div>
+							<div class="col-span-1">Actions</div>
 						</div>
 
-						<!-- Table Rows -->
-						{#each organizations as org (org.id)}
-							<div
+					<!-- Table Rows -->
+					{#each organizations as org (org.slug)}
+						<div
 								class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
 							>
 								<!-- Name -->
@@ -304,7 +310,7 @@
 								</div>
 
 								<!-- Slug (desktop only) -->
-								<div class="hidden md:block md:col-span-3">
+								<div class="hidden md:block md:col-span-2">
 									<div class="text-sm text-muted-foreground">{org.slug}</div>
 								</div>
 
@@ -329,6 +335,19 @@
 										<span class="md:hidden">Created: </span>
 										{formatDate(org.createdAt)}
 									</div>
+								</div>
+
+								<!-- Actions -->
+								<div class="col-span-1 md:col-span-1">
+									<Button
+										variant="ghost"
+										size="sm"
+										onclick={() => navigateToMembers(org.id)}
+										class="gap-1 text-primary hover:text-primary hover:bg-primary/10"
+									>
+										<Users class="h-4 w-4" />
+										<span class="md:hidden">Manage Members</span>
+									</Button>
 								</div>
 							</div>
 						{/each}

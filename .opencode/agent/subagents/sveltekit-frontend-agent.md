@@ -186,18 +186,6 @@ If you create new reusable components (like AppLogo, OAuthButtons, AppNavbar), o
     </AppBackground>
 </Sidebar.Provider>
 
-<!-- Individual pages add SidebarTrigger: -->
-<script lang="ts">
-    import { SidebarTrigger } from '$lib/components/ui/sidebar';
-</script>
-
-<main class="container mx-auto px-4 py-8">
-    <div class="mb-4">
-        <SidebarTrigger />
-    </div>
-    <!-- Page content -->
-</main>
-
 <!-- AppSidebar provides:
 - Collapsible sidebar (icon mode by default)
 - Role-based navigation (MAIN + ADMINISTRATION sections)

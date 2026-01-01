@@ -200,12 +200,11 @@ public class OrganizationMembershipService {
     /**
      * Get all organizations a user is a member of.
      *
-     * @param userId the user ID
      * @return list of membership entities with organization data
      */
     @Transactional(readOnly = true)
-    public List<OrganizationMembership> getUserOrganizations(final Long userId) {
-        return membershipRepository.findAllByUserIdWithOrganization(userId);
+    public List<OrganizationMembership> getUserOrganizations() {
+        return membershipRepository.findAllByUserIdWithOrganization(getLoggedInUser().getId());
     }
 
     /**
