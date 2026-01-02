@@ -1,14 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Clean Build" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
-      <option name="env">
-        <map>
-          <entry key="GOBIN" value="$USER_HOME$/.local/share/mise/installs/go/1.25.5/bin" />
-          <entry key="GOROOT" value="$USER_HOME$/.local/share/mise/installs/go/1.25.5" />
-          <entry key="JAVA_HOME" value="$USER_HOME$/.local/share/mise/installs/java/temurin-25.0.0+36.0.LTS" />
-          <entry key="PATH" value="$USER_HOME$/.local/share/mise/installs/java/temurin-25.0.0+36.0.LTS/bin:$USER_HOME$/.local/share/mise/installs/bun/1.3.0/bin:$USER_HOME$/.local/share/mise/installs/node/22.20.0/bin:$USER_HOME$/.local/share/mise/installs/go/1.25.5/bin:$USER_HOME$/.local/share/mise/installs/usage/2.3.2:$USER_HOME$/.nvm/versions/node/v22.17.0/bin:$USER_HOME$/.nvm/versions/node/v22.17.1/bin:$USER_HOME$/.nvm/versions/node/v22.11.0/bin:$USER_HOME$/.bun/bin:$USER_HOME$/.nvm/versions/node/v22.11.0/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:$USER_HOME$/.bun/bin:$PROJECT_DIR$/../../../homebrew/bin:$PROJECT_DIR$/../../../homebrew/sbin:$USER_HOME$/.nvm/versions/node/v22.11.0/bin:/Applications/Ghostty.app/Contents/MacOS:$USER_HOME$/bin:/usr/local/bin/bash:$USER_HOME$/Library/Application Support/JetBrains/Toolbox/scripts:$PROJECT_DIR$/../vf-access/sshconfgen/bin/mac:$PROJECT_DIR$/../../../homebrew/bin:$PROJECT_DIR$/../../../homebrew/sbin:$USER_HOME$/bin:/usr/local/bin/bash:$USER_HOME$/Library/Application Support/JetBrains/Toolbox/scripts:$PROJECT_DIR$/../vf-access/sshconfgen/bin/mac" />
-        </map>
-      </option>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
       <option name="externalSystemIdString" value="GRADLE" />
