@@ -189,8 +189,8 @@ export function createMembershipService(orgId: number) {
 	}
 
 	async function transfer(): Promise<boolean> {
-		if (!transferTarget || transferConfirmation !== 'transfer') {
-			toast.error('Please type "transfer" to confirm');
+		if (!transferTarget || transferConfirmation !== 'Transfer Ownership') {
+			toast.error('Please type "Transfer Ownership" to confirm');
 			return false;
 		}
 
