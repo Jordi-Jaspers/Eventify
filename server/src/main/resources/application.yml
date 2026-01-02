@@ -31,10 +31,10 @@ email:
 # ======= SECURITY CONFIGURATION =======
 security:
   bootstrap:
-    email: ${GLOBAL_ADMIN_EMAIL:jordijaspers@gmail.com}
+    email: ${GLOBAL_ADMIN_EMAIL:johndoe@example.com}
     password: ${GLOBAL_ADMIN_PASSWORD:admin123!}
-    first-name: ${GLOBAL_ADMIN_FIRST_NAME:Global}
-    last-name: ${GLOBAL_ADMIN_LAST_NAME:Admin}
+    first-name: ${GLOBAL_ADMIN_FIRST_NAME:John}
+    last-name: ${GLOBAL_ADMIN_LAST_NAME:Doe}
   access-token:
     lifetime: ${JWT_LIFETIME_SECONDS:15}
     time-unit: ${JWT_LIFETIME_TIME_UNIT:MINUTES}

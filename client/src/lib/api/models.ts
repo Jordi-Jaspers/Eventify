@@ -80,3 +80,9 @@ export interface UserSearchResult {
 	validated?: boolean;
 	role?: 'USER' | 'ADMIN';
 }
+
+// ================ Dev Credentials type ===================
+export interface DevCredentialsResponse {
+	email: string;
+	password: string;
+}

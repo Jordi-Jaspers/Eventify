@@ -34,32 +34,28 @@ import org.springframework.stereotype.Component;
 public class GlobalAdminBootstrap {
 
     private final UserRepository userRepository;
+
     private final PasswordEncoder passwordEncoder;
+
     private final SecurityProperties securityProperties;
 
     /**
      * Handles the application started event to bootstrap global admin user.
-     *
-     * @param event The application started event
      */
     @EventListener(ApplicationStartedEvent.class)
-    public void onApplicationStarted(final ApplicationStartedEvent event) {
-        // Get bootstrap properties
+    public void onApplicationStarted() {
         final String adminEmail = securityProperties.getBootstrap().getEmail();
         final String adminPassword = securityProperties.getBootstrap().getPassword();
 
-        // Check if required properties are present and not empty
-        if (!isValid(adminEmail) || !isValid(adminPassword)) {
-            log.debug("Global admin bootstrap skipped: required bootstrap properties not set");
-        } else if (userRepository.existsByRole(Role.ADMIN)) {
-            // Check if an admin user already exists
+        if (userRepository.existsByRole(Role.ADMIN)) {
             log.debug("Global admin bootstrap skipped: admin user already exists");
-        } else {
-            // Get name properties (with defaults from BootstrapProperties)
+            return;
+        }
+
+        if (isValid(adminEmail) || isValid(adminPassword)) {
             final String firstName = securityProperties.getBootstrap().getFirstName();
             final String lastName = securityProperties.getBootstrap().getLastName();
 
-            // Create and save the global admin user
             final User globalAdmin = new User();
             globalAdmin.setEmail(adminEmail);
             globalAdmin.setFirstName(firstName);
@@ -71,6 +67,8 @@ public class GlobalAdminBootstrap {
 
             userRepository.save(globalAdmin);
             log.info("Global admin user created successfully with email: {}", adminEmail);
+        } else {
+            log.debug("Global admin bootstrap skipped: required bootstrap properties not set");
         }
     }
 

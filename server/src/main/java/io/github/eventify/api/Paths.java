@@ -137,6 +137,10 @@ public final class Paths {
 
     public static final String OPTIONS_PATH = BASE_PATH + "/options";
 
+    /* ------------------------------- DEV ENDPOINTS ------------------------------- */
+
+    public static final String DEV_CREDENTIALS_PATH = PUBLIC_PATH + "/dev/credentials";
+
     /* ------------------------------- END ------------------------------- */
 
     private Paths() {

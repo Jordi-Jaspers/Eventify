@@ -153,10 +153,10 @@ Implemented global admin capability using `Role.ADMIN` enum value, JWT claim ren
 ```yaml
 security:
   bootstrap:
-    email: ${GLOBAL_ADMIN_EMAIL:jordijaspers@gmail.com}
+    email: ${GLOBAL_ADMIN_EMAIL:johndoe@example.com}
     password: ${GLOBAL_ADMIN_PASSWORD:admin123!}
-    first-name: ${GLOBAL_ADMIN_FIRST_NAME:Global}
-    last-name: ${GLOBAL_ADMIN_LAST_NAME:Admin}
+    first-name: ${GLOBAL_ADMIN_FIRST_NAME:John}
+    last-name: ${GLOBAL_ADMIN_LAST_NAME:Doe}
 ```
 
 **4. Test Updates**
