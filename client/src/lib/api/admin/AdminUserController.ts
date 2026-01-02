@@ -7,7 +7,7 @@ import type {PageResourceUserResponse, SearchInput, SortablePageInput, UserRespo
  * @returns Paginated list of matching users
  */
 export async function searchUsers(input: SortablePageInput): Promise<PageResourceUserResponse> {
-    const {data, error} = await client.POST('/admin/users/search', {
+    const {data, error} = await client.POST('/v1/admin/user/search', {
         body: input
     });
 

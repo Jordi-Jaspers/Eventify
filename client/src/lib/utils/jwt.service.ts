@@ -1,4 +1,3 @@
-import { ACCESS_TOKEN_COOKIE } from '$lib/config/constants';
 import type { UserDetailsResponse } from '$lib/api/models';
 
 /**

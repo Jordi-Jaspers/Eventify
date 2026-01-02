@@ -1,5 +1,4 @@
 import {client} from "$lib/api/client.ts";
-import {SERVER_BASE_URL} from "$lib/config/constants.ts";
 import type {
     OrganizationResponse,
     OrganizationStatus,
@@ -19,7 +18,7 @@ export interface SearchOrganizationsParams {
  * Create a new organization (Admin only)
  */
 export async function createOrganization(name: string, owner: string): Promise<OrganizationResponse> {
-    const {data, error} = await client.POST('/admin/organizations', {
+    const {data, error} = await client.POST('/v1/admin/organization', {
         body: {
             name,
             owner
@@ -60,19 +59,13 @@ export async function searchOrganizations(params: SearchOrganizationsParams = {}
         searchInputs
     };
 
-    const response: Response = await fetch(`${SERVER_BASE_URL}/admin/organizations/search`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
+    const {data, error} = await client.POST('/v1/admin/organization/search', {
+        body: requestBody
     });
 
-    if (!response.ok) {
-        const errorData: unknown = await response.json().catch(() => ({}));
-        throw errorData;
+    if (error) {
+        throw error;
     }
 
-    return await response.json();
+    return data;
 }

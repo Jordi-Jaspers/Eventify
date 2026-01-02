@@ -36,7 +36,7 @@ export async function updateUserDetails(firstName: string, lastName: string): Pr
  * Get all organizations for the authenticated user
  */
 export async function getUserOrganizations(): Promise<UserOrganizationResponse[]> {
-    const {data, error} = await client.GET('/v1/user/organizations');
+    const {data, error} = await client.GET('/v1/user/organization');
 
     if (error) {
         throw error;

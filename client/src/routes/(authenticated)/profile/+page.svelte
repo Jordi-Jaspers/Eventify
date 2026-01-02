@@ -1,6 +1,5 @@
 <script lang="ts">
-    import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '$lib/components/ui/card';
-    import {Input} from '$lib/components/ui/input';
+    import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import Badge from '$lib/components/ui/badge/badge.svelte';
     import {
         Calendar,
@@ -9,121 +8,16 @@
         Clock,
         Key,
         Mail,
-        Pencil,
         Shield,
         User
     } from '@lucide/svelte';
-    import {updateUserDetails} from '$lib/api/user/UserController';
-    import type {UserDetailsResponse} from '$lib/api/models';
-    import {handleError} from '$lib/utils/error-handler';
-    import {toast} from 'svelte-sonner';
-    import {currentUser, authStore} from '$lib/stores/auth';
+    import { currentUser } from '$lib/stores/auth';
+    import { createProfileService } from '$lib/api/user/ProfileService.svelte';
+    import EditableField from '$lib/components/user/EditableField.svelte';
+
+    const profileService = createProfileService();
 
     let userData = $derived($currentUser);
-
-    // Edit state for each field
-    let editingFirstName: boolean = $state(false);
-    let editingLastName: boolean = $state(false);
-
-    let savingFirstName: boolean = $state(false);
-    let savingLastName: boolean = $state(false);
-
-    let tempFirstName: string = $state('');
-    let tempLastName: string = $state('');
-
-    function startEditFirstName(): void {
-        tempFirstName = userData?.firstName || '';
-        editingFirstName = true;
-    }
-
-    function startEditLastName(): void {
-        tempLastName = userData?.lastName || '';
-        editingLastName = true;
-    }
-
-    async function saveFirstName(): Promise<void> {
-        if (!userData || savingFirstName) return;
-
-        const originalValue: string = userData.firstName || '';
-        if (tempFirstName.trim() === originalValue) {
-            editingFirstName = false;
-            return;
-        }
-
-        savingFirstName = true;
-
-        try {
-            const updatedUser: UserDetailsResponse = await updateUserDetails(
-                tempFirstName.trim(),
-                userData.lastName || ''
-            );
-            authStore.setUser(updatedUser);
-            editingFirstName = false;
-            toast.success('First name updated');
-        } catch (err: unknown) {
-            const {message}: { message: string } = handleError(err, 'Failed to update first name');
-            toast.error(message);
-            tempFirstName = originalValue;
-        } finally {
-            savingFirstName = false;
-        }
-    }
-
-    async function saveLastName(): Promise<void> {
-        if (!userData || savingLastName) return;
-
-        const originalValue: string = userData.lastName || '';
-        if (tempLastName.trim() === originalValue) {
-            editingLastName = false;
-            return;
-        }
-
-        savingLastName = true;
-
-        try {
-            const updatedUser: UserDetailsResponse = await updateUserDetails(
-                userData.firstName || '',
-                tempLastName.trim()
-            );
-            authStore.setUser(updatedUser);
-            editingLastName = false;
-            toast.success('Last name updated');
-        } catch (err: unknown) {
-            const {message}: { message: string } = handleError(err, 'Failed to update last name');
-            toast.error(message);
-            tempLastName = originalValue;
-        } finally {
-            savingLastName = false;
-        }
-    }
-
-    function cancelEditFirstName(): void {
-        editingFirstName = false;
-        tempFirstName = '';
-    }
-
-    function cancelEditLastName(): void {
-        editingLastName = false;
-        tempLastName = '';
-    }
-
-    function handleFirstNameKeydown(event: KeyboardEvent): void {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            saveFirstName();
-        } else if (event.key === 'Escape') {
-            cancelEditFirstName();
-        }
-    }
-
-    function handleLastNameKeydown(event: KeyboardEvent): void {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            saveLastName();
-        } else if (event.key === 'Escape') {
-            cancelEditLastName();
-        }
-    }
 
     function formatDate(dateString: string | undefined): string {
         if (!dateString) return 'N/A';
@@ -177,60 +71,30 @@
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- First Name -->
-                            <div class="p-4 rounded-lg bg-background/50 border border-border/50 group relative">
-                                <p class="text-xs text-muted-foreground mb-1">First Name</p>
-                                {#if editingFirstName}
-                                    <div class="flex items-center gap-2">
-                                        <Input
-                                            bind:value={tempFirstName}
-                                            onkeydown={handleFirstNameKeydown}
-                                            onblur={saveFirstName}
-                                            disabled={savingFirstName}
-                                            class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                            autofocus
-                                        />
-                                        {#if savingFirstName}
-                                            <div class="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
-                                        {/if}
-                                    </div>
-                                {:else}
-                                    <button
-                                        onclick={startEditFirstName}
-                                        class="w-full text-left font-medium text-foreground hover:text-primary transition-colors flex items-center justify-between"
-                                    >
-                                        <span>{userData.firstName || 'N/A'}</span>
-                                        <Pencil class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground" />
-                                    </button>
-                                {/if}
-                            </div>
+                            <EditableField
+                                label="First Name"
+                                value={userData.firstName || ''}
+                                editing={profileService.firstNameState.editing}
+                                saving={profileService.firstNameState.saving}
+                                tempValue={profileService.firstNameState.tempValue}
+                                onStartEdit={() => profileService.startEdit('firstName')}
+                                onSave={() => profileService.saveField('firstName')}
+                                onTempValueChange={(v) => profileService.updateTempValue('firstName', v)}
+                                onKeydown={(e) => profileService.handleKeydown('firstName', e)}
+                            />
 
                             <!-- Last Name -->
-                            <div class="p-4 rounded-lg bg-background/50 border border-border/50 group relative">
-                                <p class="text-xs text-muted-foreground mb-1">Last Name</p>
-                                {#if editingLastName}
-                                    <div class="flex items-center gap-2">
-                                        <Input
-                                            bind:value={tempLastName}
-                                            onkeydown={handleLastNameKeydown}
-                                            onblur={saveLastName}
-                                            disabled={savingLastName}
-                                            class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                            autofocus
-                                        />
-                                        {#if savingLastName}
-                                            <div class="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
-                                        {/if}
-                                    </div>
-                                {:else}
-                                    <button
-                                        onclick={startEditLastName}
-                                        class="w-full text-left font-medium text-foreground hover:text-primary transition-colors flex items-center justify-between"
-                                    >
-                                        <span>{userData.lastName || 'N/A'}</span>
-                                        <Pencil class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground" />
-                                    </button>
-                                {/if}
-                            </div>
+                            <EditableField
+                                label="Last Name"
+                                value={userData.lastName || ''}
+                                editing={profileService.lastNameState.editing}
+                                saving={profileService.lastNameState.saving}
+                                tempValue={profileService.lastNameState.tempValue}
+                                onStartEdit={() => profileService.startEdit('lastName')}
+                                onSave={() => profileService.saveField('lastName')}
+                                onTempValueChange={(v) => profileService.updateTempValue('lastName', v)}
+                                onKeydown={(e) => profileService.handleKeydown('lastName', e)}
+                            />
 
                             <!-- Email (Read-Only) -->
                             <div class="p-4 rounded-lg bg-background/50 border border-border/50 md:col-span-2 opacity-70 cursor-not-allowed">

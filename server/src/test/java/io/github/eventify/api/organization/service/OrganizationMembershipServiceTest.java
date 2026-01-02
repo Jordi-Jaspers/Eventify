@@ -569,39 +569,39 @@ public class OrganizationMembershipServiceTest extends UnitTest {
     @Test
     @DisplayName("Should return all organizations for user")
     public void shouldReturnAllOrganizationsForUser() {
-        // Given: User with multiple organization memberships
-        final OrganizationMembership membership1 = new OrganizationMembership(organization, member, OrganizationalRole.MEMBER);
+        // Given: Logged in user (owner) with multiple organization memberships
+        final OrganizationMembership membership1 = new OrganizationMembership(organization, owner, OrganizationalRole.OWNER);
         final Organization org2 = new Organization();
         org2.setId(200L);
         org2.setName("Org 2");
         org2.setSlug("org-2");
-        final OrganizationMembership membership2 = new OrganizationMembership(org2, member, OrganizationalRole.ADMIN);
+        final OrganizationMembership membership2 = new OrganizationMembership(org2, owner, OrganizationalRole.ADMIN);
 
-        when(membershipRepository.findAllByUserIdWithOrganization(member.getId()))
+        when(membershipRepository.findAllByUserIdWithOrganization(owner.getId()))
             .thenReturn(List.of(membership1, membership2));
 
         // When: Getting user's organizations
-        final List<OrganizationMembership> organizations = membershipService.getUserOrganizations(member.getId());
+        final List<OrganizationMembership> organizations = membershipService.getUserOrganizations();
 
         // Then: Should return all organizations with roles
         assertThat(organizations, hasSize(2));
         assertThat(organizations, containsInAnyOrder(membership1, membership2));
-        verify(membershipRepository).findAllByUserIdWithOrganization(member.getId());
+        verify(membershipRepository).findAllByUserIdWithOrganization(owner.getId());
     }
 
     @Test
     @DisplayName("Should return empty list for user with no memberships")
     public void shouldReturnEmptyListForUserWithNoMemberships() {
-        // Given: User with no organization memberships
-        when(membershipRepository.findAllByUserIdWithOrganization(member.getId()))
+        // Given: Logged in user (owner) with no organization memberships
+        when(membershipRepository.findAllByUserIdWithOrganization(owner.getId()))
             .thenReturn(List.of());
 
         // When: Getting user's organizations
-        final List<OrganizationMembership> organizations = membershipService.getUserOrganizations(member.getId());
+        final List<OrganizationMembership> organizations = membershipService.getUserOrganizations();
 
         // Then: Should return empty list
         assertThat(organizations, is(empty()));
-        verify(membershipRepository).findAllByUserIdWithOrganization(member.getId());
+        verify(membershipRepository).findAllByUserIdWithOrganization(owner.getId());
     }
 
     @Test

@@ -5,9 +5,7 @@ import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.common.security.oauth2.provider.OAuth2UserInfo;
 import io.github.jframe.datasource.search.model.PageableItem;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serial;
 import java.time.OffsetDateTime;
@@ -16,8 +14,10 @@ import java.util.Collection;
 import java.util.List;
 import jakarta.persistence.*;
 
+import org.apache.logging.log4j.util.Strings;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +28,8 @@ import static io.github.eventify.Main.SERIAL_VERSION_UID;
 /**
  * The user entity.
  */
-@Data
+@Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @Table(name = "\"user\"")
@@ -120,14 +121,16 @@ public class User implements UserDetails, PageableItem {
         return password;
     }
 
+    @NonNull
     @Override
     public String getUsername() {
-        return email == null ? null : email.toLowerCase();
+        return email == null ? Strings.EMPTY : email.toLowerCase();
     }
 
     /**
      * {@inheritDoc}
      */
+    @NonNull
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return role.getPermissions()

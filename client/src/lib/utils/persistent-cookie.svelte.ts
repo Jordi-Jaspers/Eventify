@@ -1,19 +1,22 @@
 import { browser } from '$app/environment';
 
-export class PersistentCookie<T> {
+export class PersistentCookie<T extends string | boolean> {
 	key: string = '';
 	#value: T = $state<T>() as T;
 	#maxAge: number;
 
 	constructor(key: string, initialValue: T, maxAge: number = 60 * 60 * 24 * 7) {
 		this.key = key;
-		this.#value = initialValue;
 		this.#maxAge = maxAge;
 
-		// On client-side init, trust the passed initialValue (from SSR) first if provided,
-		// but if we are purely client-side or want to sync, we can read from document.cookie.
-		// However, for hydration matching, we usually want to start with what the server sent.
-		// If initialValue is provided, we assume it matches the cookie.
+		// On client-side, read from document.cookie if available
+		if (browser) {
+			const cookieValue: T | null = this.readFromCookie(initialValue);
+			this.#value = cookieValue !== null ? cookieValue : initialValue;
+		} else {
+			// On server-side, use the provided initial value
+			this.#value = initialValue;
+		}
 	}
 
 	get value(): T {
@@ -27,7 +30,33 @@ export class PersistentCookie<T> {
 		}
 	}
 
+	/**
+	 * Read cookie value from document.cookie and parse it based on initial value type
+	 */
+	private readFromCookie(initialValue: T): T | null {
+		if (!browser) return null;
+
+		const cookies: string[] = document.cookie.split(';');
+		for (const cookie of cookies) {
+			const [name, ...valueParts] = cookie.trim().split('=');
+			if (name === this.key) {
+				const rawValue: string = valueParts.join('=');
+				return this.deserialize(rawValue, initialValue);
+			}
+		}
+		return null;
+	}
+
 	private serialize(value: T): string {
 		return String(value);
+	}
+
+	private deserialize(rawValue: string, initialValue: T): T {
+		// Determine type based on initialValue type
+		if (typeof initialValue === 'boolean') {
+			return (rawValue === 'true') as T;
+		}
+		// String type
+		return rawValue as T;
 	}
 }

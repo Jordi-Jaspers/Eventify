@@ -13,17 +13,17 @@ public final class Paths {
 
     public static final String AUTH_PATH = BASE_PATH + "/auth";
 
+    public static final String ADMIN_PATH = BASE_PATH + "/admin";
+
     public static final String OPENAPI_PATH = "/v3/api-docs";
+
+    /* ------------------------------- SEPARATE PATH PARTS ------------------------------- */
 
     public static final String WILDCARD_PART = "/**";
 
     public static final String WILDCARD = "*";
 
-    /* ------------------------------- SEPARATE PATH PARTS ------------------------------- */
-
     public static final String ID_PART = "/{id}";
-
-    public static final String ADMIN_PART = "/admin";
 
     public static final String SEARCH_PART = "/search";
 
@@ -34,6 +34,10 @@ public final class Paths {
     public static final String LOGIN_PART = "/login";
 
     public static final String ERROR_PART = "/error";
+
+    public static final String ORGANIZATIONS_PART = "/organization";
+
+    public static final String USER_PART = "/user";
 
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
@@ -87,7 +91,7 @@ public final class Paths {
 
     /* ------------------------------- USER ENDPOINTS ------------------------------- */
 
-    public static final String USERS_PATH = BASE_PATH + "/user";
+    public static final String USERS_PATH = BASE_PATH + USER_PART;
 
     public static final String USER_PATH = USERS_PATH + ID_PART;
 
@@ -105,19 +109,17 @@ public final class Paths {
 
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
-    private static final String ORGANIZATIONS = "/organizations";
-
-    public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PART + ORGANIZATIONS;
+    public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;
 
     public static final String ADMIN_ORGANIZATIONS_SEARCH_PATH = ADMIN_ORGANIZATIONS_PATH + SEARCH_PART;
 
-    public static final String ADMIN_STATS_PATH = ADMIN_PART + "/stats";
+    public static final String ADMIN_USERS_SEARCH_PATH = ADMIN_PATH + USER_PART + SEARCH_PART;
 
-    public static final String ADMIN_USERS_SEARCH_PATH = ADMIN_PART + "/users" + SEARCH_PART;
+    public static final String ADMIN_STATS_PATH = ADMIN_PATH + "/stats";
 
     /* ------------------------------- ORGANIZATION MEMBERSHIP ENDPOINTS ------------------------------- */
 
-    public static final String ORGANIZATIONS_PATH = BASE_PATH + ORGANIZATIONS;
+    public static final String ORGANIZATIONS_PATH = BASE_PATH + ORGANIZATIONS_PART;
 
     public static final String ORGANIZATION_PATH = ORGANIZATIONS_PATH + "/{orgId}";
 
@@ -129,7 +131,7 @@ public final class Paths {
 
     public static final String ORGANIZATION_TRANSFER_OWNERSHIP_PATH = ORGANIZATION_PATH + "/transfer-ownership";
 
-    public static final String USER_ORGANIZATIONS_PATH = USERS_PATH + ORGANIZATIONS;
+    public static final String USER_ORGANIZATIONS_PATH = USERS_PATH + ORGANIZATIONS_PART;
 
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 

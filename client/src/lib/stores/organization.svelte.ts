@@ -9,31 +9,59 @@
 
 import { getUserOrganizations } from '$lib/api/user/UserController';
 import type { UserOrganizationResponse } from '$lib/api/models';
-import { PersistentCookie } from '$lib/utils/persistent-cookie.svelte';
 import { browser } from '$app/environment';
 
 const COOKIE_NAME: string = 'currentOrganizationId';
 const COOKIE_MAX_AGE: number = 2592000; // 30 days in seconds
+
+/**
+ * Read cookie value from document.cookie
+ */
+function readCookie(key: string): string | null {
+	if (!browser) return null;
+
+	const cookies: string[] = document.cookie.split(';');
+	for (const cookie of cookies) {
+		const [name, ...valueParts] = cookie.trim().split('=');
+		if (name === key) {
+			return valueParts.join('=');
+		}
+	}
+	return null;
+}
+
+/**
+ * Write cookie value to document.cookie
+ */
+function writeCookie(key: string, value: string, maxAge: number): void {
+	if (!browser) return;
+	document.cookie = `${key}=${value}; path=/; max-age=${maxAge}`;
+}
 
 class OrganizationStore {
 	organizations: UserOrganizationResponse[] = $state([]);
 	loading: boolean = $state(true);
 	error: string | null = $state(null);
 	
-	private currentOrgIdCookie: PersistentCookie<string> = new PersistentCookie(
-		COOKIE_NAME,
-		'',
-		COOKIE_MAX_AGE
-	);
+	// Store the org ID as reactive state directly
+	private _currentOrgId: string = $state('');
 
-	get currentOrgId(): number | null {
-		const value: string = this.currentOrgIdCookie.value;
-		if (!value) return null;
-		const parsed: number = parseInt(value, 10);
-		return isNaN(parsed) ? null : parsed;
+	constructor() {
+		// Read from cookie on initialization (client-side only)
+		if (browser) {
+			const cookieValue: string | null = readCookie(COOKIE_NAME);
+			this._currentOrgId = cookieValue || '';
+		}
 	}
 
-	// Derived state
+	// Derived: parse the org ID as number
+	currentOrgId: number | null = $derived.by((): number | null => {
+		if (!this._currentOrgId) return null;
+		const parsed: number = parseInt(this._currentOrgId, 10);
+		return isNaN(parsed) ? null : parsed;
+	});
+
+	// Derived: find the current organization object
 	currentOrganization: UserOrganizationResponse | null = $derived.by((): UserOrganizationResponse | null => {
 		const orgId: number | null = this.currentOrgId;
 		if (!orgId) return null;
@@ -49,6 +77,14 @@ class OrganizationStore {
 	hasNoOrgs: boolean = $derived(this.organizations.length === 0);
 
 	/**
+	 * Set the current org ID (updates both state and cookie)
+	 */
+	private setCurrentOrgId(orgId: string): void {
+		this._currentOrgId = orgId;
+		writeCookie(COOKIE_NAME, orgId, COOKIE_MAX_AGE);
+	}
+
+	/**
 	 * Initialize the store - fetch organizations and restore selected org from cookie
 	 */
 	async initialize(): Promise<void> {
@@ -61,7 +97,7 @@ class OrganizationStore {
 			const orgs: UserOrganizationResponse[] = await getUserOrganizations();
 			this.organizations = orgs;
 
-			// Try to restore org ID from cookie
+			// Try to restore org ID from cookie (already loaded in constructor)
 			const cookieOrgId: number | null = this.currentOrgId;
 
 			// Validate that cookie org exists in user's orgs
@@ -69,10 +105,10 @@ class OrganizationStore {
 				// Cookie is valid, keep it
 			} else if (orgs.length > 0) {
 				// Select first org if cookie invalid or not found
-				this.currentOrgIdCookie.value = String(orgs[0].organizationId);
+				this.setCurrentOrgId(String(orgs[0].organizationId));
 			} else {
 				// No orgs - clear cookie
-				this.currentOrgIdCookie.value = '';
+				this.setCurrentOrgId('');
 			}
 		} catch (err: unknown) {
 			this.error = err instanceof Error ? err.message : 'Failed to load organizations';
@@ -97,7 +133,7 @@ class OrganizationStore {
 			return;
 		}
 
-		this.currentOrgIdCookie.value = String(orgId);
+		this.setCurrentOrgId(String(orgId));
 	}
 
 	/**

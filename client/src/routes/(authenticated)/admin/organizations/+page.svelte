@@ -6,10 +6,6 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Input } from '$lib/components/ui/input';
-	import { SidebarTrigger } from '$lib/components/ui/sidebar';
-	import { searchOrganizations } from '$lib/api/organization/OrganizationController';
-	import { handleError } from '$lib/utils/error-handler';
-	import { toast } from 'svelte-sonner';
 	import {
 		Building2,
 		Search,
@@ -19,8 +15,12 @@
 		Filter,
 		Users
 	} from '@lucide/svelte';
-	import type { OrganizationResponse, OrganizationStatus } from '$lib/api/models.ts';
+	import type { OrganizationStatus } from '$lib/api/models';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
+	import { createOrganizationListService } from '$lib/api/organization/OrganizationListService.svelte';
+	import { formatRelativeDate } from '$lib/utils/date';
+
+	const service = createOrganizationListService(10);
 
 	function navigateToMembers(orgId: number | undefined): void {
 		if (orgId) {
@@ -28,88 +28,9 @@
 		}
 	}
 
-	let organizations: OrganizationResponse[] = $state([]);
-	let loading: boolean = $state(true);
-	let error: string | null = $state(null);
-	let searchQuery: string = $state('');
-	let selectedStatus: OrganizationStatus | undefined = $state(undefined);
-	let currentPage: number = $state(0);
-	let totalPages: number = $state(0);
-	let totalElements: number = $state(0);
-	const pageSize: number = 10;
-
-	let debounceTimer: ReturnType<typeof setTimeout>;
-
-	async function loadOrganizations(): Promise<void> {
-		loading = true;
-		error = null;
-
-		try {
-			const response = await searchOrganizations({
-				page: currentPage,
-				size: pageSize,
-				search: searchQuery || undefined,
-				status: selectedStatus
-			});
-
-			organizations = response.content ?? [];
-			totalPages = response.totalPages ?? 0;
-			totalElements = response.totalElements ?? 0;
-		} catch (err: unknown) {
-			const { message }: { message: string } = handleError(
-				err,
-				'Failed to load organizations'
-			);
-			error = message;
-			toast.error(message);
-		} finally {
-			loading = false;
-		}
-	}
-
 	function handleSearchInput(event: Event): void {
 		const target = event.target as HTMLInputElement;
-		searchQuery = target.value;
-
-		clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(() => {
-			currentPage = 0;
-			loadOrganizations();
-		}, 300);
-	}
-
-	function handleStatusFilter(status: OrganizationStatus | undefined): void {
-		selectedStatus = status;
-		currentPage = 0;
-		loadOrganizations();
-	}
-
-	function previousPage(): void {
-		if (currentPage > 0) {
-			currentPage--;
-			loadOrganizations();
-		}
-	}
-
-	function nextPage(): void {
-		if (currentPage < totalPages - 1) {
-			currentPage++;
-			loadOrganizations();
-		}
-	}
-
-	function getStatusBadgeVariant(
-		status: OrganizationStatus | undefined
-	): 'default' | 'success' | 'destructive' {
-		switch (status) {
-			case 'ACTIVE':
-				return 'success';
-			case 'SUSPENDED':
-				return 'destructive';
-			case 'TRIAL':
-			default:
-				return 'default';
-		}
+		service.setSearchQuery(target.value);
 	}
 
 	function formatDate(dateString: string | undefined): string {
@@ -122,16 +43,8 @@
 		});
 	}
 
-	function getShowingRange(): string {
-		if (totalElements === 0) return 'Showing 0 organizations';
-
-		const start: number = currentPage * pageSize + 1;
-		const end: number = Math.min((currentPage + 1) * pageSize, totalElements);
-		return `Showing ${start}-${end} of ${totalElements} organizations`;
-	}
-
 	onMount(() => {
-		loadOrganizations();
+		service.load();
 	});
 </script>
 
@@ -152,15 +65,15 @@
 		</div>
 
 		<!-- Error Alert -->
-		{#if error && !loading}
+		{#if service.error && !service.loading}
 			<Alert
 				variant="destructive"
 				class="mb-4 bg-destructive/10 border-destructive/50 backdrop-blur-sm"
 			>
 				<CircleAlert class="h-4 w-4" />
 				<AlertDescription>
-					{error}
-					<Button variant="outline" size="sm" class="ml-4" onclick={loadOrganizations}>
+					{service.error}
+					<Button variant="outline" size="sm" class="ml-4" onclick={service.load}>
 						Retry
 					</Button>
 				</AlertDescription>
@@ -177,7 +90,7 @@
 						<Input
 							type="text"
 							placeholder="Search by name..."
-							value={searchQuery}
+							value={service.searchQuery}
 							oninput={handleSearchInput}
 							class="pl-9 bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
 						/>
@@ -186,46 +99,19 @@
 					<!-- Status Filter -->
 					<div class="flex gap-2 items-center">
 						<Filter class="h-4 w-4 text-muted-foreground" />
-						<Button
-							variant={selectedStatus === undefined ? 'default' : 'outline'}
-							size="sm"
-							onclick={() => handleStatusFilter(undefined)}
-							class={selectedStatus === undefined
-								? 'bg-gradient-to-r from-primary to-accent'
-								: 'bg-background/50 border-border/50'}
-						>
-							All
-						</Button>
-						<Button
-							variant={selectedStatus === 'TRIAL' ? 'default' : 'outline'}
-							size="sm"
-							onclick={() => handleStatusFilter('TRIAL')}
-							class={selectedStatus === 'TRIAL'
-								? 'bg-gradient-to-r from-primary to-accent'
-								: 'bg-background/50 border-border/50'}
-						>
-							Trial
-						</Button>
-						<Button
-							variant={selectedStatus === 'ACTIVE' ? 'default' : 'outline'}
-							size="sm"
-							onclick={() => handleStatusFilter('ACTIVE')}
-							class={selectedStatus === 'ACTIVE'
-								? 'bg-gradient-to-r from-primary to-accent'
-								: 'bg-background/50 border-border/50'}
-						>
-							Active
-						</Button>
-						<Button
-							variant={selectedStatus === 'SUSPENDED' ? 'default' : 'outline'}
-							size="sm"
-							onclick={() => handleStatusFilter('SUSPENDED')}
-							class={selectedStatus === 'SUSPENDED'
-								? 'bg-gradient-to-r from-primary to-accent'
-								: 'bg-background/50 border-border/50'}
-						>
-							Suspended
-						</Button>
+						{#each [undefined, 'TRIAL', 'ACTIVE', 'SUSPENDED'] as status}
+							{@const label = status ?? 'All'}
+							<Button
+								variant={service.selectedStatus === status ? 'default' : 'outline'}
+								size="sm"
+								onclick={() => service.setStatusFilter(status as OrganizationStatus | undefined)}
+								class={service.selectedStatus === status
+									? 'bg-gradient-to-r from-primary to-accent'
+									: 'bg-background/50 border-border/50'}
+							>
+								{label}
+							</Button>
+						{/each}
 					</div>
 				</div>
 			</CardContent>
@@ -238,10 +124,10 @@
 					<Building2 class="w-5 h-5 text-primary" />
 					<CardTitle class="text-xl">All Organizations</CardTitle>
 				</div>
-				<CardDescription>{getShowingRange()}</CardDescription>
+				<CardDescription>{service.showingRange}</CardDescription>
 			</CardHeader>
 			<CardContent>
-				{#if loading}
+				{#if service.loading}
 					<!-- Loading Skeleton -->
 					<div class="space-y-3">
 						{#each Array(5) as _, i}
@@ -256,7 +142,7 @@
 							</div>
 						{/each}
 					</div>
-				{:else if organizations.length === 0}
+				{:else if service.organizations.length === 0}
 					<!-- Empty State -->
 					<div class="flex flex-col items-center justify-center py-12">
 						<div class="relative">
@@ -271,7 +157,7 @@
 						</div>
 						<h3 class="mt-6 text-lg font-semibold">No organizations found</h3>
 						<p class="mt-2 text-sm text-muted-foreground text-center max-w-sm">
-							{#if searchQuery || selectedStatus}
+							{#if service.searchQuery || service.selectedStatus}
 								Try adjusting your search or filters
 							{:else}
 								No organizations have been created yet
@@ -293,9 +179,9 @@
 							<div class="col-span-1">Actions</div>
 						</div>
 
-					<!-- Table Rows -->
-					{#each organizations as org (org.slug)}
-						<div
+						<!-- Table Rows -->
+						{#each service.organizations as org (org.slug)}
+							<div
 								class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
 							>
 								<!-- Name -->
@@ -316,7 +202,7 @@
 
 								<!-- Status -->
 								<div class="col-span-1 md:col-span-2">
-									<Badge variant={getStatusBadgeVariant(org.status)}>
+									<Badge variant={service.getStatusBadgeVariant(org.status)}>
 										{org.status}
 									</Badge>
 								</div>
@@ -354,15 +240,15 @@
 					</div>
 
 					<!-- Pagination -->
-					{#if totalPages > 1}
+					{#if service.totalPages > 1}
 						<div class="flex items-center justify-between mt-6 pt-4 border-t border-border/50">
-							<div class="text-sm text-muted-foreground">{getShowingRange()}</div>
+							<div class="text-sm text-muted-foreground">{service.showingRange}</div>
 							<div class="flex gap-2">
 								<Button
 									variant="outline"
 									size="sm"
-									onclick={previousPage}
-									disabled={currentPage === 0}
+									onclick={service.previousPage}
+									disabled={!service.hasPreviousPage}
 									class="bg-background/50 border-border/50 hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									<ChevronLeft class="h-4 w-4" />
@@ -371,8 +257,8 @@
 								<Button
 									variant="outline"
 									size="sm"
-									onclick={nextPage}
-									disabled={currentPage >= totalPages - 1}
+									onclick={service.nextPage}
+									disabled={!service.hasNextPage}
 									class="bg-background/50 border-border/50 hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									Next

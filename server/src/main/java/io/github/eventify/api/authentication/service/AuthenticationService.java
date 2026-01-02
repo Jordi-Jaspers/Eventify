@@ -110,7 +110,7 @@ public class AuthenticationService {
             final User user = getLoggedInUser();
             tokenService.invalidateTokensForUser(user, REFRESH_TOKEN);
             log.debug("User '{}' successfully logged out", user.getUsername());
-        } catch (AuthorizationException _) {
+        } catch (final AuthorizationException exception) {
             log.warn("No logged-in user found when attempting to log out");
         }
     }

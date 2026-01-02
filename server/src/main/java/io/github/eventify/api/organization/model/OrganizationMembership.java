@@ -5,9 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import jakarta.persistence.*;
 
+import static io.github.eventify.Main.SERIAL_VERSION_UID;
 import static java.time.ZoneOffset.UTC;
 
 /**
@@ -18,7 +21,10 @@ import static java.time.ZoneOffset.UTC;
 @Entity
 @NoArgsConstructor
 @Table(name = "organization_membership")
-public class OrganizationMembership {
+public class OrganizationMembership implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
