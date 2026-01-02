@@ -1,5 +1,6 @@
 package io.github.eventify.api.organization.controller;
 
+import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationalRole;
 import io.github.eventify.api.organization.model.request.AddMemberRequest;
@@ -605,6 +606,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
 
         // And: Transfer ownership request
         final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(owner.getId())
             .setNewOwnerUserId(admin.getId());
 
         // When: Owner transfers ownership to admin
@@ -632,6 +634,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
 
         // And: Transfer ownership request
         final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(owner.getId())
             .setNewOwnerUserId(member.getId());
 
         // When: Owner transfers ownership to member
@@ -661,6 +664,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
 
         // And: Transfer ownership request
         final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(owner.getId())
             .setNewOwnerUserId(member.getId());
 
         // When: Admin tries to transfer ownership
@@ -687,6 +691,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
 
         // And: Transfer ownership request to non-member
         final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(owner.getId())
             .setNewOwnerUserId(nonMember.getId());
 
         // When: Owner tries to transfer to non-member
@@ -778,5 +783,92 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
 
         // Then: Should be forbidden
         response.andExpect(status().is(SC_FORBIDDEN));
+    }
+
+    @Test
+    @DisplayName("Should transfer ownership when global admin transfers")
+    public void shouldTransferOwnershipWhenGlobalAdminTransfers() throws Exception {
+        // Given: Organization with owner and member
+        final User owner = aValidatedUser();
+        final Organization org = createOrganization(owner);
+        final User member = aValidatedUser();
+        addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
+
+        // And: A global admin (not member of org)
+        final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: Transfer ownership request with currentOwnerUserId
+        final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(owner.getId())
+            .setNewOwnerUserId(member.getId());
+
+        // When: Global admin transfers ownership
+        final MockHttpServletRequestBuilder httpRequest = post(
+            ORGANIZATION_TRANSFER_OWNERSHIP_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + globalAdmin.getAccessToken().getValue())
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Should return OK
+        response.andExpect(status().is(SC_OK));
+    }
+
+    @Test
+    @DisplayName("Should transfer ownership when owner transfers with correct current owner ID")
+    public void shouldTransferOwnershipWhenOwnerTransfersWithCorrectCurrentOwnerId() throws Exception {
+        // Given: Organization with owner and member
+        final User owner = aValidatedUser();
+        final Organization org = createOrganization(owner);
+        final User member = aValidatedUser();
+        addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
+
+        // And: Transfer ownership request with owner's own ID
+        final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(owner.getId())
+            .setNewOwnerUserId(member.getId());
+
+        // When: Owner transfers ownership with correct currentOwnerUserId
+        final MockHttpServletRequestBuilder httpRequest = post(
+            ORGANIZATION_TRANSFER_OWNERSHIP_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Should return OK
+        response.andExpect(status().is(SC_OK));
+    }
+
+    @Test
+    @DisplayName("Should return forbidden when owner sends wrong current owner ID")
+    public void shouldReturnForbiddenWhenOwnerSendsWrongCurrentOwnerId() throws Exception {
+        // Given: Organization with owner and member
+        final User owner = aValidatedUser();
+        final Organization org = createOrganization(owner);
+        final User member = aValidatedUser();
+        addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
+
+        // And: Transfer ownership request with wrong currentOwnerUserId
+        final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(999L)
+            .setNewOwnerUserId(member.getId());
+
+        // When: Owner tries to transfer with wrong currentOwnerUserId
+        final MockHttpServletRequestBuilder httpRequest = post(
+            ORGANIZATION_TRANSFER_OWNERSHIP_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Should return bad request (validation failure)
+        response.andExpect(status().is(SC_BAD_REQUEST));
     }
 }

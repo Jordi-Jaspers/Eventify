@@ -14,5 +14,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class TransferOwnershipRequest {
 
+    private Long currentOwnerUserId;
     private Long newOwnerUserId;
 }

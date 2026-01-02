@@ -65,6 +65,7 @@ export interface UpdateMemberRoleRequest {
 }
 
 export interface TransferOwnershipRequest {
+	currentOwnerUserId: number;
 	newOwnerUserId: number;
 }
 

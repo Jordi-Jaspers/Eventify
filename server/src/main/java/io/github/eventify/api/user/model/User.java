@@ -1,11 +1,15 @@
 package io.github.eventify.api.user.model;
 
+import io.github.eventify.api.authentication.model.Permission;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.common.security.oauth2.provider.OAuth2UserInfo;
 import io.github.jframe.datasource.search.model.PageableItem;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.time.OffsetDateTime;
@@ -178,5 +182,14 @@ public class User implements UserDetails, PageableItem {
      */
     public String getEmail() {
         return email == null ? null : email.toLowerCase();
+    }
+
+    /**
+     * Checks if the user has a certain permission.
+     *
+     * @param permission The permission to check.
+     */
+    public boolean hasPermission(final Permission permission) {
+        return role.getPermissions().contains(permission);
     }
 }

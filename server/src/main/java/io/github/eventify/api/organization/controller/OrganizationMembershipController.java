@@ -182,11 +182,11 @@ public class OrganizationMembershipController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("@orgSecurity.isOwner(#orgId, principal.user.id)")
+    @PreAuthorize("@orgSecurity.isOwner(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
     public ResponseEntity<Void> transferOwnership(@PathVariable final Long orgId, @RequestBody final TransferOwnershipRequest request,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
         transferOwnershipValidator.validateAndThrow(request);
-        membershipService.transferOwnership(orgId, principal.getUser().getId(), request.getNewOwnerUserId());
+        membershipService.transferOwnership(orgId, request.getCurrentOwnerUserId(), request.getNewOwnerUserId());
         return ResponseEntity.status(OK).build();
     }
 

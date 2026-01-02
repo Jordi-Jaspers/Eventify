@@ -30,8 +30,9 @@ public class TransferOwnershipRequestValidatorTest extends UnitTest {
     @Test
     @DisplayName("Should pass validation with valid newOwnerUserId")
     public void shouldPassValidationWithValidNewOwnerUserId() {
-        // Given: Valid request with newOwnerUserId
+        // Given: Valid request with both currentOwnerUserId and newOwnerUserId
         final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(1L)
             .setNewOwnerUserId(123L);
 
         // When & Then: No exception thrown
@@ -100,6 +101,94 @@ public class TransferOwnershipRequestValidatorTest extends UnitTest {
             exception.getValidationResult().getErrors().stream()
                 .anyMatch(
                     error -> error.getField().equals(NEW_OWNER_USER_ID) && error.getCode().equals(NEW_OWNER_USER_ID_MUST_BE_POSITIVE)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should pass validation with valid current and new owner user ID")
+    public void shouldPassValidationWithValidCurrentAndNewOwnerUserId() {
+        // Given: Valid request with both currentOwnerUserId and newOwnerUserId
+        final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(1L)
+            .setNewOwnerUserId(2L);
+
+        // When & Then: No exception thrown
+        assertDoesNotThrow(() -> validator.validateAndThrow(request));
+    }
+
+    @Test
+    @DisplayName("Should reject null currentOwnerUserId")
+    public void shouldRejectNullCurrentOwnerUserId() {
+        // Given: Request with null currentOwnerUserId
+        final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(null)
+            .setNewOwnerUserId(2L);
+
+        // When & Then: Throws validation exception
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validateAndThrow(request)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(CURRENT_OWNER_USER_ID) && error.getCode().equals(CURRENT_OWNER_USER_ID_REQUIRED)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject zero currentOwnerUserId")
+    public void shouldRejectZeroCurrentOwnerUserId() {
+        // Given: Request with zero currentOwnerUserId
+        final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(0L)
+            .setNewOwnerUserId(2L);
+
+        // When & Then: Throws validation exception
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validateAndThrow(request)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(CURRENT_OWNER_USER_ID) && error.getCode().equals(
+                        CURRENT_OWNER_USER_ID_MUST_BE_POSITIVE
+                    )
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject negative currentOwnerUserId")
+    public void shouldRejectNegativeCurrentOwnerUserId() {
+        // Given: Request with negative currentOwnerUserId
+        final TransferOwnershipRequest request = new TransferOwnershipRequest()
+            .setCurrentOwnerUserId(-1L)
+            .setNewOwnerUserId(2L);
+
+        // When & Then: Throws validation exception
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validateAndThrow(request)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(CURRENT_OWNER_USER_ID) && error.getCode().equals(
+                        CURRENT_OWNER_USER_ID_MUST_BE_POSITIVE
+                    )
                 ),
             is(true)
         );

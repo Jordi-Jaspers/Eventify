@@ -26,6 +26,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static io.github.eventify.api.authentication.model.Permission.MANAGE_ORGANIZATIONS;
 import static io.github.eventify.api.user.model.UserMetaData.ORGANIZATION_TERM;
 import static io.github.eventify.common.exception.ApiErrorCode.*;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
@@ -162,9 +163,15 @@ public class OrganizationMembershipService {
             throw new OwnershipTransferException(CANNOT_TRANSFER_TO_SELF_ERROR);
         }
 
+        // If caller is not global admin, validate caller is the current owner
+        final User caller = getLoggedInUser();
+        if (!caller.hasPermission(MANAGE_ORGANIZATIONS) && !caller.getId().equals(currentOwnerId)) {
+            throw new OwnershipTransferException(NOT_ORGANIZATION_OWNER_ERROR);
+        }
+
         final OrganizationMembership currentOwnerMembership = membershipRepository
             .findByOrganizationIdAndUserId(orgId, currentOwnerId)
-            .orElseThrow(() -> new DataNotFoundException(MEMBERSHIP_NOT_FOUND_ERROR));
+            .orElseThrow(() -> new OwnershipTransferException(NOT_ORGANIZATION_OWNER_ERROR));
 
         if (currentOwnerMembership.getRole() != OrganizationalRole.OWNER) {
             throw new OwnershipTransferException(NOT_ORGANIZATION_OWNER_ERROR);
@@ -220,7 +227,7 @@ public class OrganizationMembershipService {
 
         final SearchInput searchInput = new SearchInput();
         searchInput.setFieldName(ORGANIZATION_TERM);
-        searchInput.setTextValue(orgId.toString());
+        searchInput.setTextValue('!' + orgId.toString());
         input.addSearchInput(searchInput);
 
         return userService.searchUsers(input);

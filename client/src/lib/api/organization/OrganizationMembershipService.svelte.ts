@@ -194,10 +194,22 @@ export function createMembershipService(orgId: number) {
 			return false;
 		}
 
+		// Find the current owner from members list
+		const currentOwner: OrganizationMembershipResponse | undefined = members.find(
+			(m: OrganizationMembershipResponse) => m.role === 'OWNER'
+		);
+		if (!currentOwner) {
+			toast.error('Could not find current owner');
+			return false;
+		}
+
 		isTransferring = true;
 
 		try {
-			await transferOwnership(orgId, { newOwnerUserId: transferTarget.userId });
+			await transferOwnership(orgId, {
+				currentOwnerUserId: currentOwner.userId,
+				newOwnerUserId: transferTarget.userId
+			});
 			await loadMembers();
 			toast.success(`Ownership transferred to ${transferTarget.userEmail}`);
 			resetTransferState();

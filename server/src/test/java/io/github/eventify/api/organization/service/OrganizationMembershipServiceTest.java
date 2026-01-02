@@ -1,5 +1,6 @@
 package io.github.eventify.api.organization.service;
 
+import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.OrganizationalRole;
@@ -498,12 +499,6 @@ public class OrganizationMembershipServiceTest extends UnitTest {
     @Test
     @DisplayName("Should throw when caller is not the current owner")
     public void shouldThrowWhenCallerIsNotCurrentOwner() {
-        // Given: Caller is not owner
-        final OrganizationMembership callerMembership = new OrganizationMembership(organization, member, OrganizationalRole.ADMIN);
-
-        when(membershipRepository.findByOrganizationIdAndUserId(organization.getId(), member.getId()))
-            .thenReturn(Optional.of(callerMembership));
-
         // When & Then: Should throw exception (only owner can transfer ownership)
         assertThrows(
             OwnershipTransferException.class,
@@ -655,5 +650,94 @@ public class OrganizationMembershipServiceTest extends UnitTest {
         // Then: Should return empty page
         assertThat(results.getContent(), is(empty()));
         verify(userService).searchUsers(any(SortablePageInput.class));
+    }
+
+    @Test
+    @DisplayName("Should transfer ownership when caller is owner")
+    public void shouldTransferOwnershipWhenCallerIsOwner() {
+        // Given: Owner caller
+        final User ownerCaller = aValidUser();
+        ownerCaller.setId(1L);
+        ownerCaller.setRole(Role.USER);
+
+        final OrganizationMembership ownerMembership = new OrganizationMembership(organization, ownerCaller, OrganizationalRole.OWNER);
+        final OrganizationMembership memberMembership = new OrganizationMembership(organization, member, OrganizationalRole.MEMBER);
+
+        when(membershipRepository.findByOrganizationIdAndUserId(organization.getId(), ownerCaller.getId()))
+            .thenReturn(Optional.of(ownerMembership));
+        when(membershipRepository.findByOrganizationIdAndUserId(organization.getId(), member.getId()))
+            .thenReturn(Optional.of(memberMembership));
+        when(membershipRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When: Owner transfers ownership
+        membershipService.transferOwnership(organization.getId(), ownerCaller.getId(), member.getId());
+
+        // Then: Transfer should succeed
+        assertThat(ownerMembership.getRole(), is(OrganizationalRole.ADMIN));
+        assertThat(memberMembership.getRole(), is(OrganizationalRole.OWNER));
+        verify(membershipRepository).saveAll(anyList());
+    }
+
+    @Test
+    @DisplayName("Should transfer ownership when caller is global admin")
+    public void shouldTransferOwnershipWhenCallerIsGlobalAdmin() {
+        // Given: Global admin caller (not the owner)
+        final User globalAdmin = aValidUser();
+        globalAdmin.setId(999L);
+        globalAdmin.setRole(Role.ADMIN);
+
+        final OrganizationMembership ownerMembership = new OrganizationMembership(organization, owner, OrganizationalRole.OWNER);
+        final OrganizationMembership memberMembership = new OrganizationMembership(organization, member, OrganizationalRole.MEMBER);
+
+        when(membershipRepository.findByOrganizationIdAndUserId(organization.getId(), owner.getId()))
+            .thenReturn(Optional.of(ownerMembership));
+        when(membershipRepository.findByOrganizationIdAndUserId(organization.getId(), member.getId()))
+            .thenReturn(Optional.of(memberMembership));
+        when(membershipRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When: Global admin transfers ownership (not being the owner)
+        membershipService.transferOwnership(organization.getId(), owner.getId(), member.getId());
+
+        // Then: Transfer should succeed
+        assertThat(ownerMembership.getRole(), is(OrganizationalRole.ADMIN));
+        assertThat(memberMembership.getRole(), is(OrganizationalRole.OWNER));
+        verify(membershipRepository).saveAll(anyList());
+    }
+
+    @Test
+    @DisplayName("Should throw when non-owner non-admin tries to transfer")
+    public void shouldThrowWhenNonOwnerNonAdminTriesToTransfer() {
+        // Given: Regular member trying to transfer
+        final User regularMember = aValidUser();
+        regularMember.setId(3L);
+        regularMember.setRole(Role.USER);
+
+        // When & Then: Should throw exception (not owner and not global admin)
+        assertThrows(
+            OwnershipTransferException.class,
+            () -> membershipService.transferOwnership(organization.getId(), owner.getId(), member.getId())
+        );
+
+        verify(membershipRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    @DisplayName("Should throw when current owner user ID does not match actual owner")
+    public void shouldThrowWhenCurrentOwnerUserIdDoesNotMatchActualOwner() {
+        // Given: Current owner caller but wrong currentOwnerUserId
+        final User actualOwner = aValidUser();
+        actualOwner.setId(1L);
+        actualOwner.setRole(Role.USER);
+
+        final User wrongOwner = aValidUser();
+        wrongOwner.setId(99L);
+
+        // When & Then: Should throw exception (currentOwnerUserId doesn't match actual owner)
+        assertThrows(
+            OwnershipTransferException.class,
+            () -> membershipService.transferOwnership(organization.getId(), wrongOwner.getId(), member.getId())
+        );
+
+        verify(membershipRepository, never()).saveAll(anyList());
     }
 }

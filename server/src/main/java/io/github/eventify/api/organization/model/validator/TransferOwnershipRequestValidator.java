@@ -19,9 +19,12 @@ public class TransferOwnershipRequestValidator implements Validator<TransferOwne
     public static final String BODY_IS_MISSING = "Request body is missing, please provide a request body with the correct configuration";
     public static final String NEW_OWNER_USER_ID_REQUIRED = "New owner user ID is required";
     public static final String NEW_OWNER_USER_ID_MUST_BE_POSITIVE = "New owner user ID must be positive";
+    public static final String CURRENT_OWNER_USER_ID_REQUIRED = "Current owner user ID is required";
+    public static final String CURRENT_OWNER_USER_ID_MUST_BE_POSITIVE = "Current owner user ID must be positive";
 
     // Fields
     public static final String NEW_OWNER_USER_ID = "newOwnerUserId";
+    public static final String CURRENT_OWNER_USER_ID = "currentOwnerUserId";
 
     /**
      * {@inheritDoc}
@@ -32,6 +35,10 @@ public class TransferOwnershipRequestValidator implements Validator<TransferOwne
             result.reject(BODY_IS_MISSING);
             throw new ValidationException(result);
         }
+
+        result.rejectField(CURRENT_OWNER_USER_ID, request.getCurrentOwnerUserId())
+            .whenNull(CURRENT_OWNER_USER_ID_REQUIRED)
+            .orWhen(id -> id <= 0, CURRENT_OWNER_USER_ID_MUST_BE_POSITIVE);
 
         result.rejectField(NEW_OWNER_USER_ID, request.getNewOwnerUserId())
             .whenNull(NEW_OWNER_USER_ID_REQUIRED)
