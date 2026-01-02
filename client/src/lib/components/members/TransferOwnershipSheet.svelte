@@ -55,12 +55,12 @@
 			</Alert>
 
 			<div class="space-y-2">
-				<Label>Type <strong>transfer</strong> to confirm:</Label>
+				<Label>Type <strong>Transfer Ownership</strong> to confirm:</Label>
 				<Input
 					type="text"
 					value={confirmation}
 					oninput={handleInput}
-					placeholder="Type 'transfer' to confirm"
+					placeholder="Type 'Transfer Ownership' to confirm"
 					disabled={transferring}
 					class="bg-background/50 border-border"
 				/>
@@ -78,7 +78,7 @@
 			</Button>
 			<Button
 				onclick={onConfirm}
-				disabled={transferring || confirmation !== 'transfer'}
+				disabled={transferring || confirmation !== 'Transfer Ownership'}
 				class="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
 			>
 				{#if transferring}
