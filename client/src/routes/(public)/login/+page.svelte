@@ -1,6 +1,7 @@
 <script lang="ts">
     import {goto} from '$app/navigation';
     import {page} from '$app/state';
+    import {dev} from '$app/environment';
     import {authStore, isAuthenticated, isUnverified} from '$lib/stores/auth';
     import {CLIENT_ROUTES} from '$lib/config/routes';
     import Button from '$lib/components/ui/button/button.svelte';
@@ -12,7 +13,7 @@
     import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
     import {toast} from 'svelte-sonner';
-    import {CircleAlert, Eye, EyeOff, Info, LoaderCircle, Shield} from '@lucide/svelte';
+    import {CircleAlert, Eye, EyeOff, Info, LoaderCircle, Shield, Terminal} from '@lucide/svelte';
     import {handleError} from '$lib/utils/error-handler';
 
     $effect(() => {
@@ -48,6 +49,11 @@
 
     function togglePasswordVisibility(): void {
         showPassword = !showPassword;
+    }
+
+    function fillDevCredentials(): void {
+        email = 'jordijaspers@gmail.com';
+        password = 'admin123!';
     }
 </script>
 
@@ -183,6 +189,28 @@
             </form>
         </CardContent>
     </Card>
+
+    <!-- Dev Credentials Block -->
+    {#if dev}
+        <div class="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 backdrop-blur-sm">
+            <div class="flex items-center gap-2 text-amber-500 text-sm font-medium mb-2">
+                <Terminal class="w-4 h-4"/>
+                Dev Credentials
+            </div>
+            <div class="text-xs text-muted-foreground space-y-1">
+                <p><span class="font-medium">Email:</span> jordijaspers@gmail.com</p>
+                <p><span class="font-medium">Password:</span> admin123!</p>
+            </div>
+            <Button
+                    variant="outline"
+                    size="sm"
+                    class="mt-2 w-full text-xs"
+                    onclick={fillDevCredentials}
+            >
+                Fill Credentials
+            </Button>
+        </div>
+    {/if}
 
     <!-- Footer -->
     <p class="text-center text-xs text-muted-foreground mt-6">
