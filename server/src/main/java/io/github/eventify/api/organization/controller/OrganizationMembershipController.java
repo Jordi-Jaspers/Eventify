@@ -67,9 +67,10 @@ public class OrganizationMembershipController {
      * @return list of matching users
      */
     @Operation(summary = "Search users to add to organization")
-    @GetMapping(
+    @PostMapping(
         path = ORGANIZATION_MEMBERS_SEARCH_PATH,
-        produces = APPLICATION_JSON_VALUE
+        produces = APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_JSON_VALUE
     )
     @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
     public ResponseEntity<PageResource<UserResponse>> searchUsers(@PathVariable final Long orgId,

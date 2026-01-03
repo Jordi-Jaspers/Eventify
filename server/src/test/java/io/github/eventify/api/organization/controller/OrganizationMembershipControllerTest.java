@@ -750,7 +750,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
         input.setPageSize(10);
 
         // When: Searching users
-        final MockHttpServletRequestBuilder httpRequest = get(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
             .contentType(APPLICATION_JSON)
             .content(toJson(input))
             .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
@@ -774,7 +774,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
         input.setPageSize(10);
 
         // When: Non-member searches
-        final MockHttpServletRequestBuilder httpRequest = get(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
             .contentType(APPLICATION_JSON)
             .content(toJson(input))
             .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue());
