@@ -77,4 +77,13 @@ public interface OrganizationMembershipRepository extends JpaRepository<Organiza
      * @return Optional containing membership if found
      */
     Optional<OrganizationMembership> findByOrganizationIdAndRole(Long orgId, OrganizationalRole role);
+
+    /**
+     * Check if a membership exists for organization and role.
+     *
+     * @param orgId the organization ID
+     * @param role  the organizational role
+     * @return true if exists, false otherwise
+     */
+    boolean existsByOrganizationIdAndRole(Long orgId, OrganizationalRole role);
 }

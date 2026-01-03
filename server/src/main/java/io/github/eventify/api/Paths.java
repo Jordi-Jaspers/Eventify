@@ -117,6 +117,8 @@ public final class Paths {
 
     public static final String ADMIN_STATS_PATH = ADMIN_PATH + "/stats";
 
+    public static final String ADMIN_ORGANIZATION_ASSIGN_OWNER_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/owner";
+
     /* ------------------------------- ORGANIZATION MEMBERSHIP ENDPOINTS ------------------------------- */
 
     public static final String ORGANIZATIONS_PATH = BASE_PATH + ORGANIZATIONS_PART;

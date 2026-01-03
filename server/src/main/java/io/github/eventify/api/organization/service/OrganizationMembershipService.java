@@ -40,7 +40,6 @@ import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 public class OrganizationMembershipService {
 
     private static final int MAX_SEARCH_RESULTS = 10;
-    private static final String NOT_A_MEMBER_MESSAGE = "Not a member of this organization";
 
     private final UserService userService;
     private final OrganizationMembershipRepository membershipRepository;
@@ -77,6 +76,57 @@ public class OrganizationMembershipService {
     }
 
     /**
+     * Assign an owner to an organization (admin only).
+     *
+     * @param orgId  the organization ID
+     * @param email  the email of the user to assign as owner (optional)
+     * @param userId the user ID to assign as owner (optional)
+     * @return the created or updated membership entity
+     */
+    @Transactional
+    public OrganizationMembership assignOwner(final Long orgId, final String email, final Long userId) {
+        // Check if organization already has an owner
+        if (membershipRepository.existsByOrganizationIdAndRole(orgId, OrganizationalRole.OWNER)) {
+            throw new OwnerRoleException(ORGANIZATION_ALREADY_HAS_OWNER_ERROR);
+        }
+
+        final Organization organization = organizationRepository.findById(orgId)
+            .orElseThrow(() -> new DataNotFoundException(ORGANIZATION_NOT_FOUND_ERROR));
+
+        // Find user by email or userId
+        final User user;
+        if (email != null) {
+            user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+        } else if (userId != null) {
+            user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+        } else {
+            throw new BadRequestException("Either email or userId must be provided");
+        }
+
+        if (!user.isEnabled()) {
+            throw new DisabledUserException();
+        }
+
+        // Check if user is already a member
+        final OrganizationMembership existingMembership = membershipRepository
+            .findByOrganizationIdAndUserId(orgId, user.getId())
+            .orElse(null);
+
+        if (existingMembership != null) {
+            // Update existing membership to OWNER
+            existingMembership.setRole(OrganizationalRole.OWNER);
+            return membershipRepository.save(existingMembership);
+        } else {
+            // Create new membership with OWNER role
+            final OrganizationMembership membership = new OrganizationMembership(organization, user, OrganizationalRole.OWNER);
+            membership.setInvitedBy(getLoggedInUser());
+            return membershipRepository.save(membership);
+        }
+    }
+
+    /**
      * Update a member's role in an organization.
      *
      * @param orgId  the organization ID
@@ -93,26 +143,21 @@ public class OrganizationMembershipService {
         final OrganizationMembership membership = membershipRepository.findByOrganizationIdAndUserId(orgId, userId)
             .orElseThrow(() -> new DataNotFoundException(MEMBERSHIP_NOT_FOUND_ERROR));
 
-        // Get caller's membership to check permissions
         final OrganizationMembership callerMembership = membershipRepository
             .findByOrganizationIdAndUserId(orgId, getLoggedInUser().getId())
-            .orElseThrow(() -> new AccessDeniedException(NOT_A_MEMBER_MESSAGE));
+            .orElseThrow(() -> new AccessDeniedException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason()));
 
-        // Admins can only update MEMBERs (not OWNER or other ADMIN)
         if (callerMembership.getRole() == OrganizationalRole.ADMIN
             && membership.getRole() != OrganizationalRole.MEMBER) {
             throw new AccessDeniedException("Admins can only update MEMBER roles");
         }
 
-        // Owner role cannot be changed (must use transfer ownership)
         if (membership.getRole() == OrganizationalRole.OWNER) {
             throw new OwnerRoleException(CANNOT_CHANGE_OWNER_ROLE_ERROR);
         }
 
         membership.setRole(role);
         final OrganizationMembership saved = membershipRepository.save(membership);
-
-        // Return membership with eagerly loaded associations for mapping
         return membershipRepository.findAllByOrganizationIdWithUser(orgId).stream()
             .filter(m -> m.getUser().getId().equals(userId))
             .findFirst()
@@ -131,18 +176,15 @@ public class OrganizationMembershipService {
         final OrganizationMembership membership = membershipRepository.findByOrganizationIdAndUserId(orgId, userId)
             .orElseThrow(() -> new DataNotFoundException(MEMBERSHIP_NOT_FOUND_ERROR));
 
-        // Get caller's membership to check permissions
         final OrganizationMembership callerMembership = membershipRepository
             .findByOrganizationIdAndUserId(orgId, callerUser.getId())
-            .orElseThrow(() -> new AccessDeniedException(NOT_A_MEMBER_MESSAGE));
+            .orElseThrow(() -> new AccessDeniedException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason()));
 
-        // Admins can only remove MEMBERs (not OWNER or other ADMIN)
         if (callerMembership.getRole() == OrganizationalRole.ADMIN
             && membership.getRole() != OrganizationalRole.MEMBER) {
             throw new AccessDeniedException("Admins can only remove MEMBER roles");
         }
 
-        // Owner cannot be removed
         if (membership.getRole() == OrganizationalRole.OWNER) {
             throw new OwnerRoleException(CANNOT_REMOVE_OWNER_ERROR);
         }
@@ -163,7 +205,6 @@ public class OrganizationMembershipService {
             throw new OwnershipTransferException(CANNOT_TRANSFER_TO_SELF_ERROR);
         }
 
-        // If caller is not global admin, validate caller is the current owner
         final User caller = getLoggedInUser();
         if (!caller.hasPermission(MANAGE_ORGANIZATIONS) && !caller.getId().equals(currentOwnerId)) {
             throw new OwnershipTransferException(NOT_ORGANIZATION_OWNER_ERROR);
@@ -181,10 +222,8 @@ public class OrganizationMembershipService {
             .findByOrganizationIdAndUserId(orgId, newOwnerId)
             .orElseThrow(() -> new BadRequestException("Target user is not a member of this organization"));
 
-        // Transfer ownership
         currentOwnerMembership.setRole(OrganizationalRole.ADMIN);
         newOwnerMembership.setRole(OrganizationalRole.OWNER);
-
         membershipRepository.saveAll(List.of(currentOwnerMembership, newOwnerMembership));
     }
 
@@ -197,7 +236,6 @@ public class OrganizationMembershipService {
      */
     @Transactional(readOnly = true)
     public List<OrganizationMembership> getOrganizationMembers(final Long orgId) {
-        // Verify organization exists first
         if (!organizationRepository.existsById(orgId)) {
             throw new DataNotFoundException(ORGANIZATION_NOT_FOUND_ERROR);
         }

@@ -128,7 +128,7 @@ public enum ApiErrorCode implements ApiError {
     ),
     CANNOT_SET_OWNER_ROLE_ERROR(
         "ERR-0029",
-        "Cannot set role to OWNER. Use transfer ownership instead."
+        "Only global administrators can assign the OWNER role."
     ),
     CANNOT_CHANGE_OWNER_ROLE_ERROR(
         "ERR-0030",
@@ -145,6 +145,14 @@ public enum ApiErrorCode implements ApiError {
     NOT_ORGANIZATION_OWNER_ERROR(
         "ERR-0033",
         "Only the current owner can transfer ownership."
+    ),
+    ORGANIZATION_ALREADY_HAS_OWNER_ERROR(
+        "ERR-0034",
+        "This organization already has an owner."
+    ),
+    NOT_MEMBER_OF_ORGANIZATION_ERROR(
+        "ERR-0035",
+        "User is not a member of the specified organization."
     );
 
     /* The error code for this reason. */
