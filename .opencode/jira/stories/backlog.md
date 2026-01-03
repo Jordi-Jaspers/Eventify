@@ -1,3 +1,9 @@
+# Epic: User Management
+- [ ] **User Dashboard**:
+    - Create filterable and sortable user list view
+    - basic table actions (lock, unlock, view)
+    - use the custom data table component
+
 # Epic: General Improvements
 - [ ] **OpenApi annotations**:
     - Add missing OpenApi annotations to request and response models for better API documentation.
