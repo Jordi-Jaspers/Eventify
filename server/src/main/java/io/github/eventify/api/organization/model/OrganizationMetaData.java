@@ -17,6 +17,8 @@ public class OrganizationMetaData extends AbstractSortSearchMetaData {
 
     private static final String MEMBER_COUNT = "memberCount";
 
+    private static final String CREATED_AT = "createdAt";
+
     /**
      * Constructor to build organization metadata / dictionary.
      */
@@ -25,5 +27,6 @@ public class OrganizationMetaData extends AbstractSortSearchMetaData {
         addField(NAME, NAME, SearchType.FUZZY_TEXT, true);
         addField(STATUS, STATUS, SearchType.MULTI_ENUM, OrganizationStatus.class, true);
         addField(MEMBER_COUNT, MEMBER_COUNT, SearchType.NUMERIC, true);
+        addField(CREATED_AT, CREATED_AT, SearchType.DATE, true);
     }
 }

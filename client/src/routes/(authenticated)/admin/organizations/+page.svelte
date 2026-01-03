@@ -29,7 +29,7 @@
 		{ key: 'status', label: 'Status', sortable: true, colSpan: 1 },
 		{ key: 'owner', label: 'Owner', sortable: false, colSpan: 2 },
 		{ key: 'memberCount', label: 'Members', sortable: true, colSpan: 1 },
-		{ key: 'createdAt', label: 'Created', sortable: false, colSpan: 2 },
+		{ key: 'createdAt', label: 'Created', sortable: true, colSpan: 2 },
 		{ key: 'actions', label: 'Actions', sortable: false, colSpan: 1 }
 	];
 
