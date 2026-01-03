@@ -1,6 +1,9 @@
 # Bug Fixes
 - [ ] **Fix User login redirect**
     - User on succesful login is not redirected to dashboard general dashboard. must refresh the page to get redirected.
+  
+- [ ] **Global admin should be able manage the users in a organisation alongside the owner and admins**
+    - Global admin should have same permissions as an org admin to manage users in any organisation.
 
 # Epic: User Management
 - [ ] **User Dashboard**:
