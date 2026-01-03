@@ -7,9 +7,7 @@ import io.github.eventify.api.organization.model.request.TransferOwnershipReques
 import io.github.eventify.api.organization.model.request.UpdateMemberRoleRequest;
 import io.github.eventify.api.organization.model.response.OrganizationMembershipResponse;
 import io.github.eventify.api.organization.model.response.UserOrganizationResponse;
-import io.github.eventify.api.organization.model.validator.AddMemberRequestValidator;
-import io.github.eventify.api.organization.model.validator.TransferOwnershipRequestValidator;
-import io.github.eventify.api.organization.model.validator.UpdateMemberRoleRequestValidator;
+import io.github.eventify.api.organization.model.validator.OrganizationMembershipValidator;
 import io.github.eventify.api.organization.service.OrganizationMembershipService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.mapper.UserMapper;
@@ -54,9 +52,7 @@ public class OrganizationMembershipController {
 
     private final OrganizationMembershipService membershipService;
     private final OrganizationMembershipMapper membershipMapper;
-    private final AddMemberRequestValidator addMemberValidator;
-    private final UpdateMemberRoleRequestValidator updateRoleValidator;
-    private final TransferOwnershipRequestValidator transferOwnershipValidator;
+    private final OrganizationMembershipValidator membershipValidator;
     private final UserMapper userMapper;
 
     /**
@@ -99,7 +95,7 @@ public class OrganizationMembershipController {
         @PathVariable final Long orgId,
         @RequestBody final AddMemberRequest request,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
-        addMemberValidator.validateAndThrow(request);
+        membershipValidator.validateAddMember(request);
         final OrganizationMembership membership = membershipService.addMember(orgId, request);
         final OrganizationMembershipResponse response = membershipMapper.toMembershipResponse(membership);
         return ResponseEntity.status(OK).body(response);
@@ -148,7 +144,7 @@ public class OrganizationMembershipController {
         @PathVariable final Long userId,
         @RequestBody final UpdateMemberRoleRequest request,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
-        updateRoleValidator.validateAndThrow(request);
+        membershipValidator.validateUpdateRole(request);
         final OrganizationMembership membership = membershipService.updateMemberRole(orgId, userId, request.getRole());
         final OrganizationMembershipResponse response = membershipMapper.toMembershipResponse(membership);
         return ResponseEntity.status(OK).body(response);
@@ -186,7 +182,7 @@ public class OrganizationMembershipController {
     @PreAuthorize("@orgSecurity.isOwner(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
     public ResponseEntity<Void> transferOwnership(@PathVariable final Long orgId, @RequestBody final TransferOwnershipRequest request,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
-        transferOwnershipValidator.validateAndThrow(request);
+        membershipValidator.validateTransferOwnership(request);
         membershipService.transferOwnership(orgId, request.getCurrentOwnerUserId(), request.getNewOwnerUserId());
         return ResponseEntity.status(OK).build();
     }

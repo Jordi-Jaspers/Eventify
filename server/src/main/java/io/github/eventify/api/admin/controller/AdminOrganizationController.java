@@ -1,7 +1,6 @@
 package io.github.eventify.api.admin.controller;
 
 import io.github.eventify.api.admin.model.request.AssignOwnerRequest;
-import io.github.eventify.api.admin.model.validator.AssignOwnerRequestValidator;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.mapper.OrganizationMapper;
@@ -9,6 +8,7 @@ import io.github.eventify.api.organization.model.mapper.OrganizationMembershipMa
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.organization.model.response.OrganizationMembershipResponse;
 import io.github.eventify.api.organization.model.response.OrganizationResponse;
+import io.github.eventify.api.organization.model.validator.OrganizationMembershipValidator;
 import io.github.eventify.api.organization.model.validator.OrganizationValidator;
 import io.github.eventify.api.organization.service.OrganizationMembershipService;
 import io.github.eventify.api.organization.service.OrganizationService;
@@ -56,7 +56,7 @@ public class AdminOrganizationController {
 
     private final OrganizationValidator validator;
 
-    private final AssignOwnerRequestValidator assignOwnerValidator;
+    private final OrganizationMembershipValidator membershipValidator;
 
     @ResponseStatus(CREATED)
     @PreAuthorize("hasAnyAuthority('PROVISION_ORGANIZATIONS')")
@@ -97,7 +97,7 @@ public class AdminOrganizationController {
     public ResponseEntity<OrganizationMembershipResponse> assignOwner(
         @PathVariable final Long orgId,
         @RequestBody final AssignOwnerRequest request) {
-        assignOwnerValidator.validateAndThrow(request);
+        membershipValidator.validateAssignOwner(request);
         final OrganizationMembership membership = membershipService.assignOwner(orgId, request.getEmail(), request.getUserId());
         final OrganizationMembershipResponse response = membershipMapper.toMembershipResponse(membership);
         return ResponseEntity.status(OK).body(response);
