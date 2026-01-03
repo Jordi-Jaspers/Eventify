@@ -6,6 +6,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Input } from '$lib/components/ui/input';
+	import { SortableTableHeader } from '$lib/components/ui/table';
 	import {
 		Building2,
 		Search,
@@ -21,6 +22,16 @@
 	import { formatRelativeDate } from '$lib/utils/date';
 
 	const service = createOrganizationListService(10);
+
+	const columns = [
+		{ key: 'name', label: 'Name', sortable: true, colSpan: 2 },
+		{ key: 'slug', label: 'Slug', sortable: false, colSpan: 2 },
+		{ key: 'status', label: 'Status', sortable: true, colSpan: 1 },
+		{ key: 'owner', label: 'Owner', sortable: false, colSpan: 2 },
+		{ key: 'memberCount', label: 'Members', sortable: true, colSpan: 1 },
+		{ key: 'createdAt', label: 'Created', sortable: false, colSpan: 2 },
+		{ key: 'actions', label: 'Actions', sortable: false, colSpan: 1 }
+	];
 
 	function navigateToMembers(orgId: number | undefined): void {
 		if (orgId) {
@@ -41,6 +52,13 @@
 			day: 'numeric',
 			year: 'numeric'
 		});
+	}
+
+	function getOwnerName(owner: { firstName?: string; lastName?: string } | undefined): string {
+		if (!owner || (!owner.firstName && !owner.lastName)) {
+			return 'No owner';
+		}
+		return `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim();
 	}
 
 	onMount(() => {
@@ -168,24 +186,20 @@
 					<!-- Organizations List -->
 					<div class="space-y-2">
 						<!-- Table Header (hidden on mobile) -->
-						<div
-							class="hidden md:grid md:grid-cols-12 gap-4 px-4 py-2 text-sm font-medium text-muted-foreground border-b border-border/50"
-						>
-							<div class="col-span-3">Name</div>
-							<div class="col-span-2">Slug</div>
-							<div class="col-span-2">Status</div>
-							<div class="col-span-2">Members</div>
-							<div class="col-span-2">Created</div>
-							<div class="col-span-1">Actions</div>
-						</div>
+						<SortableTableHeader
+							{columns}
+							currentSortKey={service.sortKey}
+							currentSortDirection={service.sortDirection}
+							onSort={service.setSort}
+						/>
 
 						<!-- Table Rows -->
 						{#each service.organizations as org (org.slug)}
 							<div
-								class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
+								class="grid grid-cols-1 md:grid-cols-11 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
 							>
 								<!-- Name -->
-								<div class="col-span-1 md:col-span-3">
+								<div class="col-span-1 md:col-span-2">
 									<div class="flex items-center gap-2">
 										<Building2 class="h-4 w-4 text-primary md:hidden" />
 										<div>
@@ -201,14 +215,22 @@
 								</div>
 
 								<!-- Status -->
-								<div class="col-span-1 md:col-span-2">
+								<div class="col-span-1 md:col-span-1">
 									<Badge variant={service.getStatusBadgeVariant(org.status)}>
 										{org.status}
 									</Badge>
 								</div>
 
-								<!-- Members -->
+								<!-- Owner -->
 								<div class="col-span-1 md:col-span-2">
+									<div class="text-sm {org.owner ? '' : 'text-muted-foreground italic'}">
+										<span class="md:hidden font-medium">Owner: </span>
+										{getOwnerName(org.owner)}
+									</div>
+								</div>
+
+								<!-- Members -->
+								<div class="col-span-1 md:col-span-1">
 									<div class="text-sm">
 										<span class="md:hidden text-muted-foreground">Members: </span>
 										{org.memberCount}

@@ -55,6 +55,9 @@
 		isGlobalAdmin || currentUserRole === 'OWNER' || currentUserRole === 'ADMIN'
 	);
 	const isOwner: boolean = $derived(isGlobalAdmin || currentUserRole === 'OWNER');
+	const hasOwner: boolean = $derived(
+		service?.members.some((m: OrganizationMembershipResponse) => m.role === 'OWNER') ?? false
+	);
 
 	// Sheet handlers
 	function openAddSheet(): void {
@@ -182,6 +185,8 @@
 		selectedUser={service.selectedUser}
 		selectedRole={service.selectedRole}
 		showSearchDropdown={service.showSearchDropdown}
+		{hasOwner}
+		{isGlobalAdmin}
 		debouncedQueryLength={service.debouncedQueryLength}
 		onOpenChange={(open) => (showAddSheet = open)}
 		onSearchQueryChange={service.setSearchQuery}

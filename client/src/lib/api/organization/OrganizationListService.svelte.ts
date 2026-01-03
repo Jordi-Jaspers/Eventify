@@ -1,11 +1,11 @@
 import { toast } from 'svelte-sonner';
 import { searchOrganizations } from './OrganizationController';
 import { handleError } from '$lib/utils/error-handler';
-import type { OrganizationResponse, OrganizationStatus } from '$lib/api/models';
+import type { OrganizationResponse, OrganizationStatus, SortDirection } from '$lib/api/models';
 
 /**
  * Service for managing organization search and listing.
- * Encapsulates search, filtering, pagination, and state management.
+ * Encapsulates search, filtering, pagination, sorting, and state management.
  */
 export function createOrganizationListService(pageSize: number = 10) {
 	// Core state
@@ -16,6 +16,10 @@ export function createOrganizationListService(pageSize: number = 10) {
 	// Search & filter state
 	let searchQuery: string = $state('');
 	let selectedStatus: OrganizationStatus | undefined = $state(undefined);
+
+	// Sort state
+	let sortKey: string | null = $state(null);
+	let sortDirection: SortDirection = $state('ASC');
 
 	// Pagination state
 	let currentPage: number = $state(0);
@@ -34,7 +38,9 @@ export function createOrganizationListService(pageSize: number = 10) {
 				page: currentPage,
 				size: pageSize,
 				search: searchQuery || undefined,
-				status: selectedStatus
+				status: selectedStatus,
+				sortKey: sortKey || undefined,
+				sortDirection: sortDirection
 			});
 
 			organizations = response.content ?? [];
@@ -61,6 +67,19 @@ export function createOrganizationListService(pageSize: number = 10) {
 
 	function setStatusFilter(status: OrganizationStatus | undefined): void {
 		selectedStatus = status;
+		currentPage = 0;
+		load();
+	}
+
+	function setSort(key: string): void {
+		if (sortKey === key) {
+			// Toggle direction if same key
+			sortDirection = sortDirection === 'ASC' ? 'DESC' : 'ASC';
+		} else {
+			// New key, default to ASC
+			sortKey = key;
+			sortDirection = 'ASC';
+		}
 		currentPage = 0;
 		load();
 	}
@@ -108,6 +127,8 @@ export function createOrganizationListService(pageSize: number = 10) {
 		get error() { return error; },
 		get searchQuery() { return searchQuery; },
 		get selectedStatus() { return selectedStatus; },
+		get sortKey() { return sortKey; },
+		get sortDirection() { return sortDirection; },
 		get currentPage() { return currentPage; },
 		get totalPages() { return totalPages; },
 		get totalElements() { return totalElements; },
@@ -121,6 +142,7 @@ export function createOrganizationListService(pageSize: number = 10) {
 		load,
 		setSearchQuery,
 		setStatusFilter,
+		setSort,
 		previousPage,
 		nextPage,
 		getStatusBadgeVariant

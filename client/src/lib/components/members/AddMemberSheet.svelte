@@ -2,13 +2,15 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Label } from '$lib/components/ui/label';
 	import * as Sheet from '$lib/components/ui/sheet';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import {
 		UserPlus,
 		Shield,
 		Search,
 		X,
 		User as UserIcon,
-		LoaderCircle
+		LoaderCircle,
+		Crown
 	} from '@lucide/svelte';
 	import type { OrganizationalRole, UserSearchResult } from '$lib/api/models';
 
@@ -21,6 +23,8 @@
 		selectedUser: UserSearchResult | null;
 		selectedRole: OrganizationalRole;
 		showSearchDropdown: boolean;
+		hasOwner: boolean;
+		isGlobalAdmin: boolean;
 		onOpenChange: (open: boolean) => void;
 		onSearchQueryChange: (query: string) => void;
 		onSelectUser: (user: UserSearchResult) => void;
@@ -40,6 +44,8 @@
 		selectedUser,
 		selectedRole,
 		showSearchDropdown,
+		hasOwner,
+		isGlobalAdmin,
 		onOpenChange,
 		onSearchQueryChange,
 		onSelectUser,
@@ -49,6 +55,16 @@
 		onSearchFocus,
 		debouncedQueryLength
 	}: Props = $props();
+
+	// OWNER button is disabled if org already has an owner OR user is not a global admin
+	const ownerButtonDisabled: boolean = $derived(hasOwner || !isGlobalAdmin);
+	const ownerButtonTooltip: string = $derived(
+		hasOwner
+			? 'This organization already has an owner'
+			: !isGlobalAdmin
+				? 'Only global admins can assign owners'
+				: ''
+	);
 
 	function handleSearchInput(event: Event): void {
 		const target = event.target as HTMLInputElement;
@@ -77,6 +93,42 @@
 			<div class="space-y-2">
 				<Label>Role</Label>
 				<div class="flex gap-2">
+					{#if ownerButtonDisabled}
+						<Tooltip.Provider>
+							<Tooltip.Root>
+								<Tooltip.Trigger>
+									{#snippet child({ props })}
+										<Button
+											{...props}
+											variant="outline"
+											size="sm"
+											disabled={true}
+											class="bg-background/50 border-border/50 opacity-50 cursor-not-allowed"
+										>
+											<Crown class="mr-2 h-4 w-4" />
+											OWNER
+										</Button>
+									{/snippet}
+								</Tooltip.Trigger>
+								<Tooltip.Content>
+									<p>{ownerButtonTooltip}</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+						</Tooltip.Provider>
+					{:else}
+						<Button
+							variant={selectedRole === 'OWNER' ? 'default' : 'outline'}
+							size="sm"
+							onclick={() => onRoleChange('OWNER')}
+							disabled={adding}
+							class={selectedRole === 'OWNER'
+								? 'bg-gradient-to-r from-purple-500 to-purple-600'
+								: 'bg-background/50 border-border/50'}
+						>
+							<Crown class="mr-2 h-4 w-4" />
+							OWNER
+						</Button>
+					{/if}
 					<Button
 						variant={selectedRole === 'ADMIN' ? 'default' : 'outline'}
 						size="sm"

@@ -4,7 +4,8 @@ import type {
     OrganizationStatus,
     PageResourceOrganizationResponse,
     SearchInput,
-    SortablePageInput
+    SortablePageInput,
+    SortDirection
 } from "$lib/api/models.ts";
 
 export interface SearchOrganizationsParams {
@@ -12,6 +13,8 @@ export interface SearchOrganizationsParams {
     size?: number;
     search?: string;
     status?: OrganizationStatus;
+    sortKey?: string;
+    sortDirection?: SortDirection;
 }
 
 /**
@@ -56,7 +59,11 @@ export async function searchOrganizations(params: SearchOrganizationsParams = {}
     const requestBody: SortablePageInput = {
         pageNumber: params.page ?? 0,
         pageSize: params.size ?? 10,
-        searchInputs
+        searchInputs,
+        sortOrder: params.sortKey && params.sortDirection ? [{
+            name: params.sortKey,
+            direction: params.sortDirection
+        }] : undefined
     };
 
     const {data, error} = await client.POST('/v1/admin/organization/search', {
