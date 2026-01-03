@@ -1,3 +1,7 @@
+# Bug Fixes
+- [ ] **Fix User login redirect**
+    - User on succesful login is not redirected to dashboard general dashboard. must refresh the page to get redirected.
+
 # Epic: User Management
 - [ ] **User Dashboard**:
     - Create filterable and sortable user list view

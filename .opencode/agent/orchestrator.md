@@ -263,9 +263,42 @@ api/{domain}/
 - ✅ Explicit TypeScript types everywhere
 - ✅ Svelte 5 runes ($state, $derived, $effect)
 - ✅ Use CLIENT_ROUTES/SERVER_ROUTES (never hardcode paths)
-- ✅ Use reusable components (AppLogo, OAuthButtons, AppNavbar)
+- ✅ Use reusable components (AppLogo, OAuthButtons, AppNavbar, DataTable)
 - ✅ Glassmorphism cards, gradient buttons
 - ✅ `bun run check` passes with 0 errors
+- ✅ **DataTable for search/list pages** - Use generic DataTable component for server-side paginated tables
+
+### DataTable Component (Search/List Pages)
+
+**When to use:** Any page with server-side search, pagination, sorting, or filtering.
+
+**Location:** `client/src/lib/components/data-table/`
+
+**Backend requirement:** Endpoint must accept `SortablePageInput` and return `PageResource<T>` (jframe pattern).
+
+**Filter types supported:**
+| Type | UI | Use Case |
+|------|-----|----------|
+| TEXT | Text input | Exact match search |
+| FUZZY_TEXT | Text + debounce | Partial/fuzzy search (most common) |
+| ENUM | Button group | Single select (e.g., status) |
+| MULTI_ENUM | Pill buttons | Multi-select (e.g., filter by multiple statuses) |
+| BOOLEAN | 3-state toggle | Yes/No/All filters |
+| NUMERIC | Number input | Numeric filters |
+| DATE | Date range picker | Date range filters |
+
+**When delegating to sveltekit-frontend-agent for search/list features:**
+```
+FEATURE: [Feature name]
+REQUIREMENTS: [What to display, filter, sort]
+API_ENDPOINTS: [Must be SortablePageInput/PageResource<T> pattern]
+USE_DATATABLE: Yes - use DataTable component from $lib/components/data-table
+COLUMNS: [List columns with sortable/filterable config]
+FILTERS: [Which filter types needed]
+CONTEXT: Reference client/src/routes/(authenticated)/admin/organizations/+page.svelte
+```
+
+**Reference implementation:** Organizations admin page (`/admin/organizations`)
 
 ### Database Standards
 - ✅ Liquibase migrations in XML with `<sql>` tags (NOT Liquibase annotations)

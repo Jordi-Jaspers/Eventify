@@ -1,6 +1,6 @@
 # Story: Members Table with DataTable Component
 
-## Epic: UI Components
+## Epic: Multi-Tenant
 
 ## Summary
 Integrate the members list with the new DataTable component to enable server-side search, sort, and pagination for organization members.

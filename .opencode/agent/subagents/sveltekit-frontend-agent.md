@@ -670,6 +670,139 @@ interface CreateUserRequest {  // Already generated!
 </div>
 ```
 
+### DataTable Component (Server-Side Pagination/Sort/Filter)
+
+**For paginated tables with server-side search, sort, and filtering, use the DataTable component:**
+
+Location: `$lib/components/data-table/`
+
+**Components:**
+- `DataTable` - Main wrapper with Card, filters, pagination
+- `DataTableHeader` - Sortable column headers
+- `DataTableFilters` - Smart filter bar (text search + pills)
+- `DataTablePagination` - Prev/next controls
+- `DataTableSkeleton` - Shimmer loading animation
+- `DataTableEmpty` - Empty state with icon
+- `createDataTableService<T>()` - Service factory
+
+**Filter Types Supported:**
+| Type | UI | Backend SearchInput |
+|------|-----|---------------------|
+| TEXT | Text input | `textValue` |
+| FUZZY_TEXT | Text input + search icon (debounced) | `textValue` |
+| ENUM | Button group (single) | `textValue` |
+| MULTI_ENUM | Pill buttons (multi) | `textValueList` |
+| BOOLEAN | 3-state toggle | `textValue` |
+| NUMERIC | Number input | `textValueAsInteger` |
+| DATE | Date range picker | `fromDateValue`, `toDateValue` |
+
+**Usage Example:**
+
+```svelte
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { DataTable, createDataTableService } from '$lib/components/data-table';
+  import type { DataTableColumn } from '$lib/components/data-table/types';
+  import { searchOrganizations } from '$lib/api/organization/OrganizationController';
+  import type { OrganizationResponse, OrganizationStatus } from '$lib/api/models';
+  import { Badge } from '$lib/components/ui/badge';
+  import { Building2 } from '@lucide/svelte';
+
+  // Define columns with filter/sort configuration
+  const columns: DataTableColumn<OrganizationResponse>[] = [
+    {
+      key: 'name',
+      label: 'Name',
+      sortable: true,
+      filterable: true,
+      filterType: 'FUZZY_TEXT',
+      filterPlaceholder: 'Search by name...',
+      colSpan: 2
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: true,
+      filterable: true,
+      filterType: 'MULTI_ENUM',
+      filterOptions: [
+        { value: 'TRIAL', label: 'Trial' },
+        { value: 'ACTIVE', label: 'Active' },
+        { value: 'SUSPENDED', label: 'Suspended' }
+      ]
+    },
+    {
+      key: 'memberCount',
+      label: 'Members',
+      sortable: true
+    },
+    {
+      key: 'createdAt',
+      label: 'Created',
+      sortable: true,
+      colSpan: 2
+    },
+    {
+      key: 'actions',
+      label: 'Actions'
+    }
+  ];
+
+  // Create service with controller function
+  const service = createDataTableService<OrganizationResponse>({
+    fetchFn: searchOrganizations,  // Must accept SortablePageInput, return PageResource<T>
+    pageSize: 10
+  });
+
+  onMount(() => service.load());
+</script>
+
+<DataTable {columns} {service} title="All Organizations" icon={Building2}>
+  {#snippet row(org: OrganizationResponse)}
+    <div class="grid grid-cols-1 md:grid-cols-7 gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors">
+      <div class="col-span-2 font-medium">{org.name}</div>
+      <div><Badge variant={getStatusVariant(org.status)}>{org.status}</Badge></div>
+      <div>{org.memberCount}</div>
+      <div class="col-span-2 text-muted-foreground">{formatDate(org.createdAt)}</div>
+      <div><!-- Actions --></div>
+    </div>
+  {/snippet}
+</DataTable>
+```
+
+**Column Definition Interface:**
+```typescript
+interface DataTableColumn<T> {
+  key: string;                    // Field name (maps to backend)
+  label: string;                  // Display label
+  colSpan?: number;               // Grid columns (default: 1)
+  sortable?: boolean;             // Can sort by this column
+  filterable?: boolean;           // Show filter for this column
+  filterType?: FilterType;        // 'TEXT' | 'FUZZY_TEXT' | 'ENUM' | 'MULTI_ENUM' | 'BOOLEAN' | 'NUMERIC' | 'DATE'
+  filterOptions?: FilterOption[]; // For ENUM/MULTI_ENUM: { value, label }[]
+  filterPlaceholder?: string;     // Placeholder text
+}
+```
+
+**Controller Function Pattern:**
+```typescript
+// Controller must accept SortablePageInput and return PageResource<T>
+export async function searchOrganizations(input: SortablePageInput): Promise<PageResource<OrganizationResponse>> {
+  const { data, error } = await client.POST('/v1/admin/organization/search', { body: input });
+  if (error) throw error;
+  return data;
+}
+```
+
+**When to use DataTable vs simple Table:**
+- ✅ Use DataTable: Server-side pagination, sorting, filtering needed
+- ✅ Use DataTable: Large datasets (> 50 items)
+- ✅ Use DataTable: Backend has `SortablePageInput`/`PageResource<T>` endpoint
+- ❌ Use simple Table: Small static lists (< 20 items)
+- ❌ Use simple Table: No filtering/sorting needed
+
+**Reference:** `client/src/routes/(authenticated)/admin/organizations/+page.svelte`
+
 ### Modal/Dialog Pattern
 
 ```svelte
