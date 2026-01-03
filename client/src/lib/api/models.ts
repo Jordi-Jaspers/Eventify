@@ -86,3 +86,9 @@ export interface DevCredentialsResponse {
 	email: string;
 	password: string;
 }
+
+// ================ Admin Organization types ===================
+export interface AssignOwnerRequest {
+	email?: string;
+	userId?: number;
+}

@@ -7,6 +7,7 @@ import {
 	transferOwnership,
 	searchUsersToAdd
 } from './OrganizationMembershipController';
+import { assignOrganizationOwner } from '$lib/api/admin/AdminController';
 import { handleError } from '$lib/utils/error-handler';
 import type {
 	OrganizationMembershipResponse,
@@ -46,37 +47,12 @@ export function createMembershipService(orgId: number) {
 	let transferTarget: OrganizationMembershipResponse | null = $state(null);
 	let transferConfirmation: string = $state('');
 
-	// Setup debounced search
-	$effect(() => {
-		if (debounceTimer) clearTimeout(debounceTimer);
-
-		if (searchQuery.length >= 3) {
-			debounceTimer = setTimeout(() => {
-				debouncedQuery = searchQuery;
-			}, 300);
-		} else {
-			debouncedQuery = '';
-			searchResults = [];
-		}
-
-		return () => {
-			if (debounceTimer) clearTimeout(debounceTimer);
-		};
-	});
-
-	// Trigger search when debounced query changes
-	$effect(() => {
-		if (debouncedQuery.length >= 3) {
-			performSearch();
-		}
-	});
-
-	async function performSearch(): Promise<void> {
+	async function performSearch(query: string): Promise<void> {
 		isSearching = true;
 		showSearchDropdown = true;
 
 		try {
-			const results: UserSearchResult[] = await searchUsersToAdd(orgId, debouncedQuery);
+			const results: UserSearchResult[] = await searchUsersToAdd(orgId, query);
 			const memberEmails: Set<string> = new Set(
 				members.map((m: OrganizationMembershipResponse) => m.userEmail.toLowerCase())
 			);
@@ -116,10 +92,21 @@ export function createMembershipService(orgId: number) {
 		isAdding = true;
 
 		try {
-			const newMember: OrganizationMembershipResponse = await addMember(orgId, {
-				email: selectedUser.email,
-				role: selectedRole
-			});
+			let newMember: OrganizationMembershipResponse;
+			
+			if (selectedRole === 'OWNER') {
+				// Use admin endpoint for OWNER role
+				newMember = await assignOrganizationOwner(orgId, {
+					email: selectedUser.email
+				});
+			} else {
+				// Use regular endpoint for MEMBER/ADMIN roles
+				newMember = await addMember(orgId, {
+					email: selectedUser.email,
+					role: selectedRole
+				});
+			}
+			
 			members = [...members, newMember];
 			toast.success(`${selectedUser.email} added successfully`);
 			resetAddState();
@@ -226,6 +213,7 @@ export function createMembershipService(orgId: number) {
 	function selectUser(user: UserSearchResult): void {
 		selectedUser = user;
 		searchQuery = '';
+		debouncedQuery = '';
 		searchResults = [];
 		showSearchDropdown = false;
 	}
@@ -233,20 +221,41 @@ export function createMembershipService(orgId: number) {
 	function clearUserSelection(): void {
 		selectedUser = null;
 		searchQuery = '';
+		debouncedQuery = '';
 		searchResults = [];
 		showSearchDropdown = false;
 	}
 
 	function setSearchQuery(query: string): void {
 		searchQuery = query;
+		
+		// Clear existing timer
+		if (debounceTimer) {
+			clearTimeout(debounceTimer);
+			debounceTimer = null;
+		}
+
 		if (query.length === 0) {
+			debouncedQuery = '';
 			searchResults = [];
 			showSearchDropdown = false;
+		} else if (query.length >= 3) {
+			showSearchDropdown = true;
+			// Debounce the search
+			debounceTimer = setTimeout(() => {
+				debouncedQuery = query;
+				performSearch(query);
+			}, 300);
+		} else {
+			// 1-2 characters: show dropdown with message but don't search
+			showSearchDropdown = true;
+			debouncedQuery = '';
+			searchResults = [];
 		}
 	}
 
 	function showDropdown(): void {
-		if (searchQuery.length >= 3) {
+		if (searchQuery.length > 0) {
 			showSearchDropdown = true;
 		}
 	}
@@ -255,8 +264,13 @@ export function createMembershipService(orgId: number) {
 		selectedUser = null;
 		selectedRole = 'MEMBER';
 		searchQuery = '';
+		debouncedQuery = '';
 		searchResults = [];
 		showSearchDropdown = false;
+		if (debounceTimer) {
+			clearTimeout(debounceTimer);
+			debounceTimer = null;
+		}
 	}
 
 	function setMemberToRemove(member: OrganizationMembershipResponse | null): void {

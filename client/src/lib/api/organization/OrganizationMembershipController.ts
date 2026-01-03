@@ -94,9 +94,6 @@ export async function transferOwnership(orgId: number, request: TransferOwnershi
 
 /**
  * Search users to add to organization (min 3 characters)
- * Uses organization-specific search endpoint.
- * Note: Backend uses @GetMapping with @RequestBody which is non-standard.
- * Using GET with body param for compatibility.
  */
 export async function searchUsersToAdd(orgId: number, query: string): Promise<UserSearchResult[]> {
 	const requestBody: SortablePageInput = {
@@ -112,7 +109,7 @@ export async function searchUsersToAdd(orgId: number, query: string): Promise<Us
 			: []
 	};
 
-	const {data, error} = await client.GET('/v1/organization/{orgId}/members/search', {
+	const {data, error} = await client.POST('/v1/organization/{orgId}/members/search', {
 		params: { path: { orgId } },
 		body: requestBody
 	});
