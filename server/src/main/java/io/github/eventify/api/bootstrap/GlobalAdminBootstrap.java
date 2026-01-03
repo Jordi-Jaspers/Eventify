@@ -6,12 +6,13 @@ import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.config.properties.SecurityProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Bootstrap component to create a global admin user on application startup.
@@ -47,13 +48,14 @@ public class GlobalAdminBootstrap {
         final String adminEmail = securityProperties.getBootstrap().getEmail();
         final String adminPassword = securityProperties.getBootstrap().getPassword();
 
-        if (userRepository.existsByRole(Role.ADMIN)) {
-            log.debug("Global admin bootstrap skipped: admin user already exists");
+        // Check required properties first (optimization: avoid DB query if not configured)
+        if (isBlank(adminEmail) || isBlank(adminPassword)) {
+            log.debug("Global admin bootstrap skipped: required bootstrap properties not set");
             return;
         }
 
-        if (isNotBlank(adminEmail) || isNotBlank((adminPassword))) {
-            log.debug("Global admin bootstrap skipped: required bootstrap properties not set");
+        if (userRepository.existsByRole(Role.ADMIN)) {
+            log.debug("Global admin bootstrap skipped: admin user already exists");
             return;
         }
 
