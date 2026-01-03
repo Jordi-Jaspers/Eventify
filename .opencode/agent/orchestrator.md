@@ -665,7 +665,10 @@ Task: Add inline editing to profile page with modal warning for email
 10. **Compose feature details** - add file in `.opencode/jira/completed/YYYYMMDD-EPIC-feature-name.md` after approving plan
 11. **Maintain changelog** - Update `.opencode/jira/CHANGELOG.md` after every feature/task completion with reference to feature detail file
 12. **Delete corresponding story if exists** - after feature/task completion, check `/opt/hawaii/workspace/eventify/.opencode/jira/stories/` for corresponding story and delete it to keep it clean.
-12. **Remind frontend agent to generate OpenAPI types** - after backend changes, startup the backend to generate updated OpenAPI spec, then have frontend agent run the type generation command.
+12. **Remind frontend agent to generate OpenAPI types** - after backend changes:
+    - Start the backend server
+    - Run `bun run download:api` (downloads `server/openapi.json` from backend)
+    - Run `bun run generate:api` (generates TypeScript types from `server/openapi.json`)
 
 ## Success Metrics
 

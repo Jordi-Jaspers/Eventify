@@ -923,13 +923,19 @@ Before reporting completion:
 ## Development Commands
 
 ```bash
-# From web/ directory
+# From client/ directory
 bun run dev              # Dev server
 bun run check            # Type check (MUST pass with 0 errors)
 bun run build            # Production build
 bun run preview          # Preview production build
-bun run generate:api     # Generate OpenAPI types
+bun run download:api     # Download OpenAPI spec to server/openapi.json
+bun run generate:api     # Generate TypeScript types from server/openapi.json
 ```
+
+**OpenAPI Workflow:**
+1. Ensure backend is running (`./gradlew bootRun` in server/)
+2. Run `bun run download:api` to download latest OpenAPI spec to `server/openapi.json`
+3. Run `bun run generate:api` to regenerate TypeScript types from it
 
 ## Completion Criteria
 
@@ -1001,7 +1007,7 @@ You're done when:
 ## Critical Reminders
 
 1. **Explicit types EVERYWHERE** - No type inference, annotate ALL variables
-2. **ALWAYS generate types from OpenAPI** - before implementing API calls ("generate:api" command)
+2. **ALWAYS generate types from OpenAPI** - Run `bun run download:api` then `bun run generate:api` before implementing API calls
 3. **Use CLIENT_ROUTES/SERVER_ROUTES** - Never hardcode paths
 4. **Research when uncertain** - Search for latest patterns immediately
 5. **Route minimalism** - Routes are adapters, keep them slim
