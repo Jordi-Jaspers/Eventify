@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -71,8 +70,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: UserRepository.save should be called once
             final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -105,8 +103,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: UserRepository.save should be called
             final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -133,8 +130,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: UserRepository.save should be called
             final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -161,8 +157,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: PasswordEncoder.encode should be called with plain password
             verify(passwordEncoder, times(1)).encode(GLOBAL_ADMIN_PASSWORD);
@@ -189,8 +184,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Saved user should have ADMIN role
             final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -213,8 +207,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Saved user should be enabled
             final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -237,8 +230,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Saved user should be validated
             final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -264,8 +256,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(bootstrapProperties.getPassword()).thenReturn(GLOBAL_ADMIN_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: UserRepository.save should NOT be called
             verify(userRepository, times(0)).save(any());
@@ -280,8 +271,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(bootstrapProperties.getPassword()).thenReturn(GLOBAL_ADMIN_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: UserRepository.save should NOT be called
             verify(userRepository, times(0)).save(any());
@@ -295,8 +285,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(bootstrapProperties.getPassword()).thenReturn(null);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: UserRepository.save should NOT be called
             verify(userRepository, times(0)).save(any());
@@ -310,8 +299,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(bootstrapProperties.getPassword()).thenReturn(null);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: UserRepository.save should NOT be called
             verify(userRepository, times(0)).save(any());
@@ -338,8 +326,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Saved user should have custom email
             final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -356,8 +343,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(bootstrapProperties.getPassword()).thenReturn(GLOBAL_ADMIN_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: UserRepository.save should NOT be called
             verify(userRepository, times(0)).save(any());
@@ -385,8 +371,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(customPassword)).thenReturn(encodedCustomPassword);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: PasswordEncoder should be called with custom password
             verify(passwordEncoder, times(1)).encode(customPassword);
@@ -406,8 +391,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(bootstrapProperties.getPassword()).thenReturn("");
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: UserRepository.save should NOT be called
             verify(userRepository, times(0)).save(any());
@@ -434,8 +418,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Saved user should have custom first name
             final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -459,8 +442,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Saved user should have custom last name
             final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -489,10 +471,9 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
 
             // Then: No exception should be thrown
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // And: UserRepository.save should be called
             verify(userRepository, times(1)).save(any());
@@ -518,8 +499,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(passwordEncoder.encode(GLOBAL_ADMIN_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Should attempt to save (DB constraint would prevent duplicate)
             verify(userRepository, times(1)).save(any());
@@ -533,8 +513,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(bootstrapProperties.getPassword()).thenReturn(GLOBAL_ADMIN_PASSWORD);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Should not proceed with creation
             verify(userRepository, never()).existsByRole(Role.ADMIN);
@@ -549,8 +528,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(bootstrapProperties.getPassword()).thenReturn(null);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Should not proceed with creation
             verify(userRepository, never()).existsByRole(Role.ADMIN);
@@ -565,8 +543,7 @@ public class GlobalAdminBootstrapTest extends UnitTest {
             when(bootstrapProperties.getPassword()).thenReturn(null);
 
             // When: Application startup event is triggered
-            final ApplicationStartedEvent event = mock(ApplicationStartedEvent.class);
-            globalAdminBootstrap.onApplicationStarted(event);
+            globalAdminBootstrap.onApplicationStarted();
 
             // Then: Should NOT check if admin exists (optimization)
             verify(userRepository, never()).existsByRole(Role.ADMIN);
