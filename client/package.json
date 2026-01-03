@@ -16,7 +16,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test": "vitest",
-    "generate:api": "openapi-typescript http://localhost:8080/api/v1/public/docs -o src/lib/types/api.d.ts"
+    "download:api": "curl -s http://localhost:8080/api/v1/public/docs -o ../server/openapi.json",
+    "generate:api": "openapi-typescript ../server/openapi.json -o src/lib/types/api.d.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
