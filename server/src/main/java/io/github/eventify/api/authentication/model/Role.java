@@ -1,6 +1,7 @@
 package io.github.eventify.api.authentication.model;
 
 import io.github.eventify.api.authentication.model.response.RoleResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
  */
 @Getter
 @AllArgsConstructor
+@Schema(description = "Role")
 public enum Role {
 
     USER(
@@ -27,7 +29,10 @@ public enum Role {
         "The authority for a user with all permissions.",
         Set.of(
             Permission.ACCESS_APPLICATION,
-            Permission.MANAGE_USERS
+            Permission.MANAGE_USERS,
+            Permission.PROVISION_ORGANIZATIONS,
+            Permission.MANAGE_ORGANIZATIONS,
+            Permission.VIEW_PLATFORM_STATS
         )
     );
 

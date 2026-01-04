@@ -2,6 +2,7 @@ package io.github.eventify.common.exception;
 
 
 import io.github.jframe.exception.ApiError;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
+@Schema(description = "ApiErrorCode")
 public enum ApiErrorCode implements ApiError {
 
     INTERNAL_SERVER_ERROR(
@@ -103,6 +105,54 @@ public enum ApiErrorCode implements ApiError {
     OAUTH2_AUTHENTICATION_ERROR(
         "ERR-0023",
         "OAuth2 authentication failed. Please try again or contact support."
+    ),
+    NON_EXISTING_USER_ERROR(
+        "ERR-0024",
+        "In order to perform this action, the user must exist within the system."
+    ),
+    ORGANIZATION_NOT_FOUND_ERROR(
+        "ERR-0025",
+        "The requested organization does not exist."
+    ),
+    MEMBERSHIP_NOT_FOUND_ERROR(
+        "ERR-0026",
+        "The requested organization membership does not exist."
+    ),
+    USER_ALREADY_MEMBER_ERROR(
+        "ERR-0027",
+        "User is already a member of this organization."
+    ),
+    CANNOT_ADD_DISABLED_USER_ERROR(
+        "ERR-0028",
+        "Cannot add disabled user to organization."
+    ),
+    CANNOT_SET_OWNER_ROLE_ERROR(
+        "ERR-0029",
+        "Only global administrators can assign the OWNER role."
+    ),
+    CANNOT_CHANGE_OWNER_ROLE_ERROR(
+        "ERR-0030",
+        "Cannot change the role of the organization owner."
+    ),
+    CANNOT_REMOVE_OWNER_ERROR(
+        "ERR-0031",
+        "Cannot remove the organization owner."
+    ),
+    CANNOT_TRANSFER_TO_SELF_ERROR(
+        "ERR-0032",
+        "Cannot transfer ownership to yourself."
+    ),
+    NOT_ORGANIZATION_OWNER_ERROR(
+        "ERR-0033",
+        "Only the current owner can transfer ownership."
+    ),
+    ORGANIZATION_ALREADY_HAS_OWNER_ERROR(
+        "ERR-0034",
+        "This organization already has an owner."
+    ),
+    NOT_MEMBER_OF_ORGANIZATION_ERROR(
+        "ERR-0035",
+        "User is not a member of the specified organization."
     );
 
     /* The error code for this reason. */

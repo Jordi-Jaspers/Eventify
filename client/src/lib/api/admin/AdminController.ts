@@ -1,0 +1,36 @@
+import { client } from '$lib/api/client.ts';
+import type {AdminStatsResponse, AssignOwnerRequest, OrganizationMembershipResponse} from "$lib/api/models.ts";
+
+/**
+ * Get admin dashboard statistics
+ */
+export async function getAdminStats(): Promise<AdminStatsResponse> {
+	const { data, error } = await client.GET('/v1/admin/stats');
+
+	if (error) {
+		throw error;
+	}
+
+	return data;
+}
+
+/**
+ * Assign an owner to an organization (Admin only)
+ * Used when an organization doesn't have an owner yet
+ */
+export async function assignOrganizationOwner(orgId: number, request: AssignOwnerRequest): Promise<OrganizationMembershipResponse> {
+	const { data, error } = await client.POST('/v1/admin/organization/{orgId}/owner', {
+		params: { path: { orgId } },
+		body: request
+	});
+
+	if (error) {
+		throw error;
+	}
+
+	if (!data) {
+		throw new Error('No data returned from assign owner');
+	}
+
+	return data as OrganizationMembershipResponse;
+}

@@ -23,4 +23,14 @@ public class OAuth2Exception extends ApiException {
     public OAuth2Exception(final String message) {
         super(OAUTH2_AUTHENTICATION_ERROR, message);
     }
+
+    /**
+     * Constructor with a custom error message and original cause.
+     *
+     * @param message The error message.
+     * @param cause   The original cause of the exception.
+     */
+    public OAuth2Exception(final String message, final Throwable cause) {
+        super(OAUTH2_AUTHENTICATION_ERROR, cause, message);
+    }
 }

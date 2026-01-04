@@ -3,7 +3,7 @@ package io.github.eventify.api.authentication.controller;
 import io.github.eventify.api.authentication.model.response.AuthenticationResponse;
 import io.github.eventify.api.authentication.service.AuthenticationService;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.api.user.model.mapper.UserMapper;
+import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +33,14 @@ public class EmailVerificationController {
 
     private final AuthenticationService authenticationService;
 
-    private final UserMapper userMapper;
+    private final UserDetailsMapper userDetailsMapper;
 
     @ResponseStatus(OK)
     @Operation(summary = "Verify the email address of a user.")
     @PostMapping(path = VERIFICATION_PATH)
     public ResponseEntity<AuthenticationResponse> verifyEmail(@RequestParam("token") final String token) {
         final User user = authenticationService.verifyEmail(token);
-        return ResponseEntity.status(OK).body(userMapper.toUserResponse(user));
+        return ResponseEntity.status(OK).body(userDetailsMapper.toUserResponse(user));
     }
 
     @ResponseStatus(NO_CONTENT)

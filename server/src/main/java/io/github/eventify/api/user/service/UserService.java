@@ -2,11 +2,15 @@ package io.github.eventify.api.user.service;
 
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.api.user.model.UserMetaData;
 import io.github.eventify.api.user.model.request.UpdateUserDetailsRequest;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.email.service.sender.EmailService;
 import io.github.eventify.common.exception.AuthorizationException;
 import io.github.eventify.common.exception.UserAlreadyExistsException;
+import io.github.jframe.datasource.search.model.JpaSearchSpecification;
+import io.github.jframe.datasource.search.model.SearchCriterium;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +19,12 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,11 +44,14 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.ExcessiveImports")
 public class UserService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
+
+    private final UserMetaData userMetaData;
 
     private final EmailService emailService;
 
@@ -48,19 +61,26 @@ public class UserService implements UserDetailsService {
      * @param username the username of the user
      * @return the user
      */
+    @NonNull
     @Override
-    public User loadUserByUsername(final String username) {
+    public User loadUserByUsername(@NonNull final String username) {
         return userRepository.findByEmail(username)
             .orElseThrow(() -> new AuthorizationException(INVALID_CREDENTIALS));
     }
 
     /**
-     * Retrieve all the users from the database.
+     * Search for users with pagination and sorting.
      *
-     * @return a list of all the users
+     * @param input the pagination and sorting input
+     * @return a page of users matching the search criteria
      */
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public Page<User> searchUsers(final SortablePageInput input) {
+        final Sort sort = userMetaData.toSort(input.getSortOrder());
+        final Pageable pageable = PageRequest.of(input.getPageNumber(), input.getPageSize(), sort);
+
+        final List<SearchCriterium> criteria = userMetaData.toSearchCriteria(input.getSearchInputs());
+        final Specification<User> spec = new JpaSearchSpecification<>(criteria);
+        return userRepository.findAll(spec, pageable);
     }
 
     /**
@@ -118,6 +138,17 @@ public class UserService implements UserDetailsService {
      */
     public User updateUserDetails(final User user) {
         return userRepository.save(user);
+    }
+
+    /**
+     * Get user by id with organizations eagerly loaded.
+     *
+     * @param id the user id
+     * @return the user with organizations
+     */
+    public User getUserWithOrganizations(final Long id) {
+        return userRepository.findByIdWithOrganizations(id)
+            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
     }
 
     /**

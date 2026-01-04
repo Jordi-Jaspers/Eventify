@@ -1,5 +1,6 @@
 package io.github.eventify.api.authentication.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,10 +13,14 @@ import java.util.stream.Stream;
  */
 @Getter
 @AllArgsConstructor
+@Schema(description = "Permission")
 public enum Permission {
 
     ACCESS_APPLICATION("The permission to access the application."),
-    MANAGE_USERS("The permission to manage the user.");
+    MANAGE_USERS("The permission to manage the user."),
+    PROVISION_ORGANIZATIONS("The permission to provision new organizations."),
+    MANAGE_ORGANIZATIONS("The permission to manage organizations."),
+    VIEW_PLATFORM_STATS("The permission to view platform statistics.");
 
     private final String description;
 

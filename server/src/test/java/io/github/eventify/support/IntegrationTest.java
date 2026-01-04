@@ -2,10 +2,14 @@ package io.github.eventify.support;
 
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.authentication.model.request.RegisterUserRequest;
+import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.model.TokenType;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.request.*;
+import io.github.eventify.common.security.principal.JwtUserPrincipalAuthenticationToken;
+import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import io.github.eventify.support.util.WebMvcConfigurator;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -42,15 +46,44 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected static final String TEST_PASSWORD = "Test123!@#";
     protected static final String INTEGRATION_PREFIX = "[Integration Test] - ";
 
+    protected static final String ORGANIZATION_NAME = "Test Organization";
+
     protected static final String NEW_PASSWORD = "NewTest123!@#";
     protected static final String NEW_PASSWORD_CONFIRMATION = "NewTest123!@#";
 
-    @Autowired
-    protected PasswordEncoder passwordEncoder;
+    protected User admin;
 
     @BeforeEach
     public void cleanUp() {
+        deleteAllTestOrganizations();
         deleteAllTestUsers();
+
+        admin = aValidatedUserWithRole(Role.ADMIN);
+        final JwtUserPrincipalAuthenticationToken authentication = new JwtUserPrincipalAuthenticationToken(
+            new UserTokenPrincipal(admin, admin.getAccessToken().getValue()),
+            admin.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    protected ProvisionOrganizationRequest aValidProvisionOrganizationRequest() {
+        final String suffix = UUID.randomUUID().toString().substring(0, 5);
+        final User owner = aValidatedUser();
+        return new ProvisionOrganizationRequest()
+            .setName(INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix)
+            .setOwner(owner.getEmail());
+    }
+
+    protected ProvisionOrganizationRequest aValidProvisionOrganizationRequestWithOwner(final String ownerEmail) {
+        final String suffix = UUID.randomUUID().toString().substring(0, 5);
+        return new ProvisionOrganizationRequest()
+            .setName(INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix)
+            .setOwner(ownerEmail);
     }
 
     protected User aValidatedUserWithRole(final Role role) {
@@ -65,7 +98,7 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     protected User anUnvalidatedUser() {
         final RegisterUserRequest registerRequest = aRegisterRequest();
-        return authenticationService.register(userMapper.toUser(registerRequest), registerRequest.getPassword());
+        return authenticationService.register(userDetailsMapper.toUser(registerRequest), registerRequest.getPassword());
     }
 
     protected User aValidatedUser() {
@@ -209,6 +242,55 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     private void deleteAllTestUsers() {
         final List<User> users = userRepository.findAllByEmailContaining(TEST_EMAIL);
+        organizationRepository.deleteAllByCreatedBy(
+            users.stream().map(User::getId).toList()
+        );
         userRepository.deleteAll(users);
+    }
+
+    private void deleteAllTestOrganizations() {
+        final List<Organization> organizations = organizationRepository.findAllByNameContaining(INTEGRATION_PREFIX);
+        organizationRepository.deleteAll(organizations);
+    }
+
+    /**
+     * Creates an organization with the specified owner.
+     *
+     * @param owner the owner of the organization
+     * @return the created organization
+     */
+    protected Organization createOrganization(final User owner) {
+        final String suffix = UUID.randomUUID().toString().substring(0, 5);
+        final Organization org = new Organization(
+            INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix,
+            "test-org-" + suffix
+        );
+        org.setCreatedBy(owner.getId());
+        final Organization savedOrg = organizationRepository.save(org);
+
+        // Create owner membership
+        final io.github.eventify.api.organization.model.OrganizationMembership ownerMembership =
+            new io.github.eventify.api.organization.model.OrganizationMembership(
+                savedOrg,
+                owner,
+                io.github.eventify.api.organization.model.OrganizationalRole.OWNER
+            );
+        organizationMembershipRepository.save(ownerMembership);
+
+        return savedOrg;
+    }
+
+    /**
+     * Adds a member to an organization with the specified role.
+     *
+     * @param organization the organization
+     * @param user         the user to add
+     * @param role         the organizational role
+     */
+    protected void addMemberToOrganization(final Organization organization, final User user,
+        final io.github.eventify.api.organization.model.OrganizationalRole role) {
+        final io.github.eventify.api.organization.model.OrganizationMembership membership =
+            new io.github.eventify.api.organization.model.OrganizationMembership(organization, user, role);
+        organizationMembershipRepository.save(membership);
     }
 }

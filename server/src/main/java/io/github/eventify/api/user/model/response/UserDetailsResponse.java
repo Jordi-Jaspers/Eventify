@@ -2,11 +2,15 @@ package io.github.eventify.api.user.model.response;
 
 import io.github.eventify.api.authentication.model.Permission;
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.organization.model.response.UserOrganizationResponse;
+import io.github.jframe.datasource.search.model.resource.PageableItemResource;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -14,7 +18,7 @@ import java.util.Set;
  */
 @Data
 @NoArgsConstructor
-public class UserDetailsResponse {
+public class UserDetailsResponse implements PageableItemResource {
 
     private Long id;
 
@@ -26,7 +30,7 @@ public class UserDetailsResponse {
 
     private ZonedDateTime lastLogin;
 
-    private ZonedDateTime created;
+    private ZonedDateTime createdAt;
 
     private Role role;
 
@@ -35,5 +39,7 @@ public class UserDetailsResponse {
     private boolean enabled;
 
     private boolean validated;
+
+    private List<UserOrganizationResponse> organizations = new ArrayList<>();
 
 }

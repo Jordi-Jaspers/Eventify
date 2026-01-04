@@ -1,11 +1,15 @@
 package io.github.eventify.api.user.model;
 
+import io.github.eventify.api.authentication.model.Permission;
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.common.security.oauth2.provider.OAuth2UserInfo;
-import lombok.Data;
+import io.github.jframe.datasource.search.model.PageableItem;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.time.OffsetDateTime;
@@ -14,8 +18,10 @@ import java.util.Collection;
 import java.util.List;
 import jakarta.persistence.*;
 
+import org.apache.logging.log4j.util.Strings;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,12 +32,13 @@ import static io.github.eventify.Main.SERIAL_VERSION_UID;
 /**
  * The user entity.
  */
-@Data
+@Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @Table(name = "\"user\"")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class User implements UserDetails {
+public class User implements UserDetails, PageableItem {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;
@@ -68,10 +75,10 @@ public class User implements UserDetails {
 
     @CreationTimestamp
     @Column(
-        name = "created",
+        name = "created_at",
         updatable = false
     )
-    private OffsetDateTime created;
+    private OffsetDateTime createdAt;
 
     @Column(name = "\"role\"")
     @Enumerated(EnumType.STRING)
@@ -84,6 +91,14 @@ public class User implements UserDetails {
         orphanRemoval = true
     )
     private List<Token> tokens = new ArrayList<>();
+
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        fetch = FetchType.LAZY,
+        orphanRemoval = true
+    )
+    private List<OrganizationMembership> organizations = new ArrayList<>();
 
     @Transient
     private Token accessToken;
@@ -110,14 +125,16 @@ public class User implements UserDetails {
         return password;
     }
 
+    @NonNull
     @Override
     public String getUsername() {
-        return email == null ? null : email.toLowerCase();
+        return email == null ? Strings.EMPTY : email.toLowerCase();
     }
 
     /**
      * {@inheritDoc}
      */
+    @NonNull
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return role.getPermissions()
@@ -165,5 +182,14 @@ public class User implements UserDetails {
      */
     public String getEmail() {
         return email == null ? null : email.toLowerCase();
+    }
+
+    /**
+     * Checks if the user has a certain permission.
+     *
+     * @param permission The permission to check.
+     */
+    public boolean hasPermission(final Permission permission) {
+        return role.getPermissions().contains(permission);
     }
 }

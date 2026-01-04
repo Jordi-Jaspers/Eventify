@@ -11,10 +11,10 @@
 -->
 <script lang="ts">
     import {goto} from '$app/navigation';
-    import {authStore} from '$lib/stores/auth';
+    import {authStore, currentUser} from '$lib/stores/auth';
     import {CLIENT_ROUTES} from '$lib/config/routes';
     import Button from '$lib/components/ui/button/button.svelte';
-    import {Activity, LogOut, User} from '@lucide/svelte';
+    import {Activity, LogOut, User, LayoutDashboard} from '@lucide/svelte';
     import {toast} from 'svelte-sonner';
     import {handleError} from '$lib/utils/error-handler';
 
@@ -27,6 +27,8 @@
             toast.error(message);
         }
     }
+
+    const isAdmin: boolean = $derived($currentUser?.role === 'ADMIN');
 </script>
 
 <!-- Header -->
@@ -41,6 +43,16 @@
             </h1>
         </a>
         <div class="flex items-center gap-2">
+            {#if isAdmin}
+                <Button
+                        onclick={() => goto(CLIENT_ROUTES.ADMIN_DASHBOARD_PAGE.path)}
+                        variant="outline"
+                        class="bg-background/50 border-border/50 hover:bg-accent/20 hover:border-accent hover:shadow-lg hover:shadow-accent/20 hover:scale-105 transition-all duration-200"
+                        title="Admin Dashboard"
+                >
+                    <LayoutDashboard class="h-4 w-4"/>
+                </Button>
+            {/if}
             <Button
                     onclick={() => goto(CLIENT_ROUTES.PROFILE_PAGE.path)}
                     variant="outline"

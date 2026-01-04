@@ -59,7 +59,7 @@ function isValidationErrorResponseResource(
  * @param fallbackMessage - Optional fallback message if error cannot be parsed (default: 'An unexpected error occurred')
  * @returns ErrorHandlerResult with user-friendly message and optional validation errors
  */
-export function handleError(error: unknown, fallbackMessage: string): ErrorHandlerResult {
+export function handleError(error: unknown, fallbackMessage: string = 'An unexpected error occurred'): ErrorHandlerResult {
 	// Handle ValidationErrorResponseResource (validation errors)
 	if (isValidationErrorResponseResource(error)) {
 		const validationError: ValidationErrorResponseResource = error;

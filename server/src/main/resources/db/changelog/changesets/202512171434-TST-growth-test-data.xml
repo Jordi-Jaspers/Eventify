@@ -1,0 +1,100 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202512171434-TST-growth-test-data.xml">
+
+    <changeSet id="202512171434-TST-growth-test-data-1" author="jordi.jaspers" context="test">
+        <comment>Insert sample users with creation dates spread across last 30 days for growth chart visualization.</comment>
+        <sql>
+            -- Insert sample users with dates spread over 30 days
+            -- Password: "TestPassword123!" (BCrypt hashed)
+            INSERT INTO "user" (first_name, last_name, email, role, password, created_at, last_login, enabled, validated)
+            VALUES
+                -- Days 1-5
+                ('Alice', 'Anderson', 'alice.anderson@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Bob', 'Brown', 'bob.brown@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '29 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Carol', 'Clark', 'carol.clark@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '28 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('David', 'Davis', 'david.davis@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '27 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Eve', 'Evans', 'eve.evans@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '26 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+
+                -- Days 6-10
+                ('Frank', 'Foster', 'frank.foster@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Grace', 'Garcia', 'grace.garcia@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '24 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Henry', 'Harris', 'henry.harris@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Ivy', 'Ingram', 'ivy.ingram@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '21 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Jack', 'Jackson', 'jack.jackson@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+
+                -- Days 11-15
+                ('Kelly', 'King', 'kelly.king@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '19 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Leo', 'Lopez', 'leo.lopez@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '17 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Mia', 'Martinez', 'mia.martinez@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '16 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Noah', 'Nelson', 'noah.nelson@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Olivia', 'Owens', 'olivia.owens@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '14 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+
+                -- Days 16-20
+                ('Paul', 'Parker', 'paul.parker@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '13 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Quinn', 'Quinn', 'quinn.quinn@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Rachel', 'Rodriguez', 'rachel.rodriguez@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Sam', 'Smith', 'sam.smith@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '9 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Tina', 'Taylor', 'tina.taylor@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '8 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+
+                -- Days 21-25
+                ('Uma', 'Underwood', 'uma.underwood@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '7 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Victor', 'Valdez', 'victor.valdez@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Wendy', 'Watson', 'wendy.watson@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Xavier', 'Xu', 'xavier.xu@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Yara', 'Young', 'yara.young@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+
+                -- Days 26-30
+                ('Zack', 'Zhang', 'zack.zhang@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Amy', 'Adams', 'amy.adams@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Ben', 'Baker', 'ben.baker@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 hours', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Chloe', 'Carter', 'chloe.carter@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 hours', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true),
+                ('Daniel', 'Diaz', 'daniel.diaz@example.com', 'USER', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202512171434-TST-growth-test-data-2" author="jordi.jaspers" context="test">
+        <comment>Insert sample organizations with creation dates spread across last 30 days for growth chart visualization. Organizations are created by the first admin user (assumed to have id=1).</comment>
+        <sql>
+            -- Insert sample organizations with dates spread over 30 days
+            -- Assumes admin user with id=1 exists (from bootstrap or previous setup)
+            INSERT INTO organization (name, slug, status, created_by, created_at)
+            VALUES
+                -- Days 1-5
+                ('Acme Corporation', 'acme-corp', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days'),
+                ('Beta Industries', 'beta-industries', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '28 days'),
+                ('Gamma Solutions', 'gamma-solutions', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '27 days'),
+                ('Delta Technologies', 'delta-tech', 'TRIAL', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '26 days'),
+
+                -- Days 6-10
+                ('Epsilon Systems', 'epsilon-systems', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days'),
+                ('Zeta Ventures', 'zeta-ventures', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '23 days'),
+                ('Theta Labs', 'theta-labs', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '21 days'),
+                ('Iota Enterprises', 'iota-enterprises', 'TRIAL', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days'),
+
+                -- Days 11-15
+                ('Kappa Holdings', 'kappa-holdings', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days'),
+                ('Lambda Group', 'lambda-group', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '16 days'),
+                ('Mu Partners', 'mu-partners', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days'),
+                ('Nu Innovations', 'nu-innovations', 'TRIAL', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '14 days'),
+
+                -- Days 16-20
+                ('Xi Consulting', 'xi-consulting', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 days'),
+                ('Omicron Digital', 'omicron-digital', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days'),
+                ('Pi Creative', 'pi-creative', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '9 days'),
+
+                -- Days 21-25
+                ('Rho Analytics', 'rho-analytics', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '7 days'),
+                ('Sigma Dynamics', 'sigma-dynamics', 'TRIAL', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days'),
+                ('Tau Media', 'tau-media', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 days'),
+
+                -- Days 26-30
+                ('Upsilon Global', 'upsilon-global', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days'),
+                ('Phi Networks', 'phi-networks', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day'),
+                ('Chi Studios', 'chi-studios', 'TRIAL', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 hours');
+        </sql>
+    </changeSet>
+</databaseChangeLog>

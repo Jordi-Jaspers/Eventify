@@ -1,5 +1,5 @@
 import {client} from "$lib/api/client.ts";
-import type {UserDetailsResponse} from "$lib/api/models.ts";
+import type {UserDetailsResponse, UserOrganizationResponse} from "$lib/api/models.ts";
 
 /**
  * Get current user details (full profile info)
@@ -24,6 +24,19 @@ export async function updateUserDetails(firstName: string, lastName: string): Pr
             lastName
         }
     });
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+}
+
+/**
+ * Get all organizations for the authenticated user
+ */
+export async function getUserOrganizations(): Promise<UserOrganizationResponse[]> {
+    const {data, error} = await client.GET('/v1/user/organization');
 
     if (error) {
         throw error;

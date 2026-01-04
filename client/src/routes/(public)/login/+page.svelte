@@ -1,6 +1,7 @@
 <script lang="ts">
     import {goto} from '$app/navigation';
     import {page} from '$app/state';
+    import {dev} from '$app/environment';
     import {authStore, isAuthenticated, isUnverified} from '$lib/stores/auth';
     import {CLIENT_ROUTES} from '$lib/config/routes';
     import Button from '$lib/components/ui/button/button.svelte';
@@ -12,8 +13,10 @@
     import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
     import {toast} from 'svelte-sonner';
-    import {CircleAlert, Eye, EyeOff, Info, LoaderCircle, Shield} from '@lucide/svelte';
+    import {CircleAlert, Eye, EyeOff, Info, LoaderCircle, Shield, Terminal} from '@lucide/svelte';
     import {handleError} from '$lib/utils/error-handler';
+    import {getDevCredentials} from '$lib/api/dev/DevController';
+    import type {DevCredentialsResponse} from '$lib/api/models';
 
     $effect(() => {
         if ($isAuthenticated) {
@@ -25,6 +28,26 @@
     let password: string = $state('');
     let showPassword: boolean = $state(false);
     let isSubmitting: boolean = $state(false);
+
+    // Dev credentials fetched from API (dev mode only)
+    let devCredentials: DevCredentialsResponse | null = $state(null);
+    let devCredentialsLoading: boolean = $state(false);
+
+    $effect(() => {
+        if (dev && !devCredentials && !devCredentialsLoading) {
+            devCredentialsLoading = true;
+            getDevCredentials()
+                .then((data: DevCredentialsResponse) => {
+                    devCredentials = data;
+                })
+                .catch((err: unknown) => {
+                    console.error('Failed to fetch dev credentials:', err);
+                })
+                .finally(() => {
+                    devCredentialsLoading = false;
+                });
+        }
+    });
 
     const verificationFailed: boolean = $derived(page.url.searchParams.get('verification') === 'failed');
     async function handleSubmit(event: SubmitEvent): Promise<void> {
@@ -48,6 +71,13 @@
 
     function togglePasswordVisibility(): void {
         showPassword = !showPassword;
+    }
+
+    function fillDevCredentials(): void {
+        if (devCredentials) {
+            email = devCredentials.email;
+            password = devCredentials.password;
+        }
     }
 </script>
 
@@ -183,6 +213,39 @@
             </form>
         </CardContent>
     </Card>
+
+    <!-- Dev Credentials Block -->
+    {#if dev}
+        <div class="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 backdrop-blur-sm">
+            <div class="flex items-center gap-2 text-amber-500 text-sm font-medium mb-2">
+                <Terminal class="w-4 h-4"/>
+                Dev Credentials
+            </div>
+            {#if devCredentialsLoading}
+                <div class="text-xs text-muted-foreground flex items-center gap-2">
+                    <LoaderCircle class="w-3 h-3 animate-spin"/>
+                    Loading credentials...
+                </div>
+            {:else if devCredentials}
+                <div class="text-xs text-muted-foreground space-y-1">
+                    <p><span class="font-medium">Email:</span> {devCredentials.email}</p>
+                    <p><span class="font-medium">Password:</span> {devCredentials.password}</p>
+                </div>
+                <Button
+                        variant="outline"
+                        size="sm"
+                        class="mt-2 w-full text-xs"
+                        onclick={fillDevCredentials}
+                >
+                    Fill Credentials
+                </Button>
+            {:else}
+                <div class="text-xs text-muted-foreground">
+                    Failed to load dev credentials
+                </div>
+            {/if}
+        </div>
+    {/if}
 
     <!-- Footer -->
     <p class="text-center text-xs text-muted-foreground mt-6">

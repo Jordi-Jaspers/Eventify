@@ -96,8 +96,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             final String password = UUID.randomUUID().toString();
             user.setPassword(passwordEncoder.encode(password));
             userRepository.save(user);
-        } catch (DataIntegrityViolationException _) {
-            throw new OAuth2Exception("A user with email " + oAuth2UserInfo.getEmail() + " already exists.");
+        } catch (final DataIntegrityViolationException exception) {
+            throw new OAuth2Exception("A user with email " + oAuth2UserInfo.getEmail() + " already exists.", exception);
         }
     }
 

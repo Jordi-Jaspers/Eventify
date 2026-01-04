@@ -1,7 +1,7 @@
 package io.github.eventify.api.user.controller;
 
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.api.user.model.mapper.UserMapper;
+import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
 import io.github.eventify.api.user.model.request.UpdateUserDetailsRequest;
 import io.github.eventify.api.user.model.response.UserDetailsResponse;
 import io.github.eventify.api.user.service.UserService;
@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import static io.github.eventify.api.Paths.*;
+import static io.github.eventify.api.Paths.USER_DETAILS;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -31,7 +31,7 @@ public class UserController {
 
     private final UserService userService;
 
-    private final UserMapper userMapper;
+    private final UserDetailsMapper userDetailsMapper;
 
     @ResponseStatus(OK)
     @Operation(summary = "Get the details of the authenticated user.")
@@ -40,7 +40,8 @@ public class UserController {
         produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<UserDetailsResponse> getUserDetails(@AuthenticationPrincipal final UserTokenPrincipal principal) {
-        final UserDetailsResponse response = userMapper.toUserDetailsResponse(principal.getUser());
+        final User user = userService.getUserWithOrganizations(principal.getUser().getId());
+        final UserDetailsResponse response = userDetailsMapper.toResourceObject(user);
         return ResponseEntity.status(OK).body(response);
     }
 
@@ -54,6 +55,6 @@ public class UserController {
     public ResponseEntity<UserDetailsResponse> updateUserDetails(@RequestBody final UpdateUserDetailsRequest request,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
         final User user = userService.updateUserDetails(principal.getUser(), request);
-        return ResponseEntity.status(OK).body(userMapper.toUserDetailsResponse(user));
+        return ResponseEntity.status(OK).body(userDetailsMapper.toResourceObject(user));
     }
 }

@@ -9,7 +9,7 @@ import io.github.eventify.api.authentication.model.validator.AuthenticationValid
 import io.github.eventify.api.authentication.service.AuthenticationService;
 import io.github.eventify.api.authentication.service.CookieService;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.api.user.model.mapper.UserMapper;
+import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public class AuthenticationController {
 
     private final CookieService cookieService;
 
-    private final UserMapper userMapper;
+    private final UserDetailsMapper userDetailsMapper;
 
     @ResponseStatus(CREATED)
     @Operation(summary = "Register a new user.")
@@ -52,8 +52,8 @@ public class AuthenticationController {
     )
     public ResponseEntity<RegisterResponse> register(@RequestBody final RegisterUserRequest request) {
         validator.validateUserRegistration(request);
-        final User user = authenticationService.register(userMapper.toUser(request), request.getPassword());
-        return ResponseEntity.status(CREATED).body(userMapper.toRegisterResponse(user));
+        final User user = authenticationService.register(userDetailsMapper.toUser(request), request.getPassword());
+        return ResponseEntity.status(CREATED).body(userDetailsMapper.toRegisterResponse(user));
     }
 
     @ResponseStatus(OK)
@@ -67,7 +67,7 @@ public class AuthenticationController {
         validator.validateLoginRequest(request);
         final User user = authenticationService.authorize(request.getEmail(), request.getPassword());
         cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
-        return ResponseEntity.status(OK).body(userMapper.toUserResponse(user));
+        return ResponseEntity.status(OK).body(userDetailsMapper.toUserResponse(user));
     }
 
     @ResponseStatus(OK)
@@ -77,7 +77,7 @@ public class AuthenticationController {
         final HttpServletResponse response) {
         final User user = authenticationService.refresh(request.getRefreshToken());
         cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
-        return ResponseEntity.status(OK).body(userMapper.toUserResponse(user));
+        return ResponseEntity.status(OK).body(userDetailsMapper.toUserResponse(user));
     }
 
     @ResponseStatus(NO_CONTENT)

@@ -50,7 +50,30 @@ export const CLIENT_ROUTES = {
 	PROFILE_PAGE: {
 		path: '/profile',
 		type: RouteType.PRIVATE
-	}
+	},
+	ADMIN_DASHBOARD_PAGE: {
+		path: '/admin/dashboard',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_ORGANIZATIONS_NEW: {
+		path: '/admin/organizations/new',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_ORGANIZATIONS_PAGE: {
+		path: '/admin/organizations',
+		type: RouteType.PRIVATE
+	},
+	ORGANIZATION_MEMBERS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/members`,
+		type: RouteType.PRIVATE
+	})
+} as const;
+
+/**
+ * Server routes (backend API endpoints)
+ */
+export const SERVER_ROUTES = {
+	ADMIN_STATS: '/admin/stats'
 } as const;
 
 /**
@@ -58,8 +81,8 @@ export const CLIENT_ROUTES = {
  */
 export function getPublicRoutes(): string[] {
 	return Object.values(CLIENT_ROUTES)
-		.filter((route: Route) => route.type === RouteType.PUBLIC)
-		.map((route: Route) => route.path);
+		.filter((route: Route | Function) => typeof route !== 'function' && route.type === RouteType.PUBLIC)
+		.map((route: Route | Function) => (route as Route).path);
 }
 
 /**

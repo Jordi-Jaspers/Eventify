@@ -1,4 +1,3 @@
-import { ACCESS_TOKEN_COOKIE } from '$lib/config/constants';
 import type { UserDetailsResponse } from '$lib/api/models';
 
 /**
@@ -100,7 +99,7 @@ export class JwtService {
 			enabled: payload.enabled,
 			validated: payload.validated,
 			lastLogin: lastLogin,
-			created: created
+			createdAt: created
 		};
 	}
 
