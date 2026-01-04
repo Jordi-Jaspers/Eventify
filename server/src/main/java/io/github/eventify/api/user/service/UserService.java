@@ -141,6 +141,17 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * Get user by id with organizations eagerly loaded.
+     *
+     * @param id the user id
+     * @return the user with organizations
+     */
+    public User getUserWithOrganizations(final Long id) {
+        return userRepository.findByIdWithOrganizations(id)
+            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+    }
+
+    /**
      * Resends the verification email to the user with the given email.
      *
      * @param email the email of the user

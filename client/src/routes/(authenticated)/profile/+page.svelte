@@ -2,6 +2,7 @@
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import Badge from '$lib/components/ui/badge/badge.svelte';
     import {
+        Building2,
         Calendar,
         CircleCheckBig,
         CircleX,
@@ -36,6 +37,21 @@
     function formatRole(role: string | undefined): string {
         if (!role) return 'N/A';
         return role.charAt(0) + role.slice(1).toLowerCase();
+    }
+
+    function getRoleBadgeVariant(role: string | undefined): 'default' | 'secondary' | 'outline' {
+        if (!role) return 'outline';
+        
+        switch (role) {
+            case 'OWNER':
+                return 'default';
+            case 'ADMIN':
+                return 'secondary';
+            case 'MEMBER':
+                return 'outline';
+            default:
+                return 'outline';
+        }
     }
 </script>
 
@@ -181,6 +197,42 @@
                         </div>
                     </div>
 
+                    <!-- Organizations -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                            <Building2 class="w-4 h-4"/>
+                            Organizations
+                        </h3>
+                        {#if userData.organizations && userData.organizations.length > 0}
+                            <div class="space-y-3">
+                                {#each userData.organizations as org}
+                                    <div class="p-4 rounded-lg bg-background/50 border border-border/50">
+                                        <div class="flex items-center justify-between gap-4">
+                                            <div class="flex-1 min-w-0">
+                                                <a 
+                                                    href="/organizations/{org.organizationSlug}"
+                                                    class="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                                                >
+                                                    {org.organizationName}
+                                                </a>
+                                                <p class="text-xs text-muted-foreground mt-1">
+                                                    Joined {formatDate(org.joinedAt)}
+                                                </p>
+                                            </div>
+                                            <Badge variant={getRoleBadgeVariant(org.role)}>
+                                                {org.role}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                {/each}
+                            </div>
+                        {:else}
+                            <div class="p-4 rounded-lg bg-background/50 border border-border/50">
+                                <p class="text-sm text-muted-foreground">You are not a member of any organization</p>
+                            </div>
+                        {/if}
+                    </div>
+
                     <!-- Account Timestamps -->
                     <div>
                         <h3 class="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
@@ -194,7 +246,7 @@
                                     <Calendar class="w-3 h-3 text-primary"/>
                                     <p class="text-xs text-muted-foreground">Account Created</p>
                                 </div>
-                                <p class="font-medium text-foreground text-sm">{formatDate(userData.created)}</p>
+                                <p class="font-medium text-foreground text-sm">{formatDate(userData.createdAt)}</p>
                             </div>
 
                             <!-- Last Login -->

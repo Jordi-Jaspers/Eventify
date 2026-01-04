@@ -141,4 +141,20 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     )
     List<User> searchUsers(@Param("query") String query, Pageable pageable);
 
+    /**
+     * Find user by id with organizations eagerly loaded.
+     *
+     * @param id the user id
+     * @return the user with organizations
+     */
+    @Query(
+        """
+            FROM User u
+            LEFT JOIN FETCH u.organizations org
+            LEFT JOIN FETCH org.organization
+            WHERE u.id = :id
+            """
+    )
+    Optional<User> findByIdWithOrganizations(@Param("id") Long id);
+
 }
