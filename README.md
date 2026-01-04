@@ -16,66 +16,86 @@
 
 [Introduction](#-introduction) •
 [Quick Start](#-quick-start) •
-[Contributing](#-contributing) •
 [Stack](#-stack) •
+[Contributing](#-contributing) •
 [License](#-license)
 
 </div>
 
 ---
 
-**Author:** Jordi
-Jaspers [[Github](https://github.com/Jordi-Jaspers "Github Page"), [Linkedin](https://www.linkedin.com/in/jordi-jaspers/ "Linkedin Page")]
-<p align="left">
-<a href="https://ie.linkedin.com/in/jordi-jaspers">
- <img alt="Mail" title="Connect via email" src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white"/>
-</a>
-<a href="https://ie.linkedin.com/in/jordi-jaspers">
- <img alt="LinkedIn" title="Connect on LinkedIn" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/>
-</a>
-<a href="https://github.com/Jordi-Jaspers?tab=followers">
- <img alt="followers" title="Follow me on Github" src="https://custom-icon-badges.demolab.com/github/followers/Jordi-Jaspers?color=236ad3&labelColor=1155ba&style=for-the-badge&logo=person-add&label=Follow&logoColor=white"/>
-</a>
-<a href="https://github.com/Jordi-Jaspers?tab=repositories&sort=stargazers">
- <img alt="total stars" title="Total stars on GitHub" src="https://custom-icon-badges.demolab.com/github/stars/Jordi-Jaspers?color=55960c&style=for-the-badge&labelColor=488207&logo=star"/>
-</a>
-<a href="https://buymeacoffee.com/jaspers">
-    <img alt="Donate" title="Donate" src="https://img.shields.io/badge/Donate-Buy%20me%20a%20coffee-FF813F?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white"/>
-</a>
-</p>
+## 📖 Introduction
+
+**Eventify** is a modern platform designed to simplify service monitoring and management. By leveraging intelligent event creation, it allows teams to track critical occurrences, manage organizations, and visualize service health in real-time. Whether you are debugging a microservice architecture or monitoring a monolithic application, Eventify provides the insights you need.
+
+## 🚀 Quick Start
+
+Get Eventify running locally in minutes.
+
+### Prerequisites
+- [Docker](https://www.docker.com/) (for database and message broker)
+- [Java 25](https://adoptium.net/) (for the backend)
+- [Bun](https://bun.sh/) or Node.js (for the frontend)
+
+### Installation
+
+1. **Start the Infrastructure**
+   Launch the required services (TimescaleDB, RabbitMQ, Inbucket).
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Run the Backend**
+   Start the Spring Boot server.
+   ```bash
+   cd server
+   ./gradlew bootRun
+   ```
+
+3. **Run the Frontend**
+   Install dependencies and start the SvelteKit development server.
+   ```bash
+   cd client
+   bun install
+   bun run dev
+   ```
+
+   The application will be available at [http://localhost:5173](http://localhost:5173).
+
+## 🛠️ Stack
+
+**Backend**
+- [Spring Boot](https://spring.io/projects/spring-boot) - Core application framework
+- [TimescaleDB](https://www.timescale.com/) - Time-series database
+- [Liquibase](https://www.liquibase.org/) - Database migration
+- [RabbitMQ](https://www.rabbitmq.com/) - Message broker
+
+**Frontend**
+- [SvelteKit](https://kit.svelte.dev/) - Web framework
+- [TailwindCSS](https://tailwindcss.com/) - Styling
+- [Shadcn Svelte](https://www.shadcn-svelte.com/) - UI Components
+- [Lucide](https://lucide.dev/) - Icons
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to submit pull requests, report issues, or suggest improvements.
+
+## 📜 License
+
+Licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html#license-text).
 
 ---
 
-## Introduction
-
-## Contributing
-
-### Dang, you found a bug, now what? 🐞
-
-No worries, just check out our [**issues**](https://github.com/Jordi-Jaspers/Eventify) section on GitHub. If you can't
-find your issue, feel free to create a new one. We trample that bug as soon as possible.
-
-### Support & Contributions ☕️
-
-##### Want to contribute to the project?
-
-All the extra help is welcome! Just follow the steps in the [**CONTRIBUTING**](CONTRIBUTING.md) section.
-
-##### Any more ideas for features?
-
-Feel free to create an issue, and we can discuss it further or contact me directly.
-
-## Stack 🛠️
-
-- [Spring Boot](https://spring.io/projects/spring-boot) - Java framework for building back-end applications.
-- [SvelteKit](https://kit.svelte.dev/) - Frontend framework for building web applications.
-- [TailwindCSS](https://tailwindcss.com/) - Utility-first CSS framework.
-- [Shadcn Svelte](https://www.shadcn-svelte.com/) - Svelte components library.
-- [Lucide](https://lucide.dev/) - SVG icons library.
-- [Liquibase](https://www.liquibase.org/) - Database migration tool
-- [TimescaleDB](https://www.timescale.com/) - Time-series database
-- [Git](https://git-scm.com/) - Version Control
-
-## License 📜
-
-Licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html#license-text).
+<div align="center">
+    <b>Author:</b> Jordi Jaspers
+    <br>
+    <a href="https://github.com/Jordi-Jaspers">
+        <img alt="GitHub" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white"/>
+    </a>
+    <a href="https://ie.linkedin.com/in/jordi-jaspers">
+        <img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/>
+    </a>
+    <a href="https://buymeacoffee.com/jaspers">
+        <img alt="Buy me a coffee" src="https://img.shields.io/badge/Donate-Buy%20me%20a%20coffee-FF813F?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white"/>
+    </a>
+</div>
