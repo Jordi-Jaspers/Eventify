@@ -107,7 +107,7 @@
 						>
 							<!-- Avatar: Always show user initials -->
 							<div
-								class="flex aspect-square size-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold text-sm shadow-lg"
+								class="flex aspect-square size-10 group-data-[collapsible=icon]:size-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold text-sm group-data-[collapsible=icon]:text-xs shadow-lg transition-all"
 							>
 								{userInitials}
 							</div>
