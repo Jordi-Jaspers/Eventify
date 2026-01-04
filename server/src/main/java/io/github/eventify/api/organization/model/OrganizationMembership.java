@@ -9,6 +9,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import jakarta.persistence.*;
+import org.springframework.core.annotation.Order;
 
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
 import static java.time.ZoneOffset.UTC;
@@ -30,6 +31,7 @@ public class OrganizationMembership implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OrderBy("role DESC, email ASC")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "user_id",
@@ -37,6 +39,7 @@ public class OrganizationMembership implements Serializable {
     )
     private User user;
 
+    @OrderBy("name ASC")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "organization_id",
