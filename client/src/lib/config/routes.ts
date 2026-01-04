@@ -66,6 +66,10 @@ export const CLIENT_ROUTES = {
 	ORGANIZATION_MEMBERS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/members`,
 		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_DASHBOARD_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/dashboard`,
+		type: RouteType.PRIVATE
 	})
 } as const;
 

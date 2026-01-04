@@ -1,4 +1,16 @@
 /**
+ * Format a date string as a readable date (e.g., "Jan 15, 2024")
+ */
+export function formatDate(dateString: string): string {
+	const date: Date = new Date(dateString);
+	return date.toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric'
+	});
+}
+
+/**
  * Format a date string as a relative time (e.g., "2 days ago")
  */
 export function formatRelativeDate(dateString: string): string {
