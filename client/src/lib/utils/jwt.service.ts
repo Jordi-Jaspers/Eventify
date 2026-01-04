@@ -99,7 +99,7 @@ export class JwtService {
 			enabled: payload.enabled,
 			validated: payload.validated,
 			lastLogin: lastLogin,
-			created: created
+			createdAt: created
 		};
 	}
 

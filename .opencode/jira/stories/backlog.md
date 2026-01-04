@@ -1,9 +1,9 @@
 # Bug Fixes
-- [ ] **Fix User login redirect**
-    - User on succesful login is not redirected to dashboard general dashboard. must refresh the page to get redirected.
-  
-- [ ] **Global admin should be able manage the users in a organisation alongside the owner and admins**
-    - Global admin should have same permissions as an org admin to manage users in any organisation.
+- [x] ~~**The avatar does not fit in the sidebar when minimized.**~~ (Fixed 2026-01-04)
+- [x] ~~**User details are not retrieved during login, they are using the auth response**~~ (Fixed 2026-01-04)
+- [x] ~~**Consider retrieving the user organisations (LEFT JOIN) during details retrieval to avoid multiple calls later.**~~ (Fixed 2026-01-04)
+- [x] ~~**Global admin should be able manage the users in a organisation alongside the owner and admins**~~ (Fixed 2026-01-04)
+- [x] ~~**Update user details page with their organtisations and their role in it.**~~ (Fixed 2026-01-04)
 
 # Epic: User Management
 - [ ] **User Dashboard**:
