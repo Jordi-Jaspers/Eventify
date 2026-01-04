@@ -740,4 +740,62 @@ public class OrganizationMembershipServiceTest extends UnitTest {
 
         verify(membershipRepository, never()).saveAll(anyList());
     }
+
+    @Test
+    @DisplayName("Should update member role when global admin not member of organization")
+    public void shouldUpdateMemberRoleWhenGlobalAdminNotMemberOfOrganization() {
+        // Given: Global admin who is NOT a member of the organization
+        final User globalAdmin = aValidUser();
+        globalAdmin.setId(999L);
+        globalAdmin.setRole(Role.ADMIN);
+        securityUtilMock.when(SecurityUtil::getLoggedInUser).thenReturn(globalAdmin);
+
+        final OrganizationMembership membership = new OrganizationMembership(organization, member, OrganizationalRole.MEMBER);
+        membership.setId(1L);
+
+        when(membershipRepository.findByOrganizationIdAndUserId(organization.getId(), member.getId()))
+            .thenReturn(Optional.of(membership));
+        when(membershipRepository.findByOrganizationIdAndUserId(organization.getId(), globalAdmin.getId()))
+            .thenReturn(Optional.empty());
+        when(membershipRepository.save(any(OrganizationMembership.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(membershipRepository.findAllByOrganizationIdWithUser(organization.getId()))
+            .thenReturn(List.of(membership));
+
+        // When: Global admin updates member's role from MEMBER to ADMIN
+        final OrganizationMembership result = membershipService.updateMemberRole(
+            organization.getId(),
+            member.getId(),
+            OrganizationalRole.ADMIN
+        );
+
+        // Then: Role update should succeed without requiring org membership
+        assertThat(result, is(notNullValue()));
+        assertThat(membership.getRole(), is(OrganizationalRole.ADMIN));
+        verify(membershipRepository).save(membership);
+    }
+
+    @Test
+    @DisplayName("Should remove member when global admin not member of organization")
+    public void shouldRemoveMemberWhenGlobalAdminNotMemberOfOrganization() {
+        // Given: Global admin who is NOT a member of the organization
+        final User globalAdmin = aValidUser();
+        globalAdmin.setId(999L);
+        globalAdmin.setRole(Role.ADMIN);
+        securityUtilMock.when(SecurityUtil::getLoggedInUser).thenReturn(globalAdmin);
+
+        final OrganizationMembership membership = new OrganizationMembership(organization, member, OrganizationalRole.MEMBER);
+        membership.setId(1L);
+
+        when(membershipRepository.findByOrganizationIdAndUserId(organization.getId(), member.getId()))
+            .thenReturn(Optional.of(membership));
+        when(membershipRepository.findByOrganizationIdAndUserId(organization.getId(), globalAdmin.getId()))
+            .thenReturn(Optional.empty());
+
+        // When: Global admin removes member from the organization
+        membershipService.removeMember(organization.getId(), member.getId(), globalAdmin);
+
+        // Then: Member removal should succeed without requiring org membership
+        verify(membershipRepository).delete(membership);
+    }
 }

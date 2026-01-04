@@ -143,11 +143,19 @@ public class OrganizationMembershipService {
         final OrganizationMembership membership = membershipRepository.findByOrganizationIdAndUserId(orgId, userId)
             .orElseThrow(() -> new DataNotFoundException(MEMBERSHIP_NOT_FOUND_ERROR));
 
-        final OrganizationMembership callerMembership = membershipRepository
-            .findByOrganizationIdAndUserId(orgId, getLoggedInUser().getId())
-            .orElseThrow(() -> new AccessDeniedException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason()));
+        final User caller = getLoggedInUser();
+        final boolean isGlobalAdmin = caller.hasPermission(MANAGE_ORGANIZATIONS);
 
-        if (callerMembership.getRole() == OrganizationalRole.ADMIN
+        final OrganizationMembership callerMembership = membershipRepository
+            .findByOrganizationIdAndUserId(orgId, caller.getId())
+            .orElse(null);
+
+        if (!isGlobalAdmin && callerMembership == null) {
+            throw new AccessDeniedException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason());
+        }
+
+        if (!isGlobalAdmin && callerMembership != null
+            && callerMembership.getRole() == OrganizationalRole.ADMIN
             && membership.getRole() != OrganizationalRole.MEMBER) {
             throw new AccessDeniedException("Admins can only update MEMBER roles");
         }
@@ -176,11 +184,18 @@ public class OrganizationMembershipService {
         final OrganizationMembership membership = membershipRepository.findByOrganizationIdAndUserId(orgId, userId)
             .orElseThrow(() -> new DataNotFoundException(MEMBERSHIP_NOT_FOUND_ERROR));
 
+        final boolean isGlobalAdmin = callerUser.hasPermission(MANAGE_ORGANIZATIONS);
+
         final OrganizationMembership callerMembership = membershipRepository
             .findByOrganizationIdAndUserId(orgId, callerUser.getId())
-            .orElseThrow(() -> new AccessDeniedException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason()));
+            .orElse(null);
 
-        if (callerMembership.getRole() == OrganizationalRole.ADMIN
+        if (!isGlobalAdmin && callerMembership == null) {
+            throw new AccessDeniedException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason());
+        }
+
+        if (!isGlobalAdmin && callerMembership != null
+            && callerMembership.getRole() == OrganizationalRole.ADMIN
             && membership.getRole() != OrganizationalRole.MEMBER) {
             throw new AccessDeniedException("Admins can only remove MEMBER roles");
         }
