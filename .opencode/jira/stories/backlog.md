@@ -1,10 +1,3 @@
-# Bug Fixes
-- [x] ~~**The avatar does not fit in the sidebar when minimized.**~~ (Fixed 2026-01-04)
-- [x] ~~**User details are not retrieved during login, they are using the auth response**~~ (Fixed 2026-01-04)
-- [x] ~~**Consider retrieving the user organisations (LEFT JOIN) during details retrieval to avoid multiple calls later.**~~ (Fixed 2026-01-04)
-- [x] ~~**Global admin should be able manage the users in a organisation alongside the owner and admins**~~ (Fixed 2026-01-04)
-- [x] ~~**Update user details page with their organtisations and their role in it.**~~ (Fixed 2026-01-04)
-
 # Epic: User Management
 - [ ] **User Dashboard**:
     - Create filterable and sortable user list view
@@ -12,6 +5,9 @@
     - use the custom data table component
 
 # Epic: General Improvements
+- [ ] **General User dashboard**:
+    - Quick buttons switch to organization and redirect to organization dashboard
+
 - [ ] **OpenApi annotations**:
     - Add missing OpenApi annotations to request and response models for better API documentation.
     - Ensure they all have proper descriptions, examples, and constraints.
