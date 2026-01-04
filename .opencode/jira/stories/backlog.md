@@ -5,6 +5,10 @@
     - use the custom data table component
 
 # Epic: General Improvements
+- [ ] **Members list improvements**:
+    - Use custom data table component with all its features (filtering, sorting, pagination)
+    - Add default sort on "role" (owners first, then admins, then members)
+  
 - [ ] **General User dashboard**:
     - Quick buttons switch to organization and redirect to organization dashboard
 
