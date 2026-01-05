@@ -168,8 +168,25 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** List organization members with pagination and search */
+        post: operations["searchCurrentMembers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/organization/{orgId}/members/new/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
         /** Search users to add to organization */
-        post: operations["searchUsers"];
+        post: operations["searchNewMembers"];
         delete?: never;
         options?: never;
         head?: never;
@@ -271,7 +288,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Search for users by email or name */
-        post: operations["searchUsers_1"];
+        post: operations["searchUsers"];
         delete?: never;
         options?: never;
         head?: never;
@@ -637,88 +654,215 @@ export interface components {
         };
         UpdateRoleRequest: {
             /**
-             * @description Role
+             * @description New role to assign to the user
+             * @example USER
              * @enum {string}
              */
-            role?: "USER" | "ADMIN";
+            role: "USER" | "ADMIN";
         };
         UserDetailsResponse: {
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Unique user identifier
+             * @example 12345
+             */
             id?: number;
+            /**
+             * @description User's email address
+             * @example user@example.com
+             */
             email?: string;
+            /**
+             * @description User's first name
+             * @example John
+             */
             firstName?: string;
+            /**
+             * @description User's last name
+             * @example Doe
+             */
             lastName?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp of the user's last login
+             * @example 2026-01-15T10:30:00Z
+             */
             lastLogin?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the user account was created
+             * @example 2026-01-15T10:30:00Z
+             */
             createdAt?: string;
             /**
-             * @description Role
+             * @description User's system role
+             * @example USER
              * @enum {string}
              */
             role?: "USER" | "ADMIN";
+            /** @description Set of permissions granted to the user */
             permissions?: ("ACCESS_APPLICATION" | "MANAGE_USERS" | "PROVISION_ORGANIZATIONS" | "MANAGE_ORGANIZATIONS" | "VIEW_PLATFORM_STATS")[];
+            /**
+             * @description Whether the user account is enabled
+             * @example true
+             */
             enabled?: boolean;
+            /**
+             * @description Whether the user's email has been validated
+             * @example true
+             */
             validated?: boolean;
+            /** @description List of organizations the user belongs to */
             organizations?: components["schemas"]["UserOrganizationResponse"][];
         };
         UserOrganizationResponse: {
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Unique organization identifier
+             * @example 12345
+             */
             organizationId?: number;
+            /**
+             * @description Organization name
+             * @example Acme Corporation
+             */
             organizationName?: string;
+            /**
+             * @description URL-friendly organization slug
+             * @example acme-corporation
+             */
             organizationSlug?: string;
             /**
-             * @description OrganizationalRole
+             * @description User's role within the organization
+             * @example MEMBER
              * @enum {string}
              */
             role?: "OWNER" | "ADMIN" | "MEMBER";
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the user joined the organization
+             * @example 2026-01-15T10:30:00Z
+             */
             joinedAt?: string;
         };
         UpdateUserDetailsRequest: {
+            /**
+             * @description User's first name
+             * @example John
+             */
             firstName?: string;
+            /**
+             * @description User's last name
+             * @example Doe
+             */
             lastName?: string;
         };
         ForgotPasswordRequest: {
-            newPassword?: string;
-            confirmPassword?: string;
-            token?: string;
+            /**
+             * @description New password for the user
+             * @example ********
+             */
+            newPassword: string;
+            /**
+             * @description Password confirmation must match new password
+             * @example ********
+             */
+            confirmPassword: string;
+            /**
+             * @description Password reset token sent via email
+             * @example eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            token: string;
         };
         UpdatePasswordRequest: {
-            newPassword?: string;
-            confirmPassword?: string;
-            oldPassword?: string;
+            /**
+             * @description New password for the user
+             * @example ********
+             */
+            newPassword: string;
+            /**
+             * @description Password confirmation must match new password
+             * @example ********
+             */
+            confirmPassword: string;
+            /**
+             * @description User's current password for verification
+             * @example ********
+             */
+            oldPassword: string;
         };
         TransferOwnershipRequest: {
-            /** Format: int64 */
-            currentOwnerUserId?: number;
-            /** Format: int64 */
-            newOwnerUserId?: number;
+            /**
+             * Format: int64
+             * @description User ID of the current organization owner
+             * @example 12345
+             */
+            currentOwnerUserId: number;
+            /**
+             * Format: int64
+             * @description User ID of the new organization owner
+             * @example 67890
+             */
+            newOwnerUserId: number;
         };
         AddMemberRequest: {
-            email?: string;
             /**
-             * @description OrganizationalRole
+             * @description Email address of the user to add as a member
+             * @example user@example.com
+             */
+            email: string;
+            /**
+             * @description Organizational role to assign to the member
+             * @example MEMBER
              * @enum {string}
              */
-            role?: "OWNER" | "ADMIN" | "MEMBER";
+            role: "OWNER" | "ADMIN" | "MEMBER";
         };
         OrganizationMembershipResponse: {
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Unique membership identifier
+             * @example 12345
+             */
             id?: number;
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Organization identifier
+             * @example 12345
+             */
             organizationId?: number;
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description User identifier
+             * @example 12345
+             */
             userId?: number;
+            /**
+             * @description User's email address
+             * @example user@example.com
+             */
             userEmail?: string;
+            /**
+             * @description User's first name
+             * @example John
+             */
             userFirstName?: string;
+            /**
+             * @description User's last name
+             * @example Doe
+             */
             userLastName?: string;
             /**
-             * @description OrganizationalRole
+             * @description User's role within the organization
+             * @example MEMBER
              * @enum {string}
              */
             role?: "OWNER" | "ADMIN" | "MEMBER";
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the user joined the organization
+             * @example 2026-01-15T10:30:00Z
+             */
             joinedAt?: string;
         };
         SearchInput: {
@@ -789,6 +933,34 @@ export interface components {
             /** @description List of search criteria to filter results */
             searchInputs?: components["schemas"]["SearchInput"][];
         };
+        PageResourceOrganizationMembershipResponse: {
+            /**
+             * Format: int64
+             * @description Total number of elements available
+             * @example 125
+             */
+            totalElements: number;
+            /**
+             * Format: int32
+             * @description Total number of pages available
+             * @example 5
+             */
+            totalPages: number;
+            /**
+             * Format: int32
+             * @description Number of items per page
+             * @example 25
+             */
+            pageSize: number;
+            /**
+             * Format: int32
+             * @description Current page number (0-based)
+             * @example 0
+             */
+            pageNumber: number;
+            /** @description List of items on the current page */
+            content?: components["schemas"]["OrganizationMembershipResponse"][];
+        };
         PageResourceUserResponse: {
             /**
              * Format: int64
@@ -818,73 +990,240 @@ export interface components {
             content?: components["schemas"]["UserResponse"][];
         };
         UserResponse: {
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Unique user identifier
+             * @example 12345
+             */
             id?: number;
+            /**
+             * @description User's email address
+             * @example user@example.com
+             */
             email?: string;
+            /**
+             * @description User's first name
+             * @example John
+             */
             firstName?: string;
+            /**
+             * @description User's last name
+             * @example Doe
+             */
             lastName?: string;
         };
         AuthenticationResponse: {
+            /**
+             * @description User's first name
+             * @example John
+             */
             firstName?: string;
+            /**
+             * @description User's last name
+             * @example Doe
+             */
             lastName?: string;
+            /**
+             * @description User's email address
+             * @example user@example.com
+             */
             email?: string;
             /**
-             * @description Role
+             * @description User's system role
+             * @example USER
              * @enum {string}
              */
             role?: "USER" | "ADMIN";
+            /**
+             * @description JWT access token for API authentication
+             * @example eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
             accessToken?: string;
+            /**
+             * @description JWT refresh token for obtaining new access tokens
+             * @example eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
             refreshToken?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the access token expires
+             * @example 2026-01-15T10:30:00Z
+             */
             expiresAt?: string;
+            /**
+             * @description Whether the user account is enabled
+             * @example true
+             */
             enabled?: boolean;
+            /**
+             * @description Whether the user's email has been validated
+             * @example true
+             */
             validated?: boolean;
         };
         RefreshTokenRequest: {
-            refreshToken?: string;
+            /**
+             * @description JWT refresh token used to obtain a new access token
+             * @example eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken: string;
         };
         RegisterUserRequest: {
-            firstName?: string;
-            lastName?: string;
-            email?: string;
-            password?: string;
-            passwordConfirmation?: string;
+            /**
+             * @description User's first name
+             * @example John
+             */
+            firstName: string;
+            /**
+             * @description User's last name
+             * @example Doe
+             */
+            lastName: string;
+            /**
+             * @description User's email address
+             * @example user@example.com
+             */
+            email: string;
+            /**
+             * @description User's password
+             * @example ********
+             */
+            password: string;
+            /**
+             * @description Password confirmation must match password
+             * @example ********
+             */
+            passwordConfirmation: string;
         };
         RegisterResponse: {
+            /**
+             * @description User's email address
+             * @example user@example.com
+             */
             email?: string;
+            /**
+             * @description User's authority/role
+             * @example USER
+             */
             authority?: string;
+            /**
+             * @description Whether the user account is enabled
+             * @example true
+             */
             enabled?: boolean;
+            /**
+             * @description Whether the user's email has been validated
+             * @example false
+             */
             validated?: boolean;
         };
         LoginRequest: {
-            email?: string;
-            password?: string;
+            /**
+             * @description User's email address for authentication
+             * @example user@example.com
+             */
+            email: string;
+            /**
+             * @description User's password
+             * @example ********
+             */
+            password: string;
+        };
+        PageResourceUserDetailsResponse: {
+            /**
+             * Format: int64
+             * @description Total number of elements available
+             * @example 125
+             */
+            totalElements: number;
+            /**
+             * Format: int32
+             * @description Total number of pages available
+             * @example 5
+             */
+            totalPages: number;
+            /**
+             * Format: int32
+             * @description Number of items per page
+             * @example 25
+             */
+            pageSize: number;
+            /**
+             * Format: int32
+             * @description Current page number (0-based)
+             * @example 0
+             */
+            pageNumber: number;
+            /** @description List of items on the current page */
+            content?: components["schemas"]["UserDetailsResponse"][];
         };
         ProvisionOrganizationRequest: {
-            name?: string;
-            owner?: string;
+            /**
+             * @description Name of the organization
+             * @example Acme Corporation
+             */
+            name: string;
+            /**
+             * @description Email address of the organization owner
+             * @example user@example.com
+             */
+            owner: string;
         };
         OrganizationResponse: {
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Unique organization identifier
+             * @example 12345
+             */
             id?: number;
+            /**
+             * @description Organization name
+             * @example Acme Corporation
+             */
             name?: string;
+            /**
+             * @description URL-friendly organization slug
+             * @example acme-corporation
+             */
             slug?: string;
             /**
-             * @description OrganizationStatus
+             * @description Current status of the organization
+             * @example ACTIVE
              * @enum {string}
              */
             status?: "TRIAL" | "ACTIVE" | "SUSPENDED";
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description User ID of the organization creator
+             * @example 12345
+             */
             createdBy?: number;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the organization was created
+             * @example 2026-01-15T10:30:00Z
+             */
             createdAt?: string;
+            /** @description Details of the organization owner */
             owner?: components["schemas"]["UserResponse"];
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Number of members in the organization
+             * @example 42
+             */
             memberCount?: number;
         };
         AssignOwnerRequest: {
+            /**
+             * @description Email address of the user to assign as owner
+             * @example user@example.com
+             */
             email?: string;
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description User ID to assign as owner
+             * @example 12345
+             */
             userId?: number;
         };
         PageResourceOrganizationResponse: {
@@ -917,13 +1256,22 @@ export interface components {
         };
         UpdateMemberRoleRequest: {
             /**
-             * @description OrganizationalRole
+             * @description New organizational role to assign to the member
+             * @example ADMIN
              * @enum {string}
              */
-            role?: "OWNER" | "ADMIN" | "MEMBER";
+            role: "OWNER" | "ADMIN" | "MEMBER";
         };
         DevCredentialsResponse: {
+            /**
+             * @description Email address for development authentication
+             * @example user@example.com
+             */
             email?: string;
+            /**
+             * @description Password for development authentication
+             * @example ********
+             */
             password?: string;
         };
         Link: {
@@ -931,28 +1279,69 @@ export interface components {
             templated?: boolean;
         };
         AdminStatsResponse: {
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Total number of organizations in the system
+             * @example 42
+             */
             totalOrganizations?: number;
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Total number of users in the system
+             * @example 1234
+             */
             totalUsers?: number;
-            /** Format: int64 */
+            /**
+             * Format: int64
+             * @description Number of currently active users
+             * @example 789
+             */
             activeUsers?: number;
+            /** @description List of growth data points over time */
             growthData?: components["schemas"]["GrowthDataPoint"][];
         };
         GrowthDataPoint: {
-            /** Format: date */
+            /**
+             * Format: date
+             * @description Date of the data point
+             * @example 2026-01-15
+             */
             date?: string;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Cumulative total number of users
+             * @example 1234
+             */
             totalUsers?: number;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Cumulative total number of organizations
+             * @example 42
+             */
             totalOrganizations?: number;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Number of new users added on this date
+             * @example 15
+             */
             newUsers?: number;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Number of new organizations added on this date
+             * @example 3
+             */
             newOrganizations?: number;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description Percentage growth in new users compared to previous period
+             * @example 5.5
+             */
             newUsersGrowthPercentage?: number;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description Percentage growth in new organizations compared to previous period
+             * @example 10
+             */
             newOrganizationsGrowthPercentage?: number;
         };
     };
@@ -1907,7 +2296,96 @@ export interface operations {
             };
         };
     };
-    searchUsers: {
+    searchCurrentMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SortablePageInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResourceOrganizationMembershipResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    searchNewMembers: {
         parameters: {
             query?: never;
             header?: never;
@@ -2425,7 +2903,7 @@ export interface operations {
             };
         };
     };
-    searchUsers_1: {
+    searchUsers: {
         parameters: {
             query?: never;
             header?: never;
@@ -2444,7 +2922,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PageResourceUserResponse"];
+                    "application/json": components["schemas"]["PageResourceUserDetailsResponse"];
                 };
             };
             /** @description Unauthorized */

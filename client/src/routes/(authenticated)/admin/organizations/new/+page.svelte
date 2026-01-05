@@ -7,14 +7,14 @@
     import UserSearchCombobox from '$lib/components/user/UserSearchCombobox.svelte';
     import {Building2, CircleAlert, LoaderCircle} from '@lucide/svelte';
     import {createOrganization} from '$lib/api/organization/OrganizationController';
-    import type {OrganizationResponse, UserSearchResult} from '$lib/api/models';
+    import type {OrganizationResponse, UserResponse} from '$lib/api/models';
     import {handleError} from '$lib/utils/error-handler';
     import {toast} from 'svelte-sonner';
     import {goto} from '$app/navigation';
     import {CLIENT_ROUTES} from '$lib/config/routes';
 
     let organizationName: string = $state('');
-    let selectedOwner: UserSearchResult | undefined = $state(undefined);
+    let selectedOwner: UserResponse | undefined = $state(undefined);
     let isSubmitting: boolean = $state(false);
     let errors: Record<string, string> = $state({});
 
@@ -141,7 +141,7 @@
                 <div class="space-y-2">
                     <Label for="ownerSearch">Organization Owner</Label>
                     <UserSearchCombobox
-                        onSelect={(user: UserSearchResult) => { selectedOwner = user }}
+                        onSelect={(user: UserResponse) => { selectedOwner = user }}
                         selectedUser={selectedOwner}
                         placeholder="Search for organization owner..."
                         disabled={isSubmitting}

@@ -55,6 +55,10 @@ export const CLIENT_ROUTES = {
 		path: '/admin/dashboard',
 		type: RouteType.PRIVATE
 	},
+	ADMIN_USERS_PAGE: {
+		path: '/admin/users',
+		type: RouteType.PRIVATE
+	},
 	ADMIN_ORGANIZATIONS_NEW: {
 		path: '/admin/organizations/new',
 		type: RouteType.PRIVATE
