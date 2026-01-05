@@ -1,53 +1,114 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { browser } from '$app/environment';
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { onMount } from 'svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { CircleAlert, UserPlus, RefreshCw } from '@lucide/svelte';
-	import type { OrganizationMembershipResponse, OrganizationalRole } from '$lib/api/models';
+	import { UserPlus, Shield, Crown, Trash2, MoreVertical, ChevronDown, User as UserIcon, Users } from '@lucide/svelte';
+	import type { OrganizationMembershipResponse, OrganizationalRole, SortablePageInput, PageResource } from '$lib/api/models';
 	import { currentUser } from '$lib/stores/auth';
-	import { createMembershipService, type MembershipService } from '$lib/api/organization/OrganizationMembershipService.svelte';
+	import { DataTable, createDataTableService } from '$lib/components/data-table';
+	import type { DataTableColumn, DataTableService } from '$lib/components/data-table/types';
+	import { Badge } from '$lib/components/ui/badge';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { getInitials } from '$lib/utils/string';
+	import { formatRelativeDate } from '$lib/utils/date';
 	import {
-		MemberList,
 		AddMemberSheet,
 		RemoveMemberSheet,
-		TransferOwnershipSheet
+		TransferOwnershipSheet,
+		RoleBadge
 	} from '$lib/components/members';
+	import {
+		searchCurrentMembers,
+		searchUsersToAdd,
+		addMember,
+		updateMemberRole,
+		removeMember,
+		transferOwnership
+	} from '$lib/api/organization/OrganizationMembershipController';
+	import { assignOrganizationOwner } from '$lib/api/admin/AdminController';
+	import { handleError } from '$lib/utils/error-handler';
+	import { toast } from 'svelte-sonner';
+	import type { UserResponse } from '$lib/api/models';
 
 	// Reactive orgId from route params
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
 
-	// Track last loaded orgId to detect changes
+	// DataTable service - will be recreated when orgId changes
+	let service: DataTableService<OrganizationMembershipResponse> | undefined = $state(undefined);
 	let lastLoadedOrgId: number = $state(0);
 
-	// Service instance - use undefined for uninitialized state
-	let service = $state<MembershipService | undefined>(undefined);
-
-	// Reload members when orgId changes (client-side only)
+	// Recreate service when orgId changes
 	$effect(() => {
 		if (!browser) return;
-		
 		const currentOrgId: number = orgId;
-		
-		// Only reload if orgId actually changed
 		if (currentOrgId !== lastLoadedOrgId && currentOrgId > 0) {
-			service = createMembershipService(currentOrgId);
-			service.loadMembers();
+			service = createDataTableService<OrganizationMembershipResponse>({
+				fetchFn: (input: SortablePageInput): Promise<PageResource<OrganizationMembershipResponse>> =>
+					searchCurrentMembers(currentOrgId, input),
+				pageSize: 10,
+				defaultSort: [{ name: 'email', direction: 'ASC' }]
+			});
+			service.load();
 			lastLoadedOrgId = currentOrgId;
 		}
 	});
 
-	// Sheet visibility state (UI-only, not business logic)
-	let showAddSheet: boolean = $state(false);
-	let showRemoveSheet: boolean = $state(false);
-	let showTransferSheet: boolean = $state(false);
+	// Columns configuration
+	const columns: DataTableColumn<OrganizationMembershipResponse>[] = [
+		{
+			key: 'search',
+			label: 'Search',
+			filterable: true,
+			filterType: 'FUZZY_TEXT',
+			filterPlaceholder: 'Search members...',
+			colSpan: 0
+		},
+		{
+			key: 'member',
+			label: 'Member',
+			colSpan: 4
+		},
+		{
+			key: 'email',
+			label: 'Email',
+			sortable: true,
+			colSpan: 3
+		},
+		{
+			key: 'role',
+			label: 'Role',
+			sortable: true,
+			filterable: true,
+			filterType: 'MULTI_ENUM',
+			filterOptions: [
+				{ value: 'OWNER', label: 'Owner' },
+				{ value: 'ADMIN', label: 'Admin' },
+				{ value: 'MEMBER', label: 'Member' }
+			],
+			colSpan: 2
+		},
+		{
+			key: 'joinedAt',
+			label: 'Joined',
+			sortable: true,
+			colSpan: 2
+		},
+		{
+			key: 'actions',
+			label: 'Actions',
+			colSpan: 1
+		}
+	];
 
-	// Derived permissions - handle undefined service during SSR
+	// Derived permissions
 	const currentUserRole: OrganizationalRole | null = $derived.by(() => {
 		if (!service) return null;
-		const userId = $currentUser?.id;
+		const userId: number | undefined = $currentUser?.id;
 		if (!userId) return null;
-		const member = service.members.find((m: OrganizationMembershipResponse) => m.userId === userId);
+		const member: OrganizationMembershipResponse | undefined = service.items.find(
+			(m: OrganizationMembershipResponse) => m.userId === userId
+		);
 		return member?.role ?? null;
 	});
 	const isGlobalAdmin: boolean = $derived($currentUser?.role === 'ADMIN');
@@ -55,64 +116,232 @@
 		isGlobalAdmin || currentUserRole === 'OWNER' || currentUserRole === 'ADMIN'
 	);
 	const isOwner: boolean = $derived(isGlobalAdmin || currentUserRole === 'OWNER');
-	const hasOwner: boolean = $derived(
-		service?.members.some((m: OrganizationMembershipResponse) => m.role === 'OWNER') ?? false
-	);
+	const hasOwner: boolean = $derived.by(() => {
+		if (!service) return false;
+		return service.items.some((m: OrganizationMembershipResponse) => m.role === 'OWNER');
+	});
 
-	// Sheet handlers
-	function openAddSheet(): void {
-		if (!service) return;
-		service.resetAddState();
-		showAddSheet = true;
+	// Sheet state
+	let showAddSheet: boolean = $state(false);
+	let showRemoveSheet: boolean = $state(false);
+	let showTransferSheet: boolean = $state(false);
+
+	// Add member state
+	let searchQuery: string = $state('');
+	let debouncedQuery: string = $state('');
+	let isSearching: boolean = $state(false);
+	let searchResults: UserResponse[] = $state([]);
+	let showSearchDropdown: boolean = $state(false);
+	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+	let selectedUser: UserResponse | null = $state(null);
+	let selectedRole: OrganizationalRole = $state('MEMBER');
+	let isAdding: boolean = $state(false);
+
+	// Remove member state
+	let memberToRemove: OrganizationMembershipResponse | null = $state(null);
+	let isRemoving: boolean = $state(false);
+
+	// Transfer state
+	let transferTarget: OrganizationMembershipResponse | null = $state(null);
+	let transferConfirmation: string = $state('');
+	let isTransferring: boolean = $state(false);
+
+	// Search functions
+	async function performSearch(query: string): Promise<void> {
+		isSearching = true;
+		showSearchDropdown = true;
+		try {
+			searchResults = await searchUsersToAdd(orgId, query);
+		} catch (err: unknown) {
+			console.error('Search error:', err);
+			searchResults = [];
+		} finally {
+			isSearching = false;
+		}
 	}
 
+	function setSearchQuery(query: string): void {
+		searchQuery = query;
+		if (debounceTimer) {
+			clearTimeout(debounceTimer);
+			debounceTimer = null;
+		}
+		if (query.length === 0) {
+			debouncedQuery = '';
+			searchResults = [];
+			showSearchDropdown = false;
+		} else if (query.length >= 3) {
+			showSearchDropdown = true;
+			debounceTimer = setTimeout(() => {
+				debouncedQuery = query;
+				performSearch(query);
+			}, 300);
+		} else {
+			showSearchDropdown = true;
+			debouncedQuery = '';
+			searchResults = [];
+		}
+	}
+
+	function selectUser(user: UserResponse): void {
+		selectedUser = user;
+		searchQuery = '';
+		debouncedQuery = '';
+		searchResults = [];
+		showSearchDropdown = false;
+	}
+
+	function clearUserSelection(): void {
+		selectedUser = null;
+		searchQuery = '';
+		debouncedQuery = '';
+		searchResults = [];
+		showSearchDropdown = false;
+	}
+
+	function resetAddState(): void {
+		selectedUser = null;
+		selectedRole = 'MEMBER';
+		searchQuery = '';
+		debouncedQuery = '';
+		searchResults = [];
+		showSearchDropdown = false;
+		if (debounceTimer) {
+			clearTimeout(debounceTimer);
+			debounceTimer = null;
+		}
+	}
+
+	// Mutation handlers
 	async function handleAdd(): Promise<void> {
-		if (!service) return;
-		const success: boolean = await service.add();
-		if (success) showAddSheet = false;
+		if (!selectedUser?.email || !selectedRole) {
+			toast.error('Please select a user and role');
+			return;
+		}
+		isAdding = true;
+		try {
+			if (selectedRole === 'OWNER') {
+				await assignOrganizationOwner(orgId, { email: selectedUser.email });
+			} else {
+				await addMember(orgId, { email: selectedUser.email, role: selectedRole });
+			}
+			toast.success(`${selectedUser.email} added successfully`);
+			resetAddState();
+			showAddSheet = false;
+			service?.load();
+		} catch (err: unknown) {
+			const { message }: { message: string } = handleError(err, 'Failed to add member');
+			toast.error(message);
+		} finally {
+			isAdding = false;
+		}
 	}
 
-	function openRemoveSheet(member: OrganizationMembershipResponse): void {
-		if (!service) return;
-		service.setMemberToRemove(member);
-		showRemoveSheet = true;
+	async function handleUpdateRole(member: OrganizationMembershipResponse, newRole: OrganizationalRole): Promise<void> {
+		if (member.role === newRole || member.role === 'OWNER') return;
+		if (!member.userId) return;
+		try {
+			await updateMemberRole(orgId, member.userId, { role: newRole });
+			toast.success(`Role updated to ${newRole}`);
+			service?.load();
+		} catch (err: unknown) {
+			const { message }: { message: string } = handleError(err, 'Failed to update role');
+			toast.error(message);
+		}
 	}
 
 	async function handleRemove(): Promise<void> {
-		if (!service) return;
-		const success: boolean = await service.remove();
-		if (success) showRemoveSheet = false;
-	}
-
-	function openTransferSheet(member: OrganizationMembershipResponse): void {
-		if (!service) return;
-		service.setTransferTarget(member);
-		showTransferSheet = true;
+		if (!memberToRemove || !memberToRemove.userId) return;
+		isRemoving = true;
+		try {
+			await removeMember(orgId, memberToRemove.userId);
+			toast.success(`${memberToRemove.userEmail ?? 'Member'} removed successfully`);
+			memberToRemove = null;
+			showRemoveSheet = false;
+			service?.load();
+		} catch (err: unknown) {
+			const { message }: { message: string } = handleError(err, 'Failed to remove member');
+			toast.error(message);
+		} finally {
+			isRemoving = false;
+		}
 	}
 
 	async function handleTransfer(): Promise<void> {
-		if (!service) return;
-		const success: boolean = await service.transfer();
-		if (success) showTransferSheet = false;
+		if (!transferTarget || transferConfirmation !== 'Transfer Ownership') {
+			toast.error('Please type "Transfer Ownership" to confirm');
+			return;
+		}
+		const currentOwner: OrganizationMembershipResponse | undefined = service?.items.find(
+			(m: OrganizationMembershipResponse) => m.role === 'OWNER'
+		);
+		if (!currentOwner || !currentOwner.userId || !transferTarget.userId) {
+			toast.error('Could not find current owner');
+			return;
+		}
+		isTransferring = true;
+		try {
+			await transferOwnership(orgId, {
+				currentOwnerUserId: currentOwner.userId,
+				newOwnerUserId: transferTarget.userId
+			});
+			toast.success(`Ownership transferred to ${transferTarget.userEmail ?? 'new owner'}`);
+			transferTarget = null;
+			transferConfirmation = '';
+			showTransferSheet = false;
+			service?.load();
+		} catch (err: unknown) {
+			const { message }: { message: string } = handleError(err, 'Failed to transfer ownership');
+			toast.error(message);
+		} finally {
+			isTransferring = false;
+		}
 	}
 
-	function handleRoleChange(role: OrganizationalRole): void {
-		if (service) {
-			service.selectedRole = role;
-		}
+	// Sheet handlers
+	function openAddSheet(): void {
+		resetAddState();
+		showAddSheet = true;
+	}
+
+	function openRemoveSheet(member: OrganizationMembershipResponse): void {
+		memberToRemove = member;
+		showRemoveSheet = true;
+	}
+
+	function openTransferSheet(member: OrganizationMembershipResponse): void {
+		transferTarget = member;
+		transferConfirmation = '';
+		showTransferSheet = true;
+	}
+
+	function handleAddSheetOpenChange(open: boolean): void {
+		showAddSheet = open;
+		if (!open) resetAddState();
 	}
 
 	function handleRemoveSheetOpenChange(open: boolean): void {
 		showRemoveSheet = open;
-		if (!open && service) {
-			service.setMemberToRemove(null);
-		}
+		if (!open) memberToRemove = null;
 	}
 
 	function handleTransferSheetOpenChange(open: boolean): void {
 		showTransferSheet = open;
-		if (!open && service) {
-			service.resetTransferState();
+		if (!open) {
+			transferTarget = null;
+			transferConfirmation = '';
+		}
+	}
+
+	function getRoleBadgeClass(role: OrganizationalRole): string {
+		switch (role) {
+			case 'OWNER':
+				return 'bg-gradient-to-r from-purple-500 to-purple-600 border-0 text-white';
+			case 'ADMIN':
+				return 'bg-blue-500/10 border-blue-500/50 text-blue-500';
+			case 'MEMBER':
+			default:
+				return 'border-border/50 bg-background/50 text-muted-foreground';
 		}
 	}
 </script>
@@ -145,75 +374,171 @@
 			{/if}
 		</div>
 
-		<!-- Error Alert -->
-		{#if service?.error && !service?.loading}
-			<Alert
-				variant="destructive"
-				class="mb-4 bg-destructive/10 border-destructive/50 backdrop-blur-sm"
-			>
-				<CircleAlert class="h-4 w-4" />
-				<AlertDescription>
-					{service.error}
-					<Button variant="outline" size="sm" class="ml-4" onclick={service.loadMembers}>
-						<RefreshCw class="h-4 w-4" />
-					</Button>
-				</AlertDescription>
-			</Alert>
-		{/if}
+		<!-- DataTable -->
+		{#if service}
+			<DataTable {columns} {service} title="Members" icon={Users}>
+				{#snippet row(member: OrganizationMembershipResponse)}
+					<div
+						class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
+					>
+						<!-- Avatar & Name -->
+						<div class="col-span-1 md:col-span-4 flex items-center gap-3">
+							<div
+								class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 flex-shrink-0"
+							>
+								<span class="text-sm font-medium text-primary">
+									{getInitials(member.userFirstName ?? '', member.userLastName ?? '')}
+								</span>
+							</div>
+							<div class="min-w-0">
+								<p class="font-medium truncate">
+									{member.userFirstName ?? ''}
+									{member.userLastName ?? ''}
+								</p>
+								<p class="text-sm text-muted-foreground md:hidden truncate">
+									{member.userEmail ?? ''}
+								</p>
+							</div>
+						</div>
 
-		<!-- Members List -->
-		<MemberList
-			members={service?.members ?? []}
-			loading={service?.loading ?? true}
-			{canManageMembers}
-			{isOwner}
-			onUpdateRole={service?.updateRole ?? (() => {})}
-			onRemove={openRemoveSheet}
-			onTransferOwnership={openTransferSheet}
-		/>
+						<!-- Email (desktop only) -->
+						<div class="hidden md:flex md:col-span-3 items-center">
+							<p class="text-sm text-muted-foreground truncate">{member.userEmail ?? ''}</p>
+						</div>
+
+						<!-- Role Badge/Selector -->
+						<div class="col-span-1 md:col-span-2 flex items-center">
+							{#if member.role === 'OWNER'}
+								<RoleBadge role={member.role} />
+							{:else if canManageMembers && member.role}
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger>
+										{#snippet child({ props })}
+											<Button
+												{...props}
+												variant="outline"
+												size="sm"
+												class="bg-background/50 border-border/50 hover:bg-accent/10"
+											>
+											<Badge class={getRoleBadgeClass(member.role ?? 'MEMBER')}>
+												{#if member.role === 'ADMIN'}
+													<Shield class="mr-1 h-3 w-3" />
+												{/if}
+												{member.role}
+											</Badge>
+												<ChevronDown class="ml-1 h-3 w-3" />
+											</Button>
+										{/snippet}
+									</DropdownMenu.Trigger>
+									<DropdownMenu.Content class="bg-card/95 backdrop-blur-xl border-border/50">
+										<DropdownMenu.Item
+											onclick={() => handleUpdateRole(member, 'ADMIN')}
+											class="hover:bg-accent/10"
+										>
+											<Shield class="mr-2 h-4 w-4" />
+											ADMIN
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											onclick={() => handleUpdateRole(member, 'MEMBER')}
+											class="hover:bg-accent/10"
+										>
+											<UserIcon class="mr-2 h-4 w-4" />
+											MEMBER
+										</DropdownMenu.Item>
+									</DropdownMenu.Content>
+								</DropdownMenu.Root>
+							{:else if member.role}
+								<RoleBadge role={member.role} />
+							{/if}
+						</div>
+
+						<!-- Joined Date -->
+						<div class="col-span-1 md:col-span-2 flex items-center">
+							<p class="text-sm text-muted-foreground">
+								{formatRelativeDate(member.joinedAt ?? '')}
+							</p>
+						</div>
+
+						<!-- Actions -->
+						<div class="col-span-1 md:col-span-1 flex items-center justify-end">
+							{#if canManageMembers && member.role !== 'OWNER'}
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger>
+										{#snippet child({ props })}
+											<Button
+												{...props}
+												variant="outline"
+												size="sm"
+												class="bg-background/50 border-border/50 hover:bg-accent/10"
+											>
+												<MoreVertical class="h-4 w-4" />
+											</Button>
+										{/snippet}
+									</DropdownMenu.Trigger>
+									<DropdownMenu.Content class="bg-card/95 backdrop-blur-xl border-border/50">
+										{#if isOwner}
+											<DropdownMenu.Item
+												onclick={() => openTransferSheet(member)}
+												class="hover:bg-accent/10"
+											>
+												<Crown class="mr-2 h-4 w-4 text-primary" />
+												Transfer Ownership
+											</DropdownMenu.Item>
+										{/if}
+										<DropdownMenu.Item
+											onclick={() => openRemoveSheet(member)}
+											class="hover:bg-destructive/10 text-destructive"
+										>
+											<Trash2 class="mr-2 h-4 w-4" />
+											Remove
+										</DropdownMenu.Item>
+									</DropdownMenu.Content>
+								</DropdownMenu.Root>
+							{/if}
+						</div>
+					</div>
+				{/snippet}
+			</DataTable>
+		{/if}
 	</div>
 </main>
 
-<!-- Add Member Sheet -->
-{#if service}
-	<AddMemberSheet
-		open={showAddSheet}
-		searching={service.isSearching}
-		adding={service.isAdding}
-		searchQuery={service.searchQuery}
-		searchResults={service.searchResults}
-		selectedUser={service.selectedUser}
-		selectedRole={service.selectedRole}
-		showSearchDropdown={service.showSearchDropdown}
-		{hasOwner}
-		{isGlobalAdmin}
-		debouncedQueryLength={service.debouncedQueryLength}
-		onOpenChange={(open) => (showAddSheet = open)}
-		onSearchQueryChange={service.setSearchQuery}
-		onSelectUser={service.selectUser}
-		onClearSelection={service.clearUserSelection}
-		onRoleChange={handleRoleChange}
-		onSubmit={handleAdd}
-		onSearchFocus={service.showDropdown}
-	/>
+<!-- Sheets -->
+<AddMemberSheet
+	open={showAddSheet}
+	searching={isSearching}
+	adding={isAdding}
+	{searchQuery}
+	{searchResults}
+	{selectedUser}
+	{selectedRole}
+	{showSearchDropdown}
+	{hasOwner}
+	{isGlobalAdmin}
+	debouncedQueryLength={debouncedQuery.length}
+	onOpenChange={handleAddSheetOpenChange}
+	onSearchQueryChange={setSearchQuery}
+	onSelectUser={selectUser}
+	onClearSelection={clearUserSelection}
+	onRoleChange={(role) => selectedRole = role}
+	onSubmit={handleAdd}
+	onSearchFocus={() => { if (searchQuery.length > 0) showSearchDropdown = true; }}
+/>
 
-	<!-- Remove Member Sheet -->
-	<RemoveMemberSheet
-		open={showRemoveSheet}
-		member={service.memberToRemove}
-		removing={service.isRemoving}
-		onOpenChange={handleRemoveSheetOpenChange}
-		onConfirm={handleRemove}
-	/>
+<RemoveMemberSheet
+	open={showRemoveSheet}
+	member={memberToRemove}
+	removing={isRemoving}
+	onOpenChange={handleRemoveSheetOpenChange}
+	onConfirm={handleRemove}
+/>
 
-	<!-- Transfer Ownership Sheet -->
-	<TransferOwnershipSheet
-		open={showTransferSheet}
-		member={service.transferTarget}
-		confirmation={service.transferConfirmation}
-		transferring={service.isTransferring}
-		onOpenChange={handleTransferSheetOpenChange}
-		onConfirmationChange={service.setTransferConfirmation}
-		onConfirm={handleTransfer}
-	/>
-{/if}
+<TransferOwnershipSheet
+	open={showTransferSheet}
+	member={transferTarget}
+	confirmation={transferConfirmation}
+	transferring={isTransferring}
+	onOpenChange={handleTransferSheetOpenChange}
+	onConfirmationChange={(value) => transferConfirmation = value}
+	onConfirm={handleTransfer}
+/>

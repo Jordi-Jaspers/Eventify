@@ -2,11 +2,11 @@
 	import { Search, X, LoaderCircle, User } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { searchUsersByEmailAndName } from '$lib/api/admin/AdminUserController';
-	import type { UserSearchResult } from '$lib/api/models';
+	import type { UserResponse } from '$lib/api/models';
 
 	interface Props {
-		onSelect: (user: UserSearchResult) => void;
-		selectedUser?: UserSearchResult;
+		onSelect: (user: UserResponse) => void;
+		selectedUser?: UserResponse;
 		placeholder?: string;
 		disabled?: boolean;
 	}
@@ -22,7 +22,7 @@
 	let debouncedQuery: string = $state('');
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 	let isSearching: boolean = $state(false);
-	let searchResults: UserSearchResult[] = $state([]);
+	let searchResults: UserResponse[] = $state([]);
 	let showDropdown: boolean = $state(false);
 	let inputElement: HTMLInputElement | undefined = $state(undefined);
 	let dropdownElement: HTMLDivElement | undefined = $state(undefined);
@@ -57,7 +57,7 @@
 		showDropdown = true;
 
 		try {
-			const results: UserSearchResult[] = await searchUsersByEmailAndName(debouncedQuery);
+			const results: UserResponse[] = await searchUsersByEmailAndName(debouncedQuery);
 			searchResults = results;
 		} catch (error) {
 			console.error('Search error:', error);
@@ -67,7 +67,7 @@
 		}
 	}
 
-	function handleSelectUser(user: UserSearchResult): void {
+	function handleSelectUser(user: UserResponse): void {
 		onSelect(user);
 		searchQuery = '';
 		searchResults = [];
@@ -75,7 +75,7 @@
 	}
 
 	function handleClear(): void {
-		onSelect(undefined as unknown as UserSearchResult);
+		onSelect(undefined as unknown as UserResponse);
 		searchQuery = '';
 		searchResults = [];
 		showDropdown = false;

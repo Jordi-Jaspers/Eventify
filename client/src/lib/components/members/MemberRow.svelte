@@ -54,9 +54,9 @@
 		<div
 			class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 flex-shrink-0"
 		>
-			<span class="text-sm font-medium text-primary">
-				{getInitials(member.userFirstName, member.userLastName)}
-			</span>
+		<span class="text-sm font-medium text-primary">
+			{getInitials(member.userFirstName ?? '', member.userLastName ?? '')}
+		</span>
 		</div>
 		<div class="min-w-0">
 			<p class="font-medium truncate">
@@ -89,12 +89,12 @@
 							size="sm"
 							class="bg-background/50 border-border/50 hover:bg-accent/10"
 						>
-							<Badge class={getRoleBadgeClass(member.role)}>
-								{#if member.role === 'ADMIN'}
-									<Shield class="mr-1 h-3 w-3" />
-								{/if}
-								{member.role}
-							</Badge>
+						<Badge class={getRoleBadgeClass(member.role ?? 'MEMBER')}>
+							{#if member.role === 'ADMIN'}
+								<Shield class="mr-1 h-3 w-3" />
+							{/if}
+							{member.role}
+						</Badge>
 							<ChevronDown class="ml-1 h-3 w-3" />
 						</Button>
 					{/snippet}
@@ -116,16 +116,16 @@
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-		{:else}
-			<RoleBadge role={member.role} />
-		{/if}
+	{:else if member.role}
+		<RoleBadge role={member.role} />
+	{/if}
 	</div>
 
 	<!-- Joined Date -->
 	<div class="col-span-1 md:col-span-2 flex items-center">
-		<p class="text-sm text-muted-foreground">
-			{formatRelativeDate(member.joinedAt)}
-		</p>
+	<p class="text-sm text-muted-foreground">
+		{formatRelativeDate(member.joinedAt ?? '')}
+	</p>
 	</div>
 
 	<!-- Actions -->
