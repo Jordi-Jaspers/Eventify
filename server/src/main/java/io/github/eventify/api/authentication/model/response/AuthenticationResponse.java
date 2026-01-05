@@ -15,6 +15,20 @@ import java.time.ZonedDateTime;
 public class AuthenticationResponse {
 
     @Schema(
+        description = "User's first name",
+        example = "John",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private String firstName;
+
+    @Schema(
+        description = "User's last name",
+        example = "Doe",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private String lastName;
+
+    @Schema(
         description = "User's email address",
         example = "user@example.com",
         requiredMode = Schema.RequiredMode.NOT_REQUIRED
