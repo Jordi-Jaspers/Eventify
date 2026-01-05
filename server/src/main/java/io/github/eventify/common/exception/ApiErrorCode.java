@@ -153,6 +153,18 @@ public enum ApiErrorCode implements ApiError {
     NOT_MEMBER_OF_ORGANIZATION_ERROR(
         "ERR-0035",
         "User is not a member of the specified organization."
+    ),
+    CANNOT_UPDATE_ROLE_AS_ADMIN_ERROR(
+        "ERR-0036",
+        "As an administrator, you can only update roles to MEMBER."
+    ),
+    CANNOT_DEMOTE_LAST_ADMIN_ERROR(
+        "ERR-0037",
+        "Cannot demote the last system administrator. At least one admin must exist."
+    ),
+    CANNOT_LOCK_SELF_ERROR(
+        "ERR-0038",
+        "You cannot lock your own user account."
     );
 
     /* The error code for this reason. */

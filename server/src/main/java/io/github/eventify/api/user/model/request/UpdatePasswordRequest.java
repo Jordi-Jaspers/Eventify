@@ -1,5 +1,6 @@
 package io.github.eventify.api.user.model.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,11 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 public class UpdatePasswordRequest extends PasswordRequest {
 
+    @Schema(
+        description = "User's current password for verification",
+        example = "********",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
     private String oldPassword;
 
 }

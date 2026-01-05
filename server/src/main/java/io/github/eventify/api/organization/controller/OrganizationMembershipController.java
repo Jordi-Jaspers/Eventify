@@ -41,7 +41,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     name = "Organization Membership",
     description = "Endpoints for managing organization memberships"
 )
-@SuppressWarnings("ClassFanOutComplexity")
+@SuppressWarnings(
+    {
+        "ClassFanOutComplexity",
+        "PMD.CouplingBetweenObjects"
+    }
+)
 public class OrganizationMembershipController {
 
     private final OrganizationMembershipService membershipService;
@@ -49,35 +54,35 @@ public class OrganizationMembershipController {
     private final OrganizationMembershipValidator membershipValidator;
     private final UserMapper userMapper;
 
-    /**
-     * Search for users to add to an organization.
-     *
-     * @param orgId     the organization ID
-     * @param principal the authenticated user
-     * @return list of matching users
-     */
     @Operation(summary = "Search users to add to organization")
     @PostMapping(
-        path = ORGANIZATION_MEMBERS_SEARCH_PATH,
+        path = ORGANIZATION_NEW_MEMBERS_SEARCH_PATH,
         produces = APPLICATION_JSON_VALUE,
         consumes = APPLICATION_JSON_VALUE
     )
     @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
-    public ResponseEntity<PageResource<UserResponse>> searchUsers(@PathVariable final Long orgId,
+    public ResponseEntity<PageResource<UserResponse>> searchNewMembers(@PathVariable final Long orgId,
         @RequestBody final SortablePageInput input,
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
         final Page<User> page = membershipService.searchUsersForOrganization(input, orgId);
         return ResponseEntity.status(OK).body(userMapper.toPageResource(page));
     }
 
-    /**
-     * Add a member to an organization.
-     *
-     * @param orgId     the organization ID
-     * @param request   the add member request
-     * @param principal the authenticated user
-     * @return the created membership response
-     */
+    @ResponseStatus(OK)
+    @Operation(summary = "Search current members of an organization")
+    @PostMapping(
+        path = ORGANIZATION_MEMBERS_SEARCH_PATH,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("@orgSecurity.isMember(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
+    public ResponseEntity<PageResource<OrganizationMembershipResponse>> searchCurrentMembers(@PathVariable final Long orgId,
+        @RequestBody final SortablePageInput input,
+        @AuthenticationPrincipal final UserTokenPrincipal principal) {
+        final Page<OrganizationMembership> page = membershipService.searchOrganizationMembers(input, orgId);
+        return ResponseEntity.status(OK).body(membershipMapper.toPageResource(page));
+    }
+
     @Operation(summary = "Add a member to an organization")
     @PostMapping(
         path = ORGANIZATION_MEMBERS_PATH,
@@ -95,13 +100,6 @@ public class OrganizationMembershipController {
         return ResponseEntity.status(OK).body(response);
     }
 
-    /**
-     * Get all members of an organization.
-     *
-     * @param orgId     the organization ID
-     * @param principal the authenticated user
-     * @return list of organization members
-     */
     @Operation(summary = "Get all members of an organization")
     @GetMapping(
         path = ORGANIZATION_MEMBERS_PATH,
@@ -117,15 +115,6 @@ public class OrganizationMembershipController {
         return ResponseEntity.status(OK).body(responses);
     }
 
-    /**
-     * Update a member's role.
-     *
-     * @param orgId     the organization ID
-     * @param userId    the user ID
-     * @param request   the update role request
-     * @param principal the authenticated user
-     * @return the updated membership response
-     */
     @Operation(summary = "Update a member's role")
     @PatchMapping(
         path = ORGANIZATION_MEMBER_PATH,
@@ -144,13 +133,6 @@ public class OrganizationMembershipController {
         return ResponseEntity.status(OK).body(response);
     }
 
-    /**
-     * Remove a member from an organization.
-     *
-     * @param orgId     the organization ID
-     * @param userId    the user ID
-     * @param principal the authenticated user
-     */
     @Operation(summary = "Remove a member from an organization")
     @DeleteMapping(path = ORGANIZATION_MEMBER_PATH)
     @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) || hasAnyAuthority('MANAGE_ORGANIZATIONS')")
@@ -160,13 +142,6 @@ public class OrganizationMembershipController {
         return ResponseEntity.status(NO_CONTENT).build();
     }
 
-    /**
-     * Transfer ownership of an organization.
-     *
-     * @param orgId     the organization ID
-     * @param request   the transfer ownership request
-     * @param principal the authenticated user
-     */
     @Operation(summary = "Transfer ownership of an organization")
     @PostMapping(
         path = ORGANIZATION_TRANSFER_OWNERSHIP_PATH,
@@ -181,11 +156,6 @@ public class OrganizationMembershipController {
         return ResponseEntity.status(OK).build();
     }
 
-    /**
-     * Get all organizations the authenticated user is a member of.
-     *
-     * @return list of user organizations
-     */
     @Operation(summary = "Get all organizations for the authenticated user")
     @GetMapping(
         path = USER_ORGANIZATIONS_PATH,

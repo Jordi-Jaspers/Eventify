@@ -6,7 +6,13 @@ import io.github.eventify.api.organization.model.OrganizationalRole;
 import java.util.List;
 import java.util.Optional;
 
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -15,7 +21,8 @@ import org.springframework.stereotype.Repository;
  * Repository for {@link OrganizationMembership} entities.
  */
 @Repository
-public interface OrganizationMembershipRepository extends JpaRepository<OrganizationMembership, Long> {
+public interface OrganizationMembershipRepository extends JpaRepository<OrganizationMembership, Long>,
+                                                  JpaSpecificationExecutor<OrganizationMembership> {
 
     /**
      * Find a membership by organization and user ID.
@@ -86,4 +93,21 @@ public interface OrganizationMembershipRepository extends JpaRepository<Organiza
      * @return true if exists, false otherwise
      */
     boolean existsByOrganizationIdAndRole(Long orgId, OrganizationalRole role);
+
+    /**
+     * Override findAll to eagerly fetch user and organization.
+     *
+     * @param spec     the specification
+     * @param pageable the pageable
+     * @return page of memberships with user and organization eagerly loaded
+     */
+    @EntityGraph(
+        attributePaths = {
+            "user",
+            "organization"
+        }
+    )
+    @NonNull
+    @Override
+    Page<OrganizationMembership> findAll(@NonNull Specification<OrganizationMembership> spec, @NonNull Pageable pageable);
 }

@@ -2,6 +2,7 @@ import type {
 	SortDirection,
 	SearchInput,
 	SortablePageInput,
+	SortableColumn,
 	PageResource
 } from '$lib/api/models';
 import type { Snippet, Component } from 'svelte';
@@ -31,7 +32,7 @@ export type FilterValue = string | string[] | number | boolean | DateRange | nul
 // Column definition
 export interface DataTableColumn<T> {
 	key: string; // Field name (maps to backend)
-	label: string; // Display label
+	label?: string; // Display label
 	colSpan?: number; // Grid columns (default: 1)
 	sortable?: boolean; // Can sort by this column
 	filterable?: boolean; // Show filter for this column
@@ -45,8 +46,7 @@ export interface DataTableColumn<T> {
 export interface DataTableConfig<T> {
 	fetchFn: (input: SortablePageInput) => Promise<PageResource<T>>;
 	pageSize?: number;
-	defaultSortKey?: string;
-	defaultSortDirection?: SortDirection;
+	defaultSort?: SortableColumn[];
 }
 
 // Service interface (what createDataTableService returns)
@@ -81,5 +81,6 @@ export interface DataTableService<T> {
 	setFilter(fieldName: string, value: FilterValue): void;
 	clearFilter(fieldName: string): void;
 	clearAllFilters(): void;
+	reset(): void;
 	refresh(): void;
 }

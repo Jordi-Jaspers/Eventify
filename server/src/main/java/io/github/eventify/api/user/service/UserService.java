@@ -7,6 +7,8 @@ import io.github.eventify.api.user.model.request.UpdateUserDetailsRequest;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.email.service.sender.EmailService;
 import io.github.eventify.common.exception.AuthorizationException;
+import io.github.eventify.common.exception.DemoteLastAdminException;
+import io.github.eventify.common.exception.SelfLockingException;
 import io.github.eventify.common.exception.UserAlreadyExistsException;
 import io.github.jframe.datasource.search.model.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.jspecify.annotations.NonNull;
@@ -30,9 +33,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static io.github.eventify.api.authentication.model.Role.ADMIN;
 import static io.github.eventify.api.authentication.model.Role.USER;
 import static io.github.eventify.common.exception.ApiErrorCode.INVALID_CREDENTIALS;
 import static io.github.eventify.common.exception.ApiErrorCode.USER_NOT_FOUND_ERROR;
+import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -66,6 +71,28 @@ public class UserService implements UserDetailsService {
     public User loadUserByUsername(@NonNull final String username) {
         return userRepository.findByEmail(username)
             .orElseThrow(() -> new AuthorizationException(INVALID_CREDENTIALS));
+    }
+
+    /**
+     * Finds a user by email.
+     *
+     * @param email the email of the user
+     * @return the user
+     */
+    public User findByEmail(final String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+    }
+
+    /**
+     * Find a user by their id.
+     *
+     * @param id the id of the user
+     * @return the user
+     */
+    public User findById(final Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
     }
 
     /**
@@ -104,15 +131,31 @@ public class UserService implements UserDetailsService {
         final User user = userRepository.findById(id)
             .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
 
+        if (Objects.equals(user.getId(), getLoggedInUser().getId())) {
+            throw new SelfLockingException();
+        }
+
         user.setEnabled(!lockUser);
         return userRepository.save(user);
     }
 
     /**
      * Update the role of the user with the given id.
+     *
+     * @param id   the id of the user
+     * @param role the new role
+     * @return the updated user
+     * @throws AuthorizationException if trying to demote the last admin
      */
     public User updateAuthority(final Long id, final Role role) {
         final User user = userRepository.findById(id).orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+        if (user.getRole() == ADMIN && role != ADMIN) {
+            final long adminCount = userRepository.countByRole(ADMIN);
+            if (adminCount <= 1) {
+                throw new DemoteLastAdminException();
+            }
+        }
+
         user.setRole(role);
         return userRepository.save(user);
     }

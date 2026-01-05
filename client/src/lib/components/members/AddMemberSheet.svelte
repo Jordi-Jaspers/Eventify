@@ -12,22 +12,22 @@
 		LoaderCircle,
 		Crown
 	} from '@lucide/svelte';
-	import type { OrganizationalRole, UserSearchResult } from '$lib/api/models';
+	import type { OrganizationalRole, UserResponse } from '$lib/api/models';
 
 	interface Props {
 		open: boolean;
 		searching: boolean;
 		adding: boolean;
 		searchQuery: string;
-		searchResults: UserSearchResult[];
-		selectedUser: UserSearchResult | null;
+		searchResults: UserResponse[];
+		selectedUser: UserResponse | null;
 		selectedRole: OrganizationalRole;
 		showSearchDropdown: boolean;
 		hasOwner: boolean;
 		isGlobalAdmin: boolean;
 		onOpenChange: (open: boolean) => void;
 		onSearchQueryChange: (query: string) => void;
-		onSelectUser: (user: UserSearchResult) => void;
+		onSelectUser: (user: UserResponse) => void;
 		onClearSelection: () => void;
 		onRoleChange: (role: OrganizationalRole) => void;
 		onSubmit: () => void;

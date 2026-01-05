@@ -1,6 +1,6 @@
 import {type Handle, redirect} from '@sveltejs/kit';
 import {CLIENT_ROUTES, isPublicPath} from '$lib/config/routes';
-import {CookieService} from "$lib/utils/cookie.service.ts";
+import {CookieService} from "$lib/api/authentication/service/cookie.service.ts";
 
 export const handle: Handle = async ({event, resolve}) => {
     let {accessToken} = CookieService.getAuthTokens(event.cookies);

@@ -75,8 +75,8 @@
 
     function fillDevCredentials(): void {
         if (devCredentials) {
-            email = devCredentials.email;
-            password = devCredentials.password;
+            email = devCredentials.email ?? '';
+            password = devCredentials.password ?? '';
         }
     }
 </script>

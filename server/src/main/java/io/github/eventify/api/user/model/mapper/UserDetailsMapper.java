@@ -5,8 +5,7 @@ import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.authentication.model.request.RegisterUserRequest;
 import io.github.eventify.api.authentication.model.response.AuthenticationResponse;
 import io.github.eventify.api.authentication.model.response.RegisterResponse;
-import io.github.eventify.api.organization.model.OrganizationMembership;
-import io.github.eventify.api.organization.model.response.UserOrganizationResponse;
+import io.github.eventify.api.organization.model.mapper.OrganizationMembershipMapper;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.response.UserDetailsResponse;
 import io.github.jframe.datasource.search.model.mapper.PageMapper;
@@ -26,7 +25,10 @@ import org.mapstruct.Named;
  */
 @Mapper(
     config = SharedMapperConfig.class,
-    uses = DateTimeMapper.class
+    uses = {
+        DateTimeMapper.class,
+        OrganizationMembershipMapper.class
+    }
 )
 public abstract class UserDetailsMapper extends PageMapper<UserDetailsResponse, User> {
 
@@ -53,10 +55,6 @@ public abstract class UserDetailsMapper extends PageMapper<UserDetailsResponse, 
         target = "permissions",
         expression = "java(mapRoleToPermissions(user.getRole()))"
     )
-    @Mapping(
-        target = "organizations",
-        expression = "java(mapOrganizations(user.getOrganizations()))"
-    )
     @Named("toResourceObject")
     public abstract UserDetailsResponse toResourceObject(User user);
 
@@ -68,34 +66,4 @@ public abstract class UserDetailsMapper extends PageMapper<UserDetailsResponse, 
         return role.getPermissions();
     }
 
-    /**
-     * Maps organization memberships to user organization responses.
-     *
-     * @param memberships the list of organization memberships
-     * @return the list of user organization responses
-     */
-    public List<UserOrganizationResponse> mapOrganizations(final List<OrganizationMembership> memberships) {
-        if (memberships == null) {
-            return List.of();
-        }
-        return memberships.stream()
-            .map(this::mapMembership)
-            .toList();
-    }
-
-    /**
-     * Maps a single organization membership to user organization response.
-     *
-     * @param membership the organization membership
-     * @return the user organization response
-     */
-    private UserOrganizationResponse mapMembership(final OrganizationMembership membership) {
-        return UserOrganizationResponse.builder()
-            .organizationId(membership.getOrganization().getId())
-            .organizationName(membership.getOrganization().getName())
-            .organizationSlug(membership.getOrganization().getSlug())
-            .role(membership.getRole())
-            .joinedAt(membership.getCreatedAt())
-            .build();
-    }
 }

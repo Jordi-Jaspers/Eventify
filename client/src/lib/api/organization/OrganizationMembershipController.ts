@@ -3,8 +3,9 @@ import type {
 	AddMemberRequest,
 	UpdateMemberRoleRequest,
 	TransferOwnershipRequest,
-	UserSearchResult,
-	SortablePageInput
+	UserResponse,
+	SortablePageInput,
+	PageResource
 } from '$lib/api/models';
 import {client} from "$lib/api/client.ts";
 
@@ -93,9 +94,10 @@ export async function transferOwnership(orgId: number, request: TransferOwnershi
 }
 
 /**
- * Search users to add to organization (min 3 characters)
+ * Search users to add to organization (users NOT currently in the org)
+ * Uses the /members/new/search endpoint
  */
-export async function searchUsersToAdd(orgId: number, query: string): Promise<UserSearchResult[]> {
+export async function searchUsersToAdd(orgId: number, query: string): Promise<UserResponse[]> {
 	const requestBody: SortablePageInput = {
 		pageNumber: 0,
 		pageSize: 10,
@@ -109,7 +111,7 @@ export async function searchUsersToAdd(orgId: number, query: string): Promise<Us
 			: []
 	};
 
-	const {data, error} = await client.POST('/v1/organization/{orgId}/members/search', {
+	const {data, error} = await client.POST('/v1/organization/{orgId}/members/new/search', {
 		params: { path: { orgId } },
 		body: requestBody
 	});
@@ -118,5 +120,25 @@ export async function searchUsersToAdd(orgId: number, query: string): Promise<Us
 		throw error;
 	}
 
-	return (data?.content ?? []) as UserSearchResult[];
+	return (data?.content ?? []) as UserResponse[];
+}
+
+/**
+ * Search current organization members with pagination, filtering, and sorting
+ * Uses the /members/search endpoint which returns current members
+ */
+export async function searchCurrentMembers(
+	orgId: number,
+	input: SortablePageInput
+): Promise<PageResource<OrganizationMembershipResponse>> {
+	const {data, error} = await client.POST('/v1/organization/{orgId}/members/search', {
+		params: { path: { orgId } },
+		body: input
+	});
+
+	if (error) {
+		throw error;
+	}
+
+	return data as PageResource<OrganizationMembershipResponse>;
 }

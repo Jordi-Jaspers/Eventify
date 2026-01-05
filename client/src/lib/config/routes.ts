@@ -55,6 +55,10 @@ export const CLIENT_ROUTES = {
 		path: '/admin/dashboard',
 		type: RouteType.PRIVATE
 	},
+	ADMIN_USERS_PAGE: {
+		path: '/admin/users',
+		type: RouteType.PRIVATE
+	},
 	ADMIN_ORGANIZATIONS_NEW: {
 		path: '/admin/organizations/new',
 		type: RouteType.PRIVATE
@@ -65,6 +69,10 @@ export const CLIENT_ROUTES = {
 	},
 	ORGANIZATION_MEMBERS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/members`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_DASHBOARD_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/dashboard`,
 		type: RouteType.PRIVATE
 	})
 } as const;

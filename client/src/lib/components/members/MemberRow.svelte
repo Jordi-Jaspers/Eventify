@@ -13,6 +13,7 @@
 	import type { OrganizationMembershipResponse, OrganizationalRole } from '$lib/api/models';
 	import { getInitials } from '$lib/utils/string';
 	import { formatRelativeDate } from '$lib/utils/date';
+	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
 	import RoleBadge from './RoleBadge.svelte';
 
 	interface Props {
@@ -32,18 +33,6 @@
 		onRemove,
 		onTransferOwnership
 	}: Props = $props();
-
-	function getRoleBadgeClass(role: OrganizationalRole): string {
-		switch (role) {
-			case 'OWNER':
-				return 'bg-gradient-to-r from-purple-500 to-purple-600 border-0 text-white';
-			case 'ADMIN':
-				return 'bg-blue-500/10 border-blue-500/50 text-blue-500';
-			case 'MEMBER':
-			default:
-				return 'border-border/50 bg-background/50 text-muted-foreground';
-		}
-	}
 </script>
 
 <div
@@ -54,9 +43,9 @@
 		<div
 			class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 flex-shrink-0"
 		>
-			<span class="text-sm font-medium text-primary">
-				{getInitials(member.userFirstName, member.userLastName)}
-			</span>
+		<span class="text-sm font-medium text-primary">
+			{getInitials(member.userFirstName ?? '', member.userLastName ?? '')}
+		</span>
 		</div>
 		<div class="min-w-0">
 			<p class="font-medium truncate">
@@ -89,12 +78,12 @@
 							size="sm"
 							class="bg-background/50 border-border/50 hover:bg-accent/10"
 						>
-							<Badge class={getRoleBadgeClass(member.role)}>
-								{#if member.role === 'ADMIN'}
-									<Shield class="mr-1 h-3 w-3" />
-								{/if}
-								{member.role}
-							</Badge>
+						<Badge class={getOrganizationalRoleBadgeClass(member.role ?? 'MEMBER')}>
+							{#if member.role === 'ADMIN'}
+								<Shield class="mr-1 h-3 w-3" />
+							{/if}
+							{member.role}
+						</Badge>
 							<ChevronDown class="ml-1 h-3 w-3" />
 						</Button>
 					{/snippet}
@@ -116,16 +105,16 @@
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-		{:else}
-			<RoleBadge role={member.role} />
-		{/if}
+	{:else if member.role}
+		<RoleBadge role={member.role} />
+	{/if}
 	</div>
 
 	<!-- Joined Date -->
 	<div class="col-span-1 md:col-span-2 flex items-center">
-		<p class="text-sm text-muted-foreground">
-			{formatRelativeDate(member.joinedAt)}
-		</p>
+	<p class="text-sm text-muted-foreground">
+		{formatRelativeDate(member.joinedAt ?? '')}
+	</p>
 	</div>
 
 	<!-- Actions -->

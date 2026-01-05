@@ -259,4 +259,60 @@ public class AdminUserManagementControllerTest extends IntegrationTest {
         // Then: Should return an UNAUTHORIZED error
         response.andExpect(status().is(SC_UNAUTHORIZED));
     }
+
+    @Test
+    @DisplayName("Should return error when admin tries to lock themselves")
+    public void shouldReturnErrorWhenAdminTriesToLockThemselves() throws Exception {
+        // Given: A logged in admin
+        final User admin = aValidatedUserWithRole(ADMIN);
+
+        // When: Admin tries to lock their own account
+        final MockHttpServletRequestBuilder request = post(LOCK_USER_PATH, admin.getId())
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        // And: Making the request
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Should return a BAD_REQUEST error
+        response.andExpect(status().is(SC_BAD_REQUEST));
+
+        // And: Response should contain the error message
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final ApiErrorResponseResource error = fromJson(content, ApiErrorResponseResource.class);
+        assertThat(error.getApiErrorReason(), is(ApiErrorCode.CANNOT_LOCK_SELF_ERROR.getReason()));
+    }
+
+    @Test
+    @DisplayName("Should return error when trying to demote the last admin")
+    public void shouldReturnErrorWhenTryingToDemoteTheLastAdmin() throws Exception {
+        // Given: Create a second admin first (so we can demote the setup admin)
+        final User secondAdmin = aValidatedUserWithRole(ADMIN);
+
+        // And: Demote bootstrap admin and setup admin
+        final User bootstrapAdmin = userRepository.findByEmail("johndoe@example.com").orElseThrow();
+        userService.updateAuthority(bootstrapAdmin.getId(), Role.USER);
+        userService.updateAuthority(admin.getId(), Role.USER);
+
+        // And: Now secondAdmin is the only admin in the system
+        // And: A role update request to demote to USER
+        final UpdateRoleRequest request = anUpdateRoleRequest(Role.USER);
+
+        // When: Trying to demote the last admin
+        final MockHttpServletRequestBuilder updateRequest = post(USER_PATH, secondAdmin.getId())
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + secondAdmin.getAccessToken().getValue())
+            .content(toJson(request));
+
+        // And: Making the request
+        final ResultActions response = mockMvc.perform(updateRequest);
+
+        // Then: Should return a BAD_REQUEST error
+        response.andExpect(status().is(SC_BAD_REQUEST));
+
+        // And: Response should contain the error message
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final ApiErrorResponseResource error = fromJson(content, ApiErrorResponseResource.class);
+        assertThat(error.getApiErrorReason(), is(ApiErrorCode.CANNOT_DEMOTE_LAST_ADMIN_ERROR.getReason()));
+    }
 }

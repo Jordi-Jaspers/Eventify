@@ -1,5 +1,6 @@
 <script lang="ts">
     import {onMount} from 'svelte';
+    import {goto} from '$app/navigation';
     import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '$lib/components/ui/card';
     import {Alert, AlertDescription} from '$lib/components/ui/alert';
     import {Badge} from '$lib/components/ui/badge';
@@ -404,17 +405,14 @@
                         </div>
                     </Button>
 
-                    <!-- Manage Users (Future) -->
+                    <!-- Manage Users -->
                     <Button
-                            variant="outline"
-                            class="bg-background/50 border-border/50 hover:bg-primary/10 transition-all h-auto py-4"
-                            disabled
-                            title="Coming soon"
+                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4"
+                            onclick={() => goto(CLIENT_ROUTES.ADMIN_USERS_PAGE.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
                             <UserCog class="h-5 w-5"/>
                             <span>Manage Users</span>
-                            <span class="text-xs text-muted-foreground">(Coming Soon)</span>
                         </div>
                     </Button>
 

@@ -1,6 +1,7 @@
 package io.github.eventify.api.organization.model;
 
 import io.github.eventify.api.user.model.User;
+import io.github.jframe.datasource.search.model.PageableItem;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +22,7 @@ import static java.time.ZoneOffset.UTC;
 @Entity
 @NoArgsConstructor
 @Table(name = "organization_membership")
-public class OrganizationMembership implements Serializable {
+public class OrganizationMembership implements PageableItem, Serializable {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;
@@ -56,11 +57,11 @@ public class OrganizationMembership implements Serializable {
     private User invitedBy;
 
     @Column(
-        name = "created_at",
+        name = "joined_at",
         nullable = false,
         updatable = false
     )
-    private OffsetDateTime createdAt;
+    private OffsetDateTime joinedAt;
 
     /**
      * Constructs a new OrganizationMembership with the specified organization, user, and role.
@@ -73,6 +74,6 @@ public class OrganizationMembership implements Serializable {
         this.organization = organization;
         this.user = owner;
         this.role = role;
-        this.createdAt = OffsetDateTime.now(UTC);
+        this.joinedAt = OffsetDateTime.now(UTC);
     }
 }

@@ -5,7 +5,7 @@
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { LayoutDashboard, Clock, Shield, Building2, Plus, Users, ChevronUp } from '@lucide/svelte';
+	import { LayoutDashboard, Clock, Shield, Building2, Plus, Users, ChevronUp, UserCog } from '@lucide/svelte';
 
 	let isOrganizationsOpen: boolean = $state(false);
 
@@ -100,6 +100,17 @@
 							</Sidebar.MenuSub>
 						{/if}
 					</Sidebar.MenuItem>
+
+					<!-- Users -->
+					<Sidebar.MenuItem>
+						<Sidebar.MenuButton
+								onclick={() => goto(CLIENT_ROUTES.ADMIN_USERS_PAGE.path)}
+								isActive={currentPath.startsWith('/admin/users')}
+						>
+							<UserCog class="size-4" />
+							<span>Users</span>
+						</Sidebar.MenuButton>
+					</Sidebar.MenuItem>
 				</Sidebar.Menu>
 			</Sidebar.GroupContent>
 		</Sidebar.Group>
@@ -111,6 +122,15 @@
 			<Sidebar.GroupLabel>WORKSPACE</Sidebar.GroupLabel>
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
+					<Sidebar.MenuItem>
+						<Sidebar.MenuButton
+							onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(currentOrganization.organizationId!).path)}
+							isActive={isActive(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(currentOrganization.organizationId!).path)}
+						>
+							<LayoutDashboard class="size-4" />
+							<span>Dashboard</span>
+						</Sidebar.MenuButton>
+					</Sidebar.MenuItem>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton
 							onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(currentOrganization.organizationId!).path)}
