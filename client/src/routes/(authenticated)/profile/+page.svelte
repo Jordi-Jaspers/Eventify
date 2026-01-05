@@ -13,7 +13,7 @@
         User
     } from '@lucide/svelte';
     import { currentUser } from '$lib/stores/auth';
-    import { createProfileService } from '$lib/api/user/ProfileService.svelte';
+    import { createProfileService } from '$lib/api/user/service/ProfileService.svelte';
     import EditableField from '$lib/components/user/EditableField.svelte';
     import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
 
