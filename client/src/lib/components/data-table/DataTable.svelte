@@ -57,16 +57,14 @@
 
 <!-- Filters Card -->
 {#if hasFilterableColumns}
-	<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl mb-6">
-		<CardContent class="pt-6">
-			<DataTableFilters
-				{columns}
-				filters={service.filters}
-				onFilterChange={service.setFilter}
-				onClearAll={service.clearAllFilters}
-			/>
-		</CardContent>
-	</Card>
+	<div class="rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-sm mb-4 px-4 py-3">
+		<DataTableFilters
+			{columns}
+			filters={service.filters}
+			onFilterChange={service.setFilter}
+			onClearAll={service.reset}
+		/>
+	</div>
 {/if}
 
 <!-- Main Table Card -->

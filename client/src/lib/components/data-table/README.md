@@ -94,8 +94,7 @@ async function fetchOrganizations(input: SortablePageInput): Promise<PageResourc
 const service = createDataTableService<OrganizationResponse>({
   fetchFn: fetchOrganizations,
   pageSize: 10,
-  defaultSortKey: 'createdAt',
-  defaultSortDirection: 'DESC'
+  defaultSort: [{ name: 'createdAt', direction: 'DESC' }]
 });
 ```
 
@@ -146,8 +145,7 @@ Creates a reactive service for managing table state.
 **Config:**
 - `fetchFn: (input: SortablePageInput) => Promise<PageResource<T>>` - API fetch function
 - `pageSize?: number` - Items per page (default: 10)
-- `defaultSortKey?: string` - Initial sort column
-- `defaultSortDirection?: SortDirection` - Initial sort direction (default: 'ASC')
+- `defaultSort?: SortableColumn[]` - Initial sort order (supports multi-column)
 
 **Returns:** `DataTableService<T>` with:
 
@@ -175,6 +173,7 @@ Creates a reactive service for managing table state.
 - `setFilter(fieldName: string, value: FilterValue): void` - Set filter
 - `clearFilter(fieldName: string): void` - Remove filter
 - `clearAllFilters(): void` - Remove all filters
+- `reset(): void` - Reset all filters and sort to defaults
 - `refresh(): void` - Reload current page
 
 ### `DataTable` Component Props
@@ -276,9 +275,9 @@ function filterActiveOnly() {
   service.setFilter('status', 'ACTIVE');
 }
 
-// Clear all filters
-function resetFilters() {
-  service.clearAllFilters();
+// Reset all filters and sort to defaults
+function resetAll() {
+  service.reset();
 }
 
 // Go to specific page
