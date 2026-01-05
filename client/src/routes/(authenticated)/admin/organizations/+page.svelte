@@ -54,8 +54,7 @@
 			colSpan: 2
 		},
 		{
-			key: 'actions',
-			label: 'Actions'
+			key: 'actions'
 		}
 	];
 
@@ -177,7 +176,7 @@
 					</div>
 
 					<!-- Actions -->
-					<div class="col-span-1 md:col-span-1 flex items-center justify-end">
+					<div class="col-span-1 md:col-span-1 flex items-center justify-center">
 						<Button
 							variant="ghost"
 							size="sm"

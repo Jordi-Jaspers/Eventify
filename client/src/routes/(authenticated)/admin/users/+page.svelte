@@ -63,9 +63,7 @@
 			colSpan: 2
 		},
 		{
-			key: 'actions',
-			label: 'Actions',
-			colSpan: 1
+			key: 'actions'
 		}
 	];
 
@@ -239,7 +237,7 @@
 					</div>
 
 					<!-- Actions -->
-					<div class="col-span-1 md:col-span-1 flex items-center justify-end" role="none" onclick={(e) => e.stopPropagation()}>
+					<div class="col-span-1 md:col-span-1 flex items-center justify-center" role="none" onclick={(e) => e.stopPropagation()}>
 						<DropdownMenu.Root>
 							<DropdownMenu.Trigger>
 								<Button variant="ghost" size="sm" class="h-8 w-8 p-0">

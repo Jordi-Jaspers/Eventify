@@ -7,6 +7,8 @@ import io.github.eventify.api.user.model.request.UpdateUserDetailsRequest;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.email.service.sender.EmailService;
 import io.github.eventify.common.exception.AuthorizationException;
+import io.github.eventify.common.exception.DemoteLastAdminException;
+import io.github.eventify.common.exception.SelfLockingException;
 import io.github.eventify.common.exception.UserAlreadyExistsException;
 import io.github.jframe.datasource.search.model.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.jspecify.annotations.NonNull;
@@ -32,9 +35,9 @@ import org.springframework.stereotype.Service;
 
 import static io.github.eventify.api.authentication.model.Role.ADMIN;
 import static io.github.eventify.api.authentication.model.Role.USER;
-import static io.github.eventify.common.exception.ApiErrorCode.CANNOT_DEMOTE_LAST_ADMIN_ERROR;
 import static io.github.eventify.common.exception.ApiErrorCode.INVALID_CREDENTIALS;
 import static io.github.eventify.common.exception.ApiErrorCode.USER_NOT_FOUND_ERROR;
+import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -128,6 +131,10 @@ public class UserService implements UserDetailsService {
         final User user = userRepository.findById(id)
             .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
 
+        if (Objects.equals(user.getId(), getLoggedInUser().getId())) {
+            throw new SelfLockingException();
+        }
+
         user.setEnabled(!lockUser);
         return userRepository.save(user);
     }
@@ -142,12 +149,10 @@ public class UserService implements UserDetailsService {
      */
     public User updateAuthority(final Long id, final Role role) {
         final User user = userRepository.findById(id).orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
-
-        // Prevent demoting the last admin
         if (user.getRole() == ADMIN && role != ADMIN) {
             final long adminCount = userRepository.countByRole(ADMIN);
             if (adminCount <= 1) {
-                throw new AuthorizationException(CANNOT_DEMOTE_LAST_ADMIN_ERROR);
+                throw new DemoteLastAdminException();
             }
         }
 

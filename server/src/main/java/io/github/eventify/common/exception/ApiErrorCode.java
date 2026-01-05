@@ -161,6 +161,10 @@ public enum ApiErrorCode implements ApiError {
     CANNOT_DEMOTE_LAST_ADMIN_ERROR(
         "ERR-0037",
         "Cannot demote the last system administrator. At least one admin must exist."
+    ),
+    CANNOT_LOCK_SELF_ERROR(
+        "ERR-0038",
+        "You cannot lock your own user account."
     );
 
     /* The error code for this reason. */

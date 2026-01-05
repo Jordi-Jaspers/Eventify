@@ -32,7 +32,7 @@ export type FilterValue = string | string[] | number | boolean | DateRange | nul
 // Column definition
 export interface DataTableColumn<T> {
 	key: string; // Field name (maps to backend)
-	label: string; // Display label
+	label?: string; // Display label
 	colSpan?: number; // Grid columns (default: 1)
 	sortable?: boolean; // Can sort by this column
 	filterable?: boolean; // Show filter for this column

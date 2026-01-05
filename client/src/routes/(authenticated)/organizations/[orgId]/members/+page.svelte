@@ -96,9 +96,7 @@
 			colSpan: 2
 		},
 		{
-			key: 'actions',
-			label: 'Actions',
-			colSpan: 1
+			key: 'actions'
 		}
 	];
 
@@ -449,7 +447,7 @@
 						</div>
 
 						<!-- Actions -->
-						<div class="col-span-1 md:col-span-1 flex items-center justify-end">
+						<div class="col-span-1 md:col-span-1 flex items-center justify-center">
 							{#if canManageMembers && member.role !== 'OWNER'}
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger>
