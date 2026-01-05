@@ -254,6 +254,72 @@
 
 ---
 
+# Epic: CI/CD & Deployment Pipeline
+
+**Context**: Automate deployment of development builds to a self-hosted home server. The existing CI workflow builds and tests on push/PR but does not deploy. We need a continuous deployment pipeline for the `develop` branch.
+
+## Current State (from research)
+- Existing `.github/workflows/ci.yml` builds both backend (Gradle) and frontend (Bun)
+- Triggers on push to `master`/`develop`, PRs, and scheduled daily builds
+- No Docker image publishing or deployment steps yet
+- `server/Dockerfile` exists for containerization
+
+## Backlog Items
+
+- [ ] **Docker Image Build & Push**:
+    - Extend CI workflow (or create new `cd.yml`) to build Docker images
+    - Build backend image from `server/Dockerfile`
+    - Build frontend image (may need new Dockerfile for SvelteKit)
+    - Push to GitHub Container Registry (ghcr.io) or Docker Hub
+    - Tag strategy: `develop` branch → `latest-dev`, tags → `vX.Y.Z`
+    - Multi-platform builds consideration (amd64, arm64 for home server)
+
+- [ ] **Home Server Deployment Trigger**:
+    - Options to trigger deployment on home server:
+        1. **Webhook**: Server listens for GitHub webhook, pulls new images
+        2. **SSH Deploy**: GitHub Action SSHs into server and runs deploy script
+        3. **Self-hosted Runner**: Run GitHub Actions runner on home server
+        4. **Watchtower**: Container auto-updates when new image is pushed
+    - Recommendation: SSH deploy or Watchtower for simplicity
+    - Secure secrets management (SSH keys, server address in GitHub Secrets)
+
+- [ ] **Docker Compose for Home Server**:
+    - Create `docker-compose.prod.yml` or `docker-compose.dev.yml`
+    - Services: backend, frontend, PostgreSQL, (optional) Redis, Traefik/Nginx
+    - Environment variable configuration via `.env` file
+    - Volume mounts for database persistence
+    - Health checks and restart policies
+
+- [ ] **Deployment Script**:
+    - Script to: pull latest images, run migrations, restart services
+    - Zero-downtime deployment strategy (if needed)
+    - Rollback capability (keep previous image tagged)
+    - Post-deploy health check verification
+
+- [ ] **Environment Configuration**:
+    - Separate config for dev deployment vs production
+    - GitHub Secrets: `DEV_SERVER_HOST`, `DEV_SERVER_SSH_KEY`, `DEV_SERVER_USER`
+    - Application secrets: database credentials, JWT keys, OAuth secrets
+    - Consider: use GitHub Environments for approval gates (optional)
+
+- [ ] **Deployment Notifications**:
+    - Notify on successful/failed deployment (Discord, Slack, or email)
+    - Include: commit SHA, deploy time, link to logs
+    - Optional: deployment status badge in README
+
+- [ ] **Database Migrations in CD Pipeline**:
+    - Liquibase migrations should run automatically on startup (already configured?)
+    - Consider: run migrations as separate step before app restart
+    - Backup strategy before migrations (for safety)
+
+## Architecture Considerations
+- Home server needs static IP or dynamic DNS (e.g., DuckDNS, Cloudflare Tunnel)
+- Firewall rules: only allow SSH from GitHub Actions IP ranges, or use Cloudflare Tunnel
+- SSL/TLS: Let's Encrypt via Traefik or Caddy
+- Monitoring: consider adding basic uptime monitoring (UptimeRobot, Healthchecks.io)
+
+---
+
 # Epic: Future Considerations (Not for immediate development)
 
 These are ideas to keep in mind for architecture decisions but not to implement now:
