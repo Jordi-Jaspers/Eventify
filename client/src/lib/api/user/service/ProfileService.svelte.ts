@@ -1,4 +1,4 @@
-import { updateUserDetails } from './UserController';
+import { updateUserDetails } from '../UserController';
 import type { UserDetailsResponse } from '$lib/api/models';
 import { handleError } from '$lib/utils/error-handler';
 import { toast } from 'svelte-sonner';

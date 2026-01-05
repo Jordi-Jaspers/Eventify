@@ -3,7 +3,7 @@
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import { searchUsers } from '$lib/api/admin/AdminUserController';
-	import { createAdminUserService } from '$lib/api/admin/AdminUserService.svelte';
+	import { createAdminUserService } from '$lib/api/admin/service/AdminUserService.svelte';
 	import type { UserDetailsResponse } from '$lib/api/models';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -12,6 +12,7 @@
 	import { UserCog, MoreVertical, Eye, Lock, Unlock, Key, Building2 } from '@lucide/svelte';
 	import { getInitials } from '$lib/utils/string';
 	import { formatDate } from '$lib/utils/date';
+	import { getUserRoleBadgeClass } from '$lib/utils/role';
 
 	// Columns configuration
 	const columns: DataTableColumn<UserDetailsResponse>[] = [
@@ -81,10 +82,6 @@
 	let selectedUser: UserDetailsResponse | null = $state(null);
 
 	// Helper functions
-	function getRoleBadgeVariant(role: 'USER' | 'ADMIN' | undefined): 'default' | 'secondary' {
-		return role === 'ADMIN' ? 'secondary' : 'default';
-	}
-
 	function getStatusBadgeVariant(enabled: boolean | undefined, validated: boolean | undefined): 'success' | 'destructive' | 'default' {
 		if (!enabled) return 'destructive';
 		if (!validated) return 'default';
@@ -213,7 +210,7 @@
 
 					<!-- Role -->
 					<div class="col-span-1 md:col-span-1 flex items-center">
-						<Badge variant={getRoleBadgeVariant(user.role)}>
+						<Badge class={getUserRoleBadgeClass(user.role)}>
 							{user.role}
 						</Badge>
 					</div>

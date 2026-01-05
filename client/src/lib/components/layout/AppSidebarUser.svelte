@@ -25,7 +25,8 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { toast } from 'svelte-sonner';
 	import { handleError } from '$lib/utils/error-handler';
-	import type { UserOrganizationResponse, OrganizationalRole } from '$lib/api/models';
+	import type { UserOrganizationResponse } from '$lib/api/models';
+	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
 
 	// Organization state
 	const loading: boolean = $derived(organizationStore.loading);
@@ -84,13 +85,6 @@
 
 	function getOrgInitial(name: string | undefined): string {
 		return name?.charAt(0)?.toUpperCase() || '?';
-	}
-
-	function getRoleBadgeClass(role: OrganizationalRole | undefined): string {
-		if (role === 'OWNER')
-			return 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0';
-		if (role === 'ADMIN') return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-		return 'bg-muted text-muted-foreground border-border';
 	}
 </script>
 
@@ -188,7 +182,7 @@
 									<div class="flex-1 min-w-0">
 										<div class="font-medium truncate text-sm">{org.organizationName}</div>
 										<Badge
-											class="{getRoleBadgeClass(org.role)} w-fit text-[10px] px-1.5 py-0 leading-tight mt-0.5"
+											class="{getOrganizationalRoleBadgeClass(org.role)} w-fit text-[10px] px-1.5 py-0 leading-tight mt-0.5"
 										>
 											{org.role}
 										</Badge>

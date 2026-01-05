@@ -5,30 +5,13 @@
     import {Clock, Shield, User, Building2} from '@lucide/svelte';
     import {authStore} from '$lib/stores/auth';
     import { organizationStore } from '$lib/stores/organization.svelte';
-    import type { UserOrganizationResponse, OrganizationalRole } from '$lib/api/models';
+    import type { UserOrganizationResponse } from '$lib/api/models';
     import { CLIENT_ROUTES } from '$lib/config/routes';
+    import {getOrganizationalRoleBadgeClass, getUserRoleBadgeClass} from '$lib/utils/role';
 
     const organizations: UserOrganizationResponse[] = $derived(organizationStore.organizations);
     const loading: boolean = $derived(organizationStore.loading);
     const hasOrganizations: boolean = $derived(organizations.length > 0);
-
-    function getRoleBadgeVariant(role: OrganizationalRole): 'default' | 'secondary' | 'destructive' | 'outline' {
-        switch (role) {
-            case 'OWNER': return 'default';
-            case 'ADMIN': return 'secondary';
-            case 'MEMBER': return 'outline';
-            default: return 'outline';
-        }
-    }
-
-    function getRoleColor(role: OrganizationalRole): string {
-        switch (role) {
-            case 'OWNER': return 'text-purple-400';
-            case 'ADMIN': return 'text-blue-400';
-            case 'MEMBER': return 'text-green-400';
-            default: return 'text-muted-foreground';
-        }
-    }
 
     async function handleOrgClick(orgId: number): Promise<void> {
         organizationStore.switchOrganization(orgId);
@@ -72,7 +55,9 @@
                             <Shield class="w-3 h-3 text-primary"/>
                             <p class="text-xs text-muted-foreground">Role</p>
                         </div>
-                        <p class="font-medium text-foreground capitalize">{$authStore.user?.role?.toLowerCase() || 'N/A'}</p>
+                        <Badge class="{getUserRoleBadgeClass($authStore.user?.role)} font-medium text-foreground" >
+                            {$authStore.user?.role || 'N/A'}
+                        </Badge>
                     </div>
                 </div>
 
@@ -123,7 +108,7 @@
                                         {org.organizationName}
                                     </CardTitle>
                                     <CardDescription>
-                                        <Badge variant={getRoleBadgeVariant(org.role!)} class={getRoleColor(org.role!)}>
+                                        <Badge class={getOrganizationalRoleBadgeClass(org.role)}>
                                             {org.role}
                                         </Badge>
                                     </CardDescription>

@@ -15,6 +15,7 @@
     import { currentUser } from '$lib/stores/auth';
     import { createProfileService } from '$lib/api/user/ProfileService.svelte';
     import EditableField from '$lib/components/user/EditableField.svelte';
+    import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
 
     const profileService = createProfileService();
 
@@ -37,21 +38,6 @@
     function formatRole(role: string | undefined): string {
         if (!role) return 'N/A';
         return role.charAt(0) + role.slice(1).toLowerCase();
-    }
-
-    function getRoleBadgeVariant(role: string | undefined): 'default' | 'secondary' | 'outline' {
-        if (!role) return 'outline';
-        
-        switch (role) {
-            case 'OWNER':
-                return 'default';
-            case 'ADMIN':
-                return 'secondary';
-            case 'MEMBER':
-                return 'outline';
-            default:
-                return 'outline';
-        }
     }
 </script>
 
@@ -219,7 +205,7 @@
                                                     Joined {formatDate(org.joinedAt)}
                                                 </p>
                                             </div>
-                                            <Badge variant={getRoleBadgeVariant(org.role)}>
+                                            <Badge class={getOrganizationalRoleBadgeClass(org.role)}>
                                                 {org.role}
                                             </Badge>
                                         </div>

@@ -3,40 +3,13 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Building2, Users, Clock, Sparkles } from '@lucide/svelte';
 	import { organizationStore } from '$lib/stores/organization.svelte';
-	import type { UserOrganizationResponse, OrganizationalRole } from '$lib/api/models';
+	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { formatDate } from '$lib/utils/date';
+	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
 
 	const currentOrganization: UserOrganizationResponse | null = $derived(
 		organizationStore.currentOrganization
 	);
-
-	function getRoleBadgeVariant(
-		role: OrganizationalRole
-	): 'default' | 'secondary' | 'destructive' | 'outline' {
-		switch (role) {
-			case 'OWNER':
-				return 'default';
-			case 'ADMIN':
-				return 'secondary';
-			case 'MEMBER':
-				return 'outline';
-			default:
-				return 'outline';
-		}
-	}
-
-	function getRoleColor(role: OrganizationalRole): string {
-		switch (role) {
-			case 'OWNER':
-				return 'text-purple-400';
-			case 'ADMIN':
-				return 'text-blue-400';
-			case 'MEMBER':
-				return 'text-green-400';
-			default:
-				return 'text-muted-foreground';
-		}
-	}
 </script>
 
 <svelte:head>
@@ -89,10 +62,7 @@
 							<p class="text-xs text-muted-foreground">Your Role</p>
 						</div>
 						{#if currentOrganization?.role}
-							<Badge
-								variant={getRoleBadgeVariant(currentOrganization.role)}
-								class={getRoleColor(currentOrganization.role)}
-							>
+							<Badge class={getOrganizationalRoleBadgeClass(currentOrganization.role)}>
 								{currentOrganization.role}
 							</Badge>
 						{:else}

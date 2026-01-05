@@ -12,6 +12,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { getInitials } from '$lib/utils/string';
 	import { formatRelativeDate } from '$lib/utils/date';
+	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
 	import {
 		AddMemberSheet,
 		RemoveMemberSheet,
@@ -332,18 +333,6 @@
 			transferConfirmation = '';
 		}
 	}
-
-	function getRoleBadgeClass(role: OrganizationalRole): string {
-		switch (role) {
-			case 'OWNER':
-				return 'bg-gradient-to-r from-purple-500 to-purple-600 border-0 text-white';
-			case 'ADMIN':
-				return 'bg-blue-500/10 border-blue-500/50 text-blue-500';
-			case 'MEMBER':
-			default:
-				return 'border-border/50 bg-background/50 text-muted-foreground';
-		}
-	}
 </script>
 
 <svelte:head>
@@ -420,7 +409,7 @@
 												size="sm"
 												class="bg-background/50 border-border/50 hover:bg-accent/10"
 											>
-											<Badge class={getRoleBadgeClass(member.role ?? 'MEMBER')}>
+											<Badge class={getOrganizationalRoleBadgeClass(member.role ?? 'MEMBER')}>
 												{#if member.role === 'ADMIN'}
 													<Shield class="mr-1 h-3 w-3" />
 												{/if}

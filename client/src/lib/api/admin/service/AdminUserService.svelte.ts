@@ -1,4 +1,4 @@
-import { lockUser, unlockUser, updateUserRole } from './AdminUserController';
+import { lockUser, unlockUser, updateUserRole } from '../AdminUserController';
 import type { UserDetailsResponse } from '$lib/api/models';
 import { toast } from 'svelte-sonner';
 import { handleError } from '$lib/utils/error-handler';
