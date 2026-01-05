@@ -157,6 +157,10 @@ public enum ApiErrorCode implements ApiError {
     CANNOT_UPDATE_ROLE_AS_ADMIN_ERROR(
         "ERR-0036",
         "As an administrator, you can only update roles to MEMBER."
+    ),
+    CANNOT_DEMOTE_LAST_ADMIN_ERROR(
+        "ERR-0037",
+        "Cannot demote the last system administrator. At least one admin must exist."
     );
 
     /* The error code for this reason. */

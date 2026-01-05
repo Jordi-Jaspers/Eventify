@@ -30,7 +30,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static io.github.eventify.api.authentication.model.Role.ADMIN;
 import static io.github.eventify.api.authentication.model.Role.USER;
+import static io.github.eventify.common.exception.ApiErrorCode.CANNOT_DEMOTE_LAST_ADMIN_ERROR;
 import static io.github.eventify.common.exception.ApiErrorCode.INVALID_CREDENTIALS;
 import static io.github.eventify.common.exception.ApiErrorCode.USER_NOT_FOUND_ERROR;
 import static java.time.ZoneOffset.UTC;
@@ -132,9 +134,23 @@ public class UserService implements UserDetailsService {
 
     /**
      * Update the role of the user with the given id.
+     *
+     * @param id   the id of the user
+     * @param role the new role
+     * @return the updated user
+     * @throws AuthorizationException if trying to demote the last admin
      */
     public User updateAuthority(final Long id, final Role role) {
         final User user = userRepository.findById(id).orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+
+        // Prevent demoting the last admin
+        if (user.getRole() == ADMIN && role != ADMIN) {
+            final long adminCount = userRepository.countByRole(ADMIN);
+            if (adminCount <= 1) {
+                throw new AuthorizationException(CANNOT_DEMOTE_LAST_ADMIN_ERROR);
+            }
+        }
+
         user.setRole(role);
         return userRepository.save(user);
     }

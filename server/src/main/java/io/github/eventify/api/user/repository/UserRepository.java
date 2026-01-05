@@ -84,6 +84,14 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     boolean existsByRole(@NonNull Role role);
 
     /**
+     * Count users with the given role.
+     *
+     * @param role the role to count.
+     * @return the number of users with the given role.
+     */
+    long countByRole(@NonNull Role role);
+
+    /**
      * Delete unvalidated accounts that are older than 1 month.
      */
     @Modifying
