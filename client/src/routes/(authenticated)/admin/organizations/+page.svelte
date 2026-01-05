@@ -10,7 +10,6 @@
 	import { Building2, Users } from '@lucide/svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 
-	// Columns configuration
 	const columns: DataTableColumn<OrganizationResponse>[] = [
 		{
 			key: 'name',
@@ -63,7 +62,8 @@
 	// Service
 	const service = createDataTableService<OrganizationResponse>({
 		fetchFn: searchOrganizations,
-		pageSize: 10
+		pageSize: 10,
+		defaultSort: [{name: 'name', direction: 'ASC'}]
 	});
 
 	// Helper functions
@@ -127,10 +127,10 @@
 		<DataTable {columns} {service} title="All Organizations" icon={Building2}>
 			{#snippet row(org: OrganizationResponse)}
 				<div
-					class="grid grid-cols-1 md:grid-cols-11 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
+					class="grid grid-cols-1 md:grid-cols-11 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
 				>
 					<!-- Name -->
-					<div class="col-span-1 md:col-span-2">
+					<div class="col-span-1 md:col-span-2 flex items-center">
 						<div class="flex items-center gap-2">
 							<Building2 class="h-4 w-4 text-primary md:hidden" />
 							<div>
@@ -141,43 +141,43 @@
 					</div>
 
 					<!-- Slug (desktop only) -->
-					<div class="hidden md:block md:col-span-2">
-						<div class="text-sm text-muted-foreground">{org.slug}</div>
+					<div class="hidden md:flex md:col-span-2 items-center">
+						<span class="text-sm text-muted-foreground">{org.slug}</span>
 					</div>
 
 					<!-- Status -->
-					<div class="col-span-1 md:col-span-1">
+					<div class="col-span-1 md:col-span-1 flex items-center">
 						<Badge variant={getStatusBadgeVariant(org.status)}>
 							{org.status}
 						</Badge>
 					</div>
 
 					<!-- Owner -->
-					<div class="col-span-1 md:col-span-2">
-						<div class="text-sm {org.owner ? '' : 'text-muted-foreground italic'}">
+					<div class="col-span-1 md:col-span-2 flex items-center">
+						<span class="text-sm {org.owner ? '' : 'text-muted-foreground italic'}">
 							<span class="md:hidden font-medium">Owner: </span>
 							{getOwnerName(org.owner)}
-						</div>
+						</span>
 					</div>
 
 					<!-- Members -->
-					<div class="col-span-1 md:col-span-1">
-						<div class="text-sm">
+					<div class="col-span-1 md:col-span-1 flex items-center">
+						<span class="text-sm">
 							<span class="md:hidden text-muted-foreground">Members: </span>
 							{org.memberCount}
-						</div>
+						</span>
 					</div>
 
 					<!-- Created -->
-					<div class="col-span-1 md:col-span-2">
-						<div class="text-sm text-muted-foreground">
+					<div class="col-span-1 md:col-span-2 flex items-center">
+						<span class="text-sm text-muted-foreground">
 							<span class="md:hidden">Created: </span>
 							{formatDate(org.createdAt)}
-						</div>
+						</span>
 					</div>
 
 					<!-- Actions -->
-					<div class="col-span-1 md:col-span-1">
+					<div class="col-span-1 md:col-span-1 flex items-center justify-end">
 						<Button
 							variant="ghost"
 							size="sm"
