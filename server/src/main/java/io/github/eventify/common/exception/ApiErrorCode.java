@@ -153,6 +153,10 @@ public enum ApiErrorCode implements ApiError {
     NOT_MEMBER_OF_ORGANIZATION_ERROR(
         "ERR-0035",
         "User is not a member of the specified organization."
+    ),
+    CANNOT_UPDATE_ROLE_AS_ADMIN_ERROR(
+        "ERR-0036",
+        "As an administrator, you can only update roles to MEMBER."
     );
 
     /* The error code for this reason. */

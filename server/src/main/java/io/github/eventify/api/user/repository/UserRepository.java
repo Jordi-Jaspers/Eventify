@@ -5,17 +5,14 @@ import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
 
 import java.time.OffsetDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +25,20 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
     /**
-     * Find all users by their ids.
+     * Override findAll to eagerly fetch user and organization.
      *
-     * @param ids the ids of the users.
-     * @return the users.
+     * @param spec     the specification
+     * @param pageable the pageable
+     * @return page of memberships with user and organization eagerly loaded
      */
-    Set<User> findAllByIdIn(Collection<Long> ids);
+    @EntityGraph(
+        attributePaths = {
+            "organizations.organization"
+        }
+    )
+    @NonNull
+    @Override
+    Page<User> findAll(@NonNull Specification<User> spec, @NonNull Pageable pageable);
 
     /**
      * Find a user by email.
@@ -119,27 +124,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
         @Param("start") OffsetDateTime start,
         @Param("end") OffsetDateTime end
     );
-
-    /**
-     * Search for enabled users by email, firstName, or lastName. Case-insensitive partial match.
-     *
-     * @param query    the search query
-     * @param pageable pagination information
-     * @return list of matching enabled users
-     */
-    @Query(
-        """
-            FROM User u
-            WHERE u.enabled = true
-            AND (
-                LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
-                OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
-                OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))
-            )
-            ORDER BY u.email ASC
-            """
-    )
-    List<User> searchUsers(@Param("query") String query, Pageable pageable);
 
     /**
      * Find user by id with organizations eagerly loaded.

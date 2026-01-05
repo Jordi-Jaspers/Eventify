@@ -1,6 +1,7 @@
 package io.github.eventify.api.organization.model.response;
 
 import io.github.eventify.api.organization.model.OrganizationalRole;
+import io.github.jframe.datasource.search.model.resource.PageableItemResource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -16,7 +17,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-public class OrganizationMembershipResponse {
+public class OrganizationMembershipResponse implements PageableItemResource {
 
     @Schema(
         description = "Unique membership identifier",

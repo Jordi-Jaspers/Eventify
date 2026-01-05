@@ -129,6 +129,8 @@ public final class Paths {
 
     public static final String ORGANIZATION_MEMBER_PATH = ORGANIZATION_MEMBERS_PATH + "/{userId}";
 
+    public static final String ORGANIZATION_NEW_MEMBERS_SEARCH_PATH = ORGANIZATION_MEMBERS_PATH + "/new" + SEARCH_PART;
+
     public static final String ORGANIZATION_MEMBERS_SEARCH_PATH = ORGANIZATION_MEMBERS_PATH + SEARCH_PART;
 
     public static final String ORGANIZATION_TRANSFER_OWNERSHIP_PATH = ORGANIZATION_PATH + "/transfer-ownership";

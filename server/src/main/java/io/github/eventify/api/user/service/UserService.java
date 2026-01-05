@@ -69,6 +69,28 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * Finds a user by email.
+     *
+     * @param email the email of the user
+     * @return the user
+     */
+    public User findByEmail(final String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+    }
+
+    /**
+     * Find a user by their id.
+     *
+     * @param id the id of the user
+     * @return the user
+     */
+    public User findById(final Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+    }
+
+    /**
      * Search for users with pagination and sorting.
      *
      * @param input the pagination and sorting input
