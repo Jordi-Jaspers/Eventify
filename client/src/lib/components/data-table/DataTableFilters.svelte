@@ -69,14 +69,14 @@
 					<TextFilter
 						value={filterValue as string}
 						onChange={(value: string) => onFilterChange(column.key, value)}
-						placeholder={column.filterPlaceholder ?? `Filter by ${column.label.toLowerCase()}...`}
+						placeholder={column.filterPlaceholder ?? `Filter by ${(column.label ?? column.key).toLowerCase()}...`}
 						debounce={false}
 					/>
 				{:else if column.filterType === 'FUZZY_TEXT'}
 					<TextFilter
 						value={filterValue as string}
 						onChange={(value: string) => onFilterChange(column.key, value)}
-						placeholder={column.filterPlaceholder ?? `Search ${column.label.toLowerCase()}...`}
+						placeholder={column.filterPlaceholder ?? `Search ${(column.label ?? column.key).toLowerCase()}...`}
 						debounce={true}
 					/>
 				{/if}
