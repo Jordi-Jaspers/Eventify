@@ -1,8 +1,3 @@
 spring:
   liquibase:
-    enabled: true
-    contexts: dev,test
-
-springdoc:
-  api-docs:
-    enabled: true
+    contexts: tst

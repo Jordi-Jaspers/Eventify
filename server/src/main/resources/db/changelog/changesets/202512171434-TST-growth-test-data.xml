@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202512171434-TST-growth-test-data.xml">
 
-    <changeSet id="202512171434-TST-growth-test-data-1" author="jordi.jaspers" context="test">
+    <changeSet id="202512171434-TST-growth-test-data-1" author="jordi.jaspers" context="tst">
         <comment>Insert sample users with creation dates spread across last 30 days for growth chart visualization.</comment>
         <sql>
             -- Insert sample users with dates spread over 30 days
@@ -56,7 +56,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202512171434-TST-growth-test-data-2" author="jordi.jaspers" context="test">
+    <changeSet id="202512171434-TST-growth-test-data-2" author="jordi.jaspers" context="tst">
         <comment>Insert sample organizations with creation dates spread across last 30 days for growth chart visualization. Organizations are created by the first admin user (assumed to have id=1).</comment>
         <sql>
             -- Insert sample organizations with dates spread over 30 days

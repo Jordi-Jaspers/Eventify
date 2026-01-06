@@ -1,0 +1,7 @@
+spring:
+  liquibase:
+    contexts: prd
+
+springdoc:
+  api-docs:
+    enabled: false

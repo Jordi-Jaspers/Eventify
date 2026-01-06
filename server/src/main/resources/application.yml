@@ -70,7 +70,7 @@ springdoc:
     default-models-expand-depth: -1
     path: /v1/public/docs/openapi.html
   api-docs:
-    enabled: false
+    enabled: true
     path: /v1/public/docs
 
 # ======= SPRING CONFIGURATION =======
@@ -85,7 +85,7 @@ spring:
     virtual.enabled: true
 
   liquibase:
-    enabled: false
+    enabled: true
 
   datasource:
     hikari:
