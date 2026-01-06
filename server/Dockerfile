@@ -71,10 +71,10 @@ WORKDIR /opt/workspace
 COPY --from=create-slimjre --chown=eventify:eventify /workspace/slimjre /opt/workspace/slimjre/
 
 # Default Spring profile
-ARG SPRING_PROFILES_INCLUDE="dev"
+ARG SPRING_PROFILES_ACTIVE="dev"
 
 # Default environment variables
-ENV SPRING_PROFILES_INCLUDE=$SPRING_PROFILES_INCLUDE \
+ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE \
     TZ="Europe/Amsterdam" \
     JAVA_TOOL_OPTIONS="-XX:+IgnoreUnrecognizedVMOptions -XX:+UseContainerSupport" \
     HEAP_SIZE_MIN="256m" \
@@ -104,5 +104,4 @@ CMD /opt/workspace/slimjre/bin/java \
     -Djava.awt.headless=true \
     -Djava.library.path=/opt/workspace/slimjre/lib/default:/opt/workspace/slimjre/lib:/usr/lib64:/usr/lib:/usr/lib/x86_64-linux-gnu \
     -cp /opt/workspace/app:/opt/workspace/app/lib/* io.github.eventify.Main \
-    --spring.output.ansi.enabled=always \
-    --spring.profiles.include=${SPRING_PROFILES_INCLUDE}
+    --spring.output.ansi.enabled=always
