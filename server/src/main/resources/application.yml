@@ -56,6 +56,7 @@ management:
 # ====== SERVER CONFIG ======
 server:
   servlet.context-path: /api
+  forward-headers-strategy: framework
 
 # ======= SPRINGDOC CONFIGURATION <https://springdoc.org/> =======
 springdoc:
