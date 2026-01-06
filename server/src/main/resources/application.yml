@@ -86,6 +86,7 @@ spring:
 
   liquibase:
     enabled: true
+    contexts: prd
 
   datasource:
     hikari:
