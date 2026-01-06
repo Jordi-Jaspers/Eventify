@@ -16,10 +16,10 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
- * Controller for development-only endpoints. Only active in the "dev" profile.
+ * Controller for development-only endpoints. Only active when NOT in the "prod" profile.
  */
 @RestController
-@Profile("dev")
+@Profile("!prd")
 @Tag(
     name = "Development",
     description = "Development-only endpoints (not available in production)"

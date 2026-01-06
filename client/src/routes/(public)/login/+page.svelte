@@ -1,7 +1,7 @@
 <script lang="ts">
     import {goto} from '$app/navigation';
     import {page} from '$app/state';
-    import {dev} from '$app/environment';
+    import {env} from '$env/dynamic/public';
     import {authStore, isAuthenticated, isUnverified} from '$lib/stores/auth';
     import {CLIENT_ROUTES} from '$lib/config/routes';
     import Button from '$lib/components/ui/button/button.svelte';
@@ -33,8 +33,10 @@
     let devCredentials: DevCredentialsResponse | null = $state(null);
     let devCredentialsLoading: boolean = $state(false);
 
+    const showDevCredentials: boolean = env.PUBLIC_SHOW_DEV_CREDENTIALS === 'true';
+
     $effect(() => {
-        if (dev && !devCredentials && !devCredentialsLoading) {
+        if (showDevCredentials && !devCredentials && !devCredentialsLoading) {
             devCredentialsLoading = true;
             getDevCredentials()
                 .then((data: DevCredentialsResponse) => {
@@ -215,7 +217,7 @@
     </Card>
 
     <!-- Dev Credentials Block -->
-    {#if dev}
+    {#if showDevCredentials}
         <div class="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 backdrop-blur-sm">
             <div class="flex items-center gap-2 text-amber-500 text-sm font-medium mb-2">
                 <Terminal class="w-4 h-4"/>
