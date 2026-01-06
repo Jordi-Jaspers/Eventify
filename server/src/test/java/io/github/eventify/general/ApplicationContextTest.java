@@ -36,13 +36,6 @@ public class ApplicationContextTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should boot up a RabbitMQ container successfully")
-    public void testRabbitContainer() {
-        assertThat(rabbitContainer, is(notNullValue()));
-        assertThat(rabbitContainer.isRunning(), is(true));
-    }
-
-    @Test
     @DisplayName("Should respond to health endpoint with status UP")
     public void healthEndpoint() throws Exception {
         // Given: The request for the health endpoint

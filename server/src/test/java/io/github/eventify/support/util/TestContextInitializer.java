@@ -10,11 +10,8 @@ import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.support.config.BeanConfiguration;
-import io.github.eventify.support.container.RabbitContainer;
 import io.github.eventify.support.container.TimescaleContainer;
 import io.github.jframe.autoconfigure.properties.ApplicationProperties;
-import tools.jackson.databind.ObjectMapper;
-
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,8 +19,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -33,8 +30,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Import(
     {
         BeanConfiguration.class,
-        TimescaleContainer.class,
-        RabbitContainer.class
+        TimescaleContainer.class
     }
 )
 @Testcontainers
@@ -66,9 +62,6 @@ public class TestContextInitializer {
     // ========================= CONTAINERS =========================
     @Autowired
     protected PostgreSQLContainer<?> postgreSQLContainer;
-
-    @Autowired
-    protected RabbitMQContainer rabbitContainer;
 
     // ========================= APPLICATION =========================
 

@@ -120,7 +120,6 @@ dependencies {
 
     // ======= TEST DEPENDENCIES =======
     testImplementation("org.springframework.boot", "spring-boot-test")
-    testImplementation("org.springframework.amqp", "spring-rabbit-test")
     testImplementation("org.springframework.boot", "spring-boot-testcontainers")
     testImplementation("org.springframework.boot", "spring-boot-starter-test") {
         exclude("com.vaadin.external.google", module = "android-json")
@@ -128,7 +127,6 @@ dependencies {
 
     testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))
     testImplementation("org.testcontainers", "postgresql", retrieve("testContainerVersion"))
-    testImplementation("org.testcontainers", "rabbitmq", retrieve("testContainerVersion"))
     testImplementation("org.testcontainers", "junit-jupiter", retrieve("testContainerVersion"))
 }
 

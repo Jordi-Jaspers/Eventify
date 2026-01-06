@@ -85,23 +85,6 @@ spring:
   liquibase:
     enabled: false
 
-  rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:root}
-    password: ${RABBITMQ_PASSWORD:root}
-    listener:
-      simple:
-        prefetch: 250
-        concurrency: 4
-        max-concurrency: 8
-    connection-timeout: 5000
-    template:
-      reply-timeout: 5000
-    cache:
-      channel:
-        size: 25
-
   datasource:
     hikari:
       poolName: ${DATASOURCE_HIKARI_POOL_NAME:tst_eventify}
@@ -113,9 +96,9 @@ spring:
       idleTimeout: ${DATASOURCE_HIKARI_IDLE_TIMEOUT:900000}
       keepaliveTime: ${DATASOURCE_HIKARI_KEEPALIVE_TIME:0}
       registerMbeans: ${DATASOURCE_HIKARI_REGISTER_MBEANS:true}
-    url: ${DATASOURCE_TOP_URL:jdbc:postgresql://localhost:5432/tst_eventify}
-    username: ${DATASOURCE_TOP_USERNAME:tst_eventify}
-    password: ${DATASOURCE_TOP_PASSWORD:tst_eventify}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/tst_eventify}
+    username: ${DATASOURCE_USERNAME:tst_eventify}
+    password: ${DATASOURCE_PASSWORD:tst_eventify}
     driverClassName: org.postgresql.Driver
 
   jpa:

@@ -161,7 +161,7 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
     private PasswordResetService service;
     
     // MockMvc, ObjectMapper, PasswordEncoder already autowired in parent
-    // Testcontainers (PostgreSQL, RabbitMQ) already configured
+    // Testcontainers (PostgreSQL) already configured
     // cleanUp() already runs @BeforeEach
     
     @Test
@@ -409,7 +409,7 @@ public class PasswordResetIntegrationTest extends IntegrationTest {
     private PasswordResetService service;
     
     // MockMvc, PasswordEncoder, ObjectMapper already autowired via parent
-    // PostgreSQL and RabbitMQ containers already running via parent
+    // PostgreSQL container already running via parent
     // cleanUp() already configured in parent's @BeforeEach
 }
 

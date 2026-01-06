@@ -33,9 +33,9 @@ tools:
 Real-time event tracking and monitoring platform built with Domain-Driven Design principles.
 
 **Tech Stack:**
-- **Backend:** Spring Boot 3.5.6, Java 21, TimescaleDB (PostgreSQL 17), RabbitMQ 4
+- **Backend:** Spring Boot 4.0.1, Java 25, TimescaleDB (PostgreSQL 17)
 - **Frontend:** SvelteKit 2.x, Svelte 5, Bun 1.3.0, TailwindCSS v4
-- **Build:** Gradle 8.x (backend), Bun (frontend)
+- **Build:** Gradle 9.x (backend), Bun (frontend)
 - **Auth:** JWT with RSA signing
 - **Testing:** JUnit 5, Mockito, Hamcrest, Testcontainers
 

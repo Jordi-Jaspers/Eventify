@@ -607,7 +607,7 @@ throw new UnauthorizedException("Invalid credentials");
 ./gradlew bootRun                 # Then run app to apply migrations
 
 # Docker services (from root)
-docker-compose up -d              # Start TimescaleDB + RabbitMQ
+docker-compose up -d              # Start TimescaleDB
 docker-compose down               # Stop services
 docker ps                         # List containers
 ```

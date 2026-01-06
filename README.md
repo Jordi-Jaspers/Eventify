@@ -40,7 +40,7 @@ Get Eventify running locally in minutes.
 ### Installation
 
 1. **Start the Infrastructure**
-   Launch the required services (TimescaleDB, RabbitMQ, Inbucket).
+   Launch the required services (TimescaleDB, Inbucket).
    ```bash
    docker-compose up -d
    ```
@@ -68,7 +68,6 @@ Get Eventify running locally in minutes.
 - [Spring Boot](https://spring.io/projects/spring-boot) - Core application framework
 - [TimescaleDB](https://www.timescale.com/) - Time-series database
 - [Liquibase](https://www.liquibase.org/) - Database migration
-- [RabbitMQ](https://www.rabbitmq.com/) - Message broker
 
 **Frontend**
 - [SvelteKit](https://kit.svelte.dev/) - Web framework
