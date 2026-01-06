@@ -31,13 +31,9 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
      * @param pageable the pageable
      * @return page of memberships with user and organization eagerly loaded
      */
-    @EntityGraph(
-        attributePaths = {
-            "organizations.organization"
-        }
-    )
     @NonNull
     @Override
+    @EntityGraph(attributePaths = "organizations.organization")
     Page<User> findAll(@NonNull Specification<User> spec, @NonNull Pageable pageable);
 
     /**

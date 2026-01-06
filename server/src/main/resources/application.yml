@@ -69,6 +69,7 @@ springdoc:
     default-models-expand-depth: -1
     path: /v1/public/docs/openapi.html
   api-docs:
+    enabled: false
     path: /v1/public/docs
 
 # ======= SPRING CONFIGURATION =======

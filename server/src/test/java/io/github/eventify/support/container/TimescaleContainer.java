@@ -53,8 +53,8 @@ public class TimescaleContainer {
         timescaleContainer.setWaitStrategy(
             new LogMessageWaitStrategy()
                 .withRegEx(".*database system is ready to accept connections.*\\s")
-                .withTimes(1)
-                .withStartupTimeout(Duration.of(60, ChronoUnit.SECONDS))
+                .withTimes(2)
+                .withStartupTimeout(Duration.of(120, ChronoUnit.SECONDS))
         );
 
         timescaleContainer.start();
