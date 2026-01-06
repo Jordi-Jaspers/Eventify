@@ -254,27 +254,21 @@
 
 ---
 
-# Epic: CI/CD & Deployment Pipeline ✅ REFINED
+# Epic: CI/CD & Deployment Pipeline ✅ COMPLETED
 
-**Status**: Refined - Ready for implementation
-**Stories**: See `/stories/CICD-*.md` for detailed specifications
+**Status**: Completed - 2026-01-06
+**Details**: See [completed/20260106-CICD-automated-docker-builds-deployment.md](../completed/20260106-CICD-automated-docker-builds-deployment.md)
 
-## Refined Stories
+## Completed Stories
 
-| ID | Story | Estimate | Status |
-|----|-------|----------|--------|
-| CICD-001 | [Docker Image Build & Push to GHCR](CICD-001-docker-image-build-push.md) | M | Ready |
-| CICD-002 | [Frontend Dockerfile for SvelteKit/Bun](CICD-002-frontend-dockerfile.md) | S | Ready |
-| CICD-003 | [Test Environment Docker Compose](CICD-003-test-environment-docker-compose.md) | S | Ready |
-| CICD-004 | [GitHub Container Registry Auth Setup](CICD-004-ghcr-authentication-setup.md) | XS | Ready |
+| ID | Story | Status |
+|----|-------|--------|
+| CICD-001 | Docker Image Build & Push to GHCR | ✅ Done |
+| CICD-002 | Frontend Dockerfile for SvelteKit/Bun | ✅ Done |
+| CICD-003 | Test Environment Docker Compose | ✅ Done |
+| CICD-004 | GitHub Container Registry Auth Setup | ✅ Done |
 
-## Implementation Order
-1. **CICD-004** - Setup GHCR authentication (prerequisite)
-2. **CICD-002** - Create frontend Dockerfile
-3. **CICD-001** - Update CI workflow to build & push images
-4. **CICD-003** - Update test environment docker-compose
-
-## Architecture Decision
+## Architecture Implemented
 - **Two-container architecture**: Separate images for frontend (SvelteKit/Bun) and backend (Spring Boot)
 - **Deployment method**: Watchtower with scoped polling (60s interval)
 - **Registry**: GitHub Container Registry (ghcr.io)
