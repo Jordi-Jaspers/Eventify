@@ -5,25 +5,28 @@ HOST='localhost'
 PORT='5432'
 SCHEMA='tst_eventify'
 PASSWORD='postgres'
+USERNAME='postgres'
 CONTEXTS='dev'
 CONTAINER_NAME='timescaledb'
 USE_DOCKER='auto'
 
 # Parse command-line options
-while getopts ":n:h:p:P:c:d:" opt; do
+while getopts ":n:h:p:P:u:c:d:C:" opt; do
   case $opt in
     n) SCHEMA="$OPTARG" ;;               # Custom schema (database) name
     h) HOST="$OPTARG" ;;                 # Custom host
     p) PORT="$OPTARG" ;;                 # Custom port
     P) PASSWORD="$OPTARG" ;;             # Custom password
+    u) USERNAME="$OPTARG" ;;             # Custom superuser username
     c) CONTEXTS="$OPTARG" ;;             # Custom contexts
     d) USE_DOCKER="$OPTARG" ;;           # Use docker (yes/no/auto)
+    C) CONTAINER_NAME="$OPTARG" ;;       # Custom container name
     \?) echo "Invalid option: -$OPTARG" >&2; exit 1 ;;
     :) echo "Option -$OPTARG requires an argument." >&2; exit 1 ;;
   esac
 done
-if [ -z "$SCHEMA" ] || [ -z "$HOST" ] || [ -z "$PORT" ] || [ -z "$PASSWORD" ]; then
-  echo "Usage: $0 -n schema_name -h host -p port -P password [-d yes|no|auto]" >&2
+if [ -z "$SCHEMA" ] || [ -z "$HOST" ] || [ -z "$PORT" ] || [ -z "$PASSWORD" ] || [ -z "$USERNAME" ]; then
+  echo "Usage: $0 -n schema_name -h host -p port -P password [-u username] [-c contexts] [-d yes|no|auto] [-C container_name]" >&2
   exit 1
 fi
 
@@ -34,9 +37,9 @@ export PGPASSWORD="$PASSWORD"
 execute_psql() {
   local cmd="$1"
   if [ "$USE_DOCKER" = "yes" ] || ([ "$USE_DOCKER" = "auto" ] && ! command -v psql &> /dev/null); then
-    docker exec -e PGPASSWORD="$PASSWORD" "$CONTAINER_NAME" psql -U root -c "$cmd"
+    docker exec -e PGPASSWORD="$PASSWORD" "$CONTAINER_NAME" psql -U "$USERNAME" -c "$cmd"
   else
-    psql -U root -h "$HOST" -p "$PORT" -c "$cmd"
+    psql -U "$USERNAME" -h "$HOST" -p "$PORT" -c "$cmd"
   fi
 }
 
@@ -54,7 +57,7 @@ fi
 echo -e "\e[32mDropping all objects in PostgreSQL owned by user '${SCHEMA}'... The postgreSQL output will follow below here: \e[0m"
 execute_psql "REVOKE ALL PRIVILEGES ON DATABASE ${SCHEMA} FROM ${SCHEMA};"
 execute_psql "DROP DATABASE ${SCHEMA} WITH (FORCE);"
-execute_psql "REASSIGN OWNED BY ${SCHEMA} TO root;"
+execute_psql "REASSIGN OWNED BY ${SCHEMA} TO ${USERNAME};"
 execute_psql "DROP OWNED BY ${SCHEMA};"
 execute_psql "REVOKE ALL PRIVILEGES ON SCHEMA public FROM ${SCHEMA};"
 execute_psql "DROP USER IF EXISTS ${SCHEMA};"
