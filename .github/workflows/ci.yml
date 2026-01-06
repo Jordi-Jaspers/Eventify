@@ -2,14 +2,10 @@ name: CI
 on:
   push:
     branches:
-      - master
-      - develop
+      - '**'
     tags:
       - '*.*.*'
   pull_request:
-    branches:
-      - master
-      - develop
   schedule:
     - cron: '0 2 * * *'
   workflow_dispatch:
@@ -29,7 +25,6 @@ jobs:
   # =============================================================================
   build:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') == false
 
     steps:
       - uses: actions/checkout@v4
@@ -92,12 +87,12 @@ jobs:
         run: bun run build
 
   # =============================================================================
-  # DOCKER BUILD & PUSH - SERVER
+  # DOCKER BUILD & PUSH - SERVER (develop only)
   # =============================================================================
   docker-server:
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/'))
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
 
     steps:
       - uses: actions/checkout@v4
@@ -124,12 +119,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}
           tags: |
-            # For develop branch: latest-dev and dev-<sha>
-            type=raw,value=latest-dev,enable=${{ github.ref == 'refs/heads/develop' }}
-            type=sha,prefix=dev-,enable=${{ github.ref == 'refs/heads/develop' }}
-            # For tags: version and latest
-            type=semver,pattern={{version}}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=latest-dev
+            type=sha,prefix=dev-
 
       - name: Build and push server image
         uses: docker/build-push-action@v6
@@ -143,12 +134,12 @@ jobs:
           platforms: linux/amd64
 
   # =============================================================================
-  # DOCKER BUILD & PUSH - CLIENT
+  # DOCKER BUILD & PUSH - CLIENT (develop only)
   # =============================================================================
   docker-client:
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/'))
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
 
     steps:
       - uses: actions/checkout@v4
@@ -169,12 +160,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_CLIENT }}
           tags: |
-            # For develop branch: latest-dev and dev-<sha>
-            type=raw,value=latest-dev,enable=${{ github.ref == 'refs/heads/develop' }}
-            type=sha,prefix=dev-,enable=${{ github.ref == 'refs/heads/develop' }}
-            # For tags: version and latest
-            type=semver,pattern={{version}}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=latest-dev
+            type=sha,prefix=dev-
 
       - name: Build and push client image
         uses: docker/build-push-action@v6
@@ -186,3 +173,110 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+
+  # =============================================================================
+  # RELEASE - Docker images with version tags + Release notes
+  # =============================================================================
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download server build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: server-build
+          path: server/build/libs
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- Build and push server image with version tags ---
+      - name: Extract server metadata
+        id: meta-server
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          push: true
+          tags: ${{ steps.meta-server.outputs.tags }}
+          labels: ${{ steps.meta-server.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      # --- Build and push client image with version tags ---
+      - name: Extract client metadata
+        id: meta-client
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_CLIENT }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+
+      - name: Build and push client image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          push: true
+          tags: ${{ steps.meta-client.outputs.tags }}
+          labels: ${{ steps.meta-client.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      # --- Generate release notes and create GitHub release ---
+      - name: Get previous tag
+        id: prev-tag
+        run: |
+          git fetch --tags --force
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 "$CURRENT_TAG^" 2>/dev/null || echo "")
+          echo "current=$CURRENT_TAG" >> $GITHUB_OUTPUT
+          echo "previous=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          echo "Current tag: $CURRENT_TAG"
+          echo "Previous tag: $PREVIOUS_TAG"
+
+      - name: Generate changelog
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fromTag: ${{ steps.prev-tag.outputs.current }}
+          toTag: ${{ steps.prev-tag.outputs.previous }}
+          writeToFile: false
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: |
+            ${{ steps.changelog.outputs.changes }}
+
+            ## Docker Images
+
+            - `${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:${{ steps.prev-tag.outputs.current }}`
+            - `${{ env.REGISTRY }}/${{ env.IMAGE_NAME_CLIENT }}:${{ steps.prev-tag.outputs.current }}`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
