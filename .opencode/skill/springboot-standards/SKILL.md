@@ -74,6 +74,48 @@ public class User {
 
 **Always use explicit `@Column` annotations** even when column name matches field.
 
+## Entity/Schema Alignment
+
+**Critical:** Entity `@JoinColumn` nullable MUST match database schema constraints.
+
+```java
+// ✅ CORRECT - DB has ON DELETE SET NULL, entity allows null
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "revoked_by")  // nullable by default
+private User revokedBy;
+
+// ❌ WRONG - DB has ON DELETE SET NULL but entity says NOT NULL
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "revoked_by", nullable = false)  // Constraint violation!
+private User revokedBy;
+```
+
+**Transient fields** for temporary data not persisted to DB:
+```java
+@Transient
+private String key;  // Full API key, only populated during creation
+```
+
+## Audit Table Pattern
+
+Audit tables preserve history even when referenced users are deleted:
+
+```java
+// Audit entity - FK columns should be NULLABLE
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "revoked_by")  // Nullable - user may be deleted later
+private User revokedBy;
+
+@Column(name = "owner_user_id")   // Store ID directly for deleted user references
+private Long ownerUserId;
+```
+
+**Database schema for audit FKs:**
+```sql
+revoked_by INTEGER NULL,  -- Must be NULL to support SET NULL
+FOREIGN KEY (revoked_by) REFERENCES "user"(id) ON DELETE SET NULL
+```
+
 ## Repository Pattern
 
 ```java
@@ -85,6 +127,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllEnabled();
 }
 ```
+
+**Repository rules:**
+- ⚠️ **Query method field names MUST exist on the entity** - Spring Data derives queries from method names. `findByPrefix()` fails if entity has no `prefix` field.
+- Validate field names before adding query methods
+- Use `@Query` for complex queries that can't be derived from method names
 
 ## Service Pattern
 
@@ -115,6 +162,7 @@ public class UserService {
 ```
 
 **Service rules:**
+- **Services return domain entities, NOT DTOs** - Controllers use MapStruct to convert
 - Call validators, don't embed validation logic
 - `@Transactional` for writes, `@Transactional(readOnly = true)` for reads
 - `Optional.orElseThrow()` with custom exception, never `.get()`
@@ -131,7 +179,7 @@ public class UserController {
     private final CreateUserValidator createUserValidator;
     
     @ResponseStatus(OK)
-    @Operation(summary = "Get user details")
+    @Operation(summary = "Get user details", description = "Returns the authenticated user's profile")
     @GetMapping(path = USER_DETAILS, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<UserResponse> getUser(
             @AuthenticationPrincipal final UserTokenPrincipal principal) {
@@ -140,6 +188,7 @@ public class UserController {
     }
     
     @ResponseStatus(CREATED)
+    @Operation(summary = "Create user", description = "Creates a new user account")
     @PostMapping(path = USERS, consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<UserResponse> createUser(
             @RequestBody final CreateUserRequest request) {
@@ -151,10 +200,12 @@ public class UserController {
 ```
 
 **Controller rules:**
-- Endpoints from `Paths.java` constants only (never hardcode)
-- Validation via custom validators (not `@Valid`)
-- Mapstruct for DTO conversion
-- Return `ResponseEntity<T>` always
+- ✅ **ALWAYS return `ResponseEntity<T>`** - Never return raw objects
+- ✅ **NEVER use `@Valid`** - Use custom validators (`validator.validateAndThrow()`)
+- ✅ **NO Javadoc on methods with `@Operation`** - Use `@Operation(description = "...")` instead
+- ✅ Endpoints from `Paths.java` constants only (never hardcode)
+- ✅ MapStruct for entity-to-DTO conversion (service returns entities)
+- ✅ Inject validator as dependency, call in controller method
 
 ## DTO Pattern
 
