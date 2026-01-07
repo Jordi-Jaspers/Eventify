@@ -75,7 +75,7 @@ Implemented global admin capability using `Role.ADMIN` enum value, JWT claim ren
 - Added `existsByRole(Role role)` method to UserRepository
 
 **Documentation:**
-- Updated `.opencode/backlog.md`:
+- Updated `.opencode/jira/backlog.md`:
   - Story #1 marked as completed with implementation notes
   - Story #2 updated to use `@RequirePermission(PROVISION_ORGANIZATIONS)`
   - Story #4 updated with permission-based guards (VIEW_ALL_ORGANIZATIONS, MANAGE_ORGANIZATIONS)
@@ -105,7 +105,7 @@ Implemented global admin capability using `Role.ADMIN` enum value, JWT claim ren
 - `/opt/hawaii/workspace/eventify/server/src/main/java/io/github/eventify/api/bootstrap/GlobalAdminBootstrap.java` - New component (84 lines)
 - `/opt/hawaii/workspace/eventify/server/src/test/java/io/github/eventify/api/bootstrap/GlobalAdminBootstrapTest.java` - New test suite (575 lines, 22 tests)
 - `/opt/hawaii/workspace/eventify/server/src/main/java/io/github/eventify/api/user/repository/UserRepository.java` - Added existsByRole method
-- `/opt/hawaii/workspace/eventify/.opencode/backlog.md` - Updated stories #1, #2, #4, #7 with permission-based approach
+- `/opt/hawaii/workspace/eventify/.opencode/jira/backlog.md` - Updated stories #1, #2, #4, #7 with permission-based approach
 
 #### Quality Metrics
 - ✅ Tests: 22 new tests, 238 total passing

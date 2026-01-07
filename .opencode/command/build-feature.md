@@ -22,7 +22,7 @@ Trigger orchestrator to build a feature using test-driven workflow with speciali
 
 **Orchestrator executes:**
 
-1. **Check Refined backlog** - Look for existing feature story in `.opencode/jira/stories/refined/` and notes in `.opencode/backlog.md` if not found
+1. **Check Refined backlog** - Look for existing feature story in `.opencode/jira/refined/` and notes in `.opencode/jira/backlog.md` if not found
 2. **Gather requirements** - Ask clarifying questions if needed
 3. **Create plan** - Write implementation plan with agent assignments
 4. **Get approval** - Wait for user confirmation
@@ -36,13 +36,13 @@ You are orchestrating a feature build. Follow this process:
 
 ```bash
 # List all refined stories
-ls .opencode/jira/stories/refined
+ls .opencode/jira/refined
 
 # Story information
-cat .opencode/jira/stories/refined/"[FEATURE-NAME-KEYWORD]"
+cat .opencode/jira/refined/"[FEATURE-NAME-KEYWORD]"
 
 # Check backlog.md for feature information
-cat .opencode/backlog.md
+cat .opencode/jira/backlog.md
 ```
 
 Look for:

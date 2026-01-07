@@ -219,7 +219,7 @@ Built complete admin dashboard with platform statistics, cumulative growth visua
 **Documentation:**
 - `./completed/20251217-admin-dashboard.md` (this file)
 - `.opencode/CHANGELOG.md` (updated)
-- `.opencode/backlog.md` (marked Phase 1 complete, added Phase 2)
+- `.opencode/jira/backlog.md` (marked Phase 1 complete, added Phase 2)
 
 #### Technical Details
 
