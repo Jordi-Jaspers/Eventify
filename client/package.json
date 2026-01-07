@@ -11,7 +11,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "prepare": "svelte-kit sync || echo ''",
+    "prepare": "cd .. && husky frontend/.husky",
     "pre-commit": "lint-staged",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -29,6 +29,7 @@
     "tailwind-variants": "^3.1.1"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "@internationalized/date": "^3.8.1",
     "@lucide/svelte": "^0.553.0",
     "@sveltejs/adapter-auto": "^7.0.0",
