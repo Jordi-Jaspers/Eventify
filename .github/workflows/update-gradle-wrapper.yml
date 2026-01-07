@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: develop
 
       - name: Read Java version from .tool-versions
         id: java-version
@@ -29,16 +31,19 @@ jobs:
 
       - name: Get current Gradle version
         id: current-version
+        working-directory: server
         run: |
           version=$(./gradlew --version | grep "^Gradle" | awk '{print $2}')
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "Current Gradle version: $version"
 
       - name: Update Gradle Wrapper
+        working-directory: server
         run: ./gradlew wrapper --gradle-version=latest
 
       - name: Get new Gradle version
         id: new-version
+        working-directory: server
         run: |
           version=$(./gradlew --version | grep "^Gradle" | awk '{print $2}')
           echo "version=$version" >> $GITHUB_OUTPUT
@@ -70,9 +75,9 @@ jobs:
             - New version: `${{ steps.new-version.outputs.version }}`
 
             **What's included:**
-            - Updated `gradle/wrapper/gradle-wrapper.properties`
-            - Updated `gradle/wrapper/gradle-wrapper.jar`
-            - Updated `gradlew` and `gradlew.bat` scripts
+            - Updated `server/gradle/wrapper/gradle-wrapper.properties`
+            - Updated `server/gradle/wrapper/gradle-wrapper.jar`
+            - Updated `server/gradlew` and `server/gradlew.bat` scripts
 
             Please review the [Gradle release notes](https://docs.gradle.org/${{ steps.new-version.outputs.version }}/release-notes.html) for details on what's new.
           branch: gradle-wrapper-update
