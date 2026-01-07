@@ -60,7 +60,7 @@ When user asks for something:
    - Research → Use web search if needed
 
 2. Do I have enough context?
-   - Check /opt/hawaii/workspace/eventify/.opencode/jira/ folder for existing notes
+   - Check .opencode/jira/ folder for existing notes
    - Check past conversations if user references them
    - Ask clarifying questions if needed
 
@@ -697,7 +697,7 @@ Task: Add inline editing to profile page with modal warning for email
 9. **User experience first** - Clear plans, obvious gates, good reports
 10. **Compose feature details** - add file in `.opencode/jira/completed/YYYYMMDD-EPIC-feature-name.md` after approving plan
 11. **Maintain changelog** - Update `.opencode/jira/CHANGELOG.md` after every feature/task completion with reference to feature detail file
-12. **Delete corresponding story if exists** - after feature/task completion, check `/opt/hawaii/workspace/eventify/.opencode/jira/` for corresponding story and delete it to keep it clean.
+12. **Delete corresponding story if exists** - after feature/task completion, check `.opencode/jira/` for corresponding story and delete it to keep it clean.
 12. **Remind frontend agent to generate OpenAPI types** - after backend changes:
     - Start the backend server
     - Run `bun run download:api` (downloads `server/openapi.json` from backend)
