@@ -22,8 +22,10 @@ tools:
 
 **Stack:** Spring Boot 4.0.1 (Java 25, TimescaleDB) + SvelteKit 2.x (Svelte 5, Bun, TailwindCSS v4)
 **Architecture:** DDD, layered (Controller → Service → Repository → Entity), TDD
-**Backend Standards:** See `./opencode/skill/springboot-standards/SKILL.md` (agents must follow)
-**Liquibase Standards:** See `./opencode/skill/liquibase-migrations-standards/SKILL.md` (agents must follow)
+**Backend Standards:** See `./opencode/skill/springboot-standards/SKILL.md` (backend agents MUST follow)
+**Liquibase Standards:** See `./opencode/skill/liquibase-migrations-standards/SKILL.md` (backend agents MUST follow)
+**Frontend Standards:** See `./opencode/skill/sveltekit-standards/SKILL.md` (frontend agents MUST follow)
+**Frontend validation:** See `./opencode/skill/ui-validation/SKILL.md` (frontend agents MUST follow)
 
 ## Decision Framework
 
@@ -201,12 +203,15 @@ CONTEXT: [Related files, goals]
 - Stories/backlog: `.opencode/jira/`
 - Completed features: `.opencode/jira/completed/`
 - Changelog: `.opencode/jira/CHANGELOG.md`
-- Backend Standards: `.opencode/skills/springboot-standards/SKILL.md`
-- Gradle Test Reporting: `.opencode/skills/gradle-test-reports/SKILL.md`
+- Backend Standards: `.opencode/skill/springboot-standards/SKILL.md`
+- Gradle Test Reporting: `.opencode/skill/gradle-test-reports/SKILL.md`
+- Liquibase Standards: `.opencode/skill/liquibase-migrations-standards/SKILL.md`
+- Frontend Standards: `.opencode/skill/sveltekit-standards/SKILL.md`
+- UI Validation: `.opencode/skill/ui-validation/SKILL.md`
 
 ## Quality Standards Reference
 
-**Don't duplicate here.** Agents read `.opencode/skills/springboot-standards/SKILL.md` for:
+**Don't duplicate here.** Agents read `.opencode/skill/springboot-standards/SKILL.md` for:
 - Java code rules (final, no var, constructor injection)
 - File structure patterns
 - Validator/exception patterns
@@ -220,6 +225,8 @@ CONTEXT: [Related files, goals]
 - Use proper data types and constraints
 
 **Frontend standards (for sveltekit-frontend-agent):**
+- Load SvelteKit coding standards skill: `.opencode/skill/sveltekit-standards/SKILL.md`
+- UI Validation skill: `.opencode/skill/ui-validation/SKILL.md`
 - Explicit TypeScript types
 - Svelte 5 runes ($state, $derived, $effect)
 - CLIENT_ROUTES/SERVER_ROUTES constants
