@@ -177,6 +177,18 @@ public enum ApiErrorCode implements ApiError {
     API_KEY_INVALID_EXPIRATION(
         "ERR-0041",
         "Expiration date must be in the future."
+    ),
+    INVALID_API_KEY(
+        "ERR-0042",
+        "Invalid or revoked API key."
+    ),
+    API_KEY_EXPIRED(
+        "ERR-0043",
+        "API key has expired."
+    ),
+    API_KEY_USER_DISABLED(
+        "ERR-0044",
+        "User account is disabled."
     );
 
     /* The error code for this reason. */

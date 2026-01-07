@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -63,4 +65,13 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, Long>, JpaSpecif
      * @return Optional containing the API key if found
      */
     Optional<ApiKey> findByIdAndUserId(Long id, Long userId);
+
+    /**
+     * Find API key by suffix with user and organization eagerly fetched.
+     *
+     * @param suffix the API key suffix
+     * @return Optional containing the API key if found
+     */
+    @Query("SELECT k FROM ApiKey k LEFT JOIN FETCH k.user LEFT JOIN FETCH k.organization WHERE k.suffix = :suffix")
+    Optional<ApiKey> findBySuffix(@Param("suffix") String suffix);
 }

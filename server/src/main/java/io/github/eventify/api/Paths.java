@@ -149,6 +149,12 @@ public final class Paths {
 
     public static final String DEV_CREDENTIALS_PATH = PUBLIC_PATH + "/dev/credentials";
 
+    /* ------------------------------- EVENT API ENDPOINTS ------------------------------- */
+
+    public static final String EVENTS_PATH = BASE_PATH + "/events";
+
+    public static final String CHANNELS_PATH = BASE_PATH + "/channels";
+
     /* ------------------------------- END ------------------------------- */
 
     private Paths() {
