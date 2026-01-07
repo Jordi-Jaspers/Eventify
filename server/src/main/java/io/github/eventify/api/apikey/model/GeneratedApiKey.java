@@ -1,6 +1,7 @@
 package io.github.eventify.api.apikey.model;
 
 import lombok.Getter;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**

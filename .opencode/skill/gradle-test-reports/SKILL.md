@@ -1,7 +1,6 @@
 ---
 name: gradle-test-reports
 description: Analyze Gradle test and build failures by reading HTML/XML reports in build directory instead of parsing console output
-license: MIT
 compatibility: opencode
 metadata:
   language: java
