@@ -1,6 +1,6 @@
 ---
 description: Build a feature using test-driven orchestrator workflow. Checks backlog.md, gathers requirements, creates plan, executes with specialized agents.
-argument-hint: <feature-description>
+argument-hint: <feature-description> / <feature-name-keyword>
 model: github-copilot/claude-opus-4.5
 tools:
   write: true
@@ -18,11 +18,11 @@ Trigger orchestrator to build a feature using test-driven workflow with speciali
 
 ## Workflow
 
-**User provides:** Feature description in $ARGUMENTS
+**User provides:** Refined story name in $ARGUMENTS
 
 **Orchestrator executes:**
 
-1. **Check backlog.md** - Look for existing feature notes in `.opencode/backlog.md`
+1. **Check Refined backlog** - Look for existing feature story in `.opencode/jira/stories/refined/` and notes in `.opencode/backlog.md` if not found
 2. **Gather requirements** - Ask clarifying questions if needed
 3. **Create plan** - Write implementation plan with agent assignments
 4. **Get approval** - Wait for user confirmation
@@ -35,6 +35,12 @@ You are orchestrating a feature build. Follow this process:
 ### Step 1: Check Existing Context
 
 ```bash
+# List all refined stories
+ls .opencode/jira/stories/refined
+
+# Story information
+cat .opencode/jira/stories/refined/"[FEATURE-NAME-KEYWORD]"
+
 # Check backlog.md for feature information
 cat .opencode/backlog.md
 ```
@@ -213,10 +219,25 @@ AUTH: [Authentication requirements]
 CONTEXT: [Related components]
 ```
 
-## Example Execution
+## Example Execution - Refined story found
 
 ```
-User: /new-feature password reset via email
+User: /build-feature API-KEY-MANAGEMENT-database-schema-entity.md
+
+Orchestrator:
+1. Finds story file, reads requirements
+2. Creates plan with test-first approach
+3. Shows plan, waits for approval
+4. User: "approved"
+5. Calls java-testing-agent → tests created
+6. Calls java-backend-agent → implementation done
+7. Reports completion with summary
+```
+
+## Example Execution - No refined story found
+
+```
+User: /build-feature password reset via email
 
 Orchestrator:
 1. Checks backlog.md - finds note "password reset needed"
@@ -233,7 +254,7 @@ Orchestrator:
 
 ## Critical Reminders
 
-1. **Check backlog.md first** - Don't ask questions already answered
+1. **Check Refinde stories AND backlog.md first** - Don't ask questions already answered
 2. **Test-driven always** - Tests before implementation
 3. **Get approval before execution** - Never skip this gate
 4. **Structured context to agents** - Use task format above
