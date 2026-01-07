@@ -12,8 +12,6 @@ import java.security.SecureRandom;
 @UtilityClass
 public final class ApiKeyGenerator {
 
-    private static final String USER_PREFIX = "evt";
-    private static final String ORG_PREFIX = "org";
     private static final String ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
     private static final int RANDOM_LENGTH = 32;
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
@@ -25,9 +23,8 @@ public final class ApiKeyGenerator {
      * @return the generated API key
      */
     public static GeneratedApiKey generate(final ApiKeyScope scope) {
-        final String prefix = scope == ApiKeyScope.USER ? USER_PREFIX : ORG_PREFIX;
         final String randomPart = generateRandomString(RANDOM_LENGTH);
-        final String fullKey = prefix + "_" + randomPart;
+        final String fullKey = scope.getPrefix() + randomPart;
         return new GeneratedApiKey(fullKey);
     }
 

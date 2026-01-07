@@ -30,11 +30,11 @@ public class ApiKeyAudit implements Serializable {
     private Long id;
 
     @Column(
-        name = "key_prefix",
+        name = "key_suffix",
         nullable = false,
-        length = 12
+        length = 4
     )
-    private String keyPrefix;
+    private String keySuffix;
 
     @Column(
         name = "key_name",
@@ -69,10 +69,7 @@ public class ApiKeyAudit implements Serializable {
     private OffsetDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "revoked_by",
-        nullable = false
-    )
+    @JoinColumn(name = "revoked_by")
     private User revokedBy;
 
     @Column(

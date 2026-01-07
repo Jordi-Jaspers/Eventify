@@ -107,6 +107,10 @@ public final class Paths {
 
     public static final String USER_INVITATION_PATH = USERS_PATH + "/invite";
 
+    public static final String USER_API_KEYS_PATH = USERS_PATH + "/api-keys";
+
+    public static final String USER_API_KEY_PATH = USER_API_KEYS_PATH + "/{keyId}";
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;

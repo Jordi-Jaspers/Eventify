@@ -165,6 +165,18 @@ public enum ApiErrorCode implements ApiError {
     CANNOT_LOCK_SELF_ERROR(
         "ERR-0038",
         "You cannot lock your own user account."
+    ),
+    API_KEY_LIMIT_EXCEEDED(
+        "ERR-0039",
+        "Maximum number of API keys reached. Please revoke an existing key first."
+    ),
+    API_KEY_NOT_FOUND(
+        "ERR-0040",
+        "API key not found."
+    ),
+    API_KEY_INVALID_EXPIRATION(
+        "ERR-0041",
+        "Expiration date must be in the future."
     );
 
     /* The error code for this reason. */

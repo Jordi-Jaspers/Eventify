@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import jakarta.persistence.*;
 
+import org.apache.logging.log4j.util.Strings;
 import org.hibernate.annotations.CreationTimestamp;
 
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
@@ -34,11 +35,11 @@ public class ApiKey implements PageableItem, Serializable {
     private Long id;
 
     @Column(
-        name = "prefix",
+        name = "suffix",
         nullable = false,
-        length = 12
+        length = 4
     )
-    private String prefix;
+    private String suffix;
 
     @Column(
         name = "hashed_key",
@@ -90,4 +91,16 @@ public class ApiKey implements PageableItem, Serializable {
         nullable = false
     )
     private Long totalRequests = 0L;
+
+    @Transient
+    private String key;
+
+    /**
+     * Get masked key in format: evt_******xxxx or org_******xxxx where xxxx is the last 4 characters of the key.
+     *
+     * @return masked API key string
+     */
+    public String getMaskedKey() {
+        return scope.getPrefix() + Strings.repeat("*", 6) + suffix;
+    }
 }

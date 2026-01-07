@@ -12,6 +12,7 @@ public class GeneratedApiKey {
 
     private final String fullKey;
     private final String displayPrefix;
+    private final String suffix;
     private final String hashedKey;
 
     /**
@@ -22,6 +23,7 @@ public class GeneratedApiKey {
     public GeneratedApiKey(final String fullKey) {
         this.fullKey = fullKey;
         this.displayPrefix = fullKey.substring(0, 12);
+        this.suffix = fullKey.substring(fullKey.length() - 4);
         this.hashedKey = null;
     }
 
@@ -34,6 +36,7 @@ public class GeneratedApiKey {
     public GeneratedApiKey(final String fullKey, final PasswordEncoder encoder) {
         this.fullKey = fullKey;
         this.displayPrefix = fullKey.substring(0, 12);
+        this.suffix = fullKey.substring(fullKey.length() - 4);
         this.hashedKey = encoder.encode(fullKey);
     }
 }
