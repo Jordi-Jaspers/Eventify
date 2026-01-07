@@ -1,48 +1,3 @@
-# Epic: API Key Management
-
-**Context**: Users and Organizations need programmatic access to the platform to send events. This requires a secure API key system that is separate from the JWT-based user authentication.
-
-## Naming Considerations
-- "API Key" is the industry standard term
-- Consider prefix conventions: `evt_` for personal, `org_` for organization-scoped keys
-- Keys should be displayed only once on creation (show hash, never store plaintext)
-
-## Backlog Items
-
-- [ ] **API Key Entity & Database Schema**:
-    - New `api_key` table with: id, hashed_key, prefix (first 8 chars for identification), name/label, scope (USER or ORGANIZATION), owner_id, organization_id (nullable), created_at, last_used_at, expires_at (nullable), revoked_at, revoked_by
-    - Liquibase migration for the table
-    - Support for optional expiration dates
-
-- [ ] **User API Key CRUD**:
-    - User can create a personal API key (with optional name/label)
-    - User can list their personal API keys (show prefix, name, created_at, last_used, but NOT the full key)
-    - User can revoke/delete their personal API key
-    - Full key shown only once on creation (modal with copy button)
-    - Limit: Consider maximum number of keys per user (e.g., 5)
-
-- [ ] **Organization API Key CRUD**:
-    - Organization OWNER/ADMIN can create an organization-scoped API key
-    - Organization OWNER/ADMIN can list organization API keys
-    - Organization OWNER/ADMIN can revoke organization API keys
-    - Keys are scoped to the organization, not the individual user
-    - Audit log: track who created/revoked each key
-
-- [ ] **API Key Authentication Filter**:
-    - New authentication filter that checks for `Authorization: Bearer <api_key>` header
-    - Distinguish between JWT tokens and API keys (by prefix or format)
-    - Load appropriate principal (ApiKeyPrincipal vs UserTokenPrincipal)
-    - Update `last_used_at` on successful authentication
-    - Rate limiting consideration: should be handled at API key level
-
-- [ ] **Admin: Global API Key Overview**:
-    - Admin can view all API keys across the platform (paginated, searchable)
-    - Filter by: user, organization, active/revoked, created date range
-    - Admin can revoke any API key (with audit trail)
-    - Dashboard stats: total active keys, keys created this month, etc.
-
----
-
 # Epic: Event Channels (formerly "Checks")
 
 **Context**: A "Channel" is a named destination for events. Think of it like a topic or stream. Users can have personal channels, and organizations can have shared channels. Events are sent to a specific channel via API.
@@ -230,12 +185,6 @@
 
 ## Backlog Items
 
-- [ ] **Admin API Keys Dashboard**:
-    - List all API keys (paginated, searchable)
-    - Columns: prefix, owner (user or org), created, last used, status
-    - Actions: revoke key, view owner details
-    - Filters: scope, status, created date, last used date
-
 - [ ] **Admin Channels Dashboard**:
     - List all channels across all users and orgs
     - Columns: name, owner, scope, status, event count, created date
@@ -251,29 +200,7 @@
 - [ ] **Admin Audit Log**:
     - Track admin actions: key revocations, channel archives, user impersonation
     - Searchable log with: action, target, admin user, timestamp
-
----
-
-# Epic: CI/CD & Deployment Pipeline ✅ COMPLETED
-
-**Status**: Completed - 2026-01-06
-**Details**: See [completed/20260106-CICD-automated-docker-builds-deployment.md](../completed/20260106-CICD-automated-docker-builds-deployment.md)
-
-## Completed Stories
-
-| ID | Story | Status |
-|----|-------|--------|
-| CICD-001 | Docker Image Build & Push to GHCR | ✅ Done |
-| CICD-002 | Frontend Dockerfile for SvelteKit/Bun | ✅ Done |
-| CICD-003 | Test Environment Docker Compose | ✅ Done |
-| CICD-004 | GitHub Container Registry Auth Setup | ✅ Done |
-
-## Architecture Implemented
-- **Two-container architecture**: Separate images for frontend (SvelteKit/Bun) and backend (Spring Boot)
-- **Deployment method**: Watchtower with scoped polling (60s interval)
-- **Registry**: GitHub Container Registry (ghcr.io)
-- **Routing**: Traefik with priority-based routing (`/api/*` → backend, `/*` → frontend)
-
+  
 ---
 
 # Epic: Future Considerations (Not for immediate development)
