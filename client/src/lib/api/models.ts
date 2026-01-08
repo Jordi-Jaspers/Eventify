@@ -35,6 +35,12 @@ export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
 // ================ Dev ===================
 export type DevCredentialsResponse = components['schemas']['DevCredentialsResponse'];
 
+// ================ API Keys ===================
+export type CreateApiKeyRequest = components['schemas']['CreateApiKeyRequest'];
+export type ApiKeyCreationResponse = components['schemas']['ApiKeyCreationResponse'];
+export type ApiKeyListResponse = components['schemas']['ApiKeyListResponse'];
+export type ApiKeyResponse = components['schemas']['ApiKeyResponse'];
+
 // ================ Pagination ===================
 export type SearchInput = components['schemas']['SearchInput'];
 export type SortableColumn = components['schemas']['SortableColumn'];

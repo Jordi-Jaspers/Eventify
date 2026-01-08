@@ -16,6 +16,8 @@
     import { createProfileService } from '$lib/api/user/service/ProfileService.svelte';
     import EditableField from '$lib/components/user/EditableField.svelte';
     import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
+    import { SettingsNav } from '$lib/components/settings';
+    import { CLIENT_ROUTES } from '$lib/config/routes';
 
     const profileService = createProfileService();
 
@@ -44,6 +46,9 @@
 <svelte:head>
     <title>Profile - Eventify</title>
 </svelte:head>
+
+<!-- Settings Navigation -->
+<SettingsNav currentPath={CLIENT_ROUTES.PROFILE_PAGE.path} />
 
 <!-- Main Content -->
 <main class="container mx-auto px-4 py-8">

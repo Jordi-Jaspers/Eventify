@@ -51,6 +51,10 @@ export const CLIENT_ROUTES = {
 		path: '/profile',
 		type: RouteType.PRIVATE
 	},
+	DEVELOPER_PAGE: {
+		path: '/developer',
+		type: RouteType.PRIVATE
+	},
 	ADMIN_DASHBOARD_PAGE: {
 		path: '/admin/dashboard',
 		type: RouteType.PRIVATE

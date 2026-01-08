@@ -19,6 +19,9 @@ function getScreenshotPath(name: string, projectName: string): string {
 }
 
 test.describe('Login Page Screenshots', () => {
+    // Increase timeout for cold start (first test needs more time for dev server initialization)
+    test.setTimeout(30000);
+
     test.beforeEach(async ({ page }) => {
         // Navigate to login page
         await page.goto('/login');

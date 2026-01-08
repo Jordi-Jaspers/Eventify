@@ -15,8 +15,7 @@
     "pre-commit": "lint-staged",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "test": "playwright test",
-    "test:components": "playwright test test/components",
+    "test": "../scripts/playwright-test.sh",
     "download:api": "curl -s http://localhost:8080/api/v1/public/docs -o ../server/openapi.json",
     "generate:api": "openapi-typescript ../server/openapi.json -o src/lib/types/api.d.ts"
   },
@@ -31,7 +30,7 @@
   },
   "devDependencies": {
     "@internationalized/date": "^3.10.1",
-    "@lucide/svelte": "^0.553.0",
+    "@lucide/svelte": "^0.561.0",
     "@playwright/test": "^1.57.0",
     "@sveltejs/adapter-auto": "^7.0.0",
     "@sveltejs/enhanced-img": "^0.8.5",
