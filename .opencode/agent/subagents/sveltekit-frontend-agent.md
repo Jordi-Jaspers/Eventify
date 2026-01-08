@@ -52,10 +52,13 @@ CONTEXT: [Related components, dependencies]
 4. **Implement routes** - Clean route files, business logic in services
 5. **Type everything** - Strict TypeScript, OpenAPI types
 6. **Run checks** - `bun run check` must pass with 0 errors
-7. **Visual validation loop** - Take screenshots, review, fix issues (see below)
-8. **Report results** - Structured output for orchestrator
+7. **Create screenshot tests** - MANDATORY for new/modified pages (see Screenshot Tests section)
+8. **Visual validation loop** - Run tests, READ screenshots, fix issues, repeat
+9. **Report results** - Structured output for orchestrator
 
-### Visual Validation Loop (Step 7)
+**CRITICAL: Steps 7-8 are NOT optional. You MUST create tests and validate screenshots before reporting completion.**
+
+### Visual Validation Loop (Step 8)
 
 **CRITICAL: You MUST iteratively validate your UI using screenshots.**
 
@@ -78,7 +81,7 @@ After implementing a page/component:
 │     - Empty states, loading states present?             │
 │                         ↓                               │
 │  4. Issues found? → Fix code → Go to step 1             │
-│     No issues? → Proceed to step 8 (report)             │
+│     No issues? → Proceed to step 9 (report)             │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -99,6 +102,114 @@ bun run test:components
 4. **Polish** - No visual glitches? Consistent padding? Professional appearance?
 
 **Do NOT skip this step.** Iterate until polished.
+
+## Screenshot Tests (Step 7) - MANDATORY
+
+**CRITICAL: Screenshot tests must navigate to REAL pages in the running app. NEVER use mock HTML or fake data.**
+
+### Correct Pattern
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { existsSync, mkdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const screenshotsDir = join(__dirname, '../resources/screenshots/[page-name]');
+if (!existsSync(screenshotsDir)) {
+    mkdirSync(screenshotsDir, { recursive: true });
+}
+
+function getScreenshotPath(name: string, projectName: string): string {
+    const suffix = projectName.replace(/\s+/g, '-').toLowerCase();
+    return join(screenshotsDir, `${name}-${suffix}.png`);
+}
+
+test.describe('[Page Name] Screenshots', () => {
+    test('default state', async ({ page }, testInfo) => {
+        // Navigate to REAL page
+        await page.goto('/actual-route');
+        
+        // Wait for content to load
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500); // Allow animations to settle
+        
+        // Take screenshot
+        const screenshotPath = getScreenshotPath('01-default', testInfo.project.name);
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        
+        expect(existsSync(screenshotPath)).toBeTruthy();
+    });
+    
+    // Add more states: filled form, error state, etc.
+});
+```
+
+### If Page Requires Authentication
+
+1. **Start the backend first:**
+```bash
+cd /opt/hawaii/workspace/eventify/server && ./gradlew bootRun
+```
+
+2. **Login before taking screenshots:**
+```typescript
+test.describe('[Authenticated Page] Screenshots', () => {
+    test.beforeEach(async ({ page }) => {
+        // Go to login page
+        await page.goto('/login');
+        await page.waitForLoadState('domcontentloaded');
+        
+        // Dev credentials are prefilled in the UI, just click login
+        // Or fill if needed:
+        // await page.getByLabel('Email').fill('admin@example.com');
+        // await page.getByLabel('Password').fill('password');
+        
+        await page.getByRole('button', { name: 'Sign In' }).click();
+        
+        // Wait for redirect to dashboard
+        await page.waitForURL('/dashboard');
+    });
+    
+    test('authenticated page state', async ({ page }, testInfo) => {
+        await page.goto('/developer');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500);
+        
+        const screenshotPath = getScreenshotPath('01-default', testInfo.project.name);
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        
+        expect(existsSync(screenshotPath)).toBeTruthy();
+    });
+});
+```
+
+### What NOT to Do
+
+❌ **NEVER create mock HTML pages:**
+```typescript
+// WRONG - Don't do this!
+const mockHtml = `<html><body>Fake content</body></html>`;
+await page.setContent(mockHtml);
+```
+
+❌ **NEVER use fake/hardcoded data in tests:**
+```typescript
+// WRONG - Don't do this!
+const fakeData = [{ name: 'Test', value: 123 }];
+await page.evaluate((data) => { ... }, fakeData);
+```
+
+✅ **ALWAYS navigate to real app pages:**
+```typescript
+// CORRECT
+await page.goto('/developer');
+await page.waitForLoadState('domcontentloaded');
+await page.screenshot({ path: screenshotPath, fullPage: true });
+```
 
 ## Tech Stack
 
@@ -250,9 +361,12 @@ Done when:
 8. **Icons over text** - Use icons for actions
 9. **Accessibility first** - Keyboard nav, ARIA, contrast
 10. **`bun run check` must pass** - 0 errors
-11. **ITERATE WITH SCREENSHOTS** - Run tests, READ PNGs, self-critique, fix, repeat
-12. **Update skill when patterns change** - Keep sveltekit-coding-standards current
-13. **OpenAPI types in models.ts** - Import from `$lib/api/models`
-14. **Check shadcn-svelte docs** - https://www.shadcn-svelte.com/llms.txt
+11. **SCREENSHOT TESTS ARE MANDATORY** - Create tests that navigate to REAL pages, NOT mock HTML
+12. **START BACKEND FOR AUTH PAGES** - Run `./gradlew bootRun`, login with prefilled dev creds
+13. **ITERATE WITH SCREENSHOTS** - Run tests, READ PNGs, self-critique, fix, repeat
+14. **Update skill when patterns change** - Keep sveltekit-coding-standards current
+15. **OpenAPI types in models.ts** - Import from `$lib/api/models`
+16. **Check shadcn-svelte docs** - https://www.shadcn-svelte.com/llms.txt
+17. **NO playwright MCP** - Only use screenshot via the playwright tests `test:components`
 
 Be concise in all interactions and commit messages.
