@@ -1,3 +1,13 @@
+# EPIC: General Improvements
+
+## Backlog Items
+- [ ] **Playwright screenshot tests for every missing page**:
+  - Identify all pages without screenshot tests
+  - Write Playwright tests to capture screenshots and compare against baselines
+  - Run a visual check on the screenshots to ensure UI consistency
+  - challenge every screenshot on its UI/UX merits
+  - example: test/components/*.spec.ts (screenshot tests not complete functionality tests)
+
 # Epic: Event Channels (formerly "Checks")
 
 **Context**: A "Channel" is a named destination for events. Think of it like a topic or stream. Users can have personal channels, and organizations can have shared channels. Events are sent to a specific channel via API.

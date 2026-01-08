@@ -112,7 +112,7 @@ Check each agent's work:
 After completion:
 1. Create `.opencode/jira/completed/YYYYMMDD-EPIC-feature-name.md`
 2. Update `.opencode/jira/CHANGELOG.md` with reference
-3. Delete corresponding story file if exists
+3. Delete corresponding story file if exists from `.opencode/jira/refined/`
 
 ## Agent Selection
 
