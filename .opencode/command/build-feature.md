@@ -27,6 +27,7 @@ Trigger orchestrator to build a feature using test-driven workflow with speciali
 3. **Create plan** - Write implementation plan with agent assignments
 4. **Get approval** - Wait for user confirmation
 5. **Execute TDD workflow** - Delegate to specialized agents in test-first order
+6. **Update changelog** - Record feature addition, remove existing story if applicable
 
 ## Orchestrator Instructions
 
@@ -185,6 +186,13 @@ Result: ✅ Type check passing, components working
 ✅ All quality gates passed
 ✅ Ready for review
 ```
+
+### Step 6: Update Changelog
+
+After completion:
+1. Create `.opencode/jira/completed/YYYYMMDD-EPIC-feature-name.md`
+2. Update `.opencode/jira/CHANGELOG.md` with reference
+3. Delete corresponding story file if exists from `.opencode/jira/refined/`
 
 ## Agent Task Format
 
