@@ -70,10 +70,53 @@ public class User {
     
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+    
+    // Business constructor for domain-driven creation
+    public User(final String email, final String password) {
+        this.email = email;
+        this.password = password;
+        this.createdAt = Instant.now();
+        this.enabled = false;
+    }
 }
 ```
 
-**Always use explicit `@Column` annotations** even when column name matches field.
+**Entity rules:**
+- ✅ **Always use explicit `@Column` annotations** even when column name matches field
+- ✅ **Keep `@NoArgsConstructor`** for JPA (required by Hibernate)
+- ✅ **Add business constructors** for domain-driven creation logic (set defaults, timestamps, derived values)
+- ✅ **Services use constructors** instead of `new Entity()` + multiple setters
+
+## Entity Conversion Methods
+
+Entities can have methods to convert to related entities (e.g., for audit trails):
+
+```java
+@Entity
+public class ApiKey {
+    // ... fields ...
+    
+    /**
+     * Creates an audit record from this API key when it's being revoked.
+     */
+    public ApiKeyAudit toAuditRecord(final User revoker) {
+        return new ApiKeyAudit(
+            this.name,
+            this.prefix,
+            this.user,
+            this.organization,
+            this.createdAt,
+            revoker
+        );
+    }
+}
+```
+
+**Conversion method rules:**
+- ✅ Domain entities own conversion logic to related entities
+- ✅ Use for audit records, history entries, or derived entities
+- ✅ Service calls `entity.toAuditRecord(...)` instead of building inline
+- ✅ Keeps domain logic in domain layer (DDD principle)
 
 ## Entity/Schema Alignment
 
@@ -219,17 +262,42 @@ public class CreateUserRequest {
     private String password;
 }
 
-// Response DTO
+// Response DTO - ALL fields MUST have @Schema with requiredMode
 @Getter
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
+@Schema(description = "User account information")
 public class UserResponse {
+
+    @Schema(
+        description = "Unique user identifier",
+        example = "123",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
     private Long id;
+
+    @Schema(
+        description = "User email address",
+        example = "user@example.com",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
     private String email;
+
+    @Schema(
+        description = "Account creation timestamp",
+        example = "2026-01-08T10:30:00Z",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
     private Instant createdAt;
 }
 ```
+
+**Response DTO rules:**
+- ✅ **ALL fields MUST have `@Schema`** with `description`, `example`, and `requiredMode`
+- ✅ Use `Schema.RequiredMode.REQUIRED` for always-present fields
+- ✅ Use `Schema.RequiredMode.NOT_REQUIRED` for nullable/optional fields
+- ✅ Class-level `@Schema(description = "...")` for the DTO itself
 
 ## JFrame Validation
 

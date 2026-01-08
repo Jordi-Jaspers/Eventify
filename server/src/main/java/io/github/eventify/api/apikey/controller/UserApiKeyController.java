@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import static io.github.eventify.api.Paths.USER_API_KEYS_PATH;
 import static io.github.eventify.api.Paths.USER_API_KEY_PATH;
+import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -76,7 +77,7 @@ public class UserApiKeyController {
         description = "Revokes and deletes an API key. Creates an audit record."
     )
     public ResponseEntity<Void> revokeApiKey(@PathVariable final Long keyId) {
-        apiKeyService.revokeUserApiKey(keyId);
+        apiKeyService.revokeApiKey(keyId, getLoggedInUser(), null);
         return ResponseEntity.status(NO_CONTENT).build();
     }
 }

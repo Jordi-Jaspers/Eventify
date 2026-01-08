@@ -33,6 +33,10 @@ public final class Paths {
 
     public static final String LOGIN_PART = "/login";
 
+    public static final String API_KEYS_PART = "/api-keys";
+
+    public static final String KEY_ID_PART = "/{keyId}";
+
     public static final String ERROR_PART = "/error";
 
     public static final String ORGANIZATIONS_PART = "/organization";
@@ -107,9 +111,9 @@ public final class Paths {
 
     public static final String USER_INVITATION_PATH = USERS_PATH + "/invite";
 
-    public static final String USER_API_KEYS_PATH = USERS_PATH + "/api-keys";
+    public static final String USER_API_KEYS_PATH = USERS_PATH + API_KEYS_PART;
 
-    public static final String USER_API_KEY_PATH = USER_API_KEYS_PATH + "/{keyId}";
+    public static final String USER_API_KEY_PATH = USER_API_KEYS_PATH + KEY_ID_PART;
 
     public static final String USER_QUOTA_PATH = USERS_PATH + "/quota";
 
@@ -142,6 +146,10 @@ public final class Paths {
     public static final String ORGANIZATION_TRANSFER_OWNERSHIP_PATH = ORGANIZATION_PATH + "/transfer-ownership";
 
     public static final String USER_ORGANIZATIONS_PATH = USERS_PATH + ORGANIZATIONS_PART;
+
+    public static final String ORGANIZATION_API_KEYS_PATH = ORGANIZATION_PATH + API_KEYS_PART;
+
+    public static final String ORGANIZATION_API_KEY_PATH = ORGANIZATION_API_KEYS_PATH + KEY_ID_PART;
 
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 

@@ -12,6 +12,7 @@ import io.github.eventify.common.exception.NonExistingUserException;
 import io.github.jframe.datasource.search.model.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static io.github.eventify.api.organization.model.OrganizationalRole.OWNER;
+import static io.github.eventify.common.exception.ApiErrorCode.ORGANIZATION_NOT_FOUND_ERROR;
 import static io.github.jframe.util.constants.Constants.Characters.HYPHEN;
 
 /**
@@ -64,6 +66,17 @@ public class OrganizationService {
                 org.setMemberCount(memberCount);
                 return org;
             });
+    }
+
+    /**
+     * Find organization by ID.
+     *
+     * @param orgId the organization ID
+     * @return the organization
+     */
+    public Organization findOrganizationById(final Long orgId) {
+        return organizationRepository.findById(orgId)
+            .orElseThrow(() -> new DataNotFoundException(ORGANIZATION_NOT_FOUND_ERROR));
     }
 
     /**

@@ -4,6 +4,7 @@ import io.github.eventify.api.apikey.model.ApiKey;
 import io.github.eventify.api.apikey.model.response.ApiKeyCreationResponse;
 import io.github.eventify.api.apikey.model.response.ApiKeyListResponse;
 import io.github.eventify.api.apikey.model.response.ApiKeyResponse;
+import io.github.eventify.api.user.model.mapper.UserMapper;
 import io.github.jframe.datasource.search.model.mapper.PageMapper;
 import io.github.jframe.util.mapper.DateTimeMapper;
 import io.github.jframe.util.mapper.config.SharedMapperConfig;
@@ -20,7 +21,10 @@ import org.mapstruct.Named;
  */
 @Mapper(
     config = SharedMapperConfig.class,
-    uses = DateTimeMapper.class
+    uses = {
+        DateTimeMapper.class,
+        UserMapper.class
+    }
 )
 public abstract class ApiKeyMapper extends PageMapper<ApiKeyResponse, ApiKey> {
 
@@ -33,6 +37,10 @@ public abstract class ApiKeyMapper extends PageMapper<ApiKeyResponse, ApiKey> {
     @Mapping(
         target = "maskedKey",
         expression = "java(apiKey.getMaskedKey())"
+    )
+    @Mapping(
+        target = "createdBy",
+        source = "user"
     )
     @Override
     @Named("toResourceObject")
@@ -53,6 +61,10 @@ public abstract class ApiKeyMapper extends PageMapper<ApiKeyResponse, ApiKey> {
      * @param apiKey the creation result
      * @return the creation response DTO
      */
+    @Mapping(
+        target = "createdBy",
+        source = "user"
+    )
     public abstract ApiKeyCreationResponse toCreationResponse(ApiKey apiKey);
 
     /**
@@ -62,7 +74,7 @@ public abstract class ApiKeyMapper extends PageMapper<ApiKeyResponse, ApiKey> {
      * @param limit the maximum number of items
      * @return the list response DTO
      */
-    public ApiKeyListResponse toApiKeyList(final List<ApiKey> keys, final int limit) {
+    public ApiKeyListResponse toApiKeyList(final List<ApiKey> keys, final Integer limit) {
         return new ApiKeyListResponse(toResourceObjects(keys), limit);
     }
 }

@@ -47,7 +47,8 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, Long>, JpaSpecif
      * @param userId the user ID
      * @return list of personal API keys
      */
-    List<ApiKey> findAllByUserIdAndOrganizationIdIsNull(Long userId);
+    @Query("SELECT k FROM ApiKey k LEFT JOIN FETCH k.user WHERE k.user.id = :userId AND k.organization IS NULL")
+    List<ApiKey> findAllByUserIdAndOrganizationIdIsNull(@Param("userId") Long userId);
 
     /**
      * Count user personal API keys (organization ID is null).
@@ -74,4 +75,22 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, Long>, JpaSpecif
      */
     @Query("SELECT k FROM ApiKey k LEFT JOIN FETCH k.user LEFT JOIN FETCH k.organization WHERE k.suffix = :suffix")
     Optional<ApiKey> findBySuffix(@Param("suffix") String suffix);
+
+    /**
+     * Find all organization API keys ordered by creation date descending.
+     *
+     * @param organizationId the organization ID
+     * @return list of organization API keys
+     */
+    @Query("SELECT k FROM ApiKey k LEFT JOIN FETCH k.user WHERE k.organization.id = :organizationId ORDER BY k.createdAt DESC")
+    List<ApiKey> findByOrganizationIdOrderByCreatedAtDesc(@Param("organizationId") Long organizationId);
+
+    /**
+     * Find an API key by ID and organization ID.
+     *
+     * @param id             the API key ID
+     * @param organizationId the organization ID
+     * @return Optional containing the API key if found
+     */
+    Optional<ApiKey> findByIdAndOrganizationId(Long id, Long organizationId);
 }

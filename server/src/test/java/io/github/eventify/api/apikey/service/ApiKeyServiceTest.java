@@ -7,6 +7,7 @@ import io.github.eventify.api.apikey.model.GeneratedApiKey;
 import io.github.eventify.api.apikey.model.request.CreateApiKeyRequest;
 import io.github.eventify.api.apikey.repository.ApiKeyAuditRepository;
 import io.github.eventify.api.apikey.repository.ApiKeyRepository;
+import io.github.eventify.api.organization.service.OrganizationService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.ApiKeyLimitExceededException;
 import io.github.eventify.common.security.SecurityUtil;
@@ -45,6 +46,9 @@ public class ApiKeyServiceTest extends UnitTest {
 
     @Mock
     private ApiKeyAuditRepository apiKeyAuditRepository;
+
+    @Mock
+    private OrganizationService organizationService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -271,7 +275,7 @@ public class ApiKeyServiceTest extends UnitTest {
         when(apiKeyRepository.findByIdAndUserId(1L, user.getId())).thenReturn(Optional.of(key));
 
         // When: Revoking the API key
-        apiKeyService.revokeUserApiKey(1L);
+        apiKeyService.revokeApiKey(1L, user, null);
 
         // Then: Key should be deleted
         verify(apiKeyRepository).delete(key);
@@ -287,7 +291,7 @@ public class ApiKeyServiceTest extends UnitTest {
         when(apiKeyRepository.findByIdAndUserId(1L, user.getId())).thenReturn(Optional.of(key));
 
         // When: Revoking the API key
-        apiKeyService.revokeUserApiKey(1L);
+        apiKeyService.revokeApiKey(1L, user, null);
 
         // Then: Audit record should be created
         verify(apiKeyAuditRepository).save(
@@ -311,7 +315,7 @@ public class ApiKeyServiceTest extends UnitTest {
         // When & Then: Should throw DataNotFoundException
         assertThrows(
             DataNotFoundException.class,
-            () -> apiKeyService.revokeUserApiKey(999L)
+            () -> apiKeyService.revokeApiKey(999L, user, null)
         );
 
         verify(apiKeyRepository, never()).delete(any(ApiKey.class));
@@ -327,7 +331,7 @@ public class ApiKeyServiceTest extends UnitTest {
         // When & Then: Should throw DataNotFoundException
         assertThrows(
             DataNotFoundException.class,
-            () -> apiKeyService.revokeUserApiKey(1L)
+            () -> apiKeyService.revokeApiKey(1L, user, null)
         );
 
         verify(apiKeyRepository, never()).delete(any(ApiKey.class));

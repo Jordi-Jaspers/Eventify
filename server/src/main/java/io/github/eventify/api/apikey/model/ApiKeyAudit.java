@@ -83,4 +83,26 @@ public class ApiKeyAudit implements Serializable {
         nullable = false
     )
     private Long totalRequests;
+
+    /**
+     * Factory method to create an audit record from a revoked API key.
+     *
+     * @param apiKey  the API key being revoked
+     * @param revoker the user revoking the key
+     * @return a new ApiKeyAudit instance
+     */
+    public static ApiKeyAudit fromRevokedKey(final ApiKey apiKey, final User revoker) {
+        final ApiKeyAudit audit = new ApiKeyAudit();
+        audit.setKeySuffix(apiKey.getSuffix());
+        audit.setKeyName(apiKey.getName());
+        audit.setScope(apiKey.getScope());
+        audit.setOwnerUserId(apiKey.getUser().getId());
+        audit.setOrganizationId(apiKey.getOrganization() != null ? apiKey.getOrganization().getId() : null);
+        audit.setCreatedBy(apiKey.getUser().getId());
+        audit.setCreatedAt(apiKey.getCreatedAt());
+        audit.setRevokedBy(revoker);
+        audit.setRevokedAt(OffsetDateTime.now());
+        audit.setTotalRequests(apiKey.getTotalRequests());
+        return audit;
+    }
 }

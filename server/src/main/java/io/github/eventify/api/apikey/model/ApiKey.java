@@ -96,6 +96,45 @@ public class ApiKey implements PageableItem, Serializable {
     private String key;
 
     /**
+     * Creates a new API key with all required fields.
+     *
+     * @param name         the key name
+     * @param expiresAt    optional expiration date
+     * @param user         the user who owns (user key) or created (org key) this key
+     * @param organization the organization that owns this key, or null for user keys
+     * @param scope        the key scope (USER or ORGANIZATION)
+     * @param hashedKey    the BCrypt-hashed key
+     * @param generated    the generated key details (suffix and full key)
+     */
+    public ApiKey(final String name,
+                  final OffsetDateTime expiresAt,
+                  final User user,
+                  final Organization organization,
+                  final ApiKeyScope scope,
+                  final String hashedKey,
+                  final GeneratedApiKey generated) {
+        this.name = name;
+        this.expiresAt = expiresAt;
+        this.user = user;
+        this.organization = organization;
+        this.scope = scope;
+        this.hashedKey = hashedKey;
+        this.suffix = generated.getSuffix();
+        this.key = generated.getFullKey();
+        this.createdAt = OffsetDateTime.now();
+    }
+
+    /**
+     * Creates an audit record from this API key for revocation tracking.
+     *
+     * @param revoker the user revoking this key
+     * @return a new ApiKeyAudit instance
+     */
+    public ApiKeyAudit toAuditRecord(final User revoker) {
+        return ApiKeyAudit.fromRevokedKey(this, revoker);
+    }
+
+    /**
      * Get masked key in format: evt_******xxxx or org_******xxxx where xxxx is the last 4 characters of the key.
      *
      * @return masked API key string
