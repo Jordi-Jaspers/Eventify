@@ -27,10 +27,14 @@ Load skill: sveltekit-coding-standards
 
 This provides: TypeScript standards, design system, component patterns, accessibility requirements.
 
-For UI validation workflow, also reference:
+For UI validation (screenshot tests), **ALWAYS load**:
 ```
 Load skill: ui-validation
 ```
+
+This provides: Playwright test patterns, screenshot workflow, authentication handling, common states to capture.
+
+**CRITICAL: The ui-validation skill is MANDATORY for any page/component work. Load it and follow its patterns exactly.**
 
 ## Task Input Format
 
@@ -105,111 +109,30 @@ bun run test:components
 
 ## Screenshot Tests (Step 7) - MANDATORY
 
-**CRITICAL: Screenshot tests must navigate to REAL pages in the running app. NEVER use mock HTML or fake data.**
+**Load the `ui-validation` skill for complete patterns and examples.**
 
-### Correct Pattern
+Key rules:
+- Screenshot tests must navigate to REAL pages in the running app
+- NEVER use mock HTML or fake data
+- For authenticated pages: start backend (`./gradlew bootRun`), login with prefilled dev credentials
+- Follow patterns in `ui-validation` skill exactly
 
 ```typescript
-import { test, expect } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const screenshotsDir = join(__dirname, '../resources/screenshots/[page-name]');
-if (!existsSync(screenshotsDir)) {
-    mkdirSync(screenshotsDir, { recursive: true });
-}
-
-function getScreenshotPath(name: string, projectName: string): string {
-    const suffix = projectName.replace(/\s+/g, '-').toLowerCase();
-    return join(screenshotsDir, `${name}-${suffix}.png`);
-}
-
-test.describe('[Page Name] Screenshots', () => {
-    test('default state', async ({ page }, testInfo) => {
-        // Navigate to REAL page
-        await page.goto('/actual-route');
-        
-        // Wait for content to load
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500); // Allow animations to settle
-        
-        // Take screenshot
-        const screenshotPath = getScreenshotPath('01-default', testInfo.project.name);
-        await page.screenshot({ path: screenshotPath, fullPage: true });
-        
-        expect(existsSync(screenshotPath)).toBeTruthy();
-    });
-    
-    // Add more states: filled form, error state, etc.
-});
-```
-
-### If Page Requires Authentication
-
-1. **Start the backend first:**
-```bash
-cd /opt/hawaii/workspace/eventify/server && ./gradlew bootRun
-```
-
-2. **Login before taking screenshots:**
-```typescript
-test.describe('[Authenticated Page] Screenshots', () => {
-    test.beforeEach(async ({ page }) => {
-        // Go to login page
-        await page.goto('/login');
-        await page.waitForLoadState('domcontentloaded');
-        
-        // Dev credentials are prefilled in the UI, just click login
-        // Or fill if needed:
-        // await page.getByLabel('Email').fill('admin@example.com');
-        // await page.getByLabel('Password').fill('password');
-        
-        await page.getByRole('button', { name: 'Sign In' }).click();
-        
-        // Wait for redirect to dashboard
-        await page.waitForURL('/dashboard');
-    });
-    
-    test('authenticated page state', async ({ page }, testInfo) => {
-        await page.goto('/developer');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
-        
-        const screenshotPath = getScreenshotPath('01-default', testInfo.project.name);
-        await page.screenshot({ path: screenshotPath, fullPage: true });
-        
-        expect(existsSync(screenshotPath)).toBeTruthy();
-    });
-});
-```
-
-### What NOT to Do
-
-❌ **NEVER create mock HTML pages:**
-```typescript
-// WRONG - Don't do this!
-const mockHtml = `<html><body>Fake content</body></html>`;
-await page.setContent(mockHtml);
-```
-
-❌ **NEVER use fake/hardcoded data in tests:**
-```typescript
-// WRONG - Don't do this!
-const fakeData = [{ name: 'Test', value: 123 }];
-await page.evaluate((data) => { ... }, fakeData);
-```
-
-✅ **ALWAYS navigate to real app pages:**
-```typescript
-// CORRECT
+// CORRECT - navigate to real page
 await page.goto('/developer');
 await page.waitForLoadState('domcontentloaded');
 await page.screenshot({ path: screenshotPath, fullPage: true });
+
+// WRONG - never do this
+await page.setContent('<html>mock content</html>');
 ```
+
+See `ui-validation` skill for:
+- Complete test file template
+- Authentication flow for protected pages
+- Common UI states to capture (forms, modals, data states)
+- Mobile viewport testing
+- Troubleshooting tips
 
 ## Tech Stack
 

@@ -233,6 +233,65 @@ client/
 └── playwright.config.ts
 ```
 
+## Authenticated Pages
+
+For pages requiring authentication, start the backend and login first:
+
+### 1. Start Backend
+
+```bash
+cd /opt/hawaii/workspace/eventify/server && ./gradlew bootRun
+```
+
+Wait for server to be ready (check health endpoint or wait ~30 seconds).
+
+### 2. Login in beforeEach
+
+```typescript
+test.describe('[Authenticated Page] Screenshots', () => {
+    test.beforeEach(async ({ page }) => {
+        // Go to login page
+        await page.goto('/login');
+        await page.waitForLoadState('domcontentloaded');
+        
+        // Dev credentials are prefilled in the UI, just click login
+        await page.getByRole('button', { name: 'Sign In' }).click();
+        
+        // Wait for redirect to dashboard
+        await page.waitForURL('/dashboard');
+    });
+    
+    test('authenticated page', async ({ page }, testInfo) => {
+        await page.goto('/developer');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500);
+        
+        const screenshotPath = getScreenshotPath('01-default', testInfo.project.name);
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        expect(existsSync(screenshotPath)).toBeTruthy();
+    });
+});
+```
+
+## CRITICAL: No Mock Data
+
+**NEVER use mock HTML or fake data in screenshot tests.**
+
+```typescript
+// ❌ WRONG - Don't do this!
+const mockHtml = `<html><body>Fake content</body></html>`;
+await page.setContent(mockHtml);
+
+// ❌ WRONG - Don't do this!
+const fakeData = [{ name: 'Test', value: 123 }];
+await page.evaluate((data) => { ... }, fakeData);
+
+// ✅ CORRECT - Navigate to real pages
+await page.goto('/developer');
+await page.waitForLoadState('domcontentloaded');
+await page.screenshot({ path: screenshotPath, fullPage: true });
+```
+
 ## Tips
 
 1. **Wait for animations**: Use `await page.waitForTimeout(500)` after navigation
