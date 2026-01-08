@@ -3,6 +3,7 @@ name: liquibase-migrations-standards
 description: Database migration patterns using Liquibase with raw SQL. Use when creating tables, adding columns, creating indexes, modifying schema, or any database changes. Always use <sql> tags, never Liquibase XML tags like <createTable>.
 compatibility: opencode
 metadata:
+  skill-type: backend
   language: SQL, XML
   build-tool: gradle
 ---

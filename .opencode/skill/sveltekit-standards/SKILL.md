@@ -1,3 +1,13 @@
+---
+name: sveltekit-standards
+description: Project-specific conventions for the eventify frontend. Claude already knows SvelteKit/Svelte 5 fundamentals.
+metadata:
+  skill-type: frontend
+  language: svelte
+  framework: sveltekit
+  build-tool: vite, bun
+---
+
 # SvelteKit Standards
 
 Project-specific conventions for the eventify frontend. Claude already knows SvelteKit/Svelte 5 fundamentals.

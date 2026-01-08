@@ -70,7 +70,7 @@ After implementing a page/component:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  1. Run screenshot tests: bun run test:components       │
+│  1. Run screenshot tests: bun run test                  │
 │                         ↓                               │
 │  2. READ the screenshot files to visually inspect       │
 │                         ↓                               │
@@ -92,10 +92,13 @@ After implementing a page/component:
 **You can READ screenshot PNG files directly** to see what the UI looks like:
 
 ```bash
-# Run tests first
-bun run test:components
+# Run tests (auto-starts backend if needed)
+bun run test
 
-# Screenshots in: test/resources/screenshots/<page>/
+# Run specific test file
+bun run test -- test/components/developer.spec.ts
+
+# Screenshots saved to: test/resources/screenshots/<page>/
 ```
 
 **Self-critique checklist:**
@@ -114,7 +117,8 @@ bun run test:components
 Key rules:
 - Screenshot tests must navigate to REAL pages in the running app
 - NEVER use mock HTML or fake data
-- For authenticated pages: start backend (`./gradlew bootRun`), login with prefilled dev credentials
+- The `bun run test` command auto-starts backend if not running
+- For authenticated pages: use "Fill Credentials" button pattern (see ui-validation skill)
 - Follow patterns in `ui-validation` skill exactly
 
 ```typescript
@@ -171,7 +175,11 @@ bun run check            # Type check (MUST pass)
 bun run build            # Production build
 bun run download:api     # Download OpenAPI spec
 bun run generate:api     # Generate types from spec
-bun run test:components  # Playwright screenshot tests
+
+# Playwright tests (auto-starts backend if needed)
+bun run test                                    # Run ALL tests
+bun run test -- test/components/login.spec.ts  # Run specific file
+bun run test -- --grep "Developer"             # Run matching pattern
 ```
 
 **OpenAPI workflow:**
@@ -203,7 +211,7 @@ Before reporting completion:
 - [ ] Accessibility (ARIA labels, contrast)
 
 **Validation:**
-- [ ] Screenshot tests pass (`bun run test:components`)
+- [ ] Screenshot tests pass (`bun run test`)
 - [ ] Visual inspection performed via screenshots
 - [ ] Issues found were fixed
 
@@ -227,7 +235,7 @@ Done when:
 - 0 errors, 0 warnings
 
 ## UI Validation
-- `bun run test:components` passed
+- `bun run test` passed (or specific: `bun run test -- test/components/<page>.spec.ts`)
 - Screenshots reviewed: test/resources/screenshots/[page]/
 - Iterations: [X]
 - Issues fixed: [list]
@@ -285,11 +293,11 @@ Done when:
 9. **Accessibility first** - Keyboard nav, ARIA, contrast
 10. **`bun run check` must pass** - 0 errors
 11. **SCREENSHOT TESTS ARE MANDATORY** - Create tests that navigate to REAL pages, NOT mock HTML
-12. **START BACKEND FOR AUTH PAGES** - Run `./gradlew bootRun`, login with prefilled dev creds
+12. **TEST COMMAND AUTO-STARTS BACKEND** - `bun run test` handles backend lifecycle
 13. **ITERATE WITH SCREENSHOTS** - Run tests, READ PNGs, self-critique, fix, repeat
 14. **Update skill when patterns change** - Keep sveltekit-coding-standards current
 15. **OpenAPI types in models.ts** - Import from `$lib/api/models`
 16. **Check shadcn-svelte docs** - https://www.shadcn-svelte.com/llms.txt
-17. **NO playwright MCP** - Only use screenshot via the playwright tests `test:components`
+17. **NO playwright MCP** - Only use Playwright via `bun run test` command
 
 Be concise in all interactions and commit messages.

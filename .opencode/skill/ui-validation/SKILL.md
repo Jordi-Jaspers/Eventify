@@ -1,4 +1,11 @@
-# UI Validation Skill
+---
+name: ui-validation
+description: Use Playwright to validate UI during frontend development. Take screenshots iteratively to verify visual output matches requirements.
+metadata:
+  skill-type: frontend
+  framework: playwright
+---
+# UI Validation
 
 Use Playwright to validate UI during frontend development. Take screenshots iteratively to verify visual output matches requirements.
 
@@ -9,16 +16,36 @@ Use Playwright to validate UI during frontend development. Take screenshots iter
 - To check responsive behavior
 - Before reporting completion to user
 
-## Quick Validation (Single Screenshot)
+## Running Tests
 
-For quick checks, use Playwright's browser tools directly:
+The test command automatically starts the backend if not running, waits for health check, then runs Playwright tests.
 
 ```bash
-# Navigate and take screenshot
-cd client && bunx playwright test test/components/<page>.spec.ts
+cd client
+
+# Run ALL component tests
+bun run test
+
+# Run specific test file
+bun run test -- test/components/developer.spec.ts
+
+# Run tests matching a pattern
+bun run test -- --grep "Developer"
+
+# Run tests matching pattern in specific file
+bun run test -- test/components/login.spec.ts --grep "default"
 ```
 
-Or create a quick one-off test:
+The script (`scripts/playwright-test.sh`) handles:
+1. Check if backend is running (health endpoint)
+2. Start backend if needed (./gradlew bootRun)
+3. Wait for backend to be ready
+4. Run Playwright tests with all passed arguments
+5. Clean up backend process on exit
+
+## Quick Validation (Single Screenshot)
+
+For quick checks, create a simple test:
 
 ```typescript
 // test/components/<page>.spec.ts
@@ -38,7 +65,7 @@ test('validate <page>', async ({ page }) => {
 
 Run with:
 ```bash
-bun run test:components
+bun run test -- test/components/<page>.spec.ts
 ```
 
 ## Creating Screenshot Tests for a Page
@@ -90,10 +117,13 @@ test.describe('<Page> Screenshots', () => {
 cd client
 
 # Run all component tests
-bun run test:components
+bun run test
 
 # Run specific test file
-bunx playwright test test/components/<page>.spec.ts
+bun run test -- test/components/<page>.spec.ts
+
+# Run with pattern matching
+bun run test -- --grep "<Page>"
 ```
 
 ### 3. View Screenshots
@@ -235,43 +265,50 @@ client/
 
 ## Authenticated Pages
 
-For pages requiring authentication, start the backend and login first:
+For pages requiring authentication, the test must login first. The `bun run test` command automatically starts the backend.
 
-### 1. Start Backend
-
-```bash
-cd /opt/hawaii/workspace/eventify/server && ./gradlew bootRun
-```
-
-Wait for server to be ready (check health endpoint or wait ~30 seconds).
-
-### 2. Login in beforeEach
+### Login Pattern for Authenticated Pages
 
 ```typescript
 test.describe('[Authenticated Page] Screenshots', () => {
+    // Increase timeout since login adds time
+    test.setTimeout(5000);
+
     test.beforeEach(async ({ page }) => {
         // Go to login page
         await page.goto('/login');
         await page.waitForLoadState('domcontentloaded');
         
-        // Dev credentials are prefilled in the UI, just click login
+        // Wait for dev credentials button and click it
+        const fillButton = page.getByRole('button', { name: 'Fill Credentials' });
+        await fillButton.waitFor({ state: 'visible', timeout: 10000 });
+        await fillButton.click();
+        
+        // Submit login form
         await page.getByRole('button', { name: 'Sign In' }).click();
         
-        // Wait for redirect to dashboard
-        await page.waitForURL('/dashboard');
+        // Wait for redirect to dashboard (login success)
+        await page.waitForURL('/dashboard', { timeout: 15000 });
+        
+        // Navigate to target page
+        await page.goto('/developer');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(800);
     });
     
     test('authenticated page', async ({ page }, testInfo) => {
-        await page.goto('/developer');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
-        
         const screenshotPath = getScreenshotPath('01-default', testInfo.project.name);
         await page.screenshot({ path: screenshotPath, fullPage: true });
         expect(existsSync(screenshotPath)).toBeTruthy();
     });
 });
 ```
+
+**Key points:**
+- Use `test.setTimeout(5000)` to allow time for login
+- Click "Fill Credentials" button (loads from backend dev endpoint)
+- Wait for `/dashboard` redirect to confirm login success
+- Then navigate to authenticated route
 
 ## CRITICAL: No Mock Data
 
