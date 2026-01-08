@@ -13,6 +13,7 @@
 	} from '$lib/components/api-keys';
 	import { createApiKeyService } from '$lib/api/apikey/service/ApiKeyService.svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
+	import { getQuota } from '$lib/api/user/UserController';
 
 	const apiKeyService = createApiKeyService();
 
@@ -20,13 +21,30 @@
 	let creating: boolean = $state(false);
 	let revoking: boolean = $state(false);
 
-	// Placeholder quota data (backend doesn't have endpoint yet)
-	const quotaUsed: number = 342;
-	const quotaLimit: number = 1000;
+	let quotaUsed: number = $state(0);
+	let quotaLimit: number = $state(1000);
+	let quotaLoading: boolean = $state(true);
 
 	onMount(() => {
 		apiKeyService.loadKeys();
+		loadQuota();
 	});
+
+	async function loadQuota(): Promise<void> {
+		try {
+			quotaLoading = true;
+			const quota = await getQuota();
+			quotaUsed = quota.used ?? 0;
+			quotaLimit = quota.limit ?? 1000;
+		} catch (error) {
+			console.error('Failed to load quota:', error);
+			// Fallback to default values on error
+			quotaUsed = 0;
+			quotaLimit = 1000;
+		} finally {
+			quotaLoading = false;
+		}
+	}
 
 	async function handleCreateKey(name: string, expiresAt: string | undefined): Promise<void> {
 		creating = true;

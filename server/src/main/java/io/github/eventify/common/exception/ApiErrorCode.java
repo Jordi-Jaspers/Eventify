@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 @Schema(description = "ApiErrorCode")
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public enum ApiErrorCode implements ApiError {
 
     INTERNAL_SERVER_ERROR(
@@ -189,6 +190,10 @@ public enum ApiErrorCode implements ApiError {
     API_KEY_USER_DISABLED(
         "ERR-0044",
         "User account is disabled."
+    ),
+    QUOTA_EXCEEDED(
+        "ERR-0045",
+        "Monthly event quota exceeded. Quota resets on the first of each month."
     );
 
     /* The error code for this reason. */

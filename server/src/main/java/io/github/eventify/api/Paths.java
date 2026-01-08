@@ -111,6 +111,8 @@ public final class Paths {
 
     public static final String USER_API_KEY_PATH = USER_API_KEYS_PATH + "/{keyId}";
 
+    public static final String USER_QUOTA_PATH = USERS_PATH + "/quota";
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;
