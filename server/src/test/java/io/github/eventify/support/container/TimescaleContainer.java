@@ -17,6 +17,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
@@ -54,11 +55,28 @@ public class TimescaleContainer {
                 )
             );
 
-        // set port bindings
         timescaleContainer.addExposedPort(5432);
+        timescaleContainer.setWaitStrategy(getWaitStrategy());
+        timescaleContainer.start();
 
-        // Use compound wait strategy: wait for log message AND for port to be listening
-        final WaitAllStrategy waitStrategy = new WaitAllStrategy()
+        waitForJdbcConnection();
+        log.debug(timescaleContainer.getLogs());
+    }
+
+    @Bean
+    @Primary
+    @ServiceConnection
+    public PostgreSQLContainer<?> getTimescaleContainer() {
+        return timescaleContainer;
+    }
+
+    /**
+     * Creates a compound wait strategy that waits for both the PostgreSQL ready log message and for the listening port to be available.
+     *
+     * @return the wait strategy
+     */
+    private static WaitStrategy getWaitStrategy() {
+        return new WaitAllStrategy()
             .withStrategy(
                 new LogMessageWaitStrategy()
                     .withRegEx(".*database system is ready to accept connections.*\\s")
@@ -67,20 +85,11 @@ public class TimescaleContainer {
             )
             .withStrategy(Wait.forListeningPort())
             .withStartupTimeout(Duration.of(120, ChronoUnit.SECONDS));
-
-        timescaleContainer.setWaitStrategy(waitStrategy);
-        timescaleContainer.start();
-
-        // Verify actual JDBC connection is possible before proceeding
-        waitForJdbcConnection();
-
-        log.debug(timescaleContainer.getLogs());
     }
 
     /**
-     * Waits for JDBC connection to be fully available.
-     * This ensures the database is truly ready to accept connections,
-     * not just that PostgreSQL has logged the ready message.
+     * Waits for JDBC connection to be fully available. This ensures the database is truly ready to accept connections, not just that
+     * PostgreSQL has logged the ready message.
      */
     private static void waitForJdbcConnection() {
         final String jdbcUrl = timescaleContainer.getJdbcUrl();
@@ -106,12 +115,5 @@ public class TimescaleContainer {
             }
         }
         throw new IllegalStateException("Failed to establish database connection after " + MAX_CONNECTION_RETRIES + " attempts");
-    }
-
-    @Bean
-    @Primary
-    @ServiceConnection
-    public PostgreSQLContainer<?> getTimescaleContainer() {
-        return timescaleContainer;
     }
 }
