@@ -217,6 +217,12 @@
 
 These are ideas to keep in mind for architecture decisions but not to implement now:
 
+- [ ] **Company Login SSO / SAML** - enterprise authentication, user not searchable by regular users / org.
+- [ ] **Long-Lived Refresh Tokens / Remember me**
+- [ ] **Multi-Token Support / Management up to 5**
+- [ ] **Token Revocation - single/all**
+- [ ] **OAuth2 Enhancements - account linking**
+- [ ] **Stripe Integration - manage subscriptions/payments**
 - [ ] **Webhooks/Notifications**: Alert users when specific events occur (ERROR severity, keyword match)
 - [ ] **Real-time Updates**: WebSocket or SSE for live timeline updates
 - [ ] **Event Enrichment**: Auto-detect JSON payloads, extract fields for filtering
@@ -225,10 +231,6 @@ These are ideas to keep in mind for architecture decisions but not to implement 
 - [ ] **API Key Scopes**: Fine-grained permissions (read-only keys, write-only keys)
 - [ ] **Multi-region**: Consider event ingestion in multiple regions
 - [ ] **Export**: Download events as CSV/JSON for compliance/backup
-- [ ] **Long-Lived Refresh Tokens / Remember me**
-- [ ] **Multi-Token Support / Management up to 5**
-- [ ] **Token Revocation - single/all**
-- [ ] **OAuth2 Enhancements - account linking**
-- [ ] **Stripe Integration - manage subscriptions/payments**
+
 
 ---
