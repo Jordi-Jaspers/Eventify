@@ -1,0 +1,61 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601091000-TST-membership-test-data.xml">
+
+    <changeSet id="202601091000-TST-membership-test-data-1" author="backend-agent" context="tst">
+        <comment>Insert organization memberships with varied roles. Admin (id=1) owns orgs 1,2,3. Org 1 has 5+ members. Org 21 has only 1 member.</comment>
+        <sql>
+            -- Admin (id=1) as OWNER of organizations 1, 2, 3
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            VALUES
+                (1, 1, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days'),
+                (1, 2, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '28 days'),
+                (1, 3, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '27 days');
+
+            -- Org 1 (Acme Corp) with 5+ members - varied roles
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            VALUES
+                (2, 1, 'ADMIN', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days'),
+                (3, 1, 'ADMIN', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '24 days'),
+                (4, 1, 'MEMBER', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days'),
+                (5, 1, 'MEMBER', 2, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days'),
+                (6, 1, 'MEMBER', 2, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days'),
+                (7, 1, 'MEMBER', 3, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days');
+
+            -- Org 2 (Beta Industries) with a few members
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            VALUES
+                (8, 2, 'ADMIN', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days'),
+                (9, 2, 'MEMBER', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days'),
+                (10, 2, 'MEMBER', 8, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days');
+
+            -- Org 3 (Gamma Solutions) with a few members
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            VALUES
+                (11, 3, 'ADMIN', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days'),
+                (12, 3, 'MEMBER', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '19 days');
+
+            -- Additional orgs with varied membership
+            -- Org 4: User 13 as owner (not admin)
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            VALUES
+                (13, 4, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '26 days'),
+                (14, 4, 'MEMBER', 13, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days');
+
+            -- Org 5: User 15 as owner with admin
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            VALUES
+                (15, 5, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days'),
+                (16, 5, 'ADMIN', 15, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days'),
+                (17, 5, 'MEMBER', 15, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days');
+
+            -- Org 21 (Chi Studios): Only 1 member - the owner
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            VALUES
+                (18, 21, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 hours');
+        </sql>
+    </changeSet>
+</databaseChangeLog>

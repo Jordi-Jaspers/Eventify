@@ -1,0 +1,134 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601091002-TST-api-key-audit-test-data.xml">
+
+    <changeSet id="202601091002-TST-api-key-audit-test-data-1" author="backend-agent" context="tst">
+        <comment>Insert API key audit records for revoked keys. At least 5 records across last 30 days, both USER and ORGANIZATION scoped.</comment>
+        <sql>
+            -- Revoked USER-scoped keys
+            -- Record 1: User 1's old production key, revoked 25 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                'z9y8',
+                'Old Production Key',
+                'USER',
+                1,
+                NULL,
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '120 days',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days',
+                245678
+            );
+
+            -- Record 2: User 2's compromised key, revoked 18 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                'x7w6',
+                'Compromised Dev Key',
+                'USER',
+                2,
+                NULL,
+                2,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 days',
+                2,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days',
+                8923
+            );
+
+            -- Record 3: User 1's test key, revoked 10 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                'v5u4',
+                'Test Environment Key',
+                'USER',
+                1,
+                NULL,
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
+                1523
+            );
+
+            -- Revoked ORGANIZATION-scoped keys
+            -- Record 4: Org 1's old integration key, revoked 22 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                't3s2',
+                'Acme Old Integration',
+                'ORGANIZATION',
+                1,
+                1,
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '90 days',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days',
+                156234
+            );
+
+            -- Record 5: Org 2's deprecated key, revoked 15 days ago by admin (user 8)
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                'r1q0',
+                'Beta Deprecated API',
+                'ORGANIZATION',
+                1,
+                2,
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',
+                8,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
+                34567
+            );
+
+            -- Record 6: Org 3's rotated key, revoked 5 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                'p9o8',
+                'Gamma Rotated Key',
+                'ORGANIZATION',
+                1,
+                3,
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days',
+                11,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days',
+                78234
+            );
+
+            -- Record 7: User 5's expired key cleanup, revoked 2 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                'n7m6',
+                'Eve Cleanup Key',
+                'USER',
+                5,
+                NULL,
+                5,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '50 days',
+                5,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days',
+                421
+            );
+
+            -- Record 8: Org 1's security rotation, revoked yesterday
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                'l5k4',
+                'Acme Security Rotation',
+                'ORGANIZATION',
+                2,
+                1,
+                2,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day',
+                45678
+            );
+        </sql>
+    </changeSet>
+</databaseChangeLog>

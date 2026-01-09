@@ -1,0 +1,18 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202512171433-TST-global-admin-test-data.xml">
+
+    <changeSet id="202512171433-TST-global-admin-test-data-1" author="backend-agent" context="tst">
+        <comment>Insert global admin user (id=1) to prevent bootstrap from triggering. This must run before other test data that references user id=1.</comment>
+        <sql>
+            -- Global admin user with id=1
+            -- Email: admin@eventify.dev (matches dev credentials)
+            -- Password: "admin123!" (BCrypt hashed)
+            INSERT INTO "user" (first_name, last_name, email, role, password, created_at, last_login, enabled, validated)
+            VALUES ('John', 'Doe', 'johndoe@example.com', 'ADMIN', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true);
+        </sql>
+    </changeSet>
+</databaseChangeLog>
