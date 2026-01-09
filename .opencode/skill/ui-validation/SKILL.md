@@ -218,6 +218,22 @@ When critiquing screenshots in a ralph-loop, evaluate:
 - [ ] Logical visual hierarchy
 - [ ] Responsive behavior (if testing multiple viewports)
 
+### ⚠️ Overflow & Overlap Issues (CRITICAL)
+- [ ] **No text bleeding into adjacent columns** (e.g., long badges like "ORGANIZATION" overlapping date columns)
+- [ ] **Table/grid columns have adequate width** for their content
+- [ ] **Badges fit within their designated column** without overflow
+- [ ] **No truncated text cutting off critical information** (dates, names, IDs)
+- [ ] **Grid colSpan values match actual content requirements**
+- [ ] Elements don't overlap each other unexpectedly
+
+### ⚠️ Table Header/Content Alignment (CRITICAL)
+- [ ] **Table headers are perfectly aligned with their column content below**
+- [ ] **Headers and rows use the same grid structure** (identical grid-cols, identical gap values)
+- [ ] **Headers and rows have identical horizontal padding** (e.g., both use px-4)
+- [ ] **Account for row card borders** - if rows have borders/rounded corners, ensure they don't cause visual offset
+- [ ] **First column content starts at same position as first column header**
+- [ ] **Vertical alignment is consistent** between header and content rows
+
 ### Typography
 - [ ] Readable font sizes
 - [ ] Proper line height
