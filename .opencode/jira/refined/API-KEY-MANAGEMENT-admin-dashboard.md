@@ -41,7 +41,7 @@ This dashboard provides the oversight tools necessary for effective platform man
 *   [ ] **Scenario 3**: Admin views all API keys in a table
     *   Given I am a global admin
     *   When I view the "All Keys" section
-    *   Then I see a paginated DataTable with columns:
+    *   Then I see a paginated DataTable with columns using jframe search utils in backend:
         *   Key (prefix...suffix)
         *   Name
         *   Scope (USER/ORGANIZATION badge)

@@ -50,6 +50,7 @@ export type PageResourceOrganizationResponse = components['schemas']['PageResour
 export type PageResourceUserResponse = components['schemas']['PageResourceUserResponse'];
 export type PageResourceOrganizationMembershipResponse = components['schemas']['PageResourceOrganizationMembershipResponse'];
 export type PageResourceUserDetailsResponse = components['schemas']['PageResourceUserDetailsResponse'];
+export type PageResourceApiKeyResponse = components['schemas']['PageResourceApiKeyResponse'];
 
 // ================ Enums ===================
 // These are inline enums from generated types - extracted for convenience

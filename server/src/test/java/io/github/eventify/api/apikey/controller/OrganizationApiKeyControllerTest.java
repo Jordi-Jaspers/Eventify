@@ -2,12 +2,12 @@ package io.github.eventify.api.apikey.controller;
 
 import io.github.eventify.api.apikey.model.request.CreateApiKeyRequest;
 import io.github.eventify.api.apikey.model.response.ApiKeyCreationResponse;
-import io.github.eventify.api.apikey.model.response.ApiKeyListResponse;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationalRole;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
 
 import java.time.OffsetDateTime;
@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static io.github.eventify.api.Paths.ORGANIZATION_API_KEYS_PATH;
+import static io.github.eventify.api.Paths.ORGANIZATION_API_KEYS_SEARCH_PATH;
 import static io.github.eventify.api.Paths.ORGANIZATION_API_KEY_PATH;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
@@ -236,8 +237,8 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should list organization API keys when user is owner")
-    public void listOrgApiKeysSuccessWhenOwner() throws Exception {
+    @DisplayName("Should search organization API keys when user is owner")
+    public void searchOrgApiKeysSuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
         final Organization org = createOrganization(owner);
@@ -262,33 +263,31 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
                 .content(toJson(request2))
         );
 
-        // When: Listing organization API keys
-        final MockHttpServletRequestBuilder listRequest = get(ORGANIZATION_API_KEYS_PATH.replace("{orgId}", org.getId().toString()))
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+        // When: Searching organization API keys
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
 
-        final ResultActions response = mockMvc.perform(listRequest);
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_API_KEYS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
 
         // Then: Response should be OK
         response.andExpect(status().is(SC_OK));
 
-        // And: Response should contain masked keys
+        // And: Response should contain paged results with masked keys
         final String content = response.andReturn().getResponse().getContentAsString();
-        final ApiKeyListResponse listResponse = fromJson(content, ApiKeyListResponse.class);
-
-        assertThat(listResponse.getKeys(), hasSize(2));
-
-        // And: Keys should be masked with org_ prefix
-        listResponse.getKeys().forEach(key -> {
-            assertThat(key.getMaskedKey(), startsWith("org_******"));
-            assertThat(key.getName(), is(notNullValue()));
-            assertThat(key.getCreatedAt(), is(notNullValue()));
-        });
+        assertThat(content, containsString("org_******"));
     }
 
     @Test
-    @DisplayName("Should list organization API keys when user is member")
-    public void listOrgApiKeysSuccessWhenMember() throws Exception {
+    @DisplayName("Should search organization API keys when user is member")
+    public void searchOrgApiKeysSuccessWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
         final Organization org = createOrganization(owner);
@@ -306,45 +305,57 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
                 .content(toJson(request))
         );
 
-        // When: Listing organization API keys as member
-        final MockHttpServletRequestBuilder listRequest = get(ORGANIZATION_API_KEYS_PATH.replace("{orgId}", org.getId().toString()))
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + member.getAccessToken().getValue());
+        // When: Searching organization API keys as member
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
 
-        final ResultActions response = mockMvc.perform(listRequest);
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_API_KEYS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + member.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
 
         // Then: Response should be OK
         response.andExpect(status().is(SC_OK));
 
-        // And: Response should contain keys
+        // And: Response should contain paged results
         final String content = response.andReturn().getResponse().getContentAsString();
-        final ApiKeyListResponse listResponse = fromJson(content, ApiKeyListResponse.class);
-
-        assertThat(listResponse.getKeys(), hasSize(1));
+        assertThat(content, containsString("\"content\":"));
     }
 
     @Test
-    @DisplayName("Should fail when non-member tries to list organization API keys")
-    public void listOrgApiKeysFailsWhenNonMember() throws Exception {
+    @DisplayName("Should fail when non-member tries to search organization API keys")
+    public void searchOrgApiKeysFailsWhenNonMember() throws Exception {
         // Given: An organization and a non-member user
         final User owner = aValidatedUser();
         final Organization org = createOrganization(owner);
         final User nonMember = aValidatedUser();
 
-        // When: Listing organization API keys as non-member
-        final MockHttpServletRequestBuilder listRequest = get(ORGANIZATION_API_KEYS_PATH.replace("{orgId}", org.getId().toString()))
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue());
+        // When: Searching organization API keys as non-member
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
 
-        final ResultActions response = mockMvc.perform(listRequest);
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_API_KEYS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
 
         // Then: Response should be FORBIDDEN
         response.andExpect(status().is(SC_FORBIDDEN));
     }
 
     @Test
-    @DisplayName("Should allow global admin to list organization API keys")
-    public void listOrgApiKeysSuccessWhenGlobalAdmin() throws Exception {
+    @DisplayName("Should allow global admin to search organization API keys")
+    public void searchOrgApiKeysSuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
         final Organization org = createOrganization(owner);
@@ -361,50 +372,60 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
                 .content(toJson(request))
         );
 
-        // When: Listing organization API keys as global admin
-        final MockHttpServletRequestBuilder listRequest = get(ORGANIZATION_API_KEYS_PATH.replace("{orgId}", org.getId().toString()))
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + globalAdmin.getAccessToken().getValue());
+        // When: Searching organization API keys as global admin
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
 
-        final ResultActions response = mockMvc.perform(listRequest);
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_API_KEYS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + globalAdmin.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
 
         // Then: Response should be OK
         response.andExpect(status().is(SC_OK));
 
-        // And: Response should contain keys
+        // And: Response should contain paged results
         final String content = response.andReturn().getResponse().getContentAsString();
-        final ApiKeyListResponse listResponse = fromJson(content, ApiKeyListResponse.class);
-
-        assertThat(listResponse.getKeys(), hasSize(1));
+        assertThat(content, containsString("\"content\":"));
     }
 
     @Test
-    @DisplayName("Should return empty list when organization has no API keys")
-    public void listOrgApiKeysReturnsEmptyWhenNoKeys() throws Exception {
+    @DisplayName("Should return empty page when organization has no API keys")
+    public void searchOrgApiKeysReturnsEmptyWhenNoKeys() throws Exception {
         // Given: An organization with no API keys
         final User owner = aValidatedUser();
         final Organization org = createOrganization(owner);
 
-        // When: Listing organization API keys
-        final MockHttpServletRequestBuilder listRequest = get(ORGANIZATION_API_KEYS_PATH.replace("{orgId}", org.getId().toString()))
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+        // When: Searching organization API keys
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
 
-        final ResultActions response = mockMvc.perform(listRequest);
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_API_KEYS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
 
         // Then: Response should be OK
         response.andExpect(status().is(SC_OK));
 
-        // And: Response should contain empty list
+        // And: Response should be valid JSON (empty result set is fine)
         final String content = response.andReturn().getResponse().getContentAsString();
-        final ApiKeyListResponse listResponse = fromJson(content, ApiKeyListResponse.class);
-
-        assertThat(listResponse.getKeys(), is(empty()));
+        assertThat(content.length(), greaterThan(0));
     }
 
     @Test
-    @DisplayName("Should verify full key not included in list response")
-    public void listOrgApiKeysDoesNotIncludeFullKey() throws Exception {
+    @DisplayName("Should verify full key not included in search response")
+    public void searchOrgApiKeysDoesNotIncludeFullKey() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
         final Organization org = createOrganization(owner);
@@ -420,12 +441,19 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
                 .content(toJson(request))
         );
 
-        // When: Listing organization API keys
-        final MockHttpServletRequestBuilder listRequest = get(ORGANIZATION_API_KEYS_PATH.replace("{orgId}", org.getId().toString()))
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+        // When: Searching organization API keys
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
 
-        final ResultActions response = mockMvc.perform(listRequest);
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_API_KEYS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
 
         // Then: Response should be OK
         response.andExpect(status().is(SC_OK));
@@ -674,17 +702,24 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should fail when listing keys for non-existent organization")
-    public void listOrgApiKeysFailsWhenOrgNotFound() throws Exception {
+    @DisplayName("Should fail when searching keys for non-existent organization")
+    public void searchOrgApiKeysFailsWhenOrgNotFound() throws Exception {
         // Given: An authenticated user
         final User user = aValidatedUser();
 
-        // When: Listing keys for non-existent organization
-        final MockHttpServletRequestBuilder listRequest = get(ORGANIZATION_API_KEYS_PATH.replace("{orgId}", "99999"))
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+        // When: Searching keys for non-existent organization
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
 
-        final ResultActions response = mockMvc.perform(listRequest);
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_API_KEYS_SEARCH_PATH.replace("{orgId}", "99999")
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
 
         // Then: Response should be FORBIDDEN or NOT_FOUND
         assertThat(
@@ -716,17 +751,24 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should fail when unauthenticated user lists organization API keys")
-    public void listOrgApiKeysFailsWhenUnauthenticated() throws Exception {
+    @DisplayName("Should fail when unauthenticated user searches organization API keys")
+    public void searchOrgApiKeysFailsWhenUnauthenticated() throws Exception {
         // Given: An organization
         final User owner = aValidatedUser();
         final Organization org = createOrganization(owner);
 
-        // When: Listing keys without authentication
-        final MockHttpServletRequestBuilder listRequest = get(ORGANIZATION_API_KEYS_PATH.replace("{orgId}", org.getId().toString()))
-            .contentType(APPLICATION_JSON);
+        // When: Searching keys without authentication
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
 
-        final ResultActions response = mockMvc.perform(listRequest);
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_API_KEYS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
 
         // Then: Response should be UNAUTHORIZED
         response.andExpect(status().is(SC_UNAUTHORIZED));

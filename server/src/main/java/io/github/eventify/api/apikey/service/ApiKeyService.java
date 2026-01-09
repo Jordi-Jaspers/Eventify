@@ -1,6 +1,7 @@
 package io.github.eventify.api.apikey.service;
 
 import io.github.eventify.api.apikey.model.ApiKey;
+import io.github.eventify.api.apikey.model.ApiKeyMetaData;
 import io.github.eventify.api.apikey.model.ApiKeyScope;
 import io.github.eventify.api.apikey.model.GeneratedApiKey;
 import io.github.eventify.api.apikey.model.request.CreateApiKeyRequest;
@@ -10,15 +11,22 @@ import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.service.OrganizationService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.ApiKeyLimitExceededException;
+import io.github.jframe.datasource.search.model.JpaSearchSpecification;
+import io.github.jframe.datasource.search.model.SearchCriterium;
+import io.github.jframe.datasource.search.model.input.SearchInput;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static io.github.eventify.api.apikey.model.ApiKeyMetaData.ORGANIZATION_TERM;
 import static io.github.eventify.common.exception.ApiErrorCode.API_KEY_NOT_FOUND;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 import static java.util.Objects.isNull;
@@ -37,6 +45,8 @@ public class ApiKeyService {
     private final ApiKeyAuditRepository apiKeyAuditRepository;
 
     private final OrganizationService organizationService;
+
+    private final ApiKeyMetaData apiKeyMetaData;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -104,15 +114,28 @@ public class ApiKeyService {
     }
 
     /**
-     * List all organization API keys.
+     * Search organization API keys with pagination, filtering, and sorting.
      *
+     * @param input the sortable page input containing search parameters
      * @param orgId the organization ID
-     * @return list of organization API keys
+     * @return page of organization API keys matching the search criteria
      */
     @Transactional(readOnly = true)
-    public List<ApiKey> listOrganizationApiKeys(final Long orgId) {
+    public Page<ApiKey> searchOrganizationApiKeys(final SortablePageInput input, final Long orgId) {
         organizationService.findOrganizationById(orgId);
-        return apiKeyRepository.findByOrganizationIdOrderByCreatedAtDesc(orgId);
+
+        final SearchInput searchInput = new SearchInput();
+        searchInput.setFieldName(ORGANIZATION_TERM);
+        searchInput.setTextValue(orgId.toString());
+        input.addSearchInput(searchInput);
+
+        final Sort sort = apiKeyMetaData.toSort(input.getSortOrder());
+        final Pageable pageable = PageRequest.of(input.getPageNumber(), input.getPageSize(), sort);
+
+        final List<SearchCriterium> criteria = apiKeyMetaData.toSearchCriteria(input.getSearchInputs());
+        final Specification<ApiKey> spec = new JpaSearchSpecification<>(criteria);
+
+        return apiKeyRepository.findAll(spec, pageable);
     }
 
     /**

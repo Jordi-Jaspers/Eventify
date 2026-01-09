@@ -217,6 +217,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/organization/{orgId}/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create organization API key
+         * @description Creates a new organization API key. Full key is only shown once. Requires OWNER or ADMIN role.
+         */
+        post: operations["createOrganizationApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/organization/{orgId}/api-keys/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Search organization API keys
+         * @description Search organization API keys with pagination, filtering, and sorting. Any organization member can view.
+         */
+        post: operations["searchOrganizationApiKeys"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/verify": {
         parameters: {
             query?: never;
@@ -663,6 +703,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/organization/{orgId}/api-keys/{keyId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke organization API key
+         * @description Revokes and deletes an organization API key. Creates an audit record. Requires OWNER or ADMIN role.
+         */
+        delete: operations["revokeOrganizationApiKey"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -823,16 +883,66 @@ export interface components {
             /** Format: date-time */
             expiresAt?: string;
         };
+        /** @description Response returned when creating a new API key */
         ApiKeyCreationResponse: {
-            /** Format: int64 */
-            id?: number;
-            name?: string;
-            key?: string;
-            suffix?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
+            /**
+             * Format: int64
+             * @description Unique identifier of the API key
+             * @example 123
+             */
+            id: number;
+            /**
+             * @description Human-readable name of the API key
+             * @example Production Server
+             */
+            name: string;
+            /**
+             * @description Full API key value - only shown once at creation
+             * @example evt_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+             */
+            key: string;
+            /**
+             * @description Last 4 characters of the key for identification
+             * @example o5p6
+             */
+            suffix: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the key was created
+             * @example 2026-01-08T10:30:00Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the key expires (null if no expiration)
+             * @example 2027-01-08T10:30:00Z
+             */
             expiresAt?: string;
+            /** @description User who created the key (only for organization keys) */
+            createdBy?: components["schemas"]["UserResponse"];
+        };
+        UserResponse: {
+            /**
+             * Format: int64
+             * @description Unique user identifier
+             * @example 12345
+             */
+            id?: number;
+            /**
+             * @description User's email address
+             * @example user@example.com
+             */
+            email?: string;
+            /**
+             * @description User's first name
+             * @example John
+             */
+            firstName?: string;
+            /**
+             * @description User's last name
+             * @example Doe
+             */
+            lastName?: string;
         };
         ForgotPasswordRequest: {
             /**
@@ -1066,28 +1176,78 @@ export interface components {
             /** @description List of items on the current page */
             content?: components["schemas"]["UserResponse"][];
         };
-        UserResponse: {
+        /** @description API key information with masked key value */
+        ApiKeyResponse: {
             /**
              * Format: int64
-             * @description Unique user identifier
-             * @example 12345
+             * @description Unique identifier of the API key
+             * @example 123
              */
-            id?: number;
+            id: number;
             /**
-             * @description User's email address
-             * @example user@example.com
+             * @description Human-readable name of the API key
+             * @example Production Server
              */
-            email?: string;
+            name: string;
             /**
-             * @description User's first name
-             * @example John
+             * @description Masked API key showing only prefix and last 4 characters
+             * @example evt_******o5p6
              */
-            firstName?: string;
+            maskedKey: string;
             /**
-             * @description User's last name
-             * @example Doe
+             * Format: date-time
+             * @description Timestamp when the key was created
+             * @example 2026-01-08T10:30:00Z
              */
-            lastName?: string;
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the key expires (null if no expiration)
+             * @example 2027-01-08T10:30:00Z
+             */
+            expiresAt?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the key was last used for authentication
+             * @example 2026-01-08T15:45:00Z
+             */
+            lastUsedAt?: string;
+            /**
+             * Format: int64
+             * @description Total number of API requests made with this key
+             * @example 1542
+             */
+            totalRequests: number;
+            /** @description User who created the key (only for organization keys) */
+            createdBy?: components["schemas"]["UserResponse"];
+        };
+        PageResourceApiKeyResponse: {
+            /**
+             * Format: int64
+             * @description Total number of elements available
+             * @example 125
+             */
+            totalElements: number;
+            /**
+             * Format: int32
+             * @description Total number of pages available
+             * @example 5
+             */
+            totalPages: number;
+            /**
+             * Format: int32
+             * @description Number of items per page
+             * @example 25
+             */
+            pageSize: number;
+            /**
+             * Format: int32
+             * @description Current page number (0-based)
+             * @example 0
+             */
+            pageNumber: number;
+            /** @description List of items on the current page */
+            content?: components["schemas"]["ApiKeyResponse"][];
         };
         AuthenticationResponse: {
             /**
@@ -1353,24 +1513,16 @@ export interface components {
             /** Format: double */
             percentUsed?: number;
         };
+        /** @description Response containing a list of API keys */
         ApiKeyListResponse: {
-            keys?: components["schemas"]["ApiKeyResponse"][];
-            /** Format: int32 */
+            /** @description List of API keys */
+            keys: components["schemas"]["ApiKeyResponse"][];
+            /**
+             * Format: int32
+             * @description Maximum number of keys allowed (null for organization keys with no limit)
+             * @example 5
+             */
             limit?: number;
-        };
-        ApiKeyResponse: {
-            /** Format: int64 */
-            id?: number;
-            name?: string;
-            maskedKey?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            expiresAt?: string;
-            /** Format: date-time */
-            lastUsedAt?: string;
-            /** Format: int64 */
-            totalRequests?: number;
         };
         DevCredentialsResponse: {
             /**
@@ -2687,6 +2839,184 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PageResourceUserResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    createOrganizationApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateApiKeyRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyCreationResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    searchOrganizationApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SortablePageInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResourceApiKeyResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -4779,6 +5109,90 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                keyId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    revokeOrganizationApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
                 keyId: number;
             };
             cookie?: never;

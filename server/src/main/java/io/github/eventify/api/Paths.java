@@ -149,6 +149,8 @@ public final class Paths {
 
     public static final String ORGANIZATION_API_KEYS_PATH = ORGANIZATION_PATH + API_KEYS_PART;
 
+    public static final String ORGANIZATION_API_KEYS_SEARCH_PATH = ORGANIZATION_API_KEYS_PATH + SEARCH_PART;
+
     public static final String ORGANIZATION_API_KEY_PATH = ORGANIZATION_API_KEYS_PATH + KEY_ID_PART;
 
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */

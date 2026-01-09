@@ -5,6 +5,11 @@ import io.github.eventify.api.apikey.model.ApiKey;
 import java.util.List;
 import java.util.Optional;
 
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -18,28 +23,21 @@ import org.springframework.stereotype.Repository;
 public interface ApiKeyRepository extends JpaRepository<ApiKey, Long>, JpaSpecificationExecutor<ApiKey> {
 
     /**
-     * Find all API keys by user ID.
+     * Override findAll to eagerly fetch user and organization.
      *
-     * @param userId the user ID
-     * @return list of API keys
+     * @param spec     the specification
+     * @param pageable the pageable
+     * @return page of memberships with user and organization eagerly loaded
      */
-    List<ApiKey> findAllByUserId(Long userId);
-
-    /**
-     * Find all API keys by organization ID.
-     *
-     * @param organizationId the organization ID
-     * @return list of API keys
-     */
-    List<ApiKey> findAllByOrganizationId(Long organizationId);
-
-    /**
-     * Find all user personal API keys (organization ID is null) ordered by creation date descending.
-     *
-     * @param userId the user ID
-     * @return list of personal API keys
-     */
-    List<ApiKey> findAllByUserIdAndOrganizationIdIsNullOrderByCreatedAtDesc(Long userId);
+    @NonNull
+    @Override
+    @EntityGraph(
+        attributePaths = {
+            "user",
+            "organization"
+        }
+    )
+    Page<ApiKey> findAll(@NonNull Specification<ApiKey> spec, @NonNull Pageable pageable);
 
     /**
      * Find all user personal API keys (organization ID is null).
@@ -75,15 +73,6 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, Long>, JpaSpecif
      */
     @Query("SELECT k FROM ApiKey k LEFT JOIN FETCH k.user LEFT JOIN FETCH k.organization WHERE k.suffix = :suffix")
     Optional<ApiKey> findBySuffix(@Param("suffix") String suffix);
-
-    /**
-     * Find all organization API keys ordered by creation date descending.
-     *
-     * @param organizationId the organization ID
-     * @return list of organization API keys
-     */
-    @Query("SELECT k FROM ApiKey k LEFT JOIN FETCH k.user WHERE k.organization.id = :organizationId ORDER BY k.createdAt DESC")
-    List<ApiKey> findByOrganizationIdOrderByCreatedAtDesc(@Param("organizationId") Long organizationId);
 
     /**
      * Find an API key by ID and organization ID.

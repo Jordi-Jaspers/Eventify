@@ -4,20 +4,22 @@ import io.github.eventify.api.apikey.model.ApiKey;
 import io.github.eventify.api.apikey.model.mapper.ApiKeyMapper;
 import io.github.eventify.api.apikey.model.request.CreateApiKeyRequest;
 import io.github.eventify.api.apikey.model.response.ApiKeyCreationResponse;
-import io.github.eventify.api.apikey.model.response.ApiKeyListResponse;
+import io.github.eventify.api.apikey.model.response.ApiKeyResponse;
 import io.github.eventify.api.apikey.model.validator.CreateApiKeyValidator;
 import io.github.eventify.api.apikey.service.ApiKeyService;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import static io.github.eventify.api.Paths.ORGANIZATION_API_KEYS_PATH;
+import static io.github.eventify.api.Paths.ORGANIZATION_API_KEYS_SEARCH_PATH;
 import static io.github.eventify.api.Paths.ORGANIZATION_API_KEY_PATH;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 import static org.springframework.http.HttpStatus.*;
@@ -58,19 +60,22 @@ public class OrganizationApiKeyController {
         return ResponseEntity.status(CREATED).body(apiKeyMapper.toCreationResponse(apiKey));
     }
 
-    @GetMapping(
-        path = ORGANIZATION_API_KEYS_PATH,
+    @PostMapping(
+        path = ORGANIZATION_API_KEYS_SEARCH_PATH,
+        consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
     @ResponseStatus(OK)
     @PreAuthorize("@orgSecurity.isMember(#orgId, principal.user.id) or hasAuthority('MANAGE_ORGANIZATIONS')")
     @Operation(
-        summary = "List organization API keys",
-        description = "Lists all organization API keys with masked values. Any organization member can view."
+        summary = "Search organization API keys",
+        description = "Search organization API keys with pagination, filtering, and sorting. Any organization member can view."
     )
-    public ResponseEntity<ApiKeyListResponse> listOrganizationApiKeys(@PathVariable final Long orgId) {
-        final List<ApiKey> keys = apiKeyService.listOrganizationApiKeys(orgId);
-        return ResponseEntity.status(OK).body(apiKeyMapper.toApiKeyList(keys, null));
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ResponseEntity<PageResource<ApiKeyResponse>> searchOrganizationApiKeys(@PathVariable final Long orgId,
+        @RequestBody final SortablePageInput input) {
+        final Page<ApiKey> page = apiKeyService.searchOrganizationApiKeys(input, orgId);
+        return ResponseEntity.status(OK).body(apiKeyMapper.toPageResource(page));
     }
 
     @DeleteMapping(path = ORGANIZATION_API_KEY_PATH)
