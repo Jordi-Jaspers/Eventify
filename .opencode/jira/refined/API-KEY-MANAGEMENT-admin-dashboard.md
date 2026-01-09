@@ -104,6 +104,9 @@ This dashboard provides the oversight tools necessary for effective platform man
 
 ## 4. Technical Requirements
 
+### Make use of JFRAME for searching and filtering in the backend.
+There are other examples making use of the SortablePageInput and SearchSpecification classes for implementing searching, filtering, and pagination in the backend. Follow those patterns to implement the search and filter functionality for the admin API key dashboard.
+
 ### Backend API Endpoints
 
 #### Get API Key Statistics
@@ -227,65 +230,8 @@ public static final String ADMIN_API_KEY_PATH = ADMIN_API_KEYS_PATH + "/{keyId}"
 ### Controller
 Location: `server/src/main/java/io/github/eventify/api/admin/controller/AdminApiKeyController.java`
 
-```java
-@RestController
-@RequestMapping(ADMIN_API_KEYS_PATH)
-@RequiredArgsConstructor
-@PreAuthorize("hasAuthority('MANAGE_ORGANIZATIONS')")  // Admin permission
-public class AdminApiKeyController {
-
-    private final AdminApiKeyService adminApiKeyService;
-
-    @GetMapping("/stats")
-    public ResponseEntity<ApiKeyStatsResponse> getStats() { ... }
-
-    @GetMapping("/search")
-    public ResponseEntity<PagedResponse<AdminApiKeyResponse>> searchKeys(
-        @RequestParam(required = false) String search,
-        @RequestParam(required = false) ApiKeyScope scope,
-        @RequestParam(required = false) ApiKeyStatus status,
-        Pageable pageable
-    ) { ... }
-
-    @DeleteMapping("/{keyId}")
-    public ResponseEntity<Void> revokeKey(@PathVariable Long keyId) { ... }
-
-    @GetMapping("/audit")
-    public ResponseEntity<PagedResponse<ApiKeyAuditResponse>> getAuditLog(Pageable pageable) { ... }
-}
-```
-
 ### Service Layer
 Location: `server/src/main/java/io/github/eventify/api/admin/service/AdminApiKeyService.java`
-
-```java
-@Service
-@RequiredArgsConstructor
-public class AdminApiKeyService {
-
-    private final ApiKeyRepository apiKeyRepository;
-    private final ApiKeyAuditRepository auditRepository;
-    private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
-
-    public ApiKeyStatsResponse getStats() {
-        // Aggregate queries for statistics
-    }
-
-    public Page<AdminApiKeyResponse> searchKeys(String search, ApiKeyScope scope, 
-                                                 ApiKeyStatus status, Pageable pageable) {
-        // Use Specification or custom query for flexible search
-    }
-
-    public void revokeKey(Long keyId, User admin) {
-        // Find key, create audit record, delete key
-    }
-
-    public Page<ApiKeyAuditResponse> getAuditLog(Pageable pageable) {
-        // Return paginated audit entries
-    }
-}
-```
 
 ## 5. Design & UI/UX
 
