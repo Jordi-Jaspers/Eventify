@@ -7,7 +7,7 @@
 	import type { OrganizationResponse, OrganizationStatus } from '$lib/api/models';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { Building2, Users } from '@lucide/svelte';
+	import { Building2, Users, Key } from '@lucide/svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 
 	const columns: DataTableColumn<OrganizationResponse>[] = [
@@ -103,6 +103,12 @@
 		}
 	}
 
+	function navigateToApiKeys(orgId: number | undefined): void {
+		if (orgId) {
+			goto(CLIENT_ROUTES.ORGANIZATION_SETTINGS_API_KEYS_PAGE(orgId).path);
+		}
+	}
+
 	onMount(() => service.load());
 </script>
 
@@ -176,15 +182,26 @@
 					</div>
 
 					<!-- Actions -->
-					<div class="col-span-1 md:col-span-1 flex items-center justify-center">
+					<div class="col-span-1 md:col-span-1 flex items-center justify-center gap-1">
+						<Button
+							variant="ghost"
+							size="sm"
+							onclick={() => navigateToApiKeys(org.id)}
+							class="gap-1 text-primary hover:text-primary hover:bg-primary/10"
+							title="Manage API Keys"
+						>
+							<Key class="h-4 w-4" />
+							<span class="md:hidden">API Keys</span>
+						</Button>
 						<Button
 							variant="ghost"
 							size="sm"
 							onclick={() => navigateToMembers(org.id)}
 							class="gap-1 text-primary hover:text-primary hover:bg-primary/10"
+							title="Manage Members"
 						>
 							<Users class="h-4 w-4" />
-							<span class="md:hidden">Manage Members</span>
+							<span class="md:hidden">Members</span>
 						</Button>
 					</div>
 				</div>

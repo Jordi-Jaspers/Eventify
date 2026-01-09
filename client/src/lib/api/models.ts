@@ -10,6 +10,7 @@ export type RegisterResponse = components['schemas']['RegisterResponse'];
 export type UserResponse = components['schemas']['UserResponse'];
 export type UserDetailsResponse = components['schemas']['UserDetailsResponse'];
 export type UserOrganizationResponse = components['schemas']['UserOrganizationResponse'];
+export type UserQuotaResponse = components['schemas']['UserQuotaResponse'];
 
 // ================ Error Responses ===================
 export type ErrorResponseResource = components['schemas']['ErrorResponseResource'];
@@ -31,9 +32,19 @@ export type AssignOwnerRequest = components['schemas']['AssignOwnerRequest'];
 // ================ Admin ===================
 export type AdminStatsResponse = components['schemas']['AdminStatsResponse'];
 export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
+export type AdminApiKeyStatsResponse = components['schemas']['ApiKeyStatsResponse'];
+export type AdminApiKeyAuditResponse = components['schemas']['ApiKeyAuditResponse'];
+export type PageResourceAdminApiKeyAuditResponse =
+	components['schemas']['PageResourceApiKeyAuditResponse'];
 
 // ================ Dev ===================
 export type DevCredentialsResponse = components['schemas']['DevCredentialsResponse'];
+
+// ================ API Keys ===================
+export type CreateApiKeyRequest = components['schemas']['CreateApiKeyRequest'];
+export type ApiKeyCreationResponse = components['schemas']['ApiKeyCreationResponse'];
+export type ApiKeyListResponse = components['schemas']['ApiKeyListResponse'];
+export type ApiKeyResponse = components['schemas']['ApiKeyResponse'];
 
 // ================ Pagination ===================
 export type SearchInput = components['schemas']['SearchInput'];
@@ -43,6 +54,7 @@ export type PageResourceOrganizationResponse = components['schemas']['PageResour
 export type PageResourceUserResponse = components['schemas']['PageResourceUserResponse'];
 export type PageResourceOrganizationMembershipResponse = components['schemas']['PageResourceOrganizationMembershipResponse'];
 export type PageResourceUserDetailsResponse = components['schemas']['PageResourceUserDetailsResponse'];
+export type PageResourceApiKeyResponse = components['schemas']['PageResourceApiKeyResponse'];
 
 // ================ Enums ===================
 // These are inline enums from generated types - extracted for convenience

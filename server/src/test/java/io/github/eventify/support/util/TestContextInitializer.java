@@ -1,6 +1,8 @@
 package io.github.eventify.support.util;
 
 import io.github.eventify.Main;
+import io.github.eventify.api.apikey.repository.ApiKeyAuditRepository;
+import io.github.eventify.api.apikey.repository.ApiKeyRepository;
 import io.github.eventify.api.authentication.service.AuthenticationService;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
@@ -92,5 +94,11 @@ public class TestContextInitializer {
 
     @Autowired
     protected TokenService tokenService;
+
+    @Autowired
+    protected ApiKeyRepository apiKeyRepository;
+
+    @Autowired
+    protected ApiKeyAuditRepository apiKeyAuditRepository;
 
 }

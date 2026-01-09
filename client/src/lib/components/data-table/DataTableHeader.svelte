@@ -35,25 +35,26 @@
 </script>
 
 <div
-	class="hidden md:grid gap-4 px-4 py-3 border-b border-border/50 font-medium text-sm text-muted-foreground"
-	style="grid-template-columns: repeat({columns.reduce((sum, col) => sum + (col.colSpan ?? 1), 0)}, minmax(0, 1fr));"
+	class="hidden md:grid grid-cols-12 gap-4 px-4 py-3 border-b border-border/50 font-medium text-sm text-muted-foreground"
 >
 	{#each columns as column}
 		{@const colSpan = column.colSpan ?? 1}
-		<div class="col-span-{colSpan}">
-			{#if column.sortable}
-				{@const IconComponent = getSortIcon(column.key, column.sortable)}
-				<button
-					type="button"
-					onclick={() => handleSort(column.key, column.sortable)}
-					class="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
-				>
-					{column.label}
-					<IconComponent class="h-3 w-3" />
-				</button>
-			{:else}
-				<span>{column.label}</span>
-			{/if}
-		</div>
+		{#if colSpan > 0}
+			<div style="grid-column: span {colSpan} / span {colSpan};">
+				{#if column.sortable}
+					{@const IconComponent = getSortIcon(column.key, column.sortable)}
+					<button
+						type="button"
+						onclick={() => handleSort(column.key, column.sortable)}
+						class="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+					>
+						{column.label}
+						<IconComponent class="h-3 w-3" />
+					</button>
+				{:else if column.label}
+					<span>{column.label}</span>
+				{/if}
+			</div>
+		{/if}
 	{/each}
 </div>

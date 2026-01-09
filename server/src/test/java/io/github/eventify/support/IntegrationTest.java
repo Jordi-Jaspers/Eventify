@@ -55,6 +55,8 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     @BeforeEach
     public void cleanUp() {
+        deleteAllApiKeyAuditRecords();
+        deleteAllApiKeys();
         deleteAllTestOrganizations();
         deleteAllTestUsers();
 
@@ -253,6 +255,14 @@ public class IntegrationTest extends WebMvcConfigurator {
         organizationRepository.deleteAll(organizations);
     }
 
+    private void deleteAllApiKeys() {
+        apiKeyRepository.deleteAll();
+    }
+
+    private void deleteAllApiKeyAuditRecords() {
+        apiKeyAuditRepository.deleteAll();
+    }
+
     /**
      * Creates an organization with the specified owner.
      *
@@ -260,24 +270,39 @@ public class IntegrationTest extends WebMvcConfigurator {
      * @return the created organization
      */
     protected Organization createOrganization(final User owner) {
-        final String suffix = UUID.randomUUID().toString().substring(0, 5);
-        final Organization org = new Organization(
-            INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix,
-            "test-org-" + suffix
-        );
-        org.setCreatedBy(owner.getId());
-        final Organization savedOrg = organizationRepository.save(org);
+        // Save current authentication
+        final org.springframework.security.core.Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
 
-        // Create owner membership
-        final io.github.eventify.api.organization.model.OrganizationMembership ownerMembership =
-            new io.github.eventify.api.organization.model.OrganizationMembership(
-                savedOrg,
-                owner,
-                io.github.eventify.api.organization.model.OrganizationalRole.OWNER
+        try {
+            // Temporarily set owner as authenticated user
+            final JwtUserPrincipalAuthenticationToken ownerAuth = new JwtUserPrincipalAuthenticationToken(
+                new UserTokenPrincipal(owner, owner.getAccessToken().getValue()),
+                owner.getAuthorities()
             );
-        organizationMembershipRepository.save(ownerMembership);
+            SecurityContextHolder.getContext().setAuthentication(ownerAuth);
 
-        return savedOrg;
+            final String suffix = UUID.randomUUID().toString().substring(0, 5);
+            final Organization org = new Organization(
+                INTEGRATION_PREFIX + ORGANIZATION_NAME + "-" + suffix,
+                "test-org-" + suffix
+            );
+            org.setCreatedBy(owner.getId());
+            final Organization savedOrg = organizationRepository.save(org);
+
+            // Create owner membership
+            final io.github.eventify.api.organization.model.OrganizationMembership ownerMembership =
+                new io.github.eventify.api.organization.model.OrganizationMembership(
+                    savedOrg,
+                    owner,
+                    io.github.eventify.api.organization.model.OrganizationalRole.OWNER
+                );
+            organizationMembershipRepository.save(ownerMembership);
+
+            return savedOrg;
+        } finally {
+            // Restore original authentication
+            SecurityContextHolder.getContext().setAuthentication(currentAuth);
+        }
     }
 
     /**

@@ -1,5 +1,5 @@
 import {client} from "$lib/api/client.ts";
-import type {UserDetailsResponse, UserOrganizationResponse} from "$lib/api/models.ts";
+import type {UserDetailsResponse, UserOrganizationResponse, UserQuotaResponse} from "$lib/api/models.ts";
 
 /**
  * Get current user details (full profile info)
@@ -37,6 +37,19 @@ export async function updateUserDetails(firstName: string, lastName: string): Pr
  */
 export async function getUserOrganizations(): Promise<UserOrganizationResponse[]> {
     const {data, error} = await client.GET('/v1/user/organization');
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+}
+
+/**
+ * Get user quota information (API usage limits)
+ */
+export async function getQuota(): Promise<UserQuotaResponse> {
+    const {data, error} = await client.GET('/v1/user/quota');
 
     if (error) {
         throw error;

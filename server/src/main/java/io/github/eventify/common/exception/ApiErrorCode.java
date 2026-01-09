@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 @Schema(description = "ApiErrorCode")
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public enum ApiErrorCode implements ApiError {
 
     INTERNAL_SERVER_ERROR(
@@ -165,6 +166,34 @@ public enum ApiErrorCode implements ApiError {
     CANNOT_LOCK_SELF_ERROR(
         "ERR-0038",
         "You cannot lock your own user account."
+    ),
+    API_KEY_LIMIT_EXCEEDED(
+        "ERR-0039",
+        "Maximum number of API keys reached. Please revoke an existing key first."
+    ),
+    API_KEY_NOT_FOUND(
+        "ERR-0040",
+        "API key not found."
+    ),
+    API_KEY_INVALID_EXPIRATION(
+        "ERR-0041",
+        "Expiration date must be in the future."
+    ),
+    INVALID_API_KEY(
+        "ERR-0042",
+        "Invalid or revoked API key."
+    ),
+    API_KEY_EXPIRED(
+        "ERR-0043",
+        "API key has expired."
+    ),
+    API_KEY_USER_DISABLED(
+        "ERR-0044",
+        "User account is disabled."
+    ),
+    QUOTA_EXCEEDED(
+        "ERR-0045",
+        "Monthly event quota exceeded. Quota resets on the first of each month."
     );
 
     /* The error code for this reason. */

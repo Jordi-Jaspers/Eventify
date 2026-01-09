@@ -5,7 +5,7 @@
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { LayoutDashboard, Clock, Shield, Building2, Plus, Users, ChevronUp, UserCog } from '@lucide/svelte';
+	import { LayoutDashboard, Clock, Shield, Building2, Plus, Users, ChevronUp, UserCog, Settings, Key } from '@lucide/svelte';
 
 	let isOrganizationsOpen: boolean = $state(false);
 
@@ -19,6 +19,13 @@
 	const currentOrganization: UserOrganizationResponse | null = $derived(
 		organizationStore.currentOrganization
 	);
+	
+	// Check if user can manage org settings (OWNER, ADMIN, or global ADMIN)
+	const canManageOrgSettings: boolean = $derived.by((): boolean => {
+		if (!currentOrganization) return false;
+		const role: string | undefined = currentOrganization.role;
+		return isAdmin || role === 'OWNER' || role === 'ADMIN';
+	});
 
 	// Helper to check if route is active
 	function isActive(path: string): boolean {
@@ -111,6 +118,17 @@
 							<span>Users</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
+
+					<!-- API Keys -->
+					<Sidebar.MenuItem>
+						<Sidebar.MenuButton
+								onclick={() => goto(CLIENT_ROUTES.ADMIN_API_KEYS_PAGE.path)}
+								isActive={currentPath.startsWith('/admin/api-keys')}
+						>
+							<Key class="size-4" />
+							<span>API Keys</span>
+						</Sidebar.MenuButton>
+					</Sidebar.MenuItem>
 				</Sidebar.Menu>
 			</Sidebar.GroupContent>
 		</Sidebar.Group>
@@ -140,6 +158,17 @@
 							<span>Members</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
+					{#if canManageOrgSettings}
+						<Sidebar.MenuItem>
+							<Sidebar.MenuButton
+								onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_SETTINGS_PAGE(currentOrganization.organizationId!).path)}
+								isActive={currentPath.startsWith(`/organizations/${currentOrganization.organizationId}/settings`)}
+							>
+								<Settings class="size-4" />
+								<span>Settings</span>
+							</Sidebar.MenuButton>
+						</Sidebar.MenuItem>
+					{/if}
 				</Sidebar.Menu>
 			</Sidebar.GroupContent>
 		</Sidebar.Group>

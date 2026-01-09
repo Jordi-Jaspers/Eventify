@@ -33,11 +33,17 @@ public final class Paths {
 
     public static final String LOGIN_PART = "/login";
 
+    public static final String API_KEYS_PART = "/api-keys";
+
+    public static final String KEY_ID_PART = "/{keyId}";
+
     public static final String ERROR_PART = "/error";
 
     public static final String ORGANIZATIONS_PART = "/organization";
 
     public static final String USER_PART = "/user";
+
+    public static final String STATS_PART = "/stats";
 
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
@@ -107,6 +113,12 @@ public final class Paths {
 
     public static final String USER_INVITATION_PATH = USERS_PATH + "/invite";
 
+    public static final String USER_API_KEYS_PATH = USERS_PATH + API_KEYS_PART;
+
+    public static final String USER_API_KEY_PATH = USER_API_KEYS_PATH + KEY_ID_PART;
+
+    public static final String USER_QUOTA_PATH = USERS_PATH + "/quota";
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;
@@ -115,9 +127,17 @@ public final class Paths {
 
     public static final String ADMIN_USERS_SEARCH_PATH = ADMIN_PATH + USER_PART + SEARCH_PART;
 
-    public static final String ADMIN_STATS_PATH = ADMIN_PATH + "/stats";
+    public static final String ADMIN_STATS_PATH = ADMIN_PATH + STATS_PART;
 
     public static final String ADMIN_ORGANIZATION_ASSIGN_OWNER_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/owner";
+
+    public static final String ADMIN_API_KEYS_STATS_PATH = ADMIN_PATH + API_KEYS_PART + STATS_PART;
+
+    public static final String ADMIN_API_KEYS_SEARCH_PATH = ADMIN_PATH + API_KEYS_PART + SEARCH_PART;
+
+    public static final String ADMIN_API_KEY_PATH = ADMIN_PATH + API_KEYS_PART + KEY_ID_PART;
+
+    public static final String ADMIN_API_KEYS_AUDIT_SEARCH_PATH = ADMIN_PATH + API_KEYS_PART + "/audit" + SEARCH_PART;
 
     /* ------------------------------- ORGANIZATION MEMBERSHIP ENDPOINTS ------------------------------- */
 
@@ -137,6 +157,12 @@ public final class Paths {
 
     public static final String USER_ORGANIZATIONS_PATH = USERS_PATH + ORGANIZATIONS_PART;
 
+    public static final String ORGANIZATION_API_KEYS_PATH = ORGANIZATION_PATH + API_KEYS_PART;
+
+    public static final String ORGANIZATION_API_KEYS_SEARCH_PATH = ORGANIZATION_API_KEYS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_API_KEY_PATH = ORGANIZATION_API_KEYS_PATH + KEY_ID_PART;
+
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 
     public static final String OPTIONS_PATH = BASE_PATH + "/options";
@@ -144,6 +170,12 @@ public final class Paths {
     /* ------------------------------- DEV ENDPOINTS ------------------------------- */
 
     public static final String DEV_CREDENTIALS_PATH = PUBLIC_PATH + "/dev/credentials";
+
+    /* ------------------------------- EVENT API ENDPOINTS ------------------------------- */
+
+    public static final String EVENTS_PATH = BASE_PATH + "/events";
+
+    public static final String CHANNELS_PATH = BASE_PATH + "/channels";
 
     /* ------------------------------- END ------------------------------- */
 

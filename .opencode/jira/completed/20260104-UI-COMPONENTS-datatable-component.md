@@ -181,5 +181,5 @@ Custom shimmer effect instead of basic `animate-pulse`:
 ## Next Steps
 
 Story created for members table integration:
-- `.opencode/jira/stories/refined/DATATABLE-members-search-integration.md`
+- `.opencode/jira/refined/DATATABLE-members-search-integration.md`
 - Requires backend `searchMembers` endpoint first

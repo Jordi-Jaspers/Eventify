@@ -197,3 +197,8 @@ server/**/bin/
 server/**/out/
 server/**config/*.local.properties
 /.idea/
+/client/test/resources/report
+/client/test/resources/test-results
+/client/node_modules/
+/client/.svelte-kit/
+/client/.env

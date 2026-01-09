@@ -73,6 +73,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/user/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List API keys
+         * @description Lists all personal API keys with masked values.
+         */
+        get: operations["listApiKeys"];
+        put?: never;
+        /**
+         * Create API key
+         * @description Creates a new personal API key. Full key is only shown once.
+         */
+        post: operations["createApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/public/reset-password": {
         parameters: {
             query?: never;
@@ -168,7 +192,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** List organization members with pagination and search */
+        /** Search current members of an organization */
         post: operations["searchCurrentMembers"];
         delete?: never;
         options?: never;
@@ -187,6 +211,46 @@ export interface paths {
         put?: never;
         /** Search users to add to organization */
         post: operations["searchNewMembers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/organization/{orgId}/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create organization API key
+         * @description Creates a new organization API key. Full key is only shown once. Requires OWNER or ADMIN role.
+         */
+        post: operations["createOrganizationApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/organization/{orgId}/api-keys/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Search organization API keys
+         * @description Search organization API keys with pagination, filtering, and sorting. Any organization member can view.
+         */
+        post: operations["searchOrganizationApiKeys"];
         delete?: never;
         options?: never;
         head?: never;
@@ -346,6 +410,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/api-keys/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Search all API keys with filtering and pagination */
+        post: operations["searchApiKeys"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/api-keys/audit/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Search API key audit log */
+        post: operations["searchAuditLog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/organization/{orgId}/members/{userId}": {
         parameters: {
             query?: never;
@@ -362,6 +460,23 @@ export interface paths {
         head?: never;
         /** Update a member's role */
         patch: operations["updateMemberRole"];
+        trace?: never;
+    };
+    "/v1/user/quota": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current event quota status for the authenticated user */
+        get: operations["getQuota"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/user/organization": {
@@ -555,6 +670,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/api-keys/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get API key statistics */
+        get: operations["getStatistics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/login/oauth2/code/{provider}": {
         parameters: {
             query?: never;
@@ -597,6 +729,63 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/user/api-keys/{keyId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke API key
+         * @description Revokes and deletes an API key. Creates an audit record.
+         */
+        delete: operations["revokeApiKey"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/organization/{orgId}/api-keys/{keyId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke organization API key
+         * @description Revokes and deletes an organization API key. Creates an audit record. Requires OWNER or ADMIN role.
+         */
+        delete: operations["revokeOrganizationApiKey"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/api-keys/{keyId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke any API key by ID */
+        delete: operations["revokeApiKey_1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -746,6 +935,72 @@ export interface components {
             joinedAt?: string;
         };
         UpdateUserDetailsRequest: {
+            /**
+             * @description User's first name
+             * @example John
+             */
+            firstName?: string;
+            /**
+             * @description User's last name
+             * @example Doe
+             */
+            lastName?: string;
+        };
+        CreateApiKeyRequest: {
+            name: string;
+            /** Format: date-time */
+            expiresAt?: string;
+        };
+        /** @description Response returned when creating a new API key */
+        ApiKeyCreationResponse: {
+            /**
+             * Format: int64
+             * @description Unique identifier of the API key
+             * @example 123
+             */
+            id: number;
+            /**
+             * @description Human-readable name of the API key
+             * @example Production Server
+             */
+            name: string;
+            /**
+             * @description Full API key value - only shown once at creation
+             * @example evt_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+             */
+            key: string;
+            /**
+             * @description Last 4 characters of the key for identification
+             * @example o5p6
+             */
+            suffix: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the key was created
+             * @example 2026-01-08T10:30:00Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the key expires (null if no expiration)
+             * @example 2027-01-08T10:30:00Z
+             */
+            expiresAt?: string;
+            /** @description User who created the key (only for organization keys) */
+            createdBy?: components["schemas"]["UserResponse"];
+        };
+        UserResponse: {
+            /**
+             * Format: int64
+             * @description Unique user identifier
+             * @example 12345
+             */
+            id?: number;
+            /**
+             * @description User's email address
+             * @example user@example.com
+             */
+            email?: string;
             /**
              * @description User's first name
              * @example John
@@ -989,28 +1244,114 @@ export interface components {
             /** @description List of items on the current page */
             content?: components["schemas"]["UserResponse"][];
         };
-        UserResponse: {
+        ApiKeyOwnerResponse: {
             /**
              * Format: int64
-             * @description Unique user identifier
-             * @example 12345
+             * @description Owner ID
+             * @example 456
              */
-            id?: number;
+            id: number;
             /**
-             * @description User's email address
-             * @example user@example.com
+             * @description Owner type (USER or ORGANIZATION)
+             * @example USER
+             */
+            type: string;
+            /**
+             * @description Owner name
+             * @example John Doe
+             */
+            name: string;
+            /**
+             * @description Owner email (for user keys only)
+             * @example john@example.com
              */
             email?: string;
+        };
+        /** @description API key information with masked key value */
+        ApiKeyResponse: {
             /**
-             * @description User's first name
-             * @example John
+             * Format: int64
+             * @description Unique identifier of the API key
+             * @example 123
              */
-            firstName?: string;
+            id: number;
             /**
-             * @description User's last name
-             * @example Doe
+             * @description Human-readable name of the API key
+             * @example Production Server
              */
-            lastName?: string;
+            name: string;
+            /**
+             * @description Masked API key showing only prefix and last 4 characters
+             * @example evt_******o5p6
+             */
+            maskedKey: string;
+            /**
+             * @description API key scope
+             * @example USER
+             * @enum {string}
+             */
+            scope: "USER" | "ORGANIZATION";
+            /** @description Owner information (user or organization) */
+            owner: components["schemas"]["ApiKeyOwnerResponse"];
+            /** @description User who created the key (only for organization keys) */
+            createdBy?: components["schemas"]["UserResponse"];
+            /**
+             * Format: date-time
+             * @description Timestamp when the key was created
+             * @example 2026-01-08T10:30:00Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the key expires (null if no expiration)
+             * @example 2027-01-08T10:30:00Z
+             */
+            expiresAt?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the key was last used for authentication
+             * @example 2026-01-08T15:45:00Z
+             */
+            lastUsedAt?: string;
+            /**
+             * Format: int64
+             * @description Total number of API requests made with this key
+             * @example 1542
+             */
+            totalRequests: number;
+            /**
+             * @description Whether the key is expired
+             * @example false
+             */
+            isExpired: boolean;
+        };
+        PageResourceApiKeyResponse: {
+            /**
+             * Format: int64
+             * @description Total number of elements available
+             * @example 125
+             */
+            totalElements: number;
+            /**
+             * Format: int32
+             * @description Total number of pages available
+             * @example 5
+             */
+            totalPages: number;
+            /**
+             * Format: int32
+             * @description Number of items per page
+             * @example 25
+             */
+            pageSize: number;
+            /**
+             * Format: int32
+             * @description Current page number (0-based)
+             * @example 0
+             */
+            pageNumber: number;
+            /** @description List of items on the current page */
+            content?: components["schemas"]["ApiKeyResponse"][];
         };
         AuthenticationResponse: {
             /**
@@ -1254,6 +1595,93 @@ export interface components {
             /** @description List of items on the current page */
             content?: components["schemas"]["OrganizationResponse"][];
         };
+        ApiKeyAuditResponse: {
+            /**
+             * Format: int64
+             * @description Audit record ID
+             * @example 123
+             */
+            id: number;
+            /**
+             * @description API key prefix (scope prefix + suffix)
+             * @example evt_****7890
+             */
+            keyPrefix: string;
+            /**
+             * @description API key name
+             * @example Production Server
+             */
+            keyName: string;
+            /**
+             * @description API key scope
+             * @example USER
+             * @enum {string}
+             */
+            scope: "USER" | "ORGANIZATION";
+            /**
+             * @description Owner name
+             * @example John Doe
+             */
+            ownerName: string;
+            /**
+             * @description Owner email
+             * @example john@example.com
+             */
+            ownerEmail?: string;
+            /**
+             * @description Organization name (for org keys)
+             * @example Acme Corp
+             */
+            organizationName?: string;
+            /**
+             * Format: date-time
+             * @description When the key was originally created
+             * @example 2024-01-15T10:30:00Z
+             */
+            createdAt: string;
+            /** @description User who revoked the key */
+            revokedBy: components["schemas"]["UserResponse"];
+            /**
+             * Format: date-time
+             * @description When the key was revoked
+             * @example 2024-12-01T14:22:00Z
+             */
+            revokedAt: string;
+            /**
+             * Format: int64
+             * @description Total requests at the time of revocation
+             * @example 1500
+             */
+            totalRequestsAtRevocation: number;
+        };
+        PageResourceApiKeyAuditResponse: {
+            /**
+             * Format: int64
+             * @description Total number of elements available
+             * @example 125
+             */
+            totalElements: number;
+            /**
+             * Format: int32
+             * @description Total number of pages available
+             * @example 5
+             */
+            totalPages: number;
+            /**
+             * Format: int32
+             * @description Number of items per page
+             * @example 25
+             */
+            pageSize: number;
+            /**
+             * Format: int32
+             * @description Current page number (0-based)
+             * @example 0
+             */
+            pageNumber: number;
+            /** @description List of items on the current page */
+            content?: components["schemas"]["ApiKeyAuditResponse"][];
+        };
         UpdateMemberRoleRequest: {
             /**
              * @description New organizational role to assign to the member
@@ -1261,6 +1689,31 @@ export interface components {
              * @enum {string}
              */
             role: "OWNER" | "ADMIN" | "MEMBER";
+        };
+        UserQuotaResponse: {
+            /** Format: int32 */
+            used?: number;
+            /** Format: int32 */
+            limit?: number;
+            /** Format: int32 */
+            remaining?: number;
+            /** Format: date */
+            periodStart?: string;
+            /** Format: date */
+            periodEnd?: string;
+            /** Format: double */
+            percentUsed?: number;
+        };
+        /** @description Response containing a list of API keys */
+        ApiKeyListResponse: {
+            /** @description List of API keys */
+            keys: components["schemas"]["ApiKeyResponse"][];
+            /**
+             * Format: int32
+             * @description Maximum number of keys allowed (null for organization keys with no limit)
+             * @example 5
+             */
+            limit?: number;
         };
         DevCredentialsResponse: {
             /**
@@ -1343,6 +1796,58 @@ export interface components {
              * @example 10
              */
             newOrganizationsGrowthPercentage?: number;
+        };
+        ApiKeyStatsResponse: {
+            /**
+             * Format: int64
+             * @description Total number of active API keys
+             * @example 150
+             */
+            totalKeys?: number;
+            /**
+             * Format: int64
+             * @description Total number of user-scoped API keys
+             * @example 100
+             */
+            userKeys?: number;
+            /**
+             * Format: int64
+             * @description Total number of organization-scoped API keys
+             * @example 50
+             */
+            organizationKeys?: number;
+            /**
+             * Format: int64
+             * @description Number of keys created in the last 7 days
+             * @example 15
+             */
+            createdThisWeek?: number;
+            /**
+             * Format: int64
+             * @description Number of keys created in the last 30 days
+             * @example 42
+             */
+            createdThisMonth?: number;
+            /**
+             * Format: int64
+             * @description Number of keys revoked in the last 30 days
+             * @example 8
+             */
+            revokedThisMonth?: number;
+            /**
+             * Format: int64
+             * @description Number of keys expiring in the next 30 days
+             * @example 12
+             */
+            expiringNext30Days?: number;
+            /**
+             * Format: int64
+             * @description Number of keys that have never been used
+             * @example 25
+             */
+            neverUsedKeys?: number;
+            /** @description Top 5 API keys by request volume */
+            topKeysByUsage?: components["schemas"]["ApiKeyResponse"][];
         };
     };
     responses: never;
@@ -1715,6 +2220,176 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserDetailsResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    listApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyListResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    createApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateApiKeyRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyCreationResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -2407,6 +3082,184 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PageResourceUserResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    createOrganizationApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateApiKeyRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyCreationResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    searchOrganizationApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SortablePageInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResourceApiKeyResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -3253,6 +4106,180 @@ export interface operations {
             };
         };
     };
+    searchApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SortablePageInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResourceApiKeyResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    searchAuditLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SortablePageInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResourceApiKeyAuditResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
     removeMember: {
         parameters: {
             query?: never;
@@ -3360,6 +4387,89 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrganizationMembershipResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    getQuota: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserQuotaResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -4297,6 +5407,89 @@ export interface operations {
             };
         };
     };
+    getStatistics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyStatsResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
     handleOAuth2Callback: {
         parameters: {
             query: {
@@ -4353,6 +5546,256 @@ export interface operations {
                      *     }
                      */
                     "application/json": unknown;
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    revokeApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                keyId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    revokeOrganizationApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+                keyId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    revokeApiKey_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                keyId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
             /** @description Access Denied */
