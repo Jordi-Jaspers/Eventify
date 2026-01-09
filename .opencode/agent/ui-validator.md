@@ -2,7 +2,7 @@
 description: UI polish agent. Validates screenshots, improves visuals. Does NOT modify business logic.
 temperature: 0.1
 mode: primary
-model: github-copilot/gemini-3-pro-preview
+model: github-copilot/claude-sonnet-4.5
 tools:
   write: true
   read: true

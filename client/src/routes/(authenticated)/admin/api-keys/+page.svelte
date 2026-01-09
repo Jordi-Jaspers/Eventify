@@ -75,7 +75,7 @@
 				{ value: 'USER', label: 'User' },
 				{ value: 'ORGANIZATION', label: 'Organization' }
 			],
-			colSpan: 1
+			colSpan: 2
 		},
 		{
 			key: 'createdAt',
@@ -87,7 +87,7 @@
 			key: 'lastUsedAt',
 			label: 'Last Used',
 			sortable: true,
-			colSpan: 2
+			colSpan: 1
 		},
 		{
 			key: 'totalRequests',
@@ -177,8 +177,9 @@
 	}
 
 	function getScopeBadgeClass(scope: string | undefined): string {
-		if (scope === 'USER') return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-		if (scope === 'ORGANIZATION') return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+		if (scope === 'USER') return 'bg-blue-500/10 text-blue-500 border-blue-500/20 backdrop-blur-md';
+		if (scope === 'ORGANIZATION')
+			return 'bg-purple-500/10 text-purple-500 border-purple-500/20 backdrop-blur-md';
 		return '';
 	}
 
@@ -462,12 +463,12 @@
 		<DataTable {columns} service={dataTableService} title="All API Keys" icon={Key}>
 			{#snippet row(key: ApiKeyResponse)}
 				<div
-					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
+					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/40 hover:bg-accent/5 transition-colors group"
 				>
 					<!-- Key + Name -->
 					<div class="col-span-1 md:col-span-3">
 						<div class="space-y-1">
-							<div class="font-mono text-xs text-muted-foreground">
+							<div class="font-mono text-xs text-muted-foreground group-hover:text-primary/80 transition-colors">
 								{key.maskedKey}
 							</div>
 							<div class="font-medium truncate">{key.name}</div>
@@ -482,7 +483,7 @@
 					</div>
 
 					<!-- Scope -->
-					<div class="col-span-1 md:col-span-1 flex items-center">
+					<div class="col-span-1 md:col-span-2 flex items-center">
 						<Badge class={getScopeBadgeClass(key.scope)}>
 							{key.scope}
 						</Badge>
@@ -497,8 +498,8 @@
 					</div>
 
 					<!-- Last Used -->
-					<div class="col-span-1 md:col-span-2 flex items-center">
-						<span class="text-sm text-muted-foreground">
+					<div class="col-span-1 md:col-span-1 flex items-center">
+						<span class="text-sm text-muted-foreground truncate">
 							<span class="md:hidden">Last Used: </span>
 							{formatLastUsed(key.lastUsedAt)}
 						</span>
@@ -537,9 +538,11 @@
 		</DataTable>
 
 		<!-- Recent Revocations -->
-		<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+		<Card
+			class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden ring-1 ring-white/5"
+		>
 			<div
-				class="absolute inset-0 bg-gradient-to-br from-destructive/10 via-transparent to-destructive/5 opacity-50"
+				class="absolute inset-0 bg-gradient-to-br from-destructive/5 via-transparent to-destructive/5 opacity-30"
 			></div>
 			<CardHeader class="relative z-10">
 				<div class="flex items-center gap-2">
@@ -562,14 +565,15 @@
 					<div class="space-y-3">
 						{#each recentRevocations as audit}
 							<div
-								class="rounded-lg border border-border/50 bg-card/30 p-4 hover:bg-accent/5 transition-colors"
+								class="rounded-lg border border-border/50 bg-card/30 p-4 hover:bg-accent/5 transition-colors group"
 							>
 								<div class="flex items-start justify-between gap-4">
 									<div class="flex-1 min-w-0">
 										<div class="flex items-center gap-2 mb-2">
 											<span class="font-medium truncate">{audit.keyName}</span>
-											<Badge class="font-mono text-xs" variant="outline"
-												>{audit.keyPrefix}</Badge
+											<Badge
+												class="font-mono text-xs group-hover:border-primary/30 transition-colors"
+												variant="outline">{audit.keyPrefix}</Badge
 											>
 											<Badge class={getScopeBadgeClass(audit.scope)}>{audit.scope}</Badge>
 										</div>
