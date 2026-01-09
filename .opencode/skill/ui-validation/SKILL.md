@@ -1,13 +1,47 @@
 ---
 name: ui-validation
-description: Use Playwright to validate UI during frontend development. Take screenshots iteratively to verify visual output matches requirements.
+description: Use Playwright to validate UI during frontend development. Supports iterative ralph-loop for autonomous UI improvement cycles.
 metadata:
   skill-type: frontend
   framework: playwright
+  loop-compatible: true
 ---
 # UI Validation
 
 Use Playwright to validate UI during frontend development. Take screenshots iteratively to verify visual output matches requirements.
+
+## ⚠️ CRITICAL: When This Skill Is Loaded
+
+**ALWAYS use the ralph-loop for UI validation tasks unless explicitly told otherwise.**
+
+When you load this skill (or when a user asks for UI validation), you MUST:
+
+1. **Immediately check**: Is this a UI validation/improvement task?
+2. **If YES**: Use the ralph-loop pattern (see below)
+3. **If NO**: User is just asking questions about the skill - answer normally
+
+### Decision Tree
+
+```
+User asks for UI validation/screenshot tests?
+├─ YES → Use ralph-loop (./.opencode/scripts/ralph-loop.sh)
+│        └─ Run iterative improvement cycle
+│
+└─ NO → User is asking about the skill itself
+        └─ Answer questions normally
+```
+
+**Example prompts that REQUIRE ralph-loop:**
+- "Validate the dashboard UI"
+- "Check the login page screenshots"
+- "Perform UI validation on organization settings"
+- "Review the UI and make improvements"
+- "Take screenshots and fix any issues"
+
+**Example prompts that DON'T require ralph-loop:**
+- "How do I write a Playwright test?"
+- "What's the ralph-loop command?"
+- "Where are screenshots saved?"
 
 ## When to Use
 
@@ -15,6 +49,49 @@ Use Playwright to validate UI during frontend development. Take screenshots iter
 - To verify layout, styling, and visual states
 - To check responsive behavior
 - Before reporting completion to user
+- **In a ralph-loop for autonomous UI improvement** (DEFAULT for validation tasks)
+
+## Ralph Loop Integration
+
+**This is the PRIMARY way to use this skill for validation tasks.**
+
+This skill supports the ralph-loop pattern for iterative UI improvement. Use the `/ui-loop` command or run:
+
+```bash
+# From project root (RECOMMENDED)
+./.opencode/scripts/ralph-loop.sh --command ui-loop --max-iterations 10 --completion-promise "UI_VALIDATION_COMPLETE"
+
+# With custom prompt
+./.opencode/scripts/ralph-loop.sh \
+  --prompt "Improve the dashboard page styling, focus on spacing and visual hierarchy" \
+  --max-iterations 15 \
+  --completion-promise "UI_VALIDATION_COMPLETE"
+
+# Quick 5-iteration polish
+./.opencode/scripts/ralph-loop.sh --command ui-loop -m 5 -c "UI_VALIDATION_COMPLETE"
+```
+
+### Loop Workflow
+
+Each iteration of the ralph-loop:
+1. **Run tests** → Capture fresh screenshots
+2. **Analyze** → Read and critique the screenshots
+3. **Identify** → Find specific improvements needed
+4. **Implement** → Make targeted changes to components (edit Svelte files, CSS, etc.)
+5. **Verify** → Re-run tests to confirm fixes
+6. **Repeat** → Continue until quality threshold met
+
+**Key Point:** The loop allows you to make ACTUAL UI changes (not just test fixes) and verify them iteratively.
+
+### Completion Signals
+
+Use these exact strings in your output to control the loop:
+
+| Signal | Meaning |
+|--------|---------|
+| `UI_VALIDATION_COMPLETE` | All improvements done, exit loop |
+| `UI_VALIDATION_BLOCKED` | Stuck, needs human intervention |
+| `UI_VALIDATION_CONTINUE` | More work needed (default behavior) |
 
 ## Running Tests
 
@@ -129,6 +206,41 @@ bun run test -- --grep "<Page>"
 ### 3. View Screenshots
 
 Screenshots are saved to: `client/test/resources/screenshots/<page>/`
+
+## Screenshot Analysis Checklist
+
+When critiquing screenshots in a ralph-loop, evaluate:
+
+### Layout & Structure
+- [ ] Proper spacing and margins
+- [ ] Consistent padding
+- [ ] Aligned elements
+- [ ] Logical visual hierarchy
+- [ ] Responsive behavior (if testing multiple viewports)
+
+### Typography
+- [ ] Readable font sizes
+- [ ] Proper line height
+- [ ] Consistent font weights
+- [ ] Sufficient contrast
+
+### Colors & Styling
+- [ ] Color scheme consistency
+- [ ] Proper use of accent colors
+- [ ] Shadows and depth
+- [ ] Border styles
+
+### Interactive Elements
+- [ ] Button states visible
+- [ ] Focus indicators
+- [ ] Hover states (if applicable)
+- [ ] Loading states
+
+### Content States
+- [ ] Empty state handling
+- [ ] Error state display
+- [ ] Loading indicators
+- [ ] Success feedback
 
 ## Common UI States to Capture
 
@@ -260,7 +372,9 @@ client/
 │       │   └── <page>/
 │       ├── report/
 │       └── test-results/
-└── playwright.config.ts
+├── playwright.config.ts
+└── scripts/
+    └── playwright-test.sh
 ```
 
 ## Authenticated Pages
@@ -352,3 +466,9 @@ await page.screenshot({ path: screenshotPath, fullPage: true });
 - Wait for animations/transitions to complete
 - Check viewport size in config
 - Ensure fonts/images are loaded
+
+### Ralph-loop not completing
+- Check completion promise matches exactly
+- Verify screenshots are being generated
+- Look for test failures blocking the loop
+- Try reducing scope of changes per iteration

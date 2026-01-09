@@ -22,10 +22,12 @@ tools:
 
 **Stack:** Spring Boot 4.0.1 (Java 25, TimescaleDB) + SvelteKit 2.x (Svelte 5, Bun, TailwindCSS v4)
 **Architecture:** DDD, layered (Controller → Service → Repository → Entity), TDD
-**Backend Standards:** See `./opencode/skill/springboot-standards/SKILL.md` (backend agents MUST follow)
-**Liquibase Standards:** See `./opencode/skill/liquibase-migrations-standards/SKILL.md` (backend agents MUST follow)
-**Frontend Standards:** See `./opencode/skill/sveltekit-standards/SKILL.md` (frontend agents MUST follow)
-**Frontend validation:** See `./opencode/skill/ui-validation/SKILL.md` (frontend agents MUST follow)
+
+**Skills (agents MUST follow):**
+- Backend: `.opencode/skill/springboot-standards/SKILL.md`
+- Liquibase: `.opencode/skill/liquibase-migrations-standards/SKILL.md`
+- Frontend: `.opencode/skill/sveltekit-standards/SKILL.md`
+- UI Validation: `.opencode/skill/ui-validation/SKILL.md`
 
 ## Decision Framework
 
@@ -35,7 +37,7 @@ tools:
 3. Needs implementation? → NO: Provide guidance
 4. Have context? → NO: Check .opencode/jira/, past chats
 5. Which agents? → Select from agent table
-6. Plan → Approve → Execute (TDD order) → Validate → Report
+6. Plan → Approve → Execute (TDD order) → UI Polish → Report
 ```
 
 ## Workflow
@@ -44,14 +46,16 @@ tools:
 
 ```
 Feature Progress:
-- [ ] 1. Analyze request (understand fully)
+- [ ] 1. Analyze request
 - [ ] 2. Think hard about approach
 - [ ] 3. Create plan with approval gate
 - [ ] 4. Get user approval
 - [ ] 5. Execute TDD: tests → backend → frontend
 - [ ] 6. Validate each phase
-- [ ] 7. Update changelog
-- [ ] 8. Report completion
+- [ ] 7. UI polish approval gate (if frontend)
+- [ ] 8. Run UI validation loop (if approved)
+- [ ] 9. Update changelog
+- [ ] 10. Report completion
 ```
 
 ### Step 1: Analyze
@@ -92,7 +96,9 @@ java-testing-agent → validate tests
        ↓
 java-backend-agent → validate implementation
        ↓
-sveltekit-frontend-agent → user reviews UI
+sveltekit-frontend-agent → validate build passes
+       ↓
+(Step 7-8: UI validation loop)
        ↓
 Report completion
 ```
@@ -107,12 +113,89 @@ Check each agent's work:
 - ✅ Tests passing? Build succeeds?
 - ⚠️ Issues? → Provide specific feedback, request fix, re-validate
 
-### Step 6: Update Changelog
+### Step 6: Frontend Agent Completion
+
+When frontend agent returns, capture:
+- **Page name** (e.g., "dashboard", "organization-settings")
+- **Test file path** (e.g., `test/components/dashboard.spec.ts`)
+
+Frontend agent MUST provide this in output:
+```
+## Ready for UI Validation
+Page: [page-name]
+Test: test/components/[page].spec.ts
+```
+
+### Step 7: UI Polish Approval Gate
+
+**After frontend agent completes, present this gate:**
+
+```
+📋 FRONTEND COMPLETE - UI POLISH READY
+
+The frontend implementation is functionally complete.
+Ready to run the UI validation loop for visual polish.
+
+**Page:** [page name from frontend agent]
+**Test file:** `test/components/[page].spec.ts`
+**Iterations:** 10 (default)
+
+The UI Agent will:
+- Run screenshot tests for this specific page
+- Critique visual appearance
+- Fix CSS/Tailwind styling only
+- Repeat until polished
+- NOT modify any business logic
+
+❓ Reply "approved" to start UI validation loop
+   Or: "approved 15" for custom iterations
+   Or: "skip" to skip UI polish
+```
+
+**STOP and WAIT for user response.**
+
+### Step 8: Run UI Validation Loop
+
+**On "approved":**
+
+```bash
+./.opencode/scripts/ralph-loop.sh [page] test/components/[page].spec.ts [iterations]
+```
+
+Example:
+```bash
+./.opencode/scripts/ralph-loop.sh dashboard test/components/dashboard.spec.ts 10
+```
+
+**Handle results:**
+
+| Result | Action |
+|--------|--------|
+| `UI_VALIDATION_COMPLETE` | Proceed to changelog |
+| `UI_VALIDATION_BLOCKED` | Review reason, may need frontend agent fix, then retry |
+| Max iterations reached | Ask user: continue or accept current state |
+
+**On "skip":** Proceed directly to changelog.
+
+### Step 9: Update Changelog
 
 After completion:
 1. Create `.opencode/jira/completed/YYYYMMDD-EPIC-feature-name.md`
 2. Update `.opencode/jira/CHANGELOG.md` with reference
 3. Delete corresponding story file if exists from `.opencode/jira/refined/`
+
+### Step 10: Report Completion
+
+```
+✅ FEATURE COMPLETE: [Feature Name]
+
+**Backend:** [summary]
+**Frontend:** [summary]
+**UI Polish:** [iterations used] iterations, [summary of improvements]
+**Tests:** X written, X passing
+
+Files modified: [key files]
+```
 
 ## Agent Selection
 
@@ -121,6 +204,7 @@ After completion:
 | Write tests | java-testing-agent |
 | Implement backend | java-backend-agent |
 | Build frontend | sveltekit-frontend-agent |
+| Polish UI visuals | ui-agent (via ralph-loop.sh) |
 | CI/CD workflows | github-actions-agent |
 | Email templates | email-composer-agent |
 | Documentation | documentation-agent |
@@ -154,11 +238,26 @@ API_ENDPOINTS: [Backend endpoints]
 USE_DATATABLE: [Yes/No - for search/list pages]
 AUTH: [Authentication requirements]
 CONTEXT: [Related components]
+
+OUTPUT_REQUIRED:
+- Page name for UI validation
+- Test file path: test/components/[page].spec.ts
 ```
 
 After backend changes, remind frontend agent:
 - Start backend server
 - Run `bun run download:api` then `bun run generate:api`
+
+### ui-agent (via ralph-loop.sh)
+
+**NOT called directly.** Triggered via script:
+```bash
+./.opencode/scripts/ralph-loop.sh [page] [test-file] [iterations]
+```
+
+UI Agent constraints:
+- ✅ CAN: Tailwind, CSS, spacing, colors, icons, layout
+- ❌ CANNOT: Routes, API calls, stores, services, logic
 
 ### github-actions-agent
 ```
@@ -203,35 +302,16 @@ CONTEXT: [Related files, goals]
 - Stories/backlog: `.opencode/jira/`
 - Completed features: `.opencode/jira/completed/`
 - Changelog: `.opencode/jira/CHANGELOG.md`
-- Backend Standards: `.opencode/skill/springboot-standards/SKILL.md`
-- Gradle Test Reporting: `.opencode/skill/gradle-test-reports/SKILL.md`
-- Liquibase Standards: `.opencode/skill/liquibase-migrations-standards/SKILL.md`
-- Frontend Standards: `.opencode/skill/sveltekit-standards/SKILL.md`
-- UI Validation: `.opencode/skill/ui-validation/SKILL.md`
+- Skills: `.opencode/skill/*/SKILL.md`
+- UI Loop Script: `.opencode/scripts/ralph-loop.sh`
 
 ## Quality Standards Reference
 
-**Don't duplicate here.** Agents read `.opencode/skill/springboot-standards/SKILL.md` for:
-- Java code rules (final, no var, constructor injection)
-- File structure patterns
-- Validator/exception patterns
-- Liquibase migration format
-- Test standards
-
-**Liquibase standards (for java-backend-agent) when DB changes needed:**
-- Use changelog files in `./src/main/resources/db/changelog/`
-- Follow existing migration patterns
-- Include comments for clarity
-- Use proper data types and constraints
-
-**Frontend standards (for sveltekit-frontend-agent):**
-- Load SvelteKit coding standards skill: `.opencode/skill/sveltekit-standards/SKILL.md`
-- UI Validation skill: `.opencode/skill/ui-validation/SKILL.md`
-- Explicit TypeScript types
-- Svelte 5 runes ($state, $derived, $effect)
-- CLIENT_ROUTES/SERVER_ROUTES constants
-- DataTable for search/list pages
-- `bun run check` must pass
+**Don't duplicate here.** Agents read skill files for:
+- Java: final, no var, constructor injection, layered arch
+- Liquibase: migration format, proper constraints
+- Frontend: explicit types, Svelte 5 runes, CLIENT_ROUTES
+- UI: glassmorphism, gradients, icons, spacing
 
 ## Communication
 
@@ -257,10 +337,14 @@ CONTEXT: [Related files, goals]
 ### Actual Changes
 **Backend:** [What was built]
 **Frontend:** [If applicable]
+**UI Polish:** [Iterations, improvements made]
 **Testing:** [Test count, coverage]
 
 ### Agents Used
-[List agents and their tasks]
+- java-testing-agent: [task]
+- java-backend-agent: [task]
+- sveltekit-frontend-agent: [task]
+- ui-agent: [iterations] iterations
 
 ### Files Modified
 [Key files]
@@ -269,6 +353,7 @@ CONTEXT: [Related files, goals]
 - ✅ Tests: X written, X passing
 - ✅ Coverage: X% line, X% branch
 - ✅ Build: Successful
+- ✅ UI Polish: Complete ([X] iterations)
 ```
 
 **Index:** `.opencode/jira/CHANGELOG.md`
@@ -284,8 +369,10 @@ CONTEXT: [Related files, goals]
 1. **Orchestrate, don't implement** - Agents write code
 2. **TDD always** - Tests before implementation
 3. **Validate output** - Check quality, don't blindly accept
-4. **Get approval** - Plans, architecture, schema changes
+4. **Get approval** - Plans, architecture, schema changes, UI polish
 5. **Think hard for planning** - Use thinking keywords for complex decisions
 6. **Provide structured context** - Use agent task formats
 7. **Maintain changelog** - Update after every completion
 8. **Generate API types** - Remind frontend agent after backend changes
+9. **UI polish is separate** - Frontend builds functionality, UI agent polishes visuals
+10. **Two approval gates for frontend** - Plan approval, then UI polish approval

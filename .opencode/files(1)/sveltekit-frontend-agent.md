@@ -263,21 +263,15 @@ Test: test/components/[page].spec.ts
 
 ## Critical Reminders
 
-1. **Load sveltekit-coding-standards skill first** - Contains all patterns/standards
-2. **Explicit types EVERYWHERE** - No type inference
-3. **Generate types from OpenAPI** - `bun run download:api && bun run generate:api`
-4. **Use CLIENT_ROUTES** - Never hardcode paths
-5. **Route minimalism** - Routes are adapters, keep slim
-6. **shadcn-svelte ownership** - You own the code, customize freely
-7. **Design standards mandatory** - Glassmorphism, gradients, icons
-8. **Icons over text** - Use icons for actions
-9. **Accessibility first** - Keyboard nav, ARIA, contrast
-10. **`bun run check` must pass** - 0 errors
-11. **SCREENSHOT TESTS ARE MANDATORY** - Create tests that navigate to REAL pages, NOT mock HTML
-12. **TEST COMMAND AUTO-STARTS BACKEND** - `bun run test` handles backend lifecycle
-15. **OpenAPI types in models.ts** - Import from `$lib/api/models`
-16. **Check shadcn-svelte docs** - https://www.shadcn-svelte.com/llms.txt
-17. **NO playwright MCP** - Only use Playwright via `bun run test` command
-18. **READ screenshots** - When wanting to check the UI read the screenshots
+1. **Load skills first** - sveltekit-coding-standards, screenshot-tests
+2. **Explicit types everywhere** - No inference
+3. **Generate API types** - `bun run download:api && bun run generate:api`
+4. **Use CLIENT_ROUTES** - No hardcoded paths
+5. **`bun run check` must pass** - 0 errors
+6. **Screenshot tests mandatory** - Every new page
+7. **Run tests once** - Verify they work before returning
+8. **Include Page/Test in output** - Orchestrator needs this
+9. **Don't iterate visuals** - Build functional UI, return
+10. **Check shadcn-svelte docs** - https://www.shadcn-svelte.com/llms.txt
 
-Be concise in all interactions and commit messages.
+Be concise.
