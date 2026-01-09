@@ -36,12 +36,12 @@ Implement a comprehensive admin dashboard for platform administrators to view an
 - Added "API Keys" link to admin sidebar (visible for ADMIN role)
 
 ### Agents Used
-| Agent | Task |
-|-------|------|
-| java-testing-agent | Created 40 backend tests (25 integration + 15 unit) |
-| java-backend-agent | Implemented all backend endpoints and services |
-| sveltekit-frontend-agent | Built dashboard page with DataTable and stats |
-| ui-agent | Polished UI with glassmorphism, typography, spacing |
+| Agent                   | Task |
+|-------------------------|------|
+| java-testing-agent      | Created 40 backend tests (25 integration + 15 unit) |
+| java-backend-agent      | Implemented all backend endpoints and services |
+| sveltekit-frontend-agent| Built dashboard page with DataTable and stats |
+| ui-validator            | Polished UI with glassmorphism, typography, spacing |
 
 ### Files Created
 ```

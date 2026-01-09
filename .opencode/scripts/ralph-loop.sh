@@ -10,6 +10,12 @@ set -euo pipefail
 PAGE="${1:-}"
 TEST_FILE="${2:-}"
 MAX="${3:-10}"
+TEMP_OUTPUT=$(mktemp)
+
+cleanup() {
+    rm -f "$TEMP_OUTPUT"
+}
+trap cleanup EXIT
 
 if [[ -z "$PAGE" || -z "$TEST_FILE" ]]; then
     echo "Usage: ./ralph-loop.sh <page> <test-file> [max-iterations]"
@@ -39,11 +45,17 @@ ITERATION: $i of $MAX
 
 Run the test, read the screenshots, polish the UI. Output UI_VALIDATION_COMPLETE when done."
 
-    OUTPUT=$(opencode run --agent ui-agent "$PROMPT" 2>&1) || true
+    echo "⏳ Running UI Agent... (streaming output)"
+    echo "───────────────────────────────────"
     
-    echo "$OUTPUT"
+    # Stream output to terminal AND capture to file for checking
+    opencode run --agent ui-validator "$PROMPT" 2>&1 | tee "$TEMP_OUTPUT" || true
     
-    if echo "$OUTPUT" | grep -qF "UI_VALIDATION_COMPLETE"; then
+    echo ""
+    echo "───────────────────────────────────"
+
+    # Check for completion signals
+    if grep -qF "UI_VALIDATION_COMPLETE" "$TEMP_OUTPUT"; then
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "✅ UI Validation Complete"
@@ -52,7 +64,7 @@ Run the test, read the screenshots, polish the UI. Output UI_VALIDATION_COMPLETE
         exit 0
     fi
     
-    if echo "$OUTPUT" | grep -qF "UI_VALIDATION_BLOCKED"; then
+    if grep -qF "UI_VALIDATION_BLOCKED" "$TEMP_OUTPUT"; then
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "⚠️  UI Validation Blocked"
@@ -63,7 +75,7 @@ Run the test, read the screenshots, polish the UI. Output UI_VALIDATION_COMPLETE
     
     if [[ $i -lt $MAX ]]; then
         echo ""
-        echo "⏳ Cooling down before next iteration..."
+        echo "⏳ Cooling down (3s) before next iteration..."
         sleep 3
     fi
 done

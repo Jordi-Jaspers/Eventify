@@ -89,7 +89,7 @@ If unclear, ask targeted questions:
 | 1 | java-testing-agent | Create test suite |
 | 2 | java-backend-agent | Implement to pass tests |
 | 3 | sveltekit-frontend-agent | Build UI + screenshot tests |
-| 4 | ui-agent | Polish visuals (10 iterations) |
+| 4 | ui-validator | Polish visuals (10 iterations) |
 
 ## Success Criteria
 ✅ All tests passing (>90% coverage)
@@ -235,7 +235,7 @@ REQUIRED OUTPUT:
 - Test file: test/components/[page].spec.ts
 ```
 
-### ui-agent (via script)
+### ui-validation (via script)
 
 ```bash
 ./.opencode/scripts/ralph-loop.sh [page] [test-file] [iterations]
@@ -310,7 +310,7 @@ Orchestrator: Proceeds to changelog, skips UI loop
 ❌ Don't skip approval gate
 ❌ Don't implement before tests
 ❌ Don't delegate planning to agents (orchestrator plans, agents execute)
-❌ Don't Call ui-agent directly (use ralph-loop.sh)
+❌ Don't Call ui-validator directly (use ralph-loop.sh)
 ❌ Don't Skip frontend's page/test output requirement
 
 In all interactions, be extremely concise and sacrifice grammar for concision.

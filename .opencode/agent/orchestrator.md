@@ -199,15 +199,15 @@ Files modified: [key files]
 
 ## Agent Selection
 
-| Task | Agent |
-|------|-------|
-| Write tests | java-testing-agent |
-| Implement backend | java-backend-agent |
-| Build frontend | sveltekit-frontend-agent |
-| Polish UI visuals | ui-agent (via ralph-loop.sh) |
-| CI/CD workflows | github-actions-agent |
-| Email templates | email-composer-agent |
-| Documentation | documentation-agent |
+| Task | Agent                                           |
+|------|-------------------------------------------------|
+| Write tests | java-testing-agent                              |
+| Implement backend | java-backend-agent                              |
+| Build frontend | sveltekit-frontend-agent                        |
+| Polish UI visuals | ui-validator (via ralph-loop.sh / no sub-agent) |
+| CI/CD workflows | github-actions-agent                            |
+| Email templates | email-composer-agent                            |
+| Documentation | documentation-agent                             |
 
 ## Agent Context Formats
 
@@ -248,7 +248,7 @@ After backend changes, remind frontend agent:
 - Start backend server
 - Run `bun run download:api` then `bun run generate:api`
 
-### ui-agent (via ralph-loop.sh)
+### ui-validator (via ralph-loop.sh / no sub-agent)
 
 **NOT called directly.** Triggered via script:
 ```bash
@@ -344,7 +344,7 @@ CONTEXT: [Related files, goals]
 - java-testing-agent: [task]
 - java-backend-agent: [task]
 - sveltekit-frontend-agent: [task]
-- ui-agent: [iterations] iterations
+- ui-validator: [iterations] iterations
 
 ### Files Modified
 [Key files]
