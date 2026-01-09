@@ -52,17 +52,17 @@
 	// DataTable columns configuration
 	const columns: DataTableColumn<ApiKeyResponse>[] = [
 		{
-			key: 'search',
-			label: 'Search',
+			key: 'searchTerm',
+			label: 'Name',
+			sortable: true,
 			filterable: true,
 			filterType: 'FUZZY_TEXT',
 			filterPlaceholder: 'Search by name, key, owner...',
 			colSpan: 3
 		},
 		{
-			key: 'name',
-			label: 'Name',
-			sortable: true,
+			key: 'owner',
+			label: 'Owner',
 			colSpan: 2
 		},
 		{
@@ -474,9 +474,11 @@
 						</div>
 					</div>
 
-					<!-- Name (mobile only) -->
+					<!-- Owner -->
 					<div class="hidden md:flex md:col-span-2 items-center">
-						<span class="text-sm truncate">{key.name}</span>
+						<span class="text-sm truncate" title={key.owner?.email ?? key.owner?.name}>
+							{key.owner?.name ?? 'Unknown'}
+						</span>
 					</div>
 
 					<!-- Scope -->

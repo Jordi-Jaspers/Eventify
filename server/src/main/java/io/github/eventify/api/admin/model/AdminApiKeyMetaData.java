@@ -36,6 +36,8 @@ public class AdminApiKeyMetaData extends AbstractSortSearchMetaData {
 
     public static final String NAME = "name";
 
+    public static final String SUFFIX_FIELD = "suffix";
+
     public static final String CREATED_AT = "createdAt";
 
     public static final String EXPIRES_AT = "expiresAt";
@@ -64,7 +66,7 @@ public class AdminApiKeyMetaData extends AbstractSortSearchMetaData {
 
         addField(
             SEARCH_TERM,
-            List.of(NAME, USER_EMAIL_FIELD, USER_FIRST_NAME_FIELD, USER_LAST_NAME_FIELD, ORG_NAME_FIELD),
+            List.of(SUFFIX_FIELD, USER_EMAIL_FIELD, USER_FIRST_NAME_FIELD, USER_LAST_NAME_FIELD, ORG_NAME_FIELD, NAME),
             SearchType.MULTI_COLUMN_FUZZY,
             false
         );
