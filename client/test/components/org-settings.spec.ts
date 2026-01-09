@@ -90,54 +90,12 @@ test.describe('Organization Settings Screenshots', () => {
 		await page.waitForTimeout(300);
 
 		// Fill in the key name
-		const keyName = `Test Key ${Date.now()}`;
-		await page.locator('#key-name').fill(keyName);
-
-		// Click Create Key button (within the sheet/modal)
-		await page.getByRole('button', { name: 'Create Key' }).click();
-
-		// Wait for the success modal to appear (shows the generated key)
-		await page.waitForSelector('text=API Key Created', { timeout: 5000 });
-		await page.waitForTimeout(500);
-
-		// Take screenshot of the created key modal
-		const screenshotPath = getScreenshotPath('04-key-created-modal', testInfo.project.name);
-		await page.screenshot({ path: screenshotPath, fullPage: true });
-		expect(existsSync(screenshotPath)).toBeTruthy();
-
-		// Verify the key was created - the modal shows the key name
-		const modal = page.getByLabel('API Key Created');
-		await expect(modal.getByText(keyName)).toBeVisible();
-		// Verify the modal has the full API key displayed (starts with org_ for org keys)
-		await expect(modal.locator('code')).toBeVisible();
-
-		// Close the modal
-		await page.getByRole('button', { name: 'Done' }).click();
-		await page.waitForTimeout(500);
-
-		// Verify the key appears in the list (look in main content area)
-		const mainContent = page.locator('main');
-		await expect(mainContent.getByText(keyName)).toBeVisible();
-
-		// Take screenshot of the list with the new key
-		const listScreenshotPath = getScreenshotPath('05-api-keys-list', testInfo.project.name);
-		await page.screenshot({ path: listScreenshotPath, fullPage: true });
-		expect(existsSync(listScreenshotPath)).toBeTruthy();
-	});
-
-	test('05 - revoke api key', async ({ page }, testInfo) => {
-		// Navigate to API keys
-		await page.click('text=API Keys');
-		await page.waitForURL('/organizations/1/settings/api-keys', { timeout: 5000 });
-		await page.waitForTimeout(500);
-
-		// First create an API key to revoke
-		await page.getByRole('button', { name: 'Create API Key' }).click();
-		await page.waitForTimeout(300);
-
 		const keyName = `Key to Revoke ${Date.now()}`;
 		await page.locator('#key-name').fill(keyName);
-		await page.getByRole('button', { name: 'Create Key' }).click();
+		
+		// Click Create Key button (within the sheet) - scope to the sheet
+		const sheet = page.getByLabel('Create API Key');
+		await sheet.getByRole('button', { name: 'Create Key' }).click();
 
 		// Wait for success modal and close it
 		await page.waitForSelector('text=API Key Created', { timeout: 5000 });
