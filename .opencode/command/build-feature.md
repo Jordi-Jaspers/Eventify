@@ -16,29 +16,41 @@ tools:
 
 Trigger orchestrator to build a feature using test-driven workflow with specialized agents.
 
-## Workflow Overview
+## Workflow
 
-```
-1. Check refined stories / backlog.md
-2. Gather requirements (ask if needed)
-3. Create plan → APPROVAL GATE
-4. Execute TDD: tests → backend → frontend
-5. UI polish → APPROVAL GATE
-6. Run UI validation loop
-7. Update changelog, report
-```
+**User provides:** Refined story name in $ARGUMENTS
 
-## Workflow Steps
+**Orchestrator executes:**
+
+1. **Check Refined backlog** - Look for existing feature story in `.opencode/jira/refined/` and notes in `.opencode/jira/backlog.md` if not found
+2. **Gather requirements** - Ask clarifying questions if needed
+3. **Create plan** - Write implementation plan with agent assignments
+4. **Get approval** - Wait for user confirmation
+5. **Execute TDD workflow** - Delegate to specialized agents in test-first order
+6. **Update changelog** - Record feature addition, remove existing story if applicable
+
+## Orchestrator Instructions
+
+You are orchestrating a feature build. Follow this process:
 
 ### Step 1: Check Existing Context
 
 ```bash
+# List all refined stories
 ls .opencode/jira/refined
+
+# Story information
 cat .opencode/jira/refined/"[FEATURE-NAME-KEYWORD]"
+
+# Check backlog.md for feature information
 cat .opencode/jira/backlog.md
 ```
 
-Look for: feature description, requirements, technical decisions, open questions.
+Look for:
+- Feature description
+- Requirements notes
+- Technical decisions
+- Open questions
 
 ### Step 2: Gather Requirements
 
@@ -80,24 +92,37 @@ If unclear, ask targeted questions:
 | 4 | ui-agent | Polish visuals (10 iterations) |
 
 ## Success Criteria
-- All tests passing
-- Build successful
-- Type checks passing
-- UI polished
+✅ All tests passing (>90% coverage)
+✅ Build successful
+✅ Type checks passing (frontend)
+✅ Security requirements met
+✅ Feature works as specified
+
+## Estimated Effort
+[Your time estimate]
 ```
 
-Then present:
+Present plan clearly:
 
 ```
-📋 PLAN READY
+---
+🎯 FEATURE PLAN READY
 
-[Plan summary]
+[Show plan summary here]
 
 ❓ APPROVAL REQUIRED
-Reply "approved" to proceed.
+
+Review the plan above. Does it:
+- ✅ Capture all requirements?
+- ✅ Have proper test-first approach?
+- ✅ Include necessary security?
+- ✅ Sequence tasks correctly?
+
+Reply "approved" to proceed, or suggest changes.
+---
 ```
 
-**STOP. Wait for approval.**
+**STOP and WAIT for approval.** Do not proceed without explicit confirmation.
 
 ### Step 4: Execute TDD Workflow
 
@@ -269,21 +294,23 @@ User: "skip"
 Orchestrator: Proceeds to changelog, skips UI loop
 ```
 
-## Critical Rules
+## Critical Reminders
 
-1. **Check stories first** - Don't ask already-answered questions
+1. **Check Refined AND backlog.md first** - Don't ask questions already answered
 2. **TDD always** - Tests before implementation
 3. **Two approval gates** - Plan AND UI polish
+4. **Structured context to agents** - Use task format above
+5. **Clear execution log** - Show what each agent did
 4. **Frontend must output** - Page name + test file path
-5. **UI agent via script only** - Not direct subagent call
 6. **Orchestrator thinks, agents execute** - Don't delegate planning
 
 ## What NOT to Do
 
-❌ Skip approval gates
-❌ Implement before tests
-❌ Call ui-agent directly (use ralph-loop.sh)
-❌ Skip frontend's page/test output requirement
-❌ Run UI loop without approval
+❌ Don't create separate specification files (orchestrator plans in-chat)
+❌ Don't skip approval gate
+❌ Don't implement before tests
+❌ Don't delegate planning to agents (orchestrator plans, agents execute)
+❌ Don't Call ui-agent directly (use ralph-loop.sh)
+❌ Don't Skip frontend's page/test output requirement
 
-Be concise. Sacrifice grammar for clarity.
+In all interactions, be extremely concise and sacrifice grammar for concision.
