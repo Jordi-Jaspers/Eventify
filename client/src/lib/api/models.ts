@@ -32,6 +32,10 @@ export type AssignOwnerRequest = components['schemas']['AssignOwnerRequest'];
 // ================ Admin ===================
 export type AdminStatsResponse = components['schemas']['AdminStatsResponse'];
 export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
+export type AdminApiKeyStatsResponse = components['schemas']['ApiKeyStatsResponse'];
+export type AdminApiKeyAuditResponse = components['schemas']['ApiKeyAuditResponse'];
+export type PageResourceAdminApiKeyAuditResponse =
+	components['schemas']['PageResourceApiKeyAuditResponse'];
 
 // ================ Dev ===================
 export type DevCredentialsResponse = components['schemas']['DevCredentialsResponse'];

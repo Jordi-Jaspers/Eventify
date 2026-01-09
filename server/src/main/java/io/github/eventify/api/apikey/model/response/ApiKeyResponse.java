@@ -1,5 +1,6 @@
 package io.github.eventify.api.apikey.model.response;
 
+import io.github.eventify.api.apikey.model.ApiKeyScope;
 import io.github.eventify.api.user.model.response.UserResponse;
 import io.github.jframe.datasource.search.model.resource.PageableItemResource;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -43,6 +44,25 @@ public class ApiKeyResponse implements PageableItemResource {
     private String maskedKey;
 
     @Schema(
+        description = "API key scope",
+        example = "USER",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private ApiKeyScope scope;
+
+    @Schema(
+        description = "Owner information (user or organization)",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private ApiKeyOwnerResponse owner;
+
+    @Schema(
+        description = "User who created the key (only for organization keys)",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private UserResponse createdBy;
+
+    @Schema(
         description = "Timestamp when the key was created",
         example = "2026-01-08T10:30:00Z",
         requiredMode = Schema.RequiredMode.REQUIRED
@@ -71,8 +91,9 @@ public class ApiKeyResponse implements PageableItemResource {
     private Long totalRequests;
 
     @Schema(
-        description = "User who created the key (only for organization keys)",
-        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+        description = "Whether the key is expired",
+        example = "false",
+        requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private UserResponse createdBy;
+    private Boolean isExpired;
 }

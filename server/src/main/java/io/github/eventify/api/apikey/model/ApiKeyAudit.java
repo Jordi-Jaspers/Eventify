@@ -1,6 +1,7 @@
 package io.github.eventify.api.apikey.model;
 
 import io.github.eventify.api.user.model.User;
+import io.github.jframe.datasource.search.model.PageableItem;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +21,7 @@ import static io.github.eventify.Main.SERIAL_VERSION_UID;
 @Entity
 @NoArgsConstructor
 @Table(name = "api_key_audit")
-public class ApiKeyAudit implements Serializable {
+public class ApiKeyAudit implements PageableItem, Serializable {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;

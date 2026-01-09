@@ -1,7 +1,9 @@
 package io.github.eventify.api.apikey.repository;
 
 import io.github.eventify.api.apikey.model.ApiKey;
+import io.github.eventify.api.apikey.model.ApiKeyScope;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,4 +84,54 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, Long>, JpaSpecif
      * @return Optional containing the API key if found
      */
     Optional<ApiKey> findByIdAndOrganizationId(Long id, Long organizationId);
+
+    /**
+     * Count all active API keys.
+     *
+     * @return count of all keys
+     */
+    @Query("SELECT COUNT(k) FROM ApiKey k")
+    Long countAllKeys();
+
+    /**
+     * Count API keys by scope.
+     *
+     * @param scope the scope
+     * @return count of keys with given scope
+     */
+    Long countByScope(ApiKeyScope scope);
+
+    /**
+     * Count keys created after a specific date.
+     *
+     * @param since the date
+     * @return count of keys
+     */
+    Long countByCreatedAtAfter(OffsetDateTime since);
+
+    /**
+     * Count keys expiring between two dates (and not null).
+     *
+     * @param start the start date
+     * @param end   the end date
+     * @return count of keys
+     */
+    @Query("SELECT COUNT(k) FROM ApiKey k WHERE k.expiresAt IS NOT NULL AND k.expiresAt BETWEEN :start AND :end")
+    Long countByExpiresAtBetween(@Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
+
+    /**
+     * Count keys that have never been used.
+     *
+     * @return count of keys
+     */
+    Long countByLastUsedAtIsNull();
+
+    /**
+     * Find top N keys by usage.
+     *
+     * @param pageable the pageable
+     * @return list of top keys
+     */
+    @Query("SELECT k FROM ApiKey k LEFT JOIN FETCH k.user LEFT JOIN FETCH k.organization ORDER BY k.totalRequests DESC")
+    List<ApiKey> findTopByOrderByTotalRequestsDesc(Pageable pageable);
 }

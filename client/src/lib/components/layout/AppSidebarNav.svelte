@@ -5,7 +5,7 @@
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { LayoutDashboard, Clock, Shield, Building2, Plus, Users, ChevronUp, UserCog, Settings } from '@lucide/svelte';
+	import { LayoutDashboard, Clock, Shield, Building2, Plus, Users, ChevronUp, UserCog, Settings, Key } from '@lucide/svelte';
 
 	let isOrganizationsOpen: boolean = $state(false);
 
@@ -116,6 +116,17 @@
 						>
 							<UserCog class="size-4" />
 							<span>Users</span>
+						</Sidebar.MenuButton>
+					</Sidebar.MenuItem>
+
+					<!-- API Keys -->
+					<Sidebar.MenuItem>
+						<Sidebar.MenuButton
+								onclick={() => goto(CLIENT_ROUTES.ADMIN_API_KEYS_PAGE.path)}
+								isActive={currentPath.startsWith('/admin/api-keys')}
+						>
+							<Key class="size-4" />
+							<span>API Keys</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
 				</Sidebar.Menu>

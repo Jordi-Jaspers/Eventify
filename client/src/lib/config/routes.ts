@@ -71,6 +71,10 @@ export const CLIENT_ROUTES = {
 		path: '/admin/organizations',
 		type: RouteType.PRIVATE
 	},
+	ADMIN_API_KEYS_PAGE: {
+		path: '/admin/api-keys',
+		type: RouteType.PRIVATE
+	},
 	ORGANIZATION_MEMBERS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/members`,
 		type: RouteType.PRIVATE

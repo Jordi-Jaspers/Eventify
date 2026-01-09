@@ -43,6 +43,8 @@ public final class Paths {
 
     public static final String USER_PART = "/user";
 
+    public static final String STATS_PART = "/stats";
+
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
     public static final String PUBLIC_SWAGGER_PATH = PUBLIC_PATH + "/docs";
@@ -125,9 +127,17 @@ public final class Paths {
 
     public static final String ADMIN_USERS_SEARCH_PATH = ADMIN_PATH + USER_PART + SEARCH_PART;
 
-    public static final String ADMIN_STATS_PATH = ADMIN_PATH + "/stats";
+    public static final String ADMIN_STATS_PATH = ADMIN_PATH + STATS_PART;
 
     public static final String ADMIN_ORGANIZATION_ASSIGN_OWNER_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/owner";
+
+    public static final String ADMIN_API_KEYS_STATS_PATH = ADMIN_PATH + API_KEYS_PART + STATS_PART;
+
+    public static final String ADMIN_API_KEYS_SEARCH_PATH = ADMIN_PATH + API_KEYS_PART + SEARCH_PART;
+
+    public static final String ADMIN_API_KEY_PATH = ADMIN_PATH + API_KEYS_PART + KEY_ID_PART;
+
+    public static final String ADMIN_API_KEYS_AUDIT_SEARCH_PATH = ADMIN_PATH + API_KEYS_PART + "/audit" + SEARCH_PART;
 
     /* ------------------------------- ORGANIZATION MEMBERSHIP ENDPOINTS ------------------------------- */
 

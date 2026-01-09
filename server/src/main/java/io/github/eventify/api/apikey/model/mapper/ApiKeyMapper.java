@@ -3,12 +3,14 @@ package io.github.eventify.api.apikey.model.mapper;
 import io.github.eventify.api.apikey.model.ApiKey;
 import io.github.eventify.api.apikey.model.response.ApiKeyCreationResponse;
 import io.github.eventify.api.apikey.model.response.ApiKeyListResponse;
+import io.github.eventify.api.apikey.model.response.ApiKeyOwnerResponse;
 import io.github.eventify.api.apikey.model.response.ApiKeyResponse;
 import io.github.eventify.api.user.model.mapper.UserMapper;
 import io.github.jframe.datasource.search.model.mapper.PageMapper;
 import io.github.jframe.util.mapper.DateTimeMapper;
 import io.github.jframe.util.mapper.config.SharedMapperConfig;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.mapstruct.IterableMapping;
@@ -28,6 +30,8 @@ import org.mapstruct.Named;
 )
 public abstract class ApiKeyMapper extends PageMapper<ApiKeyResponse, ApiKey> {
 
+    private static final String SPACE = " ";
+
     /**
      * Maps ApiKey to ApiKeyResponse with masked key.
      *
@@ -39,8 +43,16 @@ public abstract class ApiKeyMapper extends PageMapper<ApiKeyResponse, ApiKey> {
         expression = "java(apiKey.getMaskedKey())"
     )
     @Mapping(
+        target = "owner",
+        expression = "java(mapOwner(apiKey))"
+    )
+    @Mapping(
         target = "createdBy",
         source = "user"
+    )
+    @Mapping(
+        target = "isExpired",
+        expression = "java(isExpired(apiKey))"
     )
     @Override
     @Named("toResourceObject")
@@ -76,5 +88,39 @@ public abstract class ApiKeyMapper extends PageMapper<ApiKeyResponse, ApiKey> {
      */
     public ApiKeyListResponse toApiKeyList(final List<ApiKey> keys, final Integer limit) {
         return new ApiKeyListResponse(toResourceObjects(keys), limit);
+    }
+
+    /**
+     * Map owner information.
+     *
+     * @param apiKey the API key
+     * @return the owner response
+     */
+    protected ApiKeyOwnerResponse mapOwner(final ApiKey apiKey) {
+        if (apiKey.getOrganization() != null) {
+            return ApiKeyOwnerResponse.builder()
+                .id(apiKey.getOrganization().getId())
+                .type("ORGANIZATION")
+                .name(apiKey.getOrganization().getName())
+                .email(null)
+                .build();
+        } else {
+            return ApiKeyOwnerResponse.builder()
+                .id(apiKey.getUser().getId())
+                .type("USER")
+                .name(apiKey.getUser().getFirstName() + SPACE + apiKey.getUser().getLastName())
+                .email(apiKey.getUser().getEmail())
+                .build();
+        }
+    }
+
+    /**
+     * Check if key is expired.
+     *
+     * @param apiKey the API key
+     * @return true if expired
+     */
+    protected Boolean isExpired(final ApiKey apiKey) {
+        return apiKey.getExpiresAt() != null && apiKey.getExpiresAt().isBefore(OffsetDateTime.now());
     }
 }
