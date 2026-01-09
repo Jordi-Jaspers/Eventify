@@ -32,6 +32,8 @@ public class AdminApiKeyMetaData extends AbstractSortSearchMetaData {
 
     public static final String SEARCH_TERM = "searchTerm";
 
+    public static final String TOTAL_REQUESTS = "totalRequests";
+
     public static final String NAME = "name";
 
     public static final String CREATED_AT = "createdAt";
@@ -58,6 +60,7 @@ public class AdminApiKeyMetaData extends AbstractSortSearchMetaData {
         addField(CREATED_AT, CREATED_AT, SearchType.DATE, true);
         addField(EXPIRES_AT, EXPIRES_AT, SearchType.DATE, true);
         addField(LAST_USED_AT, LAST_USED_AT, SearchType.DATE, true);
+        addField(TOTAL_REQUESTS, TOTAL_REQUESTS, SearchType.NUMERIC, true);
 
         addField(
             SEARCH_TERM,
