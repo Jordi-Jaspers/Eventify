@@ -1,3 +1,9 @@
+# Epic: Account Management
+
+- [ } **Implement Forgot Password Flow**:
+    - Backend already supports password reset tokens
+    - Client needs UI for requesting reset and setting new password
+
 # Epic: Event Channels (formerly "Checks")
 
 **Context**: A "Channel" is a named destination for events. Think of it like a topic or stream. Users can have personal channels, and organizations can have shared channels. Events are sent to a specific channel via API.
