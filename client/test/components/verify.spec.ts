@@ -1,67 +1,36 @@
-import { test, expect } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+/**
+ * Verify Email Page Screenshot Tests
+ *
+ * Tests the email verification page in both dark and light modes.
+ * This is a public page - no authentication required.
+ * Note: This page shows an error state when accessed without a token.
+ */
+import { test, expect, setTheme } from '../fixtures/test-fixtures';
+import { createScreenshotHelper } from '../utils/screenshot';
+import { COLD_START_TIMEOUT_MS, THEMES } from '../utils/constants';
 
-// ES Module compatible __dirname
-const __filename: string = fileURLToPath(import.meta.url);
-const __dirname: string = dirname(__filename);
-
-// Screenshots go to screenshots/verify/ folder
-const screenshotsDir: string = join(__dirname, '../resources/screenshots/verify');
-if (!existsSync(screenshotsDir)) {
-    mkdirSync(screenshotsDir, { recursive: true });
-}
-
-function getScreenshotPath(name: string, projectName: string): string {
-    const suffix: string = projectName.replace(/\s+/g, '-').toLowerCase();
-    return join(screenshotsDir, `${name}-${suffix}.png`);
-}
+const PAGE_NAME = 'verify';
+const getScreenshot = createScreenshotHelper(PAGE_NAME);
 
 test.describe('Verify Email Page Screenshots', () => {
-    test.setTimeout(30000);
+	test.setTimeout(COLD_START_TIMEOUT_MS);
 
-    test.describe('Dark Mode', () => {
-        test('default state - no token (error state)', async ({ page }, testInfo) => {
-            // Set dark mode BEFORE navigation
-            await page.emulateMedia({ colorScheme: 'dark' });
+	for (const theme of THEMES) {
+		test.describe(`${theme} mode`, () => {
+			test(`default state - no token (error state)`, async ({ page }, testInfo) => {
+				// Set theme BEFORE navigation for this page
+				await setTheme(page, theme);
 
-            // Navigate without token - will show error state briefly before redirect
-            await page.goto('/verify');
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(300);
+				// Navigate without token - will show error state briefly before redirect
+				await page.goto('/verify');
+				await page.waitForLoadState('domcontentloaded');
+				await page.waitForTimeout(300);
 
-            const screenshotPath: string = getScreenshotPath('01-no-token-dark', testInfo.project.name);
-
-            await page.screenshot({
-                path: screenshotPath,
-                fullPage: true
-            });
-
-            expect(existsSync(screenshotPath)).toBeTruthy();
-            console.log(`Screenshot saved: ${screenshotPath}`);
-        });
-    });
-
-    test.describe('Light Mode', () => {
-        test('default state - no token (error state)', async ({ page }, testInfo) => {
-            // Set light mode BEFORE navigation
-            await page.emulateMedia({ colorScheme: 'light' });
-
-            // Navigate without token - will show error state briefly before redirect
-            await page.goto('/verify');
-            await page.waitForLoadState('domcontentloaded');
-            await page.waitForTimeout(300);
-
-            const screenshotPath: string = getScreenshotPath('01-no-token-light', testInfo.project.name);
-
-            await page.screenshot({
-                path: screenshotPath,
-                fullPage: true
-            });
-
-            expect(existsSync(screenshotPath)).toBeTruthy();
-            console.log(`Screenshot saved: ${screenshotPath}`);
-        });
-    });
+				await page.screenshot({
+					path: getScreenshot(`01-no-token-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
+			});
+		});
+	}
 });

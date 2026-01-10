@@ -1,134 +1,65 @@
-import { test, expect } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+/**
+ * Admin API Keys Page Screenshot Tests
+ *
+ * Tests the admin API keys page in both dark and light modes.
+ * This is an admin page - requires login with admin privileges.
+ */
+import { test, expect, setTheme, loginAndNavigate, ANIMATION_SETTLE_MS, DATA_LOAD_MS } from '../fixtures/test-fixtures';
+import { createScreenshotHelper } from '../utils/screenshot';
+import { COLD_START_TIMEOUT_MS, ELEMENT_WAIT_TIMEOUT_MS, THEMES } from '../utils/constants';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const screenshotsDir = join(__dirname, '../resources/screenshots/admin-api-keys');
-if (!existsSync(screenshotsDir)) {
-	mkdirSync(screenshotsDir, { recursive: true });
-}
-
-function screenshotPath(name: string, project: string): string {
-	return join(screenshotsDir, `${name}-${project.replace(/\s+/g, '-').toLowerCase()}.png`);
-}
-
-async function loginAndNavigate(page: import('@playwright/test').Page): Promise<void> {
-	// Login flow
-	await page.goto('/login');
-	await page.waitForLoadState('domcontentloaded');
-
-	// Use dev credentials button
-	const fillButton = page.getByRole('button', { name: 'Fill Credentials' });
-	await fillButton.waitFor({ state: 'visible', timeout: 10000 });
-	await fillButton.click();
-
-	// Submit
-	await page.getByRole('button', { name: 'Sign In' }).click();
-
-	// Wait for redirect
-	await page.waitForURL('/dashboard', { timeout: 15000 });
-
-	// Navigate to admin API keys page
-	await page.goto('/admin/api-keys');
-	await page.waitForLoadState('domcontentloaded');
-	await page.waitForTimeout(500);
-}
+const PAGE_NAME = 'admin-api-keys';
+const getScreenshot = createScreenshotHelper(PAGE_NAME);
 
 test.describe('Admin API Keys Screenshots', () => {
-	test.setTimeout(30000); // Allow time for login
+	test.setTimeout(COLD_START_TIMEOUT_MS);
 
-	test.describe('Dark Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set dark mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'dark' });
-			await loginAndNavigate(page);
-		});
+	for (const theme of THEMES) {
+		test.describe(`${theme} mode`, () => {
+			test.beforeEach(async ({ page }) => {
+				await setTheme(page, theme);
+				await loginAndNavigate(page, '/admin/api-keys', ANIMATION_SETTLE_MS);
+			});
 
-		test('default state', async ({ page }, testInfo) => {
-			const path = screenshotPath('01-default-dark', testInfo.project.name);
-			await page.screenshot({ path, fullPage: true });
-			expect(existsSync(path)).toBeTruthy();
-		});
+			test(`default state`, async ({ page }, testInfo) => {
+				await page.screenshot({
+					path: getScreenshot(`01-default-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
+			});
 
-		test('stats cards loaded', async ({ page }, testInfo) => {
-			// Wait for stats to load
-			await page.waitForSelector('text=Total Keys', { timeout: 5000 });
-			const path = screenshotPath('02-stats-loaded-dark', testInfo.project.name);
-			await page.screenshot({ path, fullPage: true });
-			expect(existsSync(path)).toBeTruthy();
-		});
+			test(`stats cards loaded`, async ({ page }, testInfo) => {
+				await page.waitForSelector('text=Total Keys', { timeout: ELEMENT_WAIT_TIMEOUT_MS });
 
-		test('revoke dialog', async ({ page }, testInfo) => {
-			// Wait for table to load
-			await page.waitForSelector('text=All API Keys', { timeout: 5000 });
-			await page.waitForTimeout(1000);
+				await page.screenshot({
+					path: getScreenshot(`02-stats-loaded-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
+			});
 
-			// Try to find and click the first actions button
-			const actionsButton = page.locator('[aria-label="Actions"]').first();
-			if ((await actionsButton.count()) > 0) {
-				await actionsButton.click();
-				await page.waitForTimeout(300);
+			test(`revoke dialog`, async ({ page }, testInfo) => {
+				await page.waitForSelector('text=All API Keys', { timeout: ELEMENT_WAIT_TIMEOUT_MS });
+				await page.waitForTimeout(DATA_LOAD_MS);
 
-				// Click revoke option
-				const revokeOption = page.getByText('Revoke Key');
-				if ((await revokeOption.count()) > 0) {
-					await revokeOption.click();
-					await page.waitForTimeout(500);
+				// Try to find and click the first actions button
+				const actionsButton = page.locator('[aria-label="Actions"]').first();
+				if ((await actionsButton.count()) > 0) {
+					await actionsButton.click();
+					await page.waitForTimeout(300);
 
-					const path = screenshotPath('03-revoke-dialog-dark', testInfo.project.name);
-					await page.screenshot({ path, fullPage: true });
-					expect(existsSync(path)).toBeTruthy();
+					// Click revoke option
+					const revokeOption = page.getByText('Revoke Key');
+					if ((await revokeOption.count()) > 0) {
+						await revokeOption.click();
+						await page.waitForTimeout(ANIMATION_SETTLE_MS);
+					}
 				}
-			}
+
+				await page.screenshot({
+					path: getScreenshot(`03-revoke-dialog-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
+			});
 		});
-	});
-
-	test.describe('Light Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set light mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'light' });
-			await loginAndNavigate(page);
-		});
-
-		test('default state', async ({ page }, testInfo) => {
-			const path = screenshotPath('01-default-light', testInfo.project.name);
-			await page.screenshot({ path, fullPage: true });
-			expect(existsSync(path)).toBeTruthy();
-		});
-
-		test('stats cards loaded', async ({ page }, testInfo) => {
-			// Wait for stats to load
-			await page.waitForSelector('text=Total Keys', { timeout: 5000 });
-			const path = screenshotPath('02-stats-loaded-light', testInfo.project.name);
-			await page.screenshot({ path, fullPage: true });
-			expect(existsSync(path)).toBeTruthy();
-		});
-
-		test('revoke dialog', async ({ page }, testInfo) => {
-			// Wait for table to load
-			await page.waitForSelector('text=All API Keys', { timeout: 5000 });
-			await page.waitForTimeout(1000);
-
-			// Try to find and click the first actions button
-			const actionsButton = page.locator('[aria-label="Actions"]').first();
-			if ((await actionsButton.count()) > 0) {
-				await actionsButton.click();
-				await page.waitForTimeout(300);
-
-				// Click revoke option
-				const revokeOption = page.getByText('Revoke Key');
-				if ((await revokeOption.count()) > 0) {
-					await revokeOption.click();
-					await page.waitForTimeout(500);
-
-					const path = screenshotPath('03-revoke-dialog-light', testInfo.project.name);
-					await page.screenshot({ path, fullPage: true });
-					expect(existsSync(path)).toBeTruthy();
-				}
-			}
-		});
-	});
+	}
 });

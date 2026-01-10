@@ -1,87 +1,35 @@
-import { test, expect } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+/**
+ * Admin Dashboard Page Screenshot Tests
+ *
+ * Tests the admin dashboard page in both dark and light modes.
+ * This is an admin page - requires login with admin privileges.
+ */
+import { test, expect, setTheme, loginAndNavigate } from '../fixtures/test-fixtures';
+import { createScreenshotHelper } from '../utils/screenshot';
+import { COLD_START_TIMEOUT_MS, THEMES } from '../utils/constants';
 
-// ES Module compatible __dirname
-const __filename: string = fileURLToPath(import.meta.url);
-const __dirname: string = dirname(__filename);
+const PAGE_NAME = 'admin-dashboard';
+const getScreenshot = createScreenshotHelper(PAGE_NAME);
 
-// Screenshots go to screenshots/admin-dashboard/ folder
-const screenshotsDir: string = join(__dirname, '../resources/screenshots/admin-dashboard');
-if (!existsSync(screenshotsDir)) {
-	mkdirSync(screenshotsDir, { recursive: true });
-}
-
-function getScreenshotPath(name: string, projectName: string): string {
-	const suffix: string = projectName.replace(/\s+/g, '-').toLowerCase();
-	return join(screenshotsDir, `${name}-${suffix}.png`);
-}
-
-async function loginAndNavigate(page: import('@playwright/test').Page): Promise<void> {
-	// Login first using dev credentials button (admin user)
-	await page.goto('/login');
-	await page.waitForLoadState('domcontentloaded');
-
-	// Wait for dev credentials to load and click "Fill Credentials" button
-	const fillButton = page.getByRole('button', { name: 'Fill Credentials' });
-	await fillButton.waitFor({ state: 'visible', timeout: 15000 });
-	await fillButton.click();
-
-	// Submit login form
-	await page.getByRole('button', { name: 'Sign In' }).click();
-
-	// Wait for redirect to dashboard (login success)
-	await page.waitForURL('/dashboard', { timeout: 15000 });
-
-	// Navigate to admin dashboard
-	await page.goto('/admin/dashboard');
-	await page.waitForLoadState('domcontentloaded');
-
-	// Wait for page to settle and stats to load
-	await page.waitForTimeout(1500);
-}
+// Admin dashboard needs extra time for stats to load
+const STATS_LOAD_MS = 1500;
 
 test.describe('Admin Dashboard Page Screenshots', () => {
-	test.setTimeout(30000);
+	test.setTimeout(COLD_START_TIMEOUT_MS);
 
-	test.describe('Dark Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set dark mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'dark' });
-			await loginAndNavigate(page);
-		});
-
-		test('default state with stats and chart', async ({ page }, testInfo) => {
-			const screenshotPath: string = getScreenshotPath('01-default-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+	for (const theme of THEMES) {
+		test.describe(`${theme} mode`, () => {
+			test.beforeEach(async ({ page }) => {
+				await setTheme(page, theme);
+				await loginAndNavigate(page, '/admin/dashboard', STATS_LOAD_MS);
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-	});
-
-	test.describe('Light Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set light mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'light' });
-			await loginAndNavigate(page);
-		});
-
-		test('default state with stats and chart', async ({ page }, testInfo) => {
-			const screenshotPath: string = getScreenshotPath('01-default-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+			test(`default state with stats and chart`, async ({ page }, testInfo) => {
+				await page.screenshot({
+					path: getScreenshot(`01-default-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
 		});
-	});
+	}
 });

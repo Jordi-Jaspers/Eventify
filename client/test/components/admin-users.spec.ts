@@ -1,123 +1,45 @@
-import { test, expect } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+/**
+ * Admin Users Page Screenshot Tests
+ *
+ * Tests the admin users page in both dark and light modes.
+ * This is an admin page - requires login with admin privileges.
+ */
+import { test, expect, setTheme, loginAndNavigate, ANIMATION_SETTLE_MS, DATA_LOAD_MS } from '../fixtures/test-fixtures';
+import { createScreenshotHelper } from '../utils/screenshot';
+import { COLD_START_TIMEOUT_MS, ELEMENT_WAIT_TIMEOUT_MS, THEMES } from '../utils/constants';
 
-// ES Module compatible __dirname
-const __filename: string = fileURLToPath(import.meta.url);
-const __dirname: string = dirname(__filename);
-
-// Screenshots go to screenshots/admin-users/ folder
-const screenshotsDir: string = join(__dirname, '../resources/screenshots/admin-users');
-if (!existsSync(screenshotsDir)) {
-	mkdirSync(screenshotsDir, { recursive: true });
-}
-
-function getScreenshotPath(name: string, projectName: string): string {
-	const suffix: string = projectName.replace(/\s+/g, '-').toLowerCase();
-	return join(screenshotsDir, `${name}-${suffix}.png`);
-}
-
-async function loginAndNavigate(page: import('@playwright/test').Page): Promise<void> {
-	// Login first using dev credentials button (admin user)
-	await page.goto('/login');
-	await page.waitForLoadState('domcontentloaded');
-
-	// Wait for dev credentials to load and click "Fill Credentials" button
-	const fillButton = page.getByRole('button', { name: 'Fill Credentials' });
-	await fillButton.waitFor({ state: 'visible', timeout: 15000 });
-	await fillButton.click();
-
-	// Submit login form
-	await page.getByRole('button', { name: 'Sign In' }).click();
-
-	// Wait for redirect to dashboard (login success)
-	await page.waitForURL('/dashboard', { timeout: 15000 });
-
-	// Navigate to admin users page
-	await page.goto('/admin/users');
-	await page.waitForLoadState('domcontentloaded');
-
-	// Wait for page to settle and data to load
-	await page.waitForTimeout(1000);
-}
+const PAGE_NAME = 'admin-users';
+const getScreenshot = createScreenshotHelper(PAGE_NAME);
 
 test.describe('Admin Users Page Screenshots', () => {
-	test.setTimeout(30000);
+	test.setTimeout(COLD_START_TIMEOUT_MS);
 
-	test.describe('Dark Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set dark mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'dark' });
-			await loginAndNavigate(page);
-		});
-
-		test('users table default state', async ({ page }, testInfo) => {
-			const screenshotPath: string = getScreenshotPath('01-default-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+	for (const theme of THEMES) {
+		test.describe(`${theme} mode`, () => {
+			test.beforeEach(async ({ page }) => {
+				await setTheme(page, theme);
+				await loginAndNavigate(page, '/admin/users', DATA_LOAD_MS);
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('user details sheet opened', async ({ page }, testInfo) => {
-			// Click on first user row to open sheet
-			const userRow = page.locator('[role="button"]').filter({ hasText: /@/ }).first();
-			await userRow.waitFor({ state: 'visible', timeout: 5000 });
-			await userRow.click();
-			await page.waitForTimeout(500); // Wait for sheet animation
-
-			const screenshotPath: string = getScreenshotPath('02-user-details-sheet-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+			test(`users table default state`, async ({ page }, testInfo) => {
+				await page.screenshot({
+					path: getScreenshot(`01-default-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-	});
+			test(`user details sheet opened`, async ({ page }, testInfo) => {
+				// Click on first user row to open sheet
+				const userRow = page.locator('[role="button"]').filter({ hasText: /@/ }).first();
+				await userRow.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+				await userRow.click();
+				await page.waitForTimeout(ANIMATION_SETTLE_MS);
 
-	test.describe('Light Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set light mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'light' });
-			await loginAndNavigate(page);
-		});
-
-		test('users table default state', async ({ page }, testInfo) => {
-			const screenshotPath: string = getScreenshotPath('01-default-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`02-user-details-sheet-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
 		});
-
-		test('user details sheet opened', async ({ page }, testInfo) => {
-			// Click on first user row to open sheet
-			const userRow = page.locator('[role="button"]').filter({ hasText: /@/ }).first();
-			await userRow.waitFor({ state: 'visible', timeout: 5000 });
-			await userRow.click();
-			await page.waitForTimeout(500); // Wait for sheet animation
-
-			const screenshotPath: string = getScreenshotPath('02-user-details-sheet-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-	});
+	}
 });

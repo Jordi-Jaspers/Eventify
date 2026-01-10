@@ -1,176 +1,61 @@
-import { test, expect } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+/**
+ * Admin Organizations Page Screenshot Tests
+ *
+ * Tests the admin organizations page in both dark and light modes.
+ * This is an admin page - requires login with admin privileges.
+ */
+import { test, expect, setTheme, loginAndNavigate, ANIMATION_SETTLE_MS, DATA_LOAD_MS } from '../fixtures/test-fixtures';
+import { createScreenshotHelper } from '../utils/screenshot';
+import { COLD_START_TIMEOUT_MS, THEMES } from '../utils/constants';
+import { login } from '../utils/auth';
 
-// ES Module compatible __dirname
-const __filename: string = fileURLToPath(import.meta.url);
-const __dirname: string = dirname(__filename);
-
-// Screenshots go to screenshots/admin-organizations/ folder
-const screenshotsDir: string = join(__dirname, '../resources/screenshots/admin-organizations');
-if (!existsSync(screenshotsDir)) {
-	mkdirSync(screenshotsDir, { recursive: true });
-}
-
-function getScreenshotPath(name: string, projectName: string): string {
-	const suffix: string = projectName.replace(/\s+/g, '-').toLowerCase();
-	return join(screenshotsDir, `${name}-${suffix}.png`);
-}
-
-async function login(page: import('@playwright/test').Page): Promise<void> {
-	// Login first using dev credentials button (admin user)
-	await page.goto('/login');
-	await page.waitForLoadState('domcontentloaded');
-
-	// Wait for dev credentials to load and click "Fill Credentials" button
-	const fillButton = page.getByRole('button', { name: 'Fill Credentials' });
-	await fillButton.waitFor({ state: 'visible', timeout: 15000 });
-	await fillButton.click();
-
-	// Submit login form
-	await page.getByRole('button', { name: 'Sign In' }).click();
-
-	// Wait for redirect to dashboard (login success)
-	await page.waitForURL('/dashboard', { timeout: 15000 });
-}
+const PAGE_NAME = 'admin-organizations';
+const getScreenshot = createScreenshotHelper(PAGE_NAME);
 
 test.describe('Admin Organizations Page Screenshots', () => {
-	test.setTimeout(30000);
+	test.setTimeout(COLD_START_TIMEOUT_MS);
 
-	test.describe('Dark Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set dark mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'dark' });
-			await login(page);
-		});
-
-		test('organizations table default state', async ({ page }, testInfo) => {
-			// Navigate to admin organizations page
-			await page.goto('/admin/organizations');
-			await page.waitForLoadState('domcontentloaded');
-
-			// Wait for page to settle and data to load
-			await page.waitForTimeout(1000);
-
-			const screenshotPath: string = getScreenshotPath('01-default-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+	for (const theme of THEMES) {
+		test.describe(`${theme} mode`, () => {
+			test.beforeEach(async ({ page }) => {
+				await setTheme(page, theme);
+				await login(page);
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
+			test(`organizations table default state`, async ({ page }, testInfo) => {
+				await page.goto('/admin/organizations');
+				await page.waitForLoadState('domcontentloaded');
+				await page.waitForTimeout(DATA_LOAD_MS);
 
-		test('create organization form - empty', async ({ page }, testInfo) => {
-			// Navigate to create organization page
-			await page.goto('/admin/organizations/new');
-			await page.waitForLoadState('domcontentloaded');
-
-			// Wait for page to settle
-			await page.waitForTimeout(500);
-
-			const screenshotPath: string = getScreenshotPath('02-create-empty-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`01-default-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
+			test(`create organization form - empty`, async ({ page }, testInfo) => {
+				await page.goto('/admin/organizations/new');
+				await page.waitForLoadState('domcontentloaded');
+				await page.waitForTimeout(ANIMATION_SETTLE_MS);
 
-		test('create organization form - filled', async ({ page }, testInfo) => {
-			// Navigate to create organization page
-			await page.goto('/admin/organizations/new');
-			await page.waitForLoadState('domcontentloaded');
-
-			// Wait for page to settle
-			await page.waitForTimeout(500);
-
-			// Fill in the organization name
-			await page.getByLabel('Organization Name').fill('New Test Organization');
-
-			const screenshotPath: string = getScreenshotPath('03-create-filled-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`02-create-empty-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-	});
+			test(`create organization form - filled`, async ({ page }, testInfo) => {
+				await page.goto('/admin/organizations/new');
+				await page.waitForLoadState('domcontentloaded');
+				await page.waitForTimeout(ANIMATION_SETTLE_MS);
 
-	test.describe('Light Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set light mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'light' });
-			await login(page);
-		});
+				await page.getByLabel('Organization Name').fill('New Test Organization');
 
-		test('organizations table default state', async ({ page }, testInfo) => {
-			// Navigate to admin organizations page
-			await page.goto('/admin/organizations');
-			await page.waitForLoadState('domcontentloaded');
-
-			// Wait for page to settle and data to load
-			await page.waitForTimeout(1000);
-
-			const screenshotPath: string = getScreenshotPath('01-default-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`03-create-filled-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
 		});
-
-		test('create organization form - empty', async ({ page }, testInfo) => {
-			// Navigate to create organization page
-			await page.goto('/admin/organizations/new');
-			await page.waitForLoadState('domcontentloaded');
-
-			// Wait for page to settle
-			await page.waitForTimeout(500);
-
-			const screenshotPath: string = getScreenshotPath('02-create-empty-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('create organization form - filled', async ({ page }, testInfo) => {
-			// Navigate to create organization page
-			await page.goto('/admin/organizations/new');
-			await page.waitForLoadState('domcontentloaded');
-
-			// Wait for page to settle
-			await page.waitForTimeout(500);
-
-			// Fill in the organization name
-			await page.getByLabel('Organization Name').fill('New Test Organization');
-
-			const screenshotPath: string = getScreenshotPath('03-create-filled-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-	});
+	}
 });

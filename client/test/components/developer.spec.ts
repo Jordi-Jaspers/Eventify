@@ -1,42 +1,32 @@
-import { test, expect } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+/**
+ * Developer Page Screenshot Tests
+ *
+ * Tests the developer/API keys page in both dark and light modes.
+ * This is an authenticated page - requires login.
+ */
+import { test, expect, setTheme, loginAndNavigate, ANIMATION_SETTLE_MS, DATA_LOAD_MS } from '../fixtures/test-fixtures';
+import { createScreenshotHelper } from '../utils/screenshot';
+import { COLD_START_TIMEOUT_MS, ELEMENT_WAIT_TIMEOUT_MS, THEMES } from '../utils/constants';
+import type { Page } from '@playwright/test';
 
-// ES Module compatible __dirname
-const __filename: string = fileURLToPath(import.meta.url);
-const __dirname: string = dirname(__filename);
-
-// Screenshots go to screenshots/developer/ folder
-const screenshotsDir: string = join(__dirname, '../resources/screenshots/developer');
-if (!existsSync(screenshotsDir)) {
-	mkdirSync(screenshotsDir, { recursive: true });
-}
-
-function getScreenshotPath(name: string, projectName: string): string {
-	const suffix: string = projectName.replace(/\s+/g, '-').toLowerCase();
-	return join(screenshotsDir, `${name}-${suffix}.png`);
-}
+const PAGE_NAME = 'developer';
+const getScreenshot = createScreenshotHelper(PAGE_NAME);
 
 /**
  * Ensures there's space to create new API keys by revoking one if at limit.
- * Returns true if we can create a new key, false otherwise.
  */
-async function ensureCanCreateKey(page: import('@playwright/test').Page): Promise<boolean> {
-	// Check if the New Key button is disabled (at limit)
+async function ensureCanCreateKey(page: Page): Promise<boolean> {
 	const disabledButton = page.locator('button:has-text("New Key")[disabled]');
-	const isAtLimit: boolean = await disabledButton.count() > 0;
-	
+	const isAtLimit = (await disabledButton.count()) > 0;
+
 	if (isAtLimit) {
-		// Revoke a key to make space
 		const revokeButton = page.locator('button:has(svg.lucide-trash-2)').first();
-		const canRevoke: boolean = await revokeButton.count() > 0;
-		
+		const canRevoke = (await revokeButton.count()) > 0;
+
 		if (canRevoke) {
 			await revokeButton.click({ force: true });
-			await page.waitForTimeout(500);
-			
-			// Click confirm in the dialog
+			await page.waitForTimeout(ANIMATION_SETTLE_MS);
+
 			const confirmBtn = page.locator('button:has-text("Revoke")').last();
 			await confirmBtn.click({ force: true });
 			await page.waitForTimeout(1500);
@@ -48,467 +38,157 @@ async function ensureCanCreateKey(page: import('@playwright/test').Page): Promis
 }
 
 /**
- * Gets the enabled "New Key" or "Create Key" button
+ * Gets the enabled "New Key" or "Create Key" button.
  */
-function getCreateButton(page: import('@playwright/test').Page) {
+function getCreateButton(page: Page) {
 	return page.locator('button:has-text("New Key"):not([disabled]), button:has-text("Create Key"):not([disabled])').first();
 }
 
-async function loginAndNavigate(page: import('@playwright/test').Page): Promise<void> {
-	// Login first using dev credentials button
-	await page.goto('/login');
-	await page.waitForLoadState('domcontentloaded');
-
-	// Wait for dev credentials to load and click "Fill Credentials" button
-	const fillButton = page.getByRole('button', { name: 'Fill Credentials' });
-	await fillButton.waitFor({ state: 'visible', timeout: 15000 });
-	await fillButton.click();
-
-	// Submit login form
-	await page.getByRole('button', { name: 'Sign In' }).click();
-
-	// Wait for redirect to dashboard (login success)
-	await page.waitForURL('/dashboard', { timeout: 15000 });
-
-	// Navigate to developer page
-	await page.goto('/developer');
-	await page.waitForLoadState('domcontentloaded');
-
-	// Wait for page to settle
-	await page.waitForTimeout(800);
-}
-
 test.describe('Developer Page Screenshots', () => {
-	// Increased timeout to account for login + page load on first test
-	test.setTimeout(30000);
+	test.setTimeout(COLD_START_TIMEOUT_MS);
 
-	test.describe('Dark Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set dark mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'dark' });
-			await loginAndNavigate(page);
-		});
-
-		test('page layout and navigation', async ({ page }, testInfo) => {
-			const screenshotPath: string = getScreenshotPath('01-layout-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+	for (const theme of THEMES) {
+		test.describe(`${theme} mode`, () => {
+			test.beforeEach(async ({ page }) => {
+				await setTheme(page, theme);
+				await loginAndNavigate(page, '/developer');
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('empty state visible', async ({ page }, testInfo) => {
-			// Wait for loading to complete
-			await page.waitForTimeout(1000);
-
-			const screenshotPath: string = getScreenshotPath('02-empty-state-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+			test(`page layout and navigation`, async ({ page }, testInfo) => {
+				await page.screenshot({
+					path: getScreenshot(`01-layout-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
+			test(`empty state visible`, async ({ page }, testInfo) => {
+				await page.waitForTimeout(DATA_LOAD_MS);
 
-		test('create API key button hover', async ({ page }, testInfo) => {
-			// Find the create button (may be "New Key" or "Create Key" in empty state)
-			const createButton = page.locator('button:has-text("New Key"), button:has-text("Create Key")').first();
-			await createButton.waitFor({ state: 'visible', timeout: 5000 });
-			// Use mouse.move instead of hover() to avoid Playwright hanging issue
-			const box = await createButton.boundingBox();
-			if (box) {
-				await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-			}
-			await page.waitForTimeout(300);
-
-			const screenshotPath: string = getScreenshotPath('03-button-hover-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`02-empty-state-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
+			test(`create API key button hover`, async ({ page }, testInfo) => {
+				const createButton = page.locator('button:has-text("New Key"), button:has-text("Create Key")').first();
+				await createButton.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
 
-		test('create API key sheet opened', async ({ page }, testInfo) => {
-			// Ensure we can create a key (revoke one if at limit)
-			await ensureCanCreateKey(page);
-			
-			// Click create API key button
-			const createButton = getCreateButton(page);
-			await createButton.waitFor({ state: 'visible', timeout: 5000 });
-			await createButton.click();
-			await page.waitForTimeout(500); // Wait for sheet animation
+				const box = await createButton.boundingBox();
+				if (box) {
+					await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+				}
+				await page.waitForTimeout(300);
 
-			const screenshotPath: string = getScreenshotPath('04-create-sheet-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`03-button-hover-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
+			test(`create API key sheet opened`, async ({ page }, testInfo) => {
+				await ensureCanCreateKey(page);
 
-		test('create API key form filled', async ({ page }, testInfo) => {
-			// Ensure we can create a key (revoke one if at limit)
-			await ensureCanCreateKey(page);
-			
-			// Click create API key button
-			const createButton = getCreateButton(page);
-			await createButton.waitFor({ state: 'visible', timeout: 5000 });
-			await createButton.click();
-			
-			// Wait for sheet to appear
-			await page.waitForTimeout(1000);
+				const createButton = getCreateButton(page);
+				await createButton.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+				await createButton.click();
+				await page.waitForTimeout(ANIMATION_SETTLE_MS);
 
-			// Fill in the form - use id selector for reliability
-			const nameInput = page.locator('#key-name');
-			await nameInput.waitFor({ state: 'visible', timeout: 5000 });
-			await nameInput.fill('Production App');
-
-			// Select expiration by clicking the "30 days" button (to show the change from default 90 days)
-			const expirationButton = page.locator('button:has-text("30 days")');
-			await expirationButton.click();
-			await page.waitForTimeout(300);
-
-			const screenshotPath: string = getScreenshotPath('05-create-filled-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`04-create-sheet-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
+			test(`create API key form filled`, async ({ page }, testInfo) => {
+				await ensureCanCreateKey(page);
 
-		test('settings navigation tabs', async ({ page }, testInfo) => {
-			// Check if navigation tabs are present
-			const profileLink = page.getByRole('link', { name: 'Profile' });
-			await profileLink.waitFor({ state: 'visible', timeout: 5000 });
+				const createButton = getCreateButton(page);
+				await createButton.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+				await createButton.click();
+				await page.waitForTimeout(DATA_LOAD_MS);
 
-			// Use mouse.move instead of hover() to avoid Playwright hanging issue
-			const box = await profileLink.boundingBox();
-			if (box) {
-				await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-			}
-			await page.waitForTimeout(300);
+				const nameInput = page.locator('#key-name');
+				await nameInput.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+				await nameInput.fill('Production App');
 
-			const screenshotPath: string = getScreenshotPath('06-navigation-dark', testInfo.project.name);
+				const expirationButton = page.locator('button:has-text("30 days")');
+				await expirationButton.click();
+				await page.waitForTimeout(300);
 
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`05-create-filled-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
+			test(`settings navigation tabs`, async ({ page }, testInfo) => {
+				const profileLink = page.getByRole('link', { name: 'Profile' });
+				await profileLink.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
 
-		test('create API key and see success modal', async ({ page }, testInfo) => {
-			// Ensure we can create a key (revoke one if at limit)
-			await ensureCanCreateKey(page);
-			
-			// Click create API key button
-			const createButton = getCreateButton(page);
-			await createButton.waitFor({ state: 'visible', timeout: 5000 });
-			await createButton.click();
-			
-			// Wait for sheet to appear
-			await page.waitForTimeout(1000);
+				const box = await profileLink.boundingBox();
+				if (box) {
+					await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+				}
+				await page.waitForTimeout(300);
 
-			// Fill in the form - use id selector for reliability
-			const nameInput = page.locator('#key-name');
-			await nameInput.waitFor({ state: 'visible', timeout: 5000 });
-			await nameInput.fill('Test API Key');
-
-			// Select expiration by clicking the "30 days" button
-			const expirationButton = page.locator('button:has-text("30 days")');
-			await expirationButton.click();
-			await page.waitForTimeout(300);
-
-			// Click Create Key button (inside the sheet) - use locator for reliability
-			const submitButton = page.locator('button:has-text("Create Key")').last();
-			await submitButton.click();
-
-			// Wait for success modal to appear
-			await page.waitForTimeout(1500);
-
-			const screenshotPath: string = getScreenshotPath('07-key-created-modal-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`06-navigation-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
+			test(`create API key and see success modal`, async ({ page }, testInfo) => {
+				await ensureCanCreateKey(page);
 
-		test('API key list with keys', async ({ page }, testInfo) => {
-			// Wait for page to load with keys
-			await page.waitForTimeout(1000);
+				const createButton = getCreateButton(page);
+				await createButton.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+				await createButton.click();
+				await page.waitForTimeout(DATA_LOAD_MS);
 
-			const screenshotPath: string = getScreenshotPath('08-keys-list-dark', testInfo.project.name);
+				const nameInput = page.locator('#key-name');
+				await nameInput.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+				await nameInput.fill('Test API Key');
 
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				const expirationButton = page.locator('button:has-text("30 days")');
+				await expirationButton.click();
+				await page.waitForTimeout(300);
+
+				const submitButton = page.locator('button:has-text("Create Key")').last();
+				await submitButton.click();
+				await page.waitForTimeout(1500);
+
+				await page.screenshot({
+					path: getScreenshot(`07-key-created-modal-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
+			test(`API key list with keys`, async ({ page }, testInfo) => {
+				await page.waitForTimeout(DATA_LOAD_MS);
 
-		test('revoke API key confirmation dialog', async ({ page }, testInfo) => {
-			// Wait for keys to load
-			await page.waitForTimeout(1000);
-
-			// Find the trash icon button (revoke trigger) - it's inside the card header
-			const trashButton = page.locator('button:has(svg.lucide-trash-2)').first();
-
-			// Check if trash button exists
-			const trashExists = await trashButton.isVisible().catch(() => false);
-
-			if (trashExists) {
-				await trashButton.click({ force: true });
-				await page.waitForTimeout(500); // Wait for dialog animation
-			}
-
-			const screenshotPath: string = getScreenshotPath('09-revoke-dialog-dark', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`08-keys-list-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
 
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-	});
+			test(`revoke API key confirmation dialog`, async ({ page }, testInfo) => {
+				await page.waitForTimeout(DATA_LOAD_MS);
 
-	test.describe('Light Mode', () => {
-		test.beforeEach(async ({ page }) => {
-			// Set light mode BEFORE navigation
-			await page.emulateMedia({ colorScheme: 'light' });
-			await loginAndNavigate(page);
-		});
+				const trashButton = page.locator('button:has(svg.lucide-trash-2)').first();
+				const trashExists = await trashButton.isVisible().catch(() => false);
 
-		test('page layout and navigation', async ({ page }, testInfo) => {
-			const screenshotPath: string = getScreenshotPath('01-layout-light', testInfo.project.name);
+				if (trashExists) {
+					await trashButton.click({ force: true });
+					await page.waitForTimeout(ANIMATION_SETTLE_MS);
+				}
 
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
+				await page.screenshot({
+					path: getScreenshot(`09-revoke-dialog-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
 			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
 		});
-
-		test('empty state visible', async ({ page }, testInfo) => {
-			// Wait for loading to complete
-			await page.waitForTimeout(1000);
-
-			const screenshotPath: string = getScreenshotPath('02-empty-state-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('create API key button hover', async ({ page }, testInfo) => {
-			// Find the create button (may be "New Key" or "Create Key" in empty state)
-			const createButton = page.locator('button:has-text("New Key"), button:has-text("Create Key")').first();
-			await createButton.waitFor({ state: 'visible', timeout: 5000 });
-			// Use mouse.move instead of hover() to avoid Playwright hanging issue
-			const box = await createButton.boundingBox();
-			if (box) {
-				await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-			}
-			await page.waitForTimeout(300);
-
-			const screenshotPath: string = getScreenshotPath('03-button-hover-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('create API key sheet opened', async ({ page }, testInfo) => {
-			// Ensure we can create a key (revoke one if at limit)
-			await ensureCanCreateKey(page);
-			
-			// Click create API key button
-			const createButton = getCreateButton(page);
-			await createButton.waitFor({ state: 'visible', timeout: 5000 });
-			await createButton.click();
-			await page.waitForTimeout(500); // Wait for sheet animation
-
-			const screenshotPath: string = getScreenshotPath('04-create-sheet-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('create API key form filled', async ({ page }, testInfo) => {
-			// Ensure we can create a key (revoke one if at limit)
-			await ensureCanCreateKey(page);
-			
-			// Click create API key button
-			const createButton = getCreateButton(page);
-			await createButton.waitFor({ state: 'visible', timeout: 5000 });
-			await createButton.click();
-			
-			// Wait for sheet to appear
-			await page.waitForTimeout(1000);
-
-			// Fill in the form - use id selector for reliability
-			const nameInput = page.locator('#key-name');
-			await nameInput.waitFor({ state: 'visible', timeout: 5000 });
-			await nameInput.fill('Production App');
-
-			// Select expiration by clicking the "30 days" button (to show the change from default 90 days)
-			const expirationButton = page.locator('button:has-text("30 days")');
-			await expirationButton.click();
-			await page.waitForTimeout(300);
-
-			const screenshotPath: string = getScreenshotPath('05-create-filled-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('settings navigation tabs', async ({ page }, testInfo) => {
-			// Check if navigation tabs are present
-			const profileLink = page.getByRole('link', { name: 'Profile' });
-			await profileLink.waitFor({ state: 'visible', timeout: 5000 });
-
-			// Use mouse.move instead of hover() to avoid Playwright hanging issue
-			const box = await profileLink.boundingBox();
-			if (box) {
-				await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-			}
-			await page.waitForTimeout(300);
-
-			const screenshotPath: string = getScreenshotPath('06-navigation-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('create API key and see success modal', async ({ page }, testInfo) => {
-			// Ensure we can create a key (revoke one if at limit)
-			await ensureCanCreateKey(page);
-			
-			// Click create API key button
-			const createButton = getCreateButton(page);
-			await createButton.waitFor({ state: 'visible', timeout: 5000 });
-			await createButton.click();
-			
-			// Wait for sheet to appear
-			await page.waitForTimeout(1000);
-
-			// Fill in the form - use id selector for reliability
-			const nameInput = page.locator('#key-name');
-			await nameInput.waitFor({ state: 'visible', timeout: 5000 });
-			await nameInput.fill('Test API Key');
-
-			// Select expiration by clicking the "30 days" button
-			const expirationButton = page.locator('button:has-text("30 days")');
-			await expirationButton.click();
-			await page.waitForTimeout(300);
-
-			// Click Create Key button (inside the sheet) - use locator for reliability
-			const submitButton = page.locator('button:has-text("Create Key")').last();
-			await submitButton.click();
-
-			// Wait for success modal to appear
-			await page.waitForTimeout(1500);
-
-			const screenshotPath: string = getScreenshotPath('07-key-created-modal-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('API key list with keys', async ({ page }, testInfo) => {
-			// Wait for page to load with keys
-			await page.waitForTimeout(1000);
-
-			const screenshotPath: string = getScreenshotPath('08-keys-list-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-
-		test('revoke API key confirmation dialog', async ({ page }, testInfo) => {
-			// Wait for keys to load
-			await page.waitForTimeout(1000);
-
-			// Find the trash icon button (revoke trigger) - it's inside the card header
-			const trashButton = page.locator('button:has(svg.lucide-trash-2)').first();
-
-			// Check if trash button exists
-			const trashExists = await trashButton.isVisible().catch(() => false);
-
-			if (trashExists) {
-				await trashButton.click({ force: true });
-				await page.waitForTimeout(500); // Wait for dialog animation
-			}
-
-			const screenshotPath: string = getScreenshotPath('09-revoke-dialog-light', testInfo.project.name);
-
-			await page.screenshot({
-				path: screenshotPath,
-				fullPage: true
-			});
-
-			expect(existsSync(screenshotPath)).toBeTruthy();
-			console.log(`Screenshot saved: ${screenshotPath}`);
-		});
-	});
+	}
 });
