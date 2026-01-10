@@ -10,68 +10,114 @@ const __dirname: string = dirname(__filename);
 // Screenshots go to screenshots/admin-users/ folder
 const screenshotsDir: string = join(__dirname, '../resources/screenshots/admin-users');
 if (!existsSync(screenshotsDir)) {
-    mkdirSync(screenshotsDir, { recursive: true });
+	mkdirSync(screenshotsDir, { recursive: true });
 }
 
 function getScreenshotPath(name: string, projectName: string): string {
-    const suffix: string = projectName.replace(/\s+/g, '-').toLowerCase();
-    return join(screenshotsDir, `${name}-${suffix}.png`);
+	const suffix: string = projectName.replace(/\s+/g, '-').toLowerCase();
+	return join(screenshotsDir, `${name}-${suffix}.png`);
+}
+
+async function loginAndNavigate(page: import('@playwright/test').Page): Promise<void> {
+	// Login first using dev credentials button (admin user)
+	await page.goto('/login');
+	await page.waitForLoadState('domcontentloaded');
+
+	// Wait for dev credentials to load and click "Fill Credentials" button
+	const fillButton = page.getByRole('button', { name: 'Fill Credentials' });
+	await fillButton.waitFor({ state: 'visible', timeout: 15000 });
+	await fillButton.click();
+
+	// Submit login form
+	await page.getByRole('button', { name: 'Sign In' }).click();
+
+	// Wait for redirect to dashboard (login success)
+	await page.waitForURL('/dashboard', { timeout: 15000 });
+
+	// Navigate to admin users page
+	await page.goto('/admin/users');
+	await page.waitForLoadState('domcontentloaded');
+
+	// Wait for page to settle and data to load
+	await page.waitForTimeout(1000);
 }
 
 test.describe('Admin Users Page Screenshots', () => {
-    test.setTimeout(30000);
+	test.setTimeout(30000);
 
-    test.beforeEach(async ({ page }) => {
-        // Login first using dev credentials button (admin user)
-        await page.goto('/login');
-        await page.waitForLoadState('domcontentloaded');
+	test.describe('Dark Mode', () => {
+		test.beforeEach(async ({ page }) => {
+			// Set dark mode BEFORE navigation
+			await page.emulateMedia({ colorScheme: 'dark' });
+			await loginAndNavigate(page);
+		});
 
-        // Wait for dev credentials to load and click "Fill Credentials" button
-        const fillButton = page.getByRole('button', { name: 'Fill Credentials' });
-        await fillButton.waitFor({ state: 'visible', timeout: 15000 });
-        await fillButton.click();
+		test('users table default state', async ({ page }, testInfo) => {
+			const screenshotPath: string = getScreenshotPath('01-default-dark', testInfo.project.name);
 
-        // Submit login form
-        await page.getByRole('button', { name: 'Sign In' }).click();
+			await page.screenshot({
+				path: screenshotPath,
+				fullPage: true
+			});
 
-        // Wait for redirect to dashboard (login success)
-        await page.waitForURL('/dashboard', { timeout: 15000 });
+			expect(existsSync(screenshotPath)).toBeTruthy();
+			console.log(`Screenshot saved: ${screenshotPath}`);
+		});
 
-        // Navigate to admin users page
-        await page.goto('/admin/users');
-        await page.waitForLoadState('domcontentloaded');
+		test('user details sheet opened', async ({ page }, testInfo) => {
+			// Click on first user row to open sheet
+			const userRow = page.locator('[role="button"]').filter({ hasText: /@/ }).first();
+			await userRow.waitFor({ state: 'visible', timeout: 5000 });
+			await userRow.click();
+			await page.waitForTimeout(500); // Wait for sheet animation
 
-        // Wait for page to settle and data to load
-        await page.waitForTimeout(1000);
-    });
+			const screenshotPath: string = getScreenshotPath('02-user-details-sheet-dark', testInfo.project.name);
 
-    test('users table default state', async ({ page }, testInfo) => {
-        const screenshotPath: string = getScreenshotPath('01-default', testInfo.project.name);
+			await page.screenshot({
+				path: screenshotPath,
+				fullPage: true
+			});
 
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
-        });
+			expect(existsSync(screenshotPath)).toBeTruthy();
+			console.log(`Screenshot saved: ${screenshotPath}`);
+		});
+	});
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
-    });
+	test.describe('Light Mode', () => {
+		test.beforeEach(async ({ page }) => {
+			// Set light mode BEFORE navigation
+			await page.emulateMedia({ colorScheme: 'light' });
+			await loginAndNavigate(page);
+		});
 
-    test('user details sheet opened', async ({ page }, testInfo) => {
-        // Click on first user row to open sheet
-        const userRow = page.locator('[role="button"]').filter({ hasText: /@/ }).first();
-        await userRow.waitFor({ state: 'visible', timeout: 5000 });
-        await userRow.click();
-        await page.waitForTimeout(500); // Wait for sheet animation
+		test('users table default state', async ({ page }, testInfo) => {
+			const screenshotPath: string = getScreenshotPath('01-default-light', testInfo.project.name);
 
-        const screenshotPath: string = getScreenshotPath('02-user-details-sheet', testInfo.project.name);
+			await page.screenshot({
+				path: screenshotPath,
+				fullPage: true
+			});
 
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
-        });
+			expect(existsSync(screenshotPath)).toBeTruthy();
+			console.log(`Screenshot saved: ${screenshotPath}`);
+		});
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
-    });
+		test('user details sheet opened', async ({ page }, testInfo) => {
+			// Click on first user row to open sheet
+			const userRow = page.locator('[role="button"]').filter({ hasText: /@/ }).first();
+			await userRow.waitFor({ state: 'visible', timeout: 5000 });
+			await userRow.click();
+			await page.waitForTimeout(500); // Wait for sheet animation
+
+			const screenshotPath: string = getScreenshotPath('02-user-details-sheet-light', testInfo.project.name);
+
+			await page.screenshot({
+				path: screenshotPath,
+				fullPage: true
+			});
+
+			expect(existsSync(screenshotPath)).toBeTruthy();
+			console.log(`Screenshot saved: ${screenshotPath}`);
+		});
+	});
 });

@@ -31,74 +31,160 @@ test.describe('Login Page Screenshots', () => {
         await page.waitForTimeout(500);
     });
 
-    test('default state - empty form', async ({ page }, testInfo) => {
-        const screenshotPath = getScreenshotPath('01-default', testInfo.project.name);
-
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+    test.describe('Dark Mode', () => {
+        test.beforeEach(async ({ page }) => {
+            // Set dark mode (emulateMedia applies retroactively to already-loaded page)
+            await page.emulateMedia({ colorScheme: 'dark' });
+            await page.waitForTimeout(100); // Let theme change apply
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
+        test('default state - empty form', async ({ page }, testInfo) => {
+            const screenshotPath = getScreenshotPath('01-default-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('form with email filled', async ({ page }, testInfo) => {
+            await page.getByLabel('Email').fill('user@example.com');
+
+            const screenshotPath = getScreenshotPath('02-with-email-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('form with credentials filled', async ({ page }, testInfo) => {
+            await page.getByLabel('Email').fill('user@example.com');
+            await page.locator('#password').fill('SecurePassword123!');
+
+            const screenshotPath = getScreenshotPath('03-filled-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('password visibility toggled', async ({ page }, testInfo) => {
+            await page.getByLabel('Email').fill('user@example.com');
+            await page.locator('#password').fill('SecurePassword123!');
+            await page.getByRole('button', { name: 'Show password' }).click();
+
+            const screenshotPath = getScreenshotPath('04-password-visible-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('focused email input', async ({ page }, testInfo) => {
+            await page.getByLabel('Email').focus();
+
+            const screenshotPath = getScreenshotPath('05-email-focused-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
     });
 
-    test('form with email filled', async ({ page }, testInfo) => {
-        await page.getByLabel('Email').fill('user@example.com');
-
-        const screenshotPath = getScreenshotPath('02-with-email', testInfo.project.name);
-
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+    test.describe('Light Mode', () => {
+        test.beforeEach(async ({ page }) => {
+            await page.emulateMedia({ colorScheme: 'light' });
+            await page.waitForTimeout(100); // Let theme change apply
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
-    });
+        test('default state - empty form', async ({ page }, testInfo) => {
+            const screenshotPath = getScreenshotPath('01-default-light', testInfo.project.name);
 
-    test('form with credentials filled', async ({ page }, testInfo) => {
-        await page.getByLabel('Email').fill('user@example.com');
-        await page.locator('#password').fill('SecurePassword123!');
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
 
-        const screenshotPath = getScreenshotPath('03-filled', testInfo.project.name);
-
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
-    });
+        test('form with email filled', async ({ page }, testInfo) => {
+            await page.getByLabel('Email').fill('user@example.com');
 
-    test('password visibility toggled', async ({ page }, testInfo) => {
-        await page.getByLabel('Email').fill('user@example.com');
-        await page.locator('#password').fill('SecurePassword123!');
-        await page.getByRole('button', { name: 'Show password' }).click();
+            const screenshotPath = getScreenshotPath('02-with-email-light', testInfo.project.name);
 
-        const screenshotPath = getScreenshotPath('04-password-visible', testInfo.project.name);
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
 
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
-    });
+        test('form with credentials filled', async ({ page }, testInfo) => {
+            await page.getByLabel('Email').fill('user@example.com');
+            await page.locator('#password').fill('SecurePassword123!');
 
-    test('focused email input', async ({ page }, testInfo) => {
-        await page.getByLabel('Email').focus();
+            const screenshotPath = getScreenshotPath('03-filled-light', testInfo.project.name);
 
-        const screenshotPath = getScreenshotPath('05-email-focused', testInfo.project.name);
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
 
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
+        test('password visibility toggled', async ({ page }, testInfo) => {
+            await page.getByLabel('Email').fill('user@example.com');
+            await page.locator('#password').fill('SecurePassword123!');
+            await page.getByRole('button', { name: 'Show password' }).click();
+
+            const screenshotPath = getScreenshotPath('04-password-visible-light', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('focused email input', async ({ page }, testInfo) => {
+            await page.getByLabel('Email').focus();
+
+            const screenshotPath = getScreenshotPath('05-email-focused-light', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
     });
 });

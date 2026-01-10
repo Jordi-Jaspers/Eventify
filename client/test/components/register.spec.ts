@@ -27,79 +27,170 @@ test.describe('Register Page Screenshots', () => {
         await page.waitForTimeout(500);
     });
 
-    test('default state - empty form', async ({ page }, testInfo) => {
-        const screenshotPath: string = getScreenshotPath('01-default', testInfo.project.name);
-
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+    test.describe('Dark Mode', () => {
+        test.beforeEach(async ({ page }) => {
+            // Set dark mode (emulateMedia applies retroactively to already-loaded page)
+            await page.emulateMedia({ colorScheme: 'dark' });
+            await page.waitForTimeout(100); // Let theme change apply
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
+        test('default state - empty form', async ({ page }, testInfo) => {
+            const screenshotPath: string = getScreenshotPath('01-default-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('form with data filled', async ({ page }, testInfo) => {
+            await page.getByLabel('First Name').fill('John');
+            await page.getByLabel('Last Name').fill('Doe');
+            await page.getByLabel('Email').fill('john.doe@example.com');
+            await page.locator('#password').fill('SecurePassword123!');
+            await page.locator('#passwordConfirmation').fill('SecurePassword123!');
+
+            const screenshotPath: string = getScreenshotPath('02-filled-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('password strength indicator - weak password', async ({ page }, testInfo) => {
+            await page.locator('#password').fill('weak');
+            await page.waitForTimeout(300);
+
+            const screenshotPath: string = getScreenshotPath('03-password-weak-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('password strength indicator - strong password', async ({ page }, testInfo) => {
+            await page.locator('#password').fill('SecurePassword123!');
+            await page.waitForTimeout(300);
+
+            const screenshotPath: string = getScreenshotPath('04-password-strong-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('passwords match indicator', async ({ page }, testInfo) => {
+            await page.locator('#password').fill('SecurePassword123!');
+            await page.locator('#passwordConfirmation').fill('SecurePassword123!');
+            await page.waitForTimeout(300);
+
+            const screenshotPath: string = getScreenshotPath('05-passwords-match-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
     });
 
-    test('form with data filled', async ({ page }, testInfo) => {
-        await page.getByLabel('First Name').fill('John');
-        await page.getByLabel('Last Name').fill('Doe');
-        await page.getByLabel('Email').fill('john.doe@example.com');
-        await page.locator('#password').fill('SecurePassword123!');
-        await page.locator('#passwordConfirmation').fill('SecurePassword123!');
-
-        const screenshotPath: string = getScreenshotPath('02-filled', testInfo.project.name);
-
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+    test.describe('Light Mode', () => {
+        test.beforeEach(async ({ page }) => {
+            await page.emulateMedia({ colorScheme: 'light' });
+            await page.waitForTimeout(100); // Let theme change apply
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
-    });
+        test('default state - empty form', async ({ page }, testInfo) => {
+            const screenshotPath: string = getScreenshotPath('01-default-light', testInfo.project.name);
 
-    test('password strength indicator - weak password', async ({ page }, testInfo) => {
-        await page.locator('#password').fill('weak');
-        await page.waitForTimeout(300);
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
 
-        const screenshotPath: string = getScreenshotPath('03-password-weak', testInfo.project.name);
-
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
-    });
+        test('form with data filled', async ({ page }, testInfo) => {
+            await page.getByLabel('First Name').fill('John');
+            await page.getByLabel('Last Name').fill('Doe');
+            await page.getByLabel('Email').fill('john.doe@example.com');
+            await page.locator('#password').fill('SecurePassword123!');
+            await page.locator('#passwordConfirmation').fill('SecurePassword123!');
 
-    test('password strength indicator - strong password', async ({ page }, testInfo) => {
-        await page.locator('#password').fill('SecurePassword123!');
-        await page.waitForTimeout(300);
+            const screenshotPath: string = getScreenshotPath('02-filled-light', testInfo.project.name);
 
-        const screenshotPath: string = getScreenshotPath('04-password-strong', testInfo.project.name);
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
 
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
-    });
+        test('password strength indicator - weak password', async ({ page }, testInfo) => {
+            await page.locator('#password').fill('weak');
+            await page.waitForTimeout(300);
 
-    test('passwords match indicator', async ({ page }, testInfo) => {
-        await page.locator('#password').fill('SecurePassword123!');
-        await page.locator('#passwordConfirmation').fill('SecurePassword123!');
-        await page.waitForTimeout(300);
+            const screenshotPath: string = getScreenshotPath('03-password-weak-light', testInfo.project.name);
 
-        const screenshotPath: string = getScreenshotPath('05-passwords-match', testInfo.project.name);
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
 
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
+        test('password strength indicator - strong password', async ({ page }, testInfo) => {
+            await page.locator('#password').fill('SecurePassword123!');
+            await page.waitForTimeout(300);
+
+            const screenshotPath: string = getScreenshotPath('04-password-strong-light', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+
+        test('passwords match indicator', async ({ page }, testInfo) => {
+            await page.locator('#password').fill('SecurePassword123!');
+            await page.locator('#passwordConfirmation').fill('SecurePassword123!');
+            await page.waitForTimeout(300);
+
+            const screenshotPath: string = getScreenshotPath('05-passwords-match-light', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
     });
 });

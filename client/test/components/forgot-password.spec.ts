@@ -27,15 +27,42 @@ test.describe('Forgot Password Page Screenshots', () => {
         await page.waitForTimeout(500);
     });
 
-    test('default state', async ({ page }, testInfo) => {
-        const screenshotPath: string = getScreenshotPath('01-default', testInfo.project.name);
-
-        await page.screenshot({
-            path: screenshotPath,
-            fullPage: true
+    test.describe('Dark Mode', () => {
+        test.beforeEach(async ({ page }) => {
+            // Set dark mode (emulateMedia applies retroactively to already-loaded page)
+            await page.emulateMedia({ colorScheme: 'dark' });
+            await page.waitForTimeout(100); // Let theme change apply
         });
 
-        expect(existsSync(screenshotPath)).toBeTruthy();
-        console.log(`Screenshot saved: ${screenshotPath}`);
+        test('default state', async ({ page }, testInfo) => {
+            const screenshotPath: string = getScreenshotPath('01-default-dark', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
+    });
+
+    test.describe('Light Mode', () => {
+        test.beforeEach(async ({ page }) => {
+            await page.emulateMedia({ colorScheme: 'light' });
+            await page.waitForTimeout(100); // Let theme change apply
+        });
+
+        test('default state', async ({ page }, testInfo) => {
+            const screenshotPath: string = getScreenshotPath('01-default-light', testInfo.project.name);
+
+            await page.screenshot({
+                path: screenshotPath,
+                fullPage: true
+            });
+
+            expect(existsSync(screenshotPath)).toBeTruthy();
+            console.log(`Screenshot saved: ${screenshotPath}`);
+        });
     });
 });
