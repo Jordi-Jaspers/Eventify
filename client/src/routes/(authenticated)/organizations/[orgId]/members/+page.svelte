@@ -338,9 +338,9 @@
 </svelte:head>
 
 <main class="container mx-auto px-4 py-8">
-	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
+	<div class="max-w-7xl mx-auto space-y-8 animate-fade-in">
 		<!-- Header -->
-		<div class="flex items-center justify-between mb-8">
+		<div class="flex items-center justify-between">
 			<div>
 				<h1
 					class="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
@@ -353,7 +353,7 @@
 			{#if canManageMembers}
 				<Button
 					onclick={openAddSheet}
-					class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+					class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
 				>
 					<UserPlus class="mr-2 h-4 w-4" />
 					Add Member
@@ -366,7 +366,7 @@
 			<DataTable {columns} {service} title="Members" icon={Users}>
 				{#snippet row(member: OrganizationMembershipResponse)}
 					<div
-						class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
+						class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/40 transition-all duration-200 hover:shadow-md"
 					>
 						<!-- Avatar & Name -->
 						<div class="col-span-1 md:col-span-4 flex items-center gap-3">
@@ -405,7 +405,7 @@
 												{...props}
 												variant="outline"
 												size="sm"
-												class="bg-background/50 border-border/50 hover:bg-accent/10"
+												class="bg-background/50 border-border/50 hover:bg-accent/10 transition-all"
 											>
 											<Badge class={getOrganizationalRoleBadgeClass(member.role ?? 'MEMBER')}>
 												{#if member.role === 'ADMIN'}
@@ -456,7 +456,7 @@
 												{...props}
 												variant="outline"
 												size="sm"
-												class="bg-background/50 border-border/50 hover:bg-accent/10"
+												class="bg-background/50 border-border/50 hover:bg-accent/10 transition-all"
 											>
 												<MoreVertical class="h-4 w-4" />
 											</Button>

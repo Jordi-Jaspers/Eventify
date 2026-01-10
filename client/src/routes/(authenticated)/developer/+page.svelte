@@ -77,9 +77,9 @@
 
 <!-- Main Content -->
 <main class="container mx-auto px-4 py-8">
-	<div class="max-w-4xl mx-auto space-y-6 animate-fade-in">
+	<div class="max-w-5xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header Card -->
-		<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+		<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg relative overflow-hidden">
 			<!-- Gradient overlay -->
 			<div
 				class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-50"
@@ -87,12 +87,12 @@
 
 			<CardHeader class="relative z-10">
 				<div class="flex items-start justify-between gap-4">
-					<div>
-						<CardTitle class="text-2xl flex items-center gap-2">
+					<div class="space-y-1.5">
+						<CardTitle class="text-2xl flex items-center gap-3">
 							<Key class="w-6 h-6 text-primary" />
 							API Keys
 						</CardTitle>
-						<CardDescription> Manage API keys for programmatic access to Eventify </CardDescription>
+						<CardDescription class="text-sm"> Manage API keys for programmatic access to Eventify </CardDescription>
 					</div>
 					{#if apiKeyService.atLimit}
 						<Tooltip.Provider>
@@ -102,7 +102,7 @@
 										<Button
 											{...props}
 											disabled={true}
-											class="bg-gradient-to-r from-primary to-accent opacity-50 cursor-not-allowed"
+											class="bg-gradient-to-r from-primary to-primary/80 opacity-50 cursor-not-allowed"
 										>
 								<Plus class="mr-2 h-4 w-4" />
 								New Key
@@ -117,7 +117,7 @@
 					{:else}
 						<Button
 							onclick={() => (showCreateSheet = true)}
-							class="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+							class="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
 						>
 							<Plus class="mr-2 h-4 w-4" />
 							New Key
@@ -138,17 +138,17 @@
 				{:else if apiKeyService.keys.length === 0}
 					<!-- Empty State -->
 					<div
-						class="flex flex-col items-center justify-center py-12 px-6 text-center border-2 border-dashed border-border/50 rounded-lg bg-background/30"
+						class="flex flex-col items-center justify-center py-16 px-6 text-center border-2 border-dashed border-border/50 rounded-lg bg-background/30"
 					>
 						<Key class="w-16 h-16 text-muted-foreground/30 mb-4" />
 						<h3 class="text-lg font-semibold mb-2">No API Keys Yet</h3>
-						<p class="text-sm text-muted-foreground max-w-md mb-4">
+						<p class="text-sm text-muted-foreground max-w-md mb-6">
 							API keys allow you to authenticate requests to the Eventify API. Create your first key
 							to start sending events programmatically.
 						</p>
 						<Button
 							onclick={() => (showCreateSheet = true)}
-							class="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+							class="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
 						>
 							<Plus class="mr-2 h-4 w-4" />
 							Create Key
@@ -160,7 +160,7 @@
 					<!-- Key Limit Indicator (informational only) -->
 					<div class="flex items-center gap-2 px-1">
 						<Info class="w-3.5 h-3.5 text-muted-foreground/60" />
-						<span class="text-xs text-muted-foreground">
+						<span class="text-xs text-muted-foreground/80">
 							{apiKeyService.keys.length} of {apiKeyService.limit} keys used
 						</span>
 					</div>

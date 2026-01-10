@@ -95,7 +95,7 @@
     </div>
 
     <!-- Form Card -->
-    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl">
+    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl hover:shadow-primary/10 transition-shadow duration-300">
         <CardHeader class="space-y-1">
             <CardTitle class="text-2xl flex items-center gap-2">
                 <Building2 class="w-5 h-5 text-primary" />
@@ -158,7 +158,7 @@
                 <div class="flex gap-3">
                     <Button
                         type="submit"
-                        class="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+                        class="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all shadow-lg hover:shadow-primary/50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                         disabled={isSubmitting}
                     >
                         {#if isSubmitting}
@@ -173,7 +173,7 @@
                     <Button
                         type="button"
                         variant="outline"
-                        class="bg-background/50 border-border/50 hover:bg-destructive/10 transition-all"
+                        class="bg-background/50 border-border/50 hover:bg-destructive/10 hover:border-destructive/50 transition-all focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2"
                         onclick={handleCancel}
                         disabled={isSubmitting}
                     >

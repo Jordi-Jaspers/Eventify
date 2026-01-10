@@ -371,7 +371,7 @@
 
 			<!-- Expiring Soon Card -->
 			<Card
-				class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden hover:shadow-orange-500/20 hover:border-orange-500/50 transition-all duration-300"
+				class="border-orange-500/30 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden hover:shadow-orange-500/20 hover:border-orange-500/50 transition-all duration-300"
 			>
 				<div
 					class="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-orange-500/5 opacity-50"
@@ -461,10 +461,10 @@
 
 		<!-- All API Keys DataTable -->
 		<DataTable {columns} service={dataTableService} title="All API Keys" icon={Key}>
-			{#snippet row(key: ApiKeyResponse)}
-				<div
-					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 px-4 py-4 rounded-lg border border-border/50 bg-card/40 hover:bg-accent/5 transition-colors group"
-				>
+		{#snippet row(key: ApiKeyResponse)}
+			<div
+				class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 px-4 py-4 rounded-lg border border-border/50 bg-card/40 hover:bg-accent/5 transition-colors group"
+			>
 					<!-- Key + Name -->
 					<div class="col-span-1 md:col-span-3">
 						<div class="space-y-1">

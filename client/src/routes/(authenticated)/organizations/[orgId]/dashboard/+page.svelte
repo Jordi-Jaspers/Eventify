@@ -29,54 +29,48 @@
 		</div>
 
 		<!-- Organization Info Card -->
-		<Card
-			class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden"
-		>
-			<div
-				class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-50"
-			></div>
-
-			<CardHeader class="relative z-10">
-				<CardTitle class="text-2xl flex items-center gap-2">
-					<Building2 class="w-6 h-6 text-primary" />
-					Organization Details
-				</CardTitle>
-				<CardDescription>Your current workspace information</CardDescription>
+		<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
+			<CardHeader class="flex flex-row items-center gap-3">
+				<Building2 class="h-5 w-5 text-primary" />
+				<div>
+					<CardTitle>Organization Details</CardTitle>
+					<CardDescription>Your current workspace information</CardDescription>
+				</div>
 			</CardHeader>
 
-			<CardContent class="space-y-6 relative z-10">
+			<CardContent class="space-y-4">
 				<!-- Info Grid -->
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<!-- Organization Name -->
-					<div class="p-4 rounded-lg bg-background/50 border border-border/50">
-						<p class="text-xs text-muted-foreground mb-1">Organization Name</p>
-						<p class="font-medium text-foreground">
+					<div class="space-y-2">
+						<p class="text-sm text-muted-foreground">Organization Name</p>
+						<p class="font-semibold text-foreground text-lg">
 							{currentOrganization?.organizationName || 'N/A'}
 						</p>
 					</div>
 
 					<!-- Your Role -->
-					<div class="p-4 rounded-lg bg-background/50 border border-border/50">
-						<div class="flex items-center gap-2 mb-1">
-							<Users class="w-3 h-3 text-primary" />
-							<p class="text-xs text-muted-foreground">Your Role</p>
+					<div class="space-y-2">
+						<div class="flex items-center gap-2">
+							<Users class="h-4 w-4 text-primary" />
+							<p class="text-sm text-muted-foreground">Your Role</p>
 						</div>
 						{#if currentOrganization?.role}
 							<Badge class={getOrganizationalRoleBadgeClass(currentOrganization.role)}>
 								{currentOrganization.role}
 							</Badge>
 						{:else}
-							<p class="font-medium text-foreground">N/A</p>
+							<p class="font-semibold text-foreground">N/A</p>
 						{/if}
 					</div>
 
 					<!-- Member Since -->
-					<div class="p-4 rounded-lg bg-background/50 border border-border/50 md:col-span-2">
-						<div class="flex items-center gap-2 mb-1">
-							<Clock class="w-3 h-3 text-primary" />
-							<p class="text-xs text-muted-foreground">Member Since</p>
+					<div class="space-y-2 md:col-span-2">
+						<div class="flex items-center gap-2">
+							<Clock class="h-4 w-4 text-primary" />
+							<p class="text-sm text-muted-foreground">Member Since</p>
 						</div>
-						<p class="font-medium text-foreground">
+						<p class="font-semibold text-foreground">
 							{currentOrganization?.joinedAt ? formatDate(currentOrganization.joinedAt) : 'N/A'}
 						</p>
 					</div>
@@ -85,46 +79,32 @@
 		</Card>
 
 		<!-- Coming Soon Card -->
-		<Card
-			class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden"
-		>
-			<div
-				class="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-primary/10 opacity-50"
-			></div>
-
-			<CardHeader class="relative z-10">
-				<CardTitle class="text-xl flex items-center gap-2">
-					<Sparkles class="w-5 h-5 text-accent" />
-					Coming Soon
-				</CardTitle>
-				<CardDescription>Features being built for your organization</CardDescription>
+		<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
+			<CardHeader class="flex flex-row items-center gap-3">
+				<Sparkles class="h-5 w-5 text-primary" />
+				<div>
+					<CardTitle>Coming Soon</CardTitle>
+					<CardDescription>Features being built for your organization</CardDescription>
+				</div>
 			</CardHeader>
 
-			<CardContent class="relative z-10">
+			<CardContent>
 				<ul class="space-y-3">
-					<li class="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30">
-						<div class="flex-shrink-0 w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-							<div class="w-2 h-2 rounded-full bg-muted-foreground"></div>
-						</div>
-						<span class="text-sm text-muted-foreground">Event monitoring and tracking</span>
+					<li class="flex items-center gap-3">
+						<div class="flex-shrink-0 h-1.5 w-1.5 rounded-full bg-muted-foreground"></div>
+						<span class="text-sm text-foreground">Event monitoring and tracking</span>
 					</li>
-					<li class="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30">
-						<div class="flex-shrink-0 w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-							<div class="w-2 h-2 rounded-full bg-muted-foreground"></div>
-						</div>
-						<span class="text-sm text-muted-foreground">Real-time notifications</span>
+					<li class="flex items-center gap-3">
+						<div class="flex-shrink-0 h-1.5 w-1.5 rounded-full bg-muted-foreground"></div>
+						<span class="text-sm text-foreground">Real-time notifications</span>
 					</li>
-					<li class="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30">
-						<div class="flex-shrink-0 w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-							<div class="w-2 h-2 rounded-full bg-muted-foreground"></div>
-						</div>
-						<span class="text-sm text-muted-foreground">Analytics and insights</span>
+					<li class="flex items-center gap-3">
+						<div class="flex-shrink-0 h-1.5 w-1.5 rounded-full bg-muted-foreground"></div>
+						<span class="text-sm text-foreground">Analytics and insights</span>
 					</li>
-					<li class="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30">
-						<div class="flex-shrink-0 w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-							<div class="w-2 h-2 rounded-full bg-muted-foreground"></div>
-						</div>
-						<span class="text-sm text-muted-foreground">Custom workflows</span>
+					<li class="flex items-center gap-3">
+						<div class="flex-shrink-0 h-1.5 w-1.5 rounded-full bg-muted-foreground"></div>
+						<span class="text-sm text-foreground">Custom workflows</span>
 					</li>
 				</ul>
 			</CardContent>

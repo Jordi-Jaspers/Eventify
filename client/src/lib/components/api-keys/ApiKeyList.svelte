@@ -11,7 +11,7 @@
 	let { keys, onRevoke, revoking }: Props = $props();
 </script>
 
-<div class="space-y-2">
+<div class="space-y-3">
 	{#each keys as apiKey (apiKey.id)}
 		<ApiKeyCard {apiKey} {onRevoke} {revoking} />
 	{/each}

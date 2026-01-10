@@ -197,12 +197,12 @@
                         {#if userData.organizations && userData.organizations.length > 0}
                             <div class="space-y-3">
                                 {#each userData.organizations as org}
-                                    <div class="p-4 rounded-lg bg-background/50 border border-border/50">
+                                    <div class="p-4 rounded-lg bg-background/50 border border-border/50 hover:bg-background/70 hover:border-border transition-all duration-200 group">
                                         <div class="flex items-center justify-between gap-4">
                                             <div class="flex-1 min-w-0">
                                                 <a 
                                                     href="/organizations/{org.organizationSlug}"
-                                                    class="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                                                    class="text-sm font-medium text-foreground hover:text-primary transition-colors group-hover:underline decoration-primary/30"
                                                 >
                                                     {org.organizationName}
                                                 </a>

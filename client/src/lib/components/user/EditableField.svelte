@@ -32,7 +32,7 @@
     }
 </script>
 
-<div class="p-4 rounded-lg bg-background/50 border border-border/50 group relative">
+<div class="p-4 rounded-lg bg-background/50 border border-border/50 group relative hover:bg-background/70 hover:border-border transition-all duration-200">
     <p class="text-xs text-muted-foreground mb-1">{label}</p>
     {#if editing}
         <div class="flex items-center gap-2">
@@ -52,10 +52,10 @@
     {:else}
         <button
             onclick={onStartEdit}
-            class="w-full text-left font-medium text-foreground hover:text-primary transition-colors flex items-center justify-between"
+            class="w-full text-left font-medium text-foreground hover:text-primary transition-colors flex items-center justify-between group/button"
         >
             <span>{value || 'N/A'}</span>
-            <Pencil class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground" />
+            <Pencil class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground group-hover/button:text-primary" />
         </button>
     {/if}
 </div>

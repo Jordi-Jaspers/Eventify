@@ -132,7 +132,7 @@
 		<DataTable {columns} {service} title="All Organizations" icon={Building2}>
 			{#snippet row(org: OrganizationResponse)}
 				<div
-					class="grid grid-cols-1 md:grid-cols-11 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors"
+					class="grid grid-cols-1 md:grid-cols-11 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm hover:bg-accent/10 hover:border-border transition-all duration-200 shadow-sm hover:shadow-md"
 				>
 					<!-- Name -->
 					<div class="col-span-1 md:col-span-2 flex items-center">
@@ -152,7 +152,7 @@
 
 					<!-- Status -->
 					<div class="col-span-1 md:col-span-1 flex items-center">
-						<Badge variant={getStatusBadgeVariant(org.status)}>
+						<Badge variant={getStatusBadgeVariant(org.status)} class="min-w-[90px] justify-center">
 							{org.status}
 						</Badge>
 					</div>
@@ -187,8 +187,9 @@
 							variant="ghost"
 							size="sm"
 							onclick={() => navigateToApiKeys(org.id)}
-							class="gap-1 text-primary hover:text-primary hover:bg-primary/10"
+							class="gap-1 text-primary hover:text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
 							title="Manage API Keys"
+							aria-label="Manage API Keys for {org.name}"
 						>
 							<Key class="h-4 w-4" />
 							<span class="md:hidden">API Keys</span>
@@ -197,8 +198,9 @@
 							variant="ghost"
 							size="sm"
 							onclick={() => navigateToMembers(org.id)}
-							class="gap-1 text-primary hover:text-primary hover:bg-primary/10"
+							class="gap-1 text-primary hover:text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
 							title="Manage Members"
+							aria-label="Manage Members for {org.name}"
 						>
 							<Users class="h-4 w-4" />
 							<span class="md:hidden">Members</span>

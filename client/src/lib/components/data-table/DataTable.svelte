@@ -57,7 +57,7 @@
 
 <!-- Filters Card -->
 {#if hasFilterableColumns}
-	<div class="rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-sm mb-4 px-4 py-3">
+	<div class="rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg mb-6 px-4 py-3">
 		<DataTableFilters
 			{columns}
 			filters={service.filters}

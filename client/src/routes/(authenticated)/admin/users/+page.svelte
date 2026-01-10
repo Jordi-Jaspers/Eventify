@@ -182,7 +182,7 @@
 				<div
 					role="button"
 					tabindex="0"
-					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-colors text-left w-full cursor-pointer"
+					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/70 hover:border-border transition-all text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
 					onclick={() => openUserSheet(user)}
 					onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') openUserSheet(user); }}
 				>
@@ -240,7 +240,7 @@
 					<div class="col-span-1 md:col-span-1 flex items-center justify-center" role="none" onclick={(e) => e.stopPropagation()}>
 						<DropdownMenu.Root>
 							<DropdownMenu.Trigger>
-								<Button variant="ghost" size="sm" class="h-8 w-8 p-0">
+								<Button variant="ghost" size="icon" class="h-8 w-8">
 									<MoreVertical class="h-4 w-4" />
 									<span class="sr-only">Actions</span>
 								</Button>
@@ -302,10 +302,10 @@
 
 <!-- User Details Sheet -->
 <Sheet.Root open={showUserSheet} onOpenChange={(open) => { if (!open) closeUserSheet(); }}>
-	<Sheet.Content class="w-full sm:max-w-md bg-background border-border/50 overflow-y-auto p-0">
+	<Sheet.Content class="w-full sm:max-w-md bg-background/95 backdrop-blur-xl border-border/50 overflow-y-auto p-0">
 		{#if selectedUser}
 			<!-- Hero Header with Gradient -->
-			<div class="relative bg-gradient-to-br from-primary/20 via-accent/10 to-background pt-8 pb-12 px-6">
+			<div class="relative bg-gradient-to-br from-primary/20 via-accent/15 to-background/50 pt-8 pb-12 px-6 backdrop-blur-sm">
 				<div class="absolute inset-0 bg-grid-white/5"></div>
 				<div class="relative flex flex-col items-center text-center">
 					<!-- Avatar -->
@@ -330,9 +330,9 @@
 			</div>
 
 			<!-- Content -->
-			<div class="px-6 -mt-6">
+			<div class="px-6 py-4 -mt-6 space-y-4">
 				<!-- Role Card -->
-				<div class="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
+				<div class="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-4 shadow-sm">
 					<div class="flex items-center justify-between mb-3">
 						<span class="text-sm font-medium text-muted-foreground">Role</span>
 						<Badge variant="outline" class="font-mono text-xs">
@@ -343,7 +343,7 @@
 						<Button
 							variant={selectedUser.role === 'USER' ? 'default' : 'outline'}
 							size="sm"
-							class="flex-1 {selectedUser.role === 'USER' ? 'bg-gradient-to-r from-primary to-accent hover:opacity-90' : ''}"
+							class="flex-1 {selectedUser.role === 'USER' ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70' : ''}"
 							onclick={() => handleRoleChange(selectedUser?.id, 'USER')}
 							disabled={adminUserService.updatingRole || selectedUser.role === 'USER'}
 						>
@@ -353,7 +353,7 @@
 						<Button
 							variant={selectedUser.role === 'ADMIN' ? 'default' : 'outline'}
 							size="sm"
-							class="flex-1 {selectedUser.role === 'ADMIN' ? 'bg-gradient-to-r from-primary to-accent hover:opacity-90' : ''}"
+							class="flex-1 {selectedUser.role === 'ADMIN' ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70' : ''}"
 							onclick={() => handleRoleChange(selectedUser?.id, 'ADMIN')}
 							disabled={adminUserService.updatingRole || selectedUser.role === 'ADMIN'}
 						>
@@ -364,16 +364,16 @@
 				</div>
 
 				<!-- Info Grid -->
-				<div class="mt-4 grid grid-cols-2 gap-3">
-					<div class="rounded-lg border border-border/50 bg-card/50 p-3">
+				<div class="grid grid-cols-2 gap-3">
+					<div class="rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm p-3">
 						<p class="text-xs text-muted-foreground uppercase tracking-wide">Created</p>
 						<p class="text-sm font-medium mt-1">{formatDate(selectedUser.createdAt ?? '')}</p>
 					</div>
-					<div class="rounded-lg border border-border/50 bg-card/50 p-3">
+					<div class="rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm p-3">
 						<p class="text-xs text-muted-foreground uppercase tracking-wide">Last Login</p>
 						<p class="text-sm font-medium mt-1">{formatLastLogin(selectedUser.lastLogin)}</p>
 					</div>
-					<div class="rounded-lg border border-border/50 bg-card/50 p-3">
+					<div class="rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm p-3">
 						<p class="text-xs text-muted-foreground uppercase tracking-wide">Email Verified</p>
 						<p class="text-sm font-medium mt-1 flex items-center gap-1.5">
 							{#if selectedUser.validated}
@@ -385,7 +385,7 @@
 							{/if}
 						</p>
 					</div>
-					<div class="rounded-lg border border-border/50 bg-card/50 p-3">
+					<div class="rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm p-3">
 						<p class="text-xs text-muted-foreground uppercase tracking-wide">Account</p>
 						<p class="text-sm font-medium mt-1 flex items-center gap-1.5">
 							{#if selectedUser.enabled}
@@ -401,13 +401,13 @@
 
 				<!-- Organizations -->
 				{#if selectedUser?.organizations && selectedUser.organizations.length > 0}
-					<div class="mt-4">
+					<div>
 						<p class="text-xs text-muted-foreground uppercase tracking-wide mb-2">
 							Organizations ({selectedUser.organizations.length})
 						</p>
 						<div class="space-y-2">
 							{#each selectedUser.organizations as org}
-								<div class="flex items-center gap-3 rounded-lg border border-border/50 bg-card/50 p-3">
+								<div class="flex items-center gap-3 rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm p-3">
 									<div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
 										<Building2 class="h-4 w-4 text-primary" />
 									</div>
@@ -423,7 +423,7 @@
 			</div>
 
 			<!-- Footer Actions -->
-			<div class="sticky bottom-0 mt-6 p-4 border-t border-border/50 bg-background/95 backdrop-blur-sm">
+			<div class="sticky bottom-0 mt-4 p-4 border-t border-border/50 bg-background/98 backdrop-blur-xl shadow-lg">
 				<div class="flex gap-2">
 					<Button
 						variant={selectedUser.enabled ? 'destructive' : 'default'}

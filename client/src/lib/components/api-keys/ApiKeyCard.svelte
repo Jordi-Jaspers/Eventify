@@ -31,46 +31,47 @@
 </script>
 
 <div
-	class="group flex items-center gap-4 p-3 rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl hover:border-primary/30 transition-all"
+	class="group flex items-center gap-4 p-4 rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl hover:border-primary/30 hover:shadow-lg transition-all"
 >
 	<!-- Key Icon -->
 	<div class="flex-shrink-0">
-		<div class="p-2 rounded-md bg-primary/10">
-			<Key class="w-4 h-4 text-primary" />
+		<div class="p-2.5 rounded-lg bg-primary/10">
+			<Key class="w-5 h-5 text-primary" />
 		</div>
 	</div>
 
 	<!-- Name & Masked Key -->
 	<div class="flex-1 min-w-0">
-		<p class="font-medium text-sm truncate">{apiKey.name}</p>
-		<code class="text-xs font-mono text-muted-foreground">{apiKey.maskedKey}</code>
+		<p class="font-semibold text-base truncate">{apiKey.name}</p>
+		<code class="text-xs font-mono text-muted-foreground/80">{apiKey.maskedKey}</code>
 	</div>
 
-	<!-- Metadata -->
-	<div class="hidden sm:flex items-center gap-6 text-xs text-muted-foreground">
+	<!-- Metadata Grid -->
+	<div class="hidden md:grid grid-cols-[100px_100px_100px_80px] gap-6 text-xs">
 		<div class="text-right">
-			<p class="text-muted-foreground/70">Created</p>
-			<p class="font-medium text-foreground">{formatDate(apiKey.createdAt || '')}</p>
+			<p class="text-[10px] uppercase tracking-wider text-muted-foreground/60 mb-1">Created</p>
+			<p class="font-medium text-sm text-foreground">{formatDate(apiKey.createdAt || '')}</p>
 		</div>
 		<div class="text-right">
-			<p class="text-muted-foreground/70">Expires</p>
-			<p class="font-medium text-foreground">{formatExpiration(apiKey.expiresAt)}</p>
+			<p class="text-[10px] uppercase tracking-wider text-muted-foreground/60 mb-1">Expires</p>
+			<p class="font-medium text-sm text-foreground">{formatExpiration(apiKey.expiresAt)}</p>
 		</div>
 		<div class="text-right">
-			<p class="text-muted-foreground/70">Last used</p>
-			<p class="font-medium text-foreground">{formatLastUsed(apiKey.lastUsedAt)}</p>
+			<p class="text-[10px] uppercase tracking-wider text-muted-foreground/60 mb-1">Last used</p>
+			<p class="font-medium text-sm text-foreground">{formatLastUsed(apiKey.lastUsedAt)}</p>
 		</div>
 		<div class="text-right">
-			<p class="text-muted-foreground/70">Requests</p>
-			<p class="font-medium text-foreground">{apiKey.totalRequests?.toLocaleString() || 0}</p>
+			<p class="text-[10px] uppercase tracking-wider text-muted-foreground/60 mb-1">Requests</p>
+			<p class="font-medium text-sm text-foreground">{apiKey.totalRequests?.toLocaleString() || 0}</p>
 		</div>
 	</div>
 
 	<!-- Revoke Button -->
 	<AlertDialog.Root bind:open={showRevokeDialog}>
 		<AlertDialog.Trigger
-			class="flex-shrink-0 p-2 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all rounded-md disabled:opacity-50"
+			class="flex-shrink-0 p-2 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all rounded-md disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2"
 			disabled={revoking}
+			aria-label="Revoke API key"
 		>
 			<Trash2 class="w-4 h-4" />
 		</AlertDialog.Trigger>

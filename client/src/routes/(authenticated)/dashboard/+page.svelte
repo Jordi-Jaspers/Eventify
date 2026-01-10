@@ -99,7 +99,8 @@
                     {#each organizations as org (org.organizationId)}
                         <button
                             onclick={() => handleOrgClick(org.organizationId!)}
-                            class="text-left"
+                            class="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
+                            aria-label="Open {org.organizationName} dashboard"
                         >
                             <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg hover:shadow-primary/50 hover:scale-[1.02] transition-all duration-200 cursor-pointer h-full">
                                 <CardHeader class="space-y-1">

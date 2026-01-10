@@ -53,11 +53,11 @@
 		<div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-50"></div>
 
 		<!-- Card Content -->
-		<CardHeader class="space-y-1 relative z-10">
+		<CardHeader class="space-y-2 relative z-10">
 			<CardTitle class="text-3xl font-bold text-center gradient-text-animated">
 				Email Verification
 			</CardTitle>
-			<CardDescription class="text-center text-base">
+			<CardDescription class="text-center text-base text-muted-foreground">
 				{#if status === 'verifying'}
 					Verifying your email address...
 				{:else if status === 'success'}
@@ -68,14 +68,14 @@
 			</CardDescription>
 		</CardHeader>
 
-		<CardContent class="flex flex-col items-center space-y-4 relative z-10">
+		<CardContent class="flex flex-col items-center space-y-6 relative z-10 pb-8">
 			{#if status === 'verifying'}
 				<div class="relative">
 					<!-- Animated gradient spinner -->
 					<div class="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-accent blur-xl opacity-50 animate-glow-pulse"></div>
 					<LoaderCircle class="relative h-16 w-16 animate-spin text-primary" />
 				</div>
-				<p class="text-muted-foreground text-center animate-fade-in">
+				<p class="text-muted-foreground text-center animate-fade-in text-sm">
 					Please wait while we verify your email...
 				</p>
 
@@ -87,11 +87,11 @@
 						<CircleCheck class="h-12 w-12 text-white" />
 					</div>
 				</div>
-				<div class="text-center space-y-2 animate-fade-in-up">
-					<h3 class="text-xl font-semibold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+				<div class="text-center space-y-3 animate-fade-in-up">
+					<h3 class="text-2xl font-bold bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent">
 						Success!
 					</h3>
-					<p class="text-foreground">
+					<p class="text-foreground text-base">
 						Your email has been successfully verified!
 					</p>
 					<p class="text-sm text-muted-foreground">
@@ -107,11 +107,11 @@
 						<CircleX class="h-12 w-12 text-white" />
 					</div>
 				</div>
-				<div class="text-center space-y-2 animate-fade-in-up">
-					<h3 class="text-xl font-semibold bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
+				<div class="text-center space-y-3 animate-fade-in-up">
+					<h3 class="text-2xl font-bold bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
 						Verification Failed
 					</h3>
-					<p class="text-center text-muted-foreground">{errorMessage || 'Unable to verify your email'}</p>
+					<p class="text-center text-foreground/90 text-base">{errorMessage || 'Unable to verify your email'}</p>
 					<p class="text-sm text-muted-foreground">
 						Redirecting to login page...
 					</p>

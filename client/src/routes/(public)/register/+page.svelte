@@ -123,7 +123,7 @@
     </div>
 
     <!-- Glassmorphism Card -->
-    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl">
+    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl ring-1 ring-border/10">
         <!-- Card Content -->
         <CardHeader class="space-y-1">
             <CardTitle class="text-2xl flex items-center gap-2">
@@ -225,7 +225,7 @@
                         <button
                                 type="button"
                                 onclick={() => (showPassword = !showPassword)}
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-0.5"
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                             {#if showPassword}
@@ -267,7 +267,7 @@
                         <button
                                 type="button"
                                 onclick={() => (showPasswordConfirmation = !showPasswordConfirmation)}
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-0.5"
                                 aria-label={showPasswordConfirmation ? 'Hide password' : 'Show password'}
                         >
                             {#if showPasswordConfirmation}
@@ -294,7 +294,7 @@
                 <!-- Submit Button -->
                 <Button
                         type="submit"
-                        class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+                        class="w-full mt-6 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
                         disabled={loading}
                 >
                     {#if loading}

@@ -155,7 +155,7 @@
 		<Sheet.Footer class="flex-row gap-3 sm:flex-row pb-6">
 			<Button
 				onclick={onClose}
-				class="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg shadow-primary/20"
+				class="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all"
 			>
 				Done
 			</Button>

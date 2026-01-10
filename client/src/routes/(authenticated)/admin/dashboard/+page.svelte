@@ -180,7 +180,7 @@
                                 {stats?.totalOrganizations?.toLocaleString() || '0'}
                             </div>
                             {#if getLatestGrowth()?.newOrganizationsGrowthPercentage !== null && getLatestGrowth()?.newOrganizationsGrowthPercentage !== undefined}
-                                <Badge variant={getBadgeVariant(getLatestGrowth()?.newOrganizationsGrowthPercentage)} class="mb-1">
+                                <Badge variant={getBadgeVariant(getLatestGrowth()?.newOrganizationsGrowthPercentage)} class="mb-1.5">
                                     {formatPercentage(getLatestGrowth()?.newOrganizationsGrowthPercentage)}
                                 </Badge>
                             {/if}
@@ -213,7 +213,7 @@
                                 {stats?.totalUsers?.toLocaleString() || '0'}
                             </div>
                             {#if getLatestGrowth()?.newUsersGrowthPercentage !== null && getLatestGrowth()?.newUsersGrowthPercentage !== undefined}
-                                <Badge variant={getBadgeVariant(getLatestGrowth()?.newUsersGrowthPercentage)} class="mb-1">
+                                <Badge variant={getBadgeVariant(getLatestGrowth()?.newUsersGrowthPercentage)} class="mb-1.5">
                                     {formatPercentage(getLatestGrowth()?.newUsersGrowthPercentage)}
                                 </Badge>
                             {/if}
@@ -396,7 +396,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Create Organization -->
                     <Button
-                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4"
+                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             onclick={() => (window.location.href = CLIENT_ROUTES.ADMIN_ORGANIZATIONS_NEW.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
@@ -407,7 +407,7 @@
 
                     <!-- Manage Users -->
                     <Button
-                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4"
+                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             onclick={() => goto(CLIENT_ROUTES.ADMIN_USERS_PAGE.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
@@ -418,7 +418,7 @@
 
                     <!-- Manage Organizations (Future) -->
                     <Button
-                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4"
+                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             onclick={() => (window.location.href = CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
                     >
                         <div class="flex flex-col items-center gap-2">

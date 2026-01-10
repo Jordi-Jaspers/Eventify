@@ -148,7 +148,7 @@
 			<Button
 				onclick={handleSubmit}
 				disabled={!canSubmit}
-				class="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg shadow-primary/20"
+				class="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all"
 			>
 				{#if creating}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
