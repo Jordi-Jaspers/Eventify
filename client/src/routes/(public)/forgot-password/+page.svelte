@@ -1,36 +1,126 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import Input from '$lib/components/ui/input/input.svelte';
+	import Label from '$lib/components/ui/label/label.svelte';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { KeyRound } from '@lucide/svelte';
+	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import AppLogo from '$lib/components/layout/AppLogo.svelte';
+	import { toast } from 'svelte-sonner';
+	import { CheckCircle, KeyRound, LoaderCircle, Mail } from '@lucide/svelte';
+	import { handleError } from '$lib/utils/error-handler';
+	import { requestPasswordReset } from '$lib/api/authentication/PasswordController';
+
+	let email: string = $state('');
+	let isSubmitting: boolean = $state(false);
+	let showSuccessMessage: boolean = $state(false);
+
+	async function handleSubmit(event: SubmitEvent): Promise<void> {
+		event.preventDefault();
+
+		if (!email.trim()) {
+			toast.error('Please enter your email address');
+			return;
+		}
+
+		isSubmitting = true;
+
+		try {
+			await requestPasswordReset(email.trim());
+			showSuccessMessage = true;
+		} catch (error: unknown) {
+			const { message } = handleError(error, 'Unable to process password reset request');
+			toast.error(message);
+		} finally {
+			isSubmitting = false;
+		}
+	}
 </script>
 
 <svelte:head>
 	<title>Forgot Password - Eventify</title>
 </svelte:head>
 
-<div class="min-h-screen flex items-center justify-center bg-background px-4 py-8">
-	<div class="w-full max-w-md">
-		<Card class="bg-card/50 backdrop-blur-xl border-border/50 shadow-lg">
-			<CardHeader class="space-y-3">
-				<div class="flex justify-center">
-					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-						<KeyRound class="h-6 w-6 text-primary" />
-					</div>
-				</div>
-				<CardTitle class="text-2xl font-bold text-center">Reset Password</CardTitle>
-				<CardDescription class="text-center">
-					Password reset coming soon
-				</CardDescription>
-			</CardHeader>
-			<CardContent class="space-y-4">
-				<p class="text-center text-muted-foreground text-sm">
-					This feature is under development. Please contact support if you need to reset your password.
-				</p>
-
-				<Button href="/login" class="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all">
-					Back to Login
-				</Button>
-			</CardContent>
-		</Card>
+<div class="max-w-md mx-auto">
+	<div class="mb-8">
+		<AppLogo size="medium" subtitle="Real-time monitoring and event tracking" />
 	</div>
+
+	<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
+		<CardHeader class="space-y-2">
+			<CardTitle class="text-2xl flex items-center gap-2">
+				<KeyRound class="w-5 h-5 text-primary" />
+				Reset Password
+			</CardTitle>
+			<CardDescription>
+				Enter your email address and we'll send you a reset link
+			</CardDescription>
+		</CardHeader>
+
+		<CardContent>
+			{#if showSuccessMessage}
+				<div class="space-y-6">
+					<Alert class="bg-primary/5 border-primary/30 backdrop-blur-sm">
+						<CheckCircle class="h-5 w-5 text-primary" />
+						<AlertDescription class="text-foreground">
+							If an account exists with this email, you will receive a password reset link shortly.
+						</AlertDescription>
+					</Alert>
+
+					<Button
+						href={CLIENT_ROUTES.LOGIN_PAGE.path}
+						class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+					>
+						Back to Login
+					</Button>
+				</div>
+			{:else}
+				<form onsubmit={handleSubmit} class="space-y-4">
+					<div class="space-y-2">
+						<Label for="email">Email</Label>
+						<div class="relative">
+							<Mail class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+							<Input
+								id="email"
+								type="email"
+								placeholder="you@example.com"
+								bind:value={email}
+								disabled={isSubmitting}
+								class="pl-10 bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+								required
+							/>
+						</div>
+					</div>
+
+					<Button
+						type="submit"
+						class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+						disabled={isSubmitting}
+					>
+						{#if isSubmitting}
+							<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+							Sending...
+						{:else}
+							Send Reset Link
+						{/if}
+					</Button>
+
+					<div class="text-center">
+						<a
+							href={CLIENT_ROUTES.LOGIN_PAGE.path}
+							class="text-sm text-primary hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+							tabindex={isSubmitting ? -1 : 0}
+						>
+							Back to Login
+						</a>
+					</div>
+				</form>
+			{/if}
+		</CardContent>
+	</Card>
+
+	<p class="text-center text-xs text-muted-foreground mt-6">
+		By using this service, you agree to our Terms of Service and Privacy Policy
+	</p>
 </div>

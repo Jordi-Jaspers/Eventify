@@ -29,6 +29,25 @@ test.describe('Forgot Password Page Screenshots', () => {
 					fullPage: true
 				});
 			});
+
+			test(`filled email`, async ({ page }, testInfo) => {
+				await page.fill('input[type="email"]', 'user@example.com');
+				await page.waitForTimeout(300);
+				await page.screenshot({
+					path: getScreenshot(`02-filled-email-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
+			});
+
+			test(`success message`, async ({ page }, testInfo) => {
+				await page.fill('input[type="email"]', 'user@example.com');
+				await page.getByRole('button', { name: 'Send Reset Link' }).click();
+				await page.waitForTimeout(1000);
+				await page.screenshot({
+					path: getScreenshot(`03-success-message-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
+			});
 		});
 	}
 });

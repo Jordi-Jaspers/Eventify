@@ -5,6 +5,7 @@ export type LoginRequest = components['schemas']['LoginRequest'];
 export type RegisterRequest = components['schemas']['RegisterUserRequest'];
 export type AuthenticationResponse = components['schemas']['AuthenticationResponse'];
 export type RegisterResponse = components['schemas']['RegisterResponse'];
+export type ForgotPasswordRequest = components['schemas']['ForgotPasswordRequest'];
 
 // ================ User ===================
 export type UserResponse = components['schemas']['UserResponse'];
