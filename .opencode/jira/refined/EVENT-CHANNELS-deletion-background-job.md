@@ -70,3 +70,4 @@ N/A - Background infrastructure
 *   **Note**: Event table/entity doesn't exist yet - this job will be fully functional once Event Ingestion epic is complete. Implement the channel deletion logic; event deletion can be added when events exist.
 *   **Metrics**: Consider adding Micrometer metrics for observability
 *   **Testing**: Unit test with mocked repository; integration test with test containers
+*   **Ownership model**: This job deletes channels regardless of ownership type (personal or organization) - it only cares about the PENDING_DELETION status

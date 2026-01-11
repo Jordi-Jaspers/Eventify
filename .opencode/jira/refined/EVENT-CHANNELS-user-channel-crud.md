@@ -11,13 +11,14 @@
 **So that** I can organize my events into logical groupings
 
 ## 2. Business Context & Value
-Personal channels allow individual users to segment their event streams. A developer might have separate channels for "Backend Errors", "Frontend Errors", and "Deployment Events". This is the core self-service functionality for personal accounts.
+Personal channels allow individual users to segment their event streams. A developer might have separate channels for "Backend Errors", "Frontend Errors", and "Deployment Events". Channels accumulate time-based events that are later visualized as a timeline. This is the core self-service functionality for personal accounts.
 
 ## 3. Acceptance Criteria
 *   [ ] **Scenario 1**: User creates a personal channel
     *   Given I am authenticated
     *   When I create a channel with name "My App Errors" and optional description
-    *   Then a new channel is created with scope USER and my user ID as owner
+    *   Then a new channel is created with my user ID as owner
+    *   And organization_id is NULL
     *   And I receive the channel details in the response
 
 *   [ ] **Scenario 2**: User lists their personal channels
@@ -25,6 +26,7 @@ Personal channels allow individual users to segment their event streams. A devel
     *   When I request my channel list
     *   Then I see all 3 channels with their name, status, and created date
     *   And I do not see channels belonging to other users
+    *   And I do not see organization channels (even orgs I'm a member of)
 
 *   [ ] **Scenario 3**: User updates channel details
     *   Given I have a channel named "Old Name"
@@ -51,8 +53,8 @@ Personal channels allow individual users to segment their event streams. A devel
     *   And a background job will clean up the channel and its events
 
 *   [ ] **Scenario 7**: Duplicate channel name rejected
-    *   Given I have a channel named "Errors"
-    *   When I try to create another channel named "Errors"
+    *   Given I have a personal channel named "Errors"
+    *   When I try to create another personal channel named "Errors"
     *   Then I receive a 409 Conflict error
 
 *   [ ] **Scenario 8**: Frontend displays channels on dashboard
@@ -77,9 +79,9 @@ Personal channels allow individual users to segment their event streams. A devel
     *   `UpdateChannelRequest`: { name?, description? }
     *   `ChannelResponse`: { id, name, description, status, retentionDays, createdAt, updatedAt }
     *   `ChannelListResponse`: { channels[], pagination }
-*   **Authorization**: JWT required, user can only manage their own channels
+*   **Authorization**: JWT required, user can only manage their own channels (where user_id = currentUser AND organization_id IS NULL)
 *   **Validation**:
-    *   Name: required, 1-100 chars, unique per user
+    *   Name: required, 1-100 chars, unique per user (for personal channels)
     *   Description: optional, max 500 chars
 
 ## 5. Design & UI/UX
@@ -92,9 +94,12 @@ Personal channels allow individual users to segment their event streams. A devel
 
 ## 6. Implementation Notes / Research
 *   **Backend Package**: `io.github.eventify.api.channel`
-*   **Follow patterns from**: `api/apikey` (similar CRUD structure)
+*   **Follow patterns from**: `api/apikey` (similar CRUD structure and ownership model)
 *   **Controller**: `UserChannelController`
 *   **Service**: `ChannelService` (shared between user and org)
+*   **Repository queries**:
+    *   Personal channels: `findByUserIdAndOrganizationIdIsNull(userId)`
+    *   Ownership check: `findByIdAndUserIdAndOrganizationIdIsNull(id, userId)`
 *   **Frontend Route**: Add to existing `/dashboard` page or create `/dashboard/channels`
 *   **API Client**: Generate or create `ChannelController.ts` in `client/src/lib/api/`
 *   **Paths.java**: Add channel path constants (some already exist: `CHANNELS_PATH`)

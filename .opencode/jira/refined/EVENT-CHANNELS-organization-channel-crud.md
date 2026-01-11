@@ -11,14 +11,14 @@
 **So that** my team can share event streams across the organization
 
 ## 2. Business Context & Value
-Organizations need shared channels that all members can access. This enables teams to collectively monitor production systems, share event data, and collaborate on debugging. Only admins/owners should manage channels, but all members can view them.
+Organizations need shared channels that all members can access. This enables teams to collectively monitor production systems, share event data, and collaborate on debugging. Only admins/owners should manage channels, but all members can view them. Channels accumulate time-based events that are later visualized as a timeline.
 
 ## 3. Acceptance Criteria
 *   [ ] **Scenario 1**: Org owner/admin creates an organization channel
     *   Given I am an OWNER or ADMIN of an organization
     *   When I create a channel for that organization
-    *   Then a new channel is created with scope ORGANIZATION
-    *   And organization_id is set to my org
+    *   Then a new channel is created with organization_id set to my org
+    *   And user_id is set to me (the creator, for audit purposes)
 
 *   [ ] **Scenario 2**: Org member views organization channels
     *   Given I am a MEMBER of an organization
@@ -67,6 +67,9 @@ Organizations need shared channels that all members can access. This enables tea
     *   All endpoints: User must be member of organization
     *   Read: MEMBER, ADMIN, OWNER
     *   Write (create/update/pause/resume/delete): ADMIN, OWNER only
+*   **Ownership Model**:
+    *   `organization_id` = the org that owns the channel
+    *   `user_id` = the user who created the channel (audit trail)
 *   **Reuse**: Same DTOs and service methods as User Channel CRUD where possible
 
 ## 5. Design & UI/UX
@@ -80,4 +83,7 @@ Organizations need shared channels that all members can access. This enables tea
 *   **Authorization**: Use existing `OrganizationRole` enum and membership checks
 *   **Reference**: See `OrganizationApiKeyController` for similar pattern
 *   **Frontend Route**: `/organizations/[orgId]/channels` or section on org dashboard
-*   **Shared Service**: `ChannelService` handles both user and org channels with scope parameter
+*   **Shared Service**: `ChannelService` handles both user and org channels
+*   **Repository queries**:
+    *   Org channels: `findByOrganizationId(orgId)`
+    *   Ownership check: `findByIdAndOrganizationId(id, orgId)`
