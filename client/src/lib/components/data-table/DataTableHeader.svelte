@@ -22,9 +22,6 @@
 		columns.reduce((sum: number, col: DataTableColumn<T>) => sum + (col.colSpan ?? 1), 0)
 	);
 
-	// Get the appropriate grid class based on total columns
-	const gridClass: string = $derived(`grid-cols-${totalCols}`);
-
 	function handleSort(key: string, sortable: boolean = false): void {
 		if (!sortable) return;
 		onSort(key);
@@ -42,7 +39,7 @@
 </script>
 
 <div
-	class="hidden md:grid {gridClass} gap-4 px-4 py-3 border-b border-border/50 font-medium text-sm text-muted-foreground bg-muted/30"
+	class="hidden md:grid grid-cols-12 gap-4 px-4 py-3 border-b border-border/50 font-medium text-sm text-muted-foreground bg-muted/30"
 >
 	{#each columns as column}
 		{@const colSpan = column.colSpan ?? 1}

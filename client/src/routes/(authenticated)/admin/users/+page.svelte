@@ -157,6 +157,16 @@
 		}
 	}
 
+	// Quick force reset from dropdown
+	async function handleQuickForceReset(user: UserDetailsResponse): Promise<void> {
+		await adminUserService.forcePasswordReset(user.id, user.email);
+	}
+
+	// Force reset from sheet
+	async function handleForcePasswordReset(userId: number | undefined, email: string | undefined): Promise<void> {
+		await adminUserService.forcePasswordReset(userId, email);
+	}
+
 	onMount(() => dataTableService.load());
 </script>
 
@@ -284,13 +294,16 @@
 											Admin
 										</DropdownMenu.Item>
 									</DropdownMenu.SubContent>
-								</DropdownMenu.Sub>
-								<DropdownMenu.Separator />
-								<DropdownMenu.Item disabled class="cursor-not-allowed opacity-50">
-									<Key class="mr-2 h-4 w-4" />
-									<span>Force Password Reset</span>
-									<span class="ml-auto text-xs text-muted-foreground">(Soon)</span>
-								</DropdownMenu.Item>
+							</DropdownMenu.Sub>
+							<DropdownMenu.Separator />
+							<DropdownMenu.Item 
+								onclick={() => handleQuickForceReset(user)}
+								class="cursor-pointer"
+								disabled={adminUserService.forcingPasswordReset}
+							>
+								<Key class="mr-2 h-4 w-4" />
+								<span>Force Password Reset</span>
+							</DropdownMenu.Item>
 							</DropdownMenu.Content>
 						</DropdownMenu.Root>
 					</div>
@@ -437,9 +450,17 @@
 						{:else}
 							<Unlock class="mr-2 h-4 w-4" />
 							Unlock User
-						{/if}
-					</Button>
-					<Button variant="outline" onclick={closeUserSheet}>
+					{/if}
+				</Button>
+				<Button 
+					variant="outline" 
+					onclick={() => handleForcePasswordReset(selectedUser?.id, selectedUser?.email)}
+					disabled={adminUserService.forcingPasswordReset}
+				>
+					<Key class="mr-2 h-4 w-4" />
+					Reset Password
+				</Button>
+				<Button variant="outline" onclick={closeUserSheet}>
 						Close
 					</Button>
 				</div>

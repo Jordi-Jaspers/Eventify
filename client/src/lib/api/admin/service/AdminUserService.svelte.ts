@@ -1,4 +1,4 @@
-import { lockUser, unlockUser, updateUserRole } from '../AdminUserController';
+import { lockUser, unlockUser, updateUserRole, forcePasswordReset } from '../AdminUserController';
 import type { UserDetailsResponse } from '$lib/api/models';
 import { toast } from 'svelte-sonner';
 import { handleError } from '$lib/utils/error-handler';
@@ -6,12 +6,13 @@ import { handleError } from '$lib/utils/error-handler';
 /**
  * Admin User Service
  * 
- * Manages user administration operations (lock/unlock, role changes)
+ * Manages user administration operations (lock/unlock, role changes, password resets)
  */
 export class AdminUserService {
 	// Loading states
 	updatingRole = $state<boolean>(false);
 	lockingUser = $state<boolean>(false);
+	forcingPasswordReset = $state<boolean>(false);
 
 	/**
 	 * Update a user's role (USER or ADMIN)
@@ -70,6 +71,25 @@ export class AdminUserService {
 	 */
 	async unlock(userId: number | undefined): Promise<UserDetailsResponse | null> {
 		return this.toggleLock(userId, true);
+	}
+
+	/**
+	 * Force a password reset for a user due to security concerns.
+	 * Immediately invalidates the current password and sends a reset email.
+	 */
+	async forcePasswordReset(userId: number | undefined, email: string | undefined): Promise<void> {
+		if (!userId || !email || this.forcingPasswordReset) return;
+
+		this.forcingPasswordReset = true;
+		try {
+			await forcePasswordReset(userId);
+			toast.success(`Password invalidated. Reset email sent to ${email}`);
+		} catch (error: unknown) {
+			const { message }: { message: string } = handleError(error, 'Failed to force password reset');
+			toast.error(message);
+		} finally {
+			this.forcingPasswordReset = false;
+		}
 	}
 }
 

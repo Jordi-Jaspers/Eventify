@@ -8,10 +8,15 @@ import io.github.eventify.api.user.model.request.UpdatePasswordRequest;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.email.service.sender.EmailService;
 import io.github.eventify.common.exception.PasswordIncorrectException;
+import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
+
+import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import static io.github.eventify.common.exception.ApiErrorCode.USER_NOT_FOUND_ERROR;
 
 /**
  * A service to manage the password of a user.
@@ -64,5 +69,25 @@ public class PasswordService {
         tokenService.invalidateTokensForUser(user, TokenType.RESET_PASSWORD_TOKEN);
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
+    }
+
+    /**
+     * Forces a password reset for the specified user due to security concerns.
+     * Immediately invalidates the user's current password by setting it to a random value,
+     * invalidates all existing password reset tokens, and sends a password reset email.
+     * The user must use the reset link to regain access.
+     *
+     * @param userId the ID of the user to reset
+     * @throws DataNotFoundException if user not found
+     */
+    public void forcePasswordReset(final Long userId) {
+        final User user = userRepository.findById(userId)
+            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
+
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        userRepository.save(user);
+
+        tokenService.invalidateTokensForUser(user, TokenType.values());
+        emailService.sendPasswordResetEmail(user);
     }
 }

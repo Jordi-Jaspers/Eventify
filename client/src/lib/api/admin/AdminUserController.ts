@@ -95,3 +95,17 @@ export async function updateUserRole(userId: number, role: 'USER' | 'ADMIN'): Pr
 
     return data;
 }
+
+/**
+ * Force a password reset for a user (sends reset email)
+ * @param userId The user ID to reset
+ */
+export async function forcePasswordReset(userId: number): Promise<void> {
+    const { error } = await client.POST('/v1/admin/user/{id}/force-reset', {
+        params: { path: { id: userId } }
+    });
+
+    if (error) {
+        throw error;
+    }
+}
