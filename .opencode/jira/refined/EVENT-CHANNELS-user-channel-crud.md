@@ -77,7 +77,7 @@ Personal channels allow individual users to segment their event streams. A devel
 *   **Request/Response DTOs**:
     *   `CreateChannelRequest`: { name, description? }
     *   `UpdateChannelRequest`: { name?, description? }
-    *   `ChannelResponse`: { id, name, description, status, retentionDays, createdAt, updatedAt }
+    *   `ChannelResponse`: { id, name, description, status, createdAt, updatedAt }
     *   `ChannelListResponse`: { channels[], pagination }
 *   **Authorization**: JWT required, user can only manage their own channels (where user_id = currentUser AND organization_id IS NULL)
 *   **Validation**:
@@ -103,3 +103,4 @@ Personal channels allow individual users to segment their event streams. A devel
 *   **Frontend Route**: Add to existing `/dashboard` page or create `/dashboard/channels`
 *   **API Client**: Generate or create `ChannelController.ts` in `client/src/lib/api/`
 *   **Paths.java**: Add channel path constants (some already exist: `CHANNELS_PATH`)
+*   **Note**: Retention period is a user-level setting (`user.retention_days`), not per-channel. Default 90 days, range 90-1825 days (3 months to 5 years). DB column and entity field already exist. UI slider to be added in developer settings.

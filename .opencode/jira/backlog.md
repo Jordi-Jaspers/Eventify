@@ -1,3 +1,17 @@
+# Epic: Event Channels
+
+- [ ] **User/Organization Retention Settings UI**:
+    - DB columns already exist: `user.retention_days` and `organization.retention_days`
+    - CHECK constraints enforce range: 90-1825 days (3 months to 5 years), default 90
+    - Developer settings: New "Channel Settings" tab with retention slider
+    - Organization settings: New "Channel Settings" tab with retention slider (OWNER/ADMIN only)
+    - Display human-readable format (e.g., "3 months", "1 year")
+    - Warn about data deletion if reducing retention period
+    - Backend: PUT endpoint to update retention_days for user/org
+    - Discuss UI options during refinement
+
+---
+
 # Epic: Event Ingestion
 
 **Context**: The core functionality - receiving and storing events via API. Events are immutable log entries with metadata, severity, and payload. This should be optimized for high write throughput. high availability, high scalability. just imagine external systems sending a couple of events per second or more.
@@ -100,9 +114,9 @@
 
 - [ ] **Channel Settings Page**:
     - Edit name, description
-    - Change retention period (warning if reducing - data will be deleted) - future
     - Pause/Resume channel toggle
     - Danger zone: permanently delete channel and all events
+    - Note: Per-channel retention override is in Future Considerations
 
 ---
 
@@ -113,14 +127,14 @@
 ## Backlog Items
 
 - [ ] **Retention Policy Configuration**:
-    - Each channel has a `retention_days` setting
-    - Default: 30 days (hardcoded constant initially, configurable later)
-    - Options: 3 months min - 5 years max
-    - Organization channels may have different defaults
+    - See "User/Organization Retention Settings UI" under Event Channels epic for UI implementation
+    - DB columns already exist with CHECK constraints (90-1825 days)
+    - This item covers backend service logic for applying retention during cleanup
 
 - [ ] **Retention Cleanup Job**:
     - Scheduled background job (daily or hourly)
-    - Delete events where `received_at < NOW() - retention_days`
+    - Delete events where `received_at < NOW() - owner's retention_days`
+    - Look up retention from user (personal channel) or organization (org channel)
     - Batch deletion to avoid locking issues
     - Logging/metrics: how many events deleted per run
 
@@ -173,6 +187,7 @@ These are ideas to keep in mind for architecture decisions but not to implement 
 - [ ] **API Key Scopes**: Fine-grained permissions (read-only keys, write-only keys)
 - [ ] **Multi-region**: Consider event ingestion in multiple regions
 - [ ] **Export**: Download events as CSV/JSON for compliance/backup
+- [ ] **Per-Channel Retention Override**: Allow channels to override user/org retention_days setting. Add optional `retention_days` column to channel table. UI: Channel settings page with retention slider. Falls back to user/org setting if not specified.
 
 
 ---

@@ -100,6 +100,12 @@ public class User implements UserDetails, PageableItem {
     )
     private List<OrganizationMembership> organizations = new ArrayList<>();
 
+    @Column(
+        name = "retention_days",
+        nullable = false
+    )
+    private Integer retentionDays = 90;
+
     @Transient
     private Token accessToken;
 

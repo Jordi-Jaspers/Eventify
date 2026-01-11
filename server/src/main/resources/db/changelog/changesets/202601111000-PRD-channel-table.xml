@@ -1,0 +1,57 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601111000-PRD-channel-table.xml">
+
+    <changeSet id="202601111000-PRD-channel-table-1" author="backend-agent">
+        <comment>Creating channel table for event streaming channels.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS channel
+            (
+                id              SERIAL PRIMARY KEY,
+                name            VARCHAR(100) NOT NULL,
+                description     VARCHAR(500) NULL,
+                user_id         INTEGER NOT NULL,
+                organization_id INTEGER NULL,
+                status          VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+                created_at      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                updated_at      TIMESTAMPTZ NULL,
+                FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
+                FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601111000-PRD-channel-table-2" author="backend-agent">
+        <comment>Creating indexes and unique constraints for channel table.</comment>
+        <sql>
+            CREATE INDEX idx_channel_user ON channel(user_id) WHERE organization_id IS NULL;
+            CREATE INDEX idx_channel_org ON channel(organization_id) WHERE organization_id IS NOT NULL;
+            CREATE INDEX idx_channel_status ON channel(status);
+            CREATE UNIQUE INDEX uq_channel_user_name ON channel(user_id, lower(name)) WHERE organization_id IS NULL;
+            CREATE UNIQUE INDEX uq_channel_org_name ON channel(organization_id, lower(name)) WHERE organization_id IS NOT NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601111000-PRD-channel-table-3" author="backend-agent">
+        <comment>Adding documentation for channel table, columns, and indexes.</comment>
+        <sql>
+            COMMENT ON TABLE channel IS 'Stores channels for event streaming';
+            COMMENT ON COLUMN channel.id IS 'Unique identifier for the channel';
+            COMMENT ON COLUMN channel.name IS 'Channel name (unique per user for personal, per org for organization)';
+            COMMENT ON COLUMN channel.description IS 'Optional channel description';
+            COMMENT ON COLUMN channel.user_id IS 'User who owns (personal) or created (org) this channel';
+            COMMENT ON COLUMN channel.organization_id IS 'Organization this channel belongs to (null for personal channels)';
+            COMMENT ON COLUMN channel.status IS 'Channel status (ACTIVE, PAUSED, PENDING_DELETION)';
+            COMMENT ON COLUMN channel.created_at IS 'Timestamp when the channel was created';
+            COMMENT ON COLUMN channel.updated_at IS 'Timestamp when the channel was last updated';
+            COMMENT ON INDEX idx_channel_user IS 'Partial index for personal channels';
+            COMMENT ON INDEX idx_channel_org IS 'Partial index for organization channels';
+            COMMENT ON INDEX idx_channel_status IS 'Index for filtering by channel status';
+            COMMENT ON INDEX uq_channel_user_name IS 'Partial unique constraint for personal channel names (case-insensitive)';
+            COMMENT ON INDEX uq_channel_org_name IS 'Partial unique constraint for organization channel names (case-insensitive)';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

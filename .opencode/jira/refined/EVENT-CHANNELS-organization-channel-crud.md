@@ -87,3 +87,4 @@ Organizations need shared channels that all members can access. This enables tea
 *   **Repository queries**:
     *   Org channels: `findByOrganizationId(orgId)`
     *   Ownership check: `findByIdAndOrganizationId(id, orgId)`
+*   **Note**: Retention period is an organization-level setting (`organization.retention_days`), not per-channel. Default 90 days, range 90-1825 days (3 months to 5 years). DB column and entity field already exist. UI slider to be added in org settings.
