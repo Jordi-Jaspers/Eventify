@@ -1,55 +1,6 @@
-# Epic: Account Management
-
-- [ } **Implement Forgot Password Flow**:
-    - Backend already supports password reset tokens
-    - Client needs UI for requesting reset and setting new password
-
-# Epic: Event Channels (formerly "Checks")
-
-**Context**: A "Channel" is a named destination for events. Think of it like a topic or stream. Users can have personal channels, and organizations can have shared channels. Events are sent to a specific channel via API.
-
-## Naming Considerations
-- Alternatives considered: "Check", "Stream", "Timeline", "Feed", "Topic", "Log"
-- **Recommendation**: "Channel" - familiar (Slack channels), implies a stream of data, enterprise-friendly
-- Other viable options: "Stream" (AWS Kinesis-like), "Feed" (activity feed), "Log" (developer-friendly)
-
-## Backlog Items
-
-- [ ] **Channel Entity & Database Schema**:
-    - New `channel` table with: id, name, slug, description, scope (USER or ORGANIZATION), owner_id (user), organization_id (nullable), status (ACTIVE, PAUSED, ARCHIVED), retention_days (default 30), created_at, created_by, updated_at, archived_at
-    - Unique constraint on (scope, owner_id, slug) for personal channels
-    - Unique constraint on (scope, organization_id, slug) for org channels
-
-- [ ] **User Channel CRUD**:
-    - User can create a personal channel (name, optional description)
-    - User can list their personal channels
-    - User can update channel name/description
-    - User can archive a channel (soft delete, events retained until retention expires)
-    - User can pause a channel (stops accepting new events, useful for debugging)
-
-- [ ] **Organization Channel CRUD**:
-    - Org OWNER/ADMIN can create organization channels
-    - Org members can view organization channels (based on role permissions TBD)
-    - Org OWNER/ADMIN can update/archive/pause channels
-    - Shared visibility across all org members
-
-- [ ] **Channel Access via API Key**:
-    - API request to send event must specify channel (by slug or id)
-    - Personal API key -> can only send to user's personal channels
-    - Organization API key -> can only send to that org's channels
-    - Validation: 403 if key scope doesn't match channel scope
-
-- [ ] **Admin: Global Channel Overview**:
-    - Admin can view all channels across the platform
-    - Filter by: user, organization, status, created date
-    - Admin can archive any channel (with reason)
-    - Stats: total channels, events per channel, most active channels
-
----
-
 # Epic: Event Ingestion
 
-**Context**: The core functionality - receiving and storing events via API. Events are immutable log entries with metadata, severity, and payload.
+**Context**: The core functionality - receiving and storing events via API. Events are immutable log entries with metadata, severity, and payload. This should be optimized for high write throughput. high availability, high scalability. just imagine external systems sending a couple of events per second or more.
 
 ## Backlog Items
 
@@ -59,9 +10,9 @@
     - Partitioning consideration: by received_at for efficient retention cleanup
 
 - [ ] **Event Ingestion API Endpoint**:
-    - `POST /v1/events` or `POST /v1/channels/{slug}/events`
-    - Request body: { channel: "my-channel", severity: "INFO", title: "...", data: "...", metadata: {...}, timestamp: "..." }
+    - `POST /v1/events` with body `{ channelId, severity, title, data, metadata, timestamp }`
     - Authentication: API key only (not JWT - this is for programmatic use)
+    - Channel access validation: API key scope must match channel scope
     - Response: 201 with event ID, or 202 if async processing
     - Validation: channel exists, API key has access, payload size limits
 
@@ -93,14 +44,14 @@
 ## Backlog Items
 
 - [ ] **Channel Timeline View (Frontend)**:
-    - New page: `/dashboard/channels/{slug}` or `/organizations/{orgId}/channels/{slug}`
+    - New page: `/dashboard/channels/{id}` or `/organizations/{orgId}/channels/{id}`
     - Display events in reverse chronological order (newest first)
     - Each event shows: severity badge, title, timestamp, collapsible details
     - Auto-refresh / real-time updates (polling initially, WebSocket later)
     - Infinite scroll or pagination for older events
 
 - [ ] **Channel Timeline API Endpoint**:
-    - `GET /v1/channels/{slug}/events` - list events for a channel
+    - `GET /v1/channels/{id}/events` - list events for a channel
     - Query params: limit, before (cursor), after (cursor), severity[], search, from_date, to_date
     - Response: paginated list with cursor for infinite scroll
     - Authorization: user must own channel or be member of org that owns it
@@ -134,7 +85,7 @@
 - [ ] **Personal Dashboard - Channels Overview**:
     - New section on user dashboard: "My Channels"
     - List all personal channels with: name, status, event count (last 24h), last event time
-    - Quick action buttons: view timeline, pause, archive
+    - Quick action buttons: view timeline, pause, delete
     - "Create Channel" button
 
 - [ ] **Organization Dashboard - Channels Overview**:
@@ -143,15 +94,14 @@
     - Role-based visibility of management actions
 
 - [ ] **Channel Creation Modal/Page**:
-    - Form: name (generates slug), description, retention period (dropdown: 7d, 30d, 90d, 1yr)
+    - Form: name, description
     - Preview of API endpoint and example curl command
     - Show API key selector (which key to use in example)
 
 - [ ] **Channel Settings Page**:
     - Edit name, description
-    - Change retention period (warning if reducing - data will be deleted)
+    - Change retention period (warning if reducing - data will be deleted) - future
     - Pause/Resume channel toggle
-    - Archive channel (with confirmation)
     - Danger zone: permanently delete channel and all events
 
 ---
@@ -164,7 +114,7 @@
 
 - [ ] **Retention Policy Configuration**:
     - Each channel has a `retention_days` setting
-    - Default: 30 days (configurable at system level)
+    - Default: 30 days (hardcoded constant initially, configurable later)
     - Options: 3 months min - 5 years max
     - Organization channels may have different defaults
 
@@ -191,12 +141,6 @@
 
 ## Backlog Items
 
-- [ ] **Admin Channels Dashboard**:
-    - List all channels across all users and orgs
-    - Columns: name, owner, scope, status, event count, created date
-    - Actions: archive channel, view timeline
-    - Filters: scope, status, owner type
-
 - [ ] **Admin Events/Usage Dashboard**:
     - High-level stats: total events today/week/month, events by severity
     - Top channels by volume
@@ -213,6 +157,8 @@
 
 These are ideas to keep in mind for architecture decisions but not to implement now:
 
+- [ ] **Completely refactor landing page** - make it more user friendly, modern, and informative.
+- [ ] **Support / Help buttons** - guide users to docs or support chat from the avatar modal in sidebar.
 - [ ] **Company Login SSO / SAML** - enterprise authentication, user not searchable by regular users / org.
 - [ ] **Long-Lived Refresh Tokens / Remember me**
 - [ ] **Multi-Token Support / Management up to 5**
