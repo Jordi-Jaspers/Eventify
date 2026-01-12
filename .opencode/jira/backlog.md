@@ -1,17 +1,3 @@
-# Epic: Event Channels
-
-- [ ] **User/Organization Retention Settings UI**:
-    - DB columns already exist: `user.retention_days` and `organization.retention_days`
-    - CHECK constraints enforce range: 90-1825 days (3 months to 5 years), default 90
-    - Developer settings: New "Channel Settings" tab with retention slider
-    - Organization settings: New "Channel Settings" tab with retention slider (OWNER/ADMIN only)
-    - Display human-readable format (e.g., "3 months", "1 year")
-    - Warn about data deletion if reducing retention period
-    - Backend: PUT endpoint to update retention_days for user/org
-    - Discuss UI options during refinement
-
----
-
 # Epic: Event Ingestion
 
 **Context**: The core functionality - receiving and storing events via API. Events are immutable log entries with metadata, severity, and payload. This should be optimized for high write throughput. high availability, high scalability. just imagine external systems sending a couple of events per second or more.

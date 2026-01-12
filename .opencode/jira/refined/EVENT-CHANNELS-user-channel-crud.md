@@ -103,4 +103,4 @@ Personal channels allow individual users to segment their event streams. A devel
 *   **Frontend Route**: Add to existing `/dashboard` page or create `/dashboard/channels`
 *   **API Client**: Generate or create `ChannelController.ts` in `client/src/lib/api/`
 *   **Paths.java**: Add channel path constants (some already exist: `CHANNELS_PATH`)
-*   **Note**: Retention period is a user-level setting (`user.retention_days`), not per-channel. Default 90 days, range 90-1825 days (3 months to 5 years). DB column and entity field already exist. UI slider to be added in developer settings.
+*   **Note**: Retention period is a user-level setting (`user.retention_days`), not per-channel. Default 90 days, range 90-1825 days (3 months to 5 years). DB column and entity field already exist. Retention UI will be in a new **"Data & Storage"** tab in user settings (see: EVENT-CHANNELS-retention-settings-ui story).
