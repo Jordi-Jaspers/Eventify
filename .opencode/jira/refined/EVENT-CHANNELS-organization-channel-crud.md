@@ -52,6 +52,12 @@ Organizations need shared channels that all members can access. This enables tea
     *   Then I see the organization's channels
     *   And management actions are shown only if I am ADMIN or OWNER
 
+*   [ ] **Scenario 8**: Empty state when no channels exist
+    *   Given the organization has no channels
+    *   When I view the organization dashboard
+    *   Then I see a friendly message (e.g., "This organization doesn't have any channels yet")
+    *   And a "Create Channel" button is visible only if I am OWNER or ADMIN
+
 ## 4. Technical Requirements
 *   **API Endpoints**:
     | Method | Path | Description |

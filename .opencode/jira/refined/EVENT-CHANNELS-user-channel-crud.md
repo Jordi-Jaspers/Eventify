@@ -63,6 +63,12 @@ Personal channels allow individual users to segment their event streams. A devel
     *   Then I see a "My Channels" section listing my channels
     *   And I can create, edit, pause/resume, and delete channels from the UI
 
+*   [ ] **Scenario 9**: Empty state when no channels exist
+    *   Given I have no personal channels
+    *   When I view my dashboard
+    *   Then I see a friendly message (e.g., "You don't have any channels yet")
+    *   And a "Create Channel" button is displayed
+
 ## 4. Technical Requirements
 *   **API Endpoints**:
     | Method | Path | Description |
