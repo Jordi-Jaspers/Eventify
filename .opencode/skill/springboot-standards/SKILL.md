@@ -343,6 +343,8 @@ public class ChangePasswordValidator implements io.github.jframe.validation.Vali
 - Constructor injection for dependencies
 - **Each validator MUST have unit tests** in `test/.../model/validator/`
 - Services call validators, don't embed validation logic
+- Validators for the same controllers can be combined into one class
+  - e.g. createUserRequest + updateUserRequest → UserValidator
 
 ## JFrame Exception Pattern
 
@@ -568,7 +570,7 @@ class ChangePasswordValidatorTest extends UnitTest {
 
 **Dependency:** `io.github.jframeoss:starter-jpa:0.7.0`
 
-For searchable, paginated endpoints, see `references/jframe.md`.
+For searchable, paginated endpoints, see other `/search` endpoints for examples.
 
 ## Commands
 
