@@ -55,7 +55,7 @@ Personal channels allow individual users to segment their event streams. A devel
 *   [ ] **Scenario 7**: Duplicate channel name rejected
     *   Given I have a personal channel named "Errors"
     *   When I try to create another personal channel named "Errors"
-    *   Then I receive a 409 Conflict error
+    *   Then I receive a bad request indicating the name is already in use
 
 *   [ ] **Scenario 8**: Frontend displays channels on dashboard
     *   Given I am on my user dashboard

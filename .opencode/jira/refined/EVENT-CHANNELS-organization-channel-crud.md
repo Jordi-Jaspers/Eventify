@@ -44,7 +44,7 @@ Organizations need shared channels that all members can access. This enables tea
 *   [ ] **Scenario 6**: Channel names unique within organization
     *   Given an organization has a channel named "Production"
     *   When someone tries to create another "Production" channel in the same org
-    *   Then a 409 Conflict error is returned
+    *   Then a Bad request is returned
 
 *   [ ] **Scenario 7**: Frontend shows org channels
     *   Given I am on an organization dashboard
