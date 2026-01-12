@@ -22,12 +22,11 @@ Trigger orchestrator to build a feature using test-driven workflow with speciali
 
 **Orchestrator executes:**
 
-1. **Check Refined backlog** - Look for existing feature story in `.opencode/jira/refined/` and notes in `.opencode/jira/backlog.md` if not found
+1. **Check Existing Context** - Look for existing feature story in `.opencode/jira/refined/` and notes in `.opencode/jira/backlog.md` if not found
 2. **Gather requirements** - Ask clarifying questions if needed
-3. **Create plan** - Write implementation plan with agent assignments
-4. **Get approval** - Wait for user confirmation
-5. **Execute TDD workflow** - Delegate to specialized agents in test-first order
-6. **Update changelog** - Record feature addition, remove existing story if applicable
+3. **Create Plan + Approval Gate** - Write implementation plan with agent assignments + Wait for user approval
+4. **Execute TDD workflow** - Delegate to specialized agents in test-first order
+5. **Update changelog** - Record feature addition, remove existing story if applicable
 
 ## Orchestrator Instructions
 
@@ -139,7 +138,7 @@ Result: ✅ All tests passing
 
 Phase 2.5: Backend Review
 ─────────────────────────────
-Waiting for user review...
+Backend completed - Waiting for user review...
 ❓ Reply "approved" to proceed to frontend
    Or: "changes: [list changes]" to request fixes
 
@@ -149,14 +148,10 @@ Calling sveltekit-frontend-agent...
 Result: ✅ Build passing
         Page: [page-name]
         Test: test/components/[page].spec.ts
-```
-
-### Step 5: UI Polish Approval Gate
-
-**After frontend completes:**
-
-```
-📋 FRONTEND COMPLETE - UI POLISH READY
+        
+Phase 3.5: Frontend Review
+─────────────────────────────
+Frontend Completed - Waiting for user review...
 
 **Page:** [page name]
 **Test file:** `test/components/[page].spec.ts`
@@ -167,27 +162,29 @@ The UI Agent will polish visuals only (no logic changes).
 ❓ Reply "approved" to start UI validation loop
    Or: "approved 15" for more iterations
    Or: "skip" to skip
+    
+Phase 4: UI Polish
+─────────────────────────────
+Calling ui-validator via ralph-loop.sh...
+Result: ✅ UI polish complete
+
+Screenshots: [list]
 ```
 
-**STOP. Wait for response.**
-
-### Step 6: Run UI Validation Loop
-
+**Run UI Validation Loop**
 On approval:
-
 ```bash
 ./.opencode/scripts/ralph-loop.sh [page] test/components/[page].spec.ts 10
 ```
 
 **Results:**
-
 | Output | Action |
 |--------|--------|
 | `UI_VALIDATION_COMPLETE` | Continue to changelog |
 | `UI_VALIDATION_BLOCKED` | Report blocker, may need frontend fix |
 | Max iterations | Ask user: more iterations or accept |
 
-### Step 7: Update Changelog + Report
+### Step 5: Update Changelog + Report
 
 1. Create `.opencode/jira/completed/YYYYMMDD-EPIC-feature.md`
 2. Update `.opencode/jira/CHANGELOG.md`
@@ -282,10 +279,8 @@ Orchestrator:
 5. "📋 PLAN READY... Reply approved"
 6. User: "approved"
 7. [TDD workflow]
-8. "📋 UI POLISH READY... Reply approved"
-9. User: "approved"
-10. [UI validation loop]
-11. Reports completion
+8. [UI validation loop]
+9. Reports completion
 ```
 
 ## Example: Skip UI Polish
@@ -307,8 +302,8 @@ Orchestrator: Proceeds to changelog, skips UI loop
 3. **Two approval gates** - Plan AND UI polish
 4. **Structured context to agents** - Use task format above
 5. **Clear execution log** - Show what each agent did
-4. **Frontend must output** - Page name + test file path
-6. **Orchestrator thinks, agents execute** - Don't delegate planning
+6. **Frontend must output** - Page name + test file path
+7. **Orchestrator thinks, agents execute** - Don't delegate planning
 
 ## What NOT to Do
 
