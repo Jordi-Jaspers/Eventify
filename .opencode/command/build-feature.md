@@ -137,6 +137,12 @@ Phase 2: Backend
 Calling java-backend-agent...
 Result: ✅ All tests passing
 
+Phase 2.5: Backend Review
+─────────────────────────────
+Waiting for user review...
+❓ Reply "approved" to proceed to frontend
+   Or: "changes: [list changes]" to request fixes
+
 Phase 3: Frontend
 ─────────────────────────────
 Calling sveltekit-frontend-agent...

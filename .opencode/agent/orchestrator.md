@@ -96,6 +96,8 @@ java-testing-agent → validate tests
        ↓
 java-backend-agent → validate implementation
        ↓
+(Wait for user review of the backend)
+       ↓ 
 sveltekit-frontend-agent → validate build passes
        ↓
 (Step 7-8: UI validation loop)
