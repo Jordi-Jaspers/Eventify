@@ -94,19 +94,6 @@ public class UserQuotaServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should reset all quotas via scheduled job")
-    void shouldResetAllQuotasViaScheduledJob() {
-        // Given: Scheduled job is ready to run
-        // No stubbing needed - we just verify the call
-
-        // When: Running scheduled reset
-        userQuotaService.resetMonthlyQuotas();
-
-        // Then: Should call repository reset method with correct period start
-        verify(quotaRepository).resetAllQuotas(any(OffsetDateTime.class));
-    }
-
-    @Test
     @DisplayName("Should create quota record if not exists")
     void shouldCreateQuotaRecordIfNotExists() {
         // Given: No existing quota record

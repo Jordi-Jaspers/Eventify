@@ -11,11 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static java.time.ZoneOffset.UTC;
 
 /**
  * Service for managing user event quota.
@@ -30,19 +27,6 @@ public class UserQuotaService {
     private final UserEventQuotaRepository quotaRepository;
 
     private final UserService userService;
-
-    /**
-     * Reset all user quotas on the 1st of every month at midnight. Runs automatically via Spring's task scheduler.
-     */
-    @Transactional
-    @Scheduled(cron = "0 0 0 1 * *")
-    public void resetMonthlyQuotas() {
-        final OffsetDateTime periodStart = OffsetDateTime.now(UTC)
-            .withDayOfMonth(1)
-            .with(LocalTime.MIN);
-        final int resetCount = quotaRepository.resetAllQuotas(periodStart);
-        log.info("Monthly quota reset: {} user quotas reset to 0", resetCount);
-    }
 
     /**
      * Check if user can send an event (under quota).

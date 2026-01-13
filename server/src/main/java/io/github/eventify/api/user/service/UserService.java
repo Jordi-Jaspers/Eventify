@@ -17,10 +17,8 @@ import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -28,7 +26,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,7 +35,6 @@ import static io.github.eventify.api.authentication.model.Role.USER;
 import static io.github.eventify.common.exception.ApiErrorCode.INVALID_CREDENTIALS;
 import static io.github.eventify.common.exception.ApiErrorCode.USER_NOT_FOUND_ERROR;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
-import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -108,17 +104,6 @@ public class UserService implements UserDetailsService {
         final List<SearchCriterium> criteria = userMetaData.toSearchCriteria(input.getSearchInputs());
         final Specification<User> spec = new JpaSearchSpecification<>(criteria);
         return userRepository.findAll(spec, pageable);
-    }
-
-    /**
-     * Delete all unvalidated accounts that are older than a month. This method is scheduled to run every hour.
-     */
-    @Scheduled(
-        fixedDelay = 24,
-        timeUnit = TimeUnit.HOURS
-    )
-    public void deleteUnvalidatedAccounts() {
-        userRepository.deleteUnvalidatedAccounts(OffsetDateTime.now(UTC).minusMonths(1));
     }
 
     /**

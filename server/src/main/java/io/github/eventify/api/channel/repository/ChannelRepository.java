@@ -78,4 +78,12 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * @return optional channel
      */
     Optional<Channel> findByIdAndOrganizationIdAndStatusNot(Long id, Long organizationId, ChannelStatus status);
+
+    /**
+     * Finds all channels by status.
+     *
+     * @param status the channel status
+     * @return list of channels
+     */
+    List<Channel> findByStatus(ChannelStatus status);
 }

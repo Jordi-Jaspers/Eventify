@@ -13,7 +13,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,6 @@ import static io.github.eventify.api.token.model.TokenType.*;
 import static io.github.eventify.common.exception.ApiErrorCode.TOKEN_NOT_FOUND_ERROR;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.nonNull;
-import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * A service class which interacts with the token table in the database.
@@ -35,19 +33,6 @@ public class TokenService {
     private final TokenRepository tokenRepository;
 
     private final JwtService jwtService;
-
-    /**
-     * Remove all expired tokens from the database. This method runs every 5 minutes to clean up expired tokens
-     * in a single batch operation. The operation runs in a new transaction to avoid impacting other database operations.
-     */
-    @Scheduled(
-        fixedDelay = 5,
-        timeUnit = MINUTES
-    )
-    public void deleteExpiredTokens() {
-        final int deletedTokens = tokenRepository.deleteExpiredTokens();
-        log.debug("Successfully deleted '{}' expired tokens.", deletedTokens);
-    }
 
     /**
      * Generate an access token for a user. The access token is valid for 15 minutes.

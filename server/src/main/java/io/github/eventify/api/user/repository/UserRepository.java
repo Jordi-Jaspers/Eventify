@@ -93,7 +93,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Modifying
     @Transactional
     @Query("DELETE FROM User u WHERE u.validated = false AND u.createdAt <= :limit")
-    void deleteUnvalidatedAccounts(@NonNull OffsetDateTime limit);
+    int deleteUnvalidatedAccounts(@NonNull OffsetDateTime limit);
 
     /**
      * Count validated users.
