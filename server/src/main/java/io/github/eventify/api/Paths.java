@@ -31,6 +31,10 @@ public final class Paths {
 
     public static final String UNLOCK_PART = "/unlock";
 
+    public static final String PAUSE_PART = "/pause";
+
+    public static final String RESUME_PART = "/resume";
+
     public static final String LOGIN_PART = "/login";
 
     public static final String API_KEYS_PART = "/api-keys";
@@ -40,6 +44,8 @@ public final class Paths {
     public static final String ERROR_PART = "/error";
 
     public static final String ORGANIZATIONS_PART = "/organization";
+
+    public static final String CHANNELS_PART = "/channels";
 
     public static final String USER_PART = "/user";
 
@@ -125,9 +131,9 @@ public final class Paths {
 
     public static final String USER_CHANNEL_PATH = USER_CHANNELS_PATH + ID_PART;
 
-    public static final String USER_CHANNEL_PAUSE_PATH = USER_CHANNEL_PATH + "/pause";
+    public static final String USER_CHANNEL_PAUSE_PATH = USER_CHANNEL_PATH + PAUSE_PART;
 
-    public static final String USER_CHANNEL_RESUME_PATH = USER_CHANNEL_PATH + "/resume";
+    public static final String USER_CHANNEL_RESUME_PATH = USER_CHANNEL_PATH + RESUME_PART;
 
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
@@ -175,6 +181,16 @@ public final class Paths {
 
     public static final String ORGANIZATION_API_KEY_PATH = ORGANIZATION_API_KEYS_PATH + KEY_ID_PART;
 
+    public static final String ORGANIZATION_CHANNELS_PATH = ORGANIZATION_PATH + CHANNELS_PART;
+
+    public static final String ORGANIZATION_CHANNELS_SEARCH_PATH = ORGANIZATION_CHANNELS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_CHANNEL_PATH = ORGANIZATION_CHANNELS_PATH + ID_PART;
+
+    public static final String ORGANIZATION_CHANNEL_PAUSE_PATH = ORGANIZATION_CHANNEL_PATH + PAUSE_PART;
+
+    public static final String ORGANIZATION_CHANNEL_RESUME_PATH = ORGANIZATION_CHANNEL_PATH + RESUME_PART;
+
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 
     public static final String OPTIONS_PATH = BASE_PATH + "/options";
@@ -187,7 +203,7 @@ public final class Paths {
 
     public static final String EVENTS_PATH = BASE_PATH + "/events";
 
-    public static final String CHANNELS_PATH = BASE_PATH + "/channels";
+    public static final String CHANNELS_PATH = BASE_PATH + CHANNELS_PART;
 
     /* ------------------------------- END ------------------------------- */
 

@@ -59,4 +59,23 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * @return optional channel
      */
     Optional<Channel> findByIdAndUserIdAndStatusNot(Long id, Long userId, ChannelStatus status);
+
+    /**
+     * Finds an organization channel by organization ID and name.
+     *
+     * @param organizationId the organization ID
+     * @param name           the channel name
+     * @return optional channel
+     */
+    Optional<Channel> findByOrganizationIdAndName(Long organizationId, String name);
+
+    /**
+     * Finds a channel by ID and organization ID excluding deleted ones.
+     *
+     * @param id             the channel ID
+     * @param organizationId the organization ID
+     * @param status         the status to exclude
+     * @return optional channel
+     */
+    Optional<Channel> findByIdAndOrganizationIdAndStatusNot(Long id, Long organizationId, ChannelStatus status);
 }

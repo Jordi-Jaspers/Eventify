@@ -158,15 +158,24 @@
 							<span>Dashboard</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
-					<Sidebar.MenuItem>
-						<Sidebar.MenuButton
-							onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(currentOrganization.organizationId!).path)}
-							isActive={isActive(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(currentOrganization.organizationId!).path)}
-						>
-							<Users class="size-4" />
-							<span>Members</span>
-						</Sidebar.MenuButton>
-					</Sidebar.MenuItem>
+				<Sidebar.MenuItem>
+					<Sidebar.MenuButton
+						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(currentOrganization.organizationId!).path)}
+						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(currentOrganization.organizationId!).path)}
+					>
+						<Users class="size-4" />
+						<span>Members</span>
+					</Sidebar.MenuButton>
+				</Sidebar.MenuItem>
+				<Sidebar.MenuItem>
+					<Sidebar.MenuButton
+						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_CHANNELS_PAGE(currentOrganization.organizationId!).path)}
+						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_CHANNELS_PAGE(currentOrganization.organizationId!).path)}
+					>
+						<Radio class="size-4" />
+						<span>Channels</span>
+					</Sidebar.MenuButton>
+				</Sidebar.MenuItem>
 					{#if canManageOrgSettings}
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton

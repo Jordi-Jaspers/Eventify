@@ -98,6 +98,10 @@ export const CLIENT_ROUTES = {
 	ORGANIZATION_SETTINGS_API_KEYS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/settings/api-keys`,
 		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_CHANNELS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/channels`,
+		type: RouteType.PRIVATE
 	})
 } as const;
 
