@@ -194,6 +194,14 @@ public enum ApiErrorCode implements ApiError {
     QUOTA_EXCEEDED(
         "ERR-0045",
         "Monthly event quota exceeded. Quota resets on the first of each month."
+    ),
+    DUPLICATE_CHANNEL_NAME(
+        "ERR-0046",
+        "Duplicate channel name: A channel with this name already exists for this user."
+    ),
+    CHANNEL_NOT_FOUND(
+        "ERR-0047",
+        "Channel not found."
     );
 
     /* The error code for this reason. */

@@ -247,8 +247,7 @@ OUTPUT_REQUIRED:
 ```
 
 After backend changes, remind frontend agent:
-- Start backend server
-- Run `bun run download:api` then `bun run generate:api`
+- **Generate types from OpenAPI** - `bun run sync:api` (auto-starts backend)
 
 ### ui-validator (via ralph-loop.sh / no sub-agent)
 

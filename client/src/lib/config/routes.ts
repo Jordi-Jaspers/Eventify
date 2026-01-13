@@ -55,6 +55,10 @@ export const CLIENT_ROUTES = {
 		path: '/developer',
 		type: RouteType.PRIVATE
 	},
+	CHANNELS_PAGE: {
+		path: '/channels',
+		type: RouteType.PRIVATE
+	},
 	ADMIN_DASHBOARD_PAGE: {
 		path: '/admin/dashboard',
 		type: RouteType.PRIVATE

@@ -57,7 +57,7 @@
 
 <!-- Filters Card -->
 {#if hasFilterableColumns}
-	<div class="rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-xl mb-6 px-4 py-3">
+	<div class="rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg mb-6 px-4 py-3">
 		<DataTableFilters
 			{columns}
 			filters={service.filters}
@@ -68,7 +68,7 @@
 {/if}
 
 <!-- Main Table Card -->
-<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl">
+<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
 	{#if title || description}
 		<CardHeader>
 			{#if title}

@@ -413,15 +413,32 @@ export const appState: AppState = new AppState();
 
 ```bash
 # From client/ directory
-bun run dev              # Dev server
-bun run check            # Type check (MUST pass)
-bun run build            # Production build
-bun run download:api     # Download OpenAPI spec
-bun run generate:api     # Generate types from spec
-bun run test:components  # Playwright screenshot tests
+bun run dev                                        # Dev server
+bun run check                                      # Type check (MUST pass)
+bun run build                                      # Production build
+bun run sync:api                                   # Download & generate types (auto-starts backend)
+bun run download:api                               # Download OpenAPI spec (manual, needs backend)
+bun run generate:api                               # Generate types from spec
+bun run test                                       # All screenshot tests
+bun run test -- test/components/[page].spec.ts     # Specific page tests
+bun run test -- --grep "[Page]"                    # Tests matching pattern
 ```
 
-**OpenAPI workflow:**
+**OpenAPI workflow (after backend changes):**
+
+Use `sync:api` for one-command type regeneration:
+```bash
+cd client && bun run sync:api
+```
+
+This will:
+1. Delete existing openapi.json
+2. Start backend if not running
+3. Download fresh OpenAPI spec
+4. Generate TypeScript types
+5. Stop backend (if it started one)
+
+**Alternative (manual workflow):**
 1. Ensure backend is running
 2. `bun run download:api` 
 3. `bun run generate:api`

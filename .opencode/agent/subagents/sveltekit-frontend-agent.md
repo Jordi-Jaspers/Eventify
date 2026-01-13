@@ -110,12 +110,14 @@ The UI Agent will polish, but you should apply basics:
 bun run dev              # Dev server
 bun run check            # Type check (MUST pass)
 bun run build            # Production build
-bun run download:api     # Download OpenAPI spec
-bun run generate:api     # Generate types
+bun run sync:api         # Download & generate types (starts fresh backend)
+bun run test             # All screenshot tests (starts fresh backend)
+bun run test -- test/components/[page].spec.ts   # Specific page tests
+```
 
-# Screenshot tests
-bun run test                                    # All tests
-bun run test -- test/components/[page].spec.ts # Specific file
+**After backend changes, regenerate API types:**
+```bash
+cd client && bun run sync:api
 ```
 
 ## Screenshot Tests (MANDATORY)
@@ -128,55 +130,52 @@ See `screenshot-tests` skill for complete patterns.
 
 Location: `client/test/components/[page].spec.ts`
 
+**Use shared utilities - never manually create directories:**
+
 ```typescript
-import { test, expect } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import {
+    test,
+    expect,
+    setTheme,
+    loginAndNavigate,
+    ANIMATION_SETTLE_MS,
+    DATA_LOAD_MS
+} from '../fixtures/test-fixtures';
+import { createScreenshotHelper } from '../utils/screenshot';
+import { COLD_START_TIMEOUT_MS, ELEMENT_WAIT_TIMEOUT_MS, THEMES } from '../utils/constants';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const screenshotsDir = join(__dirname, '../resources/screenshots/[page]');
-if (!existsSync(screenshotsDir)) {
-    mkdirSync(screenshotsDir, { recursive: true });
-}
-
-function screenshotPath(name: string, project: string): string {
-    return join(screenshotsDir, `${name}-${project.replace(/\s+/g, '-').toLowerCase()}.png`);
-}
+const PAGE_NAME = '[page]';
+const getScreenshot = createScreenshotHelper(PAGE_NAME);
 
 test.describe('[Page] Screenshots', () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto('/[route]');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
-    });
+    test.setTimeout(COLD_START_TIMEOUT_MS);
 
-    test('default state', async ({ page }, testInfo) => {
-        const path = screenshotPath('01-default', testInfo.project.name);
-        await page.screenshot({ path, fullPage: true });
-        expect(existsSync(path)).toBeTruthy();
-    });
+    for (const theme of THEMES) {
+        test.describe(`${theme} mode`, () => {
+            test.beforeEach(async ({ page }) => {
+                await setTheme(page, theme);
+                await loginAndNavigate(page, '/[route]');
+            });
+
+            test(`page layout`, async ({ page }, testInfo) => {
+                await page.waitForTimeout(DATA_LOAD_MS);
+
+                await page.screenshot({
+                    path: getScreenshot(`01-layout-${theme}`, testInfo.project.name),
+                    fullPage: true
+                });
+            });
+        });
+    }
 });
 ```
 
-### Authenticated Pages
+### Key Rules
 
-```typescript
-test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForLoadState('domcontentloaded');
-    
-    await page.getByRole('button', { name: 'Fill Credentials' }).click();
-    await page.getByRole('button', { name: 'Sign In' }).click();
-    await page.waitForURL('/dashboard', { timeout: 15000 });
-    
-    await page.goto('/[target-route]');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
-});
-```
+1. **Loop over THEMES** - Test both dark and light modes
+2. **Use constants** - `DATA_LOAD_MS`, `ANIMATION_SETTLE_MS`, etc.
+3. **Include theme in screenshot name** - `01-layout-${theme}`
+4. **Use createScreenshotHelper** - Auto-creates directories
 
 ### After Creating Tests
 
@@ -188,6 +187,7 @@ cd client && bun run test -- test/components/[page].spec.ts
 Check that:
 - Tests pass
 - Screenshots are generated in `test/resources/screenshots/[page]/`
+- Both dark and light theme screenshots exist
 
 **Do NOT iterate on visuals.** Create tests, verify they run, return.
 
@@ -265,7 +265,7 @@ Test: test/components/[page].spec.ts
 
 1. **Load sveltekit-coding-standards skill first** - Contains all patterns/standards
 2. **Explicit types EVERYWHERE** - No type inference
-3. **Generate types from OpenAPI** - `bun run download:api && bun run generate:api`
+3. **Generate types from OpenAPI** - `bun run sync:api` (auto-starts backend)
 4. **Use CLIENT_ROUTES** - Never hardcode paths
 5. **Route minimalism** - Routes are adapters, keep slim
 6. **shadcn-svelte ownership** - You own the code, customize freely

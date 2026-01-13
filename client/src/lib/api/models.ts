@@ -47,6 +47,13 @@ export type ApiKeyCreationResponse = components['schemas']['ApiKeyCreationRespon
 export type ApiKeyListResponse = components['schemas']['ApiKeyListResponse'];
 export type ApiKeyResponse = components['schemas']['ApiKeyResponse'];
 
+// ================ Channels ===================
+export type ChannelDetailsResponse = components['schemas']['ChannelDetailsResponse'];
+export type CreateChannelRequest = components['schemas']['CreateChannelRequest'];
+export type UpdateChannelRequest = components['schemas']['UpdateChannelRequest'];
+export type PageResourceChannelDetailsResponse =
+	components['schemas']['PageResourceChannelDetailsResponse'];
+
 // ================ Pagination ===================
 export type SearchInput = components['schemas']['SearchInput'];
 export type SortableColumn = components['schemas']['SortableColumn'];

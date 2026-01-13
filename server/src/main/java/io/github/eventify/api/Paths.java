@@ -119,6 +119,16 @@ public final class Paths {
 
     public static final String USER_QUOTA_PATH = USERS_PATH + "/quota";
 
+    public static final String USER_CHANNELS_PATH = USERS_PATH + "/channel";
+
+    public static final String USER_CHANNELS_SEARCH_PATH = USER_CHANNELS_PATH + SEARCH_PART;
+
+    public static final String USER_CHANNEL_PATH = USER_CHANNELS_PATH + ID_PART;
+
+    public static final String USER_CHANNEL_PAUSE_PATH = USER_CHANNEL_PATH + "/pause";
+
+    public static final String USER_CHANNEL_RESUME_PATH = USER_CHANNEL_PATH + "/resume";
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;
