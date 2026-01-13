@@ -11,7 +11,7 @@
 **So that** my team can share event streams across the organization
 
 ## 2. Business Context & Value
-Organizations need shared channels that all members can access. This enables teams to collectively monitor production systems, share event data, and collaborate on debugging. Only admins/owners should manage channels, but all members can view them. Channels accumulate time-based events that are later visualized as a timeline.
+Organizations need shared channels that all members can access. This enables teams to collectively monitor production systems, share event data, and collaborate on debugging. Only admins/owners should manage channels, but all members can view them.
 
 ## 3. Acceptance Criteria
 *   [ ] **Scenario 1**: Org owner/admin creates an organization channel
@@ -58,39 +58,44 @@ Organizations need shared channels that all members can access. This enables tea
     *   Then I see a friendly message (e.g., "This organization doesn't have any channels yet")
     *   And a "Create Channel" button is visible only if I am OWNER or ADMIN
 
-## 4. Technical Requirements
-*   **API Endpoints**:
-    | Method | Path | Description |
-    |--------|------|-------------|
-    | POST | `/v1/organization/{orgId}/channels` | Create org channel |
-    | GET | `/v1/organization/{orgId}/channels` | List org channels (paginated) |
-    | GET | `/v1/organization/{orgId}/channels/{id}` | Get channel details |
-    | PUT | `/v1/organization/{orgId}/channels/{id}` | Update channel |
-    | POST | `/v1/organization/{orgId}/channels/{id}/pause` | Pause channel |
-    | POST | `/v1/organization/{orgId}/channels/{id}/resume` | Resume channel |
-    | DELETE | `/v1/organization/{orgId}/channels/{id}` | Delete channel |
-*   **Authorization**:
-    *   All endpoints: User must be member of organization
-    *   Read: MEMBER, ADMIN, OWNER
-    *   Write (create/update/pause/resume/delete): ADMIN, OWNER only
-*   **Ownership Model**:
-    *   `organization_id` = the org that owns the channel
-    *   `user_id` = the user who created the channel (audit trail)
-*   **Reuse**: Same DTOs and service methods as User Channel CRUD where possible
 
-## 5. Design & UI/UX
-*   **Organization Dashboard**: Add "Channels" section similar to user dashboard
-*   **Role-based UI**: Hide create/edit/delete buttons for MEMBER role
-*   **Navigation**: Consider adding "Channels" to org sidebar settings
-*   **Same component patterns**: Reuse channel list/form components from user channels
+## 4. API Endpoints
 
-## 6. Implementation Notes / Research
-*   **Controller**: `OrganizationChannelController`
-*   **Authorization**: Use existing `OrganizationRole` enum and membership checks
-*   **Reference**: See `OrganizationApiKeyController` for similar pattern
-*   **Frontend Route**: `/organizations/[orgId]/channels` or section on org dashboard
-*   **Shared Service**: `ChannelService` handles both user and org channels
-*   **Repository queries**:
-    *   Org channels: `findByOrganizationId(orgId)`
-    *   Ownership check: `findByIdAndOrganizationId(id, orgId)`
-*   **Note**: Retention period is an organization-level setting (`organization.retention_days`), not per-channel. Default 90 days, range 90-1825 days (3 months to 5 years). DB column and entity field already exist. Retention UI will be in a new **"Data & Storage"** tab in organization settings (OWNER/ADMIN only, hidden from MEMBER). See: EVENT-CHANNELS-retention-settings-ui story.
+| Method | Path | Auth |
+|--------|------|------|
+| POST | `/v1/organization/{orgId}/channels` | OWNER, ADMIN |
+| POST | `/v1/organization/{orgId}/channels/search` | Any member |
+| GET | `/v1/organization/{orgId}/channels/{id}` | Any member |
+| PUT | `/v1/organization/{orgId}/channels/{id}` | OWNER, ADMIN |
+| POST | `/v1/organization/{orgId}/channels/{id}/pause` | OWNER, ADMIN |
+| POST | `/v1/organization/{orgId}/channels/{id}/resume` | OWNER, ADMIN |
+| DELETE | `/v1/organization/{orgId}/channels/{id}` | OWNER, ADMIN |
+
+## 5. Implementation Notes
+
+### Backend
+- **Controller**: `OrganizationChannelController` - follow `OrganizationApiKeyController` pattern
+- **Service**: Add org methods to existing `ChannelService`
+- **Authorization**: Use `@orgSecurity.isOwnerOrAdmin()` and `@orgSecurity.isMember()`
+- **Reuse**: Same DTOs, mapper, validator as User Channel CRUD
+- **Ownership**: `organization_id` = owning org, `user_id` = creator (audit)
+- **Test data**: Add sample org channels via migration (use subselect for org ID)
+
+### Frontend
+- **Route**: `/organizations/[orgId]/channels`
+- **API client**: `OrganizationChannelController.ts`
+- **Page**: Copy from `/channels` page, add orgId param, add role-based visibility
+- **Reuse**: Same `CreateChannelSheet`, `EditChannelSheet` components
+- **Role check**: Hide action buttons when user is MEMBER (not OWNER/ADMIN)
+- **Navigation**: Add "Channels" to org settings nav
+- Should be available for a global admin to access via the admin organisations page
+
+### Testing
+- Controller integration tests: auth scenarios for each role (OWNER, ADMIN, MEMBER, non-member)
+- Service unit tests: org channel CRUD operations
+- Screenshot tests: list view, role-based button visibility
+
+## 6. Reference Patterns
+- **User Channel CRUD**: `UserChannelController`, `ChannelService`, `/channels` page
+- **Org API Keys**: `OrganizationApiKeyController` (same auth pattern)
+- **Org Members**: `OrganizationMembershipController` (same security checks)
