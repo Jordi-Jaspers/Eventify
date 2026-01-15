@@ -202,6 +202,14 @@ public enum ApiErrorCode implements ApiError {
     CHANNEL_NOT_FOUND(
         "ERR-0047",
         "Channel not found."
+    ),
+    CHANNEL_ACCESS_DENIED(
+        "ERR-0048",
+        "Access to channel denied"
+    ),
+    CHANNEL_PAUSED(
+        "ERR-0049",
+        "Channel is paused"
     );
 
     /* The error code for this reason. */
