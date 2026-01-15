@@ -1,3 +1,7 @@
+# Epic: Bug Fixes & Improvements
+
+- [ ]: The search table in the api key of the organisation page is not filtering correctly or working like the other tables. 
+
 # Epic: Event Ingestion
 
 **Context**: The core functionality - receiving and storing events via API. Events are immutable log entries with metadata, severity, and payload. This should be optimized for high write throughput. high availability, high scalability. just imagine external systems sending a couple of events per second or more.
