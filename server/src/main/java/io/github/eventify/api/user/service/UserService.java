@@ -219,6 +219,18 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
+    /**
+     * Update retention days for a user.
+     *
+     * @param user          the user to update
+     * @param retentionDays the new retention days value
+     * @return the updated user
+     */
+    public User updateRetentionDays(final User user, final Integer retentionDays) {
+        user.setRetentionDays(retentionDays);
+        return userRepository.save(user);
+    }
+
     private User register(final User newUser, final String password) {
         newUser.setPassword(passwordEncoder.encode(password));
         newUser.setRole(USER);

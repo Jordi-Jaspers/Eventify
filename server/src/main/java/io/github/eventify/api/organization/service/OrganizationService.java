@@ -104,6 +104,18 @@ public class OrganizationService {
     }
 
     /**
+     * Update retention days for an organization.
+     *
+     * @param organization  the organization to update
+     * @param retentionDays the new retention days value
+     * @return the updated organization
+     */
+    public Organization updateRetentionDays(final Organization organization, final Integer retentionDays) {
+        organization.setRetentionDays(retentionDays);
+        return organizationRepository.save(organization);
+    }
+
+    /**
      * Generate a unique slug from organization name. Handles collisions by appending -1, -2, etc.
      *
      * @param name the organization name
