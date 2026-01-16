@@ -78,6 +78,91 @@ goto(CLIENT_ROUTES.LOGIN);
 goto('/login');
 ```
 
+## API Architecture (Controller + Service Pattern)
+
+**Never use raw `fetch` in pages.** Use the layered pattern:
+
+### 1. Controller (`$lib/api/[domain]/[Name]Controller.ts`)
+Typed API calls using openapi-fetch client:
+
+```typescript
+// $lib/api/user/UserSettingsController.ts
+import { client } from '$lib/api/client';
+import type { RetentionSettingsResponse } from '$lib/api/models';
+
+export async function getUserRetentionSettings(): Promise<RetentionSettingsResponse> {
+    const { data, error } = await client.GET('/v1/user/settings/retention');
+    if (error) throw error;
+    return data;
+}
+
+export async function updateUserRetentionSettings(
+    retentionDays: number
+): Promise<RetentionSettingsResponse> {
+    const { data, error } = await client.PUT('/v1/user/settings/retention', {
+        body: { retentionDays }
+    });
+    if (error) throw error;
+    return data;
+}
+```
+
+### 2. Service (`$lib/api/[domain]/service/[Name]Service.svelte.ts`)
+Business logic, state management, error handling:
+
+```typescript
+// $lib/api/settings/service/RetentionService.svelte.ts
+import { getUserRetentionSettings, updateUserRetentionSettings } from '../UserSettingsController';
+import { handleError } from '$lib/utils/error-handler';
+import { toast } from 'svelte-sonner';
+
+export function createRetentionService() {
+    let loading: boolean = $state(true);
+    let saving: boolean = $state(false);
+    let retentionDays: number = $state(365);
+
+    async function loadSettings(): Promise<void> {
+        loading = true;
+        try {
+            const data = await getUserRetentionSettings();
+            retentionDays = data.retentionDays ?? 365;
+        } catch (err: unknown) {
+            const { message } = handleError(err, 'Failed to load settings');
+            toast.error(message);
+        } finally {
+            loading = false;
+        }
+    }
+
+    return {
+        get loading(): boolean { return loading; },
+        get retentionDays(): number { return retentionDays; },
+        loadSettings
+    };
+}
+```
+
+### 3. Page (minimal, uses service)
+
+```svelte
+<script lang="ts">
+    import { browser } from '$app/environment';
+    import { createRetentionService } from '$lib/api/settings/service/RetentionService.svelte';
+
+    const service = createRetentionService();
+
+    $effect(() => {
+        if (browser) service.loadSettings();
+    });
+</script>
+
+<MyComponent loading={service.loading} data={service.retentionDays} />
+```
+
+**Existing examples:**
+- `UserController.ts` + `ProfileService.svelte.ts`
+- `UserApiKeyController.ts` + `ApiKeyService.svelte.ts`
+
 ## Design System
 
 ### Visual Principles
