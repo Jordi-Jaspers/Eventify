@@ -55,6 +55,10 @@ export const CLIENT_ROUTES = {
 		path: '/developer',
 		type: RouteType.PRIVATE
 	},
+	DATA_STORAGE_PAGE: {
+		path: '/profile/data-storage',
+		type: RouteType.PRIVATE
+	},
 	CHANNELS_PAGE: {
 		path: '/channels',
 		type: RouteType.PRIVATE
@@ -97,6 +101,10 @@ export const CLIENT_ROUTES = {
 	}),
 	ORGANIZATION_SETTINGS_API_KEYS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/settings/api-keys`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_SETTINGS_DATA_STORAGE_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/settings/data-storage`,
 		type: RouteType.PRIVATE
 	}),
 	ORGANIZATION_CHANNELS_PAGE: (orgId: number) => ({

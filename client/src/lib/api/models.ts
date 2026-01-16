@@ -12,6 +12,7 @@ export type UserResponse = components['schemas']['UserResponse'];
 export type UserDetailsResponse = components['schemas']['UserDetailsResponse'];
 export type UserOrganizationResponse = components['schemas']['UserOrganizationResponse'];
 export type UserQuotaResponse = components['schemas']['UserQuotaResponse'];
+export type RetentionSettingsResponse = components['schemas']['RetentionSettingsResponse'];
 
 // ================ Error Responses ===================
 export type ErrorResponseResource = components['schemas']['ErrorResponseResource'];
