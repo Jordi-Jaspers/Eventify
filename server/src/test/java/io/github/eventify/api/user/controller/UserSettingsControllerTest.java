@@ -1,6 +1,8 @@
 package io.github.eventify.api.user.controller;
 
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.api.user.model.request.UpdateRetentionRequest;
+import io.github.eventify.api.user.model.response.RetentionSettingsResponse;
 import io.github.eventify.support.IntegrationTest;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
 
@@ -397,39 +399,5 @@ public class UserSettingsControllerTest extends IntegrationTest {
         final RetentionSettingsResponse retentionSettings = fromJson(content, RetentionSettingsResponse.class);
 
         assertThat(retentionSettings.getRetentionDays(), is(730));
-    }
-
-    /**
-     * Response DTO for retention settings (to be created in implementation).
-     */
-    private static class RetentionSettingsResponse {
-
-        private Integer retentionDays;
-
-        public Integer getRetentionDays() {
-            return retentionDays;
-        }
-
-        public void setRetentionDays(final Integer retentionDays) {
-            this.retentionDays = retentionDays;
-        }
-    }
-
-
-    /**
-     * Request DTO for updating retention settings (to be created in implementation).
-     */
-    private static class UpdateRetentionRequest {
-
-        private Integer retentionDays;
-
-        public Integer getRetentionDays() {
-            return retentionDays;
-        }
-
-        public UpdateRetentionRequest setRetentionDays(final Integer retentionDays) {
-            this.retentionDays = retentionDays;
-            return this;
-        }
     }
 }
