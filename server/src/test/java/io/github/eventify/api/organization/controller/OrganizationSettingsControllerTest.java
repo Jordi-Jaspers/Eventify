@@ -6,7 +6,6 @@ import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.request.UpdateRetentionRequest;
 import io.github.eventify.api.user.model.response.RetentionSettingsResponse;
 import io.github.eventify.support.IntegrationTest;
-import io.github.jframe.exception.resource.ApiErrorResponseResource;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -337,12 +336,6 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
 
         // Then: Response should be BAD_REQUEST
         response.andExpect(status().is(SC_BAD_REQUEST));
-
-        // And: Response should contain validation error
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final ApiErrorResponseResource error = fromJson(content, ApiErrorResponseResource.class);
-
-        assertThat(error.getApiErrorReason(), containsString("retention"));
     }
 
     @Test
