@@ -3,17 +3,13 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { DataRetentionSettings } from '$lib/components/settings';
-	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
 	import { getOrganizationById } from '$lib/api/organization/OrganizationController';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
-	import type {
-		RetentionSettingsResponse,
-		UserOrganizationResponse,
-		OrganizationResponse
-	} from '$lib/api/models';
+	import { createRetentionService } from '$lib/api/settings/service/RetentionService.svelte';
+	import type { UserOrganizationResponse, OrganizationResponse } from '$lib/api/models';
 
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
 
@@ -65,87 +61,26 @@
 		return 'Organization';
 	});
 
-	let loading: boolean = $state(true);
-	let saving: boolean = $state(false);
-	let retentionDays: number = $state(365);
+	// Create retention service - recreate when orgId changes
+	let retentionService = $state(createRetentionService('organization', orgId));
+	let lastServiceOrgId: number = $state(0);
 
 	// Redirect if not authorized
 	$effect(() => {
-		if (browser && !loading && !canManage && orgId > 0) {
+		if (browser && !retentionService.loading && !canManage && orgId > 0) {
 			toast.error('You do not have permission to access this page');
 			goto(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(orgId).path);
 		}
 	});
 
-	// Load retention settings
-	async function loadSettings(): Promise<void> {
-		if (!canManage) {
-			loading = false;
-			return;
-		}
-
-		loading = true;
-		try {
-			const response: Response = await fetch(`/api/v1/organization/${orgId}/settings/retention`, {
-				credentials: 'include'
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to load retention settings');
-			}
-
-			const data: RetentionSettingsResponse = await response.json();
-			retentionDays = data.retentionDays ?? 365;
-		} catch (err: unknown) {
-			const { message }: { message: string } = handleError(
-				err,
-				'Failed to load retention settings'
-			);
-			toast.error(message);
-		} finally {
-			loading = false;
-		}
-	}
-
-	// Save retention settings
-	async function handleSave(days: number): Promise<void> {
-		saving = true;
-		try {
-			const response: Response = await fetch(`/api/v1/organization/${orgId}/settings/retention`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				credentials: 'include',
-				body: JSON.stringify({ retentionDays: days })
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to update retention settings');
-			}
-
-			const data: RetentionSettingsResponse = await response.json();
-			retentionDays = data.retentionDays ?? days;
-			toast.success('Retention settings updated successfully');
-		} catch (err: unknown) {
-			const { message }: { message: string } = handleError(
-				err,
-				'Failed to update retention settings'
-			);
-			toast.error(message);
-		} finally {
-			saving = false;
-		}
-	}
-
 	// Load settings when orgId or canManage changes
-	let lastLoadedOrgId: number = $state(0);
 	$effect(() => {
 		if (!browser) return;
 		const currentOrgId: number = orgId;
-		if (currentOrgId !== lastLoadedOrgId && currentOrgId > 0 && canManage) {
-			loadSettings();
-			lastLoadedOrgId = currentOrgId;
+		if (currentOrgId !== lastServiceOrgId && currentOrgId > 0 && canManage) {
+			retentionService = createRetentionService('organization', currentOrgId);
+			retentionService.loadSettings();
+			lastServiceOrgId = currentOrgId;
 		}
 	});
 </script>
@@ -158,10 +93,10 @@
 	<div class="max-w-2xl mx-auto space-y-6 animate-fade-in">
 		{#if canManage}
 			<DataRetentionSettings
-				initialRetentionDays={retentionDays}
-				{loading}
-				{saving}
-				onSave={handleSave}
+				initialRetentionDays={retentionService.retentionDays}
+				loading={retentionService.loading}
+				saving={retentionService.saving}
+				onSave={retentionService.saveSettings}
 			/>
 		{/if}
 	</div>
