@@ -1,31 +1,14 @@
 # Epic: Event Ingestion
 
-**Context**: The core functionality - receiving and storing events via API. Events are immutable log entries with metadata, severity, and payload. This should be optimized for high write throughput. high availability, high scalability. just imagine external systems sending a couple of events per second or more.
+**Context**: The core functionality - receiving and storing events via API. Events are immutable log entries with metadata, severity, and payload. This should be optimized for high write throughput, high availability, high scalability.
 
-## Backlog Items
+## Refined Stories (see `.opencode/jira/refined/`)
 
-- [ ] **Event Entity & Database Schema**:
-    - New `event` table with: id (UUID recommended for distributed systems), channel_id, severity (INFO, WARN, ERROR, DEBUG, CRITICAL), title, message/data (TEXT or JSONB), metadata (JSONB - for custom key-value pairs), source/application (optional string), received_at, client_timestamp (optional - what the sender says the time is)
-    - TimescaleDB hypertable for time-series optimization
-    - default retention policy applied at DB level (e.g., drop chunks older than 5 years)
-    - think about timescale optimizations (compression, chunk time interval, ...)
-    - Indexes: channel_id + received_at (for timeline queries), severity, full-text on message
-    - Partitioning consideration: by received_at for efficient retention cleanup
-    - Really think about write performance and storage efficiency and discuss story thoroughly.
-
-- [ ] **Event Ingestion API Endpoint**:
-    - `POST /v1/events` with body `{ channelId, severity, title, data, metadata, timestamp }`
-    - Authentication: API key only (not JWT - this is for programmatic use)
-    - Channel access validation: API key scope must match channel scope
-    - Response: 201 with event ID, or 202 if async processing
-    - Validation: channel exists, API key has access, payload size limits
-    - must scale to high throughput, consider event bus (e.g., RabbitMQ) for decoupling ingestion from storage
-
-- [ ] **Event Ingestion Quotas & Usage Tracking**:
-    - New `usage_quota` table: user_id, organization_id, period (DAILY/MONTHLY), event_count, limit, period_start
-    - Background job to reset quotas at period boundaries
-    - User can view their current usage vs limit in dashboard
-    - Warning notifications when approaching limit (80%, 100%)
+- [x] **EVENT-entity-database-schema.md** - Event table, TimescaleDB hypertable, indexes, compression
+- [x] **EVENT-realtime-ingestion-api.md** - `POST /v1/events` with server-assigned timestamps
+- [x] **EVENT-batch-ingestion-api.md** - `POST /v1/events/batch` with client timestamps for offline sync
+- [x] **EVENT-quota-enforcement.md** - Hard block at 1000 events/month per user
+- [x] **EVENT-retention-cleanup-job.md** - Daily job respecting per-owner retention_days
 
 ---
 
@@ -65,6 +48,11 @@
     - Show event count by severity for current view
     - Mini chart showing event volume over time (last 24h, 7d, 30d)
     - Helpful for spotting anomalies (spike in errors)
+
+- [ ] **Channel Health Status from Event Series**:
+    - Derive channel "health status" (OK, WARNING, CRITICAL, UNINITIALIZED) from the most recent event
+    - Show at-a-glance health indicators on channel cards in dashboard
+    - Consider duration tracking (how long has a channel been in CRITICAL state?)
 
 ---
 
@@ -109,12 +97,7 @@
     - DB columns already exist with CHECK constraints (90-1825 days)
     - This item covers backend service logic for applying retention during cleanup
 
-- [ ] **Retention Cleanup Job**:
-    - Scheduled background job (daily or hourly)
-    - Delete events where `received_at < NOW() - owner's retention_days`
-    - Look up retention from user (personal channel) or organization (org channel)
-    - Batch deletion to avoid locking issues
-    - Logging/metrics: how many events deleted per run
+- [x] **Retention Cleanup Job**: → REFINED (see `EVENT-retention-cleanup-job.md`)
 
 - [ ] **Global Retention Settings (Admin)**:
     - Admin can set system-wide default retention
@@ -157,7 +140,7 @@ These are ideas to keep in mind for architecture decisions but not to implement 
 - [ ] **Token Revocation - single/all**
 - [ ] **OAuth2 Enhancements - account linking**
 - [ ] **Stripe Integration - manage subscriptions/payments**
-- [ ] **Batch Event Ingestion**: Useful for log aggregators sending in batches, Max batch size limit (e.g., 100 events)
+- [ ] **Configurable Event Quotas** - Allow users/orgs to configure their monthly event limit (tied to subscription tier). Default 1000, configurable up to 1M for enterprise.
 - [ ] **Webhooks/Notifications**: Alert users when specific events occur (ERROR severity, keyword match)
 - [ ] **Real-time Updates**: WebSocket or SSE for live timeline updates
 - [ ] **Event Enrichment**: Auto-detect JSON payloads, extract fields for filtering
