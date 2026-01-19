@@ -234,7 +234,7 @@ tasks.withType<ProcessResources> {
 }
 
 tasks.named<CyclonedxDirectTask>("cyclonedxDirectBom") {
-    projectType = org.cyclonedx.model.Component.Type.LIBRARY
+    projectType = org.cyclonedx.model.Component.Type.APPLICATION
     schemaVersion = Version.VERSION_16
     componentName = project.name
     componentVersion = project.version.toString()

@@ -2,6 +2,9 @@ package io.github.eventify.support;
 
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.authentication.model.request.RegisterUserRequest;
+import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.event.model.Event;
+import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.token.model.Token;
@@ -14,6 +17,7 @@ import io.github.eventify.support.util.WebMvcConfigurator;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -317,5 +321,22 @@ public class IntegrationTest extends WebMvcConfigurator {
         final io.github.eventify.api.organization.model.OrganizationMembership membership =
             new io.github.eventify.api.organization.model.OrganizationMembership(organization, user, role);
         organizationMembershipRepository.save(membership);
+    }
+
+    /**
+     * Creates an event for the specified channel with a timestamp in the past.
+     *
+     * @param channel the channel for the event
+     * @param daysAgo number of days in the past for the event timestamp
+     * @return the created event (not yet persisted)
+     */
+    protected Event aValidEvent(final Channel channel, final int daysAgo) {
+        final Event event = new Event();
+        event.setChannel(channel);
+        event.setSeverity(Severity.OK);
+        event.setTitle("Test Event");
+        event.setMessage("Test message");
+        event.setTimestamp(OffsetDateTime.now().minusDays(daysAgo));
+        return event;
     }
 }

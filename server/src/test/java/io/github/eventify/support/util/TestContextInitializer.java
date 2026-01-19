@@ -5,6 +5,7 @@ import io.github.eventify.api.apikey.repository.ApiKeyAuditRepository;
 import io.github.eventify.api.apikey.repository.ApiKeyRepository;
 import io.github.eventify.api.authentication.service.AuthenticationService;
 import io.github.eventify.api.channel.repository.ChannelRepository;
+import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.token.repository.TokenRepository;
@@ -105,6 +106,9 @@ public class TestContextInitializer {
 
     @Autowired
     protected ChannelRepository channelRepository;
+
+    @Autowired
+    protected EventRepository eventRepository;
 
     @Autowired
     protected PasswordEncoder passwordEncoder;
