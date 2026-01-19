@@ -8,15 +8,12 @@ import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.DuplicateChannelNameException;
-import io.github.jframe.datasource.search.model.JpaSearchSpecification;
-import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -39,8 +36,6 @@ import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 public class ChannelService {
 
     private static final int DEFAULT_PAGE_SIZE = 20;
-
-    private static final String STATUS_FIELD = "status";
 
     private final ChannelRepository channelRepository;
 
@@ -80,8 +75,6 @@ public class ChannelService {
     @Transactional(readOnly = true)
     public Page<Channel> searchUserChannels(final SortablePageInput input) {
         final User user = getLoggedInUser();
-
-        // Add user filter to only show personal channels
         final SearchInput userInput = new SearchInput();
         userInput.setFieldName(USER_TERM);
         userInput.setTextValue(user.getId().toString());
@@ -91,22 +84,8 @@ public class ChannelService {
         final int pageSize = input.getPageSize() > 0 ? input.getPageSize() : DEFAULT_PAGE_SIZE;
         final Pageable pageable = PageRequest.of(input.getPageNumber(), pageSize, sort);
 
-        final List<SearchCriterium> criteria = channelMetaData.toSearchCriteria(input.getSearchInputs());
-
-        // Build specification: search criteria AND organization IS NULL AND status != PENDING_DELETION
-        final Specification<Channel> searchSpec = new JpaSearchSpecification<>(criteria);
-        final Specification<Channel> personalChannelSpec = (root, query, cb) -> cb.isNull(root.get("organization"));
-        final Specification<Channel> notDeletedSpec = (root, query, cb) -> cb.notEqual(
-            root.get(STATUS_FIELD),
-            ChannelStatus.PENDING_DELETION
-        );
-
-        final Specification<Channel> combinedSpec = Specification
-            .where(searchSpec)
-            .and(personalChannelSpec)
-            .and(notDeletedSpec);
-
-        return channelRepository.findAll(combinedSpec, pageable);
+        final Specification<Channel> specification = channelMetaData.toUserChannelSpecification(input);
+        return channelRepository.findAll(specification, pageable);
     }
 
     /**

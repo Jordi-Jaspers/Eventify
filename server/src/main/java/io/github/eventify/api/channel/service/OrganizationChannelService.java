@@ -10,15 +10,12 @@ import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.service.OrganizationService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.DuplicateChannelNameException;
-import io.github.jframe.datasource.search.model.JpaSearchSpecification;
-import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -41,8 +38,6 @@ import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 public class OrganizationChannelService {
 
     private static final int DEFAULT_PAGE_SIZE = 20;
-
-    private static final String STATUS_FIELD = "status";
 
     private final ChannelRepository channelRepository;
 
@@ -86,10 +81,7 @@ public class OrganizationChannelService {
      */
     @Transactional(readOnly = true)
     public Page<Channel> searchOrganizationChannels(final Long organizationId, final SortablePageInput input) {
-        // Verify organization exists
         organizationService.findOrganizationById(organizationId);
-
-        // Add organization filter
         final SearchInput orgInput = new SearchInput();
         orgInput.setFieldName(ORGANIZATION_TERM);
         orgInput.setTextValue(organizationId.toString());
@@ -99,20 +91,8 @@ public class OrganizationChannelService {
         final int pageSize = input.getPageSize() > 0 ? input.getPageSize() : DEFAULT_PAGE_SIZE;
         final Pageable pageable = PageRequest.of(input.getPageNumber(), pageSize, sort);
 
-        final List<SearchCriterium> criteria = channelMetaData.toSearchCriteria(input.getSearchInputs());
-
-        // Build specification: search criteria AND organization ID matches AND status != PENDING_DELETION
-        final Specification<Channel> searchSpec = new JpaSearchSpecification<>(criteria);
-        final Specification<Channel> notDeletedSpec = (root, query, cb) -> cb.notEqual(
-            root.get(STATUS_FIELD),
-            ChannelStatus.PENDING_DELETION
-        );
-
-        final Specification<Channel> combinedSpec = Specification
-            .where(searchSpec)
-            .and(notDeletedSpec);
-
-        return channelRepository.findAll(combinedSpec, pageable);
+        final Specification<Channel> specification = channelMetaData.toOrganizationChannelSpecification(input);
+        return channelRepository.findAll(specification, pageable);
     }
 
     /**
