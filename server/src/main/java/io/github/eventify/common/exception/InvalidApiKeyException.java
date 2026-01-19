@@ -22,4 +22,9 @@ public class InvalidApiKeyException extends ApiException {
     public InvalidApiKeyException(final ApiErrorCode errorCode) {
         super(errorCode);
     }
+
+    @Override
+    public String getMessage() {
+        return getApiError().getReason();
+    }
 }

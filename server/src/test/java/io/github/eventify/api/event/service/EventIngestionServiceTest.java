@@ -1,0 +1,230 @@
+package io.github.eventify.api.event.service;
+
+import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.channel.model.ChannelStatus;
+import io.github.eventify.api.channel.repository.ChannelRepository;
+import io.github.eventify.api.event.model.Event;
+import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.event.model.request.CreateEventRequest;
+import io.github.eventify.api.event.repository.EventRepository;
+import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.user.model.User;
+import io.github.eventify.support.UnitTest;
+import io.github.jframe.exception.core.DataNotFoundException;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@DisplayName("Unit Test - Event Ingestion Service")
+public class EventIngestionServiceTest extends UnitTest {
+
+    @Mock
+    private EventRepository eventRepository;
+
+    @Mock
+    private ChannelRepository channelRepository;
+
+    @InjectMocks
+    private EventIngestionService eventIngestionService;
+
+    private User user;
+    private Channel channel;
+
+    @BeforeEach
+    public void setUp() {
+        user = aValidUser();
+        user.setId(1L);
+
+        channel = aChannel(1L, "Test Channel", user, null);
+        channel.setStatus(ChannelStatus.ACTIVE);
+    }
+
+    @Test
+    @DisplayName("Should ingest event with all fields successfully")
+    public void shouldIngestEventWithAllFieldsSuccessfully() {
+        // Given: Valid request with all fields
+        final Map<String, Object> metadata = new HashMap<>();
+        metadata.put("server", "prod-01");
+        metadata.put("region", "us-east-1");
+
+        final CreateEventRequest request = new CreateEventRequest()
+            .setChannelId(channel.getId())
+            .setSeverity(Severity.CRITICAL)
+            .setTitle("Server Down")
+            .setMessage("Production server experienced critical failure")
+            .setMetadata(metadata);
+
+        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            final Event event = invocation.getArgument(0);
+            event.setId(100L);
+            return event;
+        });
+
+        // When: Ingesting event
+        final Event result = eventIngestionService.ingestEvent(request);
+
+        // Then: Returned event should have ID and timestamp
+        assertThat(result.getId(), is(equalTo(100L)));
+        assertThat(result.getTimestamp(), is(notNullValue()));
+
+        // And: Event should be saved with correct fields
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+
+        final Event capturedEvent = eventCaptor.getValue();
+        assertThat(capturedEvent.getSeverity(), is(Severity.CRITICAL));
+        assertThat(capturedEvent.getTitle(), is("Server Down"));
+        assertThat(capturedEvent.getMessage(), is("Production server experienced critical failure"));
+        assertThat(capturedEvent.getMetadata(), is(notNullValue()));
+        assertThat(capturedEvent.getMetadata().get("server"), is("prod-01"));
+        assertThat(capturedEvent.getTimestamp(), is(notNullValue()));
+    }
+
+    @Test
+    @DisplayName("Should ingest event with minimal fields successfully")
+    public void shouldIngestEventWithMinimalFieldsSuccessfully() {
+        // Given: Valid request with only required fields
+        final CreateEventRequest request = new CreateEventRequest()
+            .setChannelId(channel.getId())
+            .setSeverity(Severity.OK)
+            .setTitle("System healthy");
+
+        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            final Event event = invocation.getArgument(0);
+            event.setId(101L);
+            return event;
+        });
+
+        // When: Ingesting event
+        final Event result = eventIngestionService.ingestEvent(request);
+
+        // Then: Returned event should have ID and timestamp
+        assertThat(result.getId(), is(equalTo(101L)));
+        assertThat(result.getTimestamp(), is(notNullValue()));
+
+        // And: Event should be saved with correct fields
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+
+        final Event capturedEvent = eventCaptor.getValue();
+        assertThat(capturedEvent.getSeverity(), is(Severity.OK));
+        assertThat(capturedEvent.getTitle(), is("System healthy"));
+        assertThat(capturedEvent.getMessage(), is(nullValue()));
+        assertThat(capturedEvent.getMetadata(), is(nullValue()));
+    }
+
+    @Test
+    @DisplayName("Should assign server timestamp")
+    public void shouldAssignServerTimestamp() {
+        // Given: Valid request
+        final CreateEventRequest request = new CreateEventRequest()
+            .setChannelId(channel.getId())
+            .setSeverity(Severity.WARNING)
+            .setTitle("High Memory Usage");
+
+        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            final Event event = invocation.getArgument(0);
+            event.setId(102L);
+            return event;
+        });
+
+        // When: Ingesting event
+        final Event result = eventIngestionService.ingestEvent(request);
+
+        // Then: Server should assign its own timestamp (set in Event constructor)
+        assertThat(result.getTimestamp(), is(notNullValue()));
+
+        // And: Saved event has server-assigned timestamp
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+
+        final Event capturedEvent = eventCaptor.getValue();
+        assertThat(capturedEvent.getTimestamp(), is(notNullValue()));
+    }
+
+    @Test
+    @DisplayName("Should throw not found when channel does not exist")
+    public void shouldThrowNotFoundWhenChannelDoesNotExist() {
+        // Given: Request with non-existent channel
+        final CreateEventRequest request = new CreateEventRequest()
+            .setChannelId(999L)
+            .setSeverity(Severity.CRITICAL)
+            .setTitle("Test Event");
+
+        when(channelRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then: Should throw DataNotFoundException
+        assertThrows(
+            DataNotFoundException.class,
+            () -> eventIngestionService.ingestEvent(request)
+        );
+
+        // And: Event should not be saved
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
+    @DisplayName("Should preserve metadata structure")
+    public void shouldPreserveMetadataStructure() {
+        // Given: Request with complex metadata
+        final Map<String, Object> metadata = new HashMap<>();
+        metadata.put("string", "value");
+        metadata.put("number", 42);
+        metadata.put("boolean", true);
+
+        final CreateEventRequest request = new CreateEventRequest()
+            .setChannelId(channel.getId())
+            .setSeverity(Severity.CRITICAL)
+            .setTitle("Test Event")
+            .setMetadata(metadata);
+
+        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            final Event event = invocation.getArgument(0);
+            event.setId(108L);
+            return event;
+        });
+
+        // When: Ingesting event
+        eventIngestionService.ingestEvent(request);
+
+        // Then: Metadata structure should be preserved
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+
+        final Event capturedEvent = eventCaptor.getValue();
+        assertThat(capturedEvent.getMetadata(), is(notNullValue()));
+        assertThat(capturedEvent.getMetadata().get("string"), is("value"));
+        assertThat(capturedEvent.getMetadata().get("number"), is(42));
+        assertThat(capturedEvent.getMetadata().get("boolean"), is(true));
+    }
+
+    // ===== Factory Methods =====
+
+    private Channel aChannel(final Long id, final String name, final User owner, final Organization org) {
+        final Channel ch = new Channel();
+        ch.setId(id);
+        ch.setName(name);
+        ch.setUser(owner);
+        ch.setOrganization(org);
+        ch.setStatus(ChannelStatus.ACTIVE);
+        return ch;
+    }
+}

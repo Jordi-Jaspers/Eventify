@@ -22,4 +22,9 @@ public class UserDisabledException extends ApiException {
     public UserDisabledException(final ApiErrorCode errorCode) {
         super(errorCode);
     }
+
+    @Override
+    public String getMessage() {
+        return getApiError().getReason();
+    }
 }

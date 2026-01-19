@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -16,21 +18,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpecificationExecutor<Channel> {
 
-    /**
-     * Finds all channels by user ID.
-     *
-     * @param userId the user ID
-     * @return list of channels
-     */
-    List<Channel> findAllByUserId(Long userId);
-
-    /**
-     * Finds all channels by organization ID.
-     *
-     * @param organizationId the organization ID
-     * @return list of channels
-     */
-    List<Channel> findAllByOrganizationId(Long organizationId);
+    @Query(
+        """
+            SELECT c FROM Channel c
+            WHERE c.id = :id AND c.status != 'PENDING_DELETION'
+            """
+    )
+    Optional<Channel> findActiveChannelById(@Param("id") Long id);
 
     /**
      * Finds a personal channel by user ID and name.
@@ -40,15 +34,6 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * @return optional channel
      */
     Optional<Channel> findByUserIdAndNameAndOrganizationIdIsNull(Long userId, String name);
-
-    /**
-     * Finds all personal channels by user ID excluding deleted ones.
-     *
-     * @param userId the user ID
-     * @param status the status to exclude
-     * @return list of channels
-     */
-    List<Channel> findAllByUserIdAndOrganizationIdIsNullAndStatusNot(Long userId, ChannelStatus status);
 
     /**
      * Finds a channel by ID and user ID excluding deleted ones.

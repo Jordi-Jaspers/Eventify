@@ -39,6 +39,8 @@ public class ApiKeyPrincipal implements Principal, Serializable {
 
     private final Long organizationId;
 
+    private final ApiKey apiKey;
+
     /**
      * Constructor to create an ApiKeyPrincipal from an ApiKey.
      *
@@ -51,6 +53,7 @@ public class ApiKeyPrincipal implements Principal, Serializable {
         this.userId = apiKey.getUser().getId();
         this.user = apiKey.getUser();
         this.organizationId = apiKey.getOrganization() != null ? apiKey.getOrganization().getId() : null;
+        this.apiKey = apiKey;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package io.github.eventify.common.config;
 
 import io.github.eventify.common.config.properties.SecurityProperties;
+import io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter;
 import io.github.eventify.common.security.filter.JwtAuthenticationFilter;
 import io.github.eventify.common.security.oauth2.CustomOAuth2UserService;
 import io.github.eventify.common.security.oauth2.OAuth2AuthenticationFailureHandler;
@@ -44,17 +45,19 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public SecurityFilterChain filterChain(
         final SecurityProperties securityProperties,
         final JwtAuthenticationFilter jwtAuthenticationFilter,
+        final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
         final CustomOAuth2UserService customOAuth2UserService,
         final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
         final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler,
         final HttpSecurity http) throws Exception {
-        // Adding a once per request filter to check the JWT token.
         http.addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class);
 
-        // Configure Session Management.
+        http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::disable);
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource(securityProperties.getAllowedOrigins())));
+        http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(sessionConfiguration -> sessionConfiguration.sessionCreationPolicy(STATELESS));
 
-        // Return 401 (unauthorized) instead of 302 (redirect to login) when an authorization is missing or invalid.
         http.exceptionHandling(
             handler -> handler.authenticationEntryPoint(
                 (request, response, authException) -> handleAuthenticationFailure(
@@ -65,16 +68,6 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             )
         );
 
-        // Disable CSRF because of state-less session-management.
-        http.csrf(AbstractHttpConfigurer::disable);
-
-        // Enable CORS.
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource(securityProperties.getAllowedOrigins())));
-
-        // Configure OAuth2 Resource Server.
-        http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::disable);
-
-        // Configure OAuth2 Login
         http.oauth2Login(
             oauth2 -> oauth2
                 .authorizationEndpoint(endpointConfig -> endpointConfig.baseUri(OAUTH2_AUTHORIZATION_PATH))
@@ -83,7 +76,6 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                 .failureHandler(oAuth2AuthenticationFailureHandler)
         );
 
-        // Configure Endpoints
         http.authorizeHttpRequests(accessManagement -> {
             accessManagement.requestMatchers(PUBLIC_ACTUATOR_PATH + WILDCARD_PART).permitAll();
             accessManagement.requestMatchers(PUBLIC_PATH + WILDCARD_PART).permitAll();

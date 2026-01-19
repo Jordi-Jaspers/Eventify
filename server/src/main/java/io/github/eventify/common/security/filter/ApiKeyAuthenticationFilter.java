@@ -6,9 +6,7 @@ import io.github.eventify.common.security.principal.ApiKeyPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -23,8 +21,7 @@ import static io.github.eventify.api.Paths.EVENTS_PATH;
 import static org.springframework.util.StringUtils.hasText;
 
 /**
- * Filter to authenticate requests using API keys.
- * Only processes requests to /v1/events or /v1/channels with X-Api-Key header.
+ * Filter to authenticate requests using API keys. Only processes requests to /v1/events or /v1/channels with X-Api-Key header.
  */
 @Slf4j
 @Component
@@ -46,10 +43,8 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
         @NonNull final HttpServletRequest request,
         @NonNull final HttpServletResponse response,
-        @NonNull final FilterChain filterChain) throws ServletException, IOException {
-
+        @NonNull final FilterChain filterChain) {
         final String apiKey = request.getHeader(API_KEY_HEADER);
-
         try {
             final ApiKeyPrincipal principal = apiKeyAuthenticationService.authenticate(apiKey);
             setSecurityContext(principal, request);
@@ -69,7 +64,6 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
             principal.getAuthorities()
         );
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

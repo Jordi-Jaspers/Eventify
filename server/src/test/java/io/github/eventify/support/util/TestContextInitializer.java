@@ -4,6 +4,7 @@ import io.github.eventify.Main;
 import io.github.eventify.api.apikey.repository.ApiKeyAuditRepository;
 import io.github.eventify.api.apikey.repository.ApiKeyRepository;
 import io.github.eventify.api.authentication.service.AuthenticationService;
+import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.token.repository.TokenRepository;
@@ -20,6 +21,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -100,5 +102,11 @@ public class TestContextInitializer {
 
     @Autowired
     protected ApiKeyAuditRepository apiKeyAuditRepository;
+
+    @Autowired
+    protected ChannelRepository channelRepository;
+
+    @Autowired
+    protected PasswordEncoder passwordEncoder;
 
 }

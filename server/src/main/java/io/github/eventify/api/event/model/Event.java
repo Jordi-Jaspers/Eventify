@@ -1,6 +1,8 @@
 package io.github.eventify.api.event.model;
 
 import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.event.model.request.CreateEventRequest;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,13 +19,13 @@ import org.hibernate.type.SqlTypes;
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
 
 /**
- * Entity representing an event in a channel.
- * Stored in a TimescaleDB hypertable optimized for time-series data.
+ * Entity representing an event in a channel. Stored in a TimescaleDB hypertable optimized for time-series data.
  */
 @Getter
 @Setter
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "event")
 public class Event implements Serializable {
 
@@ -71,28 +73,17 @@ public class Event implements Serializable {
     private OffsetDateTime timestamp;
 
     /**
-     * Creates a new event with the specified details.
+     * Constructs an Event from a CreateEventRequest and associated Channel with the current timestamp.
      *
-     * @param channel   the channel this event belongs to
-     * @param severity  the severity level of the event
-     * @param title     the event title
-     * @param message   the event message (optional)
-     * @param metadata  additional metadata as key-value pairs (optional)
-     * @param timestamp the timestamp when the event occurred
+     * @param request the create event request
+     * @param channel the associated channel
      */
-    public Event(
-                 final Channel channel,
-                 final Severity severity,
-                 final String title,
-                 final String message,
-                 final Map<String, Object> metadata,
-                 final OffsetDateTime timestamp
-    ) {
+    public Event(final CreateEventRequest request, final Channel channel) {
         this.channel = channel;
-        this.severity = severity;
-        this.title = title;
-        this.message = message;
-        this.metadata = metadata;
-        this.timestamp = timestamp;
+        this.severity = request.getSeverity();
+        this.title = request.getTitle();
+        this.message = request.getMessage();
+        this.metadata = request.getMetadata();
+        this.timestamp = OffsetDateTime.now();
     }
 }

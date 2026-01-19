@@ -201,15 +201,11 @@ public enum ApiErrorCode implements ApiError {
     ),
     CHANNEL_NOT_FOUND(
         "ERR-0047",
-        "Channel not found."
-    ),
-    CHANNEL_ACCESS_DENIED(
-        "ERR-0048",
-        "Access to channel denied"
+        "The requested channel has been deleted or does not exist."
     ),
     CHANNEL_PAUSED(
-        "ERR-0049",
-        "Channel is paused"
+        "ERR-0048",
+        "Your channel is paused. Resume the channel to continue sending events."
     );
 
     /* The error code for this reason. */

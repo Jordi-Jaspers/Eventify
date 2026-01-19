@@ -9,7 +9,6 @@ import static io.github.eventify.common.exception.ApiErrorCode.CHANNEL_PAUSED;
 
 /**
  * Exception thrown when attempting to access a paused channel.
- * Returns HTTP 422 UNPROCESSABLE_ENTITY.
  */
 public class ChannelPausedException extends ApiException {
 

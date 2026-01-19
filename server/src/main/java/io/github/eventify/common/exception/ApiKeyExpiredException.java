@@ -22,4 +22,9 @@ public class ApiKeyExpiredException extends ApiException {
     public ApiKeyExpiredException(final ApiErrorCode errorCode) {
         super(errorCode);
     }
+
+    @Override
+    public String getMessage() {
+        return getApiError().getReason();
+    }
 }

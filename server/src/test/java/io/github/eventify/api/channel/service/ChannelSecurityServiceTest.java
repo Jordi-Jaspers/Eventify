@@ -6,8 +6,6 @@ import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.common.exception.ChannelAccessDeniedException;
-import io.github.eventify.common.exception.ChannelPausedException;
 import io.github.eventify.common.security.principal.ApiKeyPrincipal;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.exception.core.DataNotFoundException;
@@ -59,7 +57,7 @@ public class ChannelSecurityServiceTest extends UnitTest {
         final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
         final Channel channel = aPersonalChannel(user1);
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
 
         // When: canAccess called
         final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
@@ -69,35 +67,35 @@ public class ChannelSecurityServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should deny when personal principal accesses another users channel")
-    public void shouldDenyWhenPersonalPrincipalAccessesAnotherUsersChannel() {
+    @DisplayName("Should return false when personal principal accesses another users channel")
+    public void shouldReturnFalseWhenPersonalPrincipalAccessesAnotherUsersChannel() {
         // Given: Personal principal, personal channel owned by different user
         final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
         final Channel channel = aPersonalChannel(user2);
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
 
-        // When/Then: ChannelAccessDeniedException thrown
-        assertThrows(
-            ChannelAccessDeniedException.class,
-            () -> channelSecurityService.canAccess(channel.getId(), principal)
-        );
+        // When: canAccess called
+        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+
+        // Then: Returns false (Spring Security handles 403)
+        assertThat(result, is(false));
     }
 
     @Test
-    @DisplayName("Should deny when personal principal accesses org channel")
-    public void shouldDenyWhenPersonalPrincipalAccessesOrgChannel() {
+    @DisplayName("Should return false when personal principal accesses org channel")
+    public void shouldReturnFalseWhenPersonalPrincipalAccessesOrgChannel() {
         // Given: Personal principal, organization channel
         final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
         final Channel channel = anOrgChannel(user1, org1);
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
 
-        // When/Then: ChannelAccessDeniedException thrown
-        assertThrows(
-            ChannelAccessDeniedException.class,
-            () -> channelSecurityService.canAccess(channel.getId(), principal)
-        );
+        // When: canAccess called
+        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+
+        // Then: Returns false (Spring Security handles 403)
+        assertThat(result, is(false));
     }
 
     @Test
@@ -107,7 +105,7 @@ public class ChannelSecurityServiceTest extends UnitTest {
         final ApiKeyPrincipal principal = anOrgPrincipal(user1, org1);
         final Channel channel = anOrgChannel(user1, org1);
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
 
         // When: canAccess called
         final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
@@ -117,49 +115,49 @@ public class ChannelSecurityServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should deny when org principal accesses different org channel")
-    public void shouldDenyWhenOrgPrincipalAccessesDifferentOrgChannel() {
+    @DisplayName("Should return false when org principal accesses different org channel")
+    public void shouldReturnFalseWhenOrgPrincipalAccessesDifferentOrgChannel() {
         // Given: Org principal for Org A, channel belonging to Org B
         final ApiKeyPrincipal principal = anOrgPrincipal(user1, org1);
         final Channel channel = anOrgChannel(user2, org2);
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
 
-        // When/Then: ChannelAccessDeniedException thrown
-        assertThrows(
-            ChannelAccessDeniedException.class,
-            () -> channelSecurityService.canAccess(channel.getId(), principal)
-        );
+        // When: canAccess called
+        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+
+        // Then: Returns false (Spring Security handles 403)
+        assertThat(result, is(false));
     }
 
     @Test
-    @DisplayName("Should deny when org principal accesses personal channel")
-    public void shouldDenyWhenOrgPrincipalAccessesPersonalChannel() {
+    @DisplayName("Should return false when org principal accesses personal channel")
+    public void shouldReturnFalseWhenOrgPrincipalAccessesPersonalChannel() {
         // Given: Org principal, personal channel
         final ApiKeyPrincipal principal = anOrgPrincipal(user1, org1);
         final Channel channel = aPersonalChannel(user1);
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
 
-        // When/Then: ChannelAccessDeniedException thrown
-        assertThrows(
-            ChannelAccessDeniedException.class,
-            () -> channelSecurityService.canAccess(channel.getId(), principal)
-        );
+        // When: canAccess called
+        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+
+        // Then: Returns false (Spring Security handles 403)
+        assertThat(result, is(false));
     }
 
     @Test
-    @DisplayName("Should deny when principal is null")
-    public void shouldDenyWhenPrincipalIsNull() {
+    @DisplayName("Should return false when principal is null")
+    public void shouldReturnFalseWhenPrincipalIsNull() {
         // Given: Null principal, valid channel ID
         final ApiKeyPrincipal nullPrincipal = null;
         final Long channelId = 1L;
 
-        // When/Then: ChannelAccessDeniedException thrown
-        assertThrows(
-            ChannelAccessDeniedException.class,
-            () -> channelSecurityService.canAccess(channelId, nullPrincipal)
-        );
+        // When: canAccess called
+        final boolean result = channelSecurityService.canAccess(channelId, nullPrincipal);
+
+        // Then: Returns false (Spring Security handles 403)
+        assertThat(result, is(false));
     }
 
     @Test
@@ -169,46 +167,12 @@ public class ChannelSecurityServiceTest extends UnitTest {
         final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
         final Long nonExistentChannelId = 999L;
 
-        when(channelRepository.findById(nonExistentChannelId)).thenReturn(Optional.empty());
+        when(channelRepository.findActiveChannelById(nonExistentChannelId)).thenReturn(Optional.empty());
 
         // When/Then: DataNotFoundException thrown
         assertThrows(
             DataNotFoundException.class,
             () -> channelSecurityService.canAccess(nonExistentChannelId, principal)
-        );
-    }
-
-    @Test
-    @DisplayName("Should throw paused when channel is paused")
-    public void shouldThrowPausedWhenChannelIsPaused() {
-        // Given: Valid principal, paused channel
-        final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
-        final Channel channel = aPersonalChannel(user1);
-        channel.setStatus(ChannelStatus.PAUSED);
-
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
-
-        // When/Then: ChannelPausedException thrown
-        assertThrows(
-            ChannelPausedException.class,
-            () -> channelSecurityService.canAccess(channel.getId(), principal)
-        );
-    }
-
-    @Test
-    @DisplayName("Should throw not found when channel is pending deletion")
-    public void shouldThrowNotFoundWhenChannelIsPendingDeletion() {
-        // Given: Valid principal, channel with PENDING_DELETION status
-        final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
-        final Channel channel = aPersonalChannel(user1);
-        channel.setStatus(ChannelStatus.PENDING_DELETION);
-
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
-
-        // When/Then: DataNotFoundException thrown
-        assertThrows(
-            DataNotFoundException.class,
-            () -> channelSecurityService.canAccess(channel.getId(), principal)
         );
     }
 
@@ -276,6 +240,7 @@ public class ChannelSecurityServiceTest extends UnitTest {
             ApiKeyScope.USER,
             user.getId(),
             user,
+            null,
             null
         );
     }
@@ -294,7 +259,8 @@ public class ChannelSecurityServiceTest extends UnitTest {
             ApiKeyScope.ORGANIZATION,
             user.getId(),
             user,
-            org.getId()
+            org.getId(),
+            null
         );
     }
 }
