@@ -19,6 +19,7 @@ interface AuthState {
     user: UserDetailsResponse | null;
     loading: boolean;
     error: string | null;
+    sessionExpired: boolean;
 }
 
 // Create localStorage-backed reactive user state
@@ -37,13 +38,15 @@ function createAuthStore(): {
     logout: () => Promise<void>;
     setUser: (user: UserDetailsResponse | null) => void;
     initializeFromToken: () => void;
+    validateSession: () => Promise<boolean>;
     clearError: () => void;
     clear: () => void;
 } {
     const {subscribe, set, update}: Writable<AuthState> = writable<AuthState>({
         user: userStorage.value,
         loading: false,
-        error: null
+        error: null,
+        sessionExpired: false
     });
 
     return {
@@ -133,7 +136,7 @@ function createAuthStore(): {
                 await apiLogout();
                 userStorage.reset(null);
 
-                set({user: null, loading: false, error: null});
+                set({user: null, loading: false, error: null, sessionExpired: false});
                 toast.success("You've been logged out.");
             } catch (error: unknown) {
                 const {message}: { message: string } = handleError(error, 'Logout failed');
@@ -155,6 +158,30 @@ function createAuthStore(): {
                 update((state: AuthState): AuthState => ({...state, user: null}));
             }
         },
+        validateSession: async (): Promise<boolean> => {
+            update((state: AuthState): AuthState => ({...state, loading: true, error: null}));
+            try {
+                const user: UserDetailsResponse = await apiGetUserDetails();
+                userStorage.value = user;
+                update((state: AuthState): AuthState => ({
+                    ...state,
+                    user,
+                    loading: false,
+                    sessionExpired: false
+                }));
+                return true;
+            } catch (error: unknown) {
+                // Session validation failed - clear state
+                userStorage.reset(null);
+                update((state: AuthState): AuthState => ({
+                    ...state,
+                    user: null,
+                    loading: false,
+                    sessionExpired: true
+                }));
+                return false;
+            }
+        },
         setUser: (user: UserDetailsResponse | null): void => {
             userStorage.value = user;
             update((state: AuthState): AuthState => ({...state, user}));
@@ -164,7 +191,7 @@ function createAuthStore(): {
         },
         clear: (): void => {
             userStorage.reset(null);
-            set({user: null, loading: false, error: null});
+            set({user: null, loading: false, error: null, sessionExpired: false});
         }
     };
 }

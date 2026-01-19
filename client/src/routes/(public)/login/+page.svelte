@@ -52,6 +52,7 @@
     });
 
     const verificationFailed: boolean = $derived(page.url.searchParams.get('verification') === 'failed');
+    const sessionExpired: boolean = $derived(page.url.searchParams.get('expired') === 'true');
     async function handleSubmit(event: SubmitEvent): Promise<void> {
         event.preventDefault();
         if (!email.trim() || !password) {
@@ -95,7 +96,7 @@
     </div>
 
     <!-- Glassmorphism Card -->
-    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl">
+    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl dark:shadow-primary/5">
         <!-- Card Content -->
         <CardHeader class="space-y-1">
             <CardTitle class="text-2xl flex items-center gap-2">
@@ -107,6 +108,15 @@
             </CardDescription>
         </CardHeader>
         <CardContent>
+            {#if sessionExpired}
+                <Alert class="mb-4 bg-primary/5 border-primary/30 backdrop-blur-sm">
+                    <Info class="h-4 w-4 text-primary"/>
+                    <AlertDescription class="text-foreground">
+                        Your session has expired. Please log in again.
+                    </AlertDescription>
+                </Alert>
+            {/if}
+
             {#if verificationFailed}
                 <Alert variant="destructive" class="mb-4 bg-destructive/10 border-destructive/50 backdrop-blur-sm">
                     <CircleAlert class="h-4 w-4"/>
@@ -148,11 +158,11 @@
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
                         <Label for="password">Password</Label>
-                        <a
+                         <a
                                 href={CLIENT_ROUTES.FORGOT_PASSWORD_PAGE.path}
-                                class="text-sm text-primary hover:text-accent transition-colors"
+                                class="text-sm text-primary hover:text-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
                                 tabindex={isSubmitting ? -1 : 0}
-                        >
+                         >
                             Forgot password?
                         </a>
                     </div>
@@ -169,7 +179,7 @@
                                 type="button"
                                 onclick={togglePasswordVisibility}
                                 disabled={isSubmitting}
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                                 tabindex="0"
                         >
@@ -185,7 +195,7 @@
                 <!-- Submit Button -->
                 <Button
                         type="submit"
-                        class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+                        class="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-primary/50"
                         disabled={isSubmitting}
                 >
                     {#if isSubmitting}
@@ -205,7 +215,7 @@
                         Don't have an account?{' '}
                         <a
                                 href={CLIENT_ROUTES.REGISTER_PAGE.path}
-                                class="text-primary hover:text-accent transition-colors font-medium"
+                                class="text-primary hover:text-primary/80 transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
                                 tabindex={isSubmitting ? -1 : 0}
                         >
                             Sign up

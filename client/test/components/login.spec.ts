@@ -68,6 +68,18 @@ test.describe('Login Page Screenshots', () => {
 					fullPage: true
 				});
 			});
+
+			test(`session expired message`, async ({ page }, testInfo) => {
+				await page.goto('/login?expired=true');
+				await page.waitForLoadState('domcontentloaded');
+				await setTheme(page, theme);
+				await page.waitForTimeout(ANIMATION_SETTLE_MS);
+
+				await page.screenshot({
+					path: getScreenshot(`06-session-expired-${theme}`, testInfo.project.name),
+					fullPage: true
+				});
+			});
 		});
 	}
 });
