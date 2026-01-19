@@ -6,8 +6,12 @@
 
 - [ ] **Event Entity & Database Schema**:
     - New `event` table with: id (UUID recommended for distributed systems), channel_id, severity (INFO, WARN, ERROR, DEBUG, CRITICAL), title, message/data (TEXT or JSONB), metadata (JSONB - for custom key-value pairs), source/application (optional string), received_at, client_timestamp (optional - what the sender says the time is)
+    - TimescaleDB hypertable for time-series optimization
+    - default retention policy applied at DB level (e.g., drop chunks older than 5 years)
+    - think about timescale optimizations (compression, chunk time interval, ...)
     - Indexes: channel_id + received_at (for timeline queries), severity, full-text on message
     - Partitioning consideration: by received_at for efficient retention cleanup
+    - Really think about write performance and storage efficiency and discuss story thoroughly.
 
 - [ ] **Event Ingestion API Endpoint**:
     - `POST /v1/events` with body `{ channelId, severity, title, data, metadata, timestamp }`
@@ -15,19 +19,7 @@
     - Channel access validation: API key scope must match channel scope
     - Response: 201 with event ID, or 202 if async processing
     - Validation: channel exists, API key has access, payload size limits
-
-- [ ] **Batch Event Ingestion**:
-    - `POST /v1/events/batch` - accept array of events
-    - Useful for log aggregators sending in batches
-    - Partial success handling: return which events succeeded/failed
-    - Max batch size limit (e.g., 100 events)
-
-- [ ] **Event Ingestion Rate Limiting**:
-    - Personal accounts: X events per day/month (configurable limit)
-    - Organization accounts: unlimited (or very high limit)
-    - Track usage per API key and per user/org
-    - Return 429 with Retry-After header when limit exceeded
-    - Consider: burst limits vs sustained rate limits
+    - must scale to high throughput, consider event bus (e.g., RabbitMQ) for decoupling ingestion from storage
 
 - [ ] **Event Ingestion Quotas & Usage Tracking**:
     - New `usage_quota` table: user_id, organization_id, period (DAILY/MONTHLY), event_count, limit, period_start
@@ -165,6 +157,7 @@ These are ideas to keep in mind for architecture decisions but not to implement 
 - [ ] **Token Revocation - single/all**
 - [ ] **OAuth2 Enhancements - account linking**
 - [ ] **Stripe Integration - manage subscriptions/payments**
+- [ ] **Batch Event Ingestion**: Useful for log aggregators sending in batches, Max batch size limit (e.g., 100 events)
 - [ ] **Webhooks/Notifications**: Alert users when specific events occur (ERROR severity, keyword match)
 - [ ] **Real-time Updates**: WebSocket or SSE for live timeline updates
 - [ ] **Event Enrichment**: Auto-detect JSON payloads, extract fields for filtering
@@ -174,6 +167,5 @@ These are ideas to keep in mind for architecture decisions but not to implement 
 - [ ] **Multi-region**: Consider event ingestion in multiple regions
 - [ ] **Export**: Download events as CSV/JSON for compliance/backup
 - [ ] **Per-Channel Retention Override**: Allow channels to override user/org retention_days setting. Add optional `retention_days` column to channel table. UI: Channel settings page with retention slider. Falls back to user/org setting if not specified.
-
 
 ---
