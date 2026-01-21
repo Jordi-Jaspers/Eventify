@@ -1,7 +1,7 @@
 package io.github.eventify.api.channel.cache;
 
 import io.github.eventify.api.channel.model.Channel;
-import io.github.eventify.common.cache.RequestScopedCache;
+import io.github.jframe.cache.RequestScopedCache;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
