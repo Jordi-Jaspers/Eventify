@@ -117,7 +117,7 @@ N/A - API behavior only. Dashboard quota display is a separate story in Timeline
 *   **Exception**: `server/src/main/java/io/github/eventify/common/exception/QuotaExceededException.java`
 *   **Integration points**:
     *   Real-time endpoint (`POST /v1/events`) - check quota before insert
-    *   Batch endpoint (`POST /v1/events/batch`) - check quota for full batch size before insert
+    *   Batch endpoint (`POST /v1/events/batch`) - check quota for full batch size before insert, otherwise reject entire batch.
 *   **Edge case**: Batch that would partially exceed quota is fully rejected (all-or-nothing)
 *   **Quota attribution**: Events sent via org API key count against the API key creator's (user's) personal quota
 
