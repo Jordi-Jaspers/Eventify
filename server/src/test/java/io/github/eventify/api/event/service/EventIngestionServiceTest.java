@@ -9,6 +9,7 @@ import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.model.request.CreateEventRequest;
 import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.quota.service.UserQuotaService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.exception.core.DataNotFoundException;
@@ -41,6 +42,9 @@ public class EventIngestionServiceTest extends UnitTest {
 
     @Mock
     private ChannelCache channelCache;
+
+    @Mock
+    private UserQuotaService userQuotaService;
 
     @InjectMocks
     private EventIngestionService eventIngestionService;
@@ -226,6 +230,10 @@ public class EventIngestionServiceTest extends UnitTest {
         assertThat(capturedEvent.getMetadata().get("number"), is(42));
         assertThat(capturedEvent.getMetadata().get("boolean"), is(true));
     }
+
+    // NOTE: Quota enforcement tests omitted from unit tests
+    // These are tested at integration level in EventIngestionControllerTest
+    // where the full flow including UserQuotaService is validated
 
     // ===== Factory Methods =====
 

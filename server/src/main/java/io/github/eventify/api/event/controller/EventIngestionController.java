@@ -7,6 +7,7 @@ import io.github.eventify.api.event.model.request.CreateEventRequest;
 import io.github.eventify.api.event.model.response.EventCreatedResponse;
 import io.github.eventify.api.event.model.validator.EventValidator;
 import io.github.eventify.api.event.service.EventIngestionService;
+import io.github.eventify.api.quota.service.UserQuotaService;
 import io.github.eventify.common.security.principal.ApiKeyPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,6 +45,8 @@ public class EventIngestionController {
 
     private final EventMapper eventMapper;
 
+    private final UserQuotaService userQuotaService;
+
     @ResponseStatus(CREATED)
     @Operation(
         summary = "Ingest event",
@@ -58,9 +61,9 @@ public class EventIngestionController {
     public ResponseEntity<EventCreatedResponse> ingestEvent(@RequestBody final CreateEventRequest request,
         @AuthenticationPrincipal final ApiKeyPrincipal principal) {
         eventValidator.validateAndThrow(request);
+        userQuotaService.checkAndIncrementOrThrow(principal.getUserId(), 1);
         final Event event = eventIngestionService.ingestEvent(request);
-        final EventCreatedResponse response = eventMapper.toCreatedResponse(event);
-        return ResponseEntity.status(CREATED).body(response);
+        return ResponseEntity.status(CREATED).body(eventMapper.toCreatedResponse(event));
     }
 
     @ResponseStatus(CREATED)
@@ -77,8 +80,8 @@ public class EventIngestionController {
     public ResponseEntity<List<EventCreatedResponse>> ingestBatch(@RequestBody final BatchEventRequest request,
         @AuthenticationPrincipal final ApiKeyPrincipal principal) {
         eventValidator.validateAndThrow(request);
+        userQuotaService.checkAndIncrementOrThrow(principal.getUserId(), request.getEvents().size());
         final List<Event> events = eventIngestionService.ingestBatch(request);
-        final List<EventCreatedResponse> response = eventMapper.toCreatedResponseList(events);
-        return ResponseEntity.status(CREATED).body(response);
+        return ResponseEntity.status(CREATED).body(eventMapper.toCreatedResponseList(events));
     }
 }

@@ -1,27 +1,35 @@
 package io.github.eventify.common.exception;
 
-import io.github.jframe.exception.HttpException;
+import io.github.jframe.exception.core.RateLimitExceededException;
 import lombok.Getter;
 
 import java.io.Serial;
+import java.time.OffsetDateTime;
 
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
-import static io.github.eventify.common.exception.ApiErrorCode.QUOTA_EXCEEDED;
-import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 /**
  * Exception thrown when a user has exceeded their monthly event quota.
  */
 @Getter
-public class QuotaExceededException extends HttpException {
+public class QuotaExceededException extends RateLimitExceededException {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     /**
-     * Constructs a new QuotaExceededException with the specified message.
+     * Constructs a new QuotaExceededException with rate limit information.
+     *
+     * @param limit     the monthly quota limit
+     * @param used      the number of events used
+     * @param resetDate the date when quota resets
      */
-    public QuotaExceededException() {
-        super(QUOTA_EXCEEDED.getReason(), TOO_MANY_REQUESTS);
+    public QuotaExceededException(final int limit, final int used, final OffsetDateTime resetDate) {
+        super(
+            String.format("Monthly event quota exceeded: limit=%d, used=%d, resets at=%s", limit, used, resetDate),
+            limit,
+            Math.max(0, limit - used),
+            resetDate
+        );
     }
 }

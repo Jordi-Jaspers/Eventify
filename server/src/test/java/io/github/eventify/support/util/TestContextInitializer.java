@@ -8,6 +8,7 @@ import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
+import io.github.eventify.api.quota.repository.UserEventQuotaRepository;
 import io.github.eventify.api.token.repository.TokenRepository;
 import io.github.eventify.api.token.service.TokenService;
 import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
@@ -109,6 +110,9 @@ public class TestContextInitializer {
 
     @Autowired
     protected EventRepository eventRepository;
+
+    @Autowired
+    protected UserEventQuotaRepository userEventQuotaRepository;
 
     @Autowired
     protected PasswordEncoder passwordEncoder;
