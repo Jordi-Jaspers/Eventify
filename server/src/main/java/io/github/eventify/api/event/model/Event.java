@@ -73,17 +73,30 @@ public class Event implements Serializable {
     private OffsetDateTime timestamp;
 
     /**
-     * Constructs an Event from a CreateEventRequest and associated Channel with the current timestamp.
+     * Constructs an Event from a CreateEventRequest and associated Channel.
+     * Always uses server-generated timestamp (for single event ingestion).
      *
      * @param request the create event request
      * @param channel the associated channel
      */
     public Event(final CreateEventRequest request, final Channel channel) {
+        this(request, channel, OffsetDateTime.now());
+    }
+
+    /**
+     * Constructs an Event from a CreateEventRequest with explicit timestamp.
+     * Used for batch ingestion where client provides the timestamp.
+     *
+     * @param request   the create event request
+     * @param channel   the associated channel
+     * @param timestamp the timestamp to use
+     */
+    public Event(final CreateEventRequest request, final Channel channel, final OffsetDateTime timestamp) {
         this.channel = channel;
         this.severity = request.getSeverity();
         this.title = request.getTitle();
         this.message = request.getMessage();
         this.metadata = request.getMetadata();
-        this.timestamp = OffsetDateTime.now();
+        this.timestamp = timestamp;
     }
 }

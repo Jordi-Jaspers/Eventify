@@ -1,6 +1,7 @@
 package io.github.eventify.api.channel.service;
 
 import io.github.eventify.api.apikey.model.ApiKeyScope;
+import io.github.eventify.api.channel.cache.ChannelCache;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
@@ -8,7 +9,6 @@ import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.security.principal.ApiKeyPrincipal;
 import io.github.eventify.support.UnitTest;
-import io.github.jframe.exception.core.DataNotFoundException;
 
 import java.util.Optional;
 
@@ -20,7 +20,6 @@ import org.mockito.Mock;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @DisplayName("Unit Test - Channel Security Service")
@@ -28,6 +27,9 @@ public class ChannelSecurityServiceTest extends UnitTest {
 
     @Mock
     private ChannelRepository channelRepository;
+
+    @Mock
+    private ChannelCache channelCache;
 
     @InjectMocks
     private ChannelSecurityService channelSecurityService;
@@ -161,19 +163,19 @@ public class ChannelSecurityServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should throw not found when channel does not exist")
-    public void shouldThrowNotFoundWhenChannelDoesNotExist() {
+    @DisplayName("Should return false when channel does not exist (no 404 to avoid leaking existence)")
+    public void shouldReturnFalseWhenChannelDoesNotExist() {
         // Given: Valid principal, non-existent channel ID
         final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
         final Long nonExistentChannelId = 999L;
 
         when(channelRepository.findActiveChannelById(nonExistentChannelId)).thenReturn(Optional.empty());
 
-        // When/Then: DataNotFoundException thrown
-        assertThrows(
-            DataNotFoundException.class,
-            () -> channelSecurityService.canAccess(nonExistentChannelId, principal)
-        );
+        // When: Checking access
+        final boolean result = channelSecurityService.canAccess(nonExistentChannelId, principal);
+
+        // Then: Returns false (Spring Security will convert to 403)
+        assertThat(result, is(false));
     }
 
     // ===== Factory Methods =====

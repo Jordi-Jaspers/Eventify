@@ -2,14 +2,17 @@ package io.github.eventify.api.event.controller;
 
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.mapper.EventMapper;
+import io.github.eventify.api.event.model.request.BatchEventRequest;
 import io.github.eventify.api.event.model.request.CreateEventRequest;
 import io.github.eventify.api.event.model.response.EventCreatedResponse;
-import io.github.eventify.api.event.model.validator.CreateEventValidator;
+import io.github.eventify.api.event.model.validator.EventValidator;
 import io.github.eventify.api.event.service.EventIngestionService;
 import io.github.eventify.common.security.principal.ApiKeyPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static io.github.eventify.api.Paths.EVENTS_BATCH_PATH;
 import static io.github.eventify.api.Paths.EVENTS_PATH;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -36,7 +40,7 @@ public class EventIngestionController {
 
     private final EventIngestionService eventIngestionService;
 
-    private final CreateEventValidator createEventValidator;
+    private final EventValidator eventValidator;
 
     private final EventMapper eventMapper;
 
@@ -53,9 +57,28 @@ public class EventIngestionController {
     @PreAuthorize("@channelSecurity.canAccess(#request.channelId, principal)")
     public ResponseEntity<EventCreatedResponse> ingestEvent(@RequestBody final CreateEventRequest request,
         @AuthenticationPrincipal final ApiKeyPrincipal principal) {
-        createEventValidator.validateAndThrow(request);
+        eventValidator.validateAndThrow(request);
         final Event event = eventIngestionService.ingestEvent(request);
         final EventCreatedResponse response = eventMapper.toCreatedResponse(event);
+        return ResponseEntity.status(CREATED).body(response);
+    }
+
+    @ResponseStatus(CREATED)
+    @Operation(
+        summary = "Ingest batch of events",
+        description = "Creates multiple events in a single request with client-provided timestamps. All-or-nothing semantics."
+    )
+    @PostMapping(
+        path = EVENTS_BATCH_PATH,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("@channelSecurity.canAccessBatch(#request, principal)")
+    public ResponseEntity<List<EventCreatedResponse>> ingestBatch(@RequestBody final BatchEventRequest request,
+        @AuthenticationPrincipal final ApiKeyPrincipal principal) {
+        eventValidator.validateAndThrow(request);
+        final List<Event> events = eventIngestionService.ingestBatch(request);
+        final List<EventCreatedResponse> response = eventMapper.toCreatedResponseList(events);
         return ResponseEntity.status(CREATED).body(response);
     }
 }

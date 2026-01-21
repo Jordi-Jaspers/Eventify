@@ -209,6 +209,8 @@ public final class Paths {
 
     public static final String EVENTS_PATH = BASE_PATH + "/events";
 
+    public static final String EVENTS_BATCH_PATH = EVENTS_PATH + "/batch";
+
     public static final String CHANNELS_PATH = BASE_PATH + CHANNELS_PART;
 
     /* ------------------------------- END ------------------------------- */

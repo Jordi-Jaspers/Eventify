@@ -13,22 +13,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.github.eventify.api.event.model.validator.CreateEventValidator.*;
+import static io.github.eventify.api.event.model.validator.EventValidator.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Unit Test - Create Event Validator.
+ * Unit Test - Event Validator.
  */
-@DisplayName("Unit Test - Create Event Validator")
-public class CreateEventValidatorTest extends UnitTest {
+@DisplayName("Unit Test - Event Validator")
+public class EventValidatorTest extends UnitTest {
 
-    private CreateEventValidator validator;
+    private EventValidator validator;
 
     @BeforeEach
     public void setUp() {
-        validator = new CreateEventValidator();
+        validator = new EventValidator();
     }
 
     @Test

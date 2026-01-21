@@ -180,7 +180,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should reject non-existent channel")
+    @DisplayName("Should reject non-existent channel with 403 to avoid leaking existence")
     public void ingestEventFailsWhenChannelNotFound() throws Exception {
         // Given: Valid API key but non-existent channel
         final User user = aValidatedUser();
@@ -200,14 +200,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         final ResultActions response = mockMvc.perform(ingestRequest);
 
-        // Then: Response should be NOT_FOUND
-        response.andExpect(status().is(SC_NOT_FOUND));
-
-        // And: Error should mention channel (DataNotFoundException passes resource name)
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final ApiErrorResponseResource error = fromJson(content, ApiErrorResponseResource.class);
-
-        assertThat(error.getErrorMessage(), containsStringIgnoringCase("channel"));
+        // Then: Response should be FORBIDDEN (not 404, to avoid leaking channel existence)
+        response.andExpect(status().is(SC_FORBIDDEN));
     }
 
     @Test

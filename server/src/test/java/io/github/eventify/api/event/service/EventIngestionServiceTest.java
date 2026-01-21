@@ -1,5 +1,6 @@
 package io.github.eventify.api.event.service;
 
+import io.github.eventify.api.channel.cache.ChannelCache;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
@@ -38,6 +39,9 @@ public class EventIngestionServiceTest extends UnitTest {
     @Mock
     private ChannelRepository channelRepository;
 
+    @Mock
+    private ChannelCache channelCache;
+
     @InjectMocks
     private EventIngestionService eventIngestionService;
 
@@ -51,6 +55,13 @@ public class EventIngestionServiceTest extends UnitTest {
 
         channel = aChannel(1L, "Test Channel", user, null);
         channel.setStatus(ChannelStatus.ACTIVE);
+
+        // Configure cache to delegate to repository for getOrLoad
+        when(channelCache.getOrLoad(any(), any())).thenAnswer(invocation -> {
+            final Long id = invocation.getArgument(0);
+            final java.util.function.Function<Long, Optional<Channel>> loader = invocation.getArgument(1);
+            return loader.apply(id);
+        });
     }
 
     @Test

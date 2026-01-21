@@ -3,6 +3,7 @@ package io.github.eventify.api.channel.repository;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,20 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
             """
     )
     Optional<Channel> findActiveChannelById(@Param("id") Long id);
+
+    /**
+     * Finds active channels by IDs (batch query).
+     *
+     * @param ids the channel IDs
+     * @return list of active channels
+     */
+    @Query(
+        """
+            SELECT c FROM Channel c
+            WHERE c.id IN :ids AND c.status != 'PENDING_DELETION'
+            """
+    )
+    List<Channel> findActiveChannelsByIds(@Param("ids") Collection<Long> ids);
 
     /**
      * Finds a personal channel by user ID and name.
