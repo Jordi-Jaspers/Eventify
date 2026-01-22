@@ -185,6 +185,20 @@ fun retrieve(property: String): String {
     return foundProperty.replace("\"", "")
 }
 
+/** Shared JVM arguments for running the application and tests. */
+val sharedJvmArgs = listOf(
+    "-XX:+UseG1GC",
+    "-Xms512m",
+    "-Xmx4096m",
+    "-XX:MetaspaceSize=512m",
+    "-XX:MaxMetaspaceSize=1024m",
+    "-XX:MaxMetaspaceFreeRatio=60",
+    "-XX:+EnableDynamicAgentLoading",
+    "-XX:+HeapDumpOnOutOfMemoryError",
+    "-Djava.awt.headless=true",
+    "-Dspring.output.ansi.enabled=ALWAYS"
+)
+
 // ============== TASK CONFIGURATION ================
 tasks.getByName<BootJar>("bootJar") {
     duplicatesStrategy = INCLUDE
@@ -207,7 +221,7 @@ tasks.withType<Test> {
     systemProperty("jframe.group", retrieve("group"))
     systemProperty("jframe.version", retrieve("version"))
     useJUnitPlatform()
-    jvmArgs("-XX:+EnableDynamicAgentLoading")
+    jvmArgs(sharedJvmArgs)
     testLogging {
         showCauses = true
         showExceptions = true
@@ -266,14 +280,5 @@ tasks.named<BootRun>("bootRun") {
     systemProperty("jframe.application.name", retrieve("artifactName"))
     systemProperty("jframe.application.group", retrieve("group"))
     systemProperty("jframe.application.version", retrieve("version"))
-    jvmArgs(
-        "-Xms512m",
-        "-Xmx4096m",
-        "-XX:MetaspaceSize=512m",
-        "-XX:MaxMetaspaceSize=1024m",
-        "-XX:MaxMetaspaceFreeRatio=60",
-        "-Djava.awt.headless=true",
-        "-XX:+UseG1GC",
-        "-Dspring.output.ansi.enabled=ALWAYS",
-    )
+    jvmArgs(sharedJvmArgs)
 }

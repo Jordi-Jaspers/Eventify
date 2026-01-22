@@ -4,7 +4,6 @@ spring:
   liquibase:
     enabled: true
     drop-first: true
-    contexts: test
 
 springdoc:
   api-docs:
