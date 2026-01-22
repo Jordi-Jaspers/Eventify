@@ -6,56 +6,163 @@
                    logicalFilePath="202601091000-TST-membership-test-data.xml">
 
     <changeSet id="202601091000-TST-membership-test-data-1" author="backend-agent" context="tst">
-        <comment>Insert organization memberships with varied roles. Admin (id=1) owns orgs 1,2,3. Org 1 has 5+ members. Org 21 has only 1 member.</comment>
+        <comment>Insert organization memberships with varied roles. Admin (id=1) owns orgs Acme, Beta, Gamma. Acme has 5+ members. Chi Studios has only 1 member.</comment>
         <sql>
-            -- Admin (id=1) as OWNER of organizations 1, 2, 3
+            -- Admin (id=1) as OWNER of organizations Acme, Beta, Gamma
             INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
             VALUES
-                (1, 1, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days'),
-                (1, 2, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '28 days'),
-                (1, 3, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '27 days');
+                (1, (SELECT id FROM organization WHERE slug = 'acme-corp'), 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days'),
+                (1, (SELECT id FROM organization WHERE slug = 'beta-industries'), 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '28 days'),
+                (1, (SELECT id FROM organization WHERE slug = 'gamma-solutions'), 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '27 days');
 
-            -- Org 1 (Acme Corp) with 5+ members - varied roles
+            -- Acme Corp with 5+ members - varied roles
             INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
-            VALUES
-                (2, 1, 'ADMIN', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days'),
-                (3, 1, 'ADMIN', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '24 days'),
-                (4, 1, 'MEMBER', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days'),
-                (5, 1, 'MEMBER', 2, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days'),
-                (6, 1, 'MEMBER', 2, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days'),
-                (7, 1, 'MEMBER', 3, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days');
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'ADMIN',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days';
 
-            -- Org 2 (Beta Industries) with a few members
             INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
-            VALUES
-                (8, 2, 'ADMIN', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days'),
-                (9, 2, 'MEMBER', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days'),
-                (10, 2, 'MEMBER', 8, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days');
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'bob.brown@example.com'),
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'ADMIN',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '24 days';
 
-            -- Org 3 (Gamma Solutions) with a few members
             INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
-            VALUES
-                (11, 3, 'ADMIN', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days'),
-                (12, 3, 'MEMBER', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '19 days');
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'carol.clark@example.com'),
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'MEMBER',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days';
 
-            -- Additional orgs with varied membership
-            -- Org 4: User 13 as owner (not admin)
             INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
-            VALUES
-                (13, 4, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '26 days'),
-                (14, 4, 'MEMBER', 13, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days');
+            SELECT
+                u.id,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'MEMBER',
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days'
+            FROM "user" u WHERE u.email = 'david.davis@example.com';
 
-            -- Org 5: User 15 as owner with admin
             INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
-            VALUES
-                (15, 5, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days'),
-                (16, 5, 'ADMIN', 15, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days'),
-                (17, 5, 'MEMBER', 15, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days');
+            SELECT
+                u.id,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'MEMBER',
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days'
+            FROM "user" u WHERE u.email = 'eve.evans@example.com';
 
-            -- Org 21 (Chi Studios): Only 1 member - the owner
             INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
-            VALUES
-                (18, 21, 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 hours');
+            SELECT
+                u.id,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'MEMBER',
+                (SELECT id FROM "user" WHERE email = 'bob.brown@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days'
+            FROM "user" u WHERE u.email = 'frank.foster@example.com';
+
+            -- Beta Industries with a few members
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'grace.garcia@example.com'),
+                (SELECT id FROM organization WHERE slug = 'beta-industries'),
+                'ADMIN',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days';
+
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'henry.harris@example.com'),
+                (SELECT id FROM organization WHERE slug = 'beta-industries'),
+                'MEMBER',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days';
+
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                u.id,
+                (SELECT id FROM organization WHERE slug = 'beta-industries'),
+                'MEMBER',
+                (SELECT id FROM "user" WHERE email = 'grace.garcia@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days'
+            FROM "user" u WHERE u.email = 'ivy.ingram@example.com';
+
+            -- Gamma Solutions with a few members
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'jack.jackson@example.com'),
+                (SELECT id FROM organization WHERE slug = 'gamma-solutions'),
+                'ADMIN',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days';
+
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'kelly.king@example.com'),
+                (SELECT id FROM organization WHERE slug = 'gamma-solutions'),
+                'MEMBER',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '19 days';
+
+            -- Delta Technologies: User Leo as owner (not admin)
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'leo.lopez@example.com'),
+                (SELECT id FROM organization WHERE slug = 'delta-tech'),
+                'OWNER',
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '26 days';
+
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                u.id,
+                (SELECT id FROM organization WHERE slug = 'delta-tech'),
+                'MEMBER',
+                (SELECT id FROM "user" WHERE email = 'leo.lopez@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days'
+            FROM "user" u WHERE u.email = 'mia.martinez@example.com';
+
+            -- Epsilon Systems: User Noah as owner with admin
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'noah.nelson@example.com'),
+                (SELECT id FROM organization WHERE slug = 'epsilon-systems'),
+                'OWNER',
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days';
+
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                u.id,
+                (SELECT id FROM organization WHERE slug = 'epsilon-systems'),
+                'ADMIN',
+                (SELECT id FROM "user" WHERE email = 'noah.nelson@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days'
+            FROM "user" u WHERE u.email = 'olivia.owens@example.com';
+
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                u.id,
+                (SELECT id FROM organization WHERE slug = 'epsilon-systems'),
+                'MEMBER',
+                (SELECT id FROM "user" WHERE email = 'noah.nelson@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days'
+            FROM "user" u WHERE u.email = 'paul.parker@example.com';
+
+            -- Chi Studios: Only 1 member - the owner
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'quinn.quinn@example.com'),
+                (SELECT id FROM organization WHERE slug = 'chi-studios'),
+                'OWNER',
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 hours';
         </sql>
     </changeSet>
 </databaseChangeLog>

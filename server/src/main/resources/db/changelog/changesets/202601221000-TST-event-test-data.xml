@@ -1,0 +1,79 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601221000-TST-event-test-data.xml">
+
+    <changeSet id="202601221000-TST-event-test-data-1" author="jordi.jaspers" context="tst">
+        <comment>Insert test events for channels using generate_series. Creates 5 months of historical data at 5-second intervals with varied severities.</comment>
+        <sql><![CDATA[
+            -- Insert events for all active channels using generate_series
+            -- This creates events from 5 months ago to 1 month ago at 5-second intervals
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                c.id AS channel_id,
+                (ARRAY['OK', 'OK', 'OK', 'OK', 'OK', 'OK', 'OK', 'WARNING', 'WARNING', 'CRITICAL'])[FLOOR(random() * 10 + 1)::int] AS severity,
+                'Event at ' || TO_CHAR(stamp, 'YYYY-MM-DD HH24:MI:SS') AS title,
+                'Test event generated for channel ' || c.name || ' at ' || stamp AS message,
+                jsonb_build_object(
+                    'source', 'test-data-generator',
+                    'channel_name', c.name,
+                    'random_value', (random() * 1000)::int
+                ) AS metadata,
+                stamp AS timestamp
+            FROM
+                channel c
+                CROSS JOIN LATERAL generate_series(
+                    (NOW() - INTERVAL '5 months')::timestamptz,
+                    (NOW() - INTERVAL '1 month')::timestamptz,
+                    INTERVAL '5 seconds'
+                ) AS stamp
+            WHERE
+                c.status = 'ACTIVE'
+                AND c.id IN (
+                    -- Limit to first 3 channels to avoid excessive data
+                    SELECT id FROM channel WHERE status = 'ACTIVE' ORDER BY id LIMIT 3
+                )
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="202601221000-TST-event-test-data-2" author="jordi.jaspers" context="tst">
+        <comment>Insert additional recent events for testing with higher frequency.</comment>
+        <sql><![CDATA[
+            -- Insert more recent events (last month) at 1-minute intervals for all active channels
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                c.id AS channel_id,
+                (ARRAY['OK', 'OK', 'OK', 'OK', 'OK', 'WARNING', 'WARNING', 'CRITICAL'])[FLOOR(random() * 8 + 1)::int] AS severity,
+                CASE
+                    WHEN random() < 0.1 THEN 'Critical alert triggered'
+                    WHEN random() < 0.3 THEN 'Warning threshold exceeded'
+                    ELSE 'System health check passed'
+                END AS title,
+                CASE
+                    WHEN random() < 0.1 THEN 'Critical issue detected in channel ' || c.name || '. Immediate attention required.'
+                    WHEN random() < 0.3 THEN 'Warning: Metrics approaching threshold in ' || c.name
+                    ELSE 'All systems nominal for ' || c.name
+                END AS message,
+                jsonb_build_object(
+                    'source', 'test-data-generator',
+                    'channel_name', c.name,
+                    'cpu_usage', (random() * 100)::int,
+                    'memory_usage', (random() * 100)::int,
+                    'response_time_ms', (random() * 500)::int
+                ) AS metadata,
+                stamp AS timestamp
+            FROM
+                channel c
+                CROSS JOIN LATERAL generate_series(
+                    (NOW() - INTERVAL '1 month')::timestamptz,
+                    NOW()::timestamptz,
+                    INTERVAL '1 minute'
+                ) AS stamp
+            WHERE
+                c.status = 'ACTIVE'
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+</databaseChangeLog>

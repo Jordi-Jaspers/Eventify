@@ -19,66 +19,59 @@
 
             -- User 2 (Alice): Minimal usage - 1%
             INSERT INTO user_event_quota (user_id, event_count, period_start, updated_at)
-            VALUES (
-                2,
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
                 10,
                 DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days';
 
             -- User 3 (Bob): Moderate usage - 45%
             INSERT INTO user_event_quota (user_id, event_count, period_start, updated_at)
-            VALUES (
-                3,
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'bob.brown@example.com'),
                 450,
                 DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day';
 
             -- User 4 (Carol): Light usage - 12%
             INSERT INTO user_event_quota (user_id, event_count, period_start, updated_at)
-            VALUES (
-                4,
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'carol.clark@example.com'),
                 120,
                 DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 days'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 days';
 
             -- User 5 (David): At limit - 100%
             INSERT INTO user_event_quota (user_id, event_count, period_start, updated_at)
-            VALUES (
-                5,
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'david.davis@example.com'),
                 1000,
                 DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 hours'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 hours';
 
             -- User 6 (Eve): Zero usage this period
             INSERT INTO user_event_quota (user_id, event_count, period_start, updated_at)
-            VALUES (
-                6,
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'eve.evans@example.com'),
                 0,
                 DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-            );
+                DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC');
 
             -- User 7 (Frank): Heavy usage - 78%
             INSERT INTO user_event_quota (user_id, event_count, period_start, updated_at)
-            VALUES (
-                7,
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'frank.foster@example.com'),
                 780,
                 DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 hours'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 hours';
 
             -- User 8 (Grace): Approaching warning threshold - 79%
             INSERT INTO user_event_quota (user_id, event_count, period_start, updated_at)
-            VALUES (
-                8,
+            SELECT
+                (SELECT id FROM "user" WHERE email = 'grace.garcia@example.com'),
                 790,
                 DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 hours'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 hours';
         </sql>
     </changeSet>
 </databaseChangeLog>

@@ -1,18 +1,3 @@
-# Epic: Imporovements
-
-```
-  insert into event (check_id, created, "timestamp", check_result, message)
-  SELECT ((random() * 500) + 4000)::int, stamp,
-         stamp,
-         (ARRAY['HARD_OK', 'HARD_OK', 'HARD_OK', 'HARD_OK', 'HARD_OK', 'HARD_OK', 'SOFT_OK', 'HARD_UNKNOWN', 'SOFT_UNKNOWN',
-          'HARD_WARNING', 'SOFT_WARNING', 'HARD_CRITICAL', 'SOFT_CRITICAL' ])[round(random() * 12) + 1] as "check_result",
- 'Test Event ' || stamp                                                                                                                                                                                      as "message"
-  FROM generate_series((NOW() - interval '5 month'):: timestamp, (NOW() - interval '1 month'):: timestamp, '5 SECOND':: interval) as stamp
-  ON CONFLICT DO NOTHING;
-```
-
-
-
 # Epic: Event Timeline & Visualization
 
 **Context**: Users need to view their events in a real-time or near-real-time timeline. This is the core UI experience.

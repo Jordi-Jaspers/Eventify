@@ -83,151 +83,139 @@
     </changeSet>
 
     <changeSet id="202601121000-TST-channel-test-data-2" author="backend-agent" context="tst">
-        <comment>Insert personal channels for other test users (2-5).</comment>
+        <comment>Insert personal channels for other test users.</comment>
         <sql>
-            -- Personal channels for user 2 (Alice)
+            -- Personal channels for Alice
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'Mobile App Events',
                 'User interactions and errors from the iOS and Android applications.',
-                2,
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
                 NULL,
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 hours'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 hours';
 
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'Payment Processing',
                 'Transaction events, payment failures, and refund tracking.',
-                2,
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
                 NULL,
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 hours'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 hours';
 
-            -- Personal channels for user 3 (Bob)
+            -- Personal channels for Bob
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'API Gateway Logs',
                 'Request/response logging for the API gateway.',
-                3,
+                (SELECT id FROM "user" WHERE email = 'bob.brown@example.com'),
                 NULL,
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 minutes'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 minutes';
 
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'Legacy System',
                 'Events from the legacy monolith being phased out.',
-                3,
+                (SELECT id FROM "user" WHERE email = 'bob.brown@example.com'),
                 NULL,
                 'PAUSED',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '200 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days';
 
-            -- Personal channels for user 4
+            -- Personal channels for Carol
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'IoT Sensor Data',
                 'Temperature, humidity, and motion sensor readings from smart devices.',
-                4,
+                (SELECT id FROM "user" WHERE email = 'carol.clark@example.com'),
                 NULL,
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 minutes'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 minutes';
 
-            -- Personal channels for user 5
+            -- Personal channels for David
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'E-commerce Orders',
                 'Order lifecycle events from placement to delivery.',
-                5,
+                (SELECT id FROM "user" WHERE email = 'david.davis@example.com'),
                 NULL,
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour';
 
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'Customer Support Tickets',
                 'Ticket creation, updates, and resolution events.',
-                5,
+                (SELECT id FROM "user" WHERE email = 'david.davis@example.com'),
                 NULL,
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 hours'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 hours';
         </sql>
     </changeSet>
 
     <changeSet id="202601121000-TST-channel-test-data-3" author="backend-agent" context="tst">
-        <comment>Insert organization channels for orgs 1-3.</comment>
+        <comment>Insert organization channels for Acme, Beta, and Gamma.</comment>
         <sql>
-            -- Organization channels for Acme Corp (org_id=1)
+            -- Organization channels for Acme Corp
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'Acme Production Events',
                 'All production environment events for Acme Corp applications.',
                 1,
-                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '50 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 minutes'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 minutes';
 
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'Acme Staging Events',
                 'Pre-production testing and QA events.',
                 1,
-                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '40 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours';
 
-            -- Organization channels for Beta Industries (org_id=2)
+            -- Organization channels for Beta Industries
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'Beta Manufacturing Line',
                 'Real-time events from the manufacturing floor sensors.',
                 1,
-                2,
+                (SELECT id FROM organization WHERE slug = 'beta-industries'),
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '75 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 minutes'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 minutes';
 
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'Beta Quality Control',
                 'Quality inspection results and defect tracking.',
                 1,
-                2,
+                (SELECT id FROM organization WHERE slug = 'beta-industries'),
                 'PAUSED',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '80 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days';
 
-            -- Organization channels for Gamma Solutions (org_id=3)
+            -- Organization channels for Gamma Solutions
             INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
-            VALUES (
+            SELECT
                 'Gamma Client Portal',
                 'Events from the client-facing web portal.',
                 1,
-                3,
+                (SELECT id FROM organization WHERE slug = 'gamma-solutions'),
                 'ACTIVE',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour'
-            );
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour';
         </sql>
     </changeSet>
 </databaseChangeLog>
