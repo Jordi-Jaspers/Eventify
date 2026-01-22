@@ -1,6 +1,6 @@
 ---
 name: ui-validation
-description: Use Playwright to validate UI during frontend development. Supports iterative ralph-loop for autonomous UI improvement cycles.
+description: Use Playwright to validate UI during frontend development. Supports iterative ui-polish-loop for autonomous UI improvement cycles.
 metadata:
   skill-type: frontend
   framework: playwright
@@ -10,37 +10,38 @@ metadata:
 
 Use Playwright to validate UI during frontend development. Take screenshots iteratively to verify visual output matches requirements.
 
-## ⚠️ CRITICAL: When This Skill Is Loaded
+## CRITICAL: When This Skill Is Loaded
 
-**ALWAYS use the ralph-loop for UI validation tasks unless explicitly told otherwise.**
+**ALWAYS use the ui-polish-loop for UI validation tasks unless explicitly told otherwise.**
 
 When you load this skill (or when a user asks for UI validation), you MUST:
 
 1. **Immediately check**: Is this a UI validation/improvement task?
-2. **If YES**: Use the ralph-loop pattern (see below)
+2. **If YES**: Use the ui-polish-loop script (see below)
 3. **If NO**: User is just asking questions about the skill - answer normally
 
 ### Decision Tree
 
 ```
 User asks for UI validation/screenshot tests?
-├─ YES → Use ralph-loop (./.opencode/scripts/ralph-loop.sh)
+├─ YES → Use ui-polish-loop.sh script
 │        └─ Run iterative improvement cycle
 │
 └─ NO → User is asking about the skill itself
         └─ Answer questions normally
 ```
 
-**Example prompts that REQUIRE ralph-loop:**
+**Example prompts that REQUIRE ui-polish-loop:**
 - "Validate the dashboard UI"
 - "Check the login page screenshots"
 - "Perform UI validation on organization settings"
 - "Review the UI and make improvements"
 - "Take screenshots and fix any issues"
+- "Run UI validation on landing page"
 
-**Example prompts that DON'T require ralph-loop:**
+**Example prompts that DON'T require ui-polish-loop:**
 - "How do I write a Playwright test?"
-- "What's the ralph-loop command?"
+- "What's the ui-polish-loop command?"
 - "Where are screenshots saved?"
 
 ## When to Use
@@ -49,49 +50,64 @@ User asks for UI validation/screenshot tests?
 - To verify layout, styling, and visual states
 - To check responsive behavior
 - Before reporting completion to user
-- **In a ralph-loop for autonomous UI improvement** (DEFAULT for validation tasks)
+- **In a ui-polish-loop for autonomous UI improvement** (DEFAULT for validation tasks)
 
-## Ralph Loop Integration
+## UI Polish Loop Integration
 
 **This is the PRIMARY way to use this skill for validation tasks.**
 
-This skill supports the ralph-loop pattern for iterative UI improvement. Use the `/ui-loop` command or run:
+This skill supports the ui-polish-loop pattern for iterative UI improvement.
+
+### Command Syntax
 
 ```bash
-# From project root (RECOMMENDED)
-./.opencode/scripts/ralph-loop.sh --command ui-loop --max-iterations 10 --completion-promise "UI_VALIDATION_COMPLETE"
-
-# With custom prompt
-./.opencode/scripts/ralph-loop.sh \
-  --prompt "Improve the dashboard page styling, focus on spacing and visual hierarchy" \
-  --max-iterations 15 \
-  --completion-promise "UI_VALIDATION_COMPLETE"
-
-# Quick 5-iteration polish
-./.opencode/scripts/ralph-loop.sh --command ui-loop -m 5 -c "UI_VALIDATION_COMPLETE"
+# From project root
+./.opencode/scripts/ui-polish-loop.sh <page> <test-file> [max-iterations]
 ```
+
+### Examples
+
+```bash
+# Landing page with 10 iterations (default)
+./.opencode/scripts/ui-polish-loop.sh landing client/test/components/landing.spec.ts 10
+
+# Dashboard page with 5 iterations
+./.opencode/scripts/ui-polish-loop.sh dashboard client/test/components/dashboard.spec.ts 5
+
+# Login page with default iterations
+./.opencode/scripts/ui-polish-loop.sh login client/test/components/login.spec.ts
+```
+
+### Parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `page` | Yes | Page name (used for screenshot folder organization) |
+| `test-file` | Yes | Path to Playwright test file (from project root) |
+| `max-iterations` | No | Maximum iterations (default: 5) |
 
 ### Loop Workflow
 
-Each iteration of the ralph-loop:
+Each iteration of the ui-polish-loop:
 1. **Run tests** → Capture fresh screenshots
 2. **Analyze** → Read and critique the screenshots
 3. **Identify** → Find specific improvements needed
 4. **Implement** → Make targeted changes to components (edit Svelte files, CSS, etc.)
 5. **Verify** → Re-run tests to confirm fixes
-6. **Repeat** → Continue until quality threshold met
+6. **Repeat** → Continue until quality threshold met or max iterations reached
 
 **Key Point:** The loop allows you to make ACTUAL UI changes (not just test fixes) and verify them iteratively.
 
 ### Completion Signals
 
-Use these exact strings in your output to control the loop:
+The script uses these signals to control the loop:
 
 | Signal | Meaning |
 |--------|---------|
-| `UI_VALIDATION_COMPLETE` | All improvements done, exit loop |
+| `UI_VALIDATION_COMPLETE` | All screenshots passed validation, exit loop |
 | `UI_VALIDATION_BLOCKED` | Stuck, needs human intervention |
-| `UI_VALIDATION_CONTINUE` | More work needed (default behavior) |
+| `FIXES_APPLIED` | Fixes were made, continue to next iteration |
+| `FIXES_BLOCKED` | Could not apply fixes |
 
 ## Running Tests
 
@@ -209,7 +225,7 @@ Screenshots are saved to: `client/test/resources/screenshots/<page>/`
 
 ## Screenshot Analysis Checklist
 
-When critiquing screenshots in a ralph-loop, evaluate:
+When critiquing screenshots in a ui-polish-loop, evaluate:
 
 ### Layout & Structure
 - [ ] Proper spacing and margins
@@ -218,7 +234,7 @@ When critiquing screenshots in a ralph-loop, evaluate:
 - [ ] Logical visual hierarchy
 - [ ] Responsive behavior (if testing multiple viewports)
 
-### ⚠️ Overflow & Overlap Issues (CRITICAL)
+### Overflow & Overlap Issues (CRITICAL)
 - [ ] **No text bleeding into adjacent columns** (e.g., long badges like "ORGANIZATION" overlapping date columns)
 - [ ] **Table/grid columns have adequate width** for their content
 - [ ] **Badges fit within their designated column** without overflow
@@ -226,7 +242,7 @@ When critiquing screenshots in a ralph-loop, evaluate:
 - [ ] **Grid colSpan values match actual content requirements**
 - [ ] Elements don't overlap each other unexpectedly
 
-### ⚠️ Table Header/Content Alignment (CRITICAL)
+### Table Header/Content Alignment (CRITICAL)
 - [ ] **Table headers are perfectly aligned with their column content below**
 - [ ] **Headers and rows use the same grid structure** (identical grid-cols, identical gap values)
 - [ ] **Headers and rows have identical horizontal padding** (e.g., both use px-4)
@@ -445,15 +461,15 @@ test.describe('[Authenticated Page] Screenshots', () => {
 **NEVER use mock HTML or fake data in screenshot tests.**
 
 ```typescript
-// ❌ WRONG - Don't do this!
+// WRONG - Don't do this!
 const mockHtml = `<html><body>Fake content</body></html>`;
 await page.setContent(mockHtml);
 
-// ❌ WRONG - Don't do this!
+// WRONG - Don't do this!
 const fakeData = [{ name: 'Test', value: 123 }];
 await page.evaluate((data) => { ... }, fakeData);
 
-// ✅ CORRECT - Navigate to real pages
+// CORRECT - Navigate to real pages
 await page.goto('/developer');
 await page.waitForLoadState('domcontentloaded');
 await page.screenshot({ path: screenshotPath, fullPage: true });
@@ -483,8 +499,8 @@ await page.screenshot({ path: screenshotPath, fullPage: true });
 - Check viewport size in config
 - Ensure fonts/images are loaded
 
-### Ralph-loop not completing
-- Check completion promise matches exactly
-- Verify screenshots are being generated
+### UI-polish-loop not completing
+- Check that tests are passing first
+- Verify screenshots are being generated in `client/test/resources/screenshots/<page>/`
 - Look for test failures blocking the loop
 - Try reducing scope of changes per iteration

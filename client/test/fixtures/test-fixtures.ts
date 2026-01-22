@@ -59,6 +59,12 @@ export const test = base.extend<TestFixtures>({
     // Default theme - override in describe blocks with test.use({ theme: 'dark' })
     theme: ['dark', {option: true}],
 
+    // Auto-clear cookies before each test for clean state
+    context: async ({context}, use) => {
+        await context.clearCookies();
+        await use(context);
+    },
+
     // Screenshot helper that uses the page name and theme from fixtures
     screenshotHelper: async ({page, pageName, theme}, use, testInfo) => {
         await use({

@@ -1,16 +1,17 @@
-# Epic: Event Ingestion
+# Epic: Imporovements
 
-**Context**: The core functionality - receiving and storing events via API. Events are immutable log entries with metadata, severity, and payload. This should be optimized for high write throughput, high availability, high scalability.
+```
+  insert into event (check_id, created, "timestamp", check_result, message)
+  SELECT ((random() * 500) + 4000)::int, stamp,
+         stamp,
+         (ARRAY['HARD_OK', 'HARD_OK', 'HARD_OK', 'HARD_OK', 'HARD_OK', 'HARD_OK', 'SOFT_OK', 'HARD_UNKNOWN', 'SOFT_UNKNOWN',
+          'HARD_WARNING', 'SOFT_WARNING', 'HARD_CRITICAL', 'SOFT_CRITICAL' ])[round(random() * 12) + 1] as "check_result",
+ 'Test Event ' || stamp                                                                                                                                                                                      as "message"
+  FROM generate_series((NOW() - interval '5 month'):: timestamp, (NOW() - interval '1 month'):: timestamp, '5 SECOND':: interval) as stamp
+  ON CONFLICT DO NOTHING;
+```
 
-## Refined Stories (see `.opencode/jira/refined/`)
 
-- [x] **EVENT-entity-database-schema.md** - Event table, TimescaleDB hypertable, indexes, compression
-- [x] **EVENT-realtime-ingestion-api.md** - `POST /v1/events` with server-assigned timestamps
-- [x] **EVENT-batch-ingestion-api.md** - `POST /v1/events/batch` with client timestamps for offline sync
-- [x] **EVENT-quota-enforcement.md** - Hard block at 1000 events/month per user
-- [x] **EVENT-retention-cleanup-job.md** - Daily job respecting per-owner retention_days
-
----
 
 # Epic: Event Timeline & Visualization
 

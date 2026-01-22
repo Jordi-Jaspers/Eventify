@@ -28,8 +28,11 @@ client.use({
 			const isAuthEndpoint: boolean = pathname.includes('/auth/') || pathname.includes('/login');
 			const currentPath: string = window.location.pathname;
 			const isCurrentlyOnLoginPage: boolean = currentPath === CLIENT_ROUTES.LOGIN_PAGE.path;
+			const isOnPublicPage: boolean = isPublicPath(currentPath);
 			
-			if (!isRedirecting && !isCurrentlyOnLoginPage && !isAuthEndpoint) {
+			// Only redirect if we're not on a public page, not on the login page,
+			// and the request wasn't to an auth endpoint
+			if (!isRedirecting && !isCurrentlyOnLoginPage && !isAuthEndpoint && !isOnPublicPage) {
 				isRedirecting = true;
 				
 				try {

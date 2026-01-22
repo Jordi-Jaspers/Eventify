@@ -16,7 +16,7 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: root
     volumes:
-      - timescaledb_data:/var/lib/postgresql/data  # Persistent data storage for TimescaleDB.
+      - timescaledb_data:/var/lib/postgresql/data
 
   inbucket:
     container_name: inbucket
@@ -29,8 +29,8 @@ services:
       - "2500:2500"  # SMTP service port (correct port mapping).
       - "1100:1100"  # POP3 service port.
     volumes:
-      - inbucket_data:/data  # Persistent storage for Inbucket's data.
+      - inbucket_data:/data
 
 volumes:
-  timescaledb_data:  # Volume for TimescaleDB
-  inbucket_data:     # Volume for Inbucket
+  timescaledb_data:
+  inbucket_data:

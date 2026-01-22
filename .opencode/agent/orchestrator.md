@@ -161,12 +161,12 @@ The UI Agent will:
 **On "approved":**
 
 ```bash
-./.opencode/scripts/ralph-loop.sh [page] test/components/[page].spec.ts [iterations]
+./.opencode/scripts/ui-polish-loop.sh [page] test/components/[page].spec.ts [iterations]
 ```
 
 Example:
 ```bash
-./.opencode/scripts/ralph-loop.sh dashboard test/components/dashboard.spec.ts 10
+./.opencode/scripts/ui-polish-loop.sh dashboard test/components/dashboard.spec.ts 10
 ```
 
 **Handle results:**
@@ -206,7 +206,7 @@ Files modified: [key files]
 | Write tests | java-testing-agent                              |
 | Implement backend | java-backend-agent                              |
 | Build frontend | sveltekit-frontend-agent                        |
-| Polish UI visuals | ui-validator (via ralph-loop.sh / no sub-agent) |
+| Polish UI visuals | ui-validator (via ui-polish-loop.sh)            |
 | CI/CD workflows | github-actions-agent                            |
 | Email templates | email-composer-agent                            |
 | Documentation | documentation-agent                             |
@@ -249,11 +249,16 @@ OUTPUT_REQUIRED:
 After backend changes, remind frontend agent:
 - **Generate types from OpenAPI** - `bun run sync:api` (auto-starts backend)
 
-### ui-validator (via ralph-loop.sh / no sub-agent)
+### ui-validator (via ui-polish-loop.sh / no sub-agent)
 
 **NOT called directly.** Triggered via script:
 ```bash
-./.opencode/scripts/ralph-loop.sh [page] [test-file] [iterations]
+./.opencode/scripts/ui-polish-loop.sh <page> <test-file> [max-iterations]
+```
+
+Example:
+```bash
+./.opencode/scripts/ui-polish-loop.sh landing client/test/components/landing.spec.ts 10
 ```
 
 UI Agent constraints:
@@ -304,7 +309,7 @@ CONTEXT: [Related files, goals]
 - Completed features: `.opencode/jira/completed/`
 - Changelog: `.opencode/jira/CHANGELOG.md`
 - Skills: `.opencode/skill/*/SKILL.md`
-- UI Loop Script: `.opencode/scripts/ralph-loop.sh`
+- UI Loop Script: `.opencode/scripts/ui-polish-loop.sh`
 
 ## Quality Standards Reference
 

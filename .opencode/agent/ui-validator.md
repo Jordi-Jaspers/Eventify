@@ -616,27 +616,66 @@ Before completing table work, verify:
 
 ## Validation Workflow
 
-When validating a page:
+You can operate in two modes: **Review Mode** (default) or **Fix Mode**.
 
-### Input
+### Review Mode (when called by ui-polish-loop.sh)
 
-You receive:
+In this mode, you ONLY review and critique - the Frontend Agent will apply fixes.
 
-- **PAGE**: Which page to polish
-- **TEST_FILE**: Which test to run (e.g., `tests/components/dashboard.spec.ts`)
+**Input:**
+- **PAGE**: Which page to review
+- **SCREENSHOT_DIR**: Path to screenshots
+- **SCREENSHOTS**: List of screenshot files to review
 - **ITERATION**: Current iteration number
 
-### Execution Steps
+**Steps:**
+1. Read the screenshot images from the provided directory
+2. Analyze each screenshot for visual issues
+3. Output structured findings (DO NOT make code changes)
 
-1. **Run the specific test:**
+**Output Format:**
 
+If UI is polished:
+```
+UI_VALIDATION_COMPLETE
+```
+
+If issues found:
+```
+ISSUES_FOUND
+
+## Issue 1: [Brief title]
+- Screenshot: [which screenshot]
+- Problem: [describe the visual problem]
+- Location: [component/section affected]  
+- Fix: [specific CSS/Tailwind fix needed]
+
+## Issue 2: ...
+```
+
+If blocked:
+```
+UI_VALIDATION_BLOCKED: [specific reason]
+```
+
+### Fix Mode (when called by ralph-loop.sh or directly)
+
+In this mode, you review AND fix issues yourself.
+
+**Input:**
+- **PAGE**: Which page to polish
+- **TEST_FILE**: Which test to run
+- **ITERATION**: Current iteration number
+
+**Steps:**
+1. Run the specific test:
    ```bash
    cd client && bun run test -- $TEST_FILE
    ```
 
-2. **Read screenshots** from `client/test/resources/screenshots/<page>/`
+2. Read screenshots from `client/test/resources/screenshots/<page>/`
 
-3. **Visual critique** - check for:
+3. Visual critique - check for:
     - Layout: spacing, alignment, visual hierarchy
     - Overlaps/Overflow: text bleeding, truncated content, element collisions
     - Tables: column widths adequate for content (especially badges)
@@ -645,27 +684,16 @@ You receive:
     - Polish: consistency, no visual glitches
     - States: loading, empty, error properly styled
 
-4. **Fix issues** - CSS/Tailwind/markup only (respect constraints)
+4. Fix issues - CSS/Tailwind/markup only (respect constraints)
 
-5. **Re-run test** to verify fixes
+5. Re-run test to verify fixes
 
-6. **Output completion signal** when polished
+6. Output completion signal when polished
 
-### Completion Signals
-
-When the UI looks polished and professional:
-
-```
-UI_VALIDATION_COMPLETE
-```
-
-If blocked (needs logic changes, tests failing for non-UI reasons):
-
-```
-UI_VALIDATION_BLOCKED: [specific reason]
-```
-
-If more work needed, end your response - the loop will continue.
+**Output:**
+- `UI_VALIDATION_COMPLETE` - when polished
+- `UI_VALIDATION_BLOCKED: [reason]` - when blocked
+- No signal - if more work needed (loop continues)
 
 ---
 
