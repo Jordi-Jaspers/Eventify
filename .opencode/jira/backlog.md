@@ -4,71 +4,30 @@
 
 ## Backlog Items
 
-- [ ] **Channel Timeline View (Frontend)**:
-    - New page: `/dashboard/channels/{id}` or `/organizations/{orgId}/channels/{id}`
-    - Display events in reverse chronological order (newest first)
-    - Each event shows: severity badge, title, timestamp, collapsible details
-    - Auto-refresh / real-time updates (polling initially, WebSocket later)
-    - Infinite scroll or pagination for older events
+- [ ] **monitoring dashboard creation**:
+- There should be drag and drop functionality to configure dashboards.
+- right side panel with available channels to add to the dashboard with search functionality. (just like channel page)
+- left side a canvas where channels can be dropped to create a dashboard.
+- the channels keep the same order as they were added.
+- channels can be reordered via drag and drop on the canvas.
+- dashboards can be named and is unique per user / organisation.
+- dashboards are saved automatically when changes are made.
+- dashboards can be deleted.
 
-- [ ] **Channel Timeline API Endpoint**:
-    - `GET /v1/channels/{id}/events` - list events for a channel
-    - Query params: limit, before (cursor), after (cursor), severity[], search, from_date, to_date
-    - Response: paginated list with cursor for infinite scroll
-    - Authorization: user must own channel or be member of org that owns it
-
-- [ ] **Event Detail View**:
-    - Expandable event card or slide-over panel
-    - Show full message/data payload (formatted JSON if applicable)
-    - Show all metadata key-value pairs
-    - Copy event ID, copy payload buttons
-
-- [ ] **Event Filtering & Search**:
-    - Filter by severity (multi-select)
-    - Filter by date range
-    - Full-text search on title and message
-    - Filter by source/application (if provided)
-    - Save filter presets (future enhancement)
-
-- [ ] **Timeline Aggregations & Stats**:
-    - Show event count by severity for current view
-    - Mini chart showing event volume over time (last 24h, 7d, 30d)
-    - Helpful for spotting anomalies (spike in errors)
-
-- [ ] **Channel Health Status from Event Series**:
-    - Derive channel "health status" (OK, WARNING, CRITICAL, UNINITIALIZED) from the most recent event
-    - Show at-a-glance health indicators on channel cards in dashboard
-    - Consider duration tracking (how long has a channel been in CRITICAL state?)
-
----
-
-# Epic: Dashboard & Channel Management UI
-
-**Context**: Users need a home for managing their channels, viewing aggregate stats, and quick access to recent activity.
-
-## Backlog Items
-
-- [ ] **Personal Dashboard - Channels Overview**:
-    - New section on user dashboard: "My Channels"
-    - List all personal channels with: name, status, event count (last 24h), last event time
-    - Quick action buttons: view timeline, pause, delete
-    - "Create Channel" button
-
-- [ ] **Organization Dashboard - Channels Overview**:
-    - Similar to personal dashboard but for org channels
-    - Show on organization dashboard page
-    - Role-based visibility of management actions
-
-- [ ] **Channel Creation Modal/Page**:
-    - Form: name, description
-    - Preview of API endpoint and example curl command
-    - Show API key selector (which key to use in example)
-
-- [ ] **Channel Settings Page**:
-    - Edit name, description
-    - Pause/Resume channel toggle
-    - Danger zone: permanently delete channel and all events
-    - Note: Per-channel retention override is in Future Considerations
+- [ ] **timeline monitoring**:
+- there should be a monitoring page with a selector for dashboards.
+- a dashboard contains a list of channels to monitor.
+- each channel has a timeline preview represented as a line with colors for event severities over time.
+- left of the timeline is the channel name with underneath the name a status icon (active / paused) and the last event severity.
+- paused channels are greyed out and do not show any events in the timeline.
+- clicking on a channel in the dashboard opens up a channel modal with the details of that channel.
+- clicking on a duration within the channel timeline shows the events that happened in that duration for that channel. not an extra modal but expands the channel card to show the events.
+- the dashboard also has a timeline which is the combined timeline of all channels in the dashboard.
+- On the monitoring page there should be date range selector.
+- there should be 2 types for dates: Live data options (Last 24h, Last 7d, last month) and fixed date range (calendar picker).
+- the live data options refresh automatically every minute.
+- timelines are sorted with highest last happend severity events at the top.
+- there should be a filter option button to turn off the sorting and show the channels in the order they were added to the dashboard.
 
 ---
 
