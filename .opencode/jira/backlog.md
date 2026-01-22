@@ -1,3 +1,12 @@
+Recommended Implementation Order
+1. WATCHLIST-01 → Database foundation
+2. WATCHLIST-02 → User API (enables frontend work)
+3. WATCHLIST-04 → User list page (simple, validates API)
+4. WATCHLIST-06 → User builder (core feature)
+5. WATCHLIST-08 → Timeline API (enables monitor)
+6. WATCHLIST-09 → User monitor page (the "most important" feature)
+7. Then org equivalents: 03 → 05 → 07 → 10
+
 # Epic: Retention & Data Lifecycle
 
 **Context**: Events should not be stored forever. Configurable retention policies help manage storage costs and comply with data governance requirements.
