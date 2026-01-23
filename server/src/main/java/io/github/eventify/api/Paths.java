@@ -139,6 +139,12 @@ public final class Paths {
 
     public static final String USER_RETENTION_SETTINGS_PATH = USERS_PATH + RETENTION_SETTINGS_PART;
 
+    public static final String USER_WATCHLISTS_PATH = USERS_PATH + "/watchlists";
+
+    public static final String USER_WATCHLISTS_SEARCH_PATH = USER_WATCHLISTS_PATH + SEARCH_PART;
+
+    public static final String USER_WATCHLIST_PATH = USER_WATCHLISTS_PATH + ID_PART;
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;

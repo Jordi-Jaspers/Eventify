@@ -1,0 +1,644 @@
+package io.github.eventify.api.watchlist.model.validator;
+
+import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
+import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
+import io.github.eventify.support.UnitTest;
+import io.github.jframe.exception.core.ValidationException;
+import io.github.jframe.validation.ValidationResult;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static io.github.eventify.api.watchlist.model.validator.WatchlistValidator.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+/**
+ * Unit Test - Watchlist Validator.
+ */
+@DisplayName("Unit Test - Watchlist Validator")
+public class WatchlistValidatorTest extends UnitTest {
+
+    private WatchlistValidator validator;
+
+    @BeforeEach
+    public void setUp() {
+        validator = new WatchlistValidator();
+    }
+
+    // ==================== Create Request Tests ====================
+
+    @Test
+    @DisplayName("Should accept valid create request")
+    public void shouldAcceptValidCreateRequest() {
+        // Given: Valid create request
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("My Watchlist")
+            .setDescription("Production errors");
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should accept create request with channels")
+    public void shouldAcceptCreateRequestWithChannels() {
+        // Given: Valid request with channel IDs
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("My Watchlist")
+            .setChannelIds(List.of(1L, 2L, 3L));
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should accept create request with default time range")
+    public void shouldAcceptCreateRequestWithDefaultTimeRange() {
+        // Given: Valid request with time range 24h
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("My Watchlist")
+            .setDefaultTimeRange("24h");
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should accept create request with time range 7d")
+    public void shouldAcceptCreateRequestWithTimeRange7d() {
+        // Given: Valid request with time range 7d
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("My Watchlist")
+            .setDefaultTimeRange("7d");
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should accept create request with time range 30d")
+    public void shouldAcceptCreateRequestWithTimeRange30d() {
+        // Given: Valid request with time range 30d
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("My Watchlist")
+            .setDefaultTimeRange("30d");
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should reject null create request body")
+    public void shouldRejectNullCreateRequestBody() {
+        // Given: Null request
+        final CreateWatchlistRequest request = null;
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().getErrors().size(), is(1));
+        assertThat(
+            exception.getValidationResult().getErrors().get(0).getCode(),
+            is(equalTo(BODY_IS_MISSING))
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject null name in create request")
+    public void shouldRejectNullNameInCreateRequest() {
+        // Given: Request with null name
+        final CreateWatchlistRequest request = new CreateWatchlistRequest();
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(NAME) &&
+                        error.getCode().equals(NAME_REQUIRED)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject empty name in create request")
+    public void shouldRejectEmptyNameInCreateRequest() {
+        // Given: Request with empty name
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("");
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(NAME) &&
+                        error.getCode().equals(NAME_REQUIRED)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject blank name in create request")
+    public void shouldRejectBlankNameInCreateRequest() {
+        // Given: Request with blank name
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("   ");
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(NAME) &&
+                        error.getCode().equals(NAME_REQUIRED)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject name exceeding 100 characters in create request")
+    public void shouldRejectNameExceeding100CharactersInCreateRequest() {
+        // Given: Request with name exceeding 100 characters
+        final String longName = "a".repeat(101);
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName(longName);
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(NAME) &&
+                        error.getCode().equals(NAME_TOO_LONG)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should accept name with exactly 100 characters in create request")
+    public void shouldAcceptNameWithExactly100CharactersInCreateRequest() {
+        // Given: Request with name of exactly 100 characters
+        final String maxName = "a".repeat(100);
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName(maxName);
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should reject description exceeding 500 characters in create request")
+    public void shouldRejectDescriptionExceeding500CharactersInCreateRequest() {
+        // Given: Request with description exceeding 500 characters
+        final String longDescription = "a".repeat(501);
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("Valid Name")
+            .setDescription(longDescription);
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(DESCRIPTION) &&
+                        error.getCode().equals(DESCRIPTION_TOO_LONG)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should accept description with exactly 500 characters in create request")
+    public void shouldAcceptDescriptionWithExactly500CharactersInCreateRequest() {
+        // Given: Request with description of exactly 500 characters
+        final String maxDescription = "a".repeat(500);
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("Valid Name")
+            .setDescription(maxDescription);
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should reject null value in channel IDs list")
+    public void shouldRejectNullValueInChannelIdsList() {
+        // Given: Request with null in channel IDs
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("Valid Name")
+            .setChannelIds(Arrays.asList(1L, null, 3L));
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(CHANNEL_IDS) &&
+                        error.getCode().equals(CHANNEL_ID_REQUIRED)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject invalid default time range in create request")
+    public void shouldRejectInvalidDefaultTimeRangeInCreateRequest() {
+        // Given: Request with invalid time range
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("Valid Name")
+            .setDefaultTimeRange("1h");
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(DEFAULT_TIME_RANGE) &&
+                        error.getCode().equals(INVALID_TIME_RANGE)
+                ),
+            is(true)
+        );
+    }
+
+    // ==================== Update Request Tests ====================
+
+    @Test
+    @DisplayName("Should accept valid update request")
+    public void shouldAcceptValidUpdateRequest() {
+        // Given: Valid update request
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("Updated Watchlist")
+            .setDescription("Updated description");
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should accept update request without description")
+    public void shouldAcceptUpdateRequestWithoutDescription() {
+        // Given: Valid update request without description
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("Updated Watchlist");
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should reject null update request body")
+    public void shouldRejectNullUpdateRequestBody() {
+        // Given: Null update request
+        final UpdateWatchlistRequest request = null;
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().getErrors().size(), is(1));
+        assertThat(
+            exception.getValidationResult().getErrors().get(0).getCode(),
+            is(equalTo(BODY_IS_MISSING))
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject null name in update request")
+    public void shouldRejectNullNameInUpdateRequest() {
+        // Given: Update request with null name
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest();
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(NAME) &&
+                        error.getCode().equals(NAME_REQUIRED)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject empty name in update request")
+    public void shouldRejectEmptyNameInUpdateRequest() {
+        // Given: Update request with empty name
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("");
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(NAME) &&
+                        error.getCode().equals(NAME_REQUIRED)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject blank name in update request")
+    public void shouldRejectBlankNameInUpdateRequest() {
+        // Given: Update request with blank name
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("   ");
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(NAME) &&
+                        error.getCode().equals(NAME_REQUIRED)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject name exceeding 100 characters in update request")
+    public void shouldRejectNameExceeding100CharactersInUpdateRequest() {
+        // Given: Update request with name exceeding 100 characters
+        final String longName = "a".repeat(101);
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName(longName);
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(NAME) &&
+                        error.getCode().equals(NAME_TOO_LONG)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should accept name with exactly 100 characters in update request")
+    public void shouldAcceptNameWithExactly100CharactersInUpdateRequest() {
+        // Given: Update request with name of exactly 100 characters
+        final String maxName = "a".repeat(100);
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName(maxName);
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should reject description exceeding 500 characters in update request")
+    public void shouldRejectDescriptionExceeding500CharactersInUpdateRequest() {
+        // Given: Update request with description exceeding 500 characters
+        final String longDescription = "a".repeat(501);
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("Valid Name")
+            .setDescription(longDescription);
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(DESCRIPTION) &&
+                        error.getCode().equals(DESCRIPTION_TOO_LONG)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should accept description with exactly 500 characters in update request")
+    public void shouldAcceptDescriptionWithExactly500CharactersInUpdateRequest() {
+        // Given: Update request with description of exactly 500 characters
+        final String maxDescription = "a".repeat(500);
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("Valid Name")
+            .setDescription(maxDescription);
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should reject null value in channel IDs list in update request")
+    public void shouldRejectNullValueInChannelIdsListInUpdateRequest() {
+        // Given: Update request with null in channel IDs
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("Valid Name")
+            .setChannelIds(Arrays.asList(1L, null, 3L));
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(CHANNEL_IDS) &&
+                        error.getCode().equals(CHANNEL_ID_REQUIRED)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject invalid default time range in update request")
+    public void shouldRejectInvalidDefaultTimeRangeInUpdateRequest() {
+        // Given: Update request with invalid time range
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("Valid Name")
+            .setDefaultTimeRange("invalid");
+        final ValidationResult result = new ValidationResult();
+
+        // When & Then: Should throw ValidationException
+        final ValidationException exception = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+
+        assertThat(exception.getValidationResult().hasErrors(), is(true));
+        assertThat(
+            exception.getValidationResult().getErrors().stream()
+                .anyMatch(
+                    error -> error.getField().equals(DEFAULT_TIME_RANGE) &&
+                        error.getCode().equals(INVALID_TIME_RANGE)
+                ),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should accept update request with null description")
+    public void shouldAcceptUpdateRequestWithNullDescription() {
+        // Given: Update request with null description
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("Valid Name")
+            .setDescription(null);
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should accept update request with empty description")
+    public void shouldAcceptUpdateRequestWithEmptyDescription() {
+        // Given: Update request with empty description
+        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
+            .setName("Valid Name")
+            .setDescription("");
+        final ValidationResult result = new ValidationResult();
+
+        // When: Validating request
+        validator.validate(request, result);
+
+        // Then: Validation should pass
+        assertThat(result.hasErrors(), is(false));
+    }
+}
