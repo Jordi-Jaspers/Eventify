@@ -13,6 +13,8 @@ import java.time.OffsetDateTime;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
 
@@ -57,24 +59,21 @@ public class Watchlist implements PageableItem, Serializable {
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(
-        name = "default_time_range",
+        name = "configuration",
         nullable = false,
-        length = 20
+        columnDefinition = "jsonb"
     )
-    private String defaultTimeRange;
+    private WatchlistConfiguration configuration;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(
-        name = "default_only_critical",
-        nullable = false
+        name = "filters",
+        nullable = false,
+        columnDefinition = "jsonb"
     )
-    private Boolean defaultOnlyCritical;
-
-    @Column(
-        name = "default_sort_by_severity",
-        nullable = false
-    )
-    private Boolean defaultSortBySeverity;
+    private WatchlistFilters filters;
 
     @CreationTimestamp
     @Column(
@@ -98,8 +97,7 @@ public class Watchlist implements PageableItem, Serializable {
         this.name = name;
         this.user = user;
         this.organization = organization;
-        this.defaultTimeRange = "24h";
-        this.defaultOnlyCritical = false;
-        this.defaultSortBySeverity = true;
+        this.configuration = WatchlistConfiguration.empty();
+        this.filters = WatchlistFilters.defaults();
     }
 }

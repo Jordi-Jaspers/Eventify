@@ -2,6 +2,7 @@ package io.github.eventify.api.channel.service;
 
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.repository.ChannelRepository;
+import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +28,8 @@ public class ChannelCleanupService {
 
     private final ChannelRepository channelRepository;
 
+    private final WatchlistRepository watchlistRepository;
+
     /**
      * Process all channels with PENDING_DELETION status. Deletes each channel and continues processing if one fails.
      */
@@ -43,6 +46,7 @@ public class ChannelCleanupService {
             .map(channel -> {
                 final Instant start = Instant.now();
                 try {
+                    watchlistRepository.removeChannelFromAllConfigurations(channel.getId());
                     channelRepository.delete(channel);
                     log.debug("Deleted channel ID '{}' in '{}' ms", channel.getId(), Duration.between(start, Instant.now()).toMillis());
                     return 1;

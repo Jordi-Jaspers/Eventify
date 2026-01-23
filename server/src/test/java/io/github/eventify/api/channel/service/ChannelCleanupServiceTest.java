@@ -4,6 +4,7 @@ import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;
@@ -30,6 +31,9 @@ public class ChannelCleanupServiceTest extends UnitTest {
     @Mock
     private ChannelRepository channelRepository;
 
+    @Mock
+    private WatchlistRepository watchlistRepository;
+
     @InjectMocks
     private ChannelCleanupService channelCleanupService;
 
@@ -53,8 +57,9 @@ public class ChannelCleanupServiceTest extends UnitTest {
         // When: Processing channels pending deletion
         channelCleanupService.deletePendingChannels();
 
-        // Then: Should delete the channel
+        // Then: Should remove channel from watchlists and delete the channel
         verify(channelRepository).findByStatus(ChannelStatus.PENDING_DELETION);
+        verify(watchlistRepository).removeChannelFromAllConfigurations(1L);
         verify(channelRepository).delete(channel);
         verifyNoMoreInteractions(channelRepository);
     }
@@ -73,8 +78,11 @@ public class ChannelCleanupServiceTest extends UnitTest {
         // When: Processing channels pending deletion
         channelCleanupService.deletePendingChannels();
 
-        // Then: Should delete all three channels
+        // Then: Should remove from watchlists and delete all three channels
         verify(channelRepository).findByStatus(ChannelStatus.PENDING_DELETION);
+        verify(watchlistRepository).removeChannelFromAllConfigurations(1L);
+        verify(watchlistRepository).removeChannelFromAllConfigurations(2L);
+        verify(watchlistRepository).removeChannelFromAllConfigurations(3L);
         verify(channelRepository).delete(channel1);
         verify(channelRepository).delete(channel2);
         verify(channelRepository).delete(channel3);
@@ -115,6 +123,9 @@ public class ChannelCleanupServiceTest extends UnitTest {
 
         // Then: Should delete channel1, fail on channel2, continue with channel3
         verify(channelRepository).findByStatus(ChannelStatus.PENDING_DELETION);
+        verify(watchlistRepository).removeChannelFromAllConfigurations(1L);
+        verify(watchlistRepository).removeChannelFromAllConfigurations(2L);
+        verify(watchlistRepository).removeChannelFromAllConfigurations(3L);
         verify(channelRepository).delete(channel1);
         verify(channelRepository).delete(channel2);
         verify(channelRepository).delete(channel3);
@@ -138,6 +149,7 @@ public class ChannelCleanupServiceTest extends UnitTest {
 
         // Then: Should find channels twice, but only delete once
         verify(channelRepository, times(2)).findByStatus(ChannelStatus.PENDING_DELETION);
+        verify(watchlistRepository, times(1)).removeChannelFromAllConfigurations(1L);
         verify(channelRepository, times(1)).delete(channel);
     }
 
@@ -184,7 +196,8 @@ public class ChannelCleanupServiceTest extends UnitTest {
         // When: Processing channel deletion
         channelCleanupService.deletePendingChannels();
 
-        // Then: Should call repository delete (hard delete)
+        // Then: Should remove from watchlists and call repository delete (hard delete)
+        verify(watchlistRepository).removeChannelFromAllConfigurations(1L);
         verify(channelRepository).delete(channel);
         verify(channelRepository, never()).save(any(Channel.class));
     }
@@ -207,7 +220,9 @@ public class ChannelCleanupServiceTest extends UnitTest {
         // When: Processing channels pending deletion
         channelCleanupService.deletePendingChannels();
 
-        // Then: Should delete channels from both users
+        // Then: Should remove from watchlists and delete channels from both users
+        verify(watchlistRepository).removeChannelFromAllConfigurations(1L);
+        verify(watchlistRepository).removeChannelFromAllConfigurations(2L);
         verify(channelRepository).delete(channel1);
         verify(channelRepository).delete(channel2);
     }
@@ -225,7 +240,8 @@ public class ChannelCleanupServiceTest extends UnitTest {
         // When: Processing channel deletion
         channelCleanupService.deletePendingChannels();
 
-        // Then: Should delete personal channel successfully
+        // Then: Should remove from watchlists and delete personal channel successfully
+        verify(watchlistRepository).removeChannelFromAllConfigurations(1L);
         verify(channelRepository).delete(personalChannel);
     }
 
