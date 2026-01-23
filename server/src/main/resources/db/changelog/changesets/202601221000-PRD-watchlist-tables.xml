@@ -1,0 +1,74 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601221000-PRD-watchlist-tables.xml">
+
+    <changeSet id="202601221000-PRD-watchlist-tables-1" author="backend-agent">
+        <comment>Creating watchlist table for event timeline monitoring.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS watchlist (
+                id                       SERIAL PRIMARY KEY,
+                name                     VARCHAR(100) NOT NULL,
+                description              VARCHAR(500) NULL,
+                user_id                  INTEGER NOT NULL,
+                organization_id          INTEGER NULL,
+                default_time_range       VARCHAR(20) NOT NULL DEFAULT '24h',
+                default_only_critical    BOOLEAN NOT NULL DEFAULT false,
+                default_sort_by_severity BOOLEAN NOT NULL DEFAULT true,
+                created_at               TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                updated_at               TIMESTAMPTZ NULL,
+                FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
+                FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601221000-PRD-watchlist-tables-2" author="backend-agent">
+        <comment>Creating watchlist_channel junction table for many-to-many relationship.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS watchlist_channel (
+                watchlist_id INTEGER NOT NULL,
+                channel_id   INTEGER NOT NULL,
+                position     INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (watchlist_id, channel_id),
+                FOREIGN KEY (watchlist_id) REFERENCES watchlist(id) ON DELETE CASCADE,
+                FOREIGN KEY (channel_id) REFERENCES channel(id) ON DELETE CASCADE
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601221000-PRD-watchlist-tables-3" author="backend-agent">
+        <comment>Creating indexes, unique constraints, and documentation for watchlist tables.</comment>
+        <sql>
+            CREATE INDEX idx_watchlist_user ON watchlist(user_id) WHERE organization_id IS NULL;
+            CREATE INDEX idx_watchlist_org ON watchlist(organization_id) WHERE organization_id IS NOT NULL;
+            CREATE UNIQUE INDEX uq_watchlist_user_name ON watchlist(user_id, lower(name)) WHERE organization_id IS NULL;
+            CREATE UNIQUE INDEX uq_watchlist_org_name ON watchlist(organization_id, lower(name)) WHERE organization_id IS NOT NULL;
+            CREATE INDEX idx_watchlist_channel_channel ON watchlist_channel(channel_id);
+
+            COMMENT ON TABLE watchlist IS 'Stores watchlists for monitoring event timelines across channels';
+            COMMENT ON COLUMN watchlist.id IS 'Unique identifier for the watchlist';
+            COMMENT ON COLUMN watchlist.name IS 'Watchlist name (unique per user for personal, per org for organization)';
+            COMMENT ON COLUMN watchlist.description IS 'Optional watchlist description';
+            COMMENT ON COLUMN watchlist.user_id IS 'User who owns (personal) or created (org) this watchlist';
+            COMMENT ON COLUMN watchlist.organization_id IS 'Organization this watchlist belongs to (null for personal watchlists)';
+            COMMENT ON COLUMN watchlist.default_time_range IS 'Default time range for filtering events (e.g., 24h, 7d, 30d)';
+            COMMENT ON COLUMN watchlist.default_only_critical IS 'Whether to show only critical events by default';
+            COMMENT ON COLUMN watchlist.default_sort_by_severity IS 'Whether to sort events by severity by default';
+            COMMENT ON COLUMN watchlist.created_at IS 'Timestamp when the watchlist was created';
+            COMMENT ON COLUMN watchlist.updated_at IS 'Timestamp when the watchlist was last updated';
+            COMMENT ON INDEX idx_watchlist_user IS 'Partial index for personal watchlists';
+            COMMENT ON INDEX idx_watchlist_org IS 'Partial index for organization watchlists';
+            COMMENT ON INDEX uq_watchlist_user_name IS 'Partial unique constraint for personal watchlist names (case-insensitive)';
+            COMMENT ON INDEX uq_watchlist_org_name IS 'Partial unique constraint for organization watchlist names (case-insensitive)';
+
+            COMMENT ON TABLE watchlist_channel IS 'Junction table linking watchlists to channels';
+            COMMENT ON COLUMN watchlist_channel.watchlist_id IS 'Reference to the watchlist';
+            COMMENT ON COLUMN watchlist_channel.channel_id IS 'Reference to the channel';
+            COMMENT ON COLUMN watchlist_channel.position IS 'Display position/order of the channel within the watchlist';
+            COMMENT ON INDEX idx_watchlist_channel_channel IS 'Index for reverse lookups from channel to watchlists';
+        </sql>
+    </changeSet>
+</databaseChangeLog>
