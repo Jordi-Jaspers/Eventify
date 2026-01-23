@@ -13,9 +13,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for {@link OrganizationMembership} entities.
@@ -110,4 +113,43 @@ public interface OrganizationMembershipRepository extends JpaRepository<Organiza
     @NonNull
     @Override
     Page<OrganizationMembership> findAll(@NonNull Specification<OrganizationMembership> spec, @NonNull Pageable pageable);
+
+    /**
+     * Delete all memberships for users with the given IDs.
+     *
+     * @param userIds the user IDs
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM OrganizationMembership m WHERE m.user.id IN :userIds")
+    void deleteAllByUserIdIn(@Param("userIds") List<Long> userIds);
+
+    /**
+     * Delete all memberships for organizations with names containing the given pattern.
+     *
+     * @param namePattern the name pattern
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM OrganizationMembership m WHERE m.organization.name LIKE %:namePattern%")
+    void deleteAllByOrganizationNameContaining(@Param("namePattern") String namePattern);
+
+    /**
+     * Delete all memberships for organizations created by users with the given IDs.
+     *
+     * @param creatorUserIds the creator user IDs
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM OrganizationMembership m WHERE m.organization.createdBy IN :creatorUserIds")
+    void deleteAllByOrganizationCreatedByIn(@Param("creatorUserIds") List<Long> creatorUserIds);
 }

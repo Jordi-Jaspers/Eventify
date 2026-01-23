@@ -35,7 +35,7 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
     public void getOrgChannelByIdSuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -80,7 +80,7 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
     public void getOrgChannelByIdSuccessWhenAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User adminUser = aValidatedUser();
         addMemberToOrganization(org, adminUser, OrganizationalRole.ADMIN);
 
@@ -124,7 +124,7 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
     public void getOrgChannelByIdSuccessWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -168,7 +168,7 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
     public void getOrgChannelByIdFailsWhenNonMember() throws Exception {
         // Given: An organization and a non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // And: Organization has a channel
@@ -205,7 +205,7 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
     public void getOrgChannelByIdSuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organization has a channel
@@ -248,7 +248,7 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
     public void getOrgChannelByIdFailsWhenNotFound() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Getting non-existent channel
         final MockHttpServletRequestBuilder getRequest = get(
@@ -270,9 +270,9 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
     public void getOrgChannelByIdFailsWhenDifferentOrg() throws Exception {
         // Given: Two organizations with different owners
         final User owner1 = aValidatedUser();
-        final Organization org1 = createOrganization(owner1);
+        final Organization org1 = anOrganisationWithOwner(owner1);
         final User owner2 = aValidatedUser();
-        final Organization org2 = createOrganization(owner2);
+        final Organization org2 = anOrganisationWithOwner(owner2);
 
         // And: Org1 has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -308,7 +308,7 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
     public void getOrgChannelByIdFailsWhenDeleted() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has a deleted channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -355,7 +355,7 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
     public void getOrgChannelByIdFailsWhenUnauthenticated() throws Exception {
         // Given: An organization with a channel
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         final CreateChannelRequest createRequest = new CreateChannelRequest()
             .setName("Test Channel");

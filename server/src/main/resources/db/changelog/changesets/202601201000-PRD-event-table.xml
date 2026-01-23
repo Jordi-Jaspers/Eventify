@@ -17,8 +17,7 @@
                 message         TEXT NULL,
                 metadata        JSONB NULL,
                 timestamp       TIMESTAMPTZ NOT NULL,
-                PRIMARY KEY (id, timestamp),
-                FOREIGN KEY (channel_id) REFERENCES channel(id) ON DELETE CASCADE
+                PRIMARY KEY (id, timestamp)
             );
         </sql>
     </changeSet>

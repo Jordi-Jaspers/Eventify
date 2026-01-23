@@ -3,6 +3,7 @@ package io.github.eventify.api.apikey.repository;
 import io.github.eventify.api.apikey.model.ApiKeyAudit;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -11,9 +12,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for {@link ApiKeyAudit} entities.
@@ -41,4 +45,30 @@ public interface ApiKeyAuditRepository extends JpaRepository<ApiKeyAudit, Long>,
      */
     @Query("SELECT COUNT(a) FROM ApiKeyAudit a WHERE a.revokedAt >= :since")
     Long countByRevokedAtAfter(@Param("since") OffsetDateTime since);
+
+    /**
+     * Delete all audit records where the revoking user is in the given list.
+     *
+     * @param userIds the user IDs of revokers
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM ApiKeyAudit a WHERE a.revokedBy.id IN :userIds")
+    void deleteAllByRevokedByIdIn(@Param("userIds") List<Long> userIds);
+
+    /**
+     * Delete all audit records where the owner user is in the given list.
+     *
+     * @param userIds the user IDs of owners
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM ApiKeyAudit a WHERE a.ownerUserId IN :userIds")
+    void deleteAllByOwnerUserIdIn(@Param("userIds") List<Long> userIds);
 }

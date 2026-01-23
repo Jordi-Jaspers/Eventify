@@ -38,7 +38,7 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
     public void updateOrgChannelSuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -87,7 +87,7 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
     public void updateOrgChannelSuccessWhenAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User adminUser = aValidatedUser();
         addMemberToOrganization(org, adminUser, OrganizationalRole.ADMIN);
 
@@ -135,7 +135,7 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
     public void updateOrgChannelFailsWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -177,7 +177,7 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
     public void updateOrgChannelFailsWhenNonMember() throws Exception {
         // Given: An organization and a non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // And: Organization has a channel
@@ -218,7 +218,7 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
     public void updateOrgChannelSuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organization has a channel
@@ -265,7 +265,7 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
     public void updateOrgChannelFailsWhenDuplicateName() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has two channels
         final CreateChannelRequest createRequest1 = new CreateChannelRequest()
@@ -320,7 +320,7 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
     public void updateOrgChannelFailsWhenNotFound() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Update request
         final UpdateChannelRequest updateRequest = new UpdateChannelRequest()
@@ -347,9 +347,9 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
     public void updateOrgChannelFailsWhenDifferentOrg() throws Exception {
         // Given: Two organizations with different owners
         final User owner1 = aValidatedUser();
-        final Organization org1 = createOrganization(owner1);
+        final Organization org1 = anOrganisationWithOwner(owner1);
         final User owner2 = aValidatedUser();
-        final Organization org2 = createOrganization(owner2);
+        final Organization org2 = anOrganisationWithOwner(owner2);
 
         // And: Org1 has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -389,7 +389,7 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
     public void updateOrgChannelFailsWhenUnauthenticated() throws Exception {
         // Given: An organization with a channel
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         final CreateChannelRequest createRequest = new CreateChannelRequest()
             .setName("Test Channel");

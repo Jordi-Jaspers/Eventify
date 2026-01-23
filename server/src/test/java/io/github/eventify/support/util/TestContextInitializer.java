@@ -117,4 +117,7 @@ public class TestContextInitializer {
     @Autowired
     protected PasswordEncoder passwordEncoder;
 
+    @Autowired
+    protected TestDataCleanupService testDataCleanupService;
+
 }

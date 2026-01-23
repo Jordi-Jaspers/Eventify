@@ -57,4 +57,12 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             """
     )
     List<Token> findByEmail(@NonNull String email);
+
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM Token t WHERE t.user.id IN :userIds")
+    void deleteAllByUserIdIn(@Param("userIds") List<Long> userIds);
 }

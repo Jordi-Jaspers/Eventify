@@ -1,10 +1,7 @@
 package io.github.eventify.api.event.controller;
 
 import io.github.eventify.api.apikey.model.ApiKey;
-import io.github.eventify.api.apikey.model.ApiKeyScope;
 import io.github.eventify.api.channel.model.Channel;
-import io.github.eventify.api.channel.model.ChannelStatus;
-import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.model.request.BatchEventRequest;
 import io.github.eventify.api.event.model.request.CreateEventRequest;
@@ -28,6 +25,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static io.github.eventify.api.Paths.EVENTS_BATCH_PATH;
+import static io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter.API_KEY_HEADER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
 import static io.github.jframe.util.mapper.ObjectMappers.toJson;
 import static jakarta.servlet.http.HttpServletResponse.*;
@@ -41,15 +39,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Integration Test - Batch Event Ingestion Controller")
 public class BatchEventIngestionControllerTest extends IntegrationTest {
 
-    private static final String X_API_KEY = "X-Api-Key";
-
     @Test
     @DisplayName("Should successfully ingest batch of valid events")
     public void ingestBatchWithValidEventsSuccess() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Batch Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Batch Key");
+        final Channel channel = aChannelForUser(user, "Batch Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Batch Key");
 
         // And: Batch request with 3 valid events
         final CreateEventRequest event1 = new CreateEventRequest()
@@ -79,7 +75,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -97,8 +93,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         assertThat(responses.get(2).getId(), is(notNullValue()));
 
         // And: All events should be stored with client-provided timestamps
-        final List<Event> storedEvents = eventRepository.findAll();
-        assertThat(storedEvents, hasSize(3));
+        final long storedEventCount = eventRepository.countByChannelId(channel.getId());
+        assertThat(storedEventCount, is(3L));
     }
 
     @Test
@@ -106,8 +102,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchFailsWhenFutureTimestamp() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Batch with one future timestamp
         final CreateEventRequest validEvent = new CreateEventRequest()
@@ -128,7 +124,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -143,8 +139,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         assertThat(error.getErrors().size(), is(greaterThan(0)));
 
         // And: No events should be stored
-        final List<Event> storedEvents = eventRepository.findAll();
-        assertThat(storedEvents, hasSize(0));
+        final long storedEventCount = eventRepository.countByChannelId(channel.getId());
+        assertThat(storedEventCount, is(0L));
     }
 
     @Test
@@ -153,9 +149,9 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // Given: Two users with separate channels
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
-        final Channel user1Channel = createPersonalChannel(user1, "User 1 Channel");
-        final Channel user2Channel = createPersonalChannel(user2, "User 2 Channel");
-        final ApiKey user1ApiKey = createPersonalApiKey(user1, "User 1 Key");
+        final Channel user1Channel = aChannelForUser(user1, "User 1 Channel");
+        final Channel user2Channel = aChannelForUser(user2, "User 2 Channel");
+        final ApiKey user1ApiKey = anApiKeyForUser(user1, "User 1 Key");
 
         // And: User 1 tries batch with both channels
         final CreateEventRequest accessibleEvent = new CreateEventRequest()
@@ -176,7 +172,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, user1ApiKey.getKey())
+            .header(API_KEY_HEADER, user1ApiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -185,8 +181,10 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         response.andExpect(status().is(SC_FORBIDDEN));
 
         // And: No events should be stored
-        final List<Event> storedEvents = eventRepository.findAll();
-        assertThat(storedEvents, hasSize(0));
+        final long storedEventCount = eventRepository.countByChannelIdIn(
+            List.of(user1Channel.getId(), user2Channel.getId())
+        );
+        assertThat(storedEventCount, is(0L));
     }
 
     @Test
@@ -194,8 +192,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchFailsWhenExceedsMaxSize() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Batch with 101 events
         final List<CreateEventRequest> events = new ArrayList<>();
@@ -215,7 +213,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -239,8 +237,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchFailsWhenMissingTimestamp() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Batch with one event missing timestamp
         final CreateEventRequest eventWithTimestamp = new CreateEventRequest()
@@ -260,7 +258,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -279,8 +277,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         );
 
         // And: No events should be stored
-        final List<Event> storedEvents = eventRepository.findAll();
-        assertThat(storedEvents, hasSize(0));
+        final long storedEventCount = eventRepository.countByChannelId(channel.getId());
+        assertThat(storedEventCount, is(0L));
     }
 
     @Test
@@ -288,7 +286,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchFailsWhenEmpty() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Empty batch request
         final BatchEventRequest request = new BatchEventRequest()
@@ -297,7 +295,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -321,9 +319,9 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchWithMultipleChannelsSuccess() throws Exception {
         // Given: User with two channels
         final User user = aValidatedUser();
-        final Channel channel1 = createPersonalChannel(user, "Channel 1");
-        final Channel channel2 = createPersonalChannel(user, "Channel 2");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel1 = aChannelForUser(user, "Channel 1");
+        final Channel channel2 = aChannelForUser(user, "Channel 2");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Batch with events targeting both channels
         final CreateEventRequest event1 = new CreateEventRequest()
@@ -350,7 +348,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -370,8 +368,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchVerifiesAllOrNothingSemantics() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Batch where second event has invalid data
         final CreateEventRequest validEvent1 = new CreateEventRequest()
@@ -398,7 +396,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -407,8 +405,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         response.andExpect(status().is(SC_BAD_REQUEST));
 
         // And: NO events should be stored (transaction rollback)
-        final List<Event> storedEvents = eventRepository.findAll();
-        assertThat(storedEvents, hasSize(0));
+        final long storedEventCount = eventRepository.countByChannelId(channel.getId());
+        assertThat(storedEventCount, is(0L));
     }
 
     @Test
@@ -416,10 +414,10 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchWithOrgApiKeySuccess() throws Exception {
         // Given: Organization with channels
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
-        final Channel orgChannel1 = createOrgChannel(owner, org, "Org Channel 1");
-        final Channel orgChannel2 = createOrgChannel(owner, org, "Org Channel 2");
-        final ApiKey orgApiKey = createOrgApiKey(owner, org, "Org Key");
+        final Organization org = anOrganisationWithOwner(owner);
+        final Channel orgChannel1 = aChannelForOrganisation(owner, org, "Org Channel 1");
+        final Channel orgChannel2 = aChannelForOrganisation(owner, org, "Org Channel 2");
+        final ApiKey orgApiKey = anApiKeyForOrganisation(owner, org, "Org Key");
 
         // And: Batch with events targeting org channels
         final CreateEventRequest event1 = new CreateEventRequest()
@@ -440,7 +438,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, orgApiKey.getKey())
+            .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -460,8 +458,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchWithExactly100EventsSuccess() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Batch with exactly 100 events
         final List<CreateEventRequest> events = new ArrayList<>();
@@ -481,7 +479,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -501,8 +499,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchWithCurrentTimestampSuccess() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Event with current timestamp
         final CreateEventRequest currentEvent = new CreateEventRequest()
@@ -517,7 +515,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -531,8 +529,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchFailsWhenMissingSeverity() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Batch with event missing severity
         final CreateEventRequest invalidEvent = new CreateEventRequest()
@@ -546,7 +544,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -570,8 +568,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchFailsWhenMissingTitle() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Batch with event missing title
         final CreateEventRequest invalidEvent = new CreateEventRequest()
@@ -585,7 +583,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -609,7 +607,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchFailsWhenMissingChannelId() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Batch with event missing channelId
         final CreateEventRequest invalidEvent = new CreateEventRequest()
@@ -623,7 +621,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -671,8 +669,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchWithMetadataSuccess() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Events with metadata
         final Map<String, Object> metadata1 = new HashMap<>();
@@ -703,7 +701,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // When: Posting batch events
         final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(batchRequest);
@@ -716,53 +714,5 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         final List<EventCreatedResponse> responses = fromJson(content, new TypeReference<>() {});
 
         assertThat(responses, hasSize(2));
-    }
-
-    private Channel createPersonalChannel(final User user, final String name) {
-        final Channel channel = new Channel();
-        channel.setName(name);
-        channel.setUser(user);
-        channel.setOrganization(null);
-        channel.setStatus(ChannelStatus.ACTIVE);
-        return channelRepository.save(channel);
-    }
-
-    private Channel createOrgChannel(final User user, final Organization org, final String name) {
-        final Channel channel = new Channel();
-        channel.setName(name);
-        channel.setUser(user);
-        channel.setOrganization(org);
-        channel.setStatus(ChannelStatus.ACTIVE);
-        return channelRepository.save(channel);
-    }
-
-    private ApiKey createPersonalApiKey(final User user, final String name) {
-        final String randomPart = String.format("%032d", System.nanoTime()).substring(0, 32);
-        final String rawKey = "evt_" + randomPart;
-        final ApiKey apiKey = new ApiKey();
-        apiKey.setName(name);
-        apiKey.setUser(user);
-        apiKey.setOrganization(null);
-        apiKey.setScope(ApiKeyScope.USER);
-        apiKey.setHashedKey(passwordEncoder.encode(rawKey));
-        apiKey.setSuffix(rawKey.substring(rawKey.length() - 4));
-        apiKey.setExpiresAt(null);
-        apiKey.setKey(rawKey);
-        return apiKeyRepository.save(apiKey);
-    }
-
-    private ApiKey createOrgApiKey(final User user, final Organization org, final String name) {
-        final String randomPart = String.format("%032d", System.nanoTime()).substring(0, 32);
-        final String rawKey = "org_" + randomPart;
-        final ApiKey apiKey = new ApiKey();
-        apiKey.setName(name);
-        apiKey.setUser(user);
-        apiKey.setOrganization(org);
-        apiKey.setScope(ApiKeyScope.ORGANIZATION);
-        apiKey.setHashedKey(passwordEncoder.encode(rawKey));
-        apiKey.setSuffix(rawKey.substring(rawKey.length() - 4));
-        apiKey.setExpiresAt(null);
-        apiKey.setKey(rawKey);
-        return apiKeyRepository.save(apiKey);
     }
 }

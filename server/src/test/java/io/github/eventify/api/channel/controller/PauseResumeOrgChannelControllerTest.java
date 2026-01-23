@@ -35,7 +35,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void pauseOrgChannelSuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has an active channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -77,7 +77,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void pauseOrgChannelSuccessWhenAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User adminUser = aValidatedUser();
         addMemberToOrganization(org, adminUser, OrganizationalRole.ADMIN);
 
@@ -121,7 +121,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void pauseOrgChannelFailsWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -159,7 +159,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void pauseOrgChannelFailsWhenNonMember() throws Exception {
         // Given: An organization and a non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // And: Organization has a channel
@@ -196,7 +196,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void pauseOrgChannelSuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organization has a channel
@@ -239,7 +239,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void pauseOrgChannelIdempotentWhenAlreadyPaused() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has a paused channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -292,7 +292,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void resumeOrgChannelSuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has a paused channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -345,7 +345,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void resumeOrgChannelSuccessWhenAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User adminUser = aValidatedUser();
         addMemberToOrganization(org, adminUser, OrganizationalRole.ADMIN);
 
@@ -400,7 +400,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void resumeOrgChannelFailsWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -438,7 +438,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void resumeOrgChannelSuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organization has a paused channel
@@ -492,7 +492,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void resumeOrgChannelIdempotentWhenAlreadyActive() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has an active channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -534,7 +534,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void pauseOrgChannelFailsWhenNotFound() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Pausing non-existent channel
         final MockHttpServletRequestBuilder pauseRequest = post(
@@ -556,7 +556,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void resumeOrgChannelFailsWhenNotFound() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Resuming non-existent channel
         final MockHttpServletRequestBuilder resumeRequest = post(
@@ -578,7 +578,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void pauseOrgChannelFailsWhenUnauthenticated() throws Exception {
         // Given: An organization with a channel
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         final CreateChannelRequest createRequest = new CreateChannelRequest()
             .setName("Test Channel");
@@ -612,7 +612,7 @@ public class PauseResumeOrgChannelControllerTest extends IntegrationTest {
     public void resumeOrgChannelFailsWhenUnauthenticated() throws Exception {
         // Given: An organization with a channel
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         final CreateChannelRequest createRequest = new CreateChannelRequest()
             .setName("Test Channel");

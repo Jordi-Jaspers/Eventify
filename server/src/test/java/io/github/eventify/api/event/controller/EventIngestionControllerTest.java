@@ -1,14 +1,11 @@
 package io.github.eventify.api.event.controller;
 
 import io.github.eventify.api.apikey.model.ApiKey;
-import io.github.eventify.api.apikey.model.ApiKeyScope;
 import io.github.eventify.api.channel.model.Channel;
-import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.model.request.CreateEventRequest;
 import io.github.eventify.api.event.model.response.EventCreatedResponse;
 import io.github.eventify.api.organization.model.Organization;
-import io.github.eventify.api.quota.model.UserEventQuota;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
@@ -23,10 +20,12 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static io.github.eventify.api.Paths.EVENTS_PATH;
+import static io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter.API_KEY_HEADER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
 import static io.github.jframe.util.mapper.ObjectMappers.toJson;
 import static jakarta.servlet.http.HttpServletResponse.*;
@@ -40,16 +39,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Integration Test - Event Ingestion Controller")
 public class EventIngestionControllerTest extends IntegrationTest {
 
-    private static final String X_API_KEY = "X-Api-Key";
-    private static final int SC_TOO_MANY_REQUESTS = 429;
 
     @Test
     @DisplayName("Should ingest event with all fields successfully")
     public void ingestEventWithAllFieldsSuccess() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Production Alerts");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Production Alerts");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Valid request with all fields
         final Map<String, Object> metadata = new HashMap<>();
@@ -66,7 +63,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -88,8 +85,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventWithMinimalFieldsSuccess() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Health Checks");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Health Checks");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Valid request with only required fields
         final CreateEventRequest request = new CreateEventRequest()
@@ -100,7 +97,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -121,8 +118,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenMissingRequiredFields() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Request missing severity and title
         final CreateEventRequest request = new CreateEventRequest()
@@ -131,7 +128,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -151,8 +148,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenInvalidSeverity() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Request with invalid severity
         final CreateEventRequest request = new CreateEventRequest()
@@ -163,7 +160,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -187,7 +184,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenChannelNotFound() throws Exception {
         // Given: Valid API key but non-existent channel
         final User user = aValidatedUser();
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Request with non-existent channel
         final CreateEventRequest request = new CreateEventRequest()
@@ -198,7 +195,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -213,8 +210,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // Given: Two users with separate channels
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
-        final Channel user1Channel = createPersonalChannel(user1, "User 1 Channel");
-        final ApiKey user2ApiKey = createPersonalApiKey(user2, "User 2 Key");
+        final Channel user1Channel = aChannelForUser(user1, "User 1 Channel");
+        final ApiKey user2ApiKey = anApiKeyForUser(user2, "User 2 Key");
 
         // And: User 2 tries to access User 1's channel
         final CreateEventRequest request = new CreateEventRequest()
@@ -225,7 +222,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, user2ApiKey.getKey())
+            .header(API_KEY_HEADER, user2ApiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -239,9 +236,9 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenChannelPaused() throws Exception {
         // Given: A paused channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Paused Channel");
+        final Channel channel = aChannelForUser(user, "Paused Channel");
         pauseChannel(channel);
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
@@ -252,7 +249,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -292,8 +289,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenApiKeyExpired() throws Exception {
         // Given: An expired API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createExpiredPersonalApiKey(user, "Expired Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anExpiredApiKeyForUser(user, "Expired Key");
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
@@ -304,7 +301,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -324,8 +321,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventIgnoresClientTimestamp() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Request (client cannot provide timestamp in request)
         final CreateEventRequest request = new CreateEventRequest()
@@ -338,7 +335,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -362,9 +359,9 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventSuccessWithOrgApiKey() throws Exception {
         // Given: Organization with channel and org API key
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
-        final Channel orgChannel = createOrgChannel(owner, org, "Org Channel");
-        final ApiKey orgApiKey = createOrgApiKey(owner, org, "Org Key");
+        final Organization org = anOrganisationWithOwner(owner);
+        final Channel orgChannel = aChannelForOrganisation(owner, org, "Org Channel");
+        final ApiKey orgApiKey = anApiKeyForOrganisation(owner, org, "Org Key");
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
@@ -375,7 +372,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, orgApiKey.getKey())
+            .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -395,9 +392,9 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenPersonalKeyAccessesOrgChannel() throws Exception {
         // Given: Organization with channel, but user has personal API key
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
-        final Channel orgChannel = createOrgChannel(owner, org, "Org Channel");
-        final ApiKey personalKey = createPersonalApiKey(owner, "Personal Key");
+        final Organization org = anOrganisationWithOwner(owner);
+        final Channel orgChannel = aChannelForOrganisation(owner, org, "Org Channel");
+        final ApiKey personalKey = anApiKeyForUser(owner, "Personal Key");
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
@@ -408,7 +405,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, personalKey.getKey())
+            .header(API_KEY_HEADER, personalKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -422,8 +419,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenTitleTooLong() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Request with title exceeding 255 characters
         final String longTitle = "a".repeat(256);
@@ -435,7 +432,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -459,8 +456,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventSuccessWhenTitleExactly255Chars() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Request with title exactly 255 characters
         final String maxTitle = "a".repeat(255);
@@ -472,7 +469,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -486,8 +483,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenMessageTooLarge() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Request with message exceeding 10KB
         final String largeMessage = "a".repeat(10241);
@@ -500,7 +497,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -514,8 +511,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventSuccessWithEmptyMetadata() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Request with empty metadata
         final Map<String, Object> emptyMetadata = new HashMap<>();
@@ -528,7 +525,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -544,8 +541,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventSuccessWhenUnderQuota() throws Exception {
         // Given: User has sent 500 events (under 1000 limit)
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
         seedUserEventQuota(user, 500);
 
         // And: Valid request
@@ -557,7 +554,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -575,8 +572,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenQuotaReached() throws Exception {
         // Given: User has reached quota (1000/1000 events)
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
         seedUserEventQuota(user, 1000);
 
         // And: Valid request
@@ -588,13 +585,13 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
 
         // Then: Response should be TOO_MANY_REQUESTS
-        response.andExpect(status().is(SC_TOO_MANY_REQUESTS));
+        response.andExpect(status().is(HttpStatus.TOO_MANY_REQUESTS.value()));
 
         // And: Response body should contain rate limit info
         final String content = response.andReturn().getResponse().getContentAsString();
@@ -615,8 +612,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventIncludesRateLimitInfoWhenQuotaExceeded() throws Exception {
         // Given: User has reached quota
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
         seedUserEventQuota(user, 1000);
 
         // And: Valid request
@@ -628,13 +625,13 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
 
         // Then: Response should have rate limit fields in body
-        response.andExpect(status().is(SC_TOO_MANY_REQUESTS));
+        response.andExpect(status().is(HttpStatus.TOO_MANY_REQUESTS.value()));
 
         final String content = response.andReturn().getResponse().getContentAsString();
         final RateLimitErrorResponseResource error = fromJson(content, RateLimitErrorResponseResource.class);
@@ -649,8 +646,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventCreatesQuotaRecordForNewUser() throws Exception {
         // Given: New user with no quota record
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
@@ -661,7 +658,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting first event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -679,8 +676,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventSuccessWhenExactlyOneUnderLimit() throws Exception {
         // Given: User has 999 events (one under limit)
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
         seedUserEventQuota(user, 999);
 
         // And: Valid request
@@ -692,7 +689,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -710,8 +707,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenQuotaOverLimit() throws Exception {
         // Given: User has 1001 events (over limit - edge case)
         final User user = aValidatedUser();
-        final Channel channel = createPersonalChannel(user, "Test Channel");
-        final ApiKey apiKey = createPersonalApiKey(user, "Test Key");
+        final Channel channel = aChannelForUser(user, "Test Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
         seedUserEventQuota(user, 1001);
 
         // And: Valid request
@@ -723,13 +720,13 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, apiKey.getKey())
+            .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
 
         // Then: Response should be TOO_MANY_REQUESTS
-        response.andExpect(status().is(SC_TOO_MANY_REQUESTS));
+        response.andExpect(status().is(HttpStatus.TOO_MANY_REQUESTS.value()));
     }
 
     @Test
@@ -737,9 +734,9 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventWithOrgKeyCountsAgainstUserQuota() throws Exception {
         // Given: User A creates org and has 900 events
         final User userA = aValidatedUser();
-        final Organization org = createOrganization(userA);
-        final Channel orgChannel = createOrgChannel(userA, org, "Org Channel");
-        final ApiKey orgApiKey = createOrgApiKey(userA, org, "Org Key");
+        final Organization org = anOrganisationWithOwner(userA);
+        final Channel orgChannel = aChannelForOrganisation(userA, org, "Org Channel");
+        final ApiKey orgApiKey = anApiKeyForOrganisation(userA, org, "Org Key");
         seedUserEventQuota(userA, 900);
 
         // And: Valid request
@@ -751,7 +748,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // When: Sending event via org API key
         final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, orgApiKey.getKey())
+            .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request));
 
         final ResultActions response = mockMvc.perform(ingestRequest);
@@ -769,9 +766,9 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventWithOrgKeyFailsWhenUserReachesQuota() throws Exception {
         // Given: User A has 999 events and sends 2 events via org key
         final User userA = aValidatedUser();
-        final Organization org = createOrganization(userA);
-        final Channel orgChannel = createOrgChannel(userA, org, "Org Channel");
-        final ApiKey orgApiKey = createOrgApiKey(userA, org, "Org Key");
+        final Organization org = anOrganisationWithOwner(userA);
+        final Channel orgChannel = aChannelForOrganisation(userA, org, "Org Channel");
+        final ApiKey orgApiKey = anApiKeyForOrganisation(userA, org, "Org Key");
         seedUserEventQuota(userA, 999);
 
         // And: First event should succeed
@@ -782,7 +779,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         final MockHttpServletRequestBuilder ingestRequest1 = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, orgApiKey.getKey())
+            .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request1));
 
         final ResultActions response1 = mockMvc.perform(ingestRequest1);
@@ -796,105 +793,16 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         final MockHttpServletRequestBuilder ingestRequest2 = post(EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(X_API_KEY, orgApiKey.getKey())
+            .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request2));
 
         final ResultActions response2 = mockMvc.perform(ingestRequest2);
 
         // Then: Second event should be rejected
-        response2.andExpect(status().is(SC_TOO_MANY_REQUESTS));
+        response2.andExpect(status().is(HttpStatus.TOO_MANY_REQUESTS.value()));
 
         // And: User quota should be exactly 1000
         final int finalCount = getUserQuotaEventCount(userA);
         assertThat(finalCount, is(1000));
-    }
-
-    // ===== Helper Methods =====
-
-    private Channel createPersonalChannel(final User user, final String name) {
-        final Channel channel = new Channel();
-        channel.setName(name);
-        channel.setUser(user);
-        channel.setOrganization(null);
-        channel.setStatus(ChannelStatus.ACTIVE);
-        return channelRepository.save(channel);
-    }
-
-    private Channel createOrgChannel(final User user, final Organization org, final String name) {
-        final Channel channel = new Channel();
-        channel.setName(name);
-        channel.setUser(user);
-        channel.setOrganization(org);
-        channel.setStatus(ChannelStatus.ACTIVE);
-        return channelRepository.save(channel);
-    }
-
-    private void pauseChannel(final Channel channel) {
-        channel.setStatus(ChannelStatus.PAUSED);
-        channelRepository.save(channel);
-    }
-
-    private ApiKey createPersonalApiKey(final User user, final String name) {
-        // Generate a valid format key: prefix (4 chars) + 32 random chars
-        final String randomPart = String.format("%032d", System.nanoTime()).substring(0, 32);
-        final String rawKey = "evt_" + randomPart;
-        final ApiKey apiKey = new ApiKey();
-        apiKey.setName(name);
-        apiKey.setUser(user);
-        apiKey.setOrganization(null);
-        apiKey.setScope(ApiKeyScope.USER);
-        apiKey.setHashedKey(passwordEncoder.encode(rawKey));
-        apiKey.setSuffix(rawKey.substring(rawKey.length() - 4));
-        apiKey.setExpiresAt(null);
-        apiKey.setKey(rawKey);
-        return apiKeyRepository.save(apiKey);
-    }
-
-    private ApiKey createExpiredPersonalApiKey(final User user, final String name) {
-        // Generate a valid format key: prefix (4 chars) + 32 random chars
-        final String randomPart = String.format("%032d", System.nanoTime()).substring(0, 32);
-        final String rawKey = "evt_" + randomPart;
-        final ApiKey apiKey = new ApiKey();
-        apiKey.setName(name);
-        apiKey.setUser(user);
-        apiKey.setOrganization(null);
-        apiKey.setScope(ApiKeyScope.USER);
-        apiKey.setHashedKey(passwordEncoder.encode(rawKey));
-        apiKey.setSuffix(rawKey.substring(rawKey.length() - 4));
-        apiKey.setExpiresAt(OffsetDateTime.now().minusDays(1));
-        apiKey.setKey(rawKey);
-        return apiKeyRepository.save(apiKey);
-    }
-
-    private ApiKey createOrgApiKey(final User user, final Organization org, final String name) {
-        // Generate a valid format key: prefix (4 chars) + 32 random chars
-        final String randomPart = String.format("%032d", System.nanoTime()).substring(0, 32);
-        final String rawKey = "org_" + randomPart;
-        final ApiKey apiKey = new ApiKey();
-        apiKey.setName(name);
-        apiKey.setUser(user);
-        apiKey.setOrganization(org);
-        apiKey.setScope(ApiKeyScope.ORGANIZATION);
-        apiKey.setHashedKey(passwordEncoder.encode(rawKey));
-        apiKey.setSuffix(rawKey.substring(rawKey.length() - 4));
-        apiKey.setExpiresAt(null);
-        apiKey.setKey(rawKey);
-        return apiKeyRepository.save(apiKey);
-    }
-
-    private void seedUserEventQuota(final User user, final int eventCount) {
-        final UserEventQuota quota = userEventQuotaRepository.findByUserId(user.getId())
-            .orElseGet(() -> {
-                final UserEventQuota newQuota = new UserEventQuota(user);
-                return userEventQuotaRepository.save(newQuota);
-            });
-        quota.setEventCount(eventCount);
-        userEventQuotaRepository.save(quota);
-    }
-
-    private int getUserQuotaEventCount(final User user) {
-        return userEventQuotaRepository.findByUserId(user.getId())
-            .map(UserEventQuota::getEventCount)
-            .orElse(0);
     }
 }

@@ -41,7 +41,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeySuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: A valid create API key request
         final CreateApiKeyRequest request = new CreateApiKeyRequest()
@@ -76,7 +76,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeySuccessWhenAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User adminUser = aValidatedUser();
         addMemberToOrganization(org, adminUser, OrganizationalRole.ADMIN);
 
@@ -107,7 +107,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeyFailsWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -132,7 +132,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeyFailsWhenNonMember() throws Exception {
         // Given: An organization and a non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // And: A valid create API key request
@@ -156,7 +156,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeySuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: A valid create API key request
@@ -186,7 +186,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeyWithExpirationSuccess() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: A request with future expiration
         final OffsetDateTime futureExpiration = OffsetDateTime.now().plusDays(30);
@@ -217,7 +217,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeyUnlimitedSuccess() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Creating 10 organization API keys (more than user limit)
         for (int i = 0; i < 10; i++) {
@@ -241,7 +241,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void searchOrgApiKeysSuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has API keys
         final CreateApiKeyRequest request1 = new CreateApiKeyRequest()
@@ -290,7 +290,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void searchOrgApiKeysSuccessWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -332,7 +332,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void searchOrgApiKeysFailsWhenNonMember() throws Exception {
         // Given: An organization and a non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // When: Searching organization API keys as non-member
@@ -358,7 +358,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void searchOrgApiKeysSuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organization has API keys
@@ -399,7 +399,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void searchOrgApiKeysReturnsEmptyWhenNoKeys() throws Exception {
         // Given: An organization with no API keys
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Searching organization API keys
         final SortablePageInput searchInput = new SortablePageInput();
@@ -428,7 +428,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void searchOrgApiKeysDoesNotIncludeFullKey() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has created an API key
         final CreateApiKeyRequest request = new CreateApiKeyRequest()
@@ -469,7 +469,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void revokeOrgApiKeySuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has created an API key
         final CreateApiKeyRequest request = new CreateApiKeyRequest()
@@ -504,7 +504,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void revokeOrgApiKeySuccessWhenAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User adminUser = aValidatedUser();
         addMemberToOrganization(org, adminUser, OrganizationalRole.ADMIN);
 
@@ -541,7 +541,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void revokeOrgApiKeyFailsWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -578,7 +578,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void revokeOrgApiKeySuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organization has created an API key
@@ -614,7 +614,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void revokeOrgApiKeyFailsWhenNotFound() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Revoking non-existent API key
         final MockHttpServletRequestBuilder revokeRequest = delete(
@@ -641,9 +641,9 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void revokeOrgApiKeyFailsWhenDifferentOrg() throws Exception {
         // Given: Two organizations with different owners
         final User owner1 = aValidatedUser();
-        final Organization org1 = createOrganization(owner1);
+        final Organization org1 = anOrganisationWithOwner(owner1);
         final User owner2 = aValidatedUser();
-        final Organization org2 = createOrganization(owner2);
+        final Organization org2 = anOrganisationWithOwner(owner2);
 
         // And: Org1 has created an API key
         final CreateApiKeyRequest request = new CreateApiKeyRequest()
@@ -733,7 +733,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeyFailsWhenUnauthenticated() throws Exception {
         // Given: An organization
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: A valid request
         final CreateApiKeyRequest request = new CreateApiKeyRequest()
@@ -755,7 +755,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void searchOrgApiKeysFailsWhenUnauthenticated() throws Exception {
         // Given: An organization
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Searching keys without authentication
         final SortablePageInput searchInput = new SortablePageInput();
@@ -779,7 +779,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void revokeOrgApiKeyFailsWhenUnauthenticated() throws Exception {
         // Given: An organization
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Revoking key without authentication
         final MockHttpServletRequestBuilder revokeRequest = delete(
@@ -800,7 +800,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeyFailsWhenNameIsEmpty() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Request with empty name
         final CreateApiKeyRequest request = new CreateApiKeyRequest()
@@ -823,7 +823,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeyFailsWhenNameTooLong() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Request with name exceeding 100 characters
         final String longName = "a".repeat(101);
@@ -847,7 +847,7 @@ public class OrganizationApiKeyControllerTest extends IntegrationTest {
     public void createOrgApiKeyFailsWhenExpirationInPast() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Request with past expiration
         final OffsetDateTime pastExpiration = OffsetDateTime.now().minusDays(1);

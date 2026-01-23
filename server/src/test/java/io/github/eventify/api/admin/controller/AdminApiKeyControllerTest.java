@@ -55,7 +55,7 @@ public class AdminApiKeyControllerTest extends IntegrationTest {
         createUserApiKey(user1, "User Key 2", OffsetDateTime.now().plusDays(30));
 
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         createOrgApiKey(org, owner, "Org Key 1", null);
 
         // When: Requesting API key statistics
@@ -141,7 +141,7 @@ public class AdminApiKeyControllerTest extends IntegrationTest {
         createUserApiKey(user1, "User Key", null);
 
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         createOrgApiKey(org, owner, "Org Key", null);
 
         // When: Searching without filters
@@ -178,7 +178,7 @@ public class AdminApiKeyControllerTest extends IntegrationTest {
         createUserApiKey(user1, "User Key", null);
 
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         createOrgApiKey(org, owner, "Org Key", null);
 
         // When: Searching with USER scope filter
@@ -218,7 +218,7 @@ public class AdminApiKeyControllerTest extends IntegrationTest {
         createUserApiKey(user1, "User Key", null);
 
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         createOrgApiKey(org, owner, "Org Key", null);
 
         // When: Searching with ORGANIZATION scope filter
@@ -514,7 +514,7 @@ public class AdminApiKeyControllerTest extends IntegrationTest {
 
         // And: An organization API key exists
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final ApiKey key = createOrgApiKey(org, owner, "Org Key to Revoke", null);
 
         // When: Admin revokes the key

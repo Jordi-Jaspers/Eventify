@@ -45,7 +45,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldAddMemberWhenCallerIsOwner() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User newMember = aValidatedUser();
 
         // And: Add member request
@@ -78,7 +78,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldAddMemberWhenCallerIsAdmin() throws Exception {
         // Given: An organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
         final User newMember = aValidatedUser();
@@ -105,7 +105,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenMemberTriesToAdd() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
         final User newMember = aValidatedUser();
@@ -132,7 +132,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnBadRequestWhenUserAlreadyMember() throws Exception {
         // Given: An organization with existing member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -182,7 +182,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnNotFoundWhenUserEmailDoesNotExist() throws Exception {
         // Given: Organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Add member request with non-existent email
         final AddMemberRequest request = new AddMemberRequest()
@@ -206,7 +206,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnMemberListForOwner() throws Exception {
         // Given: Organization with owner and members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
@@ -234,7 +234,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnMemberListForAdmin() throws Exception {
         // Given: Organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -254,7 +254,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnMemberListForMember() throws Exception {
         // Given: Organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -274,7 +274,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenForNonMembers() throws Exception {
         // Given: Organization and non-member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // When: Non-member requests member list
@@ -293,7 +293,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldUpdateRoleWhenOwnerUpdates() throws Exception {
         // Given: Organization with member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -328,7 +328,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldUpdateRoleWhenAdminUpdatesMemberToAdmin() throws Exception {
         // Given: Organization with admin and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
         final User member = aValidatedUser();
@@ -359,7 +359,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenAdminTriesToUpdateAnotherAdmin() throws Exception {
         // Given: Organization with two admins
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin1 = aValidatedUser();
         final User admin2 = aValidatedUser();
         addMemberToOrganization(org, admin1, OrganizationalRole.ADMIN);
@@ -390,7 +390,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenAdminTriesToUpdateOwner() throws Exception {
         // Given: Organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -419,7 +419,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenMemberTriesToUpdate() throws Exception {
         // Given: Organization with two members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
@@ -450,7 +450,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnBadRequestWhenTryingToSetOwnerRole() throws Exception {
         // Given: Organization with member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -479,7 +479,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldRemoveMemberWhenOwnerRemoves() throws Exception {
         // Given: Organization with member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -503,7 +503,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldRemoveMemberWhenAdminRemovesMember() throws Exception {
         // Given: Organization with admin and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
         final User member = aValidatedUser();
@@ -529,7 +529,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenAdminRemovesAnotherAdmin() throws Exception {
         // Given: Organization with two admins
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin1 = aValidatedUser();
         final User admin2 = aValidatedUser();
         addMemberToOrganization(org, admin1, OrganizationalRole.ADMIN);
@@ -555,7 +555,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenTryingToRemoveOwner() throws Exception {
         // Given: Organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -579,7 +579,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenMemberTriesToRemove() throws Exception {
         // Given: Organization with two members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
@@ -605,7 +605,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldTransferOwnershipWhenOwnerTransfersToAdmin() throws Exception {
         // Given: Organization with owner and admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -633,7 +633,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldTransferOwnershipWhenOwnerTransfersToMember() throws Exception {
         // Given: Organization with owner and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -661,7 +661,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenNonOwnerTriesToTransfer() throws Exception {
         // Given: Organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
         final User member = aValidatedUser();
@@ -691,7 +691,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnBadRequestWhenTargetIsNotMember() throws Exception {
         // Given: Organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // And: Transfer ownership request to non-member
@@ -718,12 +718,12 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnUserOrganizations() throws Exception {
         // Given: User with organization memberships
         final User owner = aValidatedUser();
-        final Organization org1 = createOrganization(owner);
+        final Organization org1 = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org1, member, OrganizationalRole.MEMBER);
 
         final User owner2 = aValidatedUser();
-        final Organization org2 = createOrganization(owner2);
+        final Organization org2 = anOrganisationWithOwner(owner2);
         addMemberToOrganization(org2, member, OrganizationalRole.ADMIN);
 
         // When: User requests their organizations
@@ -748,7 +748,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldSearchUsersWithValidQuery() throws Exception {
         // Given: Organization and search input
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         final SortablePageInput input = new SortablePageInput();
         input.setPageNumber(0);
@@ -773,7 +773,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenNonMemberSearches() throws Exception {
         // Given: Organization and non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         final SortablePageInput input = new SortablePageInput();
@@ -799,7 +799,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldTransferOwnershipWhenGlobalAdminTransfers() throws Exception {
         // Given: Organization with owner and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -830,7 +830,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldTransferOwnershipWhenOwnerTransfersWithCorrectCurrentOwnerId() throws Exception {
         // Given: Organization with owner and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -858,7 +858,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenOwnerSendsWrongCurrentOwnerId() throws Exception {
         // Given: Organization with owner and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -886,7 +886,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void listMembersWithPaginationSuccess() throws Exception {
         // Given: Organization with multiple members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         final User member3 = aValidatedUser();
@@ -924,7 +924,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void listMembersWithSearchFilterSuccess() throws Exception {
         // Given: Organization with members with distinct emails
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
@@ -962,7 +962,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void listMembersWithRoleFilterSuccess() throws Exception {
         // Given: Organization with members of different roles
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         final User member3 = aValidatedUser();
@@ -1009,7 +1009,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void listMembersSortByEmailSuccess() throws Exception {
         // Given: Organization with members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
@@ -1043,7 +1043,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void listMembersSortByRoleSuccess() throws Exception {
         // Given: Organization with members of different roles
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
@@ -1077,7 +1077,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void listMembersDefaultSortByRoleHierarchy() throws Exception {
         // Given: Organization with members of all role types
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         final User member = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
@@ -1111,7 +1111,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void listMembersAsNonMemberFails() throws Exception {
         // Given: Organization with members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // And: List request
@@ -1136,7 +1136,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void listMembersAsGlobalAdminSuccess() throws Exception {
         // Given: Organization with members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
 

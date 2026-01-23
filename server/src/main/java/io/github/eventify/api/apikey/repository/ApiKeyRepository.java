@@ -14,9 +14,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for {@link ApiKey} entities.
@@ -134,4 +137,17 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, Long>, JpaSpecif
      */
     @Query("SELECT k FROM ApiKey k LEFT JOIN FETCH k.user LEFT JOIN FETCH k.organization ORDER BY k.totalRequests DESC")
     List<ApiKey> findTopByOrderByTotalRequestsDesc(Pageable pageable);
+
+    /**
+     * Delete all API keys owned by users with the given IDs.
+     *
+     * @param userIds the user IDs
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM ApiKey k WHERE k.user.id IN :userIds")
+    void deleteAllByUserIdIn(@Param("userIds") List<Long> userIds);
 }

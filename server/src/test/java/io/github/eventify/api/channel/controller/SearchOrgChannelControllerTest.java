@@ -37,7 +37,7 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
     public void searchOrgChannelsSuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has 3 channels
         for (int i = 1; i <= 3; i++) {
@@ -82,7 +82,7 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
     public void searchOrgChannelsSuccessWhenAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User adminUser = aValidatedUser();
         addMemberToOrganization(org, adminUser, OrganizationalRole.ADMIN);
 
@@ -124,7 +124,7 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
     public void searchOrgChannelsSuccessWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -166,7 +166,7 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
     public void searchOrgChannelsFailsWhenNonMember() throws Exception {
         // Given: An organization and a non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // When: Searching organization channels as non-member
@@ -192,7 +192,7 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
     public void searchOrgChannelsSuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organization has channels
@@ -233,9 +233,9 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
     public void searchOrgChannelsReturnsOnlyOrgChannels() throws Exception {
         // Given: Two organizations
         final User owner1 = aValidatedUser();
-        final Organization org1 = createOrganization(owner1);
+        final Organization org1 = anOrganisationWithOwner(owner1);
         final User owner2 = aValidatedUser();
-        final Organization org2 = createOrganization(owner2);
+        final Organization org2 = anOrganisationWithOwner(owner2);
 
         // And: Org1 has 2 channels
         for (int i = 1; i <= 2; i++) {
@@ -288,7 +288,7 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
     public void searchDoesNotShowDeletedChannels() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has 2 channels
         final CreateChannelRequest createRequest1 = new CreateChannelRequest()
@@ -353,7 +353,7 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
     public void searchOrgChannelsReturnsEmptyWhenNoChannels() throws Exception {
         // Given: An organization with no channels
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Searching channels
         final SortablePageInput searchInput = new SortablePageInput();
@@ -384,7 +384,7 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
     public void searchOrgChannelsFailsWhenUnauthenticated() throws Exception {
         // Given: An organization
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Searching channels without authentication
         final SortablePageInput searchInput = new SortablePageInput();

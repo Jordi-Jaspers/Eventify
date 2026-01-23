@@ -36,7 +36,7 @@ public class DeleteOrgChannelControllerTest extends IntegrationTest {
     public void deleteOrgChannelSuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -78,7 +78,7 @@ public class DeleteOrgChannelControllerTest extends IntegrationTest {
     public void deleteOrgChannelSuccessWhenAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User adminUser = aValidatedUser();
         addMemberToOrganization(org, adminUser, OrganizationalRole.ADMIN);
 
@@ -122,7 +122,7 @@ public class DeleteOrgChannelControllerTest extends IntegrationTest {
     public void deleteOrgChannelFailsWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -160,7 +160,7 @@ public class DeleteOrgChannelControllerTest extends IntegrationTest {
     public void deleteOrgChannelFailsWhenNonMember() throws Exception {
         // Given: An organization and a non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // And: Organization has a channel
@@ -197,7 +197,7 @@ public class DeleteOrgChannelControllerTest extends IntegrationTest {
     public void deleteOrgChannelSuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organization has a channel
@@ -240,7 +240,7 @@ public class DeleteOrgChannelControllerTest extends IntegrationTest {
     public void deleteOrgChannelFailsWhenNotFound() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Deleting non-existent channel
         final MockHttpServletRequestBuilder deleteRequest = delete(
@@ -262,7 +262,7 @@ public class DeleteOrgChannelControllerTest extends IntegrationTest {
     public void deleteOrgChannelFailsWhenAlreadyDeleted() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization has a deleted channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -309,9 +309,9 @@ public class DeleteOrgChannelControllerTest extends IntegrationTest {
     public void deleteOrgChannelFailsWhenDifferentOrg() throws Exception {
         // Given: Two organizations with different owners
         final User owner1 = aValidatedUser();
-        final Organization org1 = createOrganization(owner1);
+        final Organization org1 = anOrganisationWithOwner(owner1);
         final User owner2 = aValidatedUser();
-        final Organization org2 = createOrganization(owner2);
+        final Organization org2 = anOrganisationWithOwner(owner2);
 
         // And: Org1 has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
@@ -347,7 +347,7 @@ public class DeleteOrgChannelControllerTest extends IntegrationTest {
     public void deleteOrgChannelFailsWhenUnauthenticated() throws Exception {
         // Given: An organization with a channel
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         final CreateChannelRequest createRequest = new CreateChannelRequest()
             .setName("Test Channel");

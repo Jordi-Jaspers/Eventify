@@ -9,9 +9,12 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for Channel entity.
@@ -86,4 +89,17 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * @return list of channels
      */
     List<Channel> findByStatus(ChannelStatus status);
+
+    /**
+     * Delete all channels owned by users with the given IDs.
+     *
+     * @param userIds the user IDs
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM Channel c WHERE c.user.id IN :userIds")
+    void deleteAllByUserIdIn(@Param("userIds") List<Long> userIds);
 }

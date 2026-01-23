@@ -37,7 +37,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelSuccessWhenOwner() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: A valid create channel request
         final CreateChannelRequest request = new CreateChannelRequest()
@@ -71,7 +71,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelSuccessWhenAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User adminUser = aValidatedUser();
         addMemberToOrganization(org, adminUser, OrganizationalRole.ADMIN);
 
@@ -103,7 +103,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelFailsWhenMember() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -128,7 +128,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelFailsWhenNonMember() throws Exception {
         // Given: An organization and a non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // And: A valid create channel request
@@ -152,7 +152,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelSuccessWhenGlobalAdmin() throws Exception {
         // Given: An organization and a global admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: A valid create channel request
@@ -182,7 +182,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelWithoutDescriptionSuccess() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Request without description
         final CreateChannelRequest request = new CreateChannelRequest()
@@ -211,7 +211,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelFailsWhenDuplicateName() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Organization already has channel named "Errors"
         final CreateChannelRequest firstRequest = new CreateChannelRequest()
@@ -249,9 +249,9 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelSuccessWhenSameNameDifferentOrg() throws Exception {
         // Given: Two organizations with different owners
         final User owner1 = aValidatedUser();
-        final Organization org1 = createOrganization(owner1);
+        final Organization org1 = anOrganisationWithOwner(owner1);
         final User owner2 = aValidatedUser();
-        final Organization org2 = createOrganization(owner2);
+        final Organization org2 = anOrganisationWithOwner(owner2);
 
         // And: Org1 has channel named "Errors"
         final CreateChannelRequest request1 = new CreateChannelRequest()
@@ -284,7 +284,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelFailsWhenNameIsEmpty() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Request with empty name
         final CreateChannelRequest request = new CreateChannelRequest()
@@ -312,7 +312,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelFailsWhenNameTooLong() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Request with name exceeding 100 characters
         final String longName = "a".repeat(101);
@@ -336,7 +336,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelFailsWhenDescriptionTooLong() throws Exception {
         // Given: An organization owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Request with description exceeding 500 characters
         final String longDescription = "a".repeat(501);
@@ -361,7 +361,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
     public void createOrgChannelFailsWhenUnauthenticated() throws Exception {
         // Given: An organization
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: A valid request
         final CreateChannelRequest request = new CreateChannelRequest()

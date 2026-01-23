@@ -48,7 +48,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: A valid organization request
-        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequest();
+        final ProvisionOrganizationRequest request = aProvisionOrganizationRequest();
 
         // When: Creating organization
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -83,7 +83,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final String commonOrgName = "Capsule Corp";
 
         // And: A first organization is created
-        final ProvisionOrganizationRequest organizationRequest = aValidProvisionOrganizationRequest()
+        final ProvisionOrganizationRequest organizationRequest = aProvisionOrganizationRequest()
             .setName(commonOrgName);
 
         final MockHttpServletRequestBuilder firstCreateRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -115,7 +115,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
     @DisplayName("Should not create organization without authentication")
     public void createOrganizationWithoutAuthenticationFails() throws Exception {
         // Given: A valid organization request with no authentication
-        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequest();
+        final ProvisionOrganizationRequest request = aProvisionOrganizationRequest();
 
         // When: Creating organization without authorization header
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -135,7 +135,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final User regularUser = aValidatedUser();
 
         // And: A valid organization request
-        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequest();
+        final ProvisionOrganizationRequest request = aProvisionOrganizationRequest();
 
         // When: Regular user attempts to create organization
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -373,7 +373,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final User owner = aValidatedUser();
 
         // And: A valid organization request with owner
-        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(owner.getEmail());
+        final ProvisionOrganizationRequest request = aProvisionOrganizationRequestWithOwner(owner.getEmail());
 
         // When: Creating organization with owner
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -406,7 +406,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: A request without owner field
-        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(null);
+        final ProvisionOrganizationRequest request = aProvisionOrganizationRequestWithOwner(null);
 
         // When: Creating organization without owner
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -428,7 +428,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: A request with non-existent owner email
         final String nonExistentEmail = "nonexistent@example.com";
-        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(nonExistentEmail);
+        final ProvisionOrganizationRequest request = aProvisionOrganizationRequestWithOwner(nonExistentEmail);
 
         // When: Creating organization with non-existent owner
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -452,7 +452,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final User disabledOwner = aLockedUser();
 
         // And: A request with disabled owner
-        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(disabledOwner.getEmail());
+        final ProvisionOrganizationRequest request = aProvisionOrganizationRequestWithOwner(disabledOwner.getEmail());
 
         // When: Creating organization with disabled owner
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -474,7 +474,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: A request with invalid email format
         final String invalidEmail = "not-an-email";
-        final ProvisionOrganizationRequest request = aValidProvisionOrganizationRequestWithOwner(invalidEmail);
+        final ProvisionOrganizationRequest request = aProvisionOrganizationRequestWithOwner(invalidEmail);
 
         // When: Creating organization with invalid owner email
         final MockHttpServletRequestBuilder createRequest = post(ADMIN_ORGANIZATIONS_PATH)
@@ -719,7 +719,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: An organization with owner
         final User owner = aValidatedUser();
-        final ProvisionOrganizationRequest provisionRequest = aValidProvisionOrganizationRequestWithOwner(owner.getEmail());
+        final ProvisionOrganizationRequest provisionRequest = aProvisionOrganizationRequestWithOwner(owner.getEmail());
         createOrganization(provisionRequest);
 
         // And: A search request filtering by organization name

@@ -33,7 +33,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void getRetentionSettingsAsOwner() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Owner requests retention settings
         final MockHttpServletRequestBuilder request = get(ORGANIZATION_RETENTION_SETTINGS_PATH.replace("{orgId}", org.getId().toString()))
@@ -57,7 +57,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void getRetentionSettingsAsAdmin() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -83,7 +83,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void getRetentionSettingsAsMemberForbidden() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -103,7 +103,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateRetentionSettingsAsOwnerSuccess() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Valid retention request
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -134,7 +134,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateRetentionSettingsAsAdminSuccess() throws Exception {
         // Given: An organization with admin member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -167,7 +167,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateRetentionSettingsAsMemberForbidden() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -194,7 +194,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionTo90Days() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Retention request for 90 days
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -225,7 +225,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionTo730Days() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Retention request for 730 days
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -256,7 +256,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionTo1095Days() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Retention request for 1095 days
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -287,7 +287,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionTo1825Days() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Retention request for 1825 days
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -318,7 +318,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionInvalidValue100() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Invalid retention request
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -343,7 +343,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionInvalidValue500() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Invalid retention request
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -368,7 +368,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionNegativeValue() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Negative retention request
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -393,7 +393,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionZeroValue() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Zero retention request
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -418,7 +418,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionNullValue() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Null retention request
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -443,7 +443,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void getOrganizationRetentionUnauthorized() throws Exception {
         // Given: An organization
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting retention without auth
         final MockHttpServletRequestBuilder request = get(ORGANIZATION_RETENTION_SETTINGS_PATH.replace("{orgId}", org.getId().toString()))
@@ -460,7 +460,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateOrganizationRetentionUnauthorized() throws Exception {
         // Given: An organization
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Valid retention request but no authentication
         final UpdateRetentionRequest request = new UpdateRetentionRequest()
@@ -484,7 +484,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void getNonMemberRetentionForbidden() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Another user who is not a member
         final User nonMember = aValidatedUser();
@@ -505,7 +505,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void updateNonMemberRetentionForbidden() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Another user who is not a member
         final User nonMember = aValidatedUser();
@@ -533,7 +533,7 @@ public class OrganizationSettingsControllerTest extends IntegrationTest {
     public void getOrganizationRetentionAfterUpdate() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Owner has updated retention to 1095 days
         final UpdateRetentionRequest updateRequest = new UpdateRetentionRequest()

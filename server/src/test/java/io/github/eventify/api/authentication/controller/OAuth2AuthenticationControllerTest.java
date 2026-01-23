@@ -45,10 +45,10 @@ public class OAuth2AuthenticationControllerTest extends IntegrationTest {
     @DisplayName("Should complete full OAuth2 login flow with Google and access protected resource with cookies")
     public void shouldCompleteFullOAuth2LoginFlowWithGoogleAndAccessProtectedResourceWithCookies() throws Exception {
         // Given: A new Google OAuth2 user with verified email (Google uses explicit email_verified attribute)
-        final OAuth2User googleUser = aValidGoogleOAuth2User(true);
+        final OAuth2User googleUser = aGoogleOAuth2User(true);
 
         // And: A mock OAuth2UserRequest for Google
-        final OAuth2UserRequest userRequest = aValidOAuthRequestVia(GOOGLE_REGISTRATION_ID);
+        final OAuth2UserRequest userRequest = anOAuthRequestVia(GOOGLE_REGISTRATION_ID);
 
         // When: OAuth2 authentication occurs (calling the REAL CustomOAuth2UserService)
         customOAuth2UserService.processOAuth2User(userRequest, googleUser);
@@ -78,10 +78,10 @@ public class OAuth2AuthenticationControllerTest extends IntegrationTest {
     @DisplayName("Should complete full OAuth2 login flow with GitHub and access protected resource with cookies")
     public void shouldCompleteFullOAuth2LoginFlowWithGitHubAndAccessProtectedResourceWithCookies() throws Exception {
         // Given: A new GitHub OAuth2 user with verified email
-        final OAuth2User githubUser = aValidGithubOAuthUser(true);
+        final OAuth2User githubUser = aGithubOAuthUser(true);
 
         // And: A mock OAuth2UserRequest for GitHub
-        final OAuth2UserRequest userRequest = aValidOAuthRequestVia(GITHUB_REGISTRATION_ID);
+        final OAuth2UserRequest userRequest = anOAuthRequestVia(GITHUB_REGISTRATION_ID);
 
         // When: OAuth2 authentication occurs (calling the REAL CustomOAuth2UserService)
         customOAuth2UserService.processOAuth2User(userRequest, githubUser);
@@ -114,10 +114,10 @@ public class OAuth2AuthenticationControllerTest extends IntegrationTest {
         final User existingUser = aValidatedUser();
 
         // And: A new GitHub OAuth2 user with verified email
-        final OAuth2User githubUser = aValidGithubOAuthUser(existingUser.getEmail(), true);
+        final OAuth2User githubUser = aGithubOAuthUser(existingUser.getEmail(), true);
 
         // And: A mock OAuth2UserRequest for GitHub
-        final OAuth2UserRequest userRequest = aValidOAuthRequestVia(GITHUB_REGISTRATION_ID);
+        final OAuth2UserRequest userRequest = anOAuthRequestVia(GITHUB_REGISTRATION_ID);
 
         // When: OAuth2 authentication occurs (calling the REAL CustomOAuth2UserService)
         customOAuth2UserService.processOAuth2User(userRequest, githubUser);

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import static io.github.eventify.api.Paths.USER_QUOTA_PATH;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
@@ -22,8 +23,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Integration Test - User Quota Controller")
 public class UserQuotaControllerTest extends IntegrationTest {
-
-    private static final String USER_QUOTA_PATH = "/v1/user/quota";
 
     @Test
     @DisplayName("Should return quota status for authenticated user")

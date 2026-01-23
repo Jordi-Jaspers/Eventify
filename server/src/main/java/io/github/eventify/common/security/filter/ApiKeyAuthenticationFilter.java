@@ -28,7 +28,7 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor
 public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String API_KEY_HEADER = "X-Api-Key";
+    public static final String API_KEY_HEADER = "X-Api-Key";
 
     private final ApiKeyAuthenticationService apiKeyAuthenticationService;
 
