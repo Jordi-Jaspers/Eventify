@@ -5,10 +5,9 @@ import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
+import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
+import io.github.eventify.api.watchlist.model.WatchlistFilters;
 import io.github.eventify.api.watchlist.model.WatchlistMetaData;
-import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
-import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
-import io.github.eventify.api.watchlist.repository.WatchlistChannelRepository;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.common.exception.DuplicateWatchlistNameException;
 import io.github.eventify.common.security.SecurityUtil;
@@ -37,7 +36,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 @DisplayName("Unit Test - Watchlist Service")
@@ -46,9 +44,6 @@ public class WatchlistServiceTest extends UnitTest {
 
     @Mock
     private WatchlistRepository watchlistRepository;
-
-    @Mock
-    private WatchlistChannelRepository watchlistChannelRepository;
 
     @Mock
     private ChannelRepository channelRepository;
@@ -81,10 +76,11 @@ public class WatchlistServiceTest extends UnitTest {
     @Test
     @DisplayName("Should create watchlist successfully")
     public void shouldCreateWatchlistSuccessfully() {
-        // Given: A valid create request
-        final CreateWatchlistRequest request = new CreateWatchlistRequest()
-            .setName("My Watchlist")
-            .setDescription("Production errors");
+        // Given: Valid watchlist
+        final Watchlist input = new Watchlist();
+        input.setName("My Watchlist");
+        input.setDescription("Production errors");
+        input.setFilters(WatchlistFilters.defaults());
 
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
             .thenReturn(Optional.empty());
@@ -95,7 +91,7 @@ public class WatchlistServiceTest extends UnitTest {
         });
 
         // When: Creating watchlist
-        final Watchlist watchlist = watchlistService.createWatchlist(request);
+        final Watchlist watchlist = watchlistService.createWatchlist(input);
 
         // Then: Watchlist should be created with correct properties
         assertThat(watchlist, is(notNullValue()));
@@ -103,20 +99,24 @@ public class WatchlistServiceTest extends UnitTest {
         assertThat(watchlist.getName(), is("My Watchlist"));
         assertThat(watchlist.getDescription(), is("Production errors"));
         assertThat(watchlist.getUser().getId(), is(user.getId()));
-        assertThat(watchlist.getDefaultTimeRange(), is("24h"));
-        assertThat(watchlist.getDefaultOnlyCritical(), is(false));
-        assertThat(watchlist.getDefaultSortBySeverity(), is(true));
+        assertThat(watchlist.getFilters().getTimeRange(), is("24h"));
+        assertThat(watchlist.getFilters().isOnlyCritical(), is(false));
+        assertThat(watchlist.getFilters().isSortBySeverity(), is(true));
 
         verify(watchlistRepository).save(any(Watchlist.class));
     }
 
     @Test
-    @DisplayName("Should create watchlist with channels successfully")
-    public void shouldCreateWatchlistWithChannelsSuccessfully() {
-        // Given: A valid request with channel IDs
-        final CreateWatchlistRequest request = new CreateWatchlistRequest()
-            .setName("My Watchlist")
-            .setChannelIds(List.of(1L, 2L));
+    @DisplayName("Should create watchlist with configuration successfully")
+    public void shouldCreateWatchlistWithConfigurationSuccessfully() {
+        // Given: Watchlist with configuration
+        final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
+            .channelIds(List.of(1L, 2L))
+            .build();
+
+        final Watchlist input = new Watchlist();
+        input.setName("My Watchlist");
+        input.setConfiguration(configuration);
 
         final Channel channel1 = createChannel(1L, "Channel 1", user);
         final Channel channel2 = createChannel(2L, "Channel 2", user);
@@ -132,32 +132,32 @@ public class WatchlistServiceTest extends UnitTest {
             watchlist.setId(1L);
             return watchlist;
         });
-        when(watchlistChannelRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When: Creating watchlist with channels
-        final Watchlist watchlist = watchlistService.createWatchlist(request);
+        // When: Creating watchlist with configuration
+        final Watchlist watchlist = watchlistService.createWatchlist(input);
 
-        // Then: Channels should be added
+        // Then: Configuration should be set
         assertThat(watchlist, is(notNullValue()));
-        verify(watchlistChannelRepository).saveAll(anyList());
+        assertThat(watchlist.getConfiguration().getChannelIds(), hasItems(1L, 2L));
+        verify(watchlistRepository).save(any(Watchlist.class));
     }
 
     @Test
     @DisplayName("Should fail to create when duplicate name")
     public void shouldFailToCreateWhenDuplicateName() {
         // Given: User already has watchlist with same name
-        final CreateWatchlistRequest request = new CreateWatchlistRequest()
-            .setName("My Watchlist");
-
         final Watchlist existingWatchlist = new Watchlist();
         existingWatchlist.setName("My Watchlist");
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
             .thenReturn(Optional.of(existingWatchlist));
 
+        final Watchlist input = new Watchlist();
+        input.setName("My Watchlist");
+
         // When & Then: Should throw DuplicateWatchlistNameException
         assertThrows(
             DuplicateWatchlistNameException.class,
-            () -> watchlistService.createWatchlist(request)
+            () -> watchlistService.createWatchlist(input)
         );
 
         verify(watchlistRepository, never()).save(any(Watchlist.class));
@@ -166,10 +166,14 @@ public class WatchlistServiceTest extends UnitTest {
     @Test
     @DisplayName("Should fail when channel not found")
     public void shouldFailWhenChannelNotFound() {
-        // Given: Request with non-existent channel ID
-        final CreateWatchlistRequest request = new CreateWatchlistRequest()
-            .setName("My Watchlist")
-            .setChannelIds(List.of(999L));
+        // Given: Watchlist with non-existent channel ID
+        final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
+            .channelIds(List.of(999L))
+            .build();
+
+        final Watchlist input = new Watchlist();
+        input.setName("My Watchlist");
+        input.setConfiguration(configuration);
 
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
             .thenReturn(Optional.empty());
@@ -179,7 +183,7 @@ public class WatchlistServiceTest extends UnitTest {
         // When & Then: Should throw DataNotFoundException
         assertThrows(
             DataNotFoundException.class,
-            () -> watchlistService.createWatchlist(request)
+            () -> watchlistService.createWatchlist(input)
         );
 
         verify(watchlistRepository, never()).save(any(Watchlist.class));
@@ -189,9 +193,13 @@ public class WatchlistServiceTest extends UnitTest {
     @DisplayName("Should fail when channel belongs to organization")
     public void shouldFailWhenChannelBelongsToOrganization() {
         // Given: Channel belongs to organization (so findByIdAndUserId returns empty)
-        final CreateWatchlistRequest request = new CreateWatchlistRequest()
-            .setName("My Watchlist")
-            .setChannelIds(List.of(1L));
+        final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
+            .channelIds(List.of(1L))
+            .build();
+
+        final Watchlist input = new Watchlist();
+        input.setName("My Watchlist");
+        input.setConfiguration(configuration);
 
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
             .thenReturn(Optional.empty());
@@ -202,7 +210,7 @@ public class WatchlistServiceTest extends UnitTest {
         // When & Then: Should throw DataNotFoundException
         assertThrows(
             DataNotFoundException.class,
-            () -> watchlistService.createWatchlist(request)
+            () -> watchlistService.createWatchlist(input)
         );
 
         verify(watchlistRepository, never()).save(any(Watchlist.class));
@@ -244,87 +252,87 @@ public class WatchlistServiceTest extends UnitTest {
     @DisplayName("Should update watchlist successfully")
     public void shouldUpdateWatchlistSuccessfully() {
         // Given: User has a watchlist
-        final Watchlist watchlist = createWatchlist(1L, "Old Name", user);
+        final Watchlist existing = createWatchlist(1L, "Old Name", user);
+
+        final Watchlist updated = new Watchlist();
+        updated.setName("New Name");
+        updated.setDescription("New Description");
 
         when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
-            .thenReturn(Optional.of(watchlist));
+            .thenReturn(Optional.of(existing));
         when(watchlistRepository.findByUserIdAndName(user.getId(), "New Name"))
             .thenReturn(Optional.empty());
         when(watchlistRepository.save(any(Watchlist.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When: Updating watchlist
-        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
-            .setName("New Name")
-            .setDescription("New Description");
-
-        final Watchlist updated = watchlistService.updateWatchlist(1L, request);
+        final Watchlist result = watchlistService.updateWatchlist(1L, updated);
 
         // Then: Watchlist should be updated
-        assertThat(updated.getName(), is("New Name"));
-        assertThat(updated.getDescription(), is("New Description"));
-        assertThat(updated.getUpdatedAt(), is(notNullValue()));
+        assertThat(result.getName(), is("New Name"));
+        assertThat(result.getDescription(), is("New Description"));
+        assertThat(result.getUpdatedAt(), is(notNullValue()));
 
-        verify(watchlistRepository).save(watchlist);
+        verify(watchlistRepository).save(existing);
     }
 
     @Test
     @DisplayName("Should fail to update with duplicate name")
     public void shouldFailToUpdateWithDuplicateName() {
         // Given: User has a watchlist
-        final Watchlist watchlist = createWatchlist(1L, "Old Name", user);
+        final Watchlist existing = createWatchlist(1L, "Old Name", user);
 
         // And: Another watchlist with target name exists
-        final Watchlist existingWatchlist = createWatchlist(2L, "New Name", user);
+        final Watchlist anotherWatchlist = createWatchlist(2L, "New Name", user);
+
+        final Watchlist updated = new Watchlist();
+        updated.setName("New Name");
 
         when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
-            .thenReturn(Optional.of(watchlist));
+            .thenReturn(Optional.of(existing));
         when(watchlistRepository.findByUserIdAndName(user.getId(), "New Name"))
-            .thenReturn(Optional.of(existingWatchlist));
+            .thenReturn(Optional.of(anotherWatchlist));
 
         // When & Then: Should throw DuplicateWatchlistNameException
-        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
-            .setName("New Name");
-
         assertThrows(
             DuplicateWatchlistNameException.class,
-            () -> watchlistService.updateWatchlist(1L, request)
+            () -> watchlistService.updateWatchlist(1L, updated)
         );
 
         verify(watchlistRepository, never()).save(any(Watchlist.class));
     }
 
     @Test
-    @DisplayName("Should update channel order successfully")
-    public void shouldUpdateChannelOrder() {
-        // Given: User has a watchlist with channels
-        final Watchlist watchlist = createWatchlist(1L, "My Watchlist", user);
+    @DisplayName("Should update configuration successfully")
+    public void shouldUpdateConfigurationSuccessfully() {
+        // Given: User has a watchlist
+        final Watchlist existing = createWatchlist(1L, "My Watchlist", user);
         final Channel channel1 = createChannel(1L, "Channel 1", user);
         final Channel channel2 = createChannel(2L, "Channel 2", user);
-        final Channel channel3 = createChannel(3L, "Channel 3", user);
+
+        final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
+            .channelIds(List.of(2L, 1L))
+            .build();
+
+        final Watchlist updated = new Watchlist();
+        updated.setName("My Watchlist");
+        updated.setConfiguration(configuration);
 
         when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
-            .thenReturn(Optional.of(watchlist));
+            .thenReturn(Optional.of(existing));
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
-            .thenReturn(Optional.of(watchlist));
+            .thenReturn(Optional.of(existing));
         when(channelRepository.findByIdAndUserId(2L, user.getId()))
             .thenReturn(Optional.of(channel2));
         when(channelRepository.findByIdAndUserId(1L, user.getId()))
             .thenReturn(Optional.of(channel1));
-        when(channelRepository.findByIdAndUserId(3L, user.getId()))
-            .thenReturn(Optional.of(channel3));
         when(watchlistRepository.save(any(Watchlist.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(watchlistChannelRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When: Updating channel order (reversed)
-        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
-            .setName("My Watchlist")
-            .setChannelIds(List.of(2L, 1L, 3L));
+        // When: Updating configuration
+        final Watchlist result = watchlistService.updateWatchlist(1L, updated);
 
-        final Watchlist updated = watchlistService.updateWatchlist(1L, request);
-
-        // Then: Channel order should be updated
-        verify(watchlistChannelRepository).deleteAllByWatchlistId(1L);
-        verify(watchlistChannelRepository).saveAll(anyList());
+        // Then: Configuration should be updated
+        assertThat(result.getConfiguration().getChannelIds(), contains(2L, 1L));
+        verify(watchlistRepository).save(existing);
     }
 
     @Test
@@ -340,7 +348,6 @@ public class WatchlistServiceTest extends UnitTest {
         watchlistService.deleteWatchlist(1L);
 
         // Then: Watchlist should be deleted
-        verify(watchlistChannelRepository).deleteAllByWatchlistId(1L);
         verify(watchlistRepository).delete(watchlist);
     }
 
@@ -411,9 +418,8 @@ public class WatchlistServiceTest extends UnitTest {
         watchlist.setId(id);
         watchlist.setName(name);
         watchlist.setUser(user);
-        watchlist.setDefaultTimeRange("24h");
-        watchlist.setDefaultOnlyCritical(false);
-        watchlist.setDefaultSortBySeverity(true);
+        watchlist.setConfiguration(WatchlistConfiguration.empty());
+        watchlist.setFilters(WatchlistFilters.defaults());
         watchlist.setCreatedAt(OffsetDateTime.now().minusDays(1));
         return watchlist;
     }

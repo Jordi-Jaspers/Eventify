@@ -5,6 +5,7 @@ import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
+import io.github.eventify.api.watchlist.model.request.WatchlistConfigurationRequest;
 import io.github.eventify.api.watchlist.model.response.WatchlistDetailsResponse;
 import io.github.eventify.support.IntegrationTest;
 import io.github.jframe.datasource.search.model.resource.PageResource;
@@ -32,11 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Integration Test - User Watchlist Controller")
 public class UserWatchlistControllerTest extends IntegrationTest {
-
-    // Path constants
-    public static final String USER_WATCHLISTS_PATH = "/v1/user/watchlists";
-    public static final String USER_WATCHLISTS_SEARCH_PATH = "/v1/user/watchlists/search";
-    public static final String USER_WATCHLIST_PATH = "/v1/user/watchlists/{id}";
 
     @Test
     @DisplayName("Should create watchlist successfully")
@@ -67,9 +63,10 @@ public class UserWatchlistControllerTest extends IntegrationTest {
         assertThat(watchlistResponse.getId(), is(notNullValue()));
         assertThat(watchlistResponse.getName(), is("My Watchlist"));
         assertThat(watchlistResponse.getDescription(), is("Production errors"));
-        assertThat(watchlistResponse.getDefaultTimeRange(), is("24h"));
-        assertThat(watchlistResponse.getDefaultOnlyCritical(), is(false));
-        assertThat(watchlistResponse.getDefaultSortBySeverity(), is(true));
+        assertThat(watchlistResponse.getFilters(), is(notNullValue()));
+        assertThat(watchlistResponse.getFilters().getTimeRange(), is("24h"));
+        assertThat(watchlistResponse.getFilters().isOnlyCritical(), is(false));
+        assertThat(watchlistResponse.getFilters().isSortBySeverity(), is(true));
         assertThat(watchlistResponse.getCreatedAt(), is(notNullValue()));
     }
 
@@ -83,10 +80,13 @@ public class UserWatchlistControllerTest extends IntegrationTest {
         final Channel channel1 = aChannelForUser(user, "Channel 1");
         final Channel channel2 = aChannelForUser(user, "Channel 2");
 
-        // And: Request with channel IDs
+        // And: Request with channel IDs in configuration
+        final WatchlistConfigurationRequest configRequest = new WatchlistConfigurationRequest()
+            .setChannelIds(List.of(channel1.getId(), channel2.getId()));
+
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("My Watchlist")
-            .setChannelIds(List.of(channel1.getId(), channel2.getId()));
+            .setConfiguration(configRequest);
 
         // When: Creating watchlist
         final MockHttpServletRequestBuilder createRequest = post(USER_WATCHLISTS_PATH)
@@ -99,13 +99,14 @@ public class UserWatchlistControllerTest extends IntegrationTest {
         // Then: Response should be CREATED
         response.andExpect(status().is(SC_CREATED));
 
-        // And: Response should contain channels
+        // And: Response should contain channels in configuration
         final String content = response.andReturn().getResponse().getContentAsString();
         final WatchlistDetailsResponse watchlistResponse = fromJson(content, WatchlistDetailsResponse.class);
 
-        assertThat(watchlistResponse.getChannels(), hasSize(2));
-        assertThat(watchlistResponse.getChannels().get(0).getId(), is(channel1.getId()));
-        assertThat(watchlistResponse.getChannels().get(1).getId(), is(channel2.getId()));
+        assertThat(watchlistResponse.getConfiguration(), is(notNullValue()));
+        assertThat(watchlistResponse.getConfiguration().getChannelIds(), hasSize(2));
+        assertThat(watchlistResponse.getConfiguration().getChannelIds().get(0), is(channel1.getId()));
+        assertThat(watchlistResponse.getConfiguration().getChannelIds().get(1), is(channel2.getId()));
     }
 
     @Test
@@ -158,9 +159,12 @@ public class UserWatchlistControllerTest extends IntegrationTest {
         final Channel orgChannel = aChannelForOrganisation(user, org, "Org Channel");
 
         // When: Creating watchlist with organization channel
+        final WatchlistConfigurationRequest configRequest = new WatchlistConfigurationRequest()
+            .setChannelIds(List.of(orgChannel.getId()));
+
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("My Watchlist")
-            .setChannelIds(List.of(orgChannel.getId()));
+            .setConfiguration(configRequest);
 
         final MockHttpServletRequestBuilder createRequest = post(USER_WATCHLISTS_PATH)
             .contentType(APPLICATION_JSON)
@@ -399,9 +403,12 @@ public class UserWatchlistControllerTest extends IntegrationTest {
         final Channel channel3 = aChannelForUser(user, "Channel 3");
 
         // And: User has a watchlist with channels
+        final WatchlistConfigurationRequest createConfigRequest = new WatchlistConfigurationRequest()
+            .setChannelIds(List.of(channel1.getId(), channel2.getId(), channel3.getId()));
+
         final CreateWatchlistRequest createRequest = new CreateWatchlistRequest()
             .setName("My Watchlist")
-            .setChannelIds(List.of(channel1.getId(), channel2.getId(), channel3.getId()));
+            .setConfiguration(createConfigRequest);
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_WATCHLISTS_PATH)
@@ -414,9 +421,12 @@ public class UserWatchlistControllerTest extends IntegrationTest {
         final WatchlistDetailsResponse createdWatchlist = fromJson(createContent, WatchlistDetailsResponse.class);
 
         // When: Updating channel order (reversed)
+        final WatchlistConfigurationRequest updateConfigRequest = new WatchlistConfigurationRequest()
+            .setChannelIds(List.of(channel3.getId(), channel2.getId(), channel1.getId()));
+
         final UpdateWatchlistRequest updateRequest = new UpdateWatchlistRequest()
             .setName("My Watchlist")
-            .setChannelIds(List.of(channel3.getId(), channel2.getId(), channel1.getId()));
+            .setConfiguration(updateConfigRequest);
 
         final MockHttpServletRequestBuilder updateRequestBuilder = put(
             USER_WATCHLIST_PATH.replace("{id}", createdWatchlist.getId().toString())
@@ -434,10 +444,11 @@ public class UserWatchlistControllerTest extends IntegrationTest {
         final String content = response.andReturn().getResponse().getContentAsString();
         final WatchlistDetailsResponse updatedWatchlist = fromJson(content, WatchlistDetailsResponse.class);
 
-        assertThat(updatedWatchlist.getChannels(), hasSize(3));
-        assertThat(updatedWatchlist.getChannels().get(0).getId(), is(channel3.getId()));
-        assertThat(updatedWatchlist.getChannels().get(1).getId(), is(channel2.getId()));
-        assertThat(updatedWatchlist.getChannels().get(2).getId(), is(channel1.getId()));
+        assertThat(updatedWatchlist.getConfiguration(), is(notNullValue()));
+        assertThat(updatedWatchlist.getConfiguration().getChannelIds(), hasSize(3));
+        assertThat(updatedWatchlist.getConfiguration().getChannelIds().get(0), is(channel3.getId()));
+        assertThat(updatedWatchlist.getConfiguration().getChannelIds().get(1), is(channel2.getId()));
+        assertThat(updatedWatchlist.getConfiguration().getChannelIds().get(2), is(channel1.getId()));
     }
 
     @Test

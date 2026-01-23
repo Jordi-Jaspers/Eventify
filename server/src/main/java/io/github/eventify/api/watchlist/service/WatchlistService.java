@@ -1,15 +1,11 @@
 package io.github.eventify.api.watchlist.service;
 
-import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
-import io.github.eventify.api.watchlist.model.WatchlistChannel;
-import io.github.eventify.api.watchlist.model.WatchlistChannelId;
+import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
+import io.github.eventify.api.watchlist.model.WatchlistFilters;
 import io.github.eventify.api.watchlist.model.WatchlistMetaData;
-import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
-import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
-import io.github.eventify.api.watchlist.repository.WatchlistChannelRepository;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.common.exception.DuplicateWatchlistNameException;
 import io.github.jframe.datasource.search.model.input.SearchInput;
@@ -18,7 +14,6 @@ import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,14 +34,12 @@ import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
  */
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.ExcessiveImports")
 public class WatchlistService {
 
     private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final String DEFAULT_TIME_RANGE = "24h";
 
     private final WatchlistRepository watchlistRepository;
-
-    private final WatchlistChannelRepository watchlistChannelRepository;
 
     private final ChannelRepository channelRepository;
 
@@ -55,51 +48,31 @@ public class WatchlistService {
     /**
      * Creates a new personal watchlist for the logged-in user.
      *
-     * @param request the create request
+     * @param watchlist the watchlist to create (mapped from request)
      * @return the created watchlist
      */
     @Transactional
-    public Watchlist createWatchlist(final CreateWatchlistRequest request) {
+    public Watchlist createWatchlist(final Watchlist watchlist) {
         final User user = getLoggedInUser();
-
-        // Check for duplicate name
-        final Optional<Watchlist> existing = watchlistRepository.findByUserIdAndName(
-            user.getId(),
-            request.getName()
-        );
+        final Optional<Watchlist> existing = watchlistRepository.findByUserIdAndName(user.getId(), watchlist.getName());
         if (existing.isPresent()) {
             throw new DuplicateWatchlistNameException();
         }
 
-        // Validate channels first (before saving watchlist)
-        if (request.getChannelIds() != null && !request.getChannelIds().isEmpty()) {
-            for (final Long channelId : request.getChannelIds()) {
-                channelRepository.findByIdAndUserId(channelId, user.getId())
-                    .orElseThrow(() -> new DataNotFoundException(CHANNEL_NOT_FOUND));
-            }
+        watchlist.setUser(user);
+        if (watchlist.getConfiguration() == null) {
+            watchlist.setConfiguration(WatchlistConfiguration.empty());
+        } else {
+            validateChannelIds(watchlist.getConfiguration().getChannelIds(), user.getId());
         }
 
-        // Create new watchlist
-        final Watchlist watchlist = new Watchlist(request.getName(), user, null);
-        watchlist.setDescription(request.getDescription());
-        watchlist.setDefaultTimeRange(
-            request.getDefaultTimeRange() != null ? request.getDefaultTimeRange() : "24h"
-        );
-        watchlist.setDefaultOnlyCritical(
-            request.getDefaultOnlyCritical() != null && request.getDefaultOnlyCritical()
-        );
-        watchlist.setDefaultSortBySeverity(
-            request.getDefaultSortBySeverity() == null || request.getDefaultSortBySeverity()
-        );
-
-        final Watchlist savedWatchlist = watchlistRepository.save(watchlist);
-
-        // Add channels if provided
-        if (request.getChannelIds() != null && !request.getChannelIds().isEmpty()) {
-            addChannelsToWatchlist(savedWatchlist, request.getChannelIds(), user.getId());
+        if (watchlist.getFilters() == null) {
+            watchlist.setFilters(WatchlistFilters.defaults());
+        } else {
+            applyDefaultTimeRangeIfMissing(watchlist);
         }
 
-        return savedWatchlist;
+        return watchlistRepository.save(watchlist);
     }
 
     /**
@@ -139,59 +112,36 @@ public class WatchlistService {
     }
 
     /**
-     * Gets watchlist channels for a watchlist.
-     *
-     * @param watchlistId the watchlist ID
-     * @return list of watchlist channels
-     */
-    @Transactional(readOnly = true)
-    public List<WatchlistChannel> getWatchlistChannels(final Long watchlistId) {
-        return watchlistChannelRepository.findByWatchlistId(watchlistId);
-    }
-
-    /**
      * Updates a personal watchlist for the logged-in user.
+     * The watchlist entity should already be updated via mapper.
      *
      * @param watchlistId the watchlist ID
-     * @param request     the update request
+     * @param updated     the watchlist with updated values (from mapper)
      * @return the updated watchlist
      * @throws DataNotFoundException           if watchlist not found or not owned by user
      * @throws DuplicateWatchlistNameException if new name already exists
      */
     @Transactional
-    public Watchlist updateWatchlist(final Long watchlistId, final UpdateWatchlistRequest request) {
+    public Watchlist updateWatchlist(final Long watchlistId, final Watchlist updated) {
         final User user = getLoggedInUser();
         final Watchlist watchlist = getWatchlist(watchlistId);
-
-        // Check for duplicate name (excluding current watchlist)
-        final Optional<Watchlist> existing = watchlistRepository.findByUserIdAndName(
-            user.getId(),
-            request.getName()
-        );
+        final Optional<Watchlist> existing = watchlistRepository.findByUserIdAndName(user.getId(), updated.getName());
         if (existing.isPresent() && !existing.get().getId().equals(watchlistId)) {
             throw new DuplicateWatchlistNameException();
         }
 
-        // Update fields
-        watchlist.setName(request.getName());
-        watchlist.setDescription(request.getDescription());
-        if (request.getDefaultTimeRange() != null) {
-            watchlist.setDefaultTimeRange(request.getDefaultTimeRange());
-        }
-        if (request.getDefaultOnlyCritical() != null) {
-            watchlist.setDefaultOnlyCritical(request.getDefaultOnlyCritical());
-        }
-        if (request.getDefaultSortBySeverity() != null) {
-            watchlist.setDefaultSortBySeverity(request.getDefaultSortBySeverity());
-        }
+        watchlist.setName(updated.getName());
+        watchlist.setDescription(updated.getDescription());
         watchlist.setUpdatedAt(OffsetDateTime.now());
 
-        // Update channels if provided
-        if (request.getChannelIds() != null) {
-            watchlistChannelRepository.deleteAllByWatchlistId(watchlistId);
-            if (!request.getChannelIds().isEmpty()) {
-                addChannelsToWatchlist(watchlist, request.getChannelIds(), user.getId());
-            }
+        if (updated.getConfiguration() != null) {
+            validateChannelIds(updated.getConfiguration().getChannelIds(), user.getId());
+            watchlist.setConfiguration(updated.getConfiguration());
+        }
+
+        if (updated.getFilters() != null) {
+            applyDefaultTimeRangeIfMissing(updated);
+            watchlist.setFilters(updated.getFilters());
         }
 
         return watchlistRepository.save(watchlist);
@@ -206,37 +156,39 @@ public class WatchlistService {
     @Transactional
     public void deleteWatchlist(final Long watchlistId) {
         final Watchlist watchlist = getWatchlist(watchlistId);
-        watchlistChannelRepository.deleteAllByWatchlistId(watchlistId);
         watchlistRepository.delete(watchlist);
     }
 
     /**
-     * Adds channels to a watchlist.
+     * Removes a channel ID from all watchlists that contain it.
+     * Called when a channel is deleted.
      *
-     * @param watchlist  the watchlist
-     * @param channelIds the channel IDs
-     * @param userId     the user ID
+     * @param channelId the channel ID to remove
      */
-    private void addChannelsToWatchlist(
-        final Watchlist watchlist,
-        final List<Long> channelIds,
-        final Long userId
-    ) {
-        final List<WatchlistChannel> watchlistChannels = new ArrayList<>();
-        int position = 0;
+    @Transactional
+    public void removeChannelFromAllWatchlists(final Long channelId) {
+        watchlistRepository.removeChannelFromAllConfigurations(channelId);
+    }
 
-        for (final Long channelId : channelIds) {
-            final Channel channel = channelRepository.findByIdAndUserId(channelId, userId)
-                .orElseThrow(() -> new DataNotFoundException(CHANNEL_NOT_FOUND));
-
-            final WatchlistChannel watchlistChannel = new WatchlistChannel();
-            watchlistChannel.setId(new WatchlistChannelId(watchlist.getId(), channel.getId()));
-            watchlistChannel.setWatchlist(watchlist);
-            watchlistChannel.setChannel(channel);
-            watchlistChannel.setPosition(position++);
-            watchlistChannels.add(watchlistChannel);
+    /**
+     * Validates that all channel IDs exist and belong to the user.
+     */
+    private void validateChannelIds(final List<Long> channelIds, final Long userId) {
+        if (channelIds == null || channelIds.isEmpty()) {
+            return;
         }
+        for (final Long channelId : channelIds) {
+            channelRepository.findByIdAndUserId(channelId, userId)
+                .orElseThrow(() -> new DataNotFoundException(CHANNEL_NOT_FOUND));
+        }
+    }
 
-        watchlistChannelRepository.saveAll(watchlistChannels);
+    /**
+     * Applies default time range if not provided.
+     */
+    private void applyDefaultTimeRangeIfMissing(final Watchlist watchlist) {
+        if (watchlist.getFilters() != null && watchlist.getFilters().getTimeRange() == null) {
+            watchlist.getFilters().setTimeRange(DEFAULT_TIME_RANGE);
+        }
     }
 }

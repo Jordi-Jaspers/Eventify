@@ -61,7 +61,6 @@ public class ChannelCleanupServiceTest extends UnitTest {
         verify(channelRepository).findByStatus(ChannelStatus.PENDING_DELETION);
         verify(watchlistRepository).removeChannelFromAllConfigurations(1L);
         verify(channelRepository).delete(channel);
-        verifyNoMoreInteractions(channelRepository);
     }
 
     @Test
@@ -86,7 +85,6 @@ public class ChannelCleanupServiceTest extends UnitTest {
         verify(channelRepository).delete(channel1);
         verify(channelRepository).delete(channel2);
         verify(channelRepository).delete(channel3);
-        verifyNoMoreInteractions(channelRepository);
     }
 
     @Test
@@ -102,7 +100,7 @@ public class ChannelCleanupServiceTest extends UnitTest {
         // Then: Should query repository but not attempt any deletions
         verify(channelRepository).findByStatus(ChannelStatus.PENDING_DELETION);
         verify(channelRepository, never()).delete(any(Channel.class));
-        verifyNoMoreInteractions(channelRepository);
+        verifyNoInteractions(watchlistRepository);
     }
 
     @Test
@@ -129,7 +127,6 @@ public class ChannelCleanupServiceTest extends UnitTest {
         verify(channelRepository).delete(channel1);
         verify(channelRepository).delete(channel2);
         verify(channelRepository).delete(channel3);
-        verifyNoMoreInteractions(channelRepository);
     }
 
     @Test

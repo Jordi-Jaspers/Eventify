@@ -1,29 +1,30 @@
 package io.github.eventify.api.watchlist.model.mapper;
 
 import io.github.eventify.api.watchlist.model.Watchlist;
-import io.github.eventify.api.watchlist.model.WatchlistChannel;
-import io.github.eventify.api.watchlist.model.response.WatchlistChannelResponse;
+import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
+import io.github.eventify.api.watchlist.model.WatchlistFilters;
+import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
+import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
+import io.github.eventify.api.watchlist.model.request.WatchlistConfigurationRequest;
+import io.github.eventify.api.watchlist.model.request.WatchlistFiltersRequest;
 import io.github.eventify.api.watchlist.model.response.WatchlistDetailsResponse;
 import io.github.jframe.datasource.search.model.mapper.PageMapper;
 import io.github.jframe.util.mapper.DateTimeMapper;
 import io.github.jframe.util.mapper.config.SharedMapperConfig;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 /**
- * Mapper for watchlist entities to DTOs.
+ * Mapper for watchlist entities and DTOs.
  */
 @Mapper(
     config = SharedMapperConfig.class,
     uses = DateTimeMapper.class
 )
 public abstract class WatchlistMapper extends PageMapper<WatchlistDetailsResponse, Watchlist> {
+
+    // ==================== Entity -> Response ====================
 
     /**
      * Maps Watchlist entity to WatchlistDetailsResponse.
@@ -33,80 +34,45 @@ public abstract class WatchlistMapper extends PageMapper<WatchlistDetailsRespons
      */
     @Override
     @Named("toResourceObject")
-    public WatchlistDetailsResponse toResourceObject(final Watchlist watchlist) {
-        final WatchlistDetailsResponse response = toBasicResourceObject(watchlist);
-        response.setChannels(List.of());
-        return response;
-    }
+    public abstract WatchlistDetailsResponse toResourceObject(Watchlist watchlist);
+
+    // ==================== Request -> Entity ====================
 
     /**
-     * Maps Watchlist entity to WatchlistDetailsResponse with channels.
+     * Maps CreateWatchlistRequest to Watchlist entity.
+     * Note: user and organization must be set separately.
      *
-     * @param watchlist the watchlist entity
-     * @param channels  the watchlist channels
-     * @return the response DTO
+     * @param request the create request
+     * @return the watchlist entity
      */
-    public WatchlistDetailsResponse toDetailsResponse(
-        final Watchlist watchlist,
-        final List<WatchlistChannel> channels
-    ) {
-        final WatchlistDetailsResponse response = toBasicResourceObject(watchlist);
-        response.setChannels(
-            channels.stream()
-                .map(this::toChannelResponse)
-                .collect(Collectors.toList())
-        );
-        return response;
-    }
+    public abstract Watchlist toWatchlist(CreateWatchlistRequest request);
 
     /**
-     * Maps Watchlist entity to WatchlistDetailsResponse (without channels).
+     * Maps UpdateWatchlistRequest to Watchlist entity.
+     * Note: user and organization must be set separately.
      *
-     * @param watchlist the watchlist entity
-     * @return the response DTO
+     * @param request the update request
+     * @return the watchlist entity with updated values
      */
-    public WatchlistDetailsResponse toDetailsResponse(final Watchlist watchlist) {
-        return toResourceObject(watchlist);
-    }
+    public abstract Watchlist toWatchlist(UpdateWatchlistRequest request);
+
+    // ==================== Nested Request -> Domain ====================
 
     /**
-     * Maps list of Watchlist entities to list of WatchlistDetailsResponse.
+     * Maps WatchlistConfigurationRequest to domain.
+     * Used by MapStruct for nested mapping in toWatchlist methods.
      *
-     * @param watchlists the list of watchlist entities
-     * @return the list of response DTOs
+     * @param request the configuration request
+     * @return the configuration domain object
      */
-    @IterableMapping(qualifiedByName = "toResourceObject")
-    public abstract List<WatchlistDetailsResponse> toResourceObjects(List<Watchlist> watchlists);
+    public abstract WatchlistConfiguration toConfiguration(WatchlistConfigurationRequest request);
 
     /**
-     * Maps Watchlist basic fields to WatchlistDetailsResponse.
+     * Maps WatchlistFiltersRequest to domain.
+     * Used by MapStruct for nested mapping in toWatchlist methods.
      *
-     * @param watchlist the watchlist entity
-     * @return the response DTO
+     * @param request the filters request
+     * @return the filters domain object
      */
-    protected abstract WatchlistDetailsResponse toBasicResourceObject(Watchlist watchlist);
-
-    /**
-     * Maps WatchlistChannel to WatchlistChannelResponse.
-     *
-     * @param watchlistChannel the watchlist channel entity
-     * @return the channel response DTO
-     */
-    @Mapping(
-        target = "id",
-        source = "channel.id"
-    )
-    @Mapping(
-        target = "name",
-        source = "channel.name"
-    )
-    @Mapping(
-        target = "status",
-        expression = "java(watchlistChannel.getChannel().getStatus().name())"
-    )
-    @Mapping(
-        target = "position",
-        source = "position"
-    )
-    protected abstract WatchlistChannelResponse toChannelResponse(WatchlistChannel watchlistChannel);
+    public abstract WatchlistFilters toFilters(WatchlistFiltersRequest request);
 }

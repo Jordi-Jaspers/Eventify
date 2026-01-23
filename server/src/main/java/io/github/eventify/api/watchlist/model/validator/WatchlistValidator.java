@@ -2,6 +2,8 @@ package io.github.eventify.api.watchlist.model.validator;
 
 import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
+import io.github.eventify.api.watchlist.model.request.WatchlistConfigurationRequest;
+import io.github.eventify.api.watchlist.model.request.WatchlistFiltersRequest;
 import io.github.jframe.exception.core.ValidationException;
 import io.github.jframe.validation.ValidationResult;
 import io.github.jframe.validation.Validator;
@@ -24,15 +26,15 @@ public class WatchlistValidator implements Validator<Object> {
     public static final String NAME_TOO_LONG = "Name must not exceed 100 characters";
     public static final String DESCRIPTION_TOO_LONG = "Description must not exceed 500 characters";
     public static final String CHANNEL_ID_REQUIRED = "Channel ID cannot be null";
-    public static final String INVALID_TIME_RANGE = "Time range must be one of: 24h, 7d, 30d";
+    public static final String INVALID_TIME_RANGE = "Time range must be one of: 1h, 6h, 12h, 24h, 7d, 30d";
 
     // Fields
     public static final String NAME = "name";
     public static final String DESCRIPTION = "description";
-    public static final String CHANNEL_IDS = "channelIds";
-    public static final String DEFAULT_TIME_RANGE = "defaultTimeRange";
+    public static final String CONFIGURATION_CHANNEL_IDS = "configuration.channelIds";
+    public static final String FILTERS_TIME_RANGE = "filters.timeRange";
 
-    private static final Set<String> VALID_TIME_RANGES = Set.of("24h", "7d", "30d");
+    private static final Set<String> VALID_TIME_RANGES = Set.of("1h", "6h", "12h", "24h", "7d", "30d");
 
     /**
      * Validates a CreateWatchlistRequest.
@@ -46,30 +48,9 @@ public class WatchlistValidator implements Validator<Object> {
             throw new ValidationException(result);
         }
 
-        result.rejectField(NAME, request.getName())
-            .whenNull(NAME_REQUIRED)
-            .orWhen(String::isEmpty, NAME_REQUIRED)
-            .orWhen(String::isBlank, NAME_REQUIRED)
-            .orWhen(name -> name.length() > 100, NAME_TOO_LONG);
-
-        result.rejectField(DESCRIPTION, request.getDescription())
-            .when(desc -> desc != null && desc.length() > 500, DESCRIPTION_TOO_LONG);
-
-        // Validate channel IDs (no nulls in list)
-        if (request.getChannelIds() != null) {
-            for (int i = 0; i < request.getChannelIds().size(); i++) {
-                final Long channelId = request.getChannelIds().get(i);
-                result.rejectField(CHANNEL_IDS, channelId)
-                    .whenNull(CHANNEL_ID_REQUIRED);
-            }
-        }
-
-        // Validate default time range
-        result.rejectField(DEFAULT_TIME_RANGE, request.getDefaultTimeRange())
-            .when(
-                timeRange -> timeRange != null && !VALID_TIME_RANGES.contains(timeRange),
-                INVALID_TIME_RANGE
-            );
+        validateNameAndDescription(request.getName(), request.getDescription(), result);
+        validateConfiguration(request.getConfiguration(), result);
+        validateFilters(request.getFilters(), result);
 
         if (result.hasErrors()) {
             throw new ValidationException(result);
@@ -88,30 +69,9 @@ public class WatchlistValidator implements Validator<Object> {
             throw new ValidationException(result);
         }
 
-        result.rejectField(NAME, request.getName())
-            .whenNull(NAME_REQUIRED)
-            .orWhen(String::isEmpty, NAME_REQUIRED)
-            .orWhen(String::isBlank, NAME_REQUIRED)
-            .orWhen(name -> name.length() > 100, NAME_TOO_LONG);
-
-        result.rejectField(DESCRIPTION, request.getDescription())
-            .when(desc -> desc != null && desc.length() > 500, DESCRIPTION_TOO_LONG);
-
-        // Validate channel IDs (no nulls in list)
-        if (request.getChannelIds() != null) {
-            for (int i = 0; i < request.getChannelIds().size(); i++) {
-                final Long channelId = request.getChannelIds().get(i);
-                result.rejectField(CHANNEL_IDS, channelId)
-                    .whenNull(CHANNEL_ID_REQUIRED);
-            }
-        }
-
-        // Validate default time range
-        result.rejectField(DEFAULT_TIME_RANGE, request.getDefaultTimeRange())
-            .when(
-                timeRange -> timeRange != null && !VALID_TIME_RANGES.contains(timeRange),
-                INVALID_TIME_RANGE
-            );
+        validateNameAndDescription(request.getName(), request.getDescription(), result);
+        validateConfiguration(request.getConfiguration(), result);
+        validateFilters(request.getFilters(), result);
 
         if (result.hasErrors()) {
             throw new ValidationException(result);
@@ -123,13 +83,66 @@ public class WatchlistValidator implements Validator<Object> {
      */
     @Override
     public void validate(final Object request, final ValidationResult result) {
-        if (request instanceof CreateWatchlistRequest) {
-            validate((CreateWatchlistRequest) request, result);
-        } else if (request instanceof UpdateWatchlistRequest) {
-            validate((UpdateWatchlistRequest) request, result);
+        if (request instanceof CreateWatchlistRequest createRequest) {
+            validate(createRequest, result);
+        } else if (request instanceof UpdateWatchlistRequest updateRequest) {
+            validate(updateRequest, result);
         } else {
             result.reject("Unsupported request type");
             throw new ValidationException(result);
         }
+    }
+
+    /**
+     * Validates name and description fields.
+     */
+    private void validateNameAndDescription(
+        final String name,
+        final String description,
+        final ValidationResult result
+    ) {
+        result.rejectField(NAME, name)
+            .whenNull(NAME_REQUIRED)
+            .orWhen(String::isEmpty, NAME_REQUIRED)
+            .orWhen(String::isBlank, NAME_REQUIRED)
+            .orWhen(n -> n.length() > 100, NAME_TOO_LONG);
+
+        result.rejectField(DESCRIPTION, description)
+            .when(desc -> desc != null && desc.length() > 500, DESCRIPTION_TOO_LONG);
+    }
+
+    /**
+     * Validates configuration (channel IDs).
+     */
+    private void validateConfiguration(
+        final WatchlistConfigurationRequest configuration,
+        final ValidationResult result
+    ) {
+        if (configuration == null || configuration.getChannelIds() == null) {
+            return;
+        }
+
+        for (final Long channelId : configuration.getChannelIds()) {
+            result.rejectField(CONFIGURATION_CHANNEL_IDS, channelId)
+                .whenNull(CHANNEL_ID_REQUIRED);
+        }
+    }
+
+    /**
+     * Validates filter settings.
+     */
+    private void validateFilters(
+        final WatchlistFiltersRequest filters,
+        final ValidationResult result
+    ) {
+        if (filters == null) {
+            return;
+        }
+
+        result.rejectField(FILTERS_TIME_RANGE, filters.getTimeRange())
+            .when(
+                timeRange -> timeRange != null && !VALID_TIME_RANGES.contains(timeRange),
+                INVALID_TIME_RANGE
+            );
     }
 }

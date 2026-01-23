@@ -2,6 +2,8 @@ package io.github.eventify.api.watchlist.model.validator;
 
 import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
+import io.github.eventify.api.watchlist.model.request.WatchlistConfigurationRequest;
+import io.github.eventify.api.watchlist.model.request.WatchlistFiltersRequest;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.exception.core.ValidationException;
 import io.github.jframe.validation.ValidationResult;
@@ -50,12 +52,15 @@ public class WatchlistValidatorTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should accept create request with channels")
-    public void shouldAcceptCreateRequestWithChannels() {
-        // Given: Valid request with channel IDs
+    @DisplayName("Should accept create request with configuration")
+    public void shouldAcceptCreateRequestWithConfiguration() {
+        // Given: Valid request with configuration
+        final WatchlistConfigurationRequest config = new WatchlistConfigurationRequest()
+            .setChannelIds(List.of(1L, 2L, 3L));
+
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("My Watchlist")
-            .setChannelIds(List.of(1L, 2L, 3L));
+            .setConfiguration(config);
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -66,12 +71,17 @@ public class WatchlistValidatorTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should accept create request with default time range")
-    public void shouldAcceptCreateRequestWithDefaultTimeRange() {
-        // Given: Valid request with time range 24h
+    @DisplayName("Should accept create request with filters")
+    public void shouldAcceptCreateRequestWithFilters() {
+        // Given: Valid request with filters
+        final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
+            .setTimeRange("24h")
+            .setOnlyCritical(false)
+            .setSortBySeverity(true);
+
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("My Watchlist")
-            .setDefaultTimeRange("24h");
+            .setFilters(filters);
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -85,9 +95,12 @@ public class WatchlistValidatorTest extends UnitTest {
     @DisplayName("Should accept create request with time range 7d")
     public void shouldAcceptCreateRequestWithTimeRange7d() {
         // Given: Valid request with time range 7d
+        final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
+            .setTimeRange("7d");
+
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("My Watchlist")
-            .setDefaultTimeRange("7d");
+            .setFilters(filters);
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -101,9 +114,12 @@ public class WatchlistValidatorTest extends UnitTest {
     @DisplayName("Should accept create request with time range 30d")
     public void shouldAcceptCreateRequestWithTimeRange30d() {
         // Given: Valid request with time range 30d
+        final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
+            .setTimeRange("30d");
+
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("My Watchlist")
-            .setDefaultTimeRange("30d");
+            .setFilters(filters);
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -294,12 +310,15 @@ public class WatchlistValidatorTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should reject null value in channel IDs list")
-    public void shouldRejectNullValueInChannelIdsList() {
-        // Given: Request with null in channel IDs
+    @DisplayName("Should reject null value in configuration channel IDs list")
+    public void shouldRejectNullValueInConfigurationChannelIdsList() {
+        // Given: Request with null in configuration channel IDs
+        final WatchlistConfigurationRequest config = new WatchlistConfigurationRequest()
+            .setChannelIds(Arrays.asList(1L, null, 3L));
+
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("Valid Name")
-            .setChannelIds(Arrays.asList(1L, null, 3L));
+            .setConfiguration(config);
         final ValidationResult result = new ValidationResult();
 
         // When & Then: Should throw ValidationException
@@ -312,7 +331,7 @@ public class WatchlistValidatorTest extends UnitTest {
         assertThat(
             exception.getValidationResult().getErrors().stream()
                 .anyMatch(
-                    error -> error.getField().equals(CHANNEL_IDS) &&
+                    error -> error.getField().equals(CONFIGURATION_CHANNEL_IDS) &&
                         error.getCode().equals(CHANNEL_ID_REQUIRED)
                 ),
             is(true)
@@ -320,12 +339,15 @@ public class WatchlistValidatorTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should reject invalid default time range in create request")
-    public void shouldRejectInvalidDefaultTimeRangeInCreateRequest() {
+    @DisplayName("Should reject invalid time range in filters")
+    public void shouldRejectInvalidTimeRangeInFilters() {
         // Given: Request with invalid time range
+        final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
+            .setTimeRange("invalid");
+
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("Valid Name")
-            .setDefaultTimeRange("1h");
+            .setFilters(filters);
         final ValidationResult result = new ValidationResult();
 
         // When & Then: Should throw ValidationException
@@ -338,7 +360,7 @@ public class WatchlistValidatorTest extends UnitTest {
         assertThat(
             exception.getValidationResult().getErrors().stream()
                 .anyMatch(
-                    error -> error.getField().equals(DEFAULT_TIME_RANGE) &&
+                    error -> error.getField().equals(FILTERS_TIME_RANGE) &&
                         error.getCode().equals(INVALID_TIME_RANGE)
                 ),
             is(true)
@@ -559,12 +581,15 @@ public class WatchlistValidatorTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should reject null value in channel IDs list in update request")
-    public void shouldRejectNullValueInChannelIdsListInUpdateRequest() {
-        // Given: Update request with null in channel IDs
+    @DisplayName("Should reject null value in configuration channel IDs list in update request")
+    public void shouldRejectNullValueInConfigurationChannelIdsListInUpdateRequest() {
+        // Given: Update request with null in configuration channel IDs
+        final WatchlistConfigurationRequest config = new WatchlistConfigurationRequest()
+            .setChannelIds(Arrays.asList(1L, null, 3L));
+
         final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
             .setName("Valid Name")
-            .setChannelIds(Arrays.asList(1L, null, 3L));
+            .setConfiguration(config);
         final ValidationResult result = new ValidationResult();
 
         // When & Then: Should throw ValidationException
@@ -577,7 +602,7 @@ public class WatchlistValidatorTest extends UnitTest {
         assertThat(
             exception.getValidationResult().getErrors().stream()
                 .anyMatch(
-                    error -> error.getField().equals(CHANNEL_IDS) &&
+                    error -> error.getField().equals(CONFIGURATION_CHANNEL_IDS) &&
                         error.getCode().equals(CHANNEL_ID_REQUIRED)
                 ),
             is(true)
@@ -585,12 +610,15 @@ public class WatchlistValidatorTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should reject invalid default time range in update request")
-    public void shouldRejectInvalidDefaultTimeRangeInUpdateRequest() {
+    @DisplayName("Should reject invalid time range in update request filters")
+    public void shouldRejectInvalidTimeRangeInUpdateRequestFilters() {
         // Given: Update request with invalid time range
+        final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
+            .setTimeRange("invalid");
+
         final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
             .setName("Valid Name")
-            .setDefaultTimeRange("invalid");
+            .setFilters(filters);
         final ValidationResult result = new ValidationResult();
 
         // When & Then: Should throw ValidationException
@@ -603,7 +631,7 @@ public class WatchlistValidatorTest extends UnitTest {
         assertThat(
             exception.getValidationResult().getErrors().stream()
                 .anyMatch(
-                    error -> error.getField().equals(DEFAULT_TIME_RANGE) &&
+                    error -> error.getField().equals(FILTERS_TIME_RANGE) &&
                         error.getCode().equals(INVALID_TIME_RANGE)
                 ),
             is(true)

@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serial;
-import java.util.List;
 
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
 
@@ -27,13 +26,9 @@ public class WatchlistDetailsResponse implements PageableItemResource {
 
     private String description;
 
-    private String defaultTimeRange;
+    private WatchlistConfigurationResponse configuration;
 
-    private Boolean defaultOnlyCritical;
-
-    private Boolean defaultSortBySeverity;
-
-    private List<WatchlistChannelResponse> channels;
+    private WatchlistFiltersResponse filters;
 
     private String createdAt;
 

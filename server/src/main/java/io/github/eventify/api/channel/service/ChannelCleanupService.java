@@ -46,6 +46,7 @@ public class ChannelCleanupService {
             .map(channel -> {
                 final Instant start = Instant.now();
                 try {
+                    // Remove channel from all watchlist configurations before deletion
                     watchlistRepository.removeChannelFromAllConfigurations(channel.getId());
                     channelRepository.delete(channel);
                     log.debug("Deleted channel ID '{}' in '{}' ms", channel.getId(), Duration.between(start, Instant.now()).toMillis());

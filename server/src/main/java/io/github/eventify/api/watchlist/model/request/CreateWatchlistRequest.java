@@ -7,7 +7,6 @@ import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
 
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
 
@@ -27,11 +26,7 @@ public class CreateWatchlistRequest implements Serializable {
 
     private String description;
 
-    private List<Long> channelIds;
+    private WatchlistConfigurationRequest configuration;
 
-    private String defaultTimeRange;
-
-    private Boolean defaultOnlyCritical;
-
-    private Boolean defaultSortBySeverity;
+    private WatchlistFiltersRequest filters;
 }
