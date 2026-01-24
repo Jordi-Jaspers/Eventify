@@ -71,6 +71,39 @@ test.describe('Watchlist Builder Screenshots', () => {
 						fullPage: true
 					});
 				});
+
+				test(`channel search sheet open`, async ({ page }, testInfo) => {
+					await page.waitForTimeout(DATA_LOAD_MS);
+
+					// Click Add Channel button to open the sheet
+					const addChannelButton = page.getByRole('button', { name: /Add Channel/i });
+					await addChannelButton.click();
+					await page.waitForTimeout(ANIMATION_SETTLE_MS);
+
+					await page.screenshot({
+						path: getScreenshot(`06-channel-sheet-open-${theme}`, testInfo.project.name),
+						fullPage: true
+					});
+				});
+
+				test(`channel search sheet with search results`, async ({ page }, testInfo) => {
+					await page.waitForTimeout(DATA_LOAD_MS);
+
+					// Click Add Channel button to open the sheet
+					const addChannelButton = page.getByRole('button', { name: /Add Channel/i });
+					await addChannelButton.click();
+					await page.waitForTimeout(ANIMATION_SETTLE_MS);
+
+					// Type in search
+					const searchInput = page.getByPlaceholder('Search channels...');
+					await searchInput.fill('prod');
+					await page.waitForTimeout(DATA_LOAD_MS);
+
+					await page.screenshot({
+						path: getScreenshot(`07-channel-sheet-search-${theme}`, testInfo.project.name),
+						fullPage: true
+					});
+				});
 			});
 
 			test.describe('Edit Page', () => {

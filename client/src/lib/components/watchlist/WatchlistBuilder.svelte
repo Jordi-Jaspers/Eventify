@@ -15,7 +15,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { Search, Check, Save, Radio, GripVertical, X, Plus } from '@lucide/svelte';
+	import { Search, Check, Save, Radio, GripVertical, X, Plus, Loader2 } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	type CreateWatchlistRequest = components['schemas']['CreateWatchlistRequest'];
@@ -69,6 +69,14 @@
 	let channelSearch: string = $state('');
 	let searchResults: ChannelDetailsResponse[] = $state([]);
 	let isSearching: boolean = $state(false);
+
+	// Preview channels (shown when modal opens with no search query)
+	function getPreviewChannels(): ChannelDetailsResponse[] {
+		const selectedIds = selectedChannels.map((sc: SelectedChannel) => sc.id);
+		return allChannels
+			.filter((c: ChannelDetailsResponse) => !selectedIds.includes(c.id ?? 0))
+			.slice(0, 5);
+	}
 
 	// Building blocks (static list)
 	interface BuildingBlock {
@@ -389,14 +397,21 @@
 									searchResults = [];
 								}
 							}}
-							class="w-full flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-card/80 hover:bg-card hover:border-primary/50 cursor-grab active:cursor-grabbing transition-all text-left group"
+							class="w-full flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-card/80 hover:bg-card hover:border-primary/50 cursor-grab active:cursor-grabbing transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background"
 						>
-							<div class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+							<div
+								class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform"
+							>
 								<block.icon class="h-5 w-5 text-primary" />
 							</div>
-							<div>
-								<div class="font-medium">{block.label}</div>
-								<div class="text-xs text-muted-foreground">Drag or click to add</div>
+							<div class="flex-1 min-w-0">
+								<div class="font-medium truncate">{block.label}</div>
+								<div class="text-xs text-muted-foreground truncate">Drag or click to add</div>
+							</div>
+							<div
+								class="opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity"
+							>
+								<Plus class="h-4 w-4 text-primary" />
 							</div>
 						</button>
 					{/each}
@@ -413,7 +428,7 @@
 					class="w-full bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-all shadow-lg text-primary-foreground"
 				>
 					{#if isSaving}
-						<Save class="mr-2 h-4 w-4 animate-spin" />
+						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
 						Creating...
 					{:else}
 						Create Watchlist
@@ -494,13 +509,20 @@
 						}}
 					>
 						{#each selectedChannels as item (item.id)}
-							<div animate:flip={{ duration: 200 }}>
-								<div class="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-card/80 hover:bg-card transition-all group">
-									<div class="cursor-grab active:cursor-grabbing touch-none">
-										<GripVertical class="h-5 w-5 text-muted-foreground" />
+							<div
+								animate:flip={{ duration: 200 }}
+								class="rounded-lg border border-border/50 bg-card/80 transition-all hover:bg-card hover:border-primary/50"
+							>
+								<div
+									class="flex items-center gap-3 p-3 group relative"
+								>
+									<div class="cursor-grab active:cursor-grabbing touch-none p-1 -ml-1 text-muted-foreground/50 hover:text-foreground transition-colors">
+										<GripVertical class="h-5 w-5" />
 									</div>
 
-									<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+									<div
+										class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"
+									>
 										<Radio class="h-5 w-5 text-primary" />
 									</div>
 
@@ -514,9 +536,9 @@
 									<Button
 										variant="ghost"
 										size="icon"
-										class="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
+										class="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 group-focus-within:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
 										onclick={() => removeChannel(item.id)}
-										aria-label="Remove channel"
+										aria-label="Remove channel {item.channel.name}"
 									>
 										<X class="h-4 w-4" />
 									</Button>
@@ -532,65 +554,124 @@
 
 <!-- Channel Search Sheet -->
 <Sheet.Root bind:open={showChannelModal}>
-	<Sheet.Content side="right" class="sm:max-w-lg">
-		<Sheet.Header>
-			<Sheet.Title>Add Channel</Sheet.Title>
+	<Sheet.Content side="right" class="sm:max-w-md flex flex-col">
+		<Sheet.Header class="flex-shrink-0">
+			<Sheet.Title class="flex items-center gap-2">
+				<div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+					<Radio class="h-4 w-4 text-primary" />
+				</div>
+				Add Channel
+			</Sheet.Title>
 			<Sheet.Description>
-				Search for a channel to add to your watchlist
+				Select a channel to add to your watchlist
 			</Sheet.Description>
 		</Sheet.Header>
 
-		<div class="space-y-4 py-4">
+		<div class="flex flex-col gap-3 py-4 flex-1 min-h-0 px-1">
 			<!-- Search Input -->
-			<div class="relative">
-				<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+			<div class="relative flex-shrink-0">
+				<Search class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
 				<Input
 					bind:value={channelSearch}
 					oninput={handleSearchInput}
 					placeholder="Search channels..."
-					class="pl-10"
+					class="pl-8 h-9 text-sm bg-background/50 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
 				/>
 			</div>
 
-			<!-- Search Results -->
-			<div class="max-h-[calc(100vh-250px)] overflow-y-auto space-y-2">
+			<!-- Search Results / Preview List -->
+			<div class="flex-1 overflow-y-auto min-h-0 -mx-2 px-2">
 				{#if isSearching}
-					<div class="py-8 text-center text-muted-foreground">
-						Searching...
-					</div>
-				{:else if channelSearch && searchResults.length === 0}
-					<div class="py-8 text-center text-muted-foreground">
-						No channels found matching "{channelSearch}"
-					</div>
-				{:else if searchResults.length > 0}
-					{#each searchResults as channel (channel.id)}
-						<button
-							type="button"
-							onclick={() => addChannel(channel)}
-							class="w-full flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-card/50 hover:bg-card hover:border-primary/50 transition-all text-left"
-						>
-							<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-								<Radio class="h-5 w-5 text-primary" />
-							</div>
-							<div class="flex-1 min-w-0">
-								<div class="font-medium truncate">{channel.name}</div>
-								<div class="text-sm text-muted-foreground truncate">
-									{channel.description || 'No description'}
+					<!-- Loading skeleton -->
+					<div class="space-y-2">
+						{#each Array(3) as _}
+							<div class="flex items-center gap-3 p-3 rounded-lg border border-border/30 bg-muted/20">
+								<div class="h-9 w-9 rounded-lg bg-muted/50 animate-pulse"></div>
+								<div class="flex-1 space-y-2">
+									<div class="h-4 w-32 bg-muted/50 rounded animate-pulse"></div>
+									<div class="h-3 w-48 bg-muted/30 rounded animate-pulse"></div>
 								</div>
 							</div>
-							<Plus class="h-5 w-5 text-muted-foreground" />
-						</button>
-					{/each}
-				{:else}
-					<div class="py-8 text-center text-muted-foreground">
-						Start typing to search for channels
+						{/each}
 					</div>
+				{:else if channelSearch && searchResults.length === 0}
+					<!-- No results -->
+					<div class="flex flex-col items-center justify-center py-12 text-center">
+						<div class="h-12 w-12 rounded-full bg-muted/30 flex items-center justify-center mb-3">
+							<Search class="h-6 w-6 text-muted-foreground/50" />
+						</div>
+						<p class="text-sm text-muted-foreground">No channels found</p>
+						<p class="text-xs text-muted-foreground/70 mt-1">Try a different search term</p>
+					</div>
+				{:else if searchResults.length > 0}
+					<!-- Search results -->
+					<div class="space-y-1.5">
+						{#each searchResults as channel (channel.id)}
+							<button
+								type="button"
+								onclick={() => addChannel(channel)}
+								class="w-full flex items-center gap-3 p-3 rounded-lg border border-transparent bg-transparent hover:bg-accent/50 hover:border-border/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background"
+							>
+								<div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+									<Radio class="h-4 w-4 text-primary" />
+								</div>
+								<div class="flex-1 min-w-0">
+									<div class="font-medium text-sm truncate">{channel.name}</div>
+									<div class="text-xs text-muted-foreground truncate">
+										{channel.description || 'No description'}
+									</div>
+								</div>
+								<div class="h-7 w-7 rounded-md bg-primary/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+									<Plus class="h-4 w-4 text-primary" />
+								</div>
+							</button>
+						{/each}
+					</div>
+				{:else}
+					{@const previewChannels = getPreviewChannels()}
+					{#if previewChannels.length > 0}
+						<!-- Preview list -->
+						<div class="space-y-3">
+							<p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">Your channels</p>
+							<div class="space-y-1.5">
+								{#each previewChannels as channel (channel.id)}
+									<button
+										type="button"
+										onclick={() => addChannel(channel)}
+										class="w-full flex items-center gap-3 p-3 rounded-lg border border-transparent bg-transparent hover:bg-accent/50 hover:border-border/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background"
+									>
+										<div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+											<Radio class="h-4 w-4 text-primary" />
+										</div>
+										<div class="flex-1 min-w-0">
+											<div class="font-medium text-sm truncate">{channel.name}</div>
+											<div class="text-xs text-muted-foreground truncate">
+												{channel.description || 'No description'}
+											</div>
+										</div>
+										<div class="h-7 w-7 rounded-md bg-primary/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+											<Plus class="h-4 w-4 text-primary" />
+										</div>
+									</button>
+								{/each}
+							</div>
+						</div>
+					{:else}
+						<!-- Empty state -->
+						<div class="flex flex-col items-center justify-center py-12 text-center">
+							<div class="h-12 w-12 rounded-full bg-muted/30 flex items-center justify-center mb-3">
+								<Radio class="h-6 w-6 text-muted-foreground/50" />
+							</div>
+							<p class="text-sm text-muted-foreground">No channels available</p>
+							<p class="text-xs text-muted-foreground/70 mt-1">Create a channel first to add it here</p>
+						</div>
+					{/if}
 				{/if}
 			</div>
 		</div>
 
-		<Sheet.Footer>
-			<Button variant="outline" onclick={() => (showChannelModal = false)}>
+		<Sheet.Footer class="flex-shrink-0 border-t border-border/50 pt-4">
+			<Button variant="outline" onclick={() => (showChannelModal = false)} class="w-full sm:w-auto">
 				Cancel
 			</Button>
 		</Sheet.Footer>
