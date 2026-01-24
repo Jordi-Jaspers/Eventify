@@ -13,8 +13,8 @@ services:
       - "5432:5432"
     environment:
       TZ: Europe/Amsterdam
-      POSTGRES_PASSWORD: root
       POSTGRES_USER: root
+      POSTGRES_PASSWORD: postgres
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
 
