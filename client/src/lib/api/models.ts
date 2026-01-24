@@ -60,6 +60,10 @@ export type WatchlistDetailsResponse = components['schemas']['WatchlistDetailsRe
 export type WatchlistConfigurationResponse =
 	components['schemas']['WatchlistConfigurationResponse'];
 export type WatchlistFiltersResponse = components['schemas']['WatchlistFiltersResponse'];
+export type CreateWatchlistRequest = components['schemas']['CreateWatchlistRequest'];
+export type UpdateWatchlistRequest = components['schemas']['UpdateWatchlistRequest'];
+export type WatchlistConfigurationRequest = components['schemas']['WatchlistConfigurationRequest'];
+export type WatchlistFiltersRequest = components['schemas']['WatchlistFiltersRequest'];
 export type PageResourceWatchlistDetailsResponse =
 	components['schemas']['PageResourceWatchlistDetailsResponse'];
 

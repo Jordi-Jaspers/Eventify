@@ -6,7 +6,7 @@
 	import { searchWatchlists, deleteWatchlist } from '$lib/api/watchlist/UserWatchlistController';
 	import type { WatchlistDetailsResponse } from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { ClipboardList, Edit, Trash2, Plus } from '@lucide/svelte';
+	import { ClipboardList, Edit, Trash2, Plus, Eye } from '@lucide/svelte';
 	import { formatDate } from '$lib/utils/date';
 	import { toast } from 'svelte-sonner';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
@@ -54,6 +54,10 @@
 
 	function handleEditWatchlist(watchlist: WatchlistDetailsResponse): void {
 		goto(`${CLIENT_ROUTES.WATCHLISTS_PAGE.path}/${watchlist.id}`);
+	}
+
+	function handleMonitorWatchlist(watchlist: WatchlistDetailsResponse): void {
+		goto(`${CLIENT_ROUTES.WATCHLISTS_PAGE.path}/${watchlist.id}/monitor`);
 	}
 
 	function handleNewWatchlist(): void {
@@ -141,6 +145,15 @@
 
 					<!-- Actions -->
 					<div class="col-span-1 md:col-span-1 flex items-center justify-end gap-1">
+						<Button
+							variant="ghost"
+							size="icon"
+							class="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+							onclick={() => handleMonitorWatchlist(watchlist)}
+							aria-label="Monitor watchlist"
+						>
+							<Eye class="h-4 w-4" />
+						</Button>
 						<Button
 							variant="ghost"
 							size="icon"
