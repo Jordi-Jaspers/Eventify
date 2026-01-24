@@ -62,7 +62,8 @@
 	});
 
 	// Create retention service - recreate when orgId changes
-	let retentionService = $state(createRetentionService('organization', orgId));
+	// Initialize with 0; the $effect below will set the correct orgId
+	let retentionService = $state(createRetentionService('organization', 0));
 	let lastServiceOrgId: number = $state(0);
 
 	// Redirect if not authorized
