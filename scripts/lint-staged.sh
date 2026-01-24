@@ -1,17 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "Moving to project root directory..."
-cd "$(git rev-parse --show-toplevel)"
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
-echo "Moving to server directory..."
-cd server
+section "Running Code Quality Checks"
+cd "$SERVER_DIR"
+info "Running Gradle spotless, checkstyle, PMD and spotbugs tasks..."
 
-echo "Current directory: $(pwd)"
-echo "Running Gradle 'spotless, checkstyle, PMD and spotbugs' tasks..."
 if ! ./gradlew spotlessCheck checkQualityMain -xspotbugsMain; then
-  echo "Gradle code quality checks failed. Please fix the issues and try again."
+  echo ""
+  fail
+  echo -e "  ${RED}✗${RESET} Gradle code quality checks failed. Please fix the issues and try again."
   exit 1
 fi
 
-echo "Gradle code quality checks passed."
+success_banner "Code Quality Checks Passed!"
+exit 0
