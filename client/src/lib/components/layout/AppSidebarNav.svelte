@@ -5,7 +5,7 @@
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { LayoutDashboard, Clock, Shield, Building2, Plus, Users, ChevronUp, UserCog, Settings, Key, Radio } from '@lucide/svelte';
+	import { LayoutDashboard, Clock, Shield, Building2, Plus, Users, ChevronUp, UserCog, Settings, Key, Radio, ClipboardList } from '@lucide/svelte';
 
 	let isOrganizationsOpen: boolean = $state(false);
 
@@ -58,9 +58,12 @@
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton class="opacity-50 cursor-not-allowed" onclick={() => {}}>
-						<Clock class="size-4" />
-						<span>Coming Soon...</span>
+					<Sidebar.MenuButton
+						onclick={() => goto(CLIENT_ROUTES.WATCHLISTS_PAGE.path)}
+						isActive={isActive(CLIENT_ROUTES.WATCHLISTS_PAGE.path)}
+					>
+						<ClipboardList class="size-4" />
+						<span>Watchlists</span>
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>
 			</Sidebar.Menu>

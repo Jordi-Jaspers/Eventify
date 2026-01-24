@@ -55,6 +55,14 @@ export type UpdateChannelRequest = components['schemas']['UpdateChannelRequest']
 export type PageResourceChannelDetailsResponse =
 	components['schemas']['PageResourceChannelDetailsResponse'];
 
+// ================ Watchlists ===================
+export type WatchlistDetailsResponse = components['schemas']['WatchlistDetailsResponse'];
+export type WatchlistConfigurationResponse =
+	components['schemas']['WatchlistConfigurationResponse'];
+export type WatchlistFiltersResponse = components['schemas']['WatchlistFiltersResponse'];
+export type PageResourceWatchlistDetailsResponse =
+	components['schemas']['PageResourceWatchlistDetailsResponse'];
+
 // ================ Pagination ===================
 export type SearchInput = components['schemas']['SearchInput'];
 export type SortableColumn = components['schemas']['SortableColumn'];
