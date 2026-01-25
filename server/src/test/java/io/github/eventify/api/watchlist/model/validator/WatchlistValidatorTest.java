@@ -1,5 +1,6 @@
 package io.github.eventify.api.watchlist.model.validator;
 
+import io.github.eventify.api.monitor.model.TimeRange;
 import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.WatchlistConfigurationRequest;
@@ -75,7 +76,7 @@ public class WatchlistValidatorTest extends UnitTest {
     public void shouldAcceptCreateRequestWithFilters() {
         // Given: Valid request with filters
         final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
-            .setTimeRange("24h")
+            .setTimeRange(TimeRange.LAST_24H)
             .setOnlyCritical(false)
             .setSortBySeverity(true);
 
@@ -96,7 +97,7 @@ public class WatchlistValidatorTest extends UnitTest {
     public void shouldAcceptCreateRequestWithTimeRange7d() {
         // Given: Valid request with time range 7d
         final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
-            .setTimeRange("7d");
+            .setTimeRange(TimeRange.LAST_7D);
 
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("My Watchlist")
@@ -115,7 +116,7 @@ public class WatchlistValidatorTest extends UnitTest {
     public void shouldAcceptCreateRequestWithTimeRange30d() {
         // Given: Valid request with time range 30d
         final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
-            .setTimeRange("30d");
+            .setTimeRange(TimeRange.LAST_30D);
 
         final CreateWatchlistRequest request = new CreateWatchlistRequest()
             .setName("My Watchlist")
@@ -333,35 +334,6 @@ public class WatchlistValidatorTest extends UnitTest {
                 .anyMatch(
                     error -> error.getField().equals(CONFIGURATION_CHANNEL_IDS) &&
                         error.getCode().equals(CHANNEL_ID_REQUIRED)
-                ),
-            is(true)
-        );
-    }
-
-    @Test
-    @DisplayName("Should reject invalid time range in filters")
-    public void shouldRejectInvalidTimeRangeInFilters() {
-        // Given: Request with invalid time range
-        final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
-            .setTimeRange("invalid");
-
-        final CreateWatchlistRequest request = new CreateWatchlistRequest()
-            .setName("Valid Name")
-            .setFilters(filters);
-        final ValidationResult result = new ValidationResult();
-
-        // When & Then: Should throw ValidationException
-        final ValidationException exception = assertThrows(
-            ValidationException.class,
-            () -> validator.validate(request, result)
-        );
-
-        assertThat(exception.getValidationResult().hasErrors(), is(true));
-        assertThat(
-            exception.getValidationResult().getErrors().stream()
-                .anyMatch(
-                    error -> error.getField().equals(FILTERS_TIME_RANGE) &&
-                        error.getCode().equals(INVALID_TIME_RANGE)
                 ),
             is(true)
         );
@@ -604,35 +576,6 @@ public class WatchlistValidatorTest extends UnitTest {
                 .anyMatch(
                     error -> error.getField().equals(CONFIGURATION_CHANNEL_IDS) &&
                         error.getCode().equals(CHANNEL_ID_REQUIRED)
-                ),
-            is(true)
-        );
-    }
-
-    @Test
-    @DisplayName("Should reject invalid time range in update request filters")
-    public void shouldRejectInvalidTimeRangeInUpdateRequestFilters() {
-        // Given: Update request with invalid time range
-        final WatchlistFiltersRequest filters = new WatchlistFiltersRequest()
-            .setTimeRange("invalid");
-
-        final UpdateWatchlistRequest request = new UpdateWatchlistRequest()
-            .setName("Valid Name")
-            .setFilters(filters);
-        final ValidationResult result = new ValidationResult();
-
-        // When & Then: Should throw ValidationException
-        final ValidationException exception = assertThrows(
-            ValidationException.class,
-            () -> validator.validate(request, result)
-        );
-
-        assertThat(exception.getValidationResult().hasErrors(), is(true));
-        assertThat(
-            exception.getValidationResult().getErrors().stream()
-                .anyMatch(
-                    error -> error.getField().equals(FILTERS_TIME_RANGE) &&
-                        error.getCode().equals(INVALID_TIME_RANGE)
                 ),
             is(true)
         );

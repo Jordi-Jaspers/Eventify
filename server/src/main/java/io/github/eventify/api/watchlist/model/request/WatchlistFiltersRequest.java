@@ -1,5 +1,6 @@
 package io.github.eventify.api.watchlist.model.request;
 
+import io.github.eventify.api.monitor.model.TimeRange;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,17 +24,26 @@ public class WatchlistFiltersRequest implements Serializable {
     private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     /**
-     * Default time range for filtering events (e.g., "1h", "24h", "7d", "30d").
+     * Default time range for filtering events.
      */
-    private String timeRange;
+    private TimeRange timeRange;
 
     /**
-     * Whether to show only critical events by default.
+     * Whether to show only critical channels by default.
+     * Only applied in ungrouped view mode.
      */
     private boolean onlyCritical;
 
     /**
-     * Whether to sort events by severity by default.
+     * Whether to sort by severity by default.
+     * Applied in both grouped and ungrouped view modes.
      */
     private boolean sortBySeverity;
+
+    /**
+     * Whether to show grouped view by default.
+     * - true: Shows channels organized in groups as configured
+     * - false: Flatmaps all channels into a single list
+     */
+    private boolean groupedView;
 }

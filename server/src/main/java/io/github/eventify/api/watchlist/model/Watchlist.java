@@ -1,5 +1,8 @@
 package io.github.eventify.api.watchlist.model;
 
+import io.github.eventify.api.monitor.model.MonitorFilters;
+import io.github.eventify.api.monitor.model.TimeRange;
+import io.github.eventify.api.monitor.model.TimeSpan;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
 import io.github.jframe.datasource.search.model.PageableItem;
@@ -99,5 +102,48 @@ public class Watchlist implements PageableItem, Serializable {
         this.organization = organization;
         this.configuration = WatchlistConfiguration.empty();
         this.filters = WatchlistFilters.defaults();
+    }
+
+    /**
+     * Resolves the effective time range context from request filters.
+     * Falls back to this watchlist's default timeRange if not specified in request.
+     *
+     * @param requestFilters the request filters (may be null)
+     * @return the resolved time span
+     */
+    public TimeSpan resolveTimeRange(final MonitorFilters requestFilters) {
+        if (requestFilters != null && requestFilters.getStartTime() != null && requestFilters.getEndTime() != null) {
+            return new TimeSpan(requestFilters.getStartTime(), requestFilters.getEndTime());
+        }
+
+        final TimeRange range = requestFilters != null && requestFilters.getTimeRange() != null
+            ? requestFilters.getTimeRange()
+            : this.filters.getTimeRange();
+
+        final OffsetDateTime end = OffsetDateTime.now();
+        return new TimeSpan(end.minus(range.getDuration()), end);
+    }
+
+    /**
+     * Resolves the effective monitor filters from request filters.
+     * Falls back to this watchlist's defaults if not specified in request.
+     *
+     * @param requestFilters the request filters (may be null)
+     * @return the resolved monitor filters
+     */
+    public MonitorFilters resolveFilters(final MonitorFilters requestFilters) {
+        final boolean onlyCritical = requestFilters != null && requestFilters.getOnlyCritical() != null
+            ? requestFilters.getOnlyCritical()
+            : this.filters.isOnlyCritical();
+
+        final boolean sortBySeverity = requestFilters != null && requestFilters.getSortBySeverity() != null
+            ? requestFilters.getSortBySeverity()
+            : this.filters.isSortBySeverity();
+
+        final boolean groupedView = requestFilters != null && requestFilters.getGroupedView() != null
+            ? requestFilters.getGroupedView()
+            : this.filters.isGroupedView();
+
+        return MonitorFilters.resolved(onlyCritical, sortBySeverity, groupedView);
     }
 }

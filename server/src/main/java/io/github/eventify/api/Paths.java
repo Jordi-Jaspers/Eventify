@@ -219,6 +219,14 @@ public final class Paths {
 
     public static final String CHANNELS_PATH = BASE_PATH + CHANNELS_PART;
 
+    /* ------------------------------- MONITOR ENDPOINTS ------------------------------- */
+
+    public static final String MONITOR_PART = "/monitor";
+
+    public static final String USER_MONITOR_PATH = USERS_PATH + MONITOR_PART;
+
+    public static final String ORGANIZATION_MONITOR_PATH = ORGANIZATION_PATH + MONITOR_PART;
+
     /* ------------------------------- END ------------------------------- */
 
     private Paths() {

@@ -9,12 +9,9 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for Channel entity.
@@ -64,22 +61,22 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
     Optional<Channel> findByIdAndUserIdAndStatusNot(Long id, Long userId, ChannelStatus status);
 
     /**
-     * Finds a personal channel by ID and user ID (organization_id IS NULL).
+     * Finds all personal channels by IDs and user ID (batch query).
      *
-     * @param id     the channel ID
+     * @param ids    the channel IDs
      * @param userId the user ID
-     * @return optional channel
+     * @return list of channels
      */
     @Query(
         """
             SELECT c FROM Channel c
-            WHERE c.id = :id
+            WHERE c.id IN :ids
             AND c.user.id = :userId
             AND c.organization IS NULL
             AND c.status != 'PENDING_DELETION'
             """
     )
-    Optional<Channel> findByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
+    List<Channel> findAllByIdInAndUserId(@Param("ids") List<Long> ids, @Param("userId") Long userId);
 
     /**
      * Finds an organization channel by organization ID and name.
@@ -107,17 +104,4 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * @return list of channels
      */
     List<Channel> findByStatus(ChannelStatus status);
-
-    /**
-     * Delete all channels owned by users with the given IDs.
-     *
-     * @param userIds the user IDs
-     */
-    @Modifying(
-        clearAutomatically = true,
-        flushAutomatically = true
-    )
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Query("DELETE FROM Channel c WHERE c.user.id IN :userIds")
-    void deleteAllByUserIdIn(@Param("userIds") List<Long> userIds);
 }

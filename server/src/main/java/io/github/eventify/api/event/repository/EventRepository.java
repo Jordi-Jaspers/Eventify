@@ -2,6 +2,7 @@ package io.github.eventify.api.event.repository;
 
 import io.github.eventify.api.event.model.Event;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,22 +10,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for Event entity.
  */
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-
-    /**
-     * Finds all events for a given channel, ordered by timestamp descending.
-     *
-     * @param channelId the channel ID
-     * @return list of events ordered by timestamp (newest first)
-     */
-    List<Event> findByChannelIdOrderByTimestampDesc(Long channelId);
 
     /**
      * Counts all events for a given channel.
@@ -44,8 +35,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     long countByChannelIdIn(@Param("channelIds") List<Long> channelIds);
 
     /**
-     * Deletes expired events from personal channels based on user retention settings.
-     * Uses a subquery with LIMIT to batch deletions and avoid long-running transactions.
+     * Deletes expired events from personal channels based on user retention settings. Uses a subquery with LIMIT to batch deletions and
+     * avoid long-running transactions.
      *
      * @param batchSize maximum number of events to delete per call
      * @return number of events deleted
@@ -67,8 +58,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     int deleteExpiredPersonalChannelEvents(int batchSize);
 
     /**
-     * Deletes expired events from organization channels based on org retention settings.
-     * Uses a subquery with LIMIT to batch deletions and avoid long-running transactions.
+     * Deletes expired events from organization channels based on org retention settings. Uses a subquery with LIMIT to batch deletions and
+     * avoid long-running transactions.
      *
      * @param batchSize maximum number of events to delete per call
      * @return number of events deleted
@@ -89,15 +80,43 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     int deleteExpiredOrganizationChannelEvents(int batchSize);
 
     /**
-     * Delete all events in channels owned by users with the given IDs.
+     * Finds all events for multiple channels within a time range, plus the last event before the range for each channel (to establish
+     * initial severity state). Uses a CTE to efficiently combine both queries in a single database round-trip.
      *
-     * @param userIds the user IDs
+     * @param channelIds the channel IDs
+     * @param startTime  start of time range
+     * @param endTime    end of time range
+     * @return list of events ordered by timestamp (oldest first), including prior events
      */
-    @Modifying(
-        clearAutomatically = true,
-        flushAutomatically = true
+    @Query(
+        value = """
+            WITH last_before_range AS (
+                SELECT DISTINCT ON (channel_id) channel_id, timestamp AS max_time
+                FROM event
+                WHERE timestamp < :startTime
+                  AND channel_id IN (:channelIds)
+                ORDER BY channel_id, timestamp DESC
+            )
+            SELECT e.*
+            FROM (
+                SELECT ev.*
+                FROM event ev
+                INNER JOIN last_before_range lb
+                    ON lb.channel_id = ev.channel_id
+                   AND lb.max_time = ev.timestamp
+                UNION ALL
+                SELECT ev.*
+                FROM event ev
+                WHERE ev.channel_id IN (:channelIds)
+                  AND ev.timestamp BETWEEN :startTime AND :endTime
+            ) AS e
+            ORDER BY e.channel_id ASC, e.timestamp ASC
+            """,
+        nativeQuery = true
     )
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Query("DELETE FROM Event e WHERE e.channel.user.id IN :userIds")
-    void deleteAllByChannelUserIdIn(@Param("userIds") List<Long> userIds);
+    List<Event> findEventsWithLastBeforeRange(
+        @Param("channelIds") List<Long> channelIds,
+        @Param("startTime") OffsetDateTime startTime,
+        @Param("endTime") OffsetDateTime endTime
+    );
 }

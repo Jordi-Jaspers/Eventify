@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static io.github.eventify.api.organization.model.OrganizationalRole.OWNER;
 import static io.github.eventify.common.exception.ApiErrorCode.ORGANIZATION_NOT_FOUND_ERROR;
 import static io.github.jframe.util.constants.Constants.Characters.HYPHEN;
+import static java.util.stream.Stream.*;
 
 /**
  * Service for managing organizations.
@@ -123,20 +123,11 @@ public class OrganizationService {
      */
     private String generateUniqueSlug(final String name) {
         final String baseSlug = generateSlugFromName(name);
-        final Optional<Organization> existingOrg = organizationRepository.findBySlug(baseSlug);
-
-        if (existingOrg.isEmpty()) {
-            return baseSlug;
-        }
-
-        int counter = 1;
-        String candidateSlug = baseSlug + HYPHEN + counter;
-        while (organizationRepository.findBySlug(candidateSlug).isPresent()) {
-            counter++;
-            candidateSlug = baseSlug + HYPHEN + counter;
-        }
-
-        return candidateSlug;
+        return concat(of(baseSlug), iterate(1, n -> n + 1).map(n -> baseSlug + HYPHEN + n))
+            .limit(1000)
+            .filter(slug -> organizationRepository.findBySlug(slug).isEmpty())
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Could not generate unique slug"));
     }
 
     /**

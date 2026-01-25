@@ -1,6 +1,8 @@
 package io.github.eventify.api.watchlist.service;
 
+import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.repository.ChannelRepository;
+import io.github.eventify.api.monitor.model.TimeRange;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
@@ -16,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +41,6 @@ import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 public class WatchlistService {
 
     private static final int DEFAULT_PAGE_SIZE = 20;
-    private static final String DEFAULT_TIME_RANGE = "24h";
 
     private final WatchlistRepository watchlistRepository;
 
@@ -160,27 +163,24 @@ public class WatchlistService {
     }
 
     /**
-     * Removes a channel ID from all watchlists that contain it.
-     * Called when a channel is deleted.
-     *
-     * @param channelId the channel ID to remove
-     */
-    @Transactional
-    public void removeChannelFromAllWatchlists(final Long channelId) {
-        watchlistRepository.removeChannelFromAllConfigurations(channelId);
-    }
-
-    /**
      * Validates that all channel IDs exist and belong to the user.
      */
     private void validateChannelIds(final List<Long> channelIds, final Long userId) {
         if (channelIds == null || channelIds.isEmpty()) {
             return;
         }
-        for (final Long channelId : channelIds) {
-            channelRepository.findByIdAndUserId(channelId, userId)
-                .orElseThrow(() -> new DataNotFoundException(CHANNEL_NOT_FOUND));
-        }
+
+        final Set<Long> foundIds = channelRepository.findAllByIdInAndUserId(channelIds, userId)
+            .stream()
+            .map(Channel::getId)
+            .collect(Collectors.toSet());
+
+        channelIds.stream()
+            .filter(id -> !foundIds.contains(id))
+            .findFirst()
+            .ifPresent(id -> {
+                throw new DataNotFoundException(CHANNEL_NOT_FOUND);
+            });
     }
 
     /**
@@ -188,7 +188,7 @@ public class WatchlistService {
      */
     private void applyDefaultTimeRangeIfMissing(final Watchlist watchlist) {
         if (watchlist.getFilters() != null && watchlist.getFilters().getTimeRange() == null) {
-            watchlist.getFilters().setTimeRange(DEFAULT_TIME_RANGE);
+            watchlist.getFilters().setTimeRange(TimeRange.LAST_24H);
         }
     }
 }

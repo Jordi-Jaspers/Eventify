@@ -8,31 +8,38 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
 
 /**
- * Request DTO for watchlist configuration containing channels and groups.
+ * Request DTO for a channel group within a watchlist configuration.
  *
  * <p>Note: Nested groups (groups within groups) are not allowed.
- * A group can only contain channels, not other groups.
+ * Only channels can be members of a group.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class WatchlistConfigurationRequest implements Serializable {
+public class ChannelGroupRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     /**
-     * Ordered list of standalone channel IDs (not in any group).
+     * Unique identifier for this group.
+     * If null, a new UUID will be generated.
      */
-    private List<Long> channelIds;
+    private UUID id;
 
     /**
-     * Ordered list of channel groups.
+     * Display name for the group.
      */
-    private List<ChannelGroupRequest> groups;
+    private String name;
+
+    /**
+     * Ordered list of channel IDs belonging to this group.
+     */
+    private List<Long> channelIds;
 }

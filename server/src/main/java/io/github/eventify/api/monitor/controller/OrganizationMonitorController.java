@@ -1,0 +1,65 @@
+package io.github.eventify.api.monitor.controller;
+
+import io.github.eventify.api.monitor.model.MonitorResult;
+import io.github.eventify.api.monitor.model.mapper.MonitorMapper;
+import io.github.eventify.api.monitor.model.request.MonitorRequest;
+import io.github.eventify.api.monitor.model.response.MonitorResponse;
+import io.github.eventify.api.monitor.service.MonitorService;
+import io.github.eventify.api.monitor.validator.MonitorValidator;
+import io.github.eventify.common.security.principal.UserTokenPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import static io.github.eventify.api.Paths.ORGANIZATION_MONITOR_PATH;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+/**
+ * Controller for organization monitor endpoints.
+ */
+@RestController
+@RequiredArgsConstructor
+@Tag(
+    name = "Organization Monitor",
+    description = "Organization watchlist timeline monitoring"
+)
+public class OrganizationMonitorController {
+
+    private final MonitorService monitorService;
+    private final MonitorValidator monitorValidator;
+    private final MonitorMapper monitorMapper;
+
+    @ResponseStatus(OK)
+    @Operation(
+        summary = "Get organization monitor timeline",
+        description = "Returns timeline data for an organization watchlist"
+    )
+    @PostMapping(
+        path = ORGANIZATION_MONITOR_PATH,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize(
+        "@watchlistSecurity.canAccessOrgWatchlist(#request.watchlistId, #orgId, principal.user.id) "
+            + "or hasAuthority('MANAGE_ORGANIZATIONS')"
+    )
+    public ResponseEntity<MonitorResponse> getOrganizationMonitor(
+        @AuthenticationPrincipal final UserTokenPrincipal principal,
+        @PathVariable final Long orgId,
+        @RequestBody final MonitorRequest request
+    ) {
+        monitorValidator.validateAndThrow(request);
+        final MonitorResult result = monitorService.monitorWatchlist(request.getWatchlistId(), request);
+        return ResponseEntity.status(OK).body(monitorMapper.toResponse(result));
+    }
+}

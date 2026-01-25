@@ -26,12 +26,21 @@ public class WatchlistFiltersResponse implements Serializable {
     private String timeRange;
 
     /**
-     * Whether to show only critical events by default.
+     * Whether to show only critical channels by default.
+     * Only applied in ungrouped view mode.
      */
     private boolean onlyCritical;
 
     /**
-     * Whether to sort events by severity by default.
+     * Whether to sort by severity by default.
+     * Applied in both grouped and ungrouped view modes.
      */
     private boolean sortBySeverity;
+
+    /**
+     * Whether to show grouped view by default.
+     * - true: Shows channels organized in groups as configured
+     * - false: Flatmaps all channels into a single list
+     */
+    private boolean groupedView;
 }

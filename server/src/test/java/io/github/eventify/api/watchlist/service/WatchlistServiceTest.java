@@ -99,7 +99,7 @@ public class WatchlistServiceTest extends UnitTest {
         assertThat(watchlist.getName(), is("My Watchlist"));
         assertThat(watchlist.getDescription(), is("Production errors"));
         assertThat(watchlist.getUser().getId(), is(user.getId()));
-        assertThat(watchlist.getFilters().getTimeRange(), is("24h"));
+        assertThat(watchlist.getFilters().getTimeRange(), is(io.github.eventify.api.monitor.model.TimeRange.LAST_24H));
         assertThat(watchlist.getFilters().isOnlyCritical(), is(false));
         assertThat(watchlist.getFilters().isSortBySeverity(), is(true));
 
@@ -111,7 +111,7 @@ public class WatchlistServiceTest extends UnitTest {
     public void shouldCreateWatchlistWithConfigurationSuccessfully() {
         // Given: Watchlist with configuration
         final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
-            .channelIds(List.of(1L, 2L))
+            .channels(channelsWithIds(1L, 2L))
             .build();
 
         final Watchlist input = new Watchlist();
@@ -123,10 +123,8 @@ public class WatchlistServiceTest extends UnitTest {
 
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
             .thenReturn(Optional.empty());
-        when(channelRepository.findByIdAndUserId(1L, user.getId()))
-            .thenReturn(Optional.of(channel1));
-        when(channelRepository.findByIdAndUserId(2L, user.getId()))
-            .thenReturn(Optional.of(channel2));
+        when(channelRepository.findAllByIdInAndUserId(List.of(1L, 2L), user.getId()))
+            .thenReturn(List.of(channel1, channel2));
         when(watchlistRepository.save(any(Watchlist.class))).thenAnswer(invocation -> {
             final Watchlist watchlist = invocation.getArgument(0);
             watchlist.setId(1L);
@@ -168,7 +166,7 @@ public class WatchlistServiceTest extends UnitTest {
     public void shouldFailWhenChannelNotFound() {
         // Given: Watchlist with non-existent channel ID
         final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
-            .channelIds(List.of(999L))
+            .channels(channelsWithIds(999L))
             .build();
 
         final Watchlist input = new Watchlist();
@@ -177,8 +175,8 @@ public class WatchlistServiceTest extends UnitTest {
 
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
             .thenReturn(Optional.empty());
-        when(channelRepository.findByIdAndUserId(999L, user.getId()))
-            .thenReturn(Optional.empty());
+        when(channelRepository.findAllByIdInAndUserId(List.of(999L), user.getId()))
+            .thenReturn(List.of());
 
         // When & Then: Should throw DataNotFoundException
         assertThrows(
@@ -194,7 +192,7 @@ public class WatchlistServiceTest extends UnitTest {
     public void shouldFailWhenChannelBelongsToOrganization() {
         // Given: Channel belongs to organization (so findByIdAndUserId returns empty)
         final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
-            .channelIds(List.of(1L))
+            .channels(channelsWithIds(1L))
             .build();
 
         final Watchlist input = new Watchlist();
@@ -203,9 +201,9 @@ public class WatchlistServiceTest extends UnitTest {
 
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
             .thenReturn(Optional.empty());
-        // Org channels are not returned by findByIdAndUserId query
-        when(channelRepository.findByIdAndUserId(1L, user.getId()))
-            .thenReturn(Optional.empty());
+        // Org channels are not returned by findAllByIdInAndUserId query
+        when(channelRepository.findAllByIdInAndUserId(List.of(1L), user.getId()))
+            .thenReturn(List.of());
 
         // When & Then: Should throw DataNotFoundException
         assertThrows(
@@ -310,7 +308,7 @@ public class WatchlistServiceTest extends UnitTest {
         final Channel channel2 = createChannel(2L, "Channel 2", user);
 
         final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
-            .channelIds(List.of(2L, 1L))
+            .channels(channelsWithIds(2L, 1L))
             .build();
 
         final Watchlist updated = new Watchlist();
@@ -321,10 +319,8 @@ public class WatchlistServiceTest extends UnitTest {
             .thenReturn(Optional.of(existing));
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
             .thenReturn(Optional.of(existing));
-        when(channelRepository.findByIdAndUserId(2L, user.getId()))
-            .thenReturn(Optional.of(channel2));
-        when(channelRepository.findByIdAndUserId(1L, user.getId()))
-            .thenReturn(Optional.of(channel1));
+        when(channelRepository.findAllByIdInAndUserId(List.of(2L, 1L), user.getId()))
+            .thenReturn(List.of(channel1, channel2));
         when(watchlistRepository.save(any(Watchlist.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When: Updating configuration
@@ -430,6 +426,16 @@ public class WatchlistServiceTest extends UnitTest {
         channel.setStatus(ChannelStatus.ACTIVE);
         channel.setCreatedAt(OffsetDateTime.now().minusDays(1));
         return channel;
+    }
+
+    private List<Channel> channelsWithIds(final Long... ids) {
+        final List<Channel> channels = new java.util.ArrayList<>();
+        for (final Long id : ids) {
+            final Channel channel = new Channel();
+            channel.setId(id);
+            channels.add(channel);
+        }
+        return channels;
     }
 
     private SortablePageInput createDefaultPageInput() {
