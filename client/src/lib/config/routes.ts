@@ -41,6 +41,10 @@ export const CLIENT_ROUTES = {
 		path: '/oauth2/redirect',
 		type: RouteType.PUBLIC
 	},
+	DEV_PLAYBOOK_PAGE: {
+		path: '/dev-playbook',
+		type: RouteType.PUBLIC
+	},
 
 	// Private routes
 	DASHBOARD_PAGE: {
