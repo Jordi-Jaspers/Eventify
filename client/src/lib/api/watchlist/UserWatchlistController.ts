@@ -13,7 +13,7 @@ import type {
 export async function searchWatchlists(
 	input: SortablePageInput
 ): Promise<PageResourceWatchlistDetailsResponse> {
-	const { data, error } = await client.POST('/v1/user/watchlists/search', {
+	const { data, error } = await client.POST('/v1/user/watchlist/search', {
 		body: input
 	});
 	if (error) {
@@ -26,7 +26,7 @@ export async function searchWatchlists(
  * Delete watchlist (soft delete)
  */
 export async function deleteWatchlist(id: number): Promise<WatchlistDetailsResponse> {
-	const { data, error } = await client.DELETE('/v1/user/watchlists/{id}', {
+	const { data, error } = await client.DELETE('/v1/user/watchlist/{id}', {
 		params: {
 			path: { id }
 		}
@@ -41,7 +41,7 @@ export async function deleteWatchlist(id: number): Promise<WatchlistDetailsRespo
  * Get watchlist by ID
  */
 export async function getWatchlist(id: number): Promise<WatchlistDetailsResponse> {
-	const { data, error } = await client.GET('/v1/user/watchlists/{id}', {
+	const { data, error } = await client.GET('/v1/user/watchlist/{id}', {
 		params: {
 			path: { id }
 		}
@@ -58,7 +58,7 @@ export async function getWatchlist(id: number): Promise<WatchlistDetailsResponse
 export async function createWatchlist(
 	request: CreateWatchlistRequest
 ): Promise<WatchlistDetailsResponse> {
-	const { data, error } = await client.POST('/v1/user/watchlists', {
+	const { data, error } = await client.POST('/v1/user/watchlist', {
 		body: request
 	});
 	if (error || !data) {
@@ -74,7 +74,7 @@ export async function updateWatchlist(
 	id: number,
 	request: UpdateWatchlistRequest
 ): Promise<WatchlistDetailsResponse> {
-	const { data, error } = await client.PUT('/v1/user/watchlists/{id}', {
+	const { data, error } = await client.PUT('/v1/user/watchlist/{id}', {
 		params: {
 			path: { id }
 		},
