@@ -66,7 +66,7 @@
 				</Button>
 				<Button
 					type="submit"
-					class="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground transition-all shadow-sm"
+					class="flex-1"
 					disabled={!groupName.trim()}
 				>
 					Create Group

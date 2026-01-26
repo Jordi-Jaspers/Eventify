@@ -21,9 +21,7 @@
 		variant={value === null ? 'default' : 'outline'}
 		size="sm"
 		onclick={() => handleChange(null)}
-		class={value === null
-			? 'bg-gradient-to-r from-primary to-accent'
-			: 'bg-background/50 border-border/50'}
+		class={value !== null ? 'bg-background/50 border-border/50' : ''}
 	>
 		{placeholder}
 	</Button>
@@ -33,9 +31,7 @@
 			variant={value === option.value ? 'default' : 'outline'}
 			size="sm"
 			onclick={() => handleChange(option.value)}
-			class={value === option.value
-				? 'bg-gradient-to-r from-primary to-accent'
-				: 'bg-background/50 border-border/50'}
+			class={value !== option.value ? 'bg-background/50 border-border/50' : ''}
 		>
 			{option.label}
 		</Button>

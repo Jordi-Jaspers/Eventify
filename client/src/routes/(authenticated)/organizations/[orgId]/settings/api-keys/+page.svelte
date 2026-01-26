@@ -222,10 +222,7 @@
 						<CardDescription>Manage API keys for programmatic access to {orgName}</CardDescription>
 					</div>
 					{#if canManage}
-						<Button
-							onclick={() => (showCreateSheet = true)}
-							class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
-						>
+						<Button onclick={() => (showCreateSheet = true)}>
 							<Plus class="mr-2 h-4 w-4" />
 							Create API Key
 						</Button>
@@ -248,10 +245,7 @@
 								to start sending events programmatically.
 							</p>
 							{#if canManage}
-								<Button
-									onclick={() => (showCreateSheet = true)}
-									class="bg-gradient-to-r from-primary to-accent hover:opacity-90"
-								>
+								<Button onclick={() => (showCreateSheet = true)}>
 									<Plus class="mr-2 h-4 w-4" />
 									Create Key
 								</Button>

@@ -176,10 +176,7 @@
 					Manage your personal channels for organizing events
 				</p>
 			</div>
-			<Button
-				onclick={() => (showCreateSheet = true)}
-				class="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg shadow-primary/20"
-			>
+			<Button onclick={() => (showCreateSheet = true)}>
 				<Plus class="mr-2 h-4 w-4" />
 				New Channel
 			</Button>

@@ -106,7 +106,7 @@
 			{#if watchlist}
 				<Button
 					onclick={handleMonitor}
-					class="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-all shadow-lg text-primary-foreground gap-2"
+					class="gap-2"
 				>
 					<Eye class="h-4 w-4" />
 					Monitor

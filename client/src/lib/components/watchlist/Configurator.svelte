@@ -105,10 +105,7 @@
 	<CardContent>
 		<!-- Add buttons at top -->
 		<div class="flex gap-4 mb-6">
-			<Button
-				onclick={() => onAddChannel()}
-				class="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-sm hover:shadow-md"
-			>
+			<Button onclick={() => onAddChannel()} class="flex-1">
 				<Radio class="mr-2 h-4 w-4" />
 				Add Channel
 			</Button>

@@ -43,9 +43,7 @@
 			variant={isAllSelected ? 'default' : 'outline'}
 			size="sm"
 			onclick={selectAll}
-			class={isAllSelected
-				? 'bg-gradient-to-r from-primary to-accent'
-				: 'bg-background/50 border-border/50'}
+			class={!isAllSelected ? 'bg-background/50 border-border/50' : ''}
 		>
 			All
 		</Button>
@@ -56,9 +54,7 @@
 			variant={isSelected(option.value) ? 'default' : 'outline'}
 			size="sm"
 			onclick={() => toggleOption(option.value)}
-			class={isSelected(option.value)
-				? 'bg-gradient-to-r from-primary to-accent'
-				: 'bg-background/50 border-border/50'}
+			class={!isSelected(option.value) ? 'bg-background/50 border-border/50' : ''}
 		>
 			{option.label}
 		</Button>

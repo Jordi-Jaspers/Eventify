@@ -356,7 +356,7 @@
 						<Button
 							variant={selectedUser.role === 'USER' ? 'default' : 'outline'}
 							size="sm"
-							class="flex-1 {selectedUser.role === 'USER' ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70' : ''}"
+							class="flex-1"
 							onclick={() => handleRoleChange(selectedUser?.id, 'USER')}
 							disabled={adminUserService.updatingRole || selectedUser.role === 'USER'}
 						>
@@ -366,7 +366,7 @@
 						<Button
 							variant={selectedUser.role === 'ADMIN' ? 'default' : 'outline'}
 							size="sm"
-							class="flex-1 {selectedUser.role === 'ADMIN' ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70' : ''}"
+							class="flex-1"
 							onclick={() => handleRoleChange(selectedUser?.id, 'ADMIN')}
 							disabled={adminUserService.updatingRole || selectedUser.role === 'ADMIN'}
 						>

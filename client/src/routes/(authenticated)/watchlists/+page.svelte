@@ -98,10 +98,7 @@
 					Monitor channels and track important events
 				</p>
 			</div>
-			<Button
-				onclick={handleNewWatchlist}
-				class="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg shadow-primary/20"
-			>
+			<Button onclick={handleNewWatchlist}>
 				<Plus class="mr-2 h-4 w-4" />
 				New Watchlist
 			</Button>

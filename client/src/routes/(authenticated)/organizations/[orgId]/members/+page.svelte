@@ -351,10 +351,7 @@
 			</div>
 
 			{#if canManageMembers}
-				<Button
-					onclick={openAddSheet}
-					class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-				>
+				<Button onclick={openAddSheet}>
 					<UserPlus class="mr-2 h-4 w-4" />
 					Add Member
 				</Button>

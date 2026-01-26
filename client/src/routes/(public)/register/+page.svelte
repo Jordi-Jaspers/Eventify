@@ -294,7 +294,7 @@
                 <!-- Submit Button -->
                 <Button
                         type="submit"
-                        class="w-full mt-6 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+                        class="w-full mt-6"
                         disabled={loading}
                 >
                     {#if loading}

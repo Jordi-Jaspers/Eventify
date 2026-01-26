@@ -102,7 +102,7 @@
 										<Button
 											{...props}
 											disabled={true}
-											class="bg-gradient-to-r from-primary to-primary/80 opacity-50 cursor-not-allowed"
+											class="opacity-50 cursor-not-allowed"
 										>
 								<Plus class="mr-2 h-4 w-4" />
 								New Key
@@ -117,7 +117,7 @@
 					{:else}
 						<Button
 							onclick={() => (showCreateSheet = true)}
-							class="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
+							class=""
 						>
 							<Plus class="mr-2 h-4 w-4" />
 							New Key
@@ -148,7 +148,7 @@
 						</p>
 						<Button
 							onclick={() => (showCreateSheet = true)}
-							class="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
+							class=""
 						>
 							<Plus class="mr-2 h-4 w-4" />
 							Create Key

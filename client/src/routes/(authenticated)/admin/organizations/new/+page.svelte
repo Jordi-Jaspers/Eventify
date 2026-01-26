@@ -158,7 +158,7 @@
                 <div class="flex gap-3">
                     <Button
                         type="submit"
-                        class="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all shadow-lg hover:shadow-primary/50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                        class="flex-1"
                         disabled={isSubmitting}
                     >
                         {#if isSubmitting}

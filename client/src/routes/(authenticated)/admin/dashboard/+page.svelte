@@ -393,10 +393,21 @@
                 <CardDescription>Manage platform resources</CardDescription>
             </CardHeader>
             <CardContent class="relative z-10">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                    <!-- Manage Organizations -->
+                    <Button
+                            class="h-auto py-4"
+                            onclick={() => (window.location.href = CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
+                    >
+                        <div class="flex flex-col items-center gap-2">
+                            <Building class="h-5 w-5"/>
+                            <span>Manage Organizations</span>
+                        </div>
+                    </Button>
+
                     <!-- Create Organization -->
                     <Button
-                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                            class="h-auto py-4"
                             onclick={() => (window.location.href = CLIENT_ROUTES.ADMIN_ORGANIZATIONS_NEW.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
@@ -407,7 +418,7 @@
 
                     <!-- Manage Users -->
                     <Button
-                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                            class="h-auto py-4"
                             onclick={() => goto(CLIENT_ROUTES.ADMIN_USERS_PAGE.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
@@ -416,14 +427,14 @@
                         </div>
                     </Button>
 
-                    <!-- Manage Organizations (Future) -->
+                    <!-- Manage API keys -->
                     <Button
-                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                            onclick={() => (window.location.href = CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
+                            class="h-auto py-4"
+                            onclick={() => goto(CLIENT_ROUTES.ADMIN_API_KEYS_PAGE.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
-                            <Building class="h-5 w-5"/>
-                            <span>Manage Organizations</span>
+                            <UserCog class="h-5 w-5"/>
+                            <span>Manage API Keys</span>
                         </div>
                     </Button>
                 </div>
