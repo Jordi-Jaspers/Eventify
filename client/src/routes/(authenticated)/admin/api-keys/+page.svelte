@@ -208,16 +208,7 @@
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
 		<div class="mb-8 space-y-2">
-			<div class="flex items-center gap-3">
-				<div class="p-2 rounded-lg bg-primary/10 border border-primary/20">
-					<Key class="h-6 w-6 text-primary" />
-				</div>
-				<h1
-					class="text-3xl font-bold text-primary"
-				>
-					API Keys
-				</h1>
-			</div>
+			<h1 class="text-3xl font-bold text-primary">API Keys</h1>
 			<p class="text-muted-foreground">Monitor and manage API keys across the platform</p>
 		</div>
 
