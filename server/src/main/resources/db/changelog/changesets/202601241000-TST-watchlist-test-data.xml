@@ -22,9 +22,10 @@
                     )
                 ),
                 jsonb_build_object(
-                    'timeRange', '1h',
+                    'timeRange', '24h',
                     'onlyCritical', true,
-                    'sortBySeverity', true
+                    'sortBySeverity', true,
+                    'groupedView', true
                 ),
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours';
@@ -44,7 +45,8 @@
                 jsonb_build_object(
                     'timeRange', '24h',
                     'onlyCritical', false,
-                    'sortBySeverity', true
+                    'sortBySeverity', true,
+                    'groupedView', true
                 ),
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day';
@@ -69,7 +71,8 @@
                 jsonb_build_object(
                     'timeRange', '7d',
                     'onlyCritical', false,
-                    'sortBySeverity', false
+                    'sortBySeverity', false,
+                    'groupedView', true
                 ),
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 minutes';
@@ -89,7 +92,8 @@
                 jsonb_build_object(
                     'timeRange', '30d',
                     'onlyCritical', true,
-                    'sortBySeverity', true
+                    'sortBySeverity', true,
+                    'groupedView', true
                 ),
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes';
@@ -102,7 +106,7 @@
                 1,
                 NULL,
                 '{"channelIds": []}',
-                '{"timeRange": "24h", "onlyCritical": false, "sortBySeverity": true}',
+                '{"timeRange": "24h", "onlyCritical": false, "sortBySeverity": true, "groupedView": true}',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days'
             );
@@ -128,7 +132,8 @@
                 jsonb_build_object(
                     'timeRange', '24h',
                     'onlyCritical', false,
-                    'sortBySeverity', true
+                    'sortBySeverity', true,
+                    'groupedView', true
                 ),
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 hours'
@@ -147,9 +152,10 @@
                     )
                 ),
                 jsonb_build_object(
-                    'timeRange', '1h',
+                    'timeRange', '24h',
                     'onlyCritical', true,
-                    'sortBySeverity', true
+                    'sortBySeverity', true,
+                    'groupedView', true
                 ),
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '8 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour'
@@ -168,9 +174,10 @@
                     )
                 ),
                 jsonb_build_object(
-                    'timeRange', '1h',
+                    'timeRange', '24h',
                     'onlyCritical', false,
-                    'sortBySeverity', false
+                    'sortBySeverity', false,
+                    'groupedView', true
                 ),
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 minutes'
@@ -192,7 +199,8 @@
                 jsonb_build_object(
                     'timeRange', '24h',
                     'onlyCritical', false,
-                    'sortBySeverity', true
+                    'sortBySeverity', true,
+                    'groupedView', true
                 ),
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '14 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours'
