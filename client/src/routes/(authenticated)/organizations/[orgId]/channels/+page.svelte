@@ -263,7 +263,7 @@
 		<div class="flex items-center justify-between mb-8">
 			<div>
 				<h1
-					class="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
+					class="text-3xl font-bold text-primary"
 				>
 					Organization Channels
 				</h1>

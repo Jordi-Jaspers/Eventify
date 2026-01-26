@@ -115,7 +115,7 @@
 							</Badge>
 						{/if}
 					</div>
-					<CardTitle class="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+					<CardTitle class="text-4xl font-bold text-primary">
 						{orgName}
 					</CardTitle>
 					<CardDescription class="text-base mt-2">Organization Details & Information</CardDescription>
@@ -203,7 +203,7 @@
 							Global Administrator View
 						</Badge>
 					</div>
-					<CardTitle class="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+					<CardTitle class="text-4xl font-bold text-primary">
 						{orgName}
 					</CardTitle>
 					<CardDescription class="text-base mt-2">Organization Details & Information</CardDescription>

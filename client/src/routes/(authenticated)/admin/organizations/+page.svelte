@@ -121,7 +121,7 @@
 		<!-- Header -->
 		<div class="mb-8">
 			<h1
-				class="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
+				class="text-3xl font-bold text-primary"
 			>
 				Organizations
 			</h1>

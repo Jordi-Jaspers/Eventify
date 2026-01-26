@@ -5,7 +5,7 @@
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import Button from '$lib/components/ui/button/button.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
-    import { Sun, Moon, Check, X, Loader2 } from '@lucide/svelte';
+    import { Sun, Moon, Check, X, Loader2, ArrowLeft } from '@lucide/svelte';
     
     // Redirect if not in dev mode
     const isDev = env.PUBLIC_SHOW_DEV_CREDENTIALS === 'true';
@@ -45,15 +45,21 @@
             <h1 class="text-4xl font-bold mb-2">Component Playbook</h1>
             <p class="text-muted-foreground">Design system for Eventify</p>
         </div>
-        <Button variant="outline" onclick={toggleTheme}>
-            {#if isDarkMode}
-                <Sun class="h-4 w-4 mr-2" />
-                Light Mode
-            {:else}
-                <Moon class="h-4 w-4 mr-2" />
-                Dark Mode
-            {/if}
-        </Button>
+        <div class="flex items-center gap-3">
+            <Button variant="ghost" href="/">
+                <ArrowLeft class="h-4 w-4 mr-2" />
+                Back to App
+            </Button>
+            <Button variant="outline" onclick={toggleTheme}>
+                {#if isDarkMode}
+                    <Sun class="h-4 w-4 mr-2" />
+                    Light Mode
+                {:else}
+                    <Moon class="h-4 w-4 mr-2" />
+                    Dark Mode
+                {/if}
+            </Button>
+        </div>
     </div>
 
     <!-- SECTION: Logo -->
@@ -118,6 +124,319 @@
             <CardContent class="py-8">
                 <div class="flex justify-center">
                     <AppLogo size="medium" subtitle="Real-time monitoring and event tracking" />
+                </div>
+            </CardContent>
+        </Card>
+    </section>
+
+    <!-- SECTION: Typography -->
+    <section class="mb-16">
+        <h2 class="text-2xl font-semibold mb-2">Typography</h2>
+        <p class="text-muted-foreground mb-6">Consistent text styles across the application</p>
+        
+        <!-- Headings -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg">Headings</CardTitle>
+                <CardDescription>Page titles and section headers</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-6">
+                <div class="space-y-1">
+                    <h1 class="text-5xl font-bold">Heading 1</h1>
+                    <code class="text-xs text-muted-foreground">text-5xl font-bold</code>
+                </div>
+                <div class="space-y-1">
+                    <h2 class="text-4xl font-bold">Heading 2</h2>
+                    <code class="text-xs text-muted-foreground">text-4xl font-bold</code>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-3xl font-semibold">Heading 3</h3>
+                    <code class="text-xs text-muted-foreground">text-3xl font-semibold</code>
+                </div>
+                <div class="space-y-1">
+                    <h4 class="text-2xl font-semibold">Heading 4</h4>
+                    <code class="text-xs text-muted-foreground">text-2xl font-semibold</code>
+                </div>
+                <div class="space-y-1">
+                    <h5 class="text-xl font-semibold">Heading 5</h5>
+                    <code class="text-xs text-muted-foreground">text-xl font-semibold</code>
+                </div>
+                <div class="space-y-1">
+                    <h6 class="text-lg font-medium">Heading 6</h6>
+                    <code class="text-xs text-muted-foreground">text-lg font-medium</code>
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Body Text -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg">Body Text</CardTitle>
+                <CardDescription>Paragraph and content styles</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-6">
+                <div class="space-y-1">
+                    <p class="text-lg">Large body text for emphasis or introductions.</p>
+                    <code class="text-xs text-muted-foreground">text-lg</code>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-base">Default body text for general content. This is the standard size for most paragraphs and descriptions throughout the application.</p>
+                    <code class="text-xs text-muted-foreground">text-base (default)</code>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-sm">Small text for secondary information and supporting content.</p>
+                    <code class="text-xs text-muted-foreground">text-sm</code>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-xs">Extra small text for captions, labels, and metadata.</p>
+                    <code class="text-xs text-muted-foreground">text-xs</code>
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Text Colors -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg">Text Colors</CardTitle>
+                <CardDescription>Semantic color usage</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-4">
+                <div class="flex items-center gap-4">
+                    <p class="text-foreground flex-1">Primary foreground text</p>
+                    <code class="text-xs text-muted-foreground">text-foreground</code>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="text-muted-foreground flex-1">Muted text for secondary content</p>
+                    <code class="text-xs text-muted-foreground">text-muted-foreground</code>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="text-primary flex-1">Primary color for links and accents</p>
+                    <code class="text-xs text-muted-foreground">text-primary</code>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="text-destructive flex-1">Destructive for errors and warnings</p>
+                    <code class="text-xs text-muted-foreground">text-destructive</code>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="text-green-500 flex-1">Success for confirmations</p>
+                    <code class="text-xs text-muted-foreground">text-green-500</code>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="text-amber-500 flex-1">Warning for cautions</p>
+                    <code class="text-xs text-muted-foreground">text-amber-500</code>
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Font Weights -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg">Font Weights</CardTitle>
+                <CardDescription>Available weight variants</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-4">
+                <div class="flex items-center gap-4">
+                    <p class="text-lg font-light flex-1">Light weight (logo text)</p>
+                    <code class="text-xs text-muted-foreground">font-light</code>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="text-lg font-normal flex-1">Normal weight (body)</p>
+                    <code class="text-xs text-muted-foreground">font-normal</code>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="text-lg font-medium flex-1">Medium weight (labels)</p>
+                    <code class="text-xs text-muted-foreground">font-medium</code>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="text-lg font-semibold flex-1">Semibold weight (subheadings)</p>
+                    <code class="text-xs text-muted-foreground">font-semibold</code>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p class="text-lg font-bold flex-1">Bold weight (headings)</p>
+                    <code class="text-xs text-muted-foreground">font-bold</code>
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Special Text Styles -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg">Special Styles</CardTitle>
+                <CardDescription>Decorative and utility text styles</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-6">
+                <div class="space-y-1">
+                    <p class="text-2xl font-light tracking-wide">eventify</p>
+                    <code class="text-xs text-muted-foreground">font-light tracking-wide (logo style)</code>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-lg uppercase tracking-widest text-muted-foreground">Section Label</p>
+                    <code class="text-xs text-muted-foreground">uppercase tracking-widest</code>
+                </div>
+                <div class="space-y-1">
+                    <p class="font-mono text-sm bg-muted/30 px-2 py-1 rounded inline-block">code.example()</p>
+                    <code class="text-xs text-muted-foreground ml-2">font-mono (code/technical)</code>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-sm leading-relaxed max-w-md">Long form content with relaxed line height for better readability. Use this for paragraphs that span multiple lines.</p>
+                    <code class="text-xs text-muted-foreground">leading-relaxed</code>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-base"><span class="text-primary hover:underline cursor-pointer">Inline link style</span> within body text.</p>
+                    <code class="text-xs text-muted-foreground">text-primary hover:underline</code>
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Use Cases -->
+        <Card class="border-border/50 border-primary/30 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg flex items-center gap-2">
+                    Use Cases
+                    <span class="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">PATTERNS</span>
+                </CardTitle>
+                <CardDescription>Real-world typography patterns used throughout the application</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-8">
+                <!-- Page Title Pattern -->
+                <div class="p-4 rounded-lg border border-primary/30 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Page Title</p>
+                    <div class="space-y-1">
+                        <h1 class="text-3xl font-bold text-primary">
+                            Organization Channels
+                        </h1>
+                        <p class="text-muted-foreground mt-2">Manage channels for your organization</p>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">h1: text-3xl font-bold text-primary | p: text-muted-foreground mt-2</code>
+                </div>
+
+                <!-- Page Header Pattern -->
+                <div class="p-4 rounded-lg border border-border/50 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Page Header (with icon)</p>
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Sun class="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-semibold">Dashboard</h1>
+                            <p class="text-sm text-muted-foreground">Monitor your events in real-time.</p>
+                        </div>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">icon: bg-primary/10 text-primary | h1: text-2xl font-semibold | p: text-sm text-muted-foreground</code>
+                </div>
+
+                <!-- Card Title Pattern -->
+                <div class="p-4 rounded-lg border border-border/50 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Card Header</p>
+                    <div class="space-y-1">
+                        <h3 class="text-lg font-semibold">Event Statistics</h3>
+                        <p class="text-sm text-muted-foreground">Overview of events in the last 24 hours.</p>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">h3: text-lg font-semibold | p: text-sm text-muted-foreground</code>
+                </div>
+
+                <!-- Section Title Pattern -->
+                <div class="p-4 rounded-lg border border-border/50 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Section Title</p>
+                    <div class="space-y-1">
+                        <h2 class="text-xl font-semibold">Recent Activity</h2>
+                        <p class="text-sm text-muted-foreground">Your latest events and updates.</p>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">h2: text-xl font-semibold | p: text-sm text-muted-foreground</code>
+                </div>
+
+                <!-- Stat Card Pattern -->
+                <div class="p-4 rounded-lg border border-border/50 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Stat/Metric Card</p>
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-muted-foreground">Total Events</p>
+                        <p class="text-3xl font-bold">12,456</p>
+                        <p class="text-xs text-green-500">+12.5% from last week</p>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">label: text-sm font-medium text-muted-foreground | value: text-3xl font-bold | change: text-xs text-green-500</code>
+                </div>
+
+                <!-- Form Label Pattern -->
+                <div class="p-4 rounded-lg border border-border/50 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Form Labels</p>
+                    <div class="space-y-3">
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">Email Address</label>
+                            <p class="text-xs text-muted-foreground">We'll never share your email.</p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">Password <span class="text-destructive">*</span></label>
+                            <p class="text-xs text-destructive">Password is required.</p>
+                        </div>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">label: text-sm font-medium | hint: text-xs text-muted-foreground | error: text-xs text-destructive | required: text-destructive</code>
+                </div>
+
+                <!-- Empty State Pattern -->
+                <div class="p-4 rounded-lg border border-border/50 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Empty State</p>
+                    <div class="text-center py-4 space-y-2">
+                        <p class="text-lg font-medium">No events found</p>
+                        <p class="text-sm text-muted-foreground">Start by creating your first channel to receive events.</p>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">title: text-lg font-medium | description: text-sm text-muted-foreground</code>
+                </div>
+
+                <!-- Alert/Toast Pattern -->
+                <div class="p-4 rounded-lg border border-border/50 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Alerts & Toasts</p>
+                    <div class="space-y-3">
+                        <div class="p-3 rounded-md bg-green-500/10 border border-green-500/30">
+                            <p class="text-sm font-medium text-green-500">Success!</p>
+                            <p class="text-sm text-muted-foreground">Your changes have been saved.</p>
+                        </div>
+                        <div class="p-3 rounded-md bg-destructive/10 border border-destructive/30">
+                            <p class="text-sm font-medium text-destructive">Error</p>
+                            <p class="text-sm text-muted-foreground">Failed to save changes. Please try again.</p>
+                        </div>
+                        <div class="p-3 rounded-md bg-amber-500/10 border border-amber-500/30">
+                            <p class="text-sm font-medium text-amber-500">Warning</p>
+                            <p class="text-sm text-muted-foreground">This action cannot be undone.</p>
+                        </div>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">title: text-sm font-medium text-[color] | message: text-sm text-muted-foreground</code>
+                </div>
+
+                <!-- Table Header Pattern -->
+                <div class="p-4 rounded-lg border border-border/50 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Table Headers & Cells</p>
+                    <div class="overflow-hidden rounded-md border border-border/50">
+                        <table class="w-full">
+                            <thead class="bg-muted/30">
+                                <tr>
+                                    <th class="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 py-2">Name</th>
+                                    <th class="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 py-2">Status</th>
+                                    <th class="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 py-2">Events</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-border/50">
+                                    <td class="text-sm font-medium px-3 py-2">Production</td>
+                                    <td class="text-sm text-green-500 px-3 py-2">Active</td>
+                                    <td class="text-sm text-muted-foreground text-right px-3 py-2">1,234</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">th: text-xs font-medium text-muted-foreground uppercase tracking-wider | td: text-sm</code>
+                </div>
+
+                <!-- Badge/Tag Pattern -->
+                <div class="p-4 rounded-lg border border-border/50 bg-muted/20">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Badges & Tags</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/20 text-primary">Primary</span>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-500/20 text-green-500">Success</span>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500">Warning</span>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/20 text-destructive">Error</span>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">Muted</span>
+                    </div>
+                    <code class="text-xs text-muted-foreground mt-3 block">text-xs font-medium px-2 py-0.5 rounded-full bg-[color]/20 text-[color]</code>
                 </div>
             </CardContent>
         </Card>

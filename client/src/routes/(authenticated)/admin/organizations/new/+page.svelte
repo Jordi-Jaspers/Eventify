@@ -86,7 +86,7 @@
 <div class="max-w-2xl mx-auto px-4 py-8">
     <!-- Page Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+        <h1 class="text-3xl font-bold text-primary mb-2">
             Create Organization
         </h1>
         <p class="text-muted-foreground">

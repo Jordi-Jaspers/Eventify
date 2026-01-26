@@ -91,7 +91,7 @@
 <!-- Content Container -->
 <div class="max-w-md mx-auto">
     <!-- Logo/Branding Section -->
-    <div class="mb-8">
+    <div class="mb-8 text-center">
         <AppLogo size="medium" subtitle="Real-time monitoring and event tracking"/>
     </div>
 
@@ -195,7 +195,7 @@
                 <!-- Submit Button -->
                 <Button
                         type="submit"
-                        class="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-primary/50"
+                        class="w-full"
                         disabled={isSubmitting}
                 >
                     {#if isSubmitting}
@@ -229,9 +229,17 @@
     <!-- Dev Credentials Block -->
     {#if showDevCredentials}
         <div class="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 backdrop-blur-sm">
-            <div class="flex items-center gap-2 text-amber-500 text-sm font-medium mb-2">
-                <Terminal class="w-4 h-4"/>
-                Dev Credentials
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2 text-amber-500 text-sm font-medium">
+                    <Terminal class="w-4 h-4"/>
+                    Dev Credentials
+                </div>
+                <a 
+                    href="/dev-playbook" 
+                    class="text-xs text-primary hover:underline"
+                >
+                    Component Playbook →
+                </a>
             </div>
             {#if devCredentialsLoading}
                 <div class="text-xs text-muted-foreground flex items-center gap-2">

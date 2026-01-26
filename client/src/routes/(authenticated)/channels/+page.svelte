@@ -169,7 +169,7 @@
 		<!-- Header -->
 		<div class="flex items-center justify-between mb-8">
 			<div>
-				<h1 class="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+				<h1 class="text-3xl font-bold text-primary">
 					My Channels
 				</h1>
 				<p class="text-muted-foreground mt-2">
