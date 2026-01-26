@@ -73,7 +73,7 @@
 	<CardContent class="space-y-6">
 		<!-- Time Range -->
 		<div class="space-y-3">
-			<Label>Time Range</Label>
+			<Label class="text-sm font-medium">Time Range</Label>
 			<div class="flex flex-wrap gap-2">
 				{#each timeRanges as range (range.value)}
 					<button
@@ -81,8 +81,8 @@
 						class="
 							px-3 py-1.5 rounded-lg border text-sm font-medium transition-all
 							{timeRange === range.value
-								? 'bg-primary text-primary-foreground border-primary shadow-lg'
-								: 'bg-background/50 border-border hover:border-primary/50'}
+								? 'bg-primary text-primary-foreground border-primary shadow-sm'
+								: 'bg-background border-border hover:border-primary/50 text-muted-foreground hover:text-foreground'}
 						"
 					>
 						{range.label}
@@ -92,8 +92,8 @@
 		</div>
 
 		<!-- Checkboxes -->
-		<div class="space-y-3">
-			<div class="flex items-center space-x-2">
+		<div class="space-y-5 pt-4 border-t border-border/40">
+			<div class="flex items-center space-x-3">
 				<Checkbox
 					id="only-critical"
 					checked={onlyCritical}
@@ -101,13 +101,13 @@
 				/>
 				<Label
 					for="only-critical"
-					class="text-sm font-normal cursor-pointer"
+					class="text-sm font-normal cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 				>
 					Only critical events
 				</Label>
 			</div>
 
-			<div class="flex items-center space-x-2">
+			<div class="flex items-center space-x-3">
 				<Checkbox
 					id="sort-severity"
 					checked={sortBySeverity}
@@ -115,13 +115,13 @@
 				/>
 				<Label
 					for="sort-severity"
-					class="text-sm font-normal cursor-pointer"
+					class="text-sm font-normal cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 				>
 					Sort by severity
 				</Label>
 			</div>
 
-			<div class="flex items-center space-x-2">
+			<div class="flex items-center space-x-3">
 				<Checkbox
 					id="grouped-view"
 					checked={groupedView}
@@ -129,7 +129,7 @@
 				/>
 				<Label
 					for="grouped-view"
-					class="text-sm font-normal cursor-pointer"
+					class="text-sm font-normal cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 				>
 					Show grouped view
 				</Label>

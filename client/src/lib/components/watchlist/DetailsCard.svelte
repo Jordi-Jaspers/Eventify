@@ -61,9 +61,9 @@
 			{/if}
 		</div>
 	</CardHeader>
-	<CardContent class="space-y-4">
-		<div class="space-y-2">
-			<Label for="name">
+	<CardContent class="space-y-6">
+		<div class="space-y-3">
+			<Label for="name" class="text-sm font-medium">
 				Name <span class="text-destructive" aria-label="required">*</span>
 			</Label>
 			<Input
@@ -71,24 +71,24 @@
 				bind:value={name}
 				onchange={() => onNameChange(name)}
 				placeholder="My Watchlist"
-				class="bg-background/50 border-border"
+				class="bg-background border-border focus-visible:ring-primary"
 				required
 			/>
 		</div>
 
-		<div class="space-y-2">
+		<div class="space-y-3">
 			<div class="flex items-center justify-between">
-				<Label for="description" class="text-sm">Description</Label>
+				<Label for="description" class="text-sm font-medium">Description</Label>
 				<Button 
 					variant="ghost" 
 					size="sm" 
-					class="h-7 px-2 gap-1"
+					class="h-7 px-2 gap-1 text-muted-foreground hover:text-foreground"
 					onclick={toggleDescription}
 				>
-					<span class="text-xs text-muted-foreground">
+					<span class="text-xs">
 						{descriptionOpen ? 'Hide' : 'Add'}
 					</span>
-					<ChevronDown class="h-3 w-3 text-muted-foreground transition-transform {descriptionOpen ? 'rotate-180' : ''}" />
+					<ChevronDown class="h-3 w-3 transition-transform {descriptionOpen ? 'rotate-180' : ''}" />
 				</Button>
 			</div>
 			{#if descriptionOpen}
@@ -98,7 +98,7 @@
 						bind:value={description}
 						onchange={() => onDescriptionChange(description ?? '')}
 						placeholder="Optional description for this watchlist"
-						class="bg-background/50 border-border min-h-[80px]"
+						class="bg-background border-border min-h-[80px] focus-visible:ring-primary"
 					/>
 				</div>
 			{/if}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Radio, FolderTree } from '@lucide/svelte';
+	import { Radio } from '@lucide/svelte';
 	import type { ChannelDetailsResponse, WatchlistDetailsResponse } from '$lib/api/models';
 	import type { components } from '$lib/types/api';
 	import type { ConfigItem, ConfigChannelItem, ConfigGroupItem } from './types';
@@ -10,8 +10,6 @@
 	import FiltersCard from './FiltersCard.svelte';
 	import ChannelSelectSheet from './ChannelSelectSheet.svelte';
 	import GroupNameSheet from './GroupNameSheet.svelte';
-	import { Card, CardHeader, CardTitle, CardContent } from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
 
 	type CreateWatchlistRequest = components['schemas']['CreateWatchlistRequest'];
 	type UpdateWatchlistRequest = components['schemas']['UpdateWatchlistRequest'];
@@ -286,7 +284,7 @@
 </script>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-	<!-- Left Column: Details + Filters + Action Buttons -->
+	<!-- Left Column: Details + Filters -->
 	<div class="space-y-6">
 		<DetailsCard
 			bind:name
@@ -306,33 +304,6 @@
 			onSortBySeverityChange={(v) => (sortBySeverity = v)}
 			onGroupedViewChange={(v) => (groupedView = v)}
 		/>
-
-		<!-- Action Buttons Card -->
-		<Card class="bg-card/50 backdrop-blur-xl border-border/50 shadow-lg">
-			<CardHeader>
-				<CardTitle class="text-lg flex items-center gap-2">
-					<FolderTree class="h-5 w-5 text-primary" />
-					Add Items
-				</CardTitle>
-			</CardHeader>
-			<CardContent class="space-y-3">
-				<Button
-					onclick={() => openChannelSheet()}
-					class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all"
-				>
-					<Radio class="mr-2 h-4 w-4" />
-					Add Channel
-				</Button>
-				<Button
-					onclick={openGroupSheet}
-					variant="outline"
-					class="w-full"
-				>
-					<FolderTree class="mr-2 h-4 w-4" />
-					Add Group
-				</Button>
-			</CardContent>
-		</Card>
 	</div>
 
 	<!-- Right Column: Configurator (spans 2 columns) -->
@@ -341,6 +312,7 @@
 			bind:items={configItems}
 			onUpdate={handleConfigUpdate}
 			onAddChannel={openChannelSheet}
+			onAddGroup={openGroupSheet}
 		/>
 	</div>
 </div>

@@ -1,7 +1,7 @@
 /**
  * Watchlist Builder Screenshot Tests
  *
- * Tests the new drag-and-drop watchlist builder in both dark and light modes.
+ * Tests the click-based watchlist builder in both dark and light modes.
  * This is an authenticated page - requires login.
  */
 import {
@@ -12,8 +12,8 @@ import {
 	ANIMATION_SETTLE_MS,
 	DATA_LOAD_MS
 } from '../fixtures/test-fixtures';
-import { createScreenshotHelper } from '../utils/screenshot';
-import { COLD_START_TIMEOUT_MS, ELEMENT_WAIT_TIMEOUT_MS, THEMES } from '../utils/constants';
+import { createScreenshotHelper } from '../utils';
+import { COLD_START_TIMEOUT_MS, ELEMENT_WAIT_TIMEOUT_MS, THEMES } from '../utils';
 
 const PAGE_NAME = 'watchlist-builder';
 const getScreenshot = createScreenshotHelper(PAGE_NAME);
@@ -29,8 +29,16 @@ test.describe('Watchlist Builder Screenshots', () => {
 					await loginAndNavigate(page, '/watchlists/new');
 				});
 
-				test(`initial layout with building blocks`, async ({ page }, testInfo) => {
+				test(`initial layout`, async ({ page }, testInfo) => {
 					await page.waitForTimeout(DATA_LOAD_MS);
+
+					// Verify the Configuration card with Add buttons is visible
+					const configCard = page.getByText('Configuration');
+					await configCard.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+
+					// Verify Add Channel and Add Group buttons are in the configurator
+					const addChannelBtn = page.getByRole('button', { name: /add channel/i });
+					await addChannelBtn.first().waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
 
 					await page.screenshot({
 						path: getScreenshot(`01-initial-layout-${theme}`, testInfo.project.name),
@@ -45,8 +53,22 @@ test.describe('Watchlist Builder Screenshots', () => {
 					const nameInput = page.locator('#name');
 					await nameInput.fill('Production Monitoring');
 
+					// Expand description - look for the toggle button within DetailsCard (exact "Add" text, not "Add Channel")
+					// The button is inside the Description label row and shows "Add" or "Hide"
+					const descriptionSection = page.locator('label:has-text("Description")').locator('..');
+					const addDescBtn = descriptionSection.getByRole('button');
+					if (await addDescBtn.isVisible()) {
+						const buttonText = await addDescBtn.textContent();
+						if (buttonText?.includes('Add')) {
+							await addDescBtn.click();
+							await page.waitForTimeout(ANIMATION_SETTLE_MS);
+						}
+					}
+
 					const descriptionInput = page.locator('#description');
-					await descriptionInput.fill('Monitor all production channels for critical alerts');
+					if (await descriptionInput.isVisible()) {
+						await descriptionInput.fill('Monitor all production channels for critical alerts');
+					}
 
 					// Select 7d time range
 					const sevenDaysButton = page.getByRole('button', { name: '7d' });
@@ -62,78 +84,64 @@ test.describe('Watchlist Builder Screenshots', () => {
 				test(`channel select sheet open`, async ({ page }, testInfo) => {
 					await page.waitForTimeout(DATA_LOAD_MS);
 
-					// Look for building blocks section
-					const buildinBlocksCard = page.getByText('Building Blocks');
-					await buildinBlocksCard.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+					// Click the Add Channel button
+					const addChannelBtn = page.getByRole('button', { name: /add channel/i }).first();
+					await addChannelBtn.click();
+					await page.waitForTimeout(ANIMATION_SETTLE_MS);
 
-					// The sheet will open when user drags a channel block and drops it
-					// For testing, we can't easily simulate drag-drop, but we can
-					// try to find and click elements if they exist
-					// This test validates the sheet component exists
+					// Wait for sheet to be visible
+					const sheetTitle = page.getByText('Select Channel');
+					await sheetTitle.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
 
 					await page.screenshot({
-						path: getScreenshot(`03-building-blocks-${theme}`, testInfo.project.name),
+						path: getScreenshot(`03-channel-sheet-${theme}`, testInfo.project.name),
 						fullPage: true
 					});
 				});
 
-				test(`empty configurator state`, async ({ page }, testInfo) => {
+				test(`group name sheet open`, async ({ page }, testInfo) => {
 					await page.waitForTimeout(DATA_LOAD_MS);
 
-					// The configurator should show empty state initially
-					const configurator = page.getByText('Configurator');
-					await configurator.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+					// Click the Add Group button
+					const addGroupBtn = page.getByRole('button', { name: /add group/i }).first();
+					await addGroupBtn.click();
+					await page.waitForTimeout(ANIMATION_SETTLE_MS);
+
+					// Wait for sheet to be visible
+					const sheetTitle = page.getByText('Create Group');
+					await sheetTitle.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
 
 					await page.screenshot({
-						path: getScreenshot(`04-empty-configurator-${theme}`, testInfo.project.name),
+						path: getScreenshot(`04-group-sheet-${theme}`, testInfo.project.name),
+						fullPage: true
+					});
+				});
+
+				test(`watchlist with channels and groups`, async ({ page }, testInfo) => {
+					// Navigate to watchlists list (already logged in from beforeEach)
+					await page.goto('/watchlists');
+					await page.waitForTimeout(DATA_LOAD_MS);
+
+					// Wait for the list to load
+					const watchlistName = page.getByText('All Channels Overview');
+					await watchlistName.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+
+					// Find all edit buttons and click the second one (All Channels Overview is the second row)
+					const editButtons = page.getByRole('button', { name: 'Edit watchlist' });
+					await editButtons.nth(1).click(); // Second row (0-indexed)
+					await page.waitForTimeout(DATA_LOAD_MS);
+
+					// Verify we're on the edit page with configuration loaded
+					const configCard = page.getByText('Configuration');
+					await configCard.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+
+					await page.screenshot({
+						path: getScreenshot(`05-with-components-${theme}`, testInfo.project.name),
 						fullPage: true
 					});
 				});
 			});
 
-			test.describe('Edit Page (if watchlist exists)', () => {
-				test.beforeEach(async ({ page }) => {
-					await setTheme(page, theme);
-					await loginAndNavigate(page, '/watchlists');
-					await page.waitForTimeout(DATA_LOAD_MS);
-
-					// Try to click on first watchlist edit button
-					const editButtons = page.getByRole('button', { name: /edit/i });
-					const firstEdit = editButtons.first();
-
-					const isVisible: boolean = await firstEdit.isVisible().catch(() => false);
-					if (isVisible) {
-						await firstEdit.click();
-						await page.waitForTimeout(DATA_LOAD_MS);
-					}
-				});
-
-				test(`edit layout with existing configuration`, async ({ page }, testInfo) => {
-					// Check if we're on an edit page
-					const url: string = page.url();
-					if (url.includes('/watchlists/') && !url.endsWith('/new')) {
-						await page.screenshot({
-							path: getScreenshot(`05-edit-layout-${theme}`, testInfo.project.name),
-							fullPage: true
-						});
-					}
-				});
-
-				test(`saving indicator`, async ({ page }, testInfo) => {
-					const url: string = page.url();
-					if (url.includes('/watchlists/') && !url.endsWith('/new')) {
-						// Modify name to trigger auto-save
-						const nameInput = page.locator('#name');
-						await nameInput.fill('Updated Watchlist ' + Date.now());
-						await page.waitForTimeout(ANIMATION_SETTLE_MS);
-
-						await page.screenshot({
-							path: getScreenshot(`06-edit-saving-${theme}`, testInfo.project.name),
-							fullPage: true
-						});
-					}
-				});
-			});
 		});
 	}
 });

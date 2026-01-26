@@ -97,19 +97,6 @@
                 ),
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes';
-
-            -- Watchlist 5: Empty watchlist - no channels configured yet
-            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
-            VALUES (
-                'New Project (Draft)',
-                NULL,
-                1,
-                NULL,
-                '{"channelIds": []}',
-                '{"timeRange": "24h", "onlyCritical": false, "sortBySeverity": true, "groupedView": true}',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days',
-                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days'
-            );
         </sql>
     </changeSet>
 

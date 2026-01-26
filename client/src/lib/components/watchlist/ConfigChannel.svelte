@@ -1,73 +1,100 @@
 <script lang="ts">
-	import { ChevronUp, ChevronDown, Radio, Trash2 } from '@lucide/svelte';
+	import { GripVertical, Radio, X } from '@lucide/svelte';
 	import type { ConfigChannelItem } from './types';
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
 		item: ConfigChannelItem;
-		isFirst: boolean;
-		isLast: boolean;
-		onMoveUp: () => void;
-		onMoveDown: () => void;
 		onDelete: () => void;
+		onDragStart?: (e: DragEvent) => void;
+		onDragOver?: (e: DragEvent) => void;
+		onDrop?: (e: DragEvent) => void;
+		onDragEnd?: (e: DragEvent) => void;
 	}
 
-	let { item, isFirst, isLast, onMoveUp, onMoveDown, onDelete }: Props = $props();
+	let { item, onDelete, onDragStart, onDragOver, onDrop, onDragEnd }: Props = $props();
+
+	let isDragging: boolean = $state(false);
+	let isDropTarget: boolean = $state(false);
+
+	function handleDragStart(e: DragEvent): void {
+		isDragging = true;
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/plain', item.id);
+		}
+		onDragStart?.(e);
+	}
+
+	function handleDragEnd(e: DragEvent): void {
+		isDragging = false;
+		isDropTarget = false;
+		onDragEnd?.(e);
+	}
+
+	function handleDragOver(e: DragEvent): void {
+		e.preventDefault();
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'move';
+		}
+		if (!isDragging) {
+			isDropTarget = true;
+		}
+		onDragOver?.(e);
+	}
+
+	function handleDragLeave(): void {
+		isDropTarget = false;
+	}
+
+	function handleDrop(e: DragEvent): void {
+		e.preventDefault();
+		isDropTarget = false;
+		onDrop?.(e);
+	}
 </script>
 
 <div
 	data-channel-id={item.channelId}
-	class="
-		rounded-lg border border-border/50 bg-card/80 backdrop-blur-sm
-		p-3 hover:border-primary/50 transition-all shadow-sm
-		flex items-center gap-3
-	"
+	data-item-id={item.id}
+	draggable="true"
+	ondragstart={handleDragStart}
+	ondragend={handleDragEnd}
+	ondragover={handleDragOver}
+	ondragleave={handleDragLeave}
+	ondrop={handleDrop}
+	class:opacity-50={isDragging}
+	class:border={isDropTarget}
+	class:border-primary={isDropTarget}
+	class="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-all cursor-move {isDropTarget ? 'bg-primary/10' : ''}"
+	role="button"
+	tabindex="0"
+	aria-label="Drag to reorder channel"
 >
-	<!-- Reorder buttons -->
-	<div class="flex flex-col gap-1 shrink-0">
-		<Button
-			size="icon"
-			variant="ghost"
-			onclick={onMoveUp}
-			disabled={isFirst}
-			class="h-6 w-6 p-0 hover:bg-muted"
-			aria-label="Move up"
-		>
-			<ChevronUp class="h-4 w-4" />
-		</Button>
-		<Button
-			size="icon"
-			variant="ghost"
-			onclick={onMoveDown}
-			disabled={isLast}
-			class="h-6 w-6 p-0 hover:bg-muted"
-			aria-label="Move down"
-		>
-			<ChevronDown class="h-4 w-4" />
-		</Button>
+	<!-- Drag handle - subtle, shows on hover -->
+	<div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+		<GripVertical class="h-4 w-4 text-muted-foreground/50" />
 	</div>
 
-	<!-- Icon -->
-	<div class="p-2 rounded-md bg-primary/10 shrink-0">
-		<Radio class="h-5 w-5 text-primary" />
-	</div>
+	<!-- Icon - more subtle -->
+	<Radio class="h-4 w-4 text-primary/70 shrink-0" />
 
 	<!-- Info -->
 	<div class="flex-1 min-w-0">
-		<p class="font-medium text-sm truncate">{item.channel.name}</p>
+		<p class="text-sm font-medium truncate text-foreground">{item.channel.name}</p>
 		{#if item.channel.description}
-			<p class="text-xs text-muted-foreground truncate">{item.channel.description}</p>
+			<p class="text-xs text-muted-foreground truncate" title={item.channel.description}>{item.channel.description}</p>
 		{/if}
 	</div>
 
-	<!-- Delete Button - right aligned -->
+	<!-- Delete Button - subtle, shows on hover -->
 	<Button
 		variant="ghost"
 		size="icon"
-		class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+		class="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive shrink-0 transition-all"
 		onclick={onDelete}
 		aria-label="Remove channel"
 	>
-		<Trash2 class="h-4 w-4" />
+		<X class="h-4 w-4" />
 	</Button>
 </div>

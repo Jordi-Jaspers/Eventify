@@ -43,30 +43,30 @@
 		</SheetHeader>
 
 		<form onsubmit={handleSubmit} class="mt-6 space-y-6">
-			<div class="space-y-2">
-				<Label for="group-name">Group Name</Label>
+			<div class="space-y-3">
+				<Label for="group-name" class="text-sm font-medium">Group Name</Label>
 				<Input
 					id="group-name"
 					bind:value={groupName}
 					placeholder="e.g., Production Systems"
-					class="bg-background/50 border-border"
+					class="bg-background border-border focus-visible:ring-primary"
 					required
 					autofocus
 				/>
 			</div>
 
-			<div class="flex gap-3">
+			<div class="flex gap-3 pt-2">
 				<Button
 					type="button"
 					variant="outline"
-					class="flex-1"
+					class="flex-1 hover:bg-muted"
 					onclick={handleCancel}
 				>
 					Cancel
 				</Button>
 				<Button
 					type="submit"
-					class="flex-1 bg-gradient-to-r from-accent to-accent/80 hover:opacity-90 text-accent-foreground"
+					class="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground transition-all shadow-sm"
 					disabled={!groupName.trim()}
 				>
 					Create Group
