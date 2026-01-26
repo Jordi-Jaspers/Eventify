@@ -5,7 +5,8 @@
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import Button from '$lib/components/ui/button/button.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
-    import { Sun, Moon, Check, X, Loader2, ArrowLeft } from '@lucide/svelte';
+    import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2 } from '@lucide/svelte';
+    import { Badge } from '$lib/components/ui/badge';
     
     // Redirect if not in dev mode
     const isDev = env.PUBLIC_SHOW_DEV_CREDENTIALS === 'true';
@@ -564,6 +565,291 @@
                 </CardContent>
             </Card>
         </div>
+    </section>
+
+    <!-- SECTION: List Item Rows -->
+    <section class="mb-16">
+        <h2 class="text-2xl font-semibold mb-2">List Item Rows</h2>
+        <p class="text-muted-foreground mb-6">Preferred pattern for DataTable rows and list items - minimal, scannable, hover-reveal actions</p>
+        
+        <!-- Basic List Item -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg flex items-center gap-2">
+                    Basic List Item
+                    <span class="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">PREFERRED</span>
+                </CardTitle>
+                <CardDescription>Minimal row with hover actions - use this for DataTable rows</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-1">
+                <!-- Example items -->
+                <div class="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-all">
+                    <Radio class="h-4 w-4 text-primary/70 shrink-0" />
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate text-foreground">Production API</p>
+                        <p class="text-xs text-muted-foreground truncate">Main production channel for API events</p>
+                    </div>
+                    <Badge variant="default" class="shrink-0">Active</Badge>
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" class="h-7 w-7 text-muted-foreground hover:text-primary">
+                            <Edit class="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" class="h-7 w-7 text-muted-foreground hover:text-destructive">
+                            <Trash2 class="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+                <div class="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-all">
+                    <Radio class="h-4 w-4 text-primary/70 shrink-0" />
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate text-foreground">Staging Environment</p>
+                        <p class="text-xs text-muted-foreground truncate">Pre-production testing channel</p>
+                    </div>
+                    <Badge variant="secondary" class="shrink-0">Paused</Badge>
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" class="h-7 w-7 text-muted-foreground hover:text-primary">
+                            <Edit class="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" class="h-7 w-7 text-muted-foreground hover:text-destructive">
+                            <Trash2 class="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+                <div class="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-all">
+                    <Radio class="h-4 w-4 text-primary/70 shrink-0" />
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate text-foreground">Development</p>
+                        <p class="text-xs text-muted-foreground truncate">Local development events</p>
+                    </div>
+                    <Badge variant="default" class="shrink-0">Active</Badge>
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" class="h-7 w-7 text-muted-foreground hover:text-primary">
+                            <Edit class="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" class="h-7 w-7 text-muted-foreground hover:text-destructive">
+                            <Trash2 class="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Draggable List Item -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg">Draggable List Item</CardTitle>
+                <CardDescription>With drag handle that appears on hover</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-1">
+                <div class="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-all cursor-move">
+                    <div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <GripVertical class="h-4 w-4 text-muted-foreground/50" />
+                    </div>
+                    <Radio class="h-4 w-4 text-primary/70 shrink-0" />
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate">Production API</p>
+                        <p class="text-xs text-muted-foreground truncate">Main production channel</p>
+                    </div>
+                    <Button variant="ghost" size="icon" class="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all">
+                        <X class="h-4 w-4" />
+                    </Button>
+                </div>
+                <div class="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-all cursor-move">
+                    <div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <GripVertical class="h-4 w-4 text-muted-foreground/50" />
+                    </div>
+                    <Radio class="h-4 w-4 text-primary/70 shrink-0" />
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate">Staging Environment</p>
+                        <p class="text-xs text-muted-foreground truncate">Pre-production testing</p>
+                    </div>
+                    <Button variant="ghost" size="icon" class="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all">
+                        <X class="h-4 w-4" />
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Collapsible Group -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg">Collapsible Group</CardTitle>
+                <CardDescription>For nested/grouped items with expand/collapse</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div class="rounded-md border border-border/30">
+                    <div class="group flex items-center gap-3 px-3 py-2.5 bg-muted/20 hover:bg-muted/40 transition-all cursor-move">
+                        <div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <GripVertical class="h-4 w-4 text-muted-foreground/50" />
+                        </div>
+                        <button class="shrink-0 text-muted-foreground hover:text-foreground">
+                            <ChevronDown class="h-4 w-4" />
+                        </button>
+                        <Folder class="h-4 w-4 text-primary/70 shrink-0" />
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-sm truncate">Backend Services</p>
+                            <p class="text-xs text-muted-foreground">3 channels</p>
+                        </div>
+                        <Button variant="ghost" size="icon" class="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all">
+                            <X class="h-4 w-4" />
+                        </Button>
+                    </div>
+                    <div class="pl-10 pr-3 pb-3 pt-2 space-y-1">
+                        <div class="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-all cursor-move">
+                            <div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <GripVertical class="h-4 w-4 text-muted-foreground/50" />
+                            </div>
+                            <Radio class="h-4 w-4 text-primary/70 shrink-0" />
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium truncate">API Gateway</p>
+                            </div>
+                            <Button variant="ghost" size="icon" class="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all">
+                                <X class="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <div class="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-all cursor-move">
+                            <div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <GripVertical class="h-4 w-4 text-muted-foreground/50" />
+                            </div>
+                            <Radio class="h-4 w-4 text-primary/70 shrink-0" />
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium truncate">Auth Service</p>
+                            </div>
+                            <Button variant="ghost" size="icon" class="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all">
+                                <X class="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Standard Card Row -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg flex items-center gap-2">
+                    Standard Card Row
+                    <span class="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">FOR OVERVIEWS</span>
+                </CardTitle>
+                <CardDescription>More visual weight for main list pages - subtle border, larger icon, visible actions</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-2">
+                <div class="group flex items-center gap-4 px-4 py-3 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all">
+                    <Radio class="h-5 w-5 text-primary shrink-0" />
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium truncate">Production API</p>
+                        <p class="text-sm text-muted-foreground truncate">Main production channel for API events</p>
+                    </div>
+                    <Badge variant="default">Active</Badge>
+                    <span class="text-sm text-muted-foreground whitespace-nowrap">Jan 15, 2026</span>
+                    <div class="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
+                            <Edit class="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-destructive">
+                            <Trash2 class="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+                <div class="group flex items-center gap-4 px-4 py-3 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all">
+                    <Radio class="h-5 w-5 text-primary shrink-0" />
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium truncate">Staging Environment</p>
+                        <p class="text-sm text-muted-foreground truncate">Pre-production testing channel</p>
+                    </div>
+                    <Badge variant="secondary">Paused</Badge>
+                    <span class="text-sm text-muted-foreground whitespace-nowrap">Jan 10, 2026</span>
+                    <div class="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
+                            <Edit class="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-destructive">
+                            <Trash2 class="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+                <code class="text-xs text-muted-foreground block p-2 bg-muted/30 rounded mt-4">
+                    border-border/50, bg-card/30, h-5 w-5 icon (no container), visible actions
+                </code>
+            </CardContent>
+        </Card>
+
+        <!-- Comparison: Minimal vs Standard -->
+        <Card class="border-border/50 border-primary/30">
+            <CardHeader>
+                <CardTitle class="text-lg flex items-center gap-2">
+                    When to Use Each Style
+                    <span class="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">REFERENCE</span>
+                </CardTitle>
+                <CardDescription>Choose based on context and data density</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-6">
+                <!-- Minimal -->
+                <div class="space-y-2">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                        Minimal - Dense lists, builders, config panels
+                    </p>
+                    <div class="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/50 transition-all">
+                        <Radio class="h-4 w-4 text-primary/70 shrink-0" />
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium truncate">Production API</p>
+                            <p class="text-xs text-muted-foreground truncate">Main production channel</p>
+                        </div>
+                        <Badge variant="default">Active</Badge>
+                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" class="h-7 w-7 text-muted-foreground hover:text-primary">
+                                <Edit class="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                    <code class="text-xs text-muted-foreground block p-2 bg-muted/30 rounded">
+                        No border, hover:bg-muted/50, h-4 w-4 icon, hover-reveal actions
+                    </code>
+                </div>
+
+                <!-- Standard -->
+                <div class="space-y-2">
+                    <p class="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                        Standard - Main overviews, dashboards
+                    </p>
+                    <div class="group flex items-center gap-4 px-4 py-3 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all">
+                        <Radio class="h-5 w-5 text-primary shrink-0" />
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium truncate">Production API</p>
+                            <p class="text-sm text-muted-foreground truncate">Main production channel</p>
+                        </div>
+                        <Badge variant="default">Active</Badge>
+                        <div class="flex items-center gap-1">
+                            <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
+                                <Edit class="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                    <code class="text-xs text-muted-foreground block p-2 bg-muted/30 rounded">
+                        border-border/50, bg-card/30, h-5 w-5 icon, visible actions
+                    </code>
+                </div>
+
+                <!-- Avoid -->
+                <div class="space-y-2">
+                    <p class="text-xs uppercase tracking-widest text-destructive flex items-center gap-2">
+                        <X class="h-3 w-3" /> Avoid - Icon containers, gradients, blur
+                    </p>
+                    <div class="flex items-center gap-4 px-4 py-3 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm opacity-60">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
+                            <Radio class="h-5 w-5 text-primary" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium truncate">Production API</p>
+                            <p class="text-sm text-muted-foreground truncate">Main production channel</p>
+                        </div>
+                    </div>
+                    <code class="text-xs text-destructive block p-2 bg-destructive/10 rounded">
+                        Don't use: icon containers, gradients, backdrop-blur on rows
+                    </code>
+                </div>
+            </CardContent>
+        </Card>
     </section>
 
     <!-- SECTION: Usage Examples -->
