@@ -1,13 +1,11 @@
 package io.github.eventify.api.watchlist.model.mapper;
 
 import io.github.eventify.api.channel.model.Channel;
-import io.github.eventify.api.channel.model.ChannelGroup;
-import io.github.eventify.api.channel.model.response.ChannelGroupResponse;
+import io.github.eventify.api.channel.model.mapper.ChannelGroupMapper;
 import io.github.eventify.api.monitor.model.TimeRange;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
 import io.github.eventify.api.watchlist.model.WatchlistFilters;
-import io.github.eventify.api.watchlist.model.request.ChannelGroupRequest;
 import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.WatchlistConfigurationRequest;
@@ -21,8 +19,7 @@ import io.github.jframe.util.mapper.config.SharedMapperConfig;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -30,10 +27,15 @@ import org.mapstruct.Named;
 
 /**
  * Mapper for watchlist entities and DTOs.
+ *
+ * <p>Uses {@link ChannelGroupMapper} for ChannelGroup conversions to avoid duplication.
  */
 @Mapper(
     config = SharedMapperConfig.class,
-    uses = DateTimeMapper.class
+    uses = {
+        DateTimeMapper.class,
+        ChannelGroupMapper.class
+    }
 )
 public abstract class WatchlistMapper extends PageMapper<WatchlistDetailsResponse, Watchlist> {
 
@@ -59,72 +61,43 @@ public abstract class WatchlistMapper extends PageMapper<WatchlistDetailsRespons
 
     /**
      * Maps WatchlistFilters domain to response DTO.
-     * Uses @JsonValue for automatic TimeRange serialization.
+     * Converts TimeRange enum to its string value.
      *
      * @param filters the domain filters
      * @return the response filters
      */
     @Named("filtersToResponse")
-    public WatchlistFiltersResponse filtersToResponse(final WatchlistFilters filters) {
-        if (filters == null) {
-            return null;
-        }
-        final WatchlistFiltersResponse response = new WatchlistFiltersResponse();
-        response.setTimeRange(
-            filters.getTimeRange() != null
-                ? filters.getTimeRange().getValue()
-                : TimeRange.LAST_24H.getValue()
-        );
-        response.setOnlyCritical(filters.isOnlyCritical());
-        response.setSortBySeverity(filters.isSortBySeverity());
-        response.setGroupedView(filters.isGroupedView());
-        return response;
-    }
+    @Mapping(
+        target = "timeRange",
+        source = "timeRange",
+        qualifiedByName = "timeRangeToString"
+    )
+    public abstract WatchlistFiltersResponse filtersToResponse(WatchlistFilters filters);
 
     /**
      * Maps WatchlistConfiguration domain to response DTO.
+     * Uses ChannelGroupMapper for group conversion via 'uses' attribute.
      *
      * @param configuration the domain configuration
      * @return the response configuration
      */
     @Named("configurationToResponse")
-    public WatchlistConfigurationResponse configurationToResponse(final WatchlistConfiguration configuration) {
-        if (configuration == null) {
-            return null;
-        }
-        final WatchlistConfigurationResponse response = new WatchlistConfigurationResponse();
-        response.setChannelIds(configuration.getChannelIds());
-        response.setGroups(groupsToResponse(configuration.getGroups()));
-        return response;
-    }
+    @Mapping(
+        target = "groups",
+        source = "groups",
+        qualifiedByName = "toSimpleResponseList"
+    )
+    public abstract WatchlistConfigurationResponse configurationToResponse(WatchlistConfiguration configuration);
 
     /**
-     * Maps ChannelGroup list to ChannelGroupResponse list.
+     * Converts TimeRange enum to its string value.
      *
-     * @param groups the domain groups
-     * @return the response groups
+     * @param timeRange the time range enum
+     * @return the string value (e.g., "24h", "7d")
      */
-    protected List<ChannelGroupResponse> groupsToResponse(final List<ChannelGroup> groups) {
-        if (groups == null) {
-            return new ArrayList<>();
-        }
-        return groups.stream()
-            .map(this::groupToResponse)
-            .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    /**
-     * Maps a single ChannelGroup to ChannelGroupResponse.
-     *
-     * @param group the domain group
-     * @return the response group
-     */
-    private ChannelGroupResponse groupToResponse(final ChannelGroup group) {
-        final ChannelGroupResponse response = new ChannelGroupResponse();
-        response.setId(group.getId());
-        response.setName(group.getName());
-        response.setChannelIds(group.getChannelIds());
-        return response;
+    @Named("timeRangeToString")
+    protected String timeRangeToString(final TimeRange timeRange) {
+        return Objects.requireNonNullElse(timeRange, TimeRange.LAST_24H).getValue();
     }
 
     // ==================== Request -> Entity ====================
@@ -151,7 +124,7 @@ public abstract class WatchlistMapper extends PageMapper<WatchlistDetailsRespons
 
     /**
      * Maps WatchlistConfigurationRequest to domain.
-     * Used by MapStruct for nested mapping in toWatchlist methods.
+     * Uses ChannelGroupMapper for group conversion via 'uses' attribute.
      *
      * @param request the configuration request
      * @return the configuration domain object
@@ -160,11 +133,6 @@ public abstract class WatchlistMapper extends PageMapper<WatchlistDetailsRespons
         target = "channels",
         source = "channelIds",
         qualifiedByName = "channelIdsToChannels"
-    )
-    @Mapping(
-        target = "groups",
-        source = "groups",
-        qualifiedByName = "groupRequestsToGroups"
     )
     public abstract WatchlistConfiguration toConfiguration(WatchlistConfigurationRequest request);
 
@@ -180,47 +148,8 @@ public abstract class WatchlistMapper extends PageMapper<WatchlistDetailsRespons
             return new ArrayList<>();
         }
         return channelIds.stream()
-            .map(this::channelWithId)
-            .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    /**
-     * Converts group requests to ChannelGroup objects.
-     *
-     * @param groupRequests the list of group requests
-     * @return the list of ChannelGroup objects
-     */
-    @Named("groupRequestsToGroups")
-    protected List<ChannelGroup> groupRequestsToGroups(final List<ChannelGroupRequest> groupRequests) {
-        if (groupRequests == null) {
-            return new ArrayList<>();
-        }
-        return groupRequests.stream()
-            .map(this::toChannelGroup)
-            .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    /**
-     * Converts a single group request to a ChannelGroup.
-     *
-     * @param request the group request
-     * @return the ChannelGroup
-     */
-    private ChannelGroup toChannelGroup(final ChannelGroupRequest request) {
-        return ChannelGroup.builder()
-            .id(request.getId() != null ? request.getId() : UUID.randomUUID())
-            .name(request.getName())
-            .channels(channelIdsToChannels(request.getChannelIds()))
-            .build();
-    }
-
-    /**
-     * Creates a Channel with only the id populated.
-     */
-    private Channel channelWithId(final Long id) {
-        final Channel channel = new Channel();
-        channel.setId(id);
-        return channel;
+            .map(Channel::new)
+            .toList();
     }
 
     /**

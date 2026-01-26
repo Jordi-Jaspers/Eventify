@@ -1,8 +1,7 @@
 package io.github.eventify.api.monitor.model.mapper;
 
 import io.github.eventify.api.channel.model.Channel;
-import io.github.eventify.api.channel.model.ChannelGroup;
-import io.github.eventify.api.channel.model.response.ChannelGroupResponse;
+import io.github.eventify.api.channel.model.mapper.ChannelGroupMapper;
 import io.github.eventify.api.channel.model.response.ChannelResponse;
 import io.github.eventify.api.monitor.model.MonitorResult;
 import io.github.eventify.api.monitor.model.response.DashboardResponse;
@@ -17,8 +16,13 @@ import org.mapstruct.Mapping;
 
 /**
  * Mapper for monitor domain objects to response DTOs.
+ *
+ * <p>Uses {@link ChannelGroupMapper} for ChannelGroup conversions to avoid duplication.
  */
-@Mapper(config = SharedMapperConfig.class)
+@Mapper(
+    config = SharedMapperConfig.class,
+    uses = ChannelGroupMapper.class
+)
 public abstract class MonitorMapper {
 
     /**
@@ -46,28 +50,13 @@ public abstract class MonitorMapper {
     public abstract List<ChannelResponse> toChannelResponses(List<Channel> channels);
 
     /**
-     * Maps a ChannelGroup to ChannelGroupResponse.
-     *
-     * @param group the channel group (with transient channels populated)
-     * @return channel group response
-     */
-    public abstract ChannelGroupResponse toChannelGroupResponse(ChannelGroup group);
-
-    /**
-     * Maps a list of ChannelGroups to ChannelGroupResponses.
-     *
-     * @param groups the channel groups
-     * @return channel group responses
-     */
-    public abstract List<ChannelGroupResponse> toChannelGroupResponses(List<ChannelGroup> groups);
-
-    /**
-     * Maps a WatchlistConfiguration to ConfigurationResponse.
+     * Maps a WatchlistConfiguration to DashboardResponse.
+     * Uses ChannelGroupMapper for group conversion via 'uses' attribute.
      *
      * @param configuration the watchlist configuration
-     * @return configuration response
+     * @return dashboard response
      */
-    public abstract DashboardResponse toConfigurationResponse(WatchlistConfiguration configuration);
+    public abstract DashboardResponse toDashboardResponse(WatchlistConfiguration configuration);
 
     /**
      * Maps MonitorResult to MonitorResponse.

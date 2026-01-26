@@ -10,6 +10,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
+import static io.github.eventify.Main.SERIAL_VERSION_UID;
+
 /**
  * Response DTO for a channel with its timeline.
  */
@@ -19,7 +24,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Channel with its timeline")
-public class ChannelResponse {
+public class ChannelResponse implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     @Schema(
         description = "Channel identifier",

@@ -8,8 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
+
+import static io.github.eventify.Main.SERIAL_VERSION_UID;
 
 /**
  * Response DTO for a channel group with its consolidated timeline and member channels.
@@ -20,7 +24,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Channel group with consolidated timeline")
-public class ChannelGroupResponse {
+public class ChannelGroupResponse implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = SERIAL_VERSION_UID;
 
     @Schema(
         description = "Group identifier",
