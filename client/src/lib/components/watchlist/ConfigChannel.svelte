@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronUp, ChevronDown, Podcast, Trash2 } from '@lucide/svelte';
+	import { ChevronUp, ChevronDown, Radio, Trash2 } from '@lucide/svelte';
 	import type { ConfigChannelItem } from './types';
 	import { Button } from '$lib/components/ui/button';
 
@@ -47,9 +47,9 @@
 		</Button>
 	</div>
 
-	<!-- Icon - USE PODCAST -->
+	<!-- Icon -->
 	<div class="p-2 rounded-md bg-primary/10 shrink-0">
-		<Podcast class="h-5 w-5 text-primary" />
+		<Radio class="h-5 w-5 text-primary" />
 	</div>
 
 	<!-- Info -->

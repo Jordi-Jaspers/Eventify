@@ -2,7 +2,7 @@
 	import { Settings, Inbox } from '@lucide/svelte';
 	import type { ConfigItem, ConfigGroupItem, ConfigChannelItem } from './types';
 	import { isConfigChannelItem, isConfigGroupItem } from './types';
-	import { sortConfiguratorItems } from './dnd-utils';
+	import { sortConfigItems } from './utils';
 	import ConfigChannel from './ConfigChannel.svelte';
 	import ConfigGroup from './ConfigGroup.svelte';
 	import { Card, CardHeader, CardTitle, CardContent } from '$lib/components/ui/card';
@@ -10,16 +10,16 @@
 	interface Props {
 		items: ConfigItem[];
 		onUpdate: (items: ConfigItem[]) => void;
-		onChannelDropped: (groupId?: string) => void;
+		onAddChannel: (groupId?: string) => void;
 	}
 
-	let { items = $bindable(), onUpdate, onChannelDropped }: Props = $props();
+	let { items = $bindable(), onUpdate, onAddChannel }: Props = $props();
 
 	let internalItems: ConfigItem[] = $state([...items]);
 
 	// Sync external items with internal and auto-sort
 	$effect(() => {
-		const sorted: ConfigItem[] = sortConfiguratorItems([...items]) as ConfigItem[];
+		const sorted: ConfigItem[] = sortConfigItems([...items]);
 		internalItems = sorted;
 	});
 
@@ -98,7 +98,7 @@
 							onMoveDown={() => moveItem(index, 1)}
 							onUpdate={handleUpdateGroup}
 							onDelete={() => handleDeleteGroup(item.id)}
-							onAddChannel={() => onChannelDropped(item.id)}
+							onAddChannel={() => onAddChannel(item.id)}
 						/>
 					{:else if isConfigChannelItem(item)}
 						<ConfigChannel

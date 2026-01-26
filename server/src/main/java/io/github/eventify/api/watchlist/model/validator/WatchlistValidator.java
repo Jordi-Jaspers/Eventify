@@ -8,6 +8,9 @@ import io.github.jframe.exception.core.ValidationException;
 import io.github.jframe.validation.ValidationResult;
 import io.github.jframe.validation.Validator;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.isNull;
@@ -26,6 +29,7 @@ public class WatchlistValidator implements Validator<Object> {
     public static final String CHANNEL_ID_REQUIRED = "Channel ID cannot be null";
     public static final String GROUP_NAME_REQUIRED = "Group name is required";
     public static final String GROUP_NAME_TOO_LONG = "Group name must not exceed 100 characters";
+    public static final String DUPLICATE_CHANNEL_ID = "Channel ID %d appears multiple times in configuration";
 
     // Fields
     public static final String NAME = "name";
@@ -119,6 +123,7 @@ public class WatchlistValidator implements Validator<Object> {
 
         validateChannelIds(configuration, result);
         validateGroups(configuration, result);
+        validateNoDuplicateChannels(configuration, result);
     }
 
     /**
@@ -170,6 +175,86 @@ public class WatchlistValidator implements Validator<Object> {
             }
 
             groupIndex++;
+        }
+    }
+
+    /**
+     * Validates that no channel ID appears more than once across the entire configuration.
+     */
+    private void validateNoDuplicateChannels(
+        final WatchlistConfigurationRequest configuration,
+        final ValidationResult result
+    ) {
+        if (configuration == null) {
+            return;
+        }
+
+        final Set<Long> seenChannelIds = new HashSet<>();
+        checkStandaloneChannelsForDuplicates(configuration, seenChannelIds, result);
+        checkGroupChannelsForDuplicates(configuration, seenChannelIds, result);
+    }
+
+    /**
+     * Checks standalone channels for duplicates.
+     */
+    private void checkStandaloneChannelsForDuplicates(
+        final WatchlistConfigurationRequest configuration,
+        final Set<Long> seenChannelIds,
+        final ValidationResult result
+    ) {
+        if (configuration.getChannelIds() == null) {
+            return;
+        }
+
+        for (final Long channelId : configuration.getChannelIds()) {
+            rejectIfDuplicate(channelId, seenChannelIds, result);
+        }
+    }
+
+    /**
+     * Checks channels within groups for duplicates.
+     */
+    private void checkGroupChannelsForDuplicates(
+        final WatchlistConfigurationRequest configuration,
+        final Set<Long> seenChannelIds,
+        final ValidationResult result
+    ) {
+        if (configuration.getGroups() == null) {
+            return;
+        }
+
+        for (final ChannelGroupRequest group : configuration.getGroups()) {
+            checkGroupForDuplicates(group, seenChannelIds, result);
+        }
+    }
+
+    /**
+     * Checks a single group's channels for duplicates.
+     */
+    private void checkGroupForDuplicates(
+        final ChannelGroupRequest group,
+        final Set<Long> seenChannelIds,
+        final ValidationResult result
+    ) {
+        if (group.getChannelIds() == null) {
+            return;
+        }
+
+        for (final Long channelId : group.getChannelIds()) {
+            rejectIfDuplicate(channelId, seenChannelIds, result);
+        }
+    }
+
+    /**
+     * Rejects a channel ID if it's a duplicate.
+     */
+    private void rejectIfDuplicate(
+        final Long channelId,
+        final Set<Long> seenChannelIds,
+        final ValidationResult result
+    ) {
+        if (channelId != null && !seenChannelIds.add(channelId)) {
+            result.reject(String.format(DUPLICATE_CHANNEL_ID, channelId));
         }
     }
 }

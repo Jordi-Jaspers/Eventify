@@ -45,15 +45,23 @@
 
 	async function handleSave(request: UpdateWatchlistRequest): Promise<void> {
 		isSaving = true;
+		const startTime = Date.now();
+		const MIN_SAVE_DURATION = 600; // Minimum ms to show saving indicator
+		
 		try {
 			const updated: WatchlistDetailsResponse = await updateWatchlist(watchlistId, request);
 			watchlist = updated;
 			lastSaved = new Date();
-			toast.success('Watchlist saved');
 		} catch (err: unknown) {
 			const { message } = handleError(err, 'Failed to save watchlist');
 			toast.error(message);
 		} finally {
+			// Ensure spinner shows for at least MIN_SAVE_DURATION
+			const elapsed = Date.now() - startTime;
+			const remaining = MIN_SAVE_DURATION - elapsed;
+			if (remaining > 0) {
+				await new Promise((resolve) => setTimeout(resolve, remaining));
+			}
 			isSaving = false;
 		}
 	}

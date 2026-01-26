@@ -8,4 +8,4 @@ export { default as ChannelSelectSheet } from './ChannelSelectSheet.svelte';
 export { default as GroupNameSheet } from './GroupNameSheet.svelte';
 
 export * from './types';
-export * from './dnd-utils';
+export * from './utils';

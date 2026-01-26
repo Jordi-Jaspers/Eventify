@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Podcast, FolderTree } from '@lucide/svelte';
+	import { Radio, FolderTree } from '@lucide/svelte';
 	import type { ChannelDetailsResponse, WatchlistDetailsResponse } from '$lib/api/models';
 	import type { components } from '$lib/types/api';
 	import type { ConfigItem, ConfigChannelItem, ConfigGroupItem } from './types';
-	import { generateId } from './dnd-utils';
+	import { generateId } from './utils';
 	import Configurator from './Configurator.svelte';
 	import DetailsCard from './DetailsCard.svelte';
 	import FiltersCard from './FiltersCard.svelte';
@@ -320,7 +320,7 @@
 					onclick={() => openChannelSheet()}
 					class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all"
 				>
-					<Podcast class="mr-2 h-4 w-4" />
+					<Radio class="mr-2 h-4 w-4" />
 					Add Channel
 				</Button>
 				<Button
@@ -340,7 +340,7 @@
 		<Configurator
 			bind:items={configItems}
 			onUpdate={handleConfigUpdate}
-			onChannelDropped={openChannelSheet}
+			onAddChannel={openChannelSheet}
 		/>
 	</div>
 </div>

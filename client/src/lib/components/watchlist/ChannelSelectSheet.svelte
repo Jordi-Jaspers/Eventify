@@ -2,7 +2,7 @@
 	import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '$lib/components/ui/sheet';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import { Podcast, Search } from '@lucide/svelte';
+	import { Radio, Search } from '@lucide/svelte';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 
 	interface Props {
@@ -33,7 +33,7 @@
 	<SheetContent side="right" class="sm:max-w-md bg-card/95 backdrop-blur-xl border-border/50">
 		<SheetHeader>
 			<SheetTitle class="flex items-center gap-2">
-				<Podcast class="h-5 w-5 text-primary" />
+				<Radio class="h-5 w-5 text-primary" />
 				Select Channel
 			</SheetTitle>
 			<SheetDescription>
@@ -69,7 +69,7 @@
 							"
 						>
 							<div class="p-2 rounded-md bg-primary/10 shrink-0">
-								<Podcast class="h-5 w-5 text-primary" />
+								<Radio class="h-5 w-5 text-primary" />
 							</div>
 							<div class="flex-1 min-w-0">
 								<p class="font-medium text-sm truncate">{channel.name}</p>

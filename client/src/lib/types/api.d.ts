@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/v1/user/watchlists/{id}": {
+    "/v1/user/watchlist/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -175,7 +175,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/user/watchlists": {
+    "/v1/user/watchlist": {
         parameters: {
             query?: never;
             header?: never;
@@ -195,7 +195,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/user/watchlists/search": {
+    "/v1/user/watchlist/search": {
         parameters: {
             query?: never;
             header?: never;

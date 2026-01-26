@@ -1,6 +1,7 @@
 package io.github.eventify.api.watchlist.model.validator;
 
 import io.github.eventify.api.monitor.model.TimeRange;
+import io.github.eventify.api.watchlist.model.request.ChannelGroupRequest;
 import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.WatchlistConfigurationRequest;
@@ -17,6 +18,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.github.eventify.api.watchlist.model.validator.WatchlistValidator.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -611,5 +615,109 @@ public class WatchlistValidatorTest extends UnitTest {
 
         // Then: Validation should pass
         assertThat(result.hasErrors(), is(false));
+    }
+
+    // ==================== Duplicate Channel Validation Tests ====================
+
+    @Test
+    @DisplayName("Should reject duplicate channel ID in standalone list")
+    void shouldRejectDuplicateChannelIdInStandaloneList() {
+        // Given: Request with duplicate channel ID in channelIds
+        final WatchlistConfigurationRequest config = new WatchlistConfigurationRequest()
+            .setChannelIds(List.of(1L, 2L, 1L));  // 1L appears twice
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("Test")
+            .setConfiguration(config);
+        final ValidationResult validationResult = new ValidationResult();
+
+        // When/Then: Validation should fail
+        assertThatThrownBy(() -> validator.validate(request, validationResult))
+            .isInstanceOf(ValidationException.class);
+
+        assertThat(
+            validationResult.getErrors().stream()
+                .anyMatch(e -> e.getCode().contains("Channel ID 1 appears multiple times")),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject same channel ID in multiple groups")
+    void shouldRejectSameChannelIdInMultipleGroups() {
+        // Given: Request with same channel in two groups
+        final ChannelGroupRequest group1 = new ChannelGroupRequest()
+            .setName("Group 1")
+            .setChannelIds(List.of(1L, 2L));
+        final ChannelGroupRequest group2 = new ChannelGroupRequest()
+            .setName("Group 2")
+            .setChannelIds(List.of(3L, 1L));  // 1L also in group1
+
+        final WatchlistConfigurationRequest config = new WatchlistConfigurationRequest()
+            .setGroups(List.of(group1, group2));
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("Test")
+            .setConfiguration(config);
+        final ValidationResult validationResult = new ValidationResult();
+
+        // When/Then: Validation should fail
+        assertThatThrownBy(() -> validator.validate(request, validationResult))
+            .isInstanceOf(ValidationException.class);
+
+        assertThat(
+            validationResult.getErrors().stream()
+                .anyMatch(e -> e.getCode().contains("Channel ID 1 appears multiple times")),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject channel ID that is both standalone and in group")
+    void shouldRejectChannelIdBothStandaloneAndInGroup() {
+        // Given: Request with channel both standalone and in group
+        final ChannelGroupRequest group = new ChannelGroupRequest()
+            .setName("Group 1")
+            .setChannelIds(List.of(1L, 2L));
+
+        final WatchlistConfigurationRequest config = new WatchlistConfigurationRequest()
+            .setChannelIds(List.of(1L))  // 1L also in group
+            .setGroups(List.of(group));
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("Test")
+            .setConfiguration(config);
+        final ValidationResult validationResult = new ValidationResult();
+
+        // When/Then: Validation should fail
+        assertThatThrownBy(() -> validator.validate(request, validationResult))
+            .isInstanceOf(ValidationException.class);
+
+        assertThat(
+            validationResult.getErrors().stream()
+                .anyMatch(e -> e.getCode().contains("Channel ID 1 appears multiple times")),
+            is(true)
+        );
+    }
+
+    @Test
+    @DisplayName("Should accept configuration with unique channel IDs")
+    void shouldAcceptConfigurationWithUniqueChannelIds() {
+        // Given: Request with unique channel IDs across standalone and groups
+        final ChannelGroupRequest group1 = new ChannelGroupRequest()
+            .setName("Group 1")
+            .setChannelIds(List.of(3L, 4L));
+        final ChannelGroupRequest group2 = new ChannelGroupRequest()
+            .setName("Group 2")
+            .setChannelIds(List.of(5L, 6L));
+
+        final WatchlistConfigurationRequest config = new WatchlistConfigurationRequest()
+            .setChannelIds(List.of(1L, 2L))
+            .setGroups(List.of(group1, group2));
+        final CreateWatchlistRequest request = new CreateWatchlistRequest()
+            .setName("Test")
+            .setConfiguration(config);
+        final ValidationResult validationResult = new ValidationResult();
+
+        // When/Then: Validation should pass
+        assertThatCode(() -> validator.validate(request, validationResult))
+            .doesNotThrowAnyException();
     }
 }

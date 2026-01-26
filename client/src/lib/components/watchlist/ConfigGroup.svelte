@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronUp, ChevronDown, FolderTree, ChevronDown as ExpandDown, ChevronRight, Trash2, Plus, Podcast } from '@lucide/svelte';
+	import { ChevronUp, ChevronDown, FolderTree, ChevronDown as ExpandDown, ChevronRight, Trash2, Plus } from '@lucide/svelte';
 	import type { ConfigGroupItem, ConfigChannelItem } from './types';
 	import ConfigChannel from './ConfigChannel.svelte';
 	import { Button } from '$lib/components/ui/button';
