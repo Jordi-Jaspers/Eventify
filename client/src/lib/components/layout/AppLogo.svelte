@@ -56,7 +56,7 @@
 </script>
 
 {#snippet logoContent()}
-    <div class={cn("flex items-center", currentSize.gap, className)}>
+    <div class={cn("flex items-center", currentSize.gap)}>
         {#if showIcon}
             <Radar class={cn(currentSize.icon, "text-primary")} />
         {/if}
@@ -71,14 +71,12 @@
     {/if}
 {/snippet}
 
-<div class="text-center">
-    {#if href}
-        <a {href} class="inline-flex flex-col items-center hover:opacity-80 transition-opacity">
-            {@render logoContent()}
-        </a>
-    {:else}
-        <div class="inline-flex flex-col items-center">
-            {@render logoContent()}
-        </div>
-    {/if}
-</div>
+{#if href}
+    <a {href} class={cn("inline-flex flex-col items-center hover:opacity-80 transition-opacity", className)}>
+        {@render logoContent()}
+    </a>
+{:else}
+    <div class={cn("inline-flex flex-col items-center", className)}>
+        {@render logoContent()}
+    </div>
+{/if}

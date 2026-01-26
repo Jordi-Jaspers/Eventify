@@ -86,14 +86,7 @@
 	<div class="container mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex items-center justify-between h-16">
 			<!-- Logo -->
-			<a href={CLIENT_ROUTES.LANDING_PAGE.path} class="flex items-center gap-2">
-				<div
-					class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent"
-				>
-					<Activity class="w-4 h-4 text-primary-foreground" />
-				</div>
-				<span class="text-xl font-bold gradient-text">Eventify</span>
-			</a>
+			<AppLogo size="small" href={CLIENT_ROUTES.LANDING_PAGE.path} />
 
 			<!-- Desktop Navigation -->
 			<div class="hidden md:flex items-center gap-8">
@@ -120,16 +113,16 @@
 			<!-- Desktop Auth Buttons -->
 			<div class="hidden md:flex items-center gap-3">
 				{#if $isAuthenticated}
-					<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all">
-						Dashboard
-					</Button>
+				<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path}>
+					Dashboard
+				</Button>
 				{:else}
 					<Button href={CLIENT_ROUTES.LOGIN_PAGE.path} variant="outline">
 						Login
 					</Button>
-					<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all">
-						Sign Up Free
-					</Button>
+				<Button href={CLIENT_ROUTES.REGISTER_PAGE.path}>
+					Sign Up Free
+				</Button>
 				{/if}
 			</div>
 
@@ -189,16 +182,16 @@
 				<!-- Auth Buttons at Bottom -->
 				<div class="pt-6 border-t border-border/50 space-y-3">
 					{#if $isAuthenticated}
-						<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="w-full h-12 text-base bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all">
-							Dashboard
-						</Button>
+					<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="w-full h-12 text-base">
+						Dashboard
+					</Button>
 					{:else}
 						<Button href={CLIENT_ROUTES.LOGIN_PAGE.path} variant="outline" class="w-full h-12 text-base">
 							Login
 						</Button>
-						<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="w-full h-12 text-base bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all">
-							Sign Up Free
-						</Button>
+					<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="w-full h-12 text-base">
+						Sign Up Free
+					</Button>
 					{/if}
 				</div>
 			</div>
@@ -224,13 +217,13 @@
 						with WebSocket-powered live updates.
 					</p>
 					<div class="flex flex-col sm:flex-row gap-4 pt-4">
-						<Button
-							href={CLIENT_ROUTES.REGISTER_PAGE.path}
-							size="lg"
-							class="text-base bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-primary/50"
-						>
-							Get Started Free
-						</Button>
+					<Button
+						href={CLIENT_ROUTES.REGISTER_PAGE.path}
+						size="lg"
+						class="text-base"
+					>
+						Get Started Free
+					</Button>
 						<Button
 							onclick={() => scrollToSection('features')}
 							size="lg"
@@ -598,13 +591,13 @@
 					Free to get started. No credit card required.
 				</p>
 				<div class="pt-4">
-					<Button
-						href={CLIENT_ROUTES.REGISTER_PAGE.path}
-						size="lg"
-						class="text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-primary/50"
-					>
-						Create Free Account
-					</Button>
+				<Button
+					href={CLIENT_ROUTES.REGISTER_PAGE.path}
+					size="lg"
+					class="text-lg px-8 py-6"
+				>
+					Create Free Account
+				</Button>
 				</div>
 			</div>
 		</div>
@@ -617,13 +610,8 @@
 		<div class="grid md:grid-cols-4 gap-8 mb-8">
 			<!-- Brand -->
 			<div class="md:col-span-2">
-				<div class="flex items-center gap-2 mb-4">
-					<div
-						class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent"
-					>
-						<Activity class="w-4 h-4 text-primary-foreground" />
-					</div>
-					<span class="text-lg font-bold gradient-text">Eventify</span>
+				<div class="mb-4">
+					<AppLogo size="small" />
 				</div>
 				<p class="text-sm text-muted-foreground max-w-sm">
 					Real-time event monitoring for modern teams. Track, analyze, and act on events across
