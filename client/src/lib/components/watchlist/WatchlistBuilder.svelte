@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
+	import { fade, slide } from 'svelte/transition';
 	import type {
 		ChannelDetailsResponse,
 		WatchlistDetailsResponse
@@ -15,11 +16,23 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { Search, Check, Save, Radio, GripVertical, X, Plus, Loader2 } from '@lucide/svelte';
+	import {
+		Search,
+		Check,
+		Save,
+		Radio,
+		GripVertical,
+		X,
+		Plus,
+		Loader2,
+		Folder,
+		ChevronRight
+	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	type CreateWatchlistRequest = components['schemas']['CreateWatchlistRequest'];
 	type UpdateWatchlistRequest = components['schemas']['UpdateWatchlistRequest'];
+	type TimeRangeOption = NonNullable<components['schemas']['WatchlistFiltersRequest']['timeRange']>;
 
 	interface Props {
 		watchlist?: WatchlistDetailsResponse | null;
@@ -40,14 +53,23 @@
 	// Form state - intentionally capture initial values only (form controls own state after mount)
 	let name: string = $state(untrack(() => watchlist?.name ?? ''));
 	let description: string = $state(untrack(() => watchlist?.description ?? ''));
-	let timeRange: string = $state(untrack(() => watchlist?.filters?.timeRange ?? '24h'));
+	let timeRange: TimeRangeOption = $state(untrack(() => (watchlist?.filters?.timeRange as TimeRangeOption) ?? '24h'));
 	let onlyCritical: boolean = $state(untrack(() => watchlist?.filters?.onlyCritical ?? false));
 	let sortBySeverity: boolean = $state(untrack(() => watchlist?.filters?.sortBySeverity ?? true));
+	let groupedView: boolean = $state(untrack(() => watchlist?.filters?.groupedView ?? true));
 
 	// Selected channels (ordered list of channel objects for display)
 	interface SelectedChannel {
 		id: number;
 		channel: ChannelDetailsResponse;
+	}
+
+	// Channel group UI state
+	interface ChannelGroupState {
+		id: string; // UUID
+		name: string;
+		channels: SelectedChannel[];
+		isExpanded: boolean; // For UI collapse/expand
 	}
 
 	// Build initial selected channels - intentionally capture initial value only
@@ -62,13 +84,40 @@
 			.filter((item): item is SelectedChannel => item !== null);
 	}
 
+	// Build initial groups - intentionally capture initial value only
+	function buildInitialGroups(): ChannelGroupState[] {
+		return (watchlist?.configuration?.groups ?? []).map((group) => {
+			const channels: SelectedChannel[] = (group.channelIds ?? [])
+				.map((id: number) => {
+					const channel: ChannelDetailsResponse | undefined = allChannels.find(
+						(c: ChannelDetailsResponse) => c.id === id
+					);
+					return channel ? { id: channel.id ?? 0, channel } : null;
+				})
+				.filter((item): item is SelectedChannel => item !== null);
+
+			return {
+				id: group.id ?? crypto.randomUUID(),
+				name: group.name ?? 'Unnamed Group',
+				channels,
+				isExpanded: true
+			};
+		});
+	}
+
 	let selectedChannels: SelectedChannel[] = $state(untrack(() => buildInitialChannels()));
+	let groups: ChannelGroupState[] = $state(untrack(() => buildInitialGroups()));
 
 	// Channel search modal state
 	let showChannelModal: boolean = $state(false);
 	let channelSearch: string = $state('');
 	let searchResults: ChannelDetailsResponse[] = $state([]);
 	let isSearching: boolean = $state(false);
+	let addingToGroupId: string | null = $state(null);
+
+	// Group creation modal state
+	let showGroupModal: boolean = $state(false);
+	let newGroupName: string = $state('');
 
 	// Preview channels (shown when modal opens with no search query)
 	function getPreviewChannels(): ChannelDetailsResponse[] {
@@ -78,16 +127,60 @@
 			.slice(0, 5);
 	}
 
+	// Group management functions
+	function toggleGroupExpanded(groupId: string): void {
+		groups = groups.map((g: ChannelGroupState) =>
+			g.id === groupId ? { ...g, isExpanded: !g.isExpanded } : g
+		);
+	}
+
+	function removeGroup(groupId: string): void {
+		groups = groups.filter((g: ChannelGroupState) => g.id !== groupId);
+	}
+
+	function removeChannelFromGroup(groupId: string, channelId: number): void {
+		groups = groups.map((g: ChannelGroupState) =>
+			g.id === groupId
+				? { ...g, channels: g.channels.filter((c: SelectedChannel) => c.id !== channelId) }
+				: g
+		);
+	}
+
+	function openChannelModalForGroup(groupId: string): void {
+		addingToGroupId = groupId;
+		showChannelModal = true;
+		channelSearch = '';
+		searchResults = [];
+	}
+
+	function createGroup(): void {
+		if (!newGroupName.trim()) return;
+
+		groups = [
+			...groups,
+			{
+				id: crypto.randomUUID(),
+				name: newGroupName.trim(),
+				channels: [],
+				isExpanded: true
+			}
+		];
+
+		showGroupModal = false;
+		newGroupName = '';
+	}
+
 	// Building blocks (static list)
 	interface BuildingBlock {
 		id: string;
-		type: 'channel';
+		type: 'channel' | 'group';
 		label: string;
 		icon: typeof Radio;
 	}
 
 	const buildingBlocks: BuildingBlock[] = [
-		{ id: 'channel-block', type: 'channel', label: 'Channel', icon: Radio }
+		{ id: 'channel-block', type: 'channel', label: 'Channel', icon: Radio },
+		{ id: 'group-block', type: 'group', label: 'Group', icon: Folder }
 	];
 
 	// Drop zone placeholder for detecting drops
@@ -117,7 +210,10 @@
 		void timeRange;
 		void onlyCritical;
 		void sortBySeverity;
+		void groupedView;
 		void selectedChannels.length;
+		void groups.length;
+		void groups.map((g: ChannelGroupState) => g.channels.length).join(',');
 
 		if (watchlist?.id) {
 			isDirty = true;
@@ -136,8 +232,15 @@
 		const request: UpdateWatchlistRequest = {
 			name,
 			description,
-			configuration: { channelIds: selectedChannels.map((sc: SelectedChannel) => sc.id) },
-			filters: { timeRange, onlyCritical, sortBySeverity }
+			configuration: {
+				channelIds: selectedChannels.map((sc: SelectedChannel) => sc.id),
+				groups: groups.map((g: ChannelGroupState) => ({
+					id: g.id,
+					name: g.name,
+					channelIds: g.channels.map((c: SelectedChannel) => c.id)
+				}))
+			},
+			filters: { timeRange, onlyCritical, sortBySeverity, groupedView }
 		};
 
 		await onSave(request);
@@ -150,8 +253,15 @@
 		const request: CreateWatchlistRequest | UpdateWatchlistRequest = {
 			name,
 			description,
-			configuration: { channelIds: selectedChannels.map((sc: SelectedChannel) => sc.id) },
-			filters: { timeRange, onlyCritical, sortBySeverity }
+			configuration: {
+				channelIds: selectedChannels.map((sc: SelectedChannel) => sc.id),
+				groups: groups.map((g: ChannelGroupState) => ({
+					id: g.id,
+					name: g.name,
+					channelIds: g.channels.map((c: SelectedChannel) => c.id)
+				}))
+			},
+			filters: { timeRange, onlyCritical, sortBySeverity, groupedView }
 		};
 
 		await onSave(request);
@@ -162,13 +272,21 @@
 	function handleDropZoneConsider(e: CustomEvent<{ items: { id: string }[] }>): void {
 		const items: { id: string }[] = e.detail.items;
 		// Check if a building block was added
-		const newBlock = items.find((item: { id: string }) => item.id === 'channel-block');
-		if (newBlock) {
-			// Remove the placeholder immediately and open modal
+		const channelBlock = items.find((item: { id: string }) => item.id === 'channel-block');
+		const groupBlock = items.find((item: { id: string }) => item.id === 'group-block');
+
+		if (channelBlock) {
+			// Remove the placeholder immediately and open channel modal
 			dropZoneItems = [];
 			showChannelModal = true;
 			channelSearch = '';
 			searchResults = [];
+			addingToGroupId = null;
+		} else if (groupBlock) {
+			// Remove the placeholder immediately and open group modal
+			dropZoneItems = [];
+			showGroupModal = true;
+			newGroupName = '';
 		} else {
 			dropZoneItems = items;
 		}
@@ -176,12 +294,19 @@
 
 	function handleDropZoneFinalize(e: CustomEvent<{ items: { id: string }[] }>): void {
 		const items: { id: string }[] = e.detail.items;
-		const newBlock = items.find((item: { id: string }) => item.id === 'channel-block');
-		if (newBlock) {
+		const channelBlock = items.find((item: { id: string }) => item.id === 'channel-block');
+		const groupBlock = items.find((item: { id: string }) => item.id === 'group-block');
+
+		if (channelBlock) {
 			dropZoneItems = [];
 			showChannelModal = true;
 			channelSearch = '';
 			searchResults = [];
+			addingToGroupId = null;
+		} else if (groupBlock) {
+			dropZoneItems = [];
+			showGroupModal = true;
+			newGroupName = '';
 		} else {
 			dropZoneItems = items;
 		}
@@ -238,8 +363,21 @@
 	// Add channel from modal
 	function addChannel(channel: ChannelDetailsResponse): void {
 		if (!channel.id) return;
-		selectedChannels = [...selectedChannels, { id: channel.id, channel }];
+
+		const newChannel: SelectedChannel = { id: channel.id, channel };
+
+		if (addingToGroupId) {
+			// Add to specific group
+			groups = groups.map((g: ChannelGroupState) =>
+				g.id === addingToGroupId ? { ...g, channels: [...g.channels, newChannel] } : g
+			);
+		} else {
+			// Add as standalone
+			selectedChannels = [...selectedChannels, newChannel];
+		}
+
 		showChannelModal = false;
+		addingToGroupId = null;
 		channelSearch = '';
 		searchResults = [];
 	}
@@ -264,7 +402,7 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 	<!-- Left Column: Details + Building Blocks -->
-	<div class="lg:col-span-4 space-y-6">
+	<div class="lg:col-span-4 space-y-6 lg:sticky lg:top-6 lg:h-fit">
 		<!-- Watchlist Details -->
 		<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
 			<CardHeader>
@@ -294,7 +432,7 @@
 						id="name"
 						bind:value={name}
 						placeholder="My Watchlist"
-						class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+						class="bg-secondary/20 border-transparent hover:border-border/50 transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
 						aria-invalid={!!nameError}
 						aria-describedby={nameError ? 'name-error' : undefined}
 					/>
@@ -311,7 +449,7 @@
 						bind:value={description}
 						placeholder="Optional description..."
 						rows={2}
-						class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+						class="bg-secondary/20 border-transparent hover:border-border/50 transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
 					/>
 				</div>
 
@@ -368,6 +506,13 @@
 								Sort by severity
 							</Label>
 						</div>
+
+						<div class="flex items-center space-x-2">
+							<Checkbox id="groupedView" bind:checked={groupedView} />
+							<Label for="groupedView" class="cursor-pointer font-normal text-sm">
+								Show grouped view
+							</Label>
+						</div>
 					</div>
 				</div>
 			</CardContent>
@@ -395,6 +540,10 @@
 									showChannelModal = true;
 									channelSearch = '';
 									searchResults = [];
+									addingToGroupId = null;
+								} else if (block.id === 'group-block') {
+									showGroupModal = true;
+									newGroupName = '';
 								}
 							}}
 							class="w-full flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-card/80 hover:bg-card hover:border-primary/50 cursor-grab active:cursor-grabbing transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ring-offset-background"
@@ -463,7 +612,7 @@
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
-				{#if selectedChannels.length === 0}
+				{#if groups.length === 0 && selectedChannels.length === 0}
 					<div
 						role="region"
 						aria-label="Drop zone for channels"
@@ -471,86 +620,229 @@
 						ondragover={(e) => e.preventDefault()}
 						ondrop={(e) => {
 							e.preventDefault();
-							const blockId = e.dataTransfer?.getData('text/plain');
+							const blockId: string | undefined = e.dataTransfer?.getData('text/plain');
 							if (blockId === 'channel-block') {
 								showChannelModal = true;
 								channelSearch = '';
 								searchResults = [];
+								addingToGroupId = null;
+							} else if (blockId === 'group-block') {
+								showGroupModal = true;
+								newGroupName = '';
 							}
 						}}
 					>
 						<Radio class="h-16 w-16 text-muted-foreground/30 mb-4" />
 						<p class="text-muted-foreground text-lg mb-2">No channels configured</p>
 						<p class="text-muted-foreground/70 text-sm">
-							Drag a Channel block here or click "Add Channel"
+							Drag a Channel or Group block here to get started
 						</p>
 					</div>
 				{:else}
 					<div
-						role="list"
-						aria-label="Selected channels"
-						use:dndzone={{
-							items: selectedChannels,
-							flipDurationMs: 200,
-							dropTargetStyle: { outline: '2px dashed hsl(var(--primary))' }
-						}}
-						onconsider={handleSelectedConsider}
-						onfinalize={handleSelectedFinalize}
-						class="space-y-2 min-h-[400px]"
+						role="region"
+						aria-label="Watchlist configuration drop zone"
+						class="space-y-4 min-h-[400px]"
 						ondragover={(e) => e.preventDefault()}
 						ondrop={(e) => {
 							e.preventDefault();
-							const blockId = e.dataTransfer?.getData('text/plain');
+							const blockId: string | undefined = e.dataTransfer?.getData('text/plain');
 							if (blockId === 'channel-block') {
 								showChannelModal = true;
 								channelSearch = '';
 								searchResults = [];
+								addingToGroupId = null;
+							} else if (blockId === 'group-block') {
+								showGroupModal = true;
+								newGroupName = '';
 							}
 						}}
 					>
-						{#each selectedChannels as item (item.id)}
-							<div
-								animate:flip={{ duration: 200 }}
-								class="rounded-lg border border-border/50 bg-card/80 transition-all hover:bg-card hover:border-primary/50"
-							>
-								<div
-									class="flex items-center gap-3 p-3 group relative"
+						<!-- Groups Section -->
+						{#each groups as group (group.id)}
+							<div class="rounded-lg border border-border/50 bg-card/80 backdrop-blur-sm">
+								<!-- Group Header -->
+								<button
+									type="button"
+									onclick={() => toggleGroupExpanded(group.id)}
+									class="w-full flex items-center gap-3 p-3 hover:bg-accent/50 transition-colors rounded-t-lg"
 								>
-									<div class="cursor-grab active:cursor-grabbing touch-none p-1 -ml-1 text-muted-foreground/50 hover:text-foreground transition-colors">
-										<GripVertical class="h-5 w-5" />
+									<ChevronRight
+										class="h-4 w-4 transition-transform {group.isExpanded ? 'rotate-90' : ''}"
+									/>
+									<div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+										<Folder class="h-4 w-4 text-primary" />
 									</div>
-
-									<div
-										class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"
-									>
-										<Radio class="h-5 w-5 text-primary" />
-									</div>
-
-									<div class="flex-1 min-w-0">
-										<div class="font-medium truncate">{item.channel.name}</div>
-										<div class="text-sm text-muted-foreground truncate">
-											{item.channel.description || 'No description'}
-										</div>
-									</div>
-
+									<span class="flex-1 text-left font-medium">{group.name}</span>
+									<span class="text-sm text-muted-foreground">
+										{group.channels.length} channel{group.channels.length !== 1 ? 's' : ''}
+									</span>
 									<Button
 										variant="ghost"
 										size="icon"
-										class="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 group-focus-within:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
-										onclick={() => removeChannel(item.id)}
-										aria-label="Remove channel {item.channel.name}"
+										class="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+										onclick={(e: MouseEvent) => {
+											e.stopPropagation();
+											removeGroup(group.id);
+										}}
+										aria-label="Remove group {group.name}"
 									>
 										<X class="h-4 w-4" />
 									</Button>
-								</div>
+								</button>
+
+								<!-- Group Channels (collapsible) -->
+								{#if group.isExpanded}
+									<div class="border-t border-border/50 p-2 space-y-1">
+										{#each group.channels as item (item.id)}
+											<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/30 transition-colors group">
+												<div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+													<Radio class="h-4 w-4 text-primary" />
+												</div>
+												<div class="flex-1 min-w-0">
+													<div class="font-medium text-sm truncate">{item.channel.name}</div>
+													<div class="text-xs text-muted-foreground truncate">
+														{item.channel.description || 'No description'}
+													</div>
+												</div>
+												<Button
+													variant="ghost"
+													size="icon"
+													class="h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
+													onclick={() => removeChannelFromGroup(group.id, item.id)}
+													aria-label="Remove channel {item.channel.name} from group"
+												>
+													<X class="h-3.5 w-3.5" />
+												</Button>
+											</div>
+										{/each}
+
+										<!-- Add channel to group button -->
+										<Button
+											variant="ghost"
+											size="sm"
+											class="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+											onclick={() => openChannelModalForGroup(group.id)}
+										>
+											<Plus class="h-4 w-4" />
+											Add Channel
+										</Button>
+									</div>
+								{/if}
 							</div>
 						{/each}
+
+						<!-- Standalone Channels Section -->
+						{#if selectedChannels.length > 0}
+							{#if groups.length > 0}
+								<div class="pt-2 border-t border-border/30">
+									<p class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
+										Standalone Channels
+									</p>
+								</div>
+							{/if}
+							<div
+								role="list"
+								aria-label="Standalone channels"
+								use:dndzone={{
+									items: selectedChannels,
+									flipDurationMs: 200,
+									dropTargetStyle: { outline: '2px dashed hsl(var(--primary))' }
+								}}
+								onconsider={handleSelectedConsider}
+								onfinalize={handleSelectedFinalize}
+								class="space-y-2 min-h-[50px] p-1"
+							>
+								{#each selectedChannels as item (item.id)}
+									<div
+										animate:flip={{ duration: 200 }}
+										class="rounded-lg border border-border/50 bg-card/80 transition-all hover:bg-card hover:border-primary/50 group"
+									>
+										<div class="flex items-center gap-3 p-3 relative">
+											<div
+												class="cursor-grab active:cursor-grabbing touch-none p-1 -ml-1 text-muted-foreground/50 hover:text-foreground transition-colors"
+											>
+												<GripVertical class="h-5 w-5" />
+											</div>
+
+											<div
+												class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"
+											>
+												<Radio class="h-5 w-5 text-primary" />
+											</div>
+
+											<div class="flex-1 min-w-0">
+												<div class="font-medium truncate">{item.channel.name}</div>
+												<div class="text-sm text-muted-foreground truncate">
+													{item.channel.description || 'No description'}
+												</div>
+											</div>
+
+											<Button
+												variant="ghost"
+												size="icon"
+												class="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 group-focus-within:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
+												onclick={() => removeChannel(item.id)}
+												aria-label="Remove channel {item.channel.name}"
+											>
+												<X class="h-4 w-4" />
+											</Button>
+										</div>
+									</div>
+								{/each}
+							</div>
+						{/if}
 					</div>
 				{/if}
 			</CardContent>
 		</Card>
 	</div>
 </div>
+
+<!-- Group Creation Sheet -->
+<Sheet.Root bind:open={showGroupModal}>
+	<Sheet.Content side="right" class="sm:max-w-md flex flex-col">
+		<Sheet.Header class="flex-shrink-0">
+			<Sheet.Title class="flex items-center gap-2">
+				<div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+					<Folder class="h-4 w-4 text-primary" />
+				</div>
+				Create Group
+			</Sheet.Title>
+			<Sheet.Description>
+				Give your channel group a name to organize related channels
+			</Sheet.Description>
+		</Sheet.Header>
+
+		<div class="flex flex-col gap-4 py-4 flex-1 px-1">
+			<div class="space-y-2">
+				<Label for="groupName">Group Name</Label>
+				<Input
+					id="groupName"
+					bind:value={newGroupName}
+					placeholder="e.g., API Services, Frontend Apps..."
+					class="bg-background/50 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
+				/>
+			</div>
+			<p class="text-xs text-muted-foreground">
+				You can add channels to this group after creating it.
+			</p>
+		</div>
+
+		<Sheet.Footer class="flex-shrink-0 border-t border-border/50 pt-4">
+			<Button variant="outline" onclick={() => (showGroupModal = false)} class="w-full sm:w-auto">
+				Cancel
+			</Button>
+			<Button
+				onclick={createGroup}
+				disabled={!newGroupName.trim()}
+				class="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 hover:opacity-90"
+			>
+				Create Group
+			</Button>
+		</Sheet.Footer>
+	</Sheet.Content>
+</Sheet.Root>
 
 <!-- Channel Search Sheet -->
 <Sheet.Root bind:open={showChannelModal}>

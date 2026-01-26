@@ -1,8 +1,8 @@
 package io.github.eventify.api.monitor.model;
 
 import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.channel.model.ChannelGroup;
 import io.github.eventify.api.event.model.Severity;
-import io.github.eventify.api.watchlist.model.ChannelGroup;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -50,13 +50,13 @@ public class MonitorFilters {
     private OffsetDateTime endTime;
 
     @Schema(
-        description = "Show only channels with CRITICAL severity (only in ungrouped view)",
+        description = "Show only channels with CRITICAL severity. In grouped view, empty groups are removed.",
         example = "false"
     )
     private Boolean onlyCritical;
 
     @Schema(
-        description = "Sort by severity (CRITICAL first). Applied to channels and groups.",
+        description = "Sort channels by severity (CRITICAL first). Groups remain in configured order.",
         example = "true"
     )
     private Boolean sortBySeverity;
@@ -84,20 +84,15 @@ public class MonitorFilters {
     }
 
     /**
-     * Provides a comparator for channel groups based on the sortBySeverity setting.
-     * Groups are sorted by their consolidated timeline's worst severity.
+     * Returns a predicate to filter channels by critical severity.
      *
-     * @return Comparator for ChannelGroup objects
+     * @return Predicate that matches only CRITICAL channels when onlyCritical is true
      */
-    public Comparator<ChannelGroup> groupComparator() {
-        if (Boolean.TRUE.equals(this.getSortBySeverity())) {
-            return Comparator.comparingInt(
-                group -> group.getCurrentSeverity() != null
-                    ? group.getCurrentSeverity().getPriority()
-                    : Severity.NO_DATA.getPriority()
-            );
+    public Predicate<Channel> criticalFilter() {
+        if (Boolean.TRUE.equals(this.getOnlyCritical())) {
+            return ch -> ch.getCurrentSeverity() == Severity.CRITICAL;
         }
-        return Comparator.comparing(group -> group.getName() != null ? group.getName() : "");
+        return ch -> true;
     }
 
     /**
@@ -106,8 +101,8 @@ public class MonitorFilters {
      *
      * <p>Filter application rules:
      * <ul>
-     * <li>onlyCritical: Only applied in ungrouped view</li>
-     * <li>sortBySeverity: Applied in both views (groups, channels within groups, standalone channels)</li>
+     * <li>onlyCritical: Applied in both views. In grouped view, empty groups are removed.</li>
+     * <li>sortBySeverity: Sorts channels within groups and standalone channels. Groups remain in configured order.</li>
      * <li>groupedView=false: Flatmaps all channels from groups into the channels list, clears groups</li>
      * </ul>
      *
@@ -123,31 +118,36 @@ public class MonitorFilters {
 
     /**
      * Applies filters for grouped view mode.
-     * - Sorts groups by severity (if enabled)
+     * - Groups remain in configured order (NO sorting of groups)
+     * - Filters channels within each group by critical severity (if enabled)
      * - Sorts channels within each group by severity (if enabled)
-     * - Sorts standalone channels by severity (if enabled)
-     * - Does NOT apply onlyCritical filter
+     * - Removes empty groups after filtering
+     * - Filters and sorts standalone channels
      */
     private void applyGroupedView(final WatchlistConfiguration configuration) {
-        // Sort channels within each group
-        configuration.getGroups().forEach(group -> {
-            final List<Channel> sortedChannels = group.getChannels().stream()
-                .sorted(this.channelComparator())
-                .toList();
-            group.setChannels(sortedChannels);
-        });
+        final Predicate<Channel> filter = this.criticalFilter();
 
-        // Sort groups by their consolidated severity
-        final List<ChannelGroup> sortedGroups = configuration.getGroups().stream()
-            .sorted(this.groupComparator())
+        // Process each group: filter then sort channels within
+        final List<ChannelGroup> processedGroups = configuration.getGroups().stream()
+            .map(group -> {
+                final List<Channel> filteredChannels = group.getChannels().stream()
+                    .filter(filter)
+                    .sorted(this.channelComparator())
+                    .toList();
+                group.setChannels(filteredChannels);
+                return group;
+            })
+            // Remove groups that have no channels after filtering
+            .filter(group -> !group.getChannels().isEmpty())
             .collect(Collectors.toCollection(ArrayList::new));
-        configuration.setGroups(sortedGroups);
+        configuration.setGroups(processedGroups);
 
-        // Sort standalone channels
-        final List<Channel> sortedChannels = configuration.getChannels().stream()
+        // Filter and sort standalone channels
+        final List<Channel> filteredChannels = configuration.getChannels().stream()
+            .filter(filter)
             .sorted(this.channelComparator())
             .collect(Collectors.toCollection(ArrayList::new));
-        configuration.setChannels(sortedChannels);
+        configuration.setChannels(filteredChannels);
     }
 
     /**
@@ -165,13 +165,9 @@ public class MonitorFilters {
                 .flatMap(group -> group.getChannels().stream())
         ).collect(Collectors.toList());
 
-        // Apply onlyCritical filter (only in ungrouped view)
-        final Predicate<Channel> severityFilter = Boolean.TRUE.equals(this.getOnlyCritical())
-            ? ch -> ch.getCurrentSeverity() == Severity.CRITICAL
-            : ch -> true;
-
+        // Apply filter and sort
         final List<Channel> filteredChannels = allChannels.stream()
-            .filter(severityFilter)
+            .filter(this.criticalFilter())
             .sorted(this.channelComparator())
             .collect(Collectors.toCollection(ArrayList::new));
 

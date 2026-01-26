@@ -1,8 +1,9 @@
 package io.github.eventify.api.watchlist.model.mapper;
 
 import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.channel.model.ChannelGroup;
+import io.github.eventify.api.channel.model.response.ChannelGroupResponse;
 import io.github.eventify.api.monitor.model.TimeRange;
-import io.github.eventify.api.watchlist.model.ChannelGroup;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
 import io.github.eventify.api.watchlist.model.WatchlistFilters;
@@ -11,6 +12,7 @@ import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.WatchlistConfigurationRequest;
 import io.github.eventify.api.watchlist.model.request.WatchlistFiltersRequest;
+import io.github.eventify.api.watchlist.model.response.WatchlistConfigurationResponse;
 import io.github.eventify.api.watchlist.model.response.WatchlistDetailsResponse;
 import io.github.eventify.api.watchlist.model.response.WatchlistFiltersResponse;
 import io.github.jframe.datasource.search.model.mapper.PageMapper;
@@ -49,6 +51,10 @@ public abstract class WatchlistMapper extends PageMapper<WatchlistDetailsRespons
         target = "filters",
         qualifiedByName = "filtersToResponse"
     )
+    @Mapping(
+        target = "configuration",
+        qualifiedByName = "configurationToResponse"
+    )
     public abstract WatchlistDetailsResponse toResourceObject(Watchlist watchlist);
 
     /**
@@ -72,6 +78,52 @@ public abstract class WatchlistMapper extends PageMapper<WatchlistDetailsRespons
         response.setOnlyCritical(filters.isOnlyCritical());
         response.setSortBySeverity(filters.isSortBySeverity());
         response.setGroupedView(filters.isGroupedView());
+        return response;
+    }
+
+    /**
+     * Maps WatchlistConfiguration domain to response DTO.
+     *
+     * @param configuration the domain configuration
+     * @return the response configuration
+     */
+    @Named("configurationToResponse")
+    public WatchlistConfigurationResponse configurationToResponse(final WatchlistConfiguration configuration) {
+        if (configuration == null) {
+            return null;
+        }
+        final WatchlistConfigurationResponse response = new WatchlistConfigurationResponse();
+        response.setChannelIds(configuration.getChannelIds());
+        response.setGroups(groupsToResponse(configuration.getGroups()));
+        return response;
+    }
+
+    /**
+     * Maps ChannelGroup list to ChannelGroupResponse list.
+     *
+     * @param groups the domain groups
+     * @return the response groups
+     */
+    protected List<ChannelGroupResponse> groupsToResponse(final List<ChannelGroup> groups) {
+        if (groups == null) {
+            return new ArrayList<>();
+        }
+        return groups.stream()
+            .map(this::groupToResponse)
+            .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Maps a single ChannelGroup to ChannelGroupResponse.
+     *
+     * @param group the domain group
+     * @return the response group
+     */
+    private ChannelGroupResponse groupToResponse(final ChannelGroup group) {
+        final ChannelGroupResponse response = new ChannelGroupResponse();
+        response.setId(group.getId());
+        response.setName(group.getName());
+        response.setChannelIds(group.getChannelIds());
         return response;
     }
 

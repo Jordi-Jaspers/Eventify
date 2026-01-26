@@ -1,6 +1,7 @@
 package io.github.eventify.api.monitor.service;
 
 import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.channel.model.ChannelGroup;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.model.Event;
@@ -12,7 +13,6 @@ import io.github.eventify.api.monitor.model.TimeRange;
 import io.github.eventify.api.monitor.model.request.MonitorRequest;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.api.watchlist.model.ChannelGroup;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
 import io.github.eventify.api.watchlist.model.WatchlistFilters;
@@ -131,65 +131,298 @@ class MonitorServiceTest extends UnitTest {
         assertThat(result.getFilters().getSortBySeverity(), is(false));
     }
 
-    @Test
-    @DisplayName("Should filter to only critical channels when flag is true (ungrouped view)")
-    void shouldFilterToOnlyCriticalChannelsWhenFlagIsTrue() {
-        // Given: Request with onlyCritical flag (requires groupedView=false to apply)
-        final User user = aValidUser();
-        final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
-        final Channel okChannel = aChannel(1L, "ok-channel", ChannelStatus.ACTIVE);
-        final Channel criticalChannel = aChannel(2L, "critical-channel", ChannelStatus.ACTIVE);
-        final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
-        request.setFilters(MonitorFilters.builder().onlyCritical(true).groupedView(false).build());
+    // ========================= FILTER TESTS =========================
 
-        // Mock events to set severity via timeline enrichment
-        final Event okEvent = anEvent(1L, okChannel, Severity.OK);
-        final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+    @Nested
+    @DisplayName("Only Critical Filter")
+    class OnlyCriticalFilterTests {
 
-        given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
-        given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
-        given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
-            .willReturn(List.of(okEvent, criticalEvent));
+        @Test
+        @DisplayName("Should filter to only critical channels in ungrouped view")
+        void shouldFilterToOnlyCriticalChannelsInUngroupedView() {
+            // Given: Request with onlyCritical=true and groupedView=false
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
+            final Channel okChannel = aChannel(1L, "ok-channel", ChannelStatus.ACTIVE);
+            final Channel criticalChannel = aChannel(2L, "critical-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().onlyCritical(true).groupedView(false).build());
 
-        // When: Getting monitor data
-        final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
 
-        // Then: Should only include critical channel
-        assertThat(result.getConfiguration().getChannels(), hasSize(1));
-        assertThat(result.getConfiguration().getChannels().get(0).getId(), is(equalTo(2L)));
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(List.of(okEvent, criticalEvent));
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Should only include critical channel
+            assertThat(result.getConfiguration().getChannels(), hasSize(1));
+            assertThat(result.getConfiguration().getChannels().get(0).getId(), is(equalTo(2L)));
+        }
+
+        @Test
+        @DisplayName("Should filter channels within groups when onlyCritical is true in grouped view")
+        void shouldFilterChannelsWithinGroupsWhenOnlyCriticalInGroupedView() {
+            // Given: Request with onlyCritical=true and groupedView=true (default)
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlistWithGroup(1L, "My Watchlist", user);
+            final Channel okChannel = aChannel(1L, "ok-channel", ChannelStatus.ACTIVE);
+            final Channel criticalChannel = aChannel(2L, "critical-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().onlyCritical(true).groupedView(true).build());
+
+            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(List.of(okEvent, criticalEvent));
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Group should only contain critical channel
+            assertThat(result.getConfiguration().getGroups(), hasSize(1));
+            assertThat(result.getConfiguration().getGroups().get(0).getChannels(), hasSize(1));
+            assertThat(result.getConfiguration().getGroups().get(0).getChannels().get(0).getId(), is(equalTo(2L)));
+        }
+
+        @Test
+        @DisplayName("Should remove empty groups when all channels are filtered out")
+        void shouldRemoveEmptyGroupsWhenAllChannelsFilteredOut() {
+            // Given: Group with only non-critical channels
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlistWithGroup(1L, "My Watchlist", user);
+            final Channel okChannel1 = aChannel(1L, "ok-channel-1", ChannelStatus.ACTIVE);
+            final Channel okChannel2 = aChannel(2L, "ok-channel-2", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().onlyCritical(true).groupedView(true).build());
+
+            final Event okEvent1 = anEvent(1L, okChannel1, Severity.OK);
+            final Event okEvent2 = anEvent(2L, okChannel2, Severity.WARNING);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel1, okChannel2));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(List.of(okEvent1, okEvent2));
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Empty group should be removed
+            assertThat(result.getConfiguration().getGroups(), is(empty()));
+        }
+
+        @Test
+        @DisplayName("Should filter standalone channels when onlyCritical is true in grouped view")
+        void shouldFilterStandaloneChannelsWhenOnlyCriticalInGroupedView() {
+            // Given: Mixed config with standalone channels
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlistWithMixedConfig(1L, "My Watchlist", user);
+            final Channel standaloneOk = aChannel(1L, "standalone-ok", ChannelStatus.ACTIVE);
+            final Channel groupedCritical = aChannel(2L, "grouped-critical", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().onlyCritical(true).groupedView(true).build());
+
+            final Event okEvent = anEvent(1L, standaloneOk, Severity.OK);
+            final Event criticalEvent = anEvent(2L, groupedCritical, Severity.CRITICAL);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(standaloneOk, groupedCritical));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(List.of(okEvent, criticalEvent));
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Standalone OK channel should be filtered out
+            assertThat(result.getConfiguration().getChannels(), is(empty()));
+            // Group with critical channel should remain
+            assertThat(result.getConfiguration().getGroups(), hasSize(1));
+        }
     }
 
-    @Test
-    @DisplayName("Should sort by severity when flag is true")
-    void shouldSortBySeverityWhenFlagIsTrue() {
-        // Given: Request with sortBySeverity flag
-        final User user = aValidUser();
-        final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
-        final Channel okChannel = aChannel(1L, "ok-channel", ChannelStatus.ACTIVE);
-        final Channel warningChannel = aChannel(2L, "warning-channel", ChannelStatus.ACTIVE);
-        final Channel criticalChannel = aChannel(3L, "critical-channel", ChannelStatus.ACTIVE);
-        final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
-        request.setFilters(MonitorFilters.builder().sortBySeverity(true).build());
 
-        // Mock events to set severity via timeline enrichment
-        final Event okEvent = anEvent(1L, okChannel, Severity.OK);
-        final Event warningEvent = anEvent(2L, warningChannel, Severity.WARNING);
-        final Event criticalEvent = anEvent(3L, criticalChannel, Severity.CRITICAL);
+    @Nested
+    @DisplayName("Sort By Severity Filter")
+    class SortBySeverityFilterTests {
 
-        given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
-        given(channelRepository.findAllById(anyList()))
-            .willReturn(List.of(okChannel, warningChannel, criticalChannel));
-        given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
-            .willReturn(List.of(okEvent, warningEvent, criticalEvent));
+        @Test
+        @DisplayName("Should sort channels by severity in ungrouped view")
+        void shouldSortChannelsBySeverityInUngroupedView() {
+            // Given: Request with sortBySeverity=true and groupedView=false
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
+            final Channel okChannel = aChannel(1L, "ok-channel", ChannelStatus.ACTIVE);
+            final Channel warningChannel = aChannel(2L, "warning-channel", ChannelStatus.ACTIVE);
+            final Channel criticalChannel = aChannel(3L, "critical-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().sortBySeverity(true).groupedView(false).build());
 
-        // When: Getting monitor data
-        final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
+            final Event warningEvent = anEvent(2L, warningChannel, Severity.WARNING);
+            final Event criticalEvent = anEvent(3L, criticalChannel, Severity.CRITICAL);
 
-        // Then: Should sort by severity (CRITICAL, WARNING, OK)
-        assertThat(result.getConfiguration().getChannels(), hasSize(3));
-        assertThat(result.getConfiguration().getChannels().get(0).getId(), is(equalTo(3L)));
-        assertThat(result.getConfiguration().getChannels().get(1).getId(), is(equalTo(2L)));
-        assertThat(result.getConfiguration().getChannels().get(2).getId(), is(equalTo(1L)));
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList()))
+                .willReturn(List.of(okChannel, warningChannel, criticalChannel));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(List.of(okEvent, warningEvent, criticalEvent));
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Should sort by severity (CRITICAL, WARNING, OK)
+            assertThat(result.getConfiguration().getChannels(), hasSize(3));
+            assertThat(result.getConfiguration().getChannels().get(0).getId(), is(equalTo(3L)));
+            assertThat(result.getConfiguration().getChannels().get(1).getId(), is(equalTo(2L)));
+            assertThat(result.getConfiguration().getChannels().get(2).getId(), is(equalTo(1L)));
+        }
+
+        @Test
+        @DisplayName("Should sort channels within groups by severity in grouped view")
+        void shouldSortChannelsWithinGroupsBySeverityInGroupedView() {
+            // Given: Request with sortBySeverity=true and groupedView=true
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlistWithGroup(1L, "My Watchlist", user);
+            final Channel okChannel = aChannel(1L, "ok-channel", ChannelStatus.ACTIVE);
+            final Channel criticalChannel = aChannel(2L, "critical-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().sortBySeverity(true).groupedView(true).build());
+
+            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(List.of(okEvent, criticalEvent));
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Channels within group should be sorted by severity
+            assertThat(result.getConfiguration().getGroups(), hasSize(1));
+            final List<Channel> groupChannels = result.getConfiguration().getGroups().get(0).getChannels();
+            assertThat(groupChannels, hasSize(2));
+            assertThat(groupChannels.get(0).getId(), is(equalTo(2L))); // Critical first
+            assertThat(groupChannels.get(1).getId(), is(equalTo(1L))); // OK second
+        }
+
+        @Test
+        @DisplayName("Should keep groups in configured order even when sortBySeverity is true")
+        void shouldKeepGroupsInConfiguredOrderWhenSortBySeverity() {
+            // Given: Multiple groups, first group has OK, second group has CRITICAL
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlistWithMultipleGroups(1L, "My Watchlist", user);
+            final Channel okChannel = aChannel(1L, "ok-channel", ChannelStatus.ACTIVE);
+            final Channel criticalChannel = aChannel(2L, "critical-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().sortBySeverity(true).groupedView(true).build());
+
+            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(List.of(okEvent, criticalEvent));
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Groups should remain in configured order (Group A first, Group B second)
+            assertThat(result.getConfiguration().getGroups(), hasSize(2));
+            assertThat(result.getConfiguration().getGroups().get(0).getName(), is(equalTo("Group A")));
+            assertThat(result.getConfiguration().getGroups().get(1).getName(), is(equalTo("Group B")));
+        }
+
+        @Test
+        @DisplayName("Should sort standalone channels by severity in grouped view")
+        void shouldSortStandaloneChannelsBySeverityInGroupedView() {
+            // Given: Mixed config with standalone channels
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlistWithStandaloneChannels(1L, "My Watchlist", user);
+            final Channel okChannel = aChannel(1L, "ok-channel", ChannelStatus.ACTIVE);
+            final Channel criticalChannel = aChannel(2L, "critical-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().sortBySeverity(true).groupedView(true).build());
+
+            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(List.of(okEvent, criticalEvent));
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Standalone channels should be sorted by severity
+            assertThat(result.getConfiguration().getChannels(), hasSize(2));
+            assertThat(result.getConfiguration().getChannels().get(0).getId(), is(equalTo(2L))); // Critical first
+            assertThat(result.getConfiguration().getChannels().get(1).getId(), is(equalTo(1L))); // OK second
+        }
+    }
+
+
+    @Nested
+    @DisplayName("Grouped View Filter")
+    class GroupedViewFilterTests {
+
+        @Test
+        @DisplayName("Should flatten groups into channels list when groupedView is false")
+        void shouldFlattenGroupsWhenGroupedViewIsFalse() {
+            // Given: Watchlist with groups, request with groupedView=false
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlistWithGroup(1L, "My Watchlist", user);
+            final Channel channel1 = aChannel(1L, "channel-1", ChannelStatus.ACTIVE);
+            final Channel channel2 = aChannel(2L, "channel-2", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().groupedView(false).build());
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(channel1, channel2));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(new ArrayList<>());
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Groups should be empty, all channels in flat list
+            assertThat(result.getConfiguration().getGroups(), is(empty()));
+            assertThat(result.getConfiguration().getChannels(), hasSize(2));
+        }
+
+        @Test
+        @DisplayName("Should keep groups when groupedView is true")
+        void shouldKeepGroupsWhenGroupedViewIsTrue() {
+            // Given: Watchlist with groups, request with groupedView=true
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlistWithGroup(1L, "My Watchlist", user);
+            final Channel channel1 = aChannel(1L, "channel-1", ChannelStatus.ACTIVE);
+            final Channel channel2 = aChannel(2L, "channel-2", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+            request.setFilters(MonitorFilters.builder().groupedView(true).build());
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(channel1, channel2));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(new ArrayList<>());
+
+            // When: Getting monitor data
+            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+
+            // Then: Groups should remain
+            assertThat(result.getConfiguration().getGroups(), hasSize(1));
+            assertThat(result.getConfiguration().getGroups().get(0).getName(), is(equalTo("API Services")));
+        }
     }
 
     @Test
@@ -384,6 +617,45 @@ class MonitorServiceTest extends UnitTest {
                             .build()
                     )
                 )
+                .build()
+        );
+        watchlist.setFilters(WatchlistFilters.defaults());
+        return watchlist;
+    }
+
+    private Watchlist aWatchlistWithMultipleGroups(final Long id, final String name, final User user) {
+        final Watchlist watchlist = new Watchlist(name, user, null);
+        watchlist.setId(id);
+        watchlist.setConfiguration(
+            WatchlistConfiguration.builder()
+                .channels(new ArrayList<>())
+                .groups(
+                    List.of(
+                        ChannelGroup.builder()
+                            .id(UUID.randomUUID())
+                            .name("Group A")
+                            .channels(channelsWithIds(1L)) // OK channel
+                            .build(),
+                        ChannelGroup.builder()
+                            .id(UUID.randomUUID())
+                            .name("Group B")
+                            .channels(channelsWithIds(2L)) // CRITICAL channel
+                            .build()
+                    )
+                )
+                .build()
+        );
+        watchlist.setFilters(WatchlistFilters.defaults());
+        return watchlist;
+    }
+
+    private Watchlist aWatchlistWithStandaloneChannels(final Long id, final String name, final User user) {
+        final Watchlist watchlist = new Watchlist(name, user, null);
+        watchlist.setId(id);
+        watchlist.setConfiguration(
+            WatchlistConfiguration.builder()
+                .channels(channelsWithIds(1L, 2L)) // Two standalone channels
+                .groups(new ArrayList<>())
                 .build()
         );
         watchlist.setFilters(WatchlistFilters.defaults());

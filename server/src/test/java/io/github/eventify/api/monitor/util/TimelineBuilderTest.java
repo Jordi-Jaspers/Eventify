@@ -6,7 +6,7 @@ import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.monitor.model.TimeSpan;
 import io.github.eventify.api.monitor.model.Timeline;
-import io.github.eventify.api.monitor.model.response.TimelineDuration;
+import io.github.eventify.api.monitor.model.TimelineDuration;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;

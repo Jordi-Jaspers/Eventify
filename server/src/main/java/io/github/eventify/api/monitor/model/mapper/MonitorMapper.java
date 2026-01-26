@@ -1,12 +1,12 @@
 package io.github.eventify.api.monitor.model.mapper;
 
 import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.channel.model.ChannelGroup;
+import io.github.eventify.api.channel.model.response.ChannelGroupResponse;
+import io.github.eventify.api.channel.model.response.ChannelResponse;
 import io.github.eventify.api.monitor.model.MonitorResult;
-import io.github.eventify.api.monitor.model.response.ChannelGroupResponse;
-import io.github.eventify.api.monitor.model.response.ChannelResponse;
-import io.github.eventify.api.monitor.model.response.ConfigurationResponse;
+import io.github.eventify.api.monitor.model.response.DashboardResponse;
 import io.github.eventify.api.monitor.model.response.MonitorResponse;
-import io.github.eventify.api.watchlist.model.ChannelGroup;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
 import io.github.jframe.util.mapper.config.SharedMapperConfig;
 
@@ -67,11 +67,7 @@ public abstract class MonitorMapper {
      * @param configuration the watchlist configuration
      * @return configuration response
      */
-    @Mapping(
-        source = "timeline",
-        target = "dashboard"
-    )
-    public abstract ConfigurationResponse toConfigurationResponse(WatchlistConfiguration configuration);
+    public abstract DashboardResponse toConfigurationResponse(WatchlistConfiguration configuration);
 
     /**
      * Maps MonitorResult to MonitorResponse.
@@ -98,6 +94,10 @@ public abstract class MonitorMapper {
     @Mapping(
         source = "timeRange.live",
         target = "live"
+    )
+    @Mapping(
+        source = "configuration",
+        target = "dashboard"
     )
     public abstract MonitorResponse toResponse(MonitorResult result);
 }

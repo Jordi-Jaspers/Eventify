@@ -1,4 +1,4 @@
-package io.github.eventify.api.monitor.validator;
+package io.github.eventify.api.monitor.model.validator;
 
 import io.github.eventify.api.monitor.model.MonitorFilters;
 import io.github.eventify.api.monitor.model.TimeRange;

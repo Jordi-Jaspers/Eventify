@@ -1,4 +1,4 @@
-package io.github.eventify.api.monitor.model.response;
+package io.github.eventify.api.monitor.model;
 
 import io.github.eventify.api.event.model.Severity;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -72,8 +72,8 @@ class UserMonitorControllerTest extends IntegrationTest {
         assertThat(response, is(notNullValue()));
         assertThat(response.getWatchlistId(), is(equalTo(watchlist.getId())));
         assertThat(response.getWatchlistName(), is(equalTo("My Watchlist")));
-        assertThat(response.getConfiguration().getChannels(), hasSize(1));
-        assertThat(response.getConfiguration().getDashboard(), is(notNullValue()));
+        assertThat(response.getDashboard().getChannels(), hasSize(1));
+        assertThat(response.getDashboard().getTimeline(), is(notNullValue()));
         assertThat(response.getFilters(), is(notNullValue()));
         assertThat(response.isLive(), is(true));
     }
@@ -160,8 +160,8 @@ class UserMonitorControllerTest extends IntegrationTest {
             MonitorResponse.class
         );
 
-        assertThat(response.getConfiguration().getChannels(), hasSize(1));
-        assertThat(response.getConfiguration().getChannels().get(0).getChannelName(), is(equalTo("critical-channel")));
+        assertThat(response.getDashboard().getChannels(), hasSize(1));
+        assertThat(response.getDashboard().getChannels().get(0).getChannelName(), is(equalTo("critical-channel")));
         assertThat(response.getFilters().getOnlyCritical(), is(true));
     }
 
@@ -196,7 +196,7 @@ class UserMonitorControllerTest extends IntegrationTest {
             MonitorResponse.class
         );
 
-        assertThat(response.getConfiguration().getChannels(), is(empty()));
+        assertThat(response.getDashboard().getChannels(), is(empty()));
     }
 
     // ========================= VALIDATION FAILURES =========================

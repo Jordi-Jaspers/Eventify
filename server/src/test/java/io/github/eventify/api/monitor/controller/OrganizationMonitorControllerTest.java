@@ -76,7 +76,7 @@ class OrganizationMonitorControllerTest extends IntegrationTest {
         assertThat(response, is(notNullValue()));
         assertThat(response.getWatchlistId(), is(equalTo(watchlist.getId())));
         assertThat(response.getWatchlistName(), is(equalTo("Org Watchlist")));
-        assertThat(response.getConfiguration().getChannels(), hasSize(1));
+        assertThat(response.getDashboard().getChannels(), hasSize(1));
         assertThat(response.isLive(), is(true));
     }
 
@@ -157,8 +157,8 @@ class OrganizationMonitorControllerTest extends IntegrationTest {
             MonitorResponse.class
         );
 
-        assertThat(response.getConfiguration().getChannels(), hasSize(1));
-        assertThat(response.getConfiguration().getChannels().get(0).getStatus().name(), is(equalTo("PAUSED")));
+        assertThat(response.getDashboard().getChannels(), hasSize(1));
+        assertThat(response.getDashboard().getChannels().get(0).getStatus().name(), is(equalTo("PAUSED")));
     }
 
     @Test
@@ -208,10 +208,10 @@ class OrganizationMonitorControllerTest extends IntegrationTest {
             MonitorResponse.class
         );
 
-        assertThat(response.getConfiguration().getChannels(), hasSize(3));
-        assertThat(response.getConfiguration().getChannels().get(0).getChannelName(), is(equalTo("critical-channel")));
-        assertThat(response.getConfiguration().getChannels().get(1).getChannelName(), is(equalTo("warning-channel")));
-        assertThat(response.getConfiguration().getChannels().get(2).getChannelName(), is(equalTo("ok-channel")));
+        assertThat(response.getDashboard().getChannels(), hasSize(3));
+        assertThat(response.getDashboard().getChannels().get(0).getChannelName(), is(equalTo("critical-channel")));
+        assertThat(response.getDashboard().getChannels().get(1).getChannelName(), is(equalTo("warning-channel")));
+        assertThat(response.getDashboard().getChannels().get(2).getChannelName(), is(equalTo("ok-channel")));
     }
 
     // ========================= VALIDATION FAILURES =========================

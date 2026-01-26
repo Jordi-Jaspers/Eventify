@@ -3,8 +3,8 @@ package io.github.eventify.api.monitor.util;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.monitor.model.TimePoint;
 import io.github.eventify.api.monitor.model.Timeline;
+import io.github.eventify.api.monitor.model.TimelineDuration;
 import io.github.eventify.api.monitor.model.TimelineSource;
-import io.github.eventify.api.monitor.model.response.TimelineDuration;
 import lombok.experimental.UtilityClass;
 
 import java.time.OffsetDateTime;

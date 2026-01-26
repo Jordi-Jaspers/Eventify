@@ -1,6 +1,5 @@
-package io.github.eventify.api.watchlist.model;
+package io.github.eventify.api.channel.model;
 
-import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.monitor.model.Timeline;
 import io.github.eventify.api.monitor.model.TimelineSource;

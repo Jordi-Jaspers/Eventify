@@ -1,6 +1,7 @@
 package io.github.eventify.api.watchlist.model;
 
 import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.channel.model.ChannelGroup;
 import io.github.eventify.api.monitor.model.Timeline;
 import io.github.eventify.api.monitor.model.TimelineSource;
 import io.github.eventify.api.monitor.util.TimelineConsolidator;

@@ -1,6 +1,7 @@
 package io.github.eventify.api.monitor.service;
 
 import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.channel.model.ChannelGroup;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.model.Event;
@@ -11,7 +12,6 @@ import io.github.eventify.api.monitor.model.TimeSpan;
 import io.github.eventify.api.monitor.model.Timeline;
 import io.github.eventify.api.monitor.model.request.MonitorRequest;
 import io.github.eventify.api.monitor.util.TimelineBuilder;
-import io.github.eventify.api.watchlist.model.ChannelGroup;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;

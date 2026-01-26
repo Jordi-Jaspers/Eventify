@@ -2,8 +2,8 @@ package io.github.eventify.api.monitor.util;
 
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.monitor.model.Timeline;
+import io.github.eventify.api.monitor.model.TimelineDuration;
 import io.github.eventify.api.monitor.model.TimelineSource;
-import io.github.eventify.api.monitor.model.response.TimelineDuration;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;

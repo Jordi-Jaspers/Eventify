@@ -1,4 +1,4 @@
-package io.github.eventify.api.monitor.model.response;
+package io.github.eventify.api.channel.model.response;
 
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.event.model.Severity;

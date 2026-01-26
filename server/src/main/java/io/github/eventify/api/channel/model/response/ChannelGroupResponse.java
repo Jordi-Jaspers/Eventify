@@ -1,4 +1,4 @@
-package io.github.eventify.api.monitor.model.response;
+package io.github.eventify.api.channel.model.response;
 
 import io.github.eventify.api.monitor.model.Timeline;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,14 +37,20 @@ public class ChannelGroupResponse {
     private String name;
 
     @Schema(
+        description = "Ordered list of channel IDs belonging to this group",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private List<Long> channelIds;
+
+    @Schema(
         description = "Consolidated timeline for the group (worst severity across all members)",
-        requiredMode = Schema.RequiredMode.REQUIRED
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private Timeline timeline;
 
     @Schema(
         description = "Member channels with individual timelines",
-        requiredMode = Schema.RequiredMode.REQUIRED
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private List<ChannelResponse> channels;
 }

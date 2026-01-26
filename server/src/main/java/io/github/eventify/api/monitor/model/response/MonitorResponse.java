@@ -60,7 +60,7 @@ public class MonitorResponse {
         description = "Watchlist configuration with dashboard, channels and groups",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private ConfigurationResponse configuration;
+    private DashboardResponse dashboard;
 
     @Schema(
         description = "Applied filter settings",

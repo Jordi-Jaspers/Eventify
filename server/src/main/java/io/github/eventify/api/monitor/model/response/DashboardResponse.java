@@ -1,5 +1,7 @@
 package io.github.eventify.api.monitor.model.response;
 
+import io.github.eventify.api.channel.model.response.ChannelGroupResponse;
+import io.github.eventify.api.channel.model.response.ChannelResponse;
 import io.github.eventify.api.monitor.model.Timeline;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -20,13 +22,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Watchlist configuration with dashboard timeline, channels and groups")
-public class ConfigurationResponse {
+public class DashboardResponse {
 
     @Schema(
         description = "Consolidated dashboard timeline (worst severity across all channels and groups)",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private Timeline dashboard;
+    private Timeline timeline;
 
     @Schema(
         description = "Standalone channels (not in any group)",

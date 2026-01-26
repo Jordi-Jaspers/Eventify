@@ -4,7 +4,7 @@ import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.monitor.model.TimeSpan;
 import io.github.eventify.api.monitor.model.Timeline;
-import io.github.eventify.api.monitor.model.response.TimelineDuration;
+import io.github.eventify.api.monitor.model.TimelineDuration;
 import lombok.experimental.UtilityClass;
 
 import java.time.OffsetDateTime;
