@@ -14,7 +14,8 @@
     import {authStore, currentUser} from '$lib/stores/auth';
     import {CLIENT_ROUTES} from '$lib/config/routes';
     import Button from '$lib/components/ui/button/button.svelte';
-    import {Activity, LogOut, User, LayoutDashboard} from '@lucide/svelte';
+    import AppLogo from '$lib/components/layout/AppLogo.svelte';
+    import {LogOut, User, LayoutDashboard} from '@lucide/svelte';
     import {toast} from 'svelte-sonner';
     import {handleError} from '$lib/utils/error-handler';
 
@@ -34,14 +35,7 @@
 <!-- Header -->
 <header class="border-b border-border/50 bg-card/50 backdrop-blur-xl">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <a href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg">
-                <Activity class="w-5 h-5 text-primary-foreground"/>
-            </div>
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                Eventify
-            </h1>
-        </a>
+        <AppLogo size="small" href={CLIENT_ROUTES.DASHBOARD_PAGE.path} />
         <div class="flex items-center gap-2">
             {#if isAdmin}
                 <Button
