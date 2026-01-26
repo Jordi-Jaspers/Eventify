@@ -19,6 +19,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @Schema(description = "Time range preset or custom")
 public enum TimeRange {
 
+    LAST_2H("2h", Duration.ofHours(2)),
+    LAST_4H("4h", Duration.ofHours(4)),
+    LAST_12H("12h", Duration.ofHours(12)),
     LAST_24H("24h", Duration.ofHours(24)),
     LAST_7D("7d", Duration.ofDays(7)),
     LAST_30D("30d", Duration.ofDays(30)),
