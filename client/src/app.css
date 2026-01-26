@@ -154,10 +154,10 @@
 
 @keyframes grid-move {
   0% {
-    transform: translate(0, 0);
+    background-position: 0 0;
   }
   100% {
-    transform: translate(40px, 40px);
+    background-position: 40px 40px;
   }
 }
 
