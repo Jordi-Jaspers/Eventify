@@ -74,6 +74,7 @@
             WHERE
                 c.status = 'ACTIVE'
                 AND c.user_id = au.id
+                AND c.organization_id IS NULL  -- Only personal channels, not org channels
             ON CONFLICT DO NOTHING;
         ]]></sql>
     </changeSet>
@@ -132,6 +133,7 @@
             WHERE
                 c.status = 'ACTIVE'
                 AND c.user_id = au.id
+                AND c.organization_id IS NULL  -- Only personal channels
                 AND c.name IN ('Backend Errors', 'Security Alerts')
             ON CONFLICT DO NOTHING;
         ]]></sql>
