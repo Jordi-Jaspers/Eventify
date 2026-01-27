@@ -160,28 +160,32 @@
 		></button>
 		
 		<!-- Menu Panel -->
-		<div class="absolute inset-x-0 top-16 bottom-0 bg-background/95 backdrop-blur-xl border-t border-border/50 animate-fade-in-up overflow-y-auto">
+		<div
+			class="absolute inset-x-0 top-16 bottom-0 bg-background/95 backdrop-blur-xl border-t border-border/50 animate-fade-in-up overflow-y-auto"
+			role="dialog"
+			aria-modal="true"
+		>
 			<div class="flex flex-col h-full px-6 py-8">
 				<!-- Navigation Links -->
 				<nav class="flex-1 space-y-2">
 					<Button
 						variant="ghost"
 						onclick={() => scrollToSection('features')}
-						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-accent/10 rounded-xl"
+						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-muted/50 rounded-md"
 					>
 						Features
 					</Button>
 					<Button
 						variant="ghost"
 						onclick={() => scrollToSection('how-it-works')}
-						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-accent/10 rounded-xl"
+						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-muted/50 rounded-md"
 					>
 						How It Works
 					</Button>
 					<Button
 						variant="ghost"
 						onclick={() => scrollToSection('cta')}
-						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-accent/10 rounded-xl"
+						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-muted/50 rounded-md"
 					>
 						Get Started
 					</Button>
@@ -190,16 +194,16 @@
 				<!-- Auth Buttons at Bottom -->
 				<div class="pt-6 border-t border-border/50 space-y-3">
 					{#if $isAuthenticated}
-					<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="w-full h-12 text-base">
-						Dashboard
-					</Button>
+						<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="w-full h-12 text-base">
+							Dashboard
+						</Button>
 					{:else}
 						<Button href={CLIENT_ROUTES.LOGIN_PAGE.path} variant="outline" class="w-full h-12 text-base">
 							Login
 						</Button>
-					<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="w-full h-12 text-base">
-						Sign Up Free
-					</Button>
+						<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="w-full h-12 text-base">
+							Sign Up Free
+						</Button>
 					{/if}
 				</div>
 			</div>
@@ -207,126 +211,126 @@
 	</div>
 {/if}
 
-<!-- Main Content -->
-<main>
-	<!-- Hero Section -->
-	<section id="hero" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-		<div class="container mx-auto max-w-7xl">
-			<div class="grid lg:grid-cols-2 gap-12 items-center">
-				<!-- Hero Text -->
-				<div class="animate-fade-in-up space-y-6">
-					<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-						<span class="text-primary">Real-Time Event Monitoring</span>
-						<br class="block" />
-						<span class="text-foreground relative z-10">for Modern Teams</span>
-					</h1>
-					<p class="text-lg sm:text-xl text-muted-foreground">
-						Track, analyze, and act on events across your distributed systems. Get instant insights
-						with WebSocket-powered live updates.
-					</p>
-					<div class="flex flex-col sm:flex-row gap-4 pt-4">
-					<Button
-						href={CLIENT_ROUTES.REGISTER_PAGE.path}
-						size="lg"
-						class="text-base"
-					>
-						Get Started Free
-					</Button>
+	<!-- Main Content -->
+	<main class="overflow-x-hidden">
+		<!-- Hero Section -->
+		<section id="hero" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+			<div class="container mx-auto max-w-7xl">
+				<div class="grid lg:grid-cols-2 gap-12 items-center">
+					<!-- Hero Text -->
+					<div class="animate-fade-in-up space-y-6">
+						<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+							<span class="text-primary">Real-Time Event Monitoring</span>
+							<br class="block" />
+							<span class="text-foreground relative z-10">for Modern Teams</span>
+						</h1>
+						<p class="text-lg sm:text-xl text-muted-foreground">
+							Track, analyze, and act on events across your distributed systems. Get instant insights
+							with WebSocket-powered live updates.
+						</p>
+						<div class="flex flex-col sm:flex-row gap-4 pt-4">
 						<Button
-							onclick={() => scrollToSection('features')}
+							href={CLIENT_ROUTES.REGISTER_PAGE.path}
 							size="lg"
-							variant="outline"
-							class="text-base"
+							class="text-base w-full sm:w-auto"
 						>
-							Learn More
-							<ChevronDown class="ml-2 h-4 w-4" />
+							Get Started Free
 						</Button>
-					</div>
-				</div>
-
-				<!-- Hero Visual - Animated Dashboard Mockup -->
-				<div class="relative animate-fade-in">
-					<!-- Main Dashboard -->
-					<div
-						class="rounded-xl border border-border/50 bg-card/60 backdrop-blur-xl p-6 shadow-xl"
-					>
-						<div class="space-y-4">
-							<!-- Header -->
-							<div class="flex items-center justify-between pb-4 border-b border-border/50">
-								<div class="flex items-center gap-2">
-									<Activity class="h-5 w-5 text-primary" />
-									<span class="font-semibold">Live Events</span>
-								</div>
-								<div class="flex items-center gap-2">
-									<span class="relative flex h-3 w-3">
-										<span
-											class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
-										></span>
-										<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-									</span>
-									<span class="text-xs text-muted-foreground">Connected</span>
-								</div>
-							</div>
-
-							<!-- Event Cards -->
-							<div class="space-y-3">
-								<div class="animate-fade-in-up rounded-lg border border-green-500/20 bg-green-500/10 p-3">
-									<div class="flex items-center gap-2">
-										<span class="text-green-500">●</span>
-										<span class="text-sm font-mono">user.login</span>
-									</div>
-									<p class="text-xs text-muted-foreground mt-1">User authenticated successfully</p>
-								</div>
-
-								<div
-									class="animate-fade-in-up rounded-lg border border-blue-500/20 bg-blue-500/10 p-3"
-									style="animation-delay: 0.2s;"
-								>
-									<div class="flex items-center gap-2">
-										<span class="text-blue-500">●</span>
-										<span class="text-sm font-mono">payment.success</span>
-									</div>
-									<p class="text-xs text-muted-foreground mt-1">Payment processed - $99.99 USD</p>
-								</div>
-
-								<div
-									class="animate-fade-in-up rounded-lg border border-amber-500/20 bg-amber-500/10 p-3"
-									style="animation-delay: 0.4s;"
-								>
-									<div class="flex items-center gap-2">
-										<span class="text-amber-500">●</span>
-										<span class="text-sm font-mono">api.rate_limit</span>
-									</div>
-									<p class="text-xs text-muted-foreground mt-1">Rate limit warning - 80% capacity</p>
-								</div>
-							</div>
+							<Button
+								onclick={() => scrollToSection('features')}
+								size="lg"
+								variant="outline"
+								class="text-base w-full sm:w-auto"
+							>
+								Learn More
+								<ChevronDown class="ml-2 h-4 w-4" />
+							</Button>
 						</div>
 					</div>
 
-					<!-- Floating Notification Cards -->
-					<div
-						class="absolute -top-4 -right-4 max-w-[200px] animate-fade-in-up rounded-lg border border-border/50 bg-card backdrop-blur-xl p-3 shadow-lg"
-						style="animation-delay: 0.6s;"
-					>
-						<div class="flex items-center gap-2">
-							<Shield class="h-4 w-4 text-primary" />
-							<span class="text-xs font-medium">Secure & Encrypted</span>
-						</div>
-					</div>
+					<!-- Hero Visual - Animated Dashboard Mockup -->
+					<div class="relative animate-fade-in mt-8 lg:mt-0">
+						<!-- Main Dashboard -->
+						<div
+							class="rounded-lg border border-border/50 bg-card/60 backdrop-blur-xl p-6 shadow-xl"
+						>
+							<div class="space-y-4">
+								<!-- Header -->
+								<div class="flex items-center justify-between pb-4 border-b border-border/50">
+									<div class="flex items-center gap-2">
+										<Activity class="h-5 w-5 text-primary" />
+										<span class="font-semibold">Live Events</span>
+									</div>
+									<div class="flex items-center gap-2">
+										<span class="relative flex h-3 w-3">
+											<span
+												class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+											></span>
+											<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+										</span>
+										<span class="text-xs text-muted-foreground">Connected</span>
+									</div>
+								</div>
 
-					<div
-						class="absolute -bottom-4 -left-4 max-w-[180px] animate-fade-in-up rounded-lg border border-border/50 bg-card backdrop-blur-xl p-3 shadow-lg"
-						style="animation-delay: 0.8s;"
-					>
-						<div class="flex items-center gap-2">
-							<Activity class="h-4 w-4 text-primary" />
-							<span class="text-xs font-medium">Real-Time Updates</span>
+								<!-- Event Cards -->
+								<div class="space-y-3">
+									<div class="animate-fade-in-up rounded-md border border-green-500/20 bg-green-500/10 p-3">
+										<div class="flex items-center gap-2">
+											<span class="text-green-500">●</span>
+											<span class="text-sm font-mono">user.login</span>
+										</div>
+										<p class="text-xs text-muted-foreground mt-1">User authenticated successfully</p>
+									</div>
+
+									<div
+										class="animate-fade-in-up rounded-md border border-blue-500/20 bg-blue-500/10 p-3"
+										style="animation-delay: 0.2s;"
+									>
+										<div class="flex items-center gap-2">
+											<span class="text-blue-500">●</span>
+											<span class="text-sm font-mono">payment.success</span>
+										</div>
+										<p class="text-xs text-muted-foreground mt-1">Payment processed - $99.99 USD</p>
+									</div>
+
+									<div
+										class="animate-fade-in-up rounded-md border border-amber-500/20 bg-amber-500/10 p-3"
+										style="animation-delay: 0.4s;"
+									>
+										<div class="flex items-center gap-2">
+											<span class="text-amber-500">●</span>
+											<span class="text-sm font-mono">api.rate_limit</span>
+										</div>
+										<p class="text-xs text-muted-foreground mt-1">Rate limit warning - 80% capacity</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Floating Notification Cards -->
+						<div
+							class="absolute -top-4 right-0 sm:-right-4 max-w-[200px] animate-fade-in-up rounded-md border border-border/50 bg-card/80 backdrop-blur-xl p-3 shadow-lg"
+							style="animation-delay: 0.6s;"
+						>
+							<div class="flex items-center gap-2">
+								<Shield class="h-4 w-4 text-primary" />
+								<span class="text-xs font-medium">Secure & Encrypted</span>
+							</div>
+						</div>
+
+						<div
+							class="absolute -bottom-4 left-0 sm:-left-4 max-w-[180px] animate-fade-in-up rounded-md border border-border/50 bg-card/80 backdrop-blur-xl p-3 shadow-lg"
+							style="animation-delay: 0.8s;"
+						>
+							<div class="flex items-center gap-2">
+								<Activity class="h-4 w-4 text-primary" />
+								<span class="text-xs font-medium">Real-Time Updates</span>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	</section>
+		</section>
 
 	<!-- Features Section -->
 	<section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
@@ -343,10 +347,10 @@
 			<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 				<!-- Feature 1: Real-Time Streaming -->
 				<div
-					class="group rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-primary/10 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Activity class="h-6 w-6 text-primary" />
 					</div>
@@ -359,11 +363,11 @@
 
 				<!-- Feature 2: Multi-Organization Support -->
 				<div
-					class="group rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.1s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-primary/10 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Building2 class="h-6 w-6 text-primary" />
 					</div>
@@ -376,11 +380,11 @@
 
 				<!-- Feature 3: Channel-Based Routing -->
 				<div
-					class="group rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.2s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-primary/10 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<GitBranch class="h-6 w-6 text-primary" />
 					</div>
@@ -393,11 +397,11 @@
 
 				<!-- Feature 4: Developer-First API -->
 				<div
-					class="group rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.3s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-primary/10 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Code2 class="h-6 w-6 text-primary" />
 					</div>
@@ -410,11 +414,11 @@
 
 				<!-- Feature 5: Team Collaboration -->
 				<div
-					class="group rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.4s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-primary/10 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Users class="h-6 w-6 text-primary" />
 					</div>
@@ -426,11 +430,11 @@
 
 				<!-- Feature 6: Enterprise Security -->
 				<div
-					class="group rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.5s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-primary/10 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Shield class="h-6 w-6 text-primary" />
 					</div>
@@ -458,9 +462,9 @@
 			<div class="grid md:grid-cols-3 gap-8 lg:gap-12">
 				<!-- Step 1 -->
 				<div class="relative animate-fade-in-up">
-					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-xl h-full">
+					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-lg h-full">
 						<div
-							class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-6"
+							class="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 border border-primary/20 mb-6"
 						>
 							<Plug class="h-8 w-8 text-primary" />
 						</div>
@@ -482,9 +486,9 @@
 
 				<!-- Step 2 -->
 				<div class="relative animate-fade-in-up" style="animation-delay: 0.2s;">
-					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-xl h-full">
+					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-lg h-full">
 						<div
-							class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-6"
+							class="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 border border-primary/20 mb-6"
 						>
 							<Radio class="h-8 w-8 text-primary" />
 						</div>
@@ -506,9 +510,9 @@
 
 				<!-- Step 3 -->
 				<div class="animate-fade-in-up" style="animation-delay: 0.4s;">
-					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-xl h-full">
+					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-lg h-full">
 						<div
-							class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-6"
+							class="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 border border-primary/20 mb-6"
 						>
 							<BarChart3 class="h-8 w-8 text-primary" />
 						</div>
