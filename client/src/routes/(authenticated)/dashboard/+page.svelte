@@ -8,6 +8,7 @@
     import type { UserOrganizationResponse } from '$lib/api/models';
     import { CLIENT_ROUTES } from '$lib/config/routes';
     import {getOrganizationalRoleBadgeClass, getUserRoleBadgeClass} from '$lib/utils/role';
+    import { formatDate } from '$lib/utils/date';
 
     const organizations: UserOrganizationResponse[] = $derived(organizationStore.organizations);
     const loading: boolean = $derived(organizationStore.loading);
@@ -117,7 +118,7 @@
                                 <CardContent>
                                     <div class="flex items-center gap-2 text-xs text-muted-foreground">
                                         <Clock class="w-3 h-3"/>
-                                        <span>Member since {new Date(org.joinedAt!).toLocaleDateString()}</span>
+                                        <span>Member since {formatDate(org.joinedAt ?? '')}</span>
                                     </div>
                                 </CardContent>
                             </Card>
