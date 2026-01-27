@@ -4,11 +4,16 @@
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import { searchOrganizations } from '$lib/api/organization/OrganizationController';
-	import type { OrganizationResponse, OrganizationStatus } from '$lib/api/models';
+	import type { OrganizationResponse } from '$lib/api/models';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Building2, Users, Key } from '@lucide/svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
+	import { formatDate } from '$lib/utils/date';
+	import {
+		getOrganizationStatusBadgeVariant,
+		getOwnerDisplayName
+	} from '$lib/utils/organization';
 
 	const columns: DataTableColumn<OrganizationResponse>[] = [
 		{
@@ -68,38 +73,7 @@
 		defaultSort: [{name: 'name', direction: 'ASC'}]
 	});
 
-	// Helper functions
-	function getStatusBadgeVariant(
-		status: OrganizationStatus | undefined
-	): 'default' | 'success' | 'destructive' {
-		switch (status) {
-			case 'ACTIVE':
-				return 'success';
-			case 'SUSPENDED':
-				return 'destructive';
-			case 'TRIAL':
-			default:
-				return 'default';
-		}
-	}
-
-	function getOwnerName(owner: { firstName?: string; lastName?: string } | undefined): string {
-		if (!owner || (!owner.firstName && !owner.lastName)) {
-			return 'No owner';
-		}
-		return `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim();
-	}
-
-	function formatDate(dateString: string | undefined): string {
-		if (!dateString) return 'N/A';
-		const date: Date = new Date(dateString);
-		return date.toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
-		});
-	}
-
+	// Navigation helpers
 	function navigateToMembers(orgId: number | undefined): void {
 		if (orgId) {
 			goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(orgId).path);
@@ -155,7 +129,7 @@
 
 				<!-- Status -->
 				<div class="col-span-1 md:col-span-2 flex items-center">
-					<Badge variant={getStatusBadgeVariant(org.status)} class="min-w-[90px] justify-center">
+					<Badge variant={getOrganizationStatusBadgeVariant(org.status)} class="min-w-[90px] justify-center">
 						{org.status}
 					</Badge>
 				</div>
@@ -164,7 +138,7 @@
 				<div class="col-span-1 md:col-span-2 flex items-center">
 					<span class="text-sm {org.owner ? '' : 'text-muted-foreground italic'}">
 						<span class="md:hidden font-medium">Owner: </span>
-						{getOwnerName(org.owner)}
+						{getOwnerDisplayName(org.owner)}
 					</span>
 				</div>
 
@@ -180,7 +154,7 @@
 					<div class="col-span-1 md:col-span-1 flex items-center">
 						<span class="text-sm text-muted-foreground">
 							<span class="md:hidden">Created: </span>
-							{formatDate(org.createdAt)}
+							{org.createdAt ? formatDate(org.createdAt ?? '') : 'N/A'}
 						</span>
 					</div>
 
