@@ -259,7 +259,7 @@
 						<DataTable {columns} {service} title="API Keys" icon={Key}>
 							{#snippet row(apiKey: ApiKeyResponse)}
 								<div
-									class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-accent/5 transition-all shadow-sm hover:shadow-md"
+									class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all"
 								>
 									<!-- Name & Masked Key -->
 									<div class="col-span-1 md:col-span-4 flex flex-col gap-1">
@@ -320,10 +320,11 @@
 									<div class="col-span-1 md:col-span-1 flex items-center justify-center">
 										{#if canManage}
 											<Button
-												variant="outline"
-												size="sm"
+												variant="ghost"
+												size="icon"
+												class="h-8 w-8 text-muted-foreground hover:text-destructive"
 												onclick={() => openRevokeDialog(apiKey)}
-												class="bg-background/50 border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+												aria-label="Revoke API key"
 											>
 												<Trash2 class="h-4 w-4" />
 											</Button>

@@ -108,14 +108,12 @@
 		<DataTable {columns} service={dataTableService} title="All Watchlists" icon={ClipboardList}>
 			{#snippet row(watchlist: WatchlistDetailsResponse)}
 				<div
-					class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-4 py-3 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/70 hover:border-border transition-all text-left w-full"
+					class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-4 py-3 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all text-left w-full"
 				>
 					<!-- Watchlist Name -->
 					<div class="col-span-1 md:col-span-3">
 						<div class="flex items-center gap-3">
-							<div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
-								<ClipboardList class="h-5 w-5 text-primary" />
-							</div>
+							<ClipboardList class="h-5 w-5 text-primary shrink-0" />
 							<div class="min-w-0">
 								<div class="font-medium truncate">{watchlist.name}</div>
 								<div class="text-sm text-muted-foreground truncate md:hidden">
@@ -145,7 +143,7 @@
 						<Button
 							variant="ghost"
 							size="icon"
-							class="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+							class="h-8 w-8 text-muted-foreground hover:text-primary"
 							onclick={() => handleMonitorWatchlist(watchlist)}
 							aria-label="Monitor watchlist"
 						>
@@ -154,7 +152,7 @@
 						<Button
 							variant="ghost"
 							size="icon"
-							class="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+							class="h-8 w-8 text-muted-foreground hover:text-primary"
 							onclick={() => handleEditWatchlist(watchlist)}
 							aria-label="Edit watchlist"
 						>
@@ -163,7 +161,7 @@
 						<Button
 							variant="ghost"
 							size="icon"
-							class="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+							class="h-8 w-8 text-muted-foreground hover:text-destructive"
 							onclick={() => handleDeleteWatchlist(watchlist)}
 							aria-label="Delete watchlist"
 						>

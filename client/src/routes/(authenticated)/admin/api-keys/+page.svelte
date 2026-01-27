@@ -454,7 +454,7 @@
 		<DataTable {columns} service={dataTableService} title="All API Keys" icon={Key}>
 		{#snippet row(key: ApiKeyResponse)}
 			<div
-				class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 px-4 py-4 rounded-lg border border-border/50 bg-card/40 hover:bg-accent/5 transition-colors group"
+				class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 px-4 py-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all group"
 			>
 					<!-- Key + Name -->
 					<div class="col-span-1 md:col-span-3">

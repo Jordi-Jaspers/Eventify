@@ -192,7 +192,7 @@
 				<div
 					role="button"
 					tabindex="0"
-					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/70 hover:border-border transition-all text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
 					onclick={() => openUserSheet(user)}
 					onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') openUserSheet(user); }}
 				>
@@ -200,7 +200,7 @@
 					<div class="col-span-1 md:col-span-3">
 						<div class="flex items-center gap-3">
 							<!-- Avatar -->
-							<div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
+							<div class="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
 								<span class="text-sm font-semibold text-primary">{getUserInitials(user)}</span>
 							</div>
 							<!-- Name + Email -->

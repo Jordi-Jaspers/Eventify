@@ -363,7 +363,7 @@
 			<DataTable {columns} {service} title="Members" icon={Users}>
 				{#snippet row(member: OrganizationMembershipResponse)}
 					<div
-						class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/40 transition-all duration-200 hover:shadow-md"
+						class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all"
 					>
 						<!-- Avatar & Name -->
 						<div class="col-span-1 md:col-span-4 flex items-center gap-3">

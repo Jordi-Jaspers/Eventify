@@ -186,14 +186,12 @@
 		<DataTable {columns} service={dataTableService} title="All Channels" icon={Radio}>
 			{#snippet row(channel: ChannelDetailsResponse)}
 				<div
-					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 px-4 py-3 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/70 hover:border-border transition-all text-left w-full"
+					class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-4 py-3 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all text-left w-full"
 				>
 					<!-- Channel Name -->
 					<div class="col-span-1 md:col-span-3">
 						<div class="flex items-center gap-3">
-							<div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
-								<Radio class="h-5 w-5 text-primary" />
-							</div>
+							<Radio class="h-5 w-5 text-primary shrink-0" />
 							<div class="min-w-0">
 								<div class="font-medium truncate">{channel.name}</div>
 								<div class="text-sm text-muted-foreground truncate md:hidden">
@@ -230,7 +228,7 @@
 						<Button
 							variant="ghost"
 							size="icon"
-							class="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+							class="h-8 w-8 text-muted-foreground hover:text-primary"
 							onclick={() => openEditSheet(channel)}
 							aria-label="Edit channel"
 						>
@@ -240,7 +238,7 @@
 							<Button
 								variant="ghost"
 								size="icon"
-								class="h-8 w-8 hover:bg-yellow-500/10 hover:text-yellow-500"
+								class="h-8 w-8 text-muted-foreground hover:text-yellow-500"
 								onclick={() => handlePauseChannel(channel)}
 								aria-label="Pause channel"
 							>
@@ -250,7 +248,7 @@
 							<Button
 								variant="ghost"
 								size="icon"
-								class="h-8 w-8 hover:bg-green-500/10 hover:text-green-500"
+								class="h-8 w-8 text-muted-foreground hover:text-green-500"
 								onclick={() => handleResumeChannel(channel)}
 								aria-label="Resume channel"
 							>
@@ -260,7 +258,7 @@
 						<Button
 							variant="ghost"
 							size="icon"
-							class="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+							class="h-8 w-8 text-muted-foreground hover:text-destructive"
 							onclick={() => handleDeleteChannel(channel)}
 							aria-label="Delete channel"
 						>
