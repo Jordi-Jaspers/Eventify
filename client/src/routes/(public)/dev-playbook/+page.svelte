@@ -10,6 +10,8 @@
     import { DateTimePicker } from '$lib/components/ui/date-time-picker';
     import { StatCard } from '$lib/components/admin';
     import { Key, Users, Building2, Activity, AlertTriangle, Clock, TrendingUp, Shield } from '@lucide/svelte';
+    import { LoadingCard } from '$lib/components/ui/loading-card';
+    import { AccessDeniedCard } from '$lib/components/ui/access-denied-card';
     
     // DateTimePicker state
     let dateTimeValue1: string = $state('');
@@ -65,7 +67,9 @@
                 { id: 'stat-card', label: 'Stat Card' },
                 { id: 'badges', label: 'Badges' },
                 { id: 'date-time-picker', label: 'DateTimePicker' },
-                { id: 'live-indicator', label: 'Live Indicator' }
+                { id: 'live-indicator', label: 'Live Indicator' },
+                { id: 'loading-card', label: 'Loading Card' },
+                { id: 'access-denied-card', label: 'Access Denied Card' }
             ]
         },
         {
@@ -772,6 +776,64 @@
                         </CardContent>
                     </Card>
                 </div>
+            </section>
+
+            <!-- Loading Card -->
+            <section id="loading-card" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">Loading Card</h2>
+                <p class="text-muted-foreground mb-6">Generic loading state with spinner</p>
+                
+                <Card class="border-border/50 border-primary/30">
+                    <CardHeader>
+                        <CardTitle class="text-base flex items-center gap-2">
+                            Usage
+                            <Badge variant="outline" class="text-xs">COMPONENT</Badge>
+                        </CardTitle>
+                        <CardDescription>Import from $lib/components/ui/loading-card</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="max-w-md mx-auto">
+                            <LoadingCard />
+                        </div>
+                        <div class="mt-4 p-4 bg-muted/20 rounded-md">
+                            <code class="text-xs">
+                                &lt;LoadingCard /&gt;
+                            </code>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-3">
+                            Use for full-page loading states or while fetching data.
+                        </p>
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- Access Denied Card -->
+            <section id="access-denied-card" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">Access Denied Card</h2>
+                <p class="text-muted-foreground mb-6">Error state for unauthorized access</p>
+                
+                <Card class="border-border/50 border-primary/30">
+                    <CardHeader>
+                        <CardTitle class="text-base flex items-center gap-2">
+                            Usage
+                            <Badge variant="outline" class="text-xs">COMPONENT</Badge>
+                        </CardTitle>
+                        <CardDescription>Import from $lib/components/ui/access-denied-card</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="max-w-md mx-auto">
+                            <AccessDeniedCard />
+                        </div>
+                        <div class="mt-4 p-4 bg-muted/20 rounded-md">
+                            <code class="text-xs">
+                                &lt;AccessDeniedCard /&gt;
+                            </code>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-3">
+                            Use when user doesn't have permission to view a resource.
+                        </p>
+                    </CardContent>
+                </Card>
             </section>
 
             <!-- ==================== PATTERNS ==================== -->
