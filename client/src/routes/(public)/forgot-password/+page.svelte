@@ -42,12 +42,12 @@
 	<title>Forgot Password - Eventify</title>
 </svelte:head>
 
-<div class="max-w-md mx-auto">
-	<div class="mb-8">
+<div class="w-full max-w-md mx-auto px-4">
+	<div class="mb-8 text-center">
 		<AppLogo size="medium" subtitle="Real-time monitoring and event tracking" />
 	</div>
 
-	<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
+	<Card class="border-border/50 bg-card/30 backdrop-blur-md">
 		<CardHeader class="space-y-2">
 			<CardTitle class="text-2xl flex items-center gap-2">
 				<KeyRound class="w-5 h-5 text-primary" />
@@ -61,9 +61,9 @@
 		<CardContent>
 			{#if showSuccessMessage}
 				<div class="space-y-6">
-					<Alert class="bg-primary/5 border-primary/30 backdrop-blur-sm">
-						<CheckCircle class="h-5 w-5 text-primary" />
-						<AlertDescription class="text-foreground">
+					<Alert class="bg-green-500/10 border-green-500/30 backdrop-blur-sm">
+						<CheckCircle class="h-5 w-5 text-green-500" />
+						<AlertDescription class="text-muted-foreground">
 							If an account exists with this email, you will receive a password reset link shortly.
 						</AlertDescription>
 					</Alert>
@@ -87,7 +87,7 @@
 								placeholder="you@example.com"
 								bind:value={email}
 								disabled={isSubmitting}
-								class="pl-10 bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+								class="pl-10"
 								required
 							/>
 						</div>
@@ -109,7 +109,7 @@
 					<div class="text-center">
 						<a
 							href={CLIENT_ROUTES.LOGIN_PAGE.path}
-							class="text-sm text-primary hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+							class="text-sm text-primary hover:underline transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
 							tabindex={isSubmitting ? -1 : 0}
 						>
 							Back to Login

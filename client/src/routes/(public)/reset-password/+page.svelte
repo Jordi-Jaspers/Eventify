@@ -102,7 +102,7 @@
 </svelte:head>
 
 <div class="max-w-md mx-auto">
-	<div class="mb-8">
+	<div class="mb-8 text-center">
 		<AppLogo size="medium" subtitle="Real-time monitoring and event tracking" />
 	</div>
 

@@ -11,13 +11,10 @@
 
 <div class="space-y-4">
 	<!-- OR Separator -->
-	<div class="relative my-6">
-		<div class="absolute inset-0 flex items-center">
-			<div class="w-full border-t border-border/50"></div>
-		</div>
-		<div class="relative flex justify-center text-xs uppercase">
-			<span class="bg-card px-2 text-muted-foreground">Or continue with</span>
-		</div>
+	<div class="flex items-center gap-4 my-6">
+		<div class="flex-1 border-t border-border/50"></div>
+		<span class="text-xs uppercase text-muted-foreground">Or continue with</span>
+		<div class="flex-1 border-t border-border/50"></div>
 	</div>
 
 	<!-- OAuth Provider Buttons -->

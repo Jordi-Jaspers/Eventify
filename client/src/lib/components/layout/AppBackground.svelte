@@ -16,7 +16,7 @@
 </script>
 
 <!-- Enterprise Background with Grid and Gradient Orbs -->
-<div class="animated-grid-bg min-h-screen w-full">
+<div class="animated-grid-bg min-h-screen w-full overflow-x-hidden">
     <!-- Gradient Orbs -->
     <div class="gradient-orb gradient-orb-1"></div>
     <div class="gradient-orb gradient-orb-2"></div>
