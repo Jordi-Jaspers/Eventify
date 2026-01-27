@@ -358,7 +358,7 @@
                     <!-- Create Organization -->
                     <Button
                             class="h-auto py-4"
-                            onclick={() => (window.location.href = CLIENT_ROUTES.ADMIN_ORGANIZATIONS_NEW.path)}
+                            onclick={() => goto(CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
                             <Plus class="h-5 w-5"/>

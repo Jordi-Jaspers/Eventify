@@ -14,6 +14,7 @@
 		getOrganizationStatusBadgeVariant,
 		getOwnerDisplayName
 	} from '$lib/utils/organization';
+	import CreateOrganizationSheet from '$lib/components/admin/CreateOrganizationSheet.svelte';
 
 	const columns: DataTableColumn<OrganizationResponse>[] = [
 		{
@@ -73,6 +74,9 @@
 		defaultSort: [{name: 'name', direction: 'ASC'}]
 	});
 
+	// Create organization sheet state
+	let isCreateSheetOpen: boolean = $state(false);
+
 	// Navigation helpers
 	function navigateToMembers(orgId: number | undefined): void {
 		if (orgId) {
@@ -86,6 +90,11 @@
 		}
 	}
 
+	// Handle successful organization creation
+	function handleOrganizationCreated(): void {
+		service.load();
+	}
+
 	onMount(() => service.load());
 </script>
 
@@ -96,13 +105,17 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
-		<div class="mb-8">
-			<h1
-				class="text-3xl font-bold text-primary"
-			>
-				Organizations
-			</h1>
-			<p class="text-muted-foreground mt-2">Manage and monitor all organizations on the platform</p>
+		<div class="mb-8 flex items-center justify-between">
+			<div>
+				<h1 class="text-3xl font-bold text-primary">
+					Organizations
+				</h1>
+				<p class="text-muted-foreground mt-2">Manage and monitor all organizations on the platform</p>
+			</div>
+			<Button onclick={() => (isCreateSheetOpen = true)}>
+				<Building2 class="mr-2 h-4 w-4" />
+				New Organization
+			</Button>
 		</div>
 
 		<!-- DataTable -->
@@ -186,5 +199,12 @@
 				</div>
 			{/snippet}
 		</DataTable>
+
+		<!-- Create Organization Sheet -->
+		<CreateOrganizationSheet
+			open={isCreateSheetOpen}
+			onOpenChange={(open: boolean) => (isCreateSheetOpen = open)}
+			onSuccess={handleOrganizationCreated}
+		/>
 	</div>
 </main>
