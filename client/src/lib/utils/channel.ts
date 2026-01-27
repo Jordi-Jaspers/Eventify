@@ -2,6 +2,8 @@
  * Channel utility functions for formatting and display
  */
 
+import { truncateText } from './string';
+
 /**
  * Get badge variant for channel status
  */
@@ -20,12 +22,11 @@ export function getChannelStatusLabel(status: string | undefined): string {
 
 /**
  * Truncate description text with ellipsis
+ * @deprecated Use truncateText from utils/string.ts instead
  */
 export function truncateDescription(
 	description: string | undefined | null,
 	maxLength: number = 80
 ): string {
-	if (!description) return 'No description';
-	if (description.length <= maxLength) return description;
-	return `${description.substring(0, maxLength)}...`;
+	return truncateText(description, maxLength, 'No description');
 }

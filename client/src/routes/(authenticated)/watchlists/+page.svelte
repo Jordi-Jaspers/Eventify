@@ -8,6 +8,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { ClipboardList, Edit, Trash2, Plus, Eye } from '@lucide/svelte';
 	import { formatDate } from '$lib/utils/date';
+	import { truncateText } from '$lib/utils/string';
 	import { toast } from 'svelte-sonner';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 
@@ -44,13 +45,6 @@
 		pageSize: 10,
 		defaultSort: [{ name: 'createdAt', direction: 'DESC' }]
 	});
-
-	// Helper functions
-	function truncateDescription(description: string | undefined | null, maxLength: number = 80): string {
-		if (!description) return 'No description';
-		if (description.length <= maxLength) return description;
-		return `${description.substring(0, maxLength)}...`;
-	}
 
 	function handleEditWatchlist(watchlist: WatchlistDetailsResponse): void {
 		goto(`${CLIENT_ROUTES.WATCHLISTS_PAGE.path}/${watchlist.id}`);
@@ -117,7 +111,7 @@
 							<div class="min-w-0">
 								<div class="font-medium truncate">{watchlist.name}</div>
 								<div class="text-sm text-muted-foreground truncate md:hidden">
-									{truncateDescription(watchlist.description, 40)}
+									{truncateText(watchlist.description, 40, 'No description')}
 								</div>
 							</div>
 						</div>
@@ -126,7 +120,7 @@
 					<!-- Description (desktop only) -->
 					<div class="hidden md:flex md:col-span-6 items-center">
 						<span class="text-sm text-muted-foreground truncate">
-							{truncateDescription(watchlist.description, 120)}
+							{truncateText(watchlist.description, 120, 'No description')}
 						</span>
 					</div>
 
