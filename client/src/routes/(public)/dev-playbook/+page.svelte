@@ -5,13 +5,16 @@
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import Button from '$lib/components/ui/button/button.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
-    import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2, Menu, LayoutList, AlertCircle } from '@lucide/svelte';
+    import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2, Menu, LayoutList, AlertCircle, Mail, User, Settings, ShieldCheck } from '@lucide/svelte';
     import { Badge } from '$lib/components/ui/badge';
     import { DateTimePicker } from '$lib/components/ui/date-time-picker';
     import { StatCard } from '$lib/components/admin';
     import { Key, Users, Building2, Activity, AlertTriangle, Clock, TrendingUp, Shield } from '@lucide/svelte';
     import { LoadingCard } from '$lib/components/ui/loading-card';
     import { AccessDeniedCard } from '$lib/components/ui/access-denied-card';
+    import { StatusIndicator } from '$lib/components/ui/status-indicator';
+    import { InfoField } from '$lib/components/ui/info-field';
+    import { SectionHeader } from '$lib/components/ui/section-header';
     
     // DateTimePicker state
     let dateTimeValue1: string = $state('');
@@ -69,7 +72,10 @@
                 { id: 'date-time-picker', label: 'DateTimePicker' },
                 { id: 'live-indicator', label: 'Live Indicator' },
                 { id: 'loading-card', label: 'Loading Card' },
-                { id: 'access-denied-card', label: 'Access Denied Card' }
+                { id: 'access-denied-card', label: 'Access Denied Card' },
+                { id: 'status-indicator', label: 'Status Indicator' },
+                { id: 'info-field', label: 'Info Field' },
+                { id: 'section-header', label: 'Section Header' }
             ]
         },
         {
@@ -834,6 +840,341 @@
                         </p>
                     </CardContent>
                 </Card>
+            </section>
+
+            <!-- Status Indicator -->
+            <section id="status-indicator" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">Status Indicator</h2>
+                <p class="text-muted-foreground mb-6">Display boolean status with colored icon and text</p>
+                
+                <div class="grid gap-6">
+                    <Card class="border-border/50 border-primary/30">
+                        <CardHeader>
+                            <CardTitle class="text-base flex items-center gap-2">
+                                Usage
+                                <Badge variant="outline" class="text-xs">COMPONENT</Badge>
+                            </CardTitle>
+                            <CardDescription>Import from $lib/components/ui/status-indicator</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-4">
+                                <div class="p-4 rounded-lg border border-border/50 bg-card/30">
+                                    <div class="space-y-3">
+                                        <StatusIndicator 
+                                            status={true}
+                                            activeLabel="Email Verified"
+                                            inactiveLabel="Email Not Verified"
+                                        />
+                                        <StatusIndicator 
+                                            status={false}
+                                            activeLabel="Email Verified"
+                                            inactiveLabel="Email Not Verified"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-muted/20 rounded-md">
+                                    <code class="text-xs block">
+                                        &lt;StatusIndicator<br/>
+                                        &nbsp;&nbsp;status=&#123;true&#125;<br/>
+                                        &nbsp;&nbsp;activeLabel="Email Verified"<br/>
+                                        &nbsp;&nbsp;inactiveLabel="Email Not Verified"<br/>
+                                        /&gt;
+                                    </code>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Props</CardTitle>
+                            <CardDescription>Available properties</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-2 text-sm">
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30 font-medium text-muted-foreground">
+                                    <div>Prop</div>
+                                    <div>Type</div>
+                                    <div>Default</div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">status</code>
+                                    <code class="text-xs">boolean | undefined</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">activeLabel</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">inactiveLabel</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">activeColor</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">'text-green-500'</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2">
+                                    <code class="text-xs">inactiveColor</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">'text-red-500'</code>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Custom Colors</CardTitle>
+                            <CardDescription>Override default colors</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-3 p-4 rounded-lg border border-border/50 bg-card/30">
+                                <StatusIndicator 
+                                    status={true}
+                                    activeLabel="Account Active"
+                                    inactiveLabel="Account Disabled"
+                                />
+                                <StatusIndicator 
+                                    status={false}
+                                    activeLabel="Feature Enabled"
+                                    inactiveLabel="Feature Disabled"
+                                    activeColor="text-primary"
+                                    inactiveColor="text-muted-foreground"
+                                />
+                            </div>
+                            <p class="text-xs text-muted-foreground mt-3">
+                                Use cases: Email verified/not verified, Account active/disabled, Feature enabled/disabled
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </section>
+
+            <!-- Info Field -->
+            <section id="info-field" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">Info Field</h2>
+                <p class="text-muted-foreground mb-6">Read-only info display box with icon and label</p>
+                
+                <div class="grid gap-6">
+                    <Card class="border-border/50 border-primary/30">
+                        <CardHeader>
+                            <CardTitle class="text-base flex items-center gap-2">
+                                Usage
+                                <Badge variant="outline" class="text-xs">COMPONENT</Badge>
+                            </CardTitle>
+                            <CardDescription>Import from $lib/components/ui/info-field</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-4">
+                                <div class="grid gap-3 md:grid-cols-2">
+                                    <InfoField 
+                                        label="Email Address"
+                                        value="user@example.com"
+                                        icon={Mail}
+                                    />
+                                    <InfoField 
+                                        label="Username"
+                                        value="johndoe"
+                                        icon={User}
+                                    />
+                                    <InfoField 
+                                        label="Role"
+                                        value="Administrator"
+                                        icon={ShieldCheck}
+                                    />
+                                    <InfoField 
+                                        label="Account Status"
+                                        value="Active"
+                                        icon={Settings}
+                                    />
+                                </div>
+                                <div class="p-4 bg-muted/20 rounded-md">
+                                    <code class="text-xs block">
+                                        &lt;InfoField<br/>
+                                        &nbsp;&nbsp;label="Email Address"<br/>
+                                        &nbsp;&nbsp;value="user@example.com"<br/>
+                                        &nbsp;&nbsp;icon=&#123;Mail&#125;<br/>
+                                        /&gt;
+                                    </code>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Props</CardTitle>
+                            <CardDescription>Available properties</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-2 text-sm">
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30 font-medium text-muted-foreground">
+                                    <div>Prop</div>
+                                    <div>Type</div>
+                                    <div>Default</div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">label</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">value</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">icon</code>
+                                    <code class="text-xs">Component</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2">
+                                    <code class="text-xs">class</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">''</code>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Use Cases</CardTitle>
+                            <CardDescription>When to use InfoField</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Profile information display</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Settings pages with read-only fields</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Detail views showing entity information</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Any page requiring structured info display with icons</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </section>
+
+            <!-- Section Header -->
+            <section id="section-header" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">Section Header</h2>
+                <p class="text-muted-foreground mb-6">Consistent section title with icon</p>
+                
+                <div class="grid gap-6">
+                    <Card class="border-border/50 border-primary/30">
+                        <CardHeader>
+                            <CardTitle class="text-base flex items-center gap-2">
+                                Usage
+                                <Badge variant="outline" class="text-xs">COMPONENT</Badge>
+                            </CardTitle>
+                            <CardDescription>Import from $lib/components/ui/section-header</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-6">
+                                <div class="space-y-4">
+                                    <SectionHeader title="Personal Information" icon={User} />
+                                    <div class="grid gap-3 md:grid-cols-2">
+                                        <InfoField label="Name" value="John Doe" icon={User} />
+                                        <InfoField label="Email" value="john@example.com" icon={Mail} />
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <SectionHeader title="Security Settings" icon={ShieldCheck} />
+                                    <div class="space-y-3">
+                                        <StatusIndicator 
+                                            status={true}
+                                            activeLabel="Two-Factor Authentication Enabled"
+                                            inactiveLabel="Two-Factor Authentication Disabled"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="p-4 bg-muted/20 rounded-md">
+                                    <code class="text-xs block">
+                                        &lt;SectionHeader<br/>
+                                        &nbsp;&nbsp;title="Personal Information"<br/>
+                                        &nbsp;&nbsp;icon=&#123;User&#125;<br/>
+                                        /&gt;
+                                    </code>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Props</CardTitle>
+                            <CardDescription>Available properties</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-2 text-sm">
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30 font-medium text-muted-foreground">
+                                    <div>Prop</div>
+                                    <div>Type</div>
+                                    <div>Default</div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">title</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">icon</code>
+                                    <code class="text-xs">Component</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2">
+                                    <code class="text-xs">class</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">''</code>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Use Cases</CardTitle>
+                            <CardDescription>When to use SectionHeader</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Profile page sections (Personal Info, Security, Preferences)</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Settings pages with multiple grouped sections</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Any page with multiple content groups requiring visual separation</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Forms with multiple logical sections</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </section>
 
             <!-- ==================== PATTERNS ==================== -->
