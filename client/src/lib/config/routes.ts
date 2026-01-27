@@ -71,6 +71,10 @@ export const CLIENT_ROUTES = {
 		path: '/watchlists',
 		type: RouteType.PRIVATE
 	},
+	WATCHLISTS_MONITOR_PAGE: {
+		path: '/watchlists/monitor',
+		type: RouteType.PRIVATE
+	},
 	ADMIN_DASHBOARD_PAGE: {
 		path: '/admin/dashboard',
 		type: RouteType.PRIVATE

@@ -15,12 +15,21 @@
 	import AppSidebarUser from './AppSidebarUser.svelte';
 	import AppLogo from './AppLogo.svelte';
 	import { PanelLeft } from '@lucide/svelte';
+	import { useSidebar } from '$lib/components/ui/sidebar/context.svelte';
 
 	interface Props {
 		currentPath: string;
 	}
 
 	let { currentPath }: Props = $props();
+
+	const sidebar = useSidebar();
+
+	function handleLogoClick(): void {
+		if (sidebar.state === 'collapsed' && !sidebar.isMobile) {
+			sidebar.toggle();
+		}
+	}
 </script>
 
 <Sidebar.Sidebar collapsible="icon" class="bg-card/50 backdrop-blur-xl border-border/50">
@@ -28,7 +37,15 @@
 	<Sidebar.Header class="border-b border-border/50 !flex-row items-center justify-between group-data-[collapsible=icon]:justify-center">
 		<!-- Logo section -->
 		<AppLogo size="small" class="group-data-[collapsible=icon]:hidden" />
-		<AppLogo size="small" variant="icon" class="hidden group-data-[collapsible=icon]:flex" />
+		<!-- Clickable logo icon when collapsed -->
+		<button
+			type="button"
+			onclick={handleLogoClick}
+			class="hidden group-data-[collapsible=icon]:flex cursor-pointer hover:opacity-80 transition-opacity"
+			aria-label="Expand sidebar"
+		>
+			<AppLogo size="small" variant="icon" />
+		</button>
 		<!-- Trigger button (hidden when collapsed - Rail handles expand) -->
 		<Sidebar.Trigger class="size-8 group-data-[collapsible=icon]:hidden">
 			<PanelLeft class="size-4" />

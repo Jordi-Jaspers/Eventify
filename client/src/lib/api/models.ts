@@ -67,6 +67,18 @@ export type WatchlistFiltersRequest = components['schemas']['WatchlistFiltersReq
 export type PageResourceWatchlistDetailsResponse =
 	components['schemas']['PageResourceWatchlistDetailsResponse'];
 
+// ================ Monitor ===================
+export type MonitorRequest = components['schemas']['MonitorRequest'];
+export type MonitorResponse = components['schemas']['MonitorResponse'];
+export type MonitorFilters = components['schemas']['MonitorFilters'];
+export type DashboardResponse = components['schemas']['DashboardResponse'];
+export type ChannelResponse = components['schemas']['ChannelResponse'];
+export type ChannelGroupResponse = components['schemas']['ChannelGroupResponse'];
+export type Timeline = components['schemas']['Timeline'];
+export type TimelineDuration = components['schemas']['TimelineDuration'];
+export type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
+export type Severity = 'CRITICAL' | 'WARNING' | 'OK' | 'NO_DATA';
+
 // ================ Pagination ===================
 export type SearchInput = components['schemas']['SearchInput'];
 export type SortableColumn = components['schemas']['SortableColumn'];
