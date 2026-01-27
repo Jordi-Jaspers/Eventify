@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Component } from 'svelte';
+	import type { Component, Snippet } from 'svelte';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	interface Props {
@@ -9,6 +9,8 @@
 		loading?: boolean;
 		variant?: 'primary' | 'blue' | 'purple' | 'green' | 'yellow' | 'orange' | 'red' | 'accent';
 		subtitle?: string;
+		/** Optional snippet rendered next to the value (e.g., badge, percentage) */
+		trailing?: Snippet;
 	}
 
 	const {
@@ -17,7 +19,8 @@
 		icon: Icon,
 		loading = false,
 		variant = 'primary',
-		subtitle
+		subtitle,
+		trailing
 	}: Props = $props();
 
 	const variantClasses: Record<string, { border: string; gradient: string; text: string }> = {
@@ -80,8 +83,13 @@
 		{#if loading}
 			<div class="h-10 bg-muted/50 rounded animate-pulse"></div>
 		{:else}
-			<div class="text-3xl font-bold {classes.text}">
-				{value}
+			<div class="flex items-end gap-3">
+				<div class="text-3xl font-bold {classes.text}">
+					{value}
+				</div>
+				{#if trailing}
+					{@render trailing()}
+				{/if}
 			</div>
 			{#if subtitle}
 				<div class="text-xs text-muted-foreground truncate mt-1">
