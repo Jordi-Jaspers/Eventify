@@ -852,6 +852,232 @@
         </Card>
     </section>
 
+    <!-- SECTION: DataTable -->
+    <section class="mb-16">
+        <h2 class="text-2xl font-semibold mb-2">DataTable</h2>
+        <p class="text-muted-foreground mb-6">Server-side paginated tables with filtering, sorting, and custom row rendering</p>
+        
+        <!-- DataTable Structure -->
+        <Card class="border-border/50 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg flex items-center gap-2">
+                    DataTable Row Pattern
+                    <span class="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">STANDARD</span>
+                </CardTitle>
+                <CardDescription>Use this exact styling for all DataTable row snippets</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <!-- Mock DataTable header -->
+                <div class="rounded-lg border border-border/50 overflow-hidden">
+                    <!-- Header row (simulated) -->
+                    <div class="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/30 text-sm font-medium text-muted-foreground border-b border-border/50">
+                        <div class="col-span-3">Channel</div>
+                        <div class="col-span-5">Description</div>
+                        <div class="col-span-1">Status</div>
+                        <div class="col-span-2">Created</div>
+                        <div class="col-span-1"></div>
+                    </div>
+                    
+                    <!-- Data rows -->
+                    <div class="divide-y divide-border/30">
+                        <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 bg-card/30 hover:bg-card/50 hover:border-border transition-all">
+                            <div class="col-span-3">
+                                <div class="flex items-center gap-3">
+                                    <Radio class="h-5 w-5 text-primary shrink-0" />
+                                    <div class="min-w-0">
+                                        <div class="font-medium truncate">Production API</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-5">
+                                <span class="text-sm text-muted-foreground truncate">Main production channel for API events</span>
+                            </div>
+                            <div class="col-span-1">
+                                <Badge variant="default">Active</Badge>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="text-sm text-muted-foreground">Jan 15, 2026</span>
+                            </div>
+                            <div class="col-span-1 flex items-center justify-end gap-1">
+                                <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
+                                    <Edit class="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-destructive">
+                                    <Trash2 class="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 bg-card/30 hover:bg-card/50 hover:border-border transition-all">
+                            <div class="col-span-3">
+                                <div class="flex items-center gap-3">
+                                    <Radio class="h-5 w-5 text-primary shrink-0" />
+                                    <div class="min-w-0">
+                                        <div class="font-medium truncate">Staging Environment</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-5">
+                                <span class="text-sm text-muted-foreground truncate">Pre-production testing channel</span>
+                            </div>
+                            <div class="col-span-1">
+                                <Badge variant="secondary">Paused</Badge>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="text-sm text-muted-foreground">Jan 10, 2026</span>
+                            </div>
+                            <div class="col-span-1 flex items-center justify-end gap-1">
+                                <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
+                                    <Edit class="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-destructive">
+                                    <Trash2 class="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Code Example -->
+        <Card class="border-border/50 border-primary/30 mb-6">
+            <CardHeader>
+                <CardTitle class="text-lg flex items-center gap-2">
+                    Row Snippet Code
+                    <span class="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">COPY THIS</span>
+                </CardTitle>
+                <CardDescription>Standard row template for DataTable components</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <pre class="text-xs bg-muted/30 p-4 rounded-lg overflow-x-auto font-mono leading-relaxed">
+{`<DataTable {columns} service={dataTableService} title="All Channels" icon={Radio}>
+  {#snippet row(channel: ChannelDetailsResponse)}
+    <div
+      class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-4 py-3 
+             rounded-lg border border-border/50 bg-card/30 
+             hover:bg-card/50 hover:border-border transition-all 
+             text-left w-full"
+    >
+      <!-- Icon + Name -->
+      <div class="col-span-1 md:col-span-3">
+        <div class="flex items-center gap-3">
+          <Radio class="h-5 w-5 text-primary shrink-0" />
+          <div class="min-w-0">
+            <div class="font-medium truncate">{channel.name}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="hidden md:flex md:col-span-5 items-center">
+        <span class="text-sm text-muted-foreground truncate">
+          {channel.description}
+        </span>
+      </div>
+
+      <!-- Status -->
+      <div class="col-span-1 md:col-span-1 flex items-center">
+        <Badge variant={channel.status === 'ACTIVE' ? 'success' : 'secondary'}>
+          {channel.status}
+        </Badge>
+      </div>
+
+      <!-- Date -->
+      <div class="col-span-1 md:col-span-2 flex items-center">
+        <span class="text-sm text-muted-foreground">
+          {formatDate(channel.createdAt)}
+        </span>
+      </div>
+
+      <!-- Actions -->
+      <div class="col-span-1 md:col-span-1 flex items-center justify-end gap-1">
+        <Button variant="ghost" size="icon" 
+                class="h-8 w-8 text-muted-foreground hover:text-primary">
+          <Edit class="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" 
+                class="h-8 w-8 text-muted-foreground hover:text-destructive">
+          <Trash2 class="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  {/snippet}
+</DataTable>`}
+                </pre>
+            </CardContent>
+        </Card>
+
+        <!-- Key Rules -->
+        <Card class="border-border/50">
+            <CardHeader>
+                <CardTitle class="text-lg">DataTable Row Rules</CardTitle>
+                <CardDescription>Follow these conventions for consistent styling</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Do's -->
+                    <div class="space-y-3">
+                        <p class="text-sm font-medium text-green-500 flex items-center gap-2">
+                            <Check class="h-4 w-4" /> Do
+                        </p>
+                        <ul class="space-y-2 text-sm text-muted-foreground">
+                            <li class="flex items-start gap-2">
+                                <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                <span><code class="text-xs bg-muted/50 px-1 rounded">bg-card/30 hover:bg-card/50</code> for background</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                <span><code class="text-xs bg-muted/50 px-1 rounded">border-border/50 hover:border-border</code> for borders</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                <span>Icons: <code class="text-xs bg-muted/50 px-1 rounded">h-5 w-5 text-primary</code> directly (no container)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                <span>Actions: <code class="text-xs bg-muted/50 px-1 rounded">text-muted-foreground hover:text-primary</code></span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                <span>Use <code class="text-xs bg-muted/50 px-1 rounded">transition-all</code> for smooth hover</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Don'ts -->
+                    <div class="space-y-3">
+                        <p class="text-sm font-medium text-destructive flex items-center gap-2">
+                            <X class="h-4 w-4" /> Don't
+                        </p>
+                        <ul class="space-y-2 text-sm text-muted-foreground">
+                            <li class="flex items-start gap-2">
+                                <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                                <span>No <code class="text-xs bg-muted/50 px-1 rounded">backdrop-blur-sm</code> on rows</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                                <span>No <code class="text-xs bg-muted/50 px-1 rounded">shadow-sm hover:shadow-md</code></span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                                <span>No gradient icon containers</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                                <span>No <code class="text-xs bg-muted/50 px-1 rounded">hover:bg-accent/10</code> or similar</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                                <span>No <code class="text-xs bg-muted/50 px-1 rounded">hover:bg-card/70</code> (too heavy)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    </section>
+
     <!-- SECTION: Usage Examples -->
     <section class="mb-16">
         <h2 class="text-2xl font-semibold mb-2">Usage Examples</h2>
