@@ -880,7 +880,7 @@
                     
                     <!-- Data rows -->
                     <div class="divide-y divide-border/30">
-                        <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 bg-card/30 hover:bg-card/50 hover:border-border transition-all">
+                        <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all">
                             <div class="col-span-3">
                                 <div class="flex items-center gap-3">
                                     <Radio class="h-5 w-5 text-primary shrink-0" />
@@ -908,7 +908,7 @@
                             </div>
                         </div>
                         
-                        <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 bg-card/30 hover:bg-card/50 hover:border-border transition-all">
+                        <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all">
                             <div class="col-span-3">
                                 <div class="flex items-center gap-3">
                                     <Radio class="h-5 w-5 text-primary shrink-0" />
@@ -955,9 +955,7 @@
   {#snippet row(channel: ChannelDetailsResponse)}
     <div
       class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-4 py-3 
-             rounded-lg border border-border/50 bg-card/30 
-             hover:bg-card/50 hover:border-border transition-all 
-             text-left w-full"
+             hover:bg-muted/30 transition-all text-left w-full"
     >
       <!-- Icon + Name -->
       <div class="col-span-1 md:col-span-3">
@@ -1024,11 +1022,11 @@
                         <ul class="space-y-2 text-sm text-muted-foreground">
                             <li class="flex items-start gap-2">
                                 <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                                <span><code class="text-xs bg-muted/50 px-1 rounded">bg-card/30 hover:bg-card/50</code> for background</span>
+                                <span><code class="text-xs bg-muted/50 px-1 rounded">hover:bg-muted/30</code> for row hover</span>
                             </li>
                             <li class="flex items-start gap-2">
                                 <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                                <span><code class="text-xs bg-muted/50 px-1 rounded">border-border/50 hover:border-border</code> for borders</span>
+                                <span>Let DataTable component handle borders and dividers</span>
                             </li>
                             <li class="flex items-start gap-2">
                                 <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
@@ -1053,6 +1051,14 @@
                         <ul class="space-y-2 text-sm text-muted-foreground">
                             <li class="flex items-start gap-2">
                                 <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                                <span>No <code class="text-xs bg-muted/50 px-1 rounded">rounded-lg border</code> on individual rows</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                                <span>No <code class="text-xs bg-muted/50 px-1 rounded">bg-card/30</code> on rows (container handles it)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                                 <span>No <code class="text-xs bg-muted/50 px-1 rounded">backdrop-blur-sm</code> on rows</span>
                             </li>
                             <li class="flex items-start gap-2">
@@ -1062,14 +1068,6 @@
                             <li class="flex items-start gap-2">
                                 <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                                 <span>No gradient icon containers</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-                                <span>No <code class="text-xs bg-muted/50 px-1 rounded">hover:bg-accent/10</code> or similar</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <X class="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-                                <span>No <code class="text-xs bg-muted/50 px-1 rounded">hover:bg-card/70</code> (too heavy)</span>
                             </li>
                         </ul>
                     </div>

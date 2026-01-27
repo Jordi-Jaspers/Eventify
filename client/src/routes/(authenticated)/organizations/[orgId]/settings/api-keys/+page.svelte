@@ -259,7 +259,7 @@
 						<DataTable {columns} {service} title="API Keys" icon={Key}>
 							{#snippet row(apiKey: ApiKeyResponse)}
 								<div
-									class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all"
+									class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 hover:bg-muted/30 transition-all"
 								>
 									<!-- Name & Masked Key -->
 									<div class="col-span-1 md:col-span-4 flex flex-col gap-1">

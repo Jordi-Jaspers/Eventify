@@ -108,7 +108,7 @@
 		<DataTable {columns} service={dataTableService} title="All Watchlists" icon={ClipboardList}>
 			{#snippet row(watchlist: WatchlistDetailsResponse)}
 				<div
-					class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-4 py-3 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all text-left w-full"
+					class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all text-left w-full"
 				>
 					<!-- Watchlist Name -->
 					<div class="col-span-1 md:col-span-3">

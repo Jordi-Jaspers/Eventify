@@ -101,7 +101,7 @@
 			{/if}
 		{:else}
 			<!-- Data Table -->
-			<div class="space-y-2">
+			<div class="rounded-lg border border-border/50 overflow-hidden">
 				<!-- Table Header -->
 				<DataTableHeader
 					{columns}
@@ -111,9 +111,11 @@
 				/>
 
 				<!-- Table Rows -->
-				{#each service.items as item (item)}
-					{@render row(item)}
-				{/each}
+				<div class="divide-y divide-border/30">
+					{#each service.items as item (item)}
+						{@render row(item)}
+					{/each}
+				</div>
 			</div>
 
 			<!-- Pagination -->

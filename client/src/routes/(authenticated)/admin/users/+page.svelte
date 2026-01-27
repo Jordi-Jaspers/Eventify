@@ -192,7 +192,7 @@
 				<div
 					role="button"
 					tabindex="0"
-					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 hover:border-border transition-all text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+					class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 p-4 hover:bg-muted/30 transition-all text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
 					onclick={() => openUserSheet(user)}
 					onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') openUserSheet(user); }}
 				>
