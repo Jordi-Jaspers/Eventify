@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -25,14 +26,17 @@ import org.mapstruct.Named;
  *
  * <p>Used by {@code WatchlistMapper} and {@code MonitorMapper} via the {@code uses} attribute.
  */
-@Mapper(config = SharedMapperConfig.class)
+@Mapper(
+    config = SharedMapperConfig.class,
+    uses = ChannelMapper.class
+)
 public abstract class ChannelGroupMapper {
 
     // ==================== Domain -> Response ====================
 
     /**
-     * Maps a ChannelGroup to ChannelGroupResponse.
-     * MapStruct auto-maps id, name, channelIds (via getter), timeline (via getter), and channels.
+     * Maps a ChannelGroup to ChannelGroupResponse. MapStruct auto-maps id, name, channelIds (via getter), timeline (via getter), and
+     * channels.
      *
      * @param group the channel group
      * @return the response DTO
@@ -48,8 +52,8 @@ public abstract class ChannelGroupMapper {
     public abstract List<ChannelGroupResponse> toResponseList(List<ChannelGroup> groups);
 
     /**
-     * Maps a ChannelGroup to a simple response with only IDs (no enriched data).
-     * Used for watchlist configuration responses where full channel data is not needed.
+     * Maps a ChannelGroup to a simple response with only IDs (no enriched data). Used for watchlist configuration responses where full
+     * channel data is not needed.
      *
      * @param group the channel group
      * @return the response DTO with channelIds only
@@ -72,20 +76,13 @@ public abstract class ChannelGroupMapper {
      * @return the response DTOs
      */
     @Named("toSimpleResponseList")
-    public List<ChannelGroupResponse> toSimpleResponseList(final List<ChannelGroup> groups) {
-        if (groups == null) {
-            return new ArrayList<>();
-        }
-        return groups.stream()
-            .map(this::toSimpleResponse)
-            .toList();
-    }
+    @IterableMapping(qualifiedByName = "toSimpleResponse")
+    public abstract List<ChannelGroupResponse> toSimpleResponseList(List<ChannelGroup> groups);
 
     // ==================== Request -> Domain ====================
 
     /**
-     * Maps a ChannelGroupRequest to ChannelGroup domain object.
-     * Generates a new UUID if not provided in the request.
+     * Maps a ChannelGroupRequest to ChannelGroup domain object. Generates a new UUID if not provided in the request.
      *
      * @param request the group request
      * @return the channel group

@@ -57,7 +57,7 @@ public class OrganizationChannelController {
     ) {
         channelValidator.validateAndThrow(request);
         final Channel channel = organizationChannelService.createOrganizationChannel(orgId, request);
-        return ResponseEntity.status(CREATED).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(CREATED).body(channelMapper.toResourceObject(channel));
     }
 
     @PostMapping(
@@ -95,7 +95,7 @@ public class OrganizationChannelController {
         @PathVariable final Long id
     ) {
         final Channel channel = organizationChannelService.getOrganizationChannel(orgId, id);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 
     @PutMapping(
@@ -116,7 +116,7 @@ public class OrganizationChannelController {
     ) {
         channelValidator.validateAndThrow(request);
         final Channel channel = organizationChannelService.updateOrganizationChannel(orgId, id, request);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 
     @PostMapping(
@@ -134,7 +134,7 @@ public class OrganizationChannelController {
         @PathVariable final Long id
     ) {
         final Channel channel = organizationChannelService.pauseOrganizationChannel(orgId, id);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 
     @PostMapping(
@@ -152,7 +152,7 @@ public class OrganizationChannelController {
         @PathVariable final Long id
     ) {
         final Channel channel = organizationChannelService.resumeOrganizationChannel(orgId, id);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 
     @DeleteMapping(
@@ -170,6 +170,6 @@ public class OrganizationChannelController {
         @PathVariable final Long id
     ) {
         final Channel channel = organizationChannelService.deleteOrganizationChannel(orgId, id);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 }

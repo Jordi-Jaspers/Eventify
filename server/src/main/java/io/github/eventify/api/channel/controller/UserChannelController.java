@@ -52,7 +52,7 @@ public class UserChannelController {
     public ResponseEntity<ChannelDetailsResponse> createChannel(@RequestBody final CreateChannelRequest request) {
         channelValidator.validateAndThrow(request);
         final Channel channel = channelService.createUserChannel(request);
-        return ResponseEntity.status(CREATED).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(CREATED).body(channelMapper.toResourceObject(channel));
     }
 
     @PostMapping(
@@ -84,7 +84,7 @@ public class UserChannelController {
     )
     public ResponseEntity<ChannelDetailsResponse> getChannel(@PathVariable final Long id) {
         final Channel channel = channelService.getUserChannel(id);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 
     @PutMapping(
@@ -103,7 +103,7 @@ public class UserChannelController {
     ) {
         channelValidator.validateAndThrow(request);
         final Channel channel = channelService.updateUserChannel(id, request);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 
     @PostMapping(
@@ -117,7 +117,7 @@ public class UserChannelController {
     )
     public ResponseEntity<ChannelDetailsResponse> pauseChannel(@PathVariable final Long id) {
         final Channel channel = channelService.pauseUserChannel(id);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 
     @PostMapping(
@@ -131,7 +131,7 @@ public class UserChannelController {
     )
     public ResponseEntity<ChannelDetailsResponse> resumeChannel(@PathVariable final Long id) {
         final Channel channel = channelService.resumeUserChannel(id);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 
     @DeleteMapping(
@@ -145,6 +145,6 @@ public class UserChannelController {
     )
     public ResponseEntity<ChannelDetailsResponse> deleteChannel(@PathVariable final Long id) {
         final Channel channel = channelService.deleteUserChannel(id);
-        return ResponseEntity.status(OK).body(channelMapper.toDetailsResponse(channel));
+        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 }
