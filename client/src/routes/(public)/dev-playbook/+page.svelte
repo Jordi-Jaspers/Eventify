@@ -5,7 +5,7 @@
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import Button from '$lib/components/ui/button/button.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
-    import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2, Menu } from '@lucide/svelte';
+    import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2, Menu, LayoutList, AlertCircle } from '@lucide/svelte';
     import { Badge } from '$lib/components/ui/badge';
     import { DateTimePicker } from '$lib/components/ui/date-time-picker';
     
@@ -61,12 +61,14 @@
                 { id: 'buttons', label: 'Buttons' },
                 { id: 'cards', label: 'Cards' },
                 { id: 'badges', label: 'Badges' },
-                { id: 'date-time-picker', label: 'DateTimePicker' }
+                { id: 'date-time-picker', label: 'DateTimePicker' },
+                { id: 'live-indicator', label: 'Live Indicator' }
             ]
         },
         {
             category: 'Patterns',
             items: [
+                { id: 'empty-state', label: 'Empty State' },
                 { id: 'list-items', label: 'List Items' },
                 { id: 'data-table', label: 'DataTable' },
                 { id: 'forms', label: 'Form Patterns' }
@@ -637,7 +639,185 @@
                 </div>
             </section>
 
+            <!-- Live Indicator -->
+            <section id="live-indicator" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">Live Indicator</h2>
+                <p class="text-muted-foreground mb-6">Pulsing animation for real-time features</p>
+                
+                <div class="grid gap-6 md:grid-cols-2">
+                    <Card class="border-border/50 border-primary/30">
+                        <CardHeader>
+                            <CardTitle class="text-base flex items-center gap-2">
+                                Live Badge
+                                <Badge variant="outline" class="text-xs">PREFERRED</Badge>
+                            </CardTitle>
+                            <CardDescription>Pulsing dot with label</CardDescription>
+                        </CardHeader>
+                        <CardContent class="space-y-6">
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm font-medium text-green-500 flex items-center gap-1.5">
+                                    <span class="relative flex h-2 w-2">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                    </span>
+                                    Live
+                                </span>
+                                <code class="text-xs text-muted-foreground">With label</code>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                                </span>
+                                <code class="text-xs text-muted-foreground">Dot only</code>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Usage Example</CardTitle>
+                            <CardDescription>In context</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="p-3 rounded-md bg-muted/30 border border-border/50 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium">Monitor Status</span>
+                                    <span class="text-xs font-medium text-green-500 flex items-center gap-1.5">
+                                        <span class="relative flex h-1.5 w-1.5">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                                        </span>
+                                        Live
+                                    </span>
+                                </div>
+                                <p class="text-xs text-muted-foreground">Last updated 14:32</p>
+                            </div>
+                            <p class="text-xs text-muted-foreground mt-3">
+                                Use in headers, status bars, real-time dashboards
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </section>
+
             <!-- ==================== PATTERNS ==================== -->
+
+            <!-- Empty State -->
+            <section id="empty-state" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">Empty State</h2>
+                <p class="text-muted-foreground mb-6">Centered card for when no data is available</p>
+                
+                <div class="grid gap-6">
+                    <Card class="border-border/50 border-primary/30">
+                        <CardHeader>
+                            <CardTitle class="text-base flex items-center gap-2">
+                                Standard Empty State
+                                <Badge variant="outline" class="text-xs">PREFERRED</Badge>
+                            </CardTitle>
+                            <CardDescription>Use MonitorEmptyState component or this pattern</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
+                                <CardContent class="p-12">
+                                    <div class="flex flex-col items-center justify-center text-center">
+                                        <div class="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                                            <LayoutList class="h-10 w-10 text-primary" />
+                                        </div>
+                                        <h3 class="text-xl font-semibold mb-2">No Items Found</h3>
+                                        <p class="text-muted-foreground max-w-md mb-6">
+                                            There are no items to display. Create one to get started.
+                                        </p>
+                                        <Button variant="outline">Create Item</Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </CardContent>
+                    </Card>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <Card class="border-border/50">
+                            <CardHeader>
+                                <CardTitle class="text-base">Error Variant</CardTitle>
+                                <CardDescription>Destructive icon color</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div class="p-8 rounded-lg border border-border/50 bg-card/50">
+                                    <div class="flex flex-col items-center justify-center text-center">
+                                        <div class="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+                                            <AlertCircle class="h-8 w-8 text-destructive" />
+                                        </div>
+                                        <h3 class="text-lg font-semibold mb-1">Not Found</h3>
+                                        <p class="text-sm text-muted-foreground max-w-sm">
+                                            The resource you're looking for doesn't exist.
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card class="border-border/50">
+                            <CardHeader>
+                                <CardTitle class="text-base">Compact Variant</CardTitle>
+                                <CardDescription>For inline/smaller spaces</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div class="p-6 rounded-lg border border-dashed border-border/50 text-center">
+                                    <p class="text-lg font-medium">No events found</p>
+                                    <p class="text-sm text-muted-foreground mt-1">
+                                        Create your first channel to start receiving events.
+                                    </p>
+                                    <Button variant="outline" size="sm" class="mt-3">Create Channel</Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <!-- Severity Colors Reference -->
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Severity Color Reference</CardTitle>
+                            <CardDescription>Standard colors for status/severity indicators</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="space-y-2">
+                                    <div class="h-3 rounded-sm bg-green-500"></div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                                        <span class="text-sm font-medium">OK</span>
+                                    </div>
+                                    <code class="text-xs text-muted-foreground">bg-green-500</code>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="h-3 rounded-sm bg-amber-500"></div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+                                        <span class="text-sm font-medium">WARNING</span>
+                                    </div>
+                                    <code class="text-xs text-muted-foreground">bg-amber-500</code>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="h-3 rounded-sm bg-red-500"></div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                                        <span class="text-sm font-medium">CRITICAL</span>
+                                    </div>
+                                    <code class="text-xs text-muted-foreground">bg-red-500</code>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="h-3 rounded-sm bg-gray-400"></div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
+                                        <span class="text-sm font-medium">NO DATA</span>
+                                    </div>
+                                    <code class="text-xs text-muted-foreground">bg-gray-400</code>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </section>
 
             <!-- List Items -->
             <section id="list-items" class="mb-20 scroll-mt-20">

@@ -1,8 +1,6 @@
 import type {
 	TimelineDuration,
 	Severity,
-	TimeRange,
-	MonitorFilters,
 	Timeline
 } from '$lib/api/models';
 
@@ -12,6 +10,15 @@ import type {
 export interface SegmentStyle {
 	left: number;
 	width: number;
+}
+
+/**
+ * Time tick for axis rendering
+ */
+export interface TimeTick {
+	timestamp: Date;
+	label: string;
+	position: number;
 }
 
 /**
@@ -78,51 +85,8 @@ export function formatTimestamp(isoString: string): string {
 }
 
 /**
- * Session storage key for monitor state
- */
-export interface MonitorSessionState {
-	timeRange: TimeRange;
-	startTime?: string;
-	endTime?: string;
-	onlyCritical: boolean;
-	sortBySeverity: boolean;
-	groupedView: boolean;
-}
-
-const SESSION_KEY_PREFIX = 'monitor_state_';
-
-export function getSessionKey(watchlistId: number): string {
-	return `${SESSION_KEY_PREFIX}${watchlistId}`;
-}
-
-export function saveMonitorState(watchlistId: number, state: MonitorSessionState): void {
-	try {
-		sessionStorage.setItem(getSessionKey(watchlistId), JSON.stringify(state));
-	} catch (err: unknown) {
-		console.error('Failed to save monitor state:', err);
-	}
-}
-
-export function loadMonitorState(watchlistId: number): MonitorSessionState | null {
-	try {
-		const stored: string | null = sessionStorage.getItem(getSessionKey(watchlistId));
-		if (stored) {
-			return JSON.parse(stored) as MonitorSessionState;
-		}
-	} catch (err: unknown) {
-		console.error('Failed to load monitor state:', err);
-	}
-	return null;
-}
-
-/**
  * Calculate time axis ticks based on range
  */
-export interface TimeTick {
-	timestamp: Date;
-	label: string;
-	position: number;
-}
 
 export function calculateTimeTicks(rangeStart: Date, rangeEnd: Date): TimeTick[] {
 	const ticks: TimeTick[] = [];
