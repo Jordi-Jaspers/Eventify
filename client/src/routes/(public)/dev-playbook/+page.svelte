@@ -7,6 +7,12 @@
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
     import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2 } from '@lucide/svelte';
     import { Badge } from '$lib/components/ui/badge';
+    import { DateTimePicker } from '$lib/components/ui/date-time-picker';
+    
+    // DateTimePicker state
+    let dateTimeValue1: string = $state('');
+    let dateTimeValue2: string = $state(new Date().toISOString());
+    let dateTimeValue3: string = $state('');
     
     // Redirect if not in dev mode
     const isDev = env.PUBLIC_SHOW_DEV_CREDENTIALS === 'true';
@@ -1074,6 +1080,68 @@
                 </div>
             </CardContent>
         </Card>
+    </section>
+
+    <!-- SECTION: Date Time Picker -->
+    <section class="mb-16">
+        <h2 class="text-2xl font-semibold mb-2">Date Time Picker</h2>
+        <p class="text-muted-foreground mb-6">Calendar with time selection</p>
+        
+        <div class="grid gap-6 md:grid-cols-3">
+            <!-- Empty State -->
+            <Card class="border-border/50 bg-card/50 backdrop-blur-xl">
+                <CardHeader>
+                    <CardTitle class="text-base">Empty State</CardTitle>
+                    <CardDescription>No date selected</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <DateTimePicker 
+                        value={dateTimeValue1}
+                        onValueChange={(v) => dateTimeValue1 = v}
+                        label="Start Date"
+                        placeholder="Choose a date..."
+                    />
+                    <p class="text-xs text-muted-foreground mt-2">
+                        Value: {dateTimeValue1 || '(empty)'}
+                    </p>
+                </CardContent>
+            </Card>
+            
+            <!-- With Value -->
+            <Card class="border-border/50 bg-card/50 backdrop-blur-xl">
+                <CardHeader>
+                    <CardTitle class="text-base">With Value</CardTitle>
+                    <CardDescription>Pre-populated date</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <DateTimePicker 
+                        value={dateTimeValue2}
+                        onValueChange={(v) => dateTimeValue2 = v}
+                        label="Event Time"
+                    />
+                    <p class="text-xs text-muted-foreground mt-2">
+                        Value: {dateTimeValue2 ? new Date(dateTimeValue2).toLocaleString() : '(empty)'}
+                    </p>
+                </CardContent>
+            </Card>
+            
+            <!-- Disabled -->
+            <Card class="border-border/50 bg-card/50 backdrop-blur-xl">
+                <CardHeader>
+                    <CardTitle class="text-base">Disabled</CardTitle>
+                    <CardDescription>Non-interactive state</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <DateTimePicker 
+                        value={dateTimeValue3}
+                        onValueChange={(v) => dateTimeValue3 = v}
+                        label="Locked Date"
+                        placeholder="Cannot edit..."
+                        disabled
+                    />
+                </CardContent>
+            </Card>
+        </div>
     </section>
 
     <!-- SECTION: Usage Examples -->

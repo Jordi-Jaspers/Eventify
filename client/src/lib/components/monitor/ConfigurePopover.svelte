@@ -1,17 +1,16 @@
 <script lang="ts">
-	import { Settings, Clock, Filter, Calendar } from '@lucide/svelte';
+	import { Settings, Clock, Filter, Calendar, Radio, CheckCircle2 } from '@lucide/svelte';
 	import {
-		Sheet,
-		SheetContent,
-		SheetHeader,
-		SheetTitle,
-		SheetTrigger
-	} from '$lib/components/ui/sheet';
+		Popover,
+		PopoverContent,
+		PopoverTrigger
+	} from '$lib/components/ui/popover';
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
-	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { Switch } from '$lib/components/ui/switch';
 	import { Separator } from '$lib/components/ui/separator';
-	import { Input } from '$lib/components/ui/input';
+	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
+	import { DateTimePicker } from '$lib/components/ui/date-time-picker';
 
 	type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
 
@@ -49,190 +48,263 @@
 
 	let open: boolean = $state(false);
 
-	const timeRangeOptions: { value: TimeRange; label: string }[] = [
-		{ value: '2h', label: '2 hours' },
-		{ value: '4h', label: '4 hours' },
-		{ value: '12h', label: '12 hours' },
-		{ value: '24h', label: '24 hours' },
-		{ value: '7d', label: '7 days' },
-		{ value: '30d', label: '30 days' }
+	const quickRanges: { value: TimeRange; label: string }[] = [
+		{ value: '2h', label: '2h' },
+		{ value: '4h', label: '4h' },
+		{ value: '12h', label: '12h' },
+		{ value: '24h', label: '24h' },
+		{ value: '7d', label: '7d' },
+		{ value: '30d', label: '30d' }
 	];
 
-	function handleTimeRangeSelect(range: TimeRange): void {
-		onTimeRangeChange(range);
-		// Don't close the sheet to allow multiple config changes
-	}
-
-	// Convert ISO string to datetime-local format (YYYY-MM-DDTHH:mm)
-	function isoToDatetimeLocal(iso: string): string {
-		if (!iso) return '';
-		try {
-			const date = new Date(iso);
-			// Format as local datetime
-			const year = date.getFullYear();
-			const month = String(date.getMonth() + 1).padStart(2, '0');
-			const day = String(date.getDate()).padStart(2, '0');
-			const hours = String(date.getHours()).padStart(2, '0');
-			const minutes = String(date.getMinutes()).padStart(2, '0');
-			return `${year}-${month}-${day}T${hours}:${minutes}`;
-		} catch {
-			return '';
+	function handleTimeRangeSelect(value: string | undefined): void {
+		if (value && value !== 'custom') {
+			onTimeRangeChange(value as TimeRange);
 		}
 	}
 
-	// Convert datetime-local format to ISO string
-	function datetimeLocalToIso(datetimeLocal: string): string {
-		if (!datetimeLocal) return '';
-		try {
-			const date = new Date(datetimeLocal);
-			return date.toISOString();
-		} catch {
-			return '';
-		}
+	function handleCustomRangeSelect(): void {
+		onTimeRangeChange('custom');
 	}
 
-	function handleStartTimeChange(event: Event): void {
-		const input = event.target as HTMLInputElement;
-		const iso = datetimeLocalToIso(input.value);
-		onCustomStartTimeChange(iso);
-	}
-
-	function handleEndTimeChange(event: Event): void {
-		const input = event.target as HTMLInputElement;
-		const iso = datetimeLocalToIso(input.value);
-		onCustomEndTimeChange(iso);
-	}
+	// Derived state for better UX
+	const isCustomRangeValid: boolean = $derived(
+		timeRange !== 'custom' || (!!customStartTime && !!customEndTime)
+	);
 </script>
 
-<Sheet bind:open>
-	<SheetTrigger>
-		<Button variant="outline" class="gap-2 bg-background/50 border-border">
-			<Settings class="h-4 w-4" />
-			Configure
-		</Button>
-	</SheetTrigger>
-	<SheetContent class="w-[400px]">
-		<SheetHeader>
-			<SheetTitle class="flex items-center gap-2">
-				<Settings class="h-5 w-5 text-primary" />
-				Monitor Configuration
-			</SheetTitle>
-		</SheetHeader>
+<Popover bind:open>
+	<PopoverTrigger>
+		{#snippet child({ props }: { props: Record<string, any> })}
+			<Button
+				{...props}
+				variant="outline"
+				class="relative gap-2 border-border/50 bg-background/30 backdrop-blur-sm hover:bg-background/50 hover:border-primary/50 transition-all duration-200"
+			>
+				<Settings class="h-4 w-4" />
+				<span class="hidden sm:inline">Configure</span>
+				<span class="sm:hidden">Config</span>
+				{#if isLive}
+					<span class="flex h-2 w-2 absolute -top-1 -right-1">
+						<span
+							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
+						></span>
+						<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+					</span>
+				{/if}
+			</Button>
+		{/snippet}
+	</PopoverTrigger>
+	<PopoverContent
+		class="w-[380px] p-0 border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl"
+		align="end"
+		sideOffset={8}
+	>
+		<!-- Header -->
+		<div class="px-6 py-4 border-b border-border/30">
+			<div class="flex items-center justify-between">
+				<div class="flex items-center gap-2.5">
+					<div
+						class="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30"
+					>
+						<Settings class="h-4 w-4 text-primary" />
+					</div>
+					<div>
+						<h3 class="font-semibold text-sm">Monitor Configuration</h3>
+						<p class="text-xs text-muted-foreground">Customize your view</p>
+					</div>
+				</div>
+				{#if isLive}
+					<div
+						class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30"
+					>
+						<span class="relative flex h-2 w-2">
+							<span
+								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
+							></span>
+							<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+						</span>
+						<span class="text-xs font-medium text-primary">Live</span>
+					</div>
+				{/if}
+			</div>
+		</div>
 
-		<div class="mt-6 space-y-6">
+		<div class="p-6 space-y-6">
 			<!-- Time Range Section -->
 			<div class="space-y-3">
 				<div class="flex items-center gap-2">
-					<Clock class="h-4 w-4 text-muted-foreground" />
-					<Label class="text-sm font-semibold">Time Range</Label>
+					<Clock class="h-3.5 w-3.5 text-muted-foreground" />
+					<Label class="text-xs font-semibold text-foreground/90">Time Range</Label>
 				</div>
-				<div class="grid grid-cols-3 gap-2">
-					{#each timeRangeOptions as option (option.value)}
-						<Button
-							variant={timeRange === option.value ? 'default' : 'outline'}
-							size="sm"
-							onclick={() => handleTimeRangeSelect(option.value)}
-							class={timeRange === option.value ? 'bg-gradient-to-r from-primary to-accent' : ''}
+
+				<!-- Quick Ranges - Segmented Control Style -->
+				<ToggleGroup
+					type="single"
+					value={timeRange !== 'custom' ? timeRange : undefined}
+					onValueChange={handleTimeRangeSelect}
+					class="grid grid-cols-3 gap-1.5 p-1 rounded-lg bg-muted/20 border border-border/30"
+				>
+					{#each quickRanges as option (option.value)}
+						<ToggleGroupItem
+							value={option.value}
+							class="data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-sm data-[state=on]:border-primary/30 border border-transparent text-xs font-medium transition-all duration-200 hover:bg-background/50"
 						>
 							{option.label}
-						</Button>
+						</ToggleGroupItem>
 					{/each}
-				</div>
-				
-				<!-- Custom Range Button -->
-				<Button
-					variant={timeRange === 'custom' ? 'default' : 'outline'}
-					size="sm"
-					onclick={() => handleTimeRangeSelect('custom')}
-					class="w-full gap-2 {timeRange === 'custom' ? 'bg-gradient-to-r from-primary to-accent' : ''}"
+				</ToggleGroup>
+
+				<!-- Custom Range Toggle -->
+				<button
+					onclick={handleCustomRangeSelect}
+					class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all duration-200 {timeRange ===
+					'custom'
+						? 'bg-background border-primary/50 text-foreground'
+						: 'bg-background/30 border-border/30 hover:bg-background/50 hover:border-border/50 text-muted-foreground'}"
 				>
-					<Calendar class="h-4 w-4" />
-					Custom Range
-				</Button>
+					<div class="flex items-center gap-2">
+						<Calendar class="h-3.5 w-3.5" />
+						<span class="text-xs font-medium">Custom Range</span>
+					</div>
+					{#if timeRange === 'custom'}
+						<CheckCircle2 class="h-3.5 w-3.5 text-primary" />
+					{/if}
+				</button>
 
 				<!-- Custom DateTime Pickers -->
 				{#if timeRange === 'custom'}
-					<div class="space-y-3 pt-2">
-						<div class="space-y-1.5">
-							<Label for="custom-start-time" class="text-xs text-muted-foreground">Start Date & Time</Label>
-							<Input
-								id="custom-start-time"
-								type="datetime-local"
-								value={isoToDatetimeLocal(customStartTime)}
-								onchange={handleStartTimeChange}
-								class="bg-background/50"
-							/>
-						</div>
-						<div class="space-y-1.5">
-							<Label for="custom-end-time" class="text-xs text-muted-foreground">End Date & Time</Label>
-							<Input
-								id="custom-end-time"
-								type="datetime-local"
-								value={isoToDatetimeLocal(customEndTime)}
-								onchange={handleEndTimeChange}
-								class="bg-background/50"
-							/>
-						</div>
-						{#if !customStartTime || !customEndTime}
-							<p class="text-xs text-amber-500">
-								Select both start and end times to view data
-							</p>
+					<div class="space-y-3 pt-1 animate-in fade-in slide-in-from-top-2 duration-200">
+						<DateTimePicker
+							value={customStartTime}
+							onValueChange={onCustomStartTimeChange}
+							label="Start Date & Time"
+							placeholder="Select start..."
+							id="custom-start-time"
+						/>
+						<DateTimePicker
+							value={customEndTime}
+							onValueChange={onCustomEndTimeChange}
+							label="End Date & Time"
+							placeholder="Select end..."
+							id="custom-end-time"
+						/>
+						{#if !isCustomRangeValid}
+							<div
+								class="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30"
+							>
+								<div class="mt-0.5">
+									<div class="h-1 w-1 rounded-full bg-amber-500"></div>
+								</div>
+								<p class="text-xs text-amber-600 dark:text-amber-500 leading-relaxed">
+									Select both start and end times to view historical data
+								</p>
+							</div>
 						{/if}
 					</div>
 				{/if}
 
+				<!-- Live Mode Info -->
 				{#if isLive}
-					<p class="text-xs text-muted-foreground">
-						Live mode - auto-refreshes every 60 seconds
-					</p>
+					<div
+						class="flex items-start gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20 animate-in fade-in duration-300"
+					>
+						<Radio class="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
+						<p class="text-xs text-primary/90 leading-relaxed">
+							Live monitoring active • Auto-refresh every 60 seconds
+						</p>
+					</div>
 				{/if}
 			</div>
 
-			<Separator />
+			<Separator class="bg-border/30" />
 
 			<!-- Filter Options Section -->
 			<div class="space-y-4">
 				<div class="flex items-center gap-2">
-					<Filter class="h-4 w-4 text-muted-foreground" />
-					<Label class="text-sm font-semibold">Filters</Label>
+					<Filter class="h-3.5 w-3.5 text-muted-foreground" />
+					<Label class="text-xs font-semibold text-foreground/90">Display Filters</Label>
 				</div>
 
-				<!-- Only Critical -->
-				<div class="flex items-center gap-3">
-					<Checkbox
-						id="config-only-critical"
-						checked={onlyCritical}
-						onCheckedChange={onToggleOnlyCritical}
-					/>
-					<Label for="config-only-critical" class="text-sm font-normal cursor-pointer">
-						Show only critical channels
-					</Label>
-				</div>
+				<!-- Filter Toggles -->
+				<div class="space-y-3">
+					<!-- Only Critical -->
+					<div
+						class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/30 bg-background/30 hover:bg-background/50 transition-all duration-200 group"
+					>
+						<div class="flex-1">
+							<Label
+								for="toggle-critical"
+								class="text-xs font-medium cursor-pointer group-hover:text-foreground transition-colors"
+							>
+								Critical channels only
+							</Label>
+							<p class="text-[10px] text-muted-foreground mt-0.5">
+								Show high-priority channels
+							</p>
+						</div>
+						<Switch
+							id="toggle-critical"
+							checked={onlyCritical}
+							onCheckedChange={onToggleOnlyCritical}
+							class="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-primary data-[state=checked]:to-accent"
+						/>
+					</div>
 
-				<!-- Sort by Severity -->
-				<div class="flex items-center gap-3">
-					<Checkbox
-						id="config-sort-severity"
-						checked={sortBySeverity}
-						onCheckedChange={onToggleSortBySeverity}
-					/>
-					<Label for="config-sort-severity" class="text-sm font-normal cursor-pointer">
-						Sort by severity level
-					</Label>
-				</div>
+					<!-- Sort by Severity -->
+					<div
+						class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/30 bg-background/30 hover:bg-background/50 transition-all duration-200 group"
+					>
+						<div class="flex-1">
+							<Label
+								for="toggle-severity"
+								class="text-xs font-medium cursor-pointer group-hover:text-foreground transition-colors"
+							>
+								Sort by severity
+							</Label>
+							<p class="text-[10px] text-muted-foreground mt-0.5">
+								Order by threat level
+							</p>
+						</div>
+						<Switch
+							id="toggle-severity"
+							checked={sortBySeverity}
+							onCheckedChange={onToggleSortBySeverity}
+							class="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-primary data-[state=checked]:to-accent"
+						/>
+					</div>
 
-				<!-- Grouped View -->
-				<div class="flex items-center gap-3">
-					<Checkbox
-						id="config-grouped-view"
-						checked={groupedView}
-						onCheckedChange={onToggleGroupedView}
-					/>
-					<Label for="config-grouped-view" class="text-sm font-normal cursor-pointer">
-						Show channels in groups
-					</Label>
+					<!-- Grouped View -->
+					<div
+						class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border/30 bg-background/30 hover:bg-background/50 transition-all duration-200 group"
+					>
+						<div class="flex-1">
+							<Label
+								for="toggle-grouped"
+								class="text-xs font-medium cursor-pointer group-hover:text-foreground transition-colors"
+							>
+								Grouped view
+							</Label>
+							<p class="text-[10px] text-muted-foreground mt-0.5">
+								Organize by categories
+							</p>
+						</div>
+						<Switch
+							id="toggle-grouped"
+							checked={groupedView}
+							onCheckedChange={onToggleGroupedView}
+							class="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-primary data-[state=checked]:to-accent"
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
-	</SheetContent>
-</Sheet>
+
+		<!-- Footer hint -->
+		<div class="px-6 py-3 border-t border-border/30 bg-muted/5">
+			<p class="text-[10px] text-muted-foreground text-center">
+				Changes apply instantly to your monitor view
+			</p>
+		</div>
+	</PopoverContent>
+</Popover>
