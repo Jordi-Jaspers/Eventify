@@ -59,7 +59,7 @@ public class OrganizationMonitorController {
         @RequestBody final MonitorRequest request
     ) {
         monitorValidator.validateAndThrow(request);
-        final MonitorResult result = monitorService.monitorWatchlist(request.getWatchlistId(), request);
+        final MonitorResult result = monitorService.monitorWatchlist(request);
         return ResponseEntity.status(OK).body(monitorMapper.toResponse(result));
     }
 }

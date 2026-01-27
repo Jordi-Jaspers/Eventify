@@ -45,13 +45,12 @@ public class MonitorService {
     /**
      * Gets monitor timeline data for a watchlist.
      *
-     * @param watchlistId the watchlist ID
-     * @param request     the monitor request
+     * @param request the monitor request
      * @return the monitor result with enriched configuration and dashboard timeline
      */
     @Transactional(readOnly = true)
-    public MonitorResult monitorWatchlist(final Long watchlistId, final MonitorRequest request) {
-        final Watchlist watchlist = watchlistRepository.findById(watchlistId)
+    public MonitorResult monitorWatchlist(final MonitorRequest request) {
+        final Watchlist watchlist = watchlistRepository.findById(request.getWatchlistId())
             .orElseThrow(() -> new DataNotFoundException(WATCHLIST_NOT_FOUND));
 
         final TimeSpan timeRange = watchlist.resolveTimeRange(request.getFilters());

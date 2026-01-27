@@ -84,7 +84,7 @@ class MonitorServiceTest extends UnitTest {
             .willReturn(new ArrayList<>());
 
         // When: Getting monitor data
-        final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+        final MonitorResult result = monitorService.monitorWatchlist(request);
 
         // Then: Response should contain watchlist data
         assertThat(result, is(notNullValue()));
@@ -105,7 +105,7 @@ class MonitorServiceTest extends UnitTest {
 
         // When/Then: Should throw DataNotFoundException
         assertThrows(DataNotFoundException.class, () -> {
-            monitorService.monitorWatchlist(999L, request);
+            monitorService.monitorWatchlist(request);
         });
     }
 
@@ -124,7 +124,7 @@ class MonitorServiceTest extends UnitTest {
         given(channelRepository.findAllById(anyList())).willReturn(new ArrayList<>());
 
         // When: Getting monitor data
-        final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+        final MonitorResult result = monitorService.monitorWatchlist(request);
 
         // Then: Should apply watchlist defaults
         assertThat(result.getFilters().getOnlyCritical(), is(true));
@@ -157,7 +157,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(okEvent, criticalEvent));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Should only include critical channel
             assertThat(result.getConfiguration().getChannels(), hasSize(1));
@@ -184,7 +184,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(okEvent, criticalEvent));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Group should only contain critical channel
             assertThat(result.getConfiguration().getGroups(), hasSize(1));
@@ -212,7 +212,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(okEvent1, okEvent2));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Empty group should be removed
             assertThat(result.getConfiguration().getGroups(), is(empty()));
@@ -238,7 +238,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(okEvent, criticalEvent));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Standalone OK channel should be filtered out
             assertThat(result.getConfiguration().getChannels(), is(empty()));
@@ -275,7 +275,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(okEvent, warningEvent, criticalEvent));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Should sort by severity (CRITICAL, WARNING, OK)
             assertThat(result.getConfiguration().getChannels(), hasSize(3));
@@ -304,7 +304,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(okEvent, criticalEvent));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Channels within group should be sorted by severity
             assertThat(result.getConfiguration().getGroups(), hasSize(1));
@@ -334,7 +334,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(okEvent, criticalEvent));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Groups should remain in configured order (Group A first, Group B second)
             assertThat(result.getConfiguration().getGroups(), hasSize(2));
@@ -362,7 +362,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(okEvent, criticalEvent));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Standalone channels should be sorted by severity
             assertThat(result.getConfiguration().getChannels(), hasSize(2));
@@ -393,7 +393,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(new ArrayList<>());
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Groups should be empty, all channels in flat list
             assertThat(result.getConfiguration().getGroups(), is(empty()));
@@ -417,7 +417,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(new ArrayList<>());
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Groups should remain
             assertThat(result.getConfiguration().getGroups(), hasSize(1));
@@ -446,7 +446,7 @@ class MonitorServiceTest extends UnitTest {
         given(channelRepository.findAllById(anyList())).willReturn(new ArrayList<>());
 
         // When: Getting monitor data
-        final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+        final MonitorResult result = monitorService.monitorWatchlist(request);
 
         // Then: Response should use custom range
         assertThat(result.getTimeRange().getStart(), is(equalTo(customStart)));
@@ -466,7 +466,7 @@ class MonitorServiceTest extends UnitTest {
         given(channelRepository.findAllById(anyList())).willReturn(new ArrayList<>());
 
         // When: Getting monitor data
-        final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+        final MonitorResult result = monitorService.monitorWatchlist(request);
 
         // Then: Should be in live mode
         assertThat(result.getTimeRange().isLive(), is(true));
@@ -498,7 +498,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(okEvent, warningEvent));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Should have one group with two channels
             assertThat(result.getConfiguration().getChannels(), is(empty())); // No standalone channels
@@ -532,7 +532,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(List.of(criticalEvent, okEvent));
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Should have both standalone channel and group
             assertThat(result.getConfiguration().getChannels(), hasSize(1));
@@ -558,7 +558,7 @@ class MonitorServiceTest extends UnitTest {
                 .willReturn(new ArrayList<>());
 
             // When: Getting monitor data
-            final MonitorResult result = monitorService.monitorWatchlist(1L, request);
+            final MonitorResult result = monitorService.monitorWatchlist(request);
 
             // Then: Groups should be empty
             assertThat(result.getConfiguration().getChannels(), hasSize(1));
