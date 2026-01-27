@@ -11,6 +11,23 @@ export function formatDate(dateString: string): string {
 }
 
 /**
+ * Format a date string with time (e.g., "Jan 15, 2024, 2:30 PM")
+ */
+export function formatDateTime(dateString: string | undefined): string {
+	if (!dateString) return 'N/A';
+
+	try {
+		const date: Date = new Date(dateString);
+		return new Intl.DateTimeFormat('en-US', {
+			dateStyle: 'medium',
+			timeStyle: 'short'
+		}).format(date);
+	} catch {
+		return 'Invalid date';
+	}
+}
+
+/**
  * Format a date string as a relative time (e.g., "2 days ago")
  */
 export function formatRelativeDate(dateString: string): string {

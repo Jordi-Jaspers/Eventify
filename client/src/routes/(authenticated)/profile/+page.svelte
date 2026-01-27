@@ -1,11 +1,13 @@
 <script lang="ts">
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import Badge from '$lib/components/ui/badge/badge.svelte';
+    import { InfoField } from '$lib/components/ui/info-field';
+    import { SectionHeader } from '$lib/components/ui/section-header';
+    import { StatusIndicator } from '$lib/components/ui/status-indicator';
     import {
         Building2,
         Calendar,
         CircleCheckBig,
-        CircleX,
         Clock,
         Key,
         Mail,
@@ -15,32 +17,15 @@
     import { currentUser } from '$lib/stores/auth';
     import { createProfileService } from '$lib/api/user/service/ProfileService.svelte';
     import EditableField from '$lib/components/user/EditableField.svelte';
-    import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
+    import { OrganizationMembershipCard } from '$lib/components/profile';
+    import { formatDateTime } from '$lib/utils/date';
+    import { getUserRoleLabel } from '$lib/utils/role';
     import { SettingsNav } from '$lib/components/settings';
     import { CLIENT_ROUTES } from '$lib/config/routes';
 
     const profileService = createProfileService();
 
     let userData = $derived($currentUser);
-
-    function formatDate(dateString: string | undefined): string {
-        if (!dateString) return 'N/A';
-
-        try {
-            const date: Date = new Date(dateString);
-            return new Intl.DateTimeFormat('en-US', {
-                dateStyle: 'medium',
-                timeStyle: 'short'
-            }).format(date);
-        } catch {
-            return 'Invalid date';
-        }
-    }
-
-    function formatRole(role: string | undefined): string {
-        if (!role) return 'N/A';
-        return role.charAt(0) + role.slice(1).toLowerCase();
-    }
 </script>
 
 <svelte:head>
@@ -72,10 +57,7 @@
                 <CardContent class="space-y-6 relative z-10">
                     <!-- Personal Information -->
                     <div>
-                        <h3 class="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                            <User class="w-4 h-4"/>
-                            Personal Information
-                        </h3>
+                        <SectionHeader title="Personal Information" icon={User} />
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- First Name -->
                             <EditableField
@@ -116,19 +98,10 @@
 
                     <!-- Account Security -->
                     <div>
-                        <h3 class="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                            <Shield class="w-4 h-4"/>
-                            Account Security
-                        </h3>
+                        <SectionHeader title="Account Security" icon={Shield} />
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Role -->
-                            <div class="p-4 rounded-lg bg-background/50 border border-border/50">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <Shield class="w-3 h-3 text-primary"/>
-                                    <p class="text-xs text-muted-foreground">Role</p>
-                                </div>
-                                <p class="font-medium text-foreground">{formatRole(userData.role)}</p>
-                            </div>
+                            <InfoField label="Role" value={getUserRoleLabel(userData.role)} icon={Shield} />
 
                             <!-- Permissions -->
                             <div class="p-4 rounded-lg bg-background/50 border border-border/50">
@@ -153,68 +126,38 @@
 
                     <!-- Account Status -->
                     <div>
-                        <h3 class="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                            <CircleCheckBig class="w-4 h-4"/>
-                            Account Status
-                        </h3>
+                        <SectionHeader title="Account Status" icon={CircleCheckBig} />
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Validated Status -->
                             <div class="p-4 rounded-lg bg-background/50 border border-border/50">
                                 <p class="text-xs text-muted-foreground mb-2">Email Validation</p>
-                                <div class="flex items-center gap-2">
-                                    {#if userData.validated}
-                                        <CircleCheckBig class="w-4 h-4 text-green-500"/>
-                                        <span class="text-sm font-medium text-green-500">Verified</span>
-                                    {:else}
-                                        <CircleX class="w-4 h-4 text-yellow-500"/>
-                                        <span class="text-sm font-medium text-yellow-500">Not Verified</span>
-                                    {/if}
-                                </div>
+                                <StatusIndicator 
+                                    status={userData.validated} 
+                                    activeLabel="Verified" 
+                                    inactiveLabel="Not Verified"
+                                    inactiveColor="text-yellow-500"
+                                />
                             </div>
 
                             <!-- Enabled Status -->
                             <div class="p-4 rounded-lg bg-background/50 border border-border/50">
                                 <p class="text-xs text-muted-foreground mb-2">Account Status</p>
-                                <div class="flex items-center gap-2">
-                                    {#if userData.enabled}
-                                        <CircleCheckBig class="w-4 h-4 text-green-500"/>
-                                        <span class="text-sm font-medium text-green-500">Active</span>
-                                    {:else}
-                                        <CircleX class="w-4 h-4 text-red-500"/>
-                                        <span class="text-sm font-medium text-red-500">Disabled</span>
-                                    {/if}
-                                </div>
+                                <StatusIndicator 
+                                    status={userData.enabled} 
+                                    activeLabel="Active" 
+                                    inactiveLabel="Disabled"
+                                />
                             </div>
                         </div>
                     </div>
 
                     <!-- Organizations -->
                     <div>
-                        <h3 class="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                            <Building2 class="w-4 h-4"/>
-                            Organizations
-                        </h3>
+                        <SectionHeader title="Organizations" icon={Building2} />
                         {#if userData.organizations && userData.organizations.length > 0}
                             <div class="space-y-3">
                                 {#each userData.organizations as org}
-                                    <div class="p-4 rounded-lg bg-background/50 border border-border/50 hover:bg-background/70 hover:border-border transition-all duration-200 group">
-                                        <div class="flex items-center justify-between gap-4">
-                                            <div class="flex-1 min-w-0">
-                                                <a 
-                                                    href="/organizations/{org.organizationSlug}"
-                                                    class="text-sm font-medium text-foreground hover:text-primary transition-colors group-hover:underline decoration-primary/30"
-                                                >
-                                                    {org.organizationName}
-                                                </a>
-                                                <p class="text-xs text-muted-foreground mt-1">
-                                                    Joined {formatDate(org.joinedAt)}
-                                                </p>
-                                            </div>
-                                            <Badge class={getOrganizationalRoleBadgeClass(org.role)}>
-                                                {org.role}
-                                            </Badge>
-                                        </div>
-                                    </div>
+                                    <OrganizationMembershipCard membership={org} />
                                 {/each}
                             </div>
                         {:else}
@@ -226,28 +169,13 @@
 
                     <!-- Account Timestamps -->
                     <div>
-                        <h3 class="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                            <Clock class="w-4 h-4"/>
-                            Account Timeline
-                        </h3>
+                        <SectionHeader title="Account Timeline" icon={Clock} />
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Created Date -->
-                            <div class="p-4 rounded-lg bg-background/50 border border-border/50">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <Calendar class="w-3 h-3 text-primary"/>
-                                    <p class="text-xs text-muted-foreground">Account Created</p>
-                                </div>
-                                <p class="font-medium text-foreground text-sm">{formatDate(userData.createdAt)}</p>
-                            </div>
+                            <InfoField label="Account Created" value={formatDateTime(userData.createdAt)} icon={Calendar} class="text-sm" />
 
                             <!-- Last Login -->
-                            <div class="p-4 rounded-lg bg-background/50 border border-border/50">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <Clock class="w-3 h-3 text-primary"/>
-                                    <p class="text-xs text-muted-foreground">Last Login</p>
-                                </div>
-                                <p class="font-medium text-foreground text-sm">{formatDate(userData.lastLogin)}</p>
-                            </div>
+                            <InfoField label="Last Login" value={formatDateTime(userData.lastLogin)} icon={Clock} class="text-sm" />
                         </div>
                     </div>
                 </CardContent>
