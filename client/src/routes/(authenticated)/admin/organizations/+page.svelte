@@ -35,7 +35,8 @@
 				{ value: 'TRIAL', label: 'Trial' },
 				{ value: 'ACTIVE', label: 'Active' },
 				{ value: 'SUSPENDED', label: 'Suspended' }
-			]
+			],
+			colSpan: 2
 		},
 		{
 			key: 'owner',
@@ -45,16 +46,18 @@
 		{
 			key: 'memberCount',
 			label: 'Members',
-			sortable: true
+			sortable: true,
+			colSpan: 1
 		},
 		{
 			key: 'createdAt',
 			label: 'Created',
 			sortable: true,
-			colSpan: 2
+			colSpan: 1
 		},
 		{
-			key: 'actions'
+			key: 'actions',
+			colSpan: 1
 		}
 	];
 
@@ -150,20 +153,20 @@
 						<span class="text-sm text-muted-foreground">{org.slug}</span>
 					</div>
 
-					<!-- Status -->
-					<div class="col-span-1 md:col-span-1 flex items-center">
-						<Badge variant={getStatusBadgeVariant(org.status)} class="min-w-[90px] justify-center">
-							{org.status}
-						</Badge>
-					</div>
+				<!-- Status -->
+				<div class="col-span-1 md:col-span-2 flex items-center">
+					<Badge variant={getStatusBadgeVariant(org.status)} class="min-w-[90px] justify-center">
+						{org.status}
+					</Badge>
+				</div>
 
-					<!-- Owner -->
-					<div class="col-span-1 md:col-span-2 flex items-center">
-						<span class="text-sm {org.owner ? '' : 'text-muted-foreground italic'}">
-							<span class="md:hidden font-medium">Owner: </span>
-							{getOwnerName(org.owner)}
-						</span>
-					</div>
+				<!-- Owner -->
+				<div class="col-span-1 md:col-span-2 flex items-center">
+					<span class="text-sm {org.owner ? '' : 'text-muted-foreground italic'}">
+						<span class="md:hidden font-medium">Owner: </span>
+						{getOwnerName(org.owner)}
+					</span>
+				</div>
 
 					<!-- Members -->
 					<div class="col-span-1 md:col-span-1 flex items-center">
@@ -174,7 +177,7 @@
 					</div>
 
 					<!-- Created -->
-					<div class="col-span-1 md:col-span-2 flex items-center">
+					<div class="col-span-1 md:col-span-1 flex items-center">
 						<span class="text-sm text-muted-foreground">
 							<span class="md:hidden">Created: </span>
 							{formatDate(org.createdAt)}
