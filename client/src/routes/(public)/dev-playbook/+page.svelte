@@ -8,6 +8,8 @@
     import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2, Menu, LayoutList, AlertCircle } from '@lucide/svelte';
     import { Badge } from '$lib/components/ui/badge';
     import { DateTimePicker } from '$lib/components/ui/date-time-picker';
+    import { StatCard } from '$lib/components/admin';
+    import { Key, Users, Building2, Activity, AlertTriangle, Clock, TrendingUp, Shield } from '@lucide/svelte';
     
     // DateTimePicker state
     let dateTimeValue1: string = $state('');
@@ -60,6 +62,7 @@
             items: [
                 { id: 'buttons', label: 'Buttons' },
                 { id: 'cards', label: 'Cards' },
+                { id: 'stat-card', label: 'Stat Card' },
                 { id: 'badges', label: 'Badges' },
                 { id: 'date-time-picker', label: 'DateTimePicker' },
                 { id: 'live-indicator', label: 'Live Indicator' }
@@ -551,6 +554,76 @@
                             <code class="text-xs text-muted-foreground">bg-card/30 backdrop-blur-md</code>
                         </CardContent>
                     </Card>
+                </div>
+            </section>
+
+            <!-- Stat Card -->
+            <section id="stat-card" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">Stat Card</h2>
+                <p class="text-muted-foreground mb-6">Dashboard statistics with color variants and gradients</p>
+                
+                <div class="grid gap-6">
+                    <Card class="border-border/50 border-primary/30">
+                        <CardHeader>
+                            <CardTitle class="text-base flex items-center gap-2">
+                                Color Variants
+                                <Badge variant="outline" class="text-xs">COMPONENT</Badge>
+                            </CardTitle>
+                            <CardDescription>Import from $lib/components/admin</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <StatCard title="Primary" value="1,234" icon={Key} variant="primary" />
+                                <StatCard title="Blue" value="567" icon={Users} variant="blue" />
+                                <StatCard title="Purple" value="89" icon={Building2} variant="purple" />
+                                <StatCard title="Green" value="42" icon={Activity} variant="green" />
+                                <StatCard title="Yellow" value="15" icon={AlertTriangle} variant="yellow" />
+                                <StatCard title="Orange" value="7" icon={Clock} variant="orange" />
+                                <StatCard title="Red" value="3" icon={Shield} variant="red" />
+                                <StatCard title="Accent" value="99" icon={TrendingUp} variant="accent" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <Card class="border-border/50">
+                            <CardHeader>
+                                <CardTitle class="text-base">With Subtitle</CardTitle>
+                                <CardDescription>Additional context text</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <StatCard 
+                                        title="Total Users" 
+                                        value="1,234" 
+                                        icon={Users} 
+                                        variant="blue" 
+                                        subtitle="Active this month"
+                                    />
+                                    <StatCard 
+                                        title="API Keys" 
+                                        value="89" 
+                                        icon={Key} 
+                                        variant="green" 
+                                        subtitle="12 expiring soon"
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card class="border-border/50">
+                            <CardHeader>
+                                <CardTitle class="text-base">Loading State</CardTitle>
+                                <CardDescription>Skeleton while fetching data</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <StatCard title="Loading..." value="" icon={Activity} variant="primary" loading />
+                                    <StatCard title="Ready" value="Done" icon={Activity} variant="green" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </section>
 
