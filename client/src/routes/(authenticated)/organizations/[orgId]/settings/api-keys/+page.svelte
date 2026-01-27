@@ -3,23 +3,17 @@
 	import { browser } from '$app/environment';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { Key, Plus, Trash2, Clock, Activity, Info } from '@lucide/svelte';
+	import { Key, Plus, Info } from '@lucide/svelte';
 	import type { ApiKeyResponse, SortablePageInput, PageResource, UserOrganizationResponse, OrganizationResponse } from '$lib/api/models';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn, DataTableService } from '$lib/components/data-table/types';
-	import { CreateApiKeySheet, ApiKeyCreatedModal, ApiKeyList } from '$lib/components/api-keys';
-	import {
-		searchOrganizationApiKeys,
-		createOrganizationApiKey,
-		revokeOrganizationApiKey
-	} from '$lib/api/organization/OrganizationApiKeyController';
+	import { CreateApiKeySheet, ApiKeyCreatedModal, ApiKeyTableRow } from '$lib/components/api-keys';
+	import { searchOrganizationApiKeys } from '$lib/api/organization/OrganizationApiKeyController';
 	import { getOrganizationById } from '$lib/api/organization/OrganizationController';
-	import { handleError } from '$lib/utils/error-handler';
-	import { toast } from 'svelte-sonner';
-	import { formatRelativeDate } from '$lib/utils/date';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
+	import { createApiKeyManagementService } from '$lib/api/organization/service/ApiKeyManagementService.svelte';
 
 	// Reactive orgId from route params
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
@@ -75,7 +69,12 @@
 	let service: DataTableService<ApiKeyResponse> | undefined = $state(undefined);
 	let lastLoadedOrgId: number = $state(0);
 
-	// Recreate service when orgId changes
+	// API Key Management Service
+	let apiKeyService = $derived(
+		createApiKeyManagementService(orgId, () => service?.load())
+	);
+
+	// Recreate DataTable service when orgId changes
 	$effect(() => {
 		if (!browser) return;
 		const currentOrgId: number = orgId;
@@ -135,68 +134,6 @@
 			colSpan: 1
 		}
 	];
-
-	// Sheet state
-	let showCreateSheet: boolean = $state(false);
-	let isCreating: boolean = $state(false);
-	let createdKey: { id: number; name: string; key: string; suffix: string; createdAt: string; expiresAt?: string; createdBy?: any } | null = $state(null);
-
-	// Revoke state
-	let keyToRevoke: ApiKeyResponse | null = $state(null);
-	let showRevokeDialog: boolean = $state(false);
-	let isRevoking: boolean = $state(false);
-
-	// Create handler
-	async function handleCreate(name: string, expiresAt: string | undefined): Promise<void> {
-		isCreating = true;
-		try {
-			const response = await createOrganizationApiKey(orgId, { name, expiresAt });
-			toast.success(`API key "${name}" created successfully`);
-			createdKey = {
-				id: response.id ?? 0,
-				name: response.name ?? name,
-				key: response.key ?? '',
-				suffix: response.suffix ?? '',
-				createdAt: response.createdAt ?? new Date().toISOString(),
-				expiresAt: response.expiresAt,
-				createdBy: response.createdBy
-			};
-			showCreateSheet = false;
-			service?.load();
-		} catch (err: unknown) {
-			const { message }: { message: string } = handleError(err, 'Failed to create API key');
-			toast.error(message);
-		} finally {
-			isCreating = false;
-		}
-	}
-
-	// Revoke handler
-	async function handleRevoke(): Promise<void> {
-		if (!keyToRevoke || !keyToRevoke.id) return;
-		isRevoking = true;
-		try {
-			await revokeOrganizationApiKey(orgId, keyToRevoke.id);
-			toast.success(`API key "${keyToRevoke.name ?? 'Unnamed'}" revoked successfully`);
-			keyToRevoke = null;
-			showRevokeDialog = false;
-			service?.load();
-		} catch (err: unknown) {
-			const { message }: { message: string } = handleError(err, 'Failed to revoke API key');
-			toast.error(message);
-		} finally {
-			isRevoking = false;
-		}
-	}
-
-	function openRevokeDialog(key: ApiKeyResponse): void {
-		keyToRevoke = key;
-		showRevokeDialog = true;
-	}
-
-	function closeCreatedModal(): void {
-		createdKey = null;
-	}
 </script>
 
 <svelte:head>
@@ -222,7 +159,7 @@
 						<CardDescription>Manage API keys for programmatic access to {orgName}</CardDescription>
 					</div>
 					{#if canManage}
-						<Button onclick={() => (showCreateSheet = true)}>
+						<Button onclick={() => apiKeyService.openCreateSheet()}>
 							<Plus class="mr-2 h-4 w-4" />
 							Create API Key
 						</Button>
@@ -245,7 +182,7 @@
 								to start sending events programmatically.
 							</p>
 							{#if canManage}
-								<Button onclick={() => (showCreateSheet = true)}>
+								<Button onclick={() => apiKeyService.openCreateSheet()}>
 									<Plus class="mr-2 h-4 w-4" />
 									Create Key
 								</Button>
@@ -258,79 +195,11 @@
 					{:else}
 						<DataTable {columns} {service} title="API Keys" icon={Key}>
 							{#snippet row(apiKey: ApiKeyResponse)}
-								<div
-									class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 hover:bg-muted/30 transition-all"
-								>
-									<!-- Name & Masked Key -->
-									<div class="col-span-1 md:col-span-4 flex flex-col gap-1">
-										<p class="font-medium">{apiKey.name ?? 'Unnamed'}</p>
-										<code class="text-xs text-muted-foreground font-mono">{apiKey.maskedKey ?? ''}</code>
-									</div>
-
-									<!-- Created By -->
-									<div class="col-span-1 md:col-span-2 flex items-center">
-										<p class="text-sm text-muted-foreground">
-											{#if apiKey.createdBy}
-												{apiKey.createdBy.firstName ?? ''} {apiKey.createdBy.lastName ?? ''}
-											{:else}
-												N/A
-											{/if}
-										</p>
-									</div>
-
-									<!-- Created At -->
-									<div class="col-span-1 md:col-span-2 flex items-center gap-1">
-										<Clock class="w-3 h-3 text-muted-foreground" />
-										<p class="text-sm text-muted-foreground">
-											{formatRelativeDate(apiKey.createdAt ?? '')}
-										</p>
-									</div>
-
-									<!-- Expires At -->
-									<div class="col-span-1 md:col-span-2 flex items-center">
-										<p class="text-sm text-muted-foreground">
-											{#if apiKey.expiresAt}
-												{formatRelativeDate(apiKey.expiresAt)}
-											{:else}
-												<span class="text-green-500">Never</span>
-											{/if}
-										</p>
-									</div>
-
-									<!-- Last Used -->
-									<div class="hidden md:flex md:col-span-1 items-center">
-										<div class="flex flex-col gap-0.5">
-											<div class="flex items-center gap-1">
-												<Activity class="w-3 h-3 text-muted-foreground" />
-												<p class="text-xs text-muted-foreground">
-													{#if apiKey.lastUsedAt}
-														{formatRelativeDate(apiKey.lastUsedAt)}
-													{:else}
-														Never
-													{/if}
-												</p>
-											</div>
-											<p class="text-xs text-muted-foreground">
-												{apiKey.totalRequests ?? 0} req
-											</p>
-										</div>
-									</div>
-
-									<!-- Actions -->
-									<div class="col-span-1 md:col-span-1 flex items-center justify-center">
-										{#if canManage}
-											<Button
-												variant="ghost"
-												size="icon"
-												class="h-8 w-8 text-muted-foreground hover:text-destructive"
-												onclick={() => openRevokeDialog(apiKey)}
-												aria-label="Revoke API key"
-											>
-												<Trash2 class="h-4 w-4" />
-											</Button>
-										{/if}
-									</div>
-								</div>
+								<ApiKeyTableRow
+									{apiKey}
+									{canManage}
+									onRevoke={(key: ApiKeyResponse) => apiKeyService.openRevokeDialog(key)}
+								/>
 							{/snippet}
 						</DataTable>
 
@@ -350,33 +219,40 @@
 
 <!-- Create Sheet -->
 <CreateApiKeySheet
-	open={showCreateSheet}
-	creating={isCreating}
-	onOpenChange={(o) => (showCreateSheet = o)}
-	onSubmit={handleCreate}
+	open={apiKeyService.showCreateSheet}
+	creating={apiKeyService.isCreating}
+	onOpenChange={(o) => apiKeyService.setShowCreateSheet(o)}
+	onSubmit={apiKeyService.handleCreate}
 />
 
 <!-- Created Modal -->
-<ApiKeyCreatedModal open={createdKey !== null} apiKey={createdKey} onClose={closeCreatedModal} />
+<ApiKeyCreatedModal
+	open={apiKeyService.createdKey !== null}
+	apiKey={apiKeyService.createdKey}
+	onClose={apiKeyService.closeCreatedModal}
+/>
 
 <!-- Revoke Dialog -->
-<AlertDialog.Root open={showRevokeDialog} onOpenChange={(o) => (showRevokeDialog = o)}>
+<AlertDialog.Root
+	open={apiKeyService.showRevokeDialog}
+	onOpenChange={(o) => apiKeyService.setShowRevokeDialog(o)}
+>
 	<AlertDialog.Content class="bg-card/95 backdrop-blur-xl border-border/50">
 		<AlertDialog.Header>
 			<AlertDialog.Title>Revoke API Key</AlertDialog.Title>
 			<AlertDialog.Description>
-				Are you sure you want to revoke the API key "{keyToRevoke?.name ?? 'Unnamed'}"? This action
+				Are you sure you want to revoke the API key "{apiKeyService.keyToRevoke?.name ?? 'Unnamed'}"? This action
 				cannot be undone and any applications using this key will lose access immediately.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 			<AlertDialog.Action
-				onclick={handleRevoke}
-				disabled={isRevoking}
+				onclick={apiKeyService.handleRevoke}
+				disabled={apiKeyService.isRevoking}
 				class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 			>
-				{isRevoking ? 'Revoking...' : 'Revoke Key'}
+				{apiKeyService.isRevoking ? 'Revoking...' : 'Revoke Key'}
 			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
