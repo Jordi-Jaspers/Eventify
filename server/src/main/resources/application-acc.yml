@@ -1,4 +1,0 @@
-spring:
-  liquibase:
-    contexts: acc
-    drop-first: true
