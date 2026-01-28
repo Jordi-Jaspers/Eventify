@@ -33,26 +33,35 @@ test.describe('Admin Organizations Page Screenshots', () => {
 				});
 			});
 
-			test(`create organization form - empty`, async ({ page }, testInfo) => {
-				await page.goto('/admin/organizations/new');
+			test(`create organization sheet - open`, async ({ page }, testInfo) => {
+				await page.goto('/admin/organizations');
 				await page.waitForLoadState('domcontentloaded');
+				await page.waitForTimeout(DATA_LOAD_MS);
+
+				// Click "New Organization" button to open the sheet
+				await page.getByRole('button', { name: /New Organization/i }).click();
 				await page.waitForTimeout(ANIMATION_SETTLE_MS);
 
 				await page.screenshot({
-					path: getScreenshot(`02-create-empty-${theme}`, testInfo.project.name),
+					path: getScreenshot(`02-create-sheet-open-${theme}`, testInfo.project.name),
 					fullPage: true
 				});
 			});
 
-			test(`create organization form - filled`, async ({ page }, testInfo) => {
-				await page.goto('/admin/organizations/new');
+			test(`create organization sheet - filled`, async ({ page }, testInfo) => {
+				await page.goto('/admin/organizations');
 				await page.waitForLoadState('domcontentloaded');
+				await page.waitForTimeout(DATA_LOAD_MS);
+
+				// Click "New Organization" button to open the sheet
+				await page.getByRole('button', { name: /New Organization/i }).click();
 				await page.waitForTimeout(ANIMATION_SETTLE_MS);
 
+				// Fill in the organization name
 				await page.getByLabel('Organization Name').fill('New Test Organization');
 
 				await page.screenshot({
-					path: getScreenshot(`03-create-filled-${theme}`, testInfo.project.name),
+					path: getScreenshot(`03-create-sheet-filled-${theme}`, testInfo.project.name),
 					fullPage: true
 				});
 			});

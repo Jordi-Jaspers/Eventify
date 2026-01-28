@@ -36,7 +36,7 @@ test.describe('Monitor Page Screenshots', () => {
 			});
 
 			test(`default layout`, async ({ page }, testInfo) => {
-				await loginAndNavigate(page, `/watchlists/${watchlistId}/monitor`);
+				await loginAndNavigate(page, `/watchlists/monitor?id=${watchlistId}`);
 				await page.waitForTimeout(DATA_LOAD_MS * 2); // Extra time for API call
 
 				await page.screenshot({
@@ -46,7 +46,7 @@ test.describe('Monitor Page Screenshots', () => {
 			});
 
 			test(`watchlist selector dropdown`, async ({ page }, testInfo) => {
-				await loginAndNavigate(page, `/watchlists/${watchlistId}/monitor`);
+				await loginAndNavigate(page, `/watchlists/monitor?id=${watchlistId}`);
 				await page.waitForTimeout(DATA_LOAD_MS * 2);
 
 				// Try to open watchlist selector dropdown
@@ -65,7 +65,7 @@ test.describe('Monitor Page Screenshots', () => {
 			});
 
 			test(`configure sheet open`, async ({ page }, testInfo) => {
-				await loginAndNavigate(page, `/watchlists/${watchlistId}/monitor`);
+				await loginAndNavigate(page, `/watchlists/monitor?id=${watchlistId}`);
 				await page.waitForTimeout(DATA_LOAD_MS * 2);
 
 				// Try to open configure sheet
