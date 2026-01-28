@@ -3,6 +3,8 @@ package io.github.eventify.api.watchlist.service;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
+import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.organization.service.OrganizationService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
@@ -38,9 +40,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@DisplayName("Unit Test - Watchlist Service")
+@DisplayName("Unit Test - Organization Watchlist Service")
 @SuppressWarnings("unchecked")
-public class WatchlistServiceTest extends UnitTest {
+public class OrganizationUserWatchlistServiceTest extends UnitTest {
 
     @Mock
     private WatchlistRepository watchlistRepository;
@@ -49,18 +51,26 @@ public class WatchlistServiceTest extends UnitTest {
     private ChannelRepository channelRepository;
 
     @Mock
+    private OrganizationService organizationService;
+
+    @Mock
     private WatchlistMetaData watchlistMetaData;
 
     @InjectMocks
-    private WatchlistService watchlistService;
+    private OrganizationWatchlistService organizationWatchlistService;
 
     private MockedStatic<SecurityUtil> securityUtilMock;
     private User user;
+    private Organization organization;
 
     @BeforeEach
     public void setUp() {
         user = aValidUser();
         user.setId(1L);
+
+        organization = new Organization();
+        organization.setId(10L);
+        organization.setName("Test Org");
 
         securityUtilMock = mockStatic(SecurityUtil.class);
         securityUtilMock.when(SecurityUtil::getLoggedInUser).thenReturn(user);
@@ -74,15 +84,16 @@ public class WatchlistServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should create watchlist successfully")
-    public void shouldCreateWatchlistSuccessfully() {
-        // Given: Valid watchlist
+    @DisplayName("Should create organization watchlist successfully")
+    public void shouldCreateOrganizationWatchlistSuccessfully() {
+        // Given: Valid organization watchlist
         final Watchlist input = new Watchlist();
-        input.setName("My Watchlist");
-        input.setDescription("Production errors");
+        input.setName("Org Watchlist");
+        input.setDescription("Production monitoring");
         input.setFilters(WatchlistFilters.defaults());
 
-        when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByOrganizationIdAndName(organization.getId(), "Org Watchlist"))
             .thenReturn(Optional.empty());
         when(watchlistRepository.save(any(Watchlist.class))).thenAnswer(invocation -> {
             final Watchlist watchlist = invocation.getArgument(0);
@@ -90,40 +101,40 @@ public class WatchlistServiceTest extends UnitTest {
             return watchlist;
         });
 
-        // When: Creating watchlist
-        final Watchlist watchlist = watchlistService.createWatchlist(input);
+        // When: Creating organization watchlist
+        final Watchlist watchlist = organizationWatchlistService.createWatchlist(organization.getId(), input);
 
         // Then: Watchlist should be created with correct properties
         assertThat(watchlist, is(notNullValue()));
         assertThat(watchlist.getId(), is(1L));
-        assertThat(watchlist.getName(), is("My Watchlist"));
-        assertThat(watchlist.getDescription(), is("Production errors"));
+        assertThat(watchlist.getName(), is("Org Watchlist"));
+        assertThat(watchlist.getDescription(), is("Production monitoring"));
         assertThat(watchlist.getUser().getId(), is(user.getId()));
+        assertThat(watchlist.getOrganization().getId(), is(organization.getId()));
         assertThat(watchlist.getFilters().getTimeRange(), is(io.github.eventify.api.monitor.model.TimeRange.LAST_24H));
-        assertThat(watchlist.getFilters().isOnlyCritical(), is(false));
-        assertThat(watchlist.getFilters().isSortBySeverity(), is(true));
 
         verify(watchlistRepository).save(any(Watchlist.class));
     }
 
     @Test
-    @DisplayName("Should create watchlist with configuration successfully")
-    public void shouldCreateWatchlistWithConfigurationSuccessfully() {
+    @DisplayName("Should create organization watchlist with configuration successfully")
+    public void shouldCreateOrganizationWatchlistWithConfigurationSuccessfully() {
         // Given: Watchlist with configuration
         final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
             .channels(channelsWithIds(1L, 2L))
             .build();
 
         final Watchlist input = new Watchlist();
-        input.setName("My Watchlist");
+        input.setName("Org Watchlist");
         input.setConfiguration(configuration);
 
-        final Channel channel1 = createChannel(1L, "Channel 1", user);
-        final Channel channel2 = createChannel(2L, "Channel 2", user);
+        final Channel channel1 = createOrgChannel(1L, "Channel 1", user, organization);
+        final Channel channel2 = createOrgChannel(2L, "Channel 2", user, organization);
 
-        when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByOrganizationIdAndName(organization.getId(), "Org Watchlist"))
             .thenReturn(Optional.empty());
-        when(channelRepository.findAllByIdInAndUserId(List.of(1L, 2L), user.getId()))
+        when(channelRepository.findAllByIdInAndOrganizationId(List.of(1L, 2L), organization.getId()))
             .thenReturn(List.of(channel1, channel2));
         when(watchlistRepository.save(any(Watchlist.class))).thenAnswer(invocation -> {
             final Watchlist watchlist = invocation.getArgument(0);
@@ -132,7 +143,7 @@ public class WatchlistServiceTest extends UnitTest {
         });
 
         // When: Creating watchlist with configuration
-        final Watchlist watchlist = watchlistService.createWatchlist(input);
+        final Watchlist watchlist = organizationWatchlistService.createWatchlist(organization.getId(), input);
 
         // Then: Configuration should be set
         assertThat(watchlist, is(notNullValue()));
@@ -143,19 +154,22 @@ public class WatchlistServiceTest extends UnitTest {
     @Test
     @DisplayName("Should fail to create when duplicate name")
     public void shouldFailToCreateWhenDuplicateName() {
-        // Given: User already has watchlist with same name
+        // Given: Organization already has watchlist with same name
         final Watchlist existingWatchlist = new Watchlist();
-        existingWatchlist.setName("My Watchlist");
-        when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
+        existingWatchlist.setName("Org Watchlist");
+        existingWatchlist.setOrganization(organization);
+
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByOrganizationIdAndName(organization.getId(), "Org Watchlist"))
             .thenReturn(Optional.of(existingWatchlist));
 
         final Watchlist input = new Watchlist();
-        input.setName("My Watchlist");
+        input.setName("Org Watchlist");
 
         // When & Then: Should throw DuplicateWatchlistNameException
         assertThrows(
             DuplicateWatchlistNameException.class,
-            () -> watchlistService.createWatchlist(input)
+            () -> organizationWatchlistService.createWatchlist(organization.getId(), input)
         );
 
         verify(watchlistRepository, never()).save(any(Watchlist.class));
@@ -170,100 +184,138 @@ public class WatchlistServiceTest extends UnitTest {
             .build();
 
         final Watchlist input = new Watchlist();
-        input.setName("My Watchlist");
+        input.setName("Org Watchlist");
         input.setConfiguration(configuration);
 
-        when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByOrganizationIdAndName(organization.getId(), "Org Watchlist"))
             .thenReturn(Optional.empty());
-        when(channelRepository.findAllByIdInAndUserId(List.of(999L), user.getId()))
+        when(channelRepository.findAllByIdInAndOrganizationId(List.of(999L), organization.getId()))
             .thenReturn(List.of());
 
         // When & Then: Should throw DataNotFoundException
         assertThrows(
             DataNotFoundException.class,
-            () -> watchlistService.createWatchlist(input)
+            () -> organizationWatchlistService.createWatchlist(organization.getId(), input)
         );
 
         verify(watchlistRepository, never()).save(any(Watchlist.class));
     }
 
     @Test
-    @DisplayName("Should fail when channel belongs to organization")
-    public void shouldFailWhenChannelBelongsToOrganization() {
-        // Given: Channel belongs to organization (so findByIdAndUserId returns empty)
+    @DisplayName("Should fail when channel belongs to user")
+    public void shouldFailWhenChannelBelongsToUser() {
+        // Given: Channel belongs to user (personal channel)
         final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
             .channels(channelsWithIds(1L))
             .build();
 
         final Watchlist input = new Watchlist();
-        input.setName("My Watchlist");
+        input.setName("Org Watchlist");
         input.setConfiguration(configuration);
 
-        when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByOrganizationIdAndName(organization.getId(), "Org Watchlist"))
             .thenReturn(Optional.empty());
-        // Org channels are not returned by findAllByIdInAndUserId query
-        when(channelRepository.findAllByIdInAndUserId(List.of(1L), user.getId()))
+        // Personal channels are not returned by findAllByIdInAndOrganizationId query
+        when(channelRepository.findAllByIdInAndOrganizationId(List.of(1L), organization.getId()))
             .thenReturn(List.of());
 
         // When & Then: Should throw DataNotFoundException
         assertThrows(
             DataNotFoundException.class,
-            () -> watchlistService.createWatchlist(input)
+            () -> organizationWatchlistService.createWatchlist(organization.getId(), input)
         );
 
         verify(watchlistRepository, never()).save(any(Watchlist.class));
     }
 
     @Test
-    @DisplayName("Should get user watchlist successfully")
-    public void shouldGetUserWatchlistSuccessfully() {
-        // Given: User has a watchlist
-        final Watchlist watchlist = createWatchlist(1L, "My Watchlist", user);
+    @DisplayName("Should fail when channel belongs to other organization")
+    public void shouldFailWhenChannelBelongsToOtherOrg() {
+        // Given: Channel belongs to different organization
+        final Organization otherOrg = new Organization();
+        otherOrg.setId(20L);
+        otherOrg.setName("Other Org");
 
-        when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
+        final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
+            .channels(channelsWithIds(1L))
+            .build();
+
+        final Watchlist input = new Watchlist();
+        input.setName("Org Watchlist");
+        input.setConfiguration(configuration);
+
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByOrganizationIdAndName(organization.getId(), "Org Watchlist"))
+            .thenReturn(Optional.empty());
+        // Other org channels are not returned by findAllByIdInAndOrganizationId query
+        when(channelRepository.findAllByIdInAndOrganizationId(List.of(1L), organization.getId()))
+            .thenReturn(List.of());
+
+        // When & Then: Should throw DataNotFoundException
+        assertThrows(
+            DataNotFoundException.class,
+            () -> organizationWatchlistService.createWatchlist(organization.getId(), input)
+        );
+
+        verify(watchlistRepository, never()).save(any(Watchlist.class));
+    }
+
+    @Test
+    @DisplayName("Should get organization watchlist successfully")
+    public void shouldGetOrganizationWatchlistSuccessfully() {
+        // Given: Organization has a watchlist
+        final Watchlist watchlist = createOrgWatchlist(1L, "Org Watchlist", user, organization);
+
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByIdAndOrganizationId(1L, organization.getId()))
             .thenReturn(Optional.of(watchlist));
 
         // When: Getting watchlist by ID
-        final Watchlist result = watchlistService.getWatchlist(1L);
+        final Watchlist result = organizationWatchlistService.getWatchlist(organization.getId(), 1L);
 
         // Then: Should return watchlist
         assertThat(result, is(notNullValue()));
         assertThat(result.getId(), is(1L));
-        assertThat(result.getName(), is("My Watchlist"));
+        assertThat(result.getName(), is("Org Watchlist"));
+        assertThat(result.getOrganization().getId(), is(organization.getId()));
     }
 
     @Test
-    @DisplayName("Should fail to get watchlist of another user")
-    public void shouldFailToGetWatchlistOfAnotherUser() {
-        // Given: Watchlist does not belong to current user
-        when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
+    @DisplayName("Should fail to get watchlist from other organization")
+    public void shouldFailToGetWatchlistFromOtherOrg() {
+        // Given: Watchlist does not belong to current organization
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByIdAndOrganizationId(1L, organization.getId()))
             .thenReturn(Optional.empty());
 
         // When & Then: Should throw DataNotFoundException
         assertThrows(
             DataNotFoundException.class,
-            () -> watchlistService.getWatchlist(1L)
+            () -> organizationWatchlistService.getWatchlist(organization.getId(), 1L)
         );
     }
 
     @Test
-    @DisplayName("Should update watchlist successfully")
-    public void shouldUpdateWatchlistSuccessfully() {
-        // Given: User has a watchlist
-        final Watchlist existing = createWatchlist(1L, "Old Name", user);
+    @DisplayName("Should update organization watchlist successfully")
+    public void shouldUpdateOrganizationWatchlistSuccessfully() {
+        // Given: Organization has a watchlist
+        final Watchlist existing = createOrgWatchlist(1L, "Old Name", user, organization);
 
         final Watchlist updated = new Watchlist();
         updated.setName("New Name");
         updated.setDescription("New Description");
 
-        when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByIdAndOrganizationId(1L, organization.getId()))
             .thenReturn(Optional.of(existing));
-        when(watchlistRepository.findByUserIdAndName(user.getId(), "New Name"))
+        when(watchlistRepository.findByOrganizationIdAndName(organization.getId(), "New Name"))
             .thenReturn(Optional.empty());
         when(watchlistRepository.save(any(Watchlist.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When: Updating watchlist
-        final Watchlist result = watchlistService.updateWatchlist(1L, updated);
+        final Watchlist result = organizationWatchlistService.updateWatchlist(organization.getId(), 1L, updated);
 
         // Then: Watchlist should be updated
         assertThat(result.getName(), is("New Name"));
@@ -276,111 +328,67 @@ public class WatchlistServiceTest extends UnitTest {
     @Test
     @DisplayName("Should fail to update with duplicate name")
     public void shouldFailToUpdateWithDuplicateName() {
-        // Given: User has a watchlist
-        final Watchlist existing = createWatchlist(1L, "Old Name", user);
+        // Given: Organization has a watchlist
+        final Watchlist existing = createOrgWatchlist(1L, "Old Name", user, organization);
 
         // And: Another watchlist with target name exists
-        final Watchlist anotherWatchlist = createWatchlist(2L, "New Name", user);
+        final Watchlist anotherWatchlist = createOrgWatchlist(2L, "New Name", user, organization);
 
         final Watchlist updated = new Watchlist();
         updated.setName("New Name");
 
-        when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByIdAndOrganizationId(1L, organization.getId()))
             .thenReturn(Optional.of(existing));
-        when(watchlistRepository.findByUserIdAndName(user.getId(), "New Name"))
+        when(watchlistRepository.findByOrganizationIdAndName(organization.getId(), "New Name"))
             .thenReturn(Optional.of(anotherWatchlist));
 
         // When & Then: Should throw DuplicateWatchlistNameException
         assertThrows(
             DuplicateWatchlistNameException.class,
-            () -> watchlistService.updateWatchlist(1L, updated)
+            () -> organizationWatchlistService.updateWatchlist(organization.getId(), 1L, updated)
         );
 
         verify(watchlistRepository, never()).save(any(Watchlist.class));
     }
 
     @Test
-    @DisplayName("Should update configuration successfully")
-    public void shouldUpdateConfigurationSuccessfully() {
-        // Given: User has a watchlist
-        final Watchlist existing = createWatchlist(1L, "My Watchlist", user);
-        final Channel channel1 = createChannel(1L, "Channel 1", user);
-        final Channel channel2 = createChannel(2L, "Channel 2", user);
+    @DisplayName("Should delete organization watchlist successfully")
+    public void shouldDeleteOrganizationWatchlistSuccessfully() {
+        // Given: Organization has a watchlist
+        final Watchlist watchlist = createOrgWatchlist(1L, "Org Watchlist", user, organization);
 
-        final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
-            .channels(channelsWithIds(2L, 1L))
-            .build();
-
-        final Watchlist updated = new Watchlist();
-        updated.setName("My Watchlist");
-        updated.setConfiguration(configuration);
-
-        when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
-            .thenReturn(Optional.of(existing));
-        when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
-            .thenReturn(Optional.of(existing));
-        when(channelRepository.findAllByIdInAndUserId(List.of(2L, 1L), user.getId()))
-            .thenReturn(List.of(channel1, channel2));
-        when(watchlistRepository.save(any(Watchlist.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        // When: Updating configuration
-        final Watchlist result = watchlistService.updateWatchlist(1L, updated);
-
-        // Then: Configuration should be updated
-        assertThat(result.getConfiguration().getChannelIds(), contains(2L, 1L));
-        verify(watchlistRepository).save(existing);
-    }
-
-    @Test
-    @DisplayName("Should delete watchlist successfully")
-    public void shouldDeleteWatchlistSuccessfully() {
-        // Given: User has a watchlist
-        final Watchlist watchlist = createWatchlist(1L, "My Watchlist", user);
-
-        when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
+        when(watchlistRepository.findByIdAndOrganizationId(1L, organization.getId()))
             .thenReturn(Optional.of(watchlist));
 
         // When: Deleting watchlist
-        watchlistService.deleteWatchlist(1L);
+        organizationWatchlistService.deleteWatchlist(organization.getId(), 1L);
 
         // Then: Watchlist should be deleted
         verify(watchlistRepository).delete(watchlist);
     }
 
     @Test
-    @DisplayName("Should fail to delete watchlist of another user")
-    public void shouldFailToDeleteWatchlistOfAnotherUser() {
-        // Given: Watchlist does not belong to current user
-        when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
-            .thenReturn(Optional.empty());
-
-        // When & Then: Should throw DataNotFoundException
-        assertThrows(
-            DataNotFoundException.class,
-            () -> watchlistService.deleteWatchlist(1L)
-        );
-
-        verify(watchlistRepository, never()).delete(any(Watchlist.class));
-    }
-
-    @Test
-    @DisplayName("Should search personal watchlists successfully")
-    public void shouldSearchPersonalWatchlistsSuccessfully() {
-        // Given: User has 3 watchlists
-        final Watchlist watchlist1 = createWatchlist(1L, "Watchlist 1", user);
-        final Watchlist watchlist2 = createWatchlist(2L, "Watchlist 2", user);
-        final Watchlist watchlist3 = createWatchlist(3L, "Watchlist 3", user);
+    @DisplayName("Should search organization watchlists successfully")
+    public void shouldSearchOrganizationWatchlistsSuccessfully() {
+        // Given: Organization has 3 watchlists
+        final Watchlist watchlist1 = createOrgWatchlist(1L, "Watchlist 1", user, organization);
+        final Watchlist watchlist2 = createOrgWatchlist(2L, "Watchlist 2", user, organization);
+        final Watchlist watchlist3 = createOrgWatchlist(3L, "Watchlist 3", user, organization);
 
         final Page<Watchlist> mockPage = new PageImpl<>(List.of(watchlist1, watchlist2, watchlist3));
 
+        when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
         when(watchlistMetaData.toSort(any())).thenReturn(Sort.by(Sort.Direction.DESC, "createdAt"));
-        when(watchlistMetaData.toUserWatchlistSpecification(any())).thenReturn((root, query, cb) -> cb.conjunction());
+        when(watchlistMetaData.toOrganizationWatchlistSpecification(any(), eq(organization.getId())))
+            .thenReturn((root, query, cb) -> cb.conjunction());
         when(watchlistRepository.findAll(any(Specification.class), any(Pageable.class)))
             .thenReturn(mockPage);
 
         // When: Searching watchlists
         final SortablePageInput input = createDefaultPageInput();
-        final Page<Watchlist> watchlists = watchlistService.searchWatchlists(input);
+        final Page<Watchlist> watchlists = organizationWatchlistService.searchWatchlists(organization.getId(), input);
 
         // Then: Should return all 3 watchlists
         assertThat(watchlists, is(notNullValue()));
@@ -390,38 +398,20 @@ public class WatchlistServiceTest extends UnitTest {
         assertThat(watchlists.getContent().get(2).getName(), is("Watchlist 3"));
     }
 
-    @Test
-    @DisplayName("Should return empty list when user has no watchlists")
-    public void shouldReturnEmptyListWhenUserHasNoWatchlists() {
-        // Given: User has no watchlists
-        final Page<Watchlist> emptyPage = new PageImpl<>(List.of());
-
-        when(watchlistMetaData.toSort(any())).thenReturn(Sort.by(Sort.Direction.DESC, "createdAt"));
-        when(watchlistMetaData.toUserWatchlistSpecification(any())).thenReturn((root, query, cb) -> cb.conjunction());
-        when(watchlistRepository.findAll(any(Specification.class), any(Pageable.class)))
-            .thenReturn(emptyPage);
-
-        // When: Searching watchlists
-        final SortablePageInput input = createDefaultPageInput();
-        final Page<Watchlist> watchlists = watchlistService.searchWatchlists(input);
-
-        // Then: Should return empty list
-        assertThat(watchlists.getContent(), is(empty()));
-    }
-
-    private Watchlist createWatchlist(final Long id, final String name, final User user) {
+    private Watchlist createOrgWatchlist(final Long id, final String name, final User user, final Organization org) {
         final Watchlist watchlist = new Watchlist();
         watchlist.setId(id);
         watchlist.setName(name);
         watchlist.setUser(user);
+        watchlist.setOrganization(org);
         watchlist.setConfiguration(WatchlistConfiguration.empty());
         watchlist.setFilters(WatchlistFilters.defaults());
         watchlist.setCreatedAt(OffsetDateTime.now().minusDays(1));
         return watchlist;
     }
 
-    private Channel createChannel(final Long id, final String name, final User user) {
-        final Channel channel = new Channel(name, user, null);
+    private Channel createOrgChannel(final Long id, final String name, final User user, final Organization org) {
+        final Channel channel = new Channel(name, user, org);
         channel.setId(id);
         channel.setStatus(ChannelStatus.ACTIVE);
         channel.setCreatedAt(OffsetDateTime.now().minusDays(1));

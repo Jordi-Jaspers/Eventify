@@ -6,7 +6,7 @@ import io.github.eventify.api.watchlist.model.request.CreateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.request.UpdateWatchlistRequest;
 import io.github.eventify.api.watchlist.model.response.WatchlistDetailsResponse;
 import io.github.eventify.api.watchlist.model.validator.WatchlistValidator;
-import io.github.eventify.api.watchlist.service.WatchlistService;
+import io.github.eventify.api.watchlist.service.UserWatchlistService;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,7 +33,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 )
 public class UserWatchlistController {
 
-    private final WatchlistService watchlistService;
+    private final UserWatchlistService userWatchlistService;
 
     private final WatchlistMapper watchlistMapper;
 
@@ -51,7 +51,7 @@ public class UserWatchlistController {
     )
     public ResponseEntity<WatchlistDetailsResponse> createWatchlist(@RequestBody final CreateWatchlistRequest request) {
         watchlistValidator.validateAndThrow(request);
-        final Watchlist watchlist = watchlistService.createWatchlist(watchlistMapper.toWatchlist(request));
+        final Watchlist watchlist = userWatchlistService.createWatchlist(watchlistMapper.toWatchlist(request));
         return ResponseEntity.status(CREATED).body(watchlistMapper.toResourceObject(watchlist));
     }
 
@@ -66,7 +66,7 @@ public class UserWatchlistController {
         produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<PageResource<WatchlistDetailsResponse>> searchWatchlists(@RequestBody final SortablePageInput input) {
-        final Page<Watchlist> page = watchlistService.searchWatchlists(input);
+        final Page<Watchlist> page = userWatchlistService.searchWatchlists(input);
         return ResponseEntity.status(OK).body(watchlistMapper.toPageResource(page));
     }
 
@@ -80,7 +80,7 @@ public class UserWatchlistController {
         produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<WatchlistDetailsResponse> getWatchlist(@PathVariable final Long id) {
-        final Watchlist watchlist = watchlistService.getWatchlist(id);
+        final Watchlist watchlist = userWatchlistService.getWatchlist(id);
         return ResponseEntity.status(OK).body(watchlistMapper.toResourceObject(watchlist));
     }
 
@@ -98,7 +98,7 @@ public class UserWatchlistController {
         @RequestBody final UpdateWatchlistRequest request) {
         watchlistValidator.validateAndThrow(request);
         final Watchlist updated = watchlistMapper.toWatchlist(request);
-        final Watchlist watchlist = watchlistService.updateWatchlist(id, updated);
+        final Watchlist watchlist = userWatchlistService.updateWatchlist(id, updated);
         return ResponseEntity.status(OK).body(watchlistMapper.toResourceObject(watchlist));
     }
 
@@ -112,7 +112,7 @@ public class UserWatchlistController {
         produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Void> deleteWatchlist(@PathVariable final Long id) {
-        watchlistService.deleteWatchlist(id);
+        userWatchlistService.deleteWatchlist(id);
         return ResponseEntity.status(OK).build();
     }
 }

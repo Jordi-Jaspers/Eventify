@@ -80,6 +80,16 @@ public class OrganizationService {
     }
 
     /**
+     * Get organization by ID (alias for findOrganizationById).
+     *
+     * @param orgId the organization ID
+     * @return the organization
+     */
+    public Organization getOrganization(final Long orgId) {
+        return findOrganizationById(orgId);
+    }
+
+    /**
      * Create a new organization.
      *
      * @param request the organization provisioning request

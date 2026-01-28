@@ -31,7 +31,9 @@ public class WatchlistMetaData extends AbstractSortSearchMetaData {
 
     public static final String UPDATED_AT = "updatedAt";
 
-    private static final String ORGANIZATION_ENTITY_FIELD = "organization";
+    public static final String ORGANIZATION_TERM = "organization";
+
+    public static final String ORGANIZATION_FIELD = "organization.id";
 
     /**
      * Constructor to build watchlist metadata / dictionary.
@@ -41,6 +43,7 @@ public class WatchlistMetaData extends AbstractSortSearchMetaData {
         addField(NAME, NAME, SearchType.FUZZY_TEXT, true);
         addField(DESCRIPTION, DESCRIPTION, SearchType.FUZZY_TEXT, true);
         addField(USER_TERM, USER_FIELD, SearchType.NUMERIC, true);
+        addField(ORGANIZATION_TERM, ORGANIZATION_FIELD, SearchType.NUMERIC, true);
         addField(CREATED_AT, CREATED_AT, SearchType.DATE, true);
         addField(UPDATED_AT, UPDATED_AT, SearchType.DATE, true);
 
@@ -74,6 +77,36 @@ public class WatchlistMetaData extends AbstractSortSearchMetaData {
      * @return the specification for personal watchlists
      */
     private Specification<Watchlist> buildPersonalWatchlistSpecification() {
-        return (root, query, cb) -> cb.isNull(root.get(ORGANIZATION_ENTITY_FIELD));
+        return (root, query, cb) -> cb.isNull(root.get(ORGANIZATION_TERM));
+    }
+
+    /**
+     * Builds a JPA Specification for searching organization watchlists.
+     * Includes: search criteria, organization ID filter, organization IS NOT NULL.
+     *
+     * @param input          the sortable page input containing search inputs
+     * @param organizationId the organization ID to filter by
+     * @return the JPA Specification for querying organization watchlists
+     */
+    public Specification<Watchlist> toOrganizationWatchlistSpecification(final SortablePageInput input, final Long organizationId) {
+        final List<SearchCriterium> criteria = toSearchCriteria(input.getSearchInputs());
+        final Specification<Watchlist> searchSpec = new JpaSearchSpecification<>(criteria);
+
+        return Specification
+            .where(searchSpec)
+            .and(buildOrganizationWatchlistSpecification(organizationId));
+    }
+
+    /**
+     * Builds a specification for organization watchlists (organization IS NOT NULL and matches ID).
+     *
+     * @param organizationId the organization ID to filter by
+     * @return the specification for organization watchlists
+     */
+    private Specification<Watchlist> buildOrganizationWatchlistSpecification(final Long organizationId) {
+        return (root, query, cb) -> cb.and(
+            cb.isNotNull(root.get(ORGANIZATION_TERM)),
+            cb.equal(root.get(ORGANIZATION_TERM).get("id"), organizationId)
+        );
     }
 }

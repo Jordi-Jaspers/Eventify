@@ -53,6 +53,8 @@ public final class Paths {
 
     public static final String RETENTION_SETTINGS_PART = "/settings/retention";
 
+    public static final String WATCHLISTS_PART = "/watchlist";
+
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
     public static final String PUBLIC_SWAGGER_PATH = PUBLIC_PATH + "/docs";
@@ -139,7 +141,7 @@ public final class Paths {
 
     public static final String USER_RETENTION_SETTINGS_PATH = USERS_PATH + RETENTION_SETTINGS_PART;
 
-    public static final String USER_WATCHLISTS_PATH = USERS_PATH + "/watchlist";
+    public static final String USER_WATCHLISTS_PATH = USERS_PATH + WATCHLISTS_PART;
 
     public static final String USER_WATCHLISTS_SEARCH_PATH = USER_WATCHLISTS_PATH + SEARCH_PART;
 
@@ -202,6 +204,12 @@ public final class Paths {
     public static final String ORGANIZATION_CHANNEL_RESUME_PATH = ORGANIZATION_CHANNEL_PATH + RESUME_PART;
 
     public static final String ORGANIZATION_RETENTION_SETTINGS_PATH = ORGANIZATION_PATH + RETENTION_SETTINGS_PART;
+
+    public static final String ORGANIZATION_WATCHLISTS_PATH = ORGANIZATION_PATH + WATCHLISTS_PART;
+
+    public static final String ORGANIZATION_WATCHLISTS_SEARCH_PATH = ORGANIZATION_WATCHLISTS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_WATCHLIST_PATH = ORGANIZATION_WATCHLISTS_PATH + ID_PART;
 
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 

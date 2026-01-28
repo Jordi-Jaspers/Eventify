@@ -65,4 +65,29 @@ public interface WatchlistRepository extends JpaRepository<Watchlist, Long>, Jpa
         nativeQuery = true
     )
     void removeChannelFromAllConfigurations(@Param("channelId") Long channelId);
+
+    /**
+     * Finds a watchlist by ID and organization ID.
+     *
+     * @param id             the watchlist ID
+     * @param organizationId the organization ID
+     * @return optional watchlist
+     */
+    Optional<Watchlist> findByIdAndOrganizationId(Long id, Long organizationId);
+
+    /**
+     * Finds a watchlist by organization ID and name (case-insensitive).
+     *
+     * @param organizationId the organization ID
+     * @param name           the watchlist name
+     * @return optional watchlist
+     */
+    @Query(
+        """
+            SELECT w FROM Watchlist w
+            WHERE w.organization.id = :organizationId
+            AND LOWER(w.name) = LOWER(:name)
+            """
+    )
+    Optional<Watchlist> findByOrganizationIdAndName(@Param("organizationId") Long organizationId, @Param("name") String name);
 }
