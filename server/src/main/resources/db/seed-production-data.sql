@@ -133,18 +133,18 @@ SELECT
     1,
     NULL,
     jsonb_build_object(
-        'channelIds', jsonb_build_array(
-            (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1 AND organization_id IS NULL)
-        ),
         'groups', jsonb_build_array(
             jsonb_build_object(
-                'id', 'g1-critical-services',
+                'id', '550e8400-e29b-41d4-a716-446655440001'::text,
                 'name', 'Critical Services',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Backend Errors' AND user_id = 1 AND organization_id IS NULL),
                     (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1 AND organization_id IS NULL)
                 )
             )
+        ),
+        'channelIds', jsonb_build_array(
+            (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1 AND organization_id IS NULL)
         )
     ),
     jsonb_build_object('timeRange', '24h', 'onlyCritical', true, 'sortBySeverity', true, 'groupedView', true),
@@ -159,6 +159,7 @@ SELECT
     1,
     NULL,
     jsonb_build_object(
+        'groups', jsonb_build_array(),
         'channelIds', jsonb_build_array(
             (SELECT id FROM channel WHERE name = 'Frontend Analytics' AND user_id = 1 AND organization_id IS NULL)
         )
@@ -175,13 +176,9 @@ SELECT
     1,
     NULL,
     jsonb_build_object(
-        'channelIds', jsonb_build_array(
-            (SELECT id FROM channel WHERE name = 'Marketing Campaigns' AND user_id = 1 AND organization_id IS NULL),
-            (SELECT id FROM channel WHERE name = 'Test Channel' AND user_id = 1 AND organization_id IS NULL)
-        ),
         'groups', jsonb_build_array(
             jsonb_build_object(
-                'id', 'g2-application',
+                'id', '550e8400-e29b-41d4-a716-446655440002'::text,
                 'name', 'Application',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Backend Errors' AND user_id = 1 AND organization_id IS NULL),
@@ -190,7 +187,7 @@ SELECT
                 )
             ),
             jsonb_build_object(
-                'id', 'g3-operations',
+                'id', '550e8400-e29b-41d4-a716-446655440003'::text,
                 'name', 'Operations',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1 AND organization_id IS NULL),
@@ -199,13 +196,17 @@ SELECT
                 )
             ),
             jsonb_build_object(
-                'id', 'g4-integrations',
+                'id', '550e8400-e29b-41d4-a716-446655440004'::text,
                 'name', 'Integrations',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'API Gateway Logs' AND user_id = 1 AND organization_id IS NULL),
                     (SELECT id FROM channel WHERE name = 'Payment Processing' AND user_id = 1 AND organization_id IS NULL)
                 )
             )
+        ),
+        'channelIds', jsonb_build_array(
+            (SELECT id FROM channel WHERE name = 'Marketing Campaigns' AND user_id = 1 AND organization_id IS NULL),
+            (SELECT id FROM channel WHERE name = 'Test Channel' AND user_id = 1 AND organization_id IS NULL)
         )
     ),
     jsonb_build_object('timeRange', '7d', 'onlyCritical', false, 'sortBySeverity', false, 'groupedView', true),
@@ -220,6 +221,7 @@ SELECT
     1,
     NULL,
     jsonb_build_object(
+        'groups', jsonb_build_array(),
         'channelIds', jsonb_build_array(
             (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1 AND organization_id IS NULL)
         )
@@ -236,17 +238,17 @@ SELECT
     1,
     NULL,
     jsonb_build_object(
-        'channelIds', '[]'::jsonb,
         'groups', jsonb_build_array(
             jsonb_build_object(
-                'id', 'g5-mobile-commerce',
+                'id', '550e8400-e29b-41d4-a716-446655440005'::text,
                 'name', 'Mobile Commerce',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Mobile App Events' AND user_id = 1 AND organization_id IS NULL),
                     (SELECT id FROM channel WHERE name = 'Payment Processing' AND user_id = 1 AND organization_id IS NULL)
                 )
             )
-        )
+        ),
+        'channelIds', jsonb_build_array()
     ),
     jsonb_build_object('timeRange', '24h', 'onlyCritical', false, 'sortBySeverity', true, 'groupedView', true),
     NOW() - INTERVAL '20 days',
@@ -260,10 +262,9 @@ SELECT
     1,
     NULL,
     jsonb_build_object(
-        'channelIds', '[]'::jsonb,
         'groups', jsonb_build_array(
             jsonb_build_object(
-                'id', 'g6-devops',
+                'id', '550e8400-e29b-41d4-a716-446655440006'::text,
                 'name', 'DevOps',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1 AND organization_id IS NULL),
@@ -271,7 +272,8 @@ SELECT
                     (SELECT id FROM channel WHERE name = 'API Gateway Logs' AND user_id = 1 AND organization_id IS NULL)
                 )
             )
-        )
+        ),
+        'channelIds', jsonb_build_array()
     ),
     jsonb_build_object('timeRange', '24h', 'onlyCritical', false, 'sortBySeverity', true, 'groupedView', true),
     NOW() - INTERVAL '15 days',
@@ -289,18 +291,18 @@ SELECT
     1,
     (SELECT id FROM organization WHERE slug = 'acme-corp'),
     jsonb_build_object(
-        'channelIds', jsonb_build_array(
-            (SELECT id FROM channel WHERE name = 'Acme CI/CD Pipeline' AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp'))
-        ),
         'groups', jsonb_build_array(
             jsonb_build_object(
-                'id', 'acme-g1-environments',
+                'id', '650e8400-e29b-41d4-a716-446655440001'::text,
                 'name', 'Environments',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Acme Production Events' AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp')),
                     (SELECT id FROM channel WHERE name = 'Acme Staging Events' AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp'))
                 )
             )
+        ),
+        'channelIds', jsonb_build_array(
+            (SELECT id FROM channel WHERE name = 'Acme CI/CD Pipeline' AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp'))
         )
     ),
     jsonb_build_object('timeRange', '24h', 'onlyCritical', false, 'sortBySeverity', true, 'groupedView', true),
@@ -315,6 +317,7 @@ SELECT
     1,
     (SELECT id FROM organization WHERE slug = 'acme-corp'),
     jsonb_build_object(
+        'groups', jsonb_build_array(),
         'channelIds', jsonb_build_array(
             (SELECT id FROM channel WHERE name = 'Acme Production Events' AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp'))
         )
@@ -331,10 +334,9 @@ SELECT
     1,
     (SELECT id FROM organization WHERE slug = 'beta-industries'),
     jsonb_build_object(
-        'channelIds', '[]'::jsonb,
         'groups', jsonb_build_array(
             jsonb_build_object(
-                'id', 'beta-g1-operations',
+                'id', '650e8400-e29b-41d4-a716-446655440002'::text,
                 'name', 'Manufacturing Operations',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Beta Manufacturing Line' AND organization_id = (SELECT id FROM organization WHERE slug = 'beta-industries')),
@@ -342,7 +344,8 @@ SELECT
                     (SELECT id FROM channel WHERE name = 'Beta Inventory System' AND organization_id = (SELECT id FROM organization WHERE slug = 'beta-industries'))
                 )
             )
-        )
+        ),
+        'channelIds', jsonb_build_array()
     ),
     jsonb_build_object('timeRange', '24h', 'onlyCritical', false, 'sortBySeverity', true, 'groupedView', true),
     NOW() - INTERVAL '30 days',
@@ -356,17 +359,17 @@ SELECT
     1,
     (SELECT id FROM organization WHERE slug = 'gamma-solutions'),
     jsonb_build_object(
-        'channelIds', '[]'::jsonb,
         'groups', jsonb_build_array(
             jsonb_build_object(
-                'id', 'gamma-g1-client',
+                'id', '650e8400-e29b-41d4-a716-446655440003'::text,
                 'name', 'Client Experience',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Gamma Client Portal' AND organization_id = (SELECT id FROM organization WHERE slug = 'gamma-solutions')),
                     (SELECT id FROM channel WHERE name = 'Gamma Support Tickets' AND organization_id = (SELECT id FROM organization WHERE slug = 'gamma-solutions'))
                 )
             )
-        )
+        ),
+        'channelIds', jsonb_build_array()
     ),
     jsonb_build_object('timeRange', '24h', 'onlyCritical', false, 'sortBySeverity', true, 'groupedView', true),
     NOW() - INTERVAL '28 days',
@@ -380,17 +383,17 @@ SELECT
     1,
     (SELECT id FROM organization WHERE slug = 'delta-tech'),
     jsonb_build_object(
-        'channelIds', '[]'::jsonb,
         'groups', jsonb_build_array(
             jsonb_build_object(
-                'id', 'delta-g1-rd',
+                'id', '650e8400-e29b-41d4-a716-446655440004'::text,
                 'name', 'Research and Testing',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Delta RnD Lab' AND organization_id = (SELECT id FROM organization WHERE slug = 'delta-tech')),
                     (SELECT id FROM channel WHERE name = 'Delta Test Automation' AND organization_id = (SELECT id FROM organization WHERE slug = 'delta-tech'))
                 )
             )
-        )
+        ),
+        'channelIds', jsonb_build_array()
     ),
     jsonb_build_object('timeRange', '7d', 'onlyCritical', false, 'sortBySeverity', false, 'groupedView', true),
     NOW() - INTERVAL '25 days',
@@ -404,17 +407,17 @@ SELECT
     1,
     (SELECT id FROM organization WHERE slug = 'epsilon-systems'),
     jsonb_build_object(
-        'channelIds', '[]'::jsonb,
         'groups', jsonb_build_array(
             jsonb_build_object(
-                'id', 'epsilon-g1-infra',
+                'id', '650e8400-e29b-41d4-a716-446655440005'::text,
                 'name', 'Infrastructure',
                 'channelIds', jsonb_build_array(
                     (SELECT id FROM channel WHERE name = 'Epsilon Infrastructure' AND organization_id = (SELECT id FROM organization WHERE slug = 'epsilon-systems')),
                     (SELECT id FROM channel WHERE name = 'Epsilon Database Ops' AND organization_id = (SELECT id FROM organization WHERE slug = 'epsilon-systems'))
                 )
             )
-        )
+        ),
+        'channelIds', jsonb_build_array()
     ),
     jsonb_build_object('timeRange', '24h', 'onlyCritical', false, 'sortBySeverity', true, 'groupedView', true),
     NOW() - INTERVAL '20 days',
