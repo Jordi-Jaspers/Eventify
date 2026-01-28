@@ -118,6 +118,10 @@ export const CLIENT_ROUTES = {
 	ORGANIZATION_CHANNELS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/channels`,
 		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_WATCHLISTS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/watchlists`,
+		type: RouteType.PRIVATE
 	})
 } as const;
 

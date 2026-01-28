@@ -110,6 +110,15 @@
 						<span>Channels</span>
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>
+				<Sidebar.MenuItem>
+					<Sidebar.MenuButton
+						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_WATCHLISTS_PAGE(currentOrganization.organizationId!).path)}
+						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_WATCHLISTS_PAGE(currentOrganization.organizationId!).path)}
+					>
+						<ClipboardList class="size-4" />
+						<span>Watchlists</span>
+					</Sidebar.MenuButton>
+				</Sidebar.MenuItem>
 					{#if canManageOrgSettings}
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton
