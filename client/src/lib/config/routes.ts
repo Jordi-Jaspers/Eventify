@@ -122,6 +122,10 @@ export const CLIENT_ROUTES = {
 	ORGANIZATION_WATCHLISTS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/watchlists`,
 		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_MONITOR_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/watchlists/monitor`,
+		type: RouteType.PRIVATE
 	})
 } as const;
 

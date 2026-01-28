@@ -1517,8 +1517,9 @@
                         </CardHeader>
                         <CardContent class="space-y-4">
                             <div class="space-y-1.5">
-                                <label class="text-sm font-medium">Email Address</label>
+                                <label for="demo-email-1" class="text-sm font-medium">Email Address</label>
                                 <input 
+                                    id="demo-email-1"
                                     type="email" 
                                     placeholder="you@example.com"
                                     class="w-full h-9 px-3 rounded-md border border-border/50 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -1526,8 +1527,9 @@
                                 <p class="text-xs text-muted-foreground">We'll never share your email.</p>
                             </div>
                             <div class="space-y-1.5">
-                                <label class="text-sm font-medium">Password <span class="text-destructive">*</span></label>
+                                <label for="demo-password-1" class="text-sm font-medium">Password <span class="text-destructive">*</span></label>
                                 <input 
+                                    id="demo-password-1"
                                     type="password" 
                                     placeholder="Enter password"
                                     class="w-full h-9 px-3 rounded-md border border-destructive/50 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-destructive"
@@ -1568,16 +1570,18 @@
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <div class="space-y-2">
-                            <label class="text-sm font-medium">Email</label>
+                            <label for="demo-email-2" class="text-sm font-medium">Email</label>
                             <input 
+                                id="demo-email-2"
                                 type="email" 
                                 placeholder="you@example.com"
                                 class="w-full h-10 px-3 rounded-md border border-border/50 bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
                         <div class="space-y-2">
-                            <label class="text-sm font-medium">Password</label>
+                            <label for="demo-password-2" class="text-sm font-medium">Password</label>
                             <input 
+                                id="demo-password-2"
                                 type="password" 
                                 placeholder="Enter your password"
                                 class="w-full h-10 px-3 rounded-md border border-border/50 bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary"

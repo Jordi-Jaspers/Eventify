@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { goto, replaceState } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { getWatchlist, searchWatchlists } from '$lib/api/watchlist/UserWatchlistController';
-	import { getUserMonitor } from '$lib/api/monitor/UserMonitorController';
+	import { onMount, untrack } from 'svelte';
+	import { getWatchlist, searchWatchlists } from '$lib/api/watchlist/OrganizationWatchlistController';
+	import { getOrganizationMonitor } from '$lib/api/monitor/OrganizationMonitorController';
 	import type { MonitorRequest, MonitorResponse, WatchlistDetailsResponse, SearchInput, TimeRange } from '$lib/api/models';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -25,15 +26,22 @@
 		MonitorRow,
 		MonitorGroup,
 		MonitorEmptyState,
-		WatchlistSelector,
+		OrganizationWatchlistSelector,
 		ConfigurePopover,
 		TimeAxisHeader,
 		calculateTimeTicks,
 		getCurrentSeverityFromTimeline
 	} from '$lib/components/monitor';
 
-	// Session storage for persisting monitor state
-	const session = new Sessionstorage<MonitorSession>(getMonitorSessionKey(), createDefaultSession());
+	// Get orgId from route params
+	const orgId: number = $derived(parseInt(page.params.orgId ?? '0', 10));
+
+	// Session storage for persisting monitor state (org-specific key)
+	// Use untrack to read orgId at initialization without creating reactive dependency
+	const session = new Sessionstorage<MonitorSession>(
+		getMonitorSessionKey(untrack(() => orgId)),
+		createDefaultSession()
+	);
 
 	// Core state
 	let watchlist = $state<WatchlistDetailsResponse | null>(null);
@@ -105,7 +113,7 @@
 
 	async function fetchFirstWatchlistId(): Promise<number | null> {
 		try {
-			const result = await searchWatchlists({
+			const result = await searchWatchlists(orgId, {
 				pageNumber: 0,
 				pageSize: 1,
 				sortOrder: [{ name: 'name', direction: 'ASC' }],
@@ -122,7 +130,7 @@
 		if (watchlistId === null) return;
 		
 		try {
-			watchlist = await getWatchlist(watchlistId);
+			watchlist = await getWatchlist(orgId, watchlistId);
 		} catch (err) {
 			const { message } = handleError(err, 'Failed to load watchlist');
 			toast.error(message);
@@ -148,7 +156,7 @@
 				}
 			};
 
-			monitorData = await getUserMonitor(request);
+			monitorData = await getOrganizationMonitor(orgId, request);
 			lastUpdated = new Date();
 
 			// Setup auto-refresh if live mode
@@ -179,7 +187,7 @@
 				...createDefaultFilters(),
 				...queryParams.filters
 			};
-			replaceState(CLIENT_ROUTES.WATCHLISTS_MONITOR_PAGE.path, {});
+			replaceState(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(orgId).path, {});
 		}
 
 		// If still no watchlist, try to fetch the first one
@@ -207,7 +215,7 @@
 	async function handleShare(): Promise<void> {
 		if (watchlistId === null) return;
 		
-		const url = buildMonitorShareUrl(CLIENT_ROUTES.WATCHLISTS_MONITOR_PAGE.path, watchlistId, filters);
+		const url = buildMonitorShareUrl(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(orgId).path, watchlistId, filters);
 		try {
 			await navigator.clipboard.writeText(url);
 			toast.success('Link copied to clipboard');
@@ -218,7 +226,7 @@
 
 	function handleEdit(): void {
 		if (watchlistId !== null) {
-			goto(`${CLIENT_ROUTES.WATCHLISTS_PAGE.path}/${watchlistId}`);
+			goto(`${CLIENT_ROUTES.ORGANIZATION_WATCHLISTS_PAGE(orgId).path}/${watchlistId}`);
 		}
 	}
 
@@ -259,7 +267,8 @@
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-4">
 				{#if watchlist}
-					<WatchlistSelector
+					<OrganizationWatchlistSelector
+						{orgId}
 						currentWatchlistId={watchlistId ?? 0}
 						currentWatchlistName={watchlist.name ?? ''}
 						onSelect={handleWatchlistChange}
@@ -267,7 +276,8 @@
 				{:else if loading}
 					<div class="h-9 w-[300px] bg-muted/20 rounded animate-pulse"></div>
 				{:else if noWatchlistSelected}
-					<WatchlistSelector
+					<OrganizationWatchlistSelector
+						{orgId}
 						currentWatchlistId={0}
 						currentWatchlistName="Select a watchlist..."
 						onSelect={handleWatchlistChange}
@@ -313,7 +323,7 @@
 				title="No Watchlist Selected"
 				description="Select a watchlist from the dropdown above to start monitoring your channels."
 				actionLabel="View All Watchlists"
-				onAction={() => goto(CLIENT_ROUTES.WATCHLISTS_PAGE.path)}
+				onAction={() => goto(CLIENT_ROUTES.ORGANIZATION_WATCHLISTS_PAGE(orgId).path)}
 			/>
 		{:else if !watchlist}
 			<MonitorEmptyState

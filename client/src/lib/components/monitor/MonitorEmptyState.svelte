@@ -14,8 +14,8 @@
 
 	const { icon: Icon, iconVariant = 'primary', title, description, actionLabel, onAction }: Props = $props();
 
-	const iconBgClass = iconVariant === 'destructive' ? 'bg-destructive/10' : 'bg-primary/10';
-	const iconTextClass = iconVariant === 'destructive' ? 'text-destructive' : 'text-primary';
+	const iconBgClass = $derived(iconVariant === 'destructive' ? 'bg-destructive/10' : 'bg-primary/10');
+	const iconTextClass = $derived(iconVariant === 'destructive' ? 'text-destructive' : 'text-primary');
 </script>
 
 <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">

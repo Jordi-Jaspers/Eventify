@@ -119,6 +119,15 @@
 						<span>Watchlists</span>
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>
+				<Sidebar.MenuItem>
+					<Sidebar.MenuButton
+						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(currentOrganization.organizationId!).path)}
+						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(currentOrganization.organizationId!).path)}
+					>
+						<Activity class="size-4" />
+						<span>Monitor</span>
+					</Sidebar.MenuButton>
+				</Sidebar.MenuItem>
 					{#if canManageOrgSettings}
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton

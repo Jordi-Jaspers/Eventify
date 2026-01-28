@@ -12,7 +12,7 @@ export interface MonitorFilters {
 }
 
 export interface MonitorSession extends MonitorFilters {
-	watchlistId: number;
+	watchlistId: number | null;
 }
 
 export const DEFAULT_FILTERS: MonitorFilters = {
@@ -28,26 +28,19 @@ export function createDefaultFilters(): MonitorFilters {
 	return { ...DEFAULT_FILTERS };
 }
 
-const MONITOR_SESSION_KEY = 'monitor_session';
-
-export function saveMonitorSession(session: MonitorSession): void {
-	try {
-		sessionStorage.setItem(MONITOR_SESSION_KEY, JSON.stringify(session));
-	} catch (err) {
-		console.error('Failed to save monitor session:', err);
-	}
+export function createDefaultSession(): MonitorSession {
+	return {
+		watchlistId: null,
+		...DEFAULT_FILTERS
+	};
 }
 
-export function loadMonitorSession(): MonitorSession | null {
-	try {
-		const stored = sessionStorage.getItem(MONITOR_SESSION_KEY);
-		if (stored) {
-			return JSON.parse(stored) as MonitorSession;
-		}
-	} catch (err) {
-		console.error('Failed to load monitor session:', err);
-	}
-	return null;
+// ============ Session Key Helpers ============
+
+const DEFAULT_SESSION_KEY = 'monitor_session';
+
+export function getMonitorSessionKey(orgId?: number): string {
+	return orgId ? `monitor_session_org_${orgId}` : DEFAULT_SESSION_KEY;
 }
 
 // ============ URL Query Params ============

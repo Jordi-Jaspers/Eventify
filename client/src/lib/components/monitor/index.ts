@@ -5,5 +5,6 @@ export { default as TimelineBar } from './TimelineBar.svelte';
 export { default as TimelineSegment } from './TimelineSegment.svelte';
 export { default as TimeAxisHeader } from './TimeAxisHeader.svelte';
 export { default as WatchlistSelector } from './WatchlistSelector.svelte';
+export { default as OrganizationWatchlistSelector } from './OrganizationWatchlistSelector.svelte';
 export { default as ConfigurePopover } from './ConfigurePopover.svelte';
 export * from './types';
