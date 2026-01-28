@@ -14,11 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static io.github.eventify.api.Paths.ORGANIZATION_MONITOR_PATH;
 import static org.springframework.http.HttpStatus.OK;
@@ -54,10 +50,8 @@ public class OrganizationMonitorController {
             + "or hasAuthority('MANAGE_ORGANIZATIONS')"
     )
     public ResponseEntity<MonitorResponse> getOrganizationMonitor(
-        @AuthenticationPrincipal final UserTokenPrincipal principal,
-        @PathVariable final Long orgId,
-        @RequestBody final MonitorRequest request
-    ) {
+        @AuthenticationPrincipal final UserTokenPrincipal principal, @PathVariable final Long orgId,
+        @RequestBody final MonitorRequest request) {
         monitorValidator.validateAndThrow(request);
         final MonitorResult result = monitorService.monitorWatchlist(request);
         return ResponseEntity.status(OK).body(monitorMapper.toResponse(result));
