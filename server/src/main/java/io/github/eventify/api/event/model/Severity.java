@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.stream.Stream;
-
 /**
  * Enum representing the severity level of an event.
  */
@@ -14,16 +12,30 @@ import java.util.stream.Stream;
 @Schema(description = "Severity")
 public enum Severity {
 
-    OK,
-    WARNING,
-    CRITICAL;
+    CRITICAL(0),
+    WARNING(1),
+    OK(2),
+    NO_DATA(999);
+
+    private final int priority;
 
     /**
-     * Retrieve all the configured permissions as a stream.
+     * Returns the worst (highest priority) severity between two.
+     * Lower priority number = worse severity.
      *
-     * @return A stream of the configured permissions.
+     * @param a first severity
+     * @param b second severity
+     * @return the worse severity
      */
-    public Stream<Severity> stream() {
-        return Stream.of(values());
+    public static Severity worst(final Severity a, final Severity b) {
+        final Severity result;
+        if (a == null) {
+            result = b;
+        } else if (b == null) {
+            result = a;
+        } else {
+            result = a.priority < b.priority ? a : b;
+        }
+        return result;
     }
 }

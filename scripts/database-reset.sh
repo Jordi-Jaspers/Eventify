@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 
-# Colors
-readonly RED='\033[0;91m'
-readonly GREEN='\033[0;32m'
-readonly BLUE='\033[0;94m'
-readonly CYAN='\033[0;96m'
-readonly BOLD='\033[1m'
-readonly RESET='\033[0m'
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 # Default values
 HOST='localhost'
@@ -33,13 +27,6 @@ done
 
 export TZ='Europe/Amsterdam'
 export PGPASSWORD="$PASSWORD"
-
-# Output helpers
-section() { echo -e "\n${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"; echo -e "${BOLD}  $1${RESET}"; echo -e "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n"; }
-step() { printf "  ${CYAN}▸${RESET} %-50s" "$1"; }
-ok() { echo -e "${GREEN}✓${RESET}"; }
-fail() { echo -e "${RED}✗${RESET}"; }
-info() { echo -e "  ${CYAN}ℹ${RESET} $1"; }
 
 execute_psql() {
   local cmd="$1"

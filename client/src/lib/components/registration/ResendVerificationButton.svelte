@@ -45,10 +45,6 @@
         disabled={loading || cooldown > 0}
         onclick={handleResend}
 >
-    <!-- Gradient background on hover -->
-    <div class="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-
-    <!-- Content -->
     <span class="relative z-10 flex items-center">
         {#if loading}
             <LoaderCircle class="mr-2 h-4 w-4 animate-spin"/>

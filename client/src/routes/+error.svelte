@@ -82,7 +82,7 @@
 					<div class="space-y-2">
 						<Button
 							href={CLIENT_ROUTES.LANDING_PAGE.path}
-							class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+							class="w-full"
 						>
 							<House class="mr-2 h-4 w-4" />
 							Go to Home

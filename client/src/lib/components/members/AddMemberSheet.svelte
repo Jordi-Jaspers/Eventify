@@ -115,44 +115,38 @@
 								</Tooltip.Content>
 							</Tooltip.Root>
 						</Tooltip.Provider>
-					{:else}
-						<Button
-							variant={selectedRole === 'OWNER' ? 'default' : 'outline'}
-							size="sm"
-							onclick={() => onRoleChange('OWNER')}
-							disabled={adding}
-							class={selectedRole === 'OWNER'
-								? 'bg-gradient-to-r from-purple-500 to-purple-600'
-								: 'bg-background/50 border-border/50'}
-						>
-							<Crown class="mr-2 h-4 w-4" />
-							OWNER
-						</Button>
-					{/if}
+				{:else}
 					<Button
-						variant={selectedRole === 'ADMIN' ? 'default' : 'outline'}
+						variant={selectedRole === 'OWNER' ? 'default' : 'outline'}
 						size="sm"
-						onclick={() => onRoleChange('ADMIN')}
+						onclick={() => onRoleChange('OWNER')}
 						disabled={adding}
-						class={selectedRole === 'ADMIN'
-							? 'bg-gradient-to-r from-primary to-accent'
-							: 'bg-background/50 border-border/50'}
+						class={selectedRole !== 'OWNER' ? 'bg-background/50 border-border/50' : ''}
 					>
-						<Shield class="mr-2 h-4 w-4" />
-						ADMIN
+						<Crown class="mr-2 h-4 w-4" />
+						OWNER
 					</Button>
-					<Button
-						variant={selectedRole === 'MEMBER' ? 'default' : 'outline'}
-						size="sm"
-						onclick={() => onRoleChange('MEMBER')}
-						disabled={adding}
-						class={selectedRole === 'MEMBER'
-							? 'bg-gradient-to-r from-primary to-accent'
-							: 'bg-background/50 border-border/50'}
-					>
-						<UserIcon class="mr-2 h-4 w-4" />
-						MEMBER
-					</Button>
+				{/if}
+				<Button
+					variant={selectedRole === 'ADMIN' ? 'default' : 'outline'}
+					size="sm"
+					onclick={() => onRoleChange('ADMIN')}
+					disabled={adding}
+					class={selectedRole !== 'ADMIN' ? 'bg-background/50 border-border/50' : ''}
+				>
+					<Shield class="mr-2 h-4 w-4" />
+					ADMIN
+				</Button>
+				<Button
+					variant={selectedRole === 'MEMBER' ? 'default' : 'outline'}
+					size="sm"
+					onclick={() => onRoleChange('MEMBER')}
+					disabled={adding}
+					class={selectedRole !== 'MEMBER' ? 'bg-background/50 border-border/50' : ''}
+				>
+					<UserIcon class="mr-2 h-4 w-4" />
+					MEMBER
+				</Button>
 				</div>
 			</div>
 
@@ -279,7 +273,7 @@
 			<Button
 				onclick={onSubmit}
 				disabled={adding || !selectedUser}
-				class="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+				class="flex-1"
 			>
 				{#if adding}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />

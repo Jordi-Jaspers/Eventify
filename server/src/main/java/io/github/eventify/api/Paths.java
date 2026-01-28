@@ -53,6 +53,8 @@ public final class Paths {
 
     public static final String RETENTION_SETTINGS_PART = "/settings/retention";
 
+    public static final String WATCHLISTS_PART = "/watchlist";
+
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
     public static final String PUBLIC_SWAGGER_PATH = PUBLIC_PATH + "/docs";
@@ -139,6 +141,12 @@ public final class Paths {
 
     public static final String USER_RETENTION_SETTINGS_PATH = USERS_PATH + RETENTION_SETTINGS_PART;
 
+    public static final String USER_WATCHLISTS_PATH = USERS_PATH + WATCHLISTS_PART;
+
+    public static final String USER_WATCHLISTS_SEARCH_PATH = USER_WATCHLISTS_PATH + SEARCH_PART;
+
+    public static final String USER_WATCHLIST_PATH = USER_WATCHLISTS_PATH + ID_PART;
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;
@@ -197,6 +205,12 @@ public final class Paths {
 
     public static final String ORGANIZATION_RETENTION_SETTINGS_PATH = ORGANIZATION_PATH + RETENTION_SETTINGS_PART;
 
+    public static final String ORGANIZATION_WATCHLISTS_PATH = ORGANIZATION_PATH + WATCHLISTS_PART;
+
+    public static final String ORGANIZATION_WATCHLISTS_SEARCH_PATH = ORGANIZATION_WATCHLISTS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_WATCHLIST_PATH = ORGANIZATION_WATCHLISTS_PATH + ID_PART;
+
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 
     public static final String OPTIONS_PATH = BASE_PATH + "/options";
@@ -212,6 +226,14 @@ public final class Paths {
     public static final String EVENTS_BATCH_PATH = EVENTS_PATH + "/batch";
 
     public static final String CHANNELS_PATH = BASE_PATH + CHANNELS_PART;
+
+    /* ------------------------------- MONITOR ENDPOINTS ------------------------------- */
+
+    public static final String MONITOR_PART = "/monitor";
+
+    public static final String USER_MONITOR_PATH = USERS_PATH + MONITOR_PART;
+
+    public static final String ORGANIZATION_MONITOR_PATH = ORGANIZATION_PATH + MONITOR_PART;
 
     /* ------------------------------- END ------------------------------- */
 

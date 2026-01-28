@@ -1,0 +1,908 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601271000-ACC-admin-data.xml">
+
+    <!-- ==================== ADMIN USER ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-1" author="jordi.jaspers" context="acc">
+        <comment>Insert global admin user (id=1) for ACC environment. Email: johndoe@example.com, Password: admin123!</comment>
+        <sql>
+            INSERT INTO "user" (first_name, last_name, email, role, password, created_at, last_login, enabled, validated)
+            VALUES ('John', 'Doe', 'johndoe@example.com', 'ADMIN', '{bcrypt}$2a$10$zO/ntKU1/JDupHoNEwDlnOqORuBV/K.YCGB5x1rMSVVViayrOo.cW', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'), true, true);
+        </sql>
+    </changeSet>
+
+    <!-- ==================== ORGANIZATIONS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-2" author="jordi.jaspers" context="acc">
+        <comment>Insert organizations for ACC. Admin owns Acme, Beta, Gamma. Delta and Epsilon exist for variety.</comment>
+        <sql>
+            INSERT INTO organization (name, slug, status, created_by, created_at)
+            VALUES
+                ('Acme Corporation', 'acme-corp', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 days'),
+                ('Beta Industries', 'beta-industries', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '40 days'),
+                ('Gamma Solutions', 'gamma-solutions', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days'),
+                ('Delta Technologies', 'delta-tech', 'TRIAL', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days'),
+                ('Epsilon Systems', 'epsilon-systems', 'ACTIVE', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days');
+        </sql>
+    </changeSet>
+
+    <!-- ==================== MEMBERSHIPS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-3" author="jordi.jaspers" context="acc">
+        <comment>Insert organization memberships. Admin (id=1) is OWNER of Acme, Beta, Gamma, Delta, Epsilon.</comment>
+        <sql>
+            INSERT INTO organization_membership (user_id, organization_id, role, invited_by, joined_at)
+            VALUES
+                (1, (SELECT id FROM organization WHERE slug = 'acme-corp'), 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 days'),
+                (1, (SELECT id FROM organization WHERE slug = 'beta-industries'), 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '40 days'),
+                (1, (SELECT id FROM organization WHERE slug = 'gamma-solutions'), 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days'),
+                (1, (SELECT id FROM organization WHERE slug = 'delta-tech'), 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days'),
+                (1, (SELECT id FROM organization WHERE slug = 'epsilon-systems'), 'OWNER', NULL, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days');
+        </sql>
+    </changeSet>
+
+    <!-- ==================== PERSONAL CHANNELS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-4" author="jordi.jaspers" context="acc">
+        <comment>Insert personal channels for admin with varied statuses and use cases.</comment>
+        <sql>
+            -- Personal channels for admin (id=1)
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            VALUES 
+                ('Backend Errors', 'Production error tracking for backend services. Monitors API failures, database issues, and service exceptions.', 1, NULL, 'ACTIVE', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '50 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours'),
+                ('Frontend Analytics', 'User behavior and performance metrics from the web application.', 1, NULL, 'ACTIVE', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day'),
+                ('Deployment Events', 'Tracks deployments, rollbacks, and infrastructure changes across all environments.', 1, NULL, 'ACTIVE', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '55 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes'),
+                ('Marketing Campaigns', 'Event tracking for seasonal marketing campaigns. Paused between campaigns.', 1, NULL, 'PAUSED', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '80 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days'),
+                ('Security Alerts', 'Critical security events including failed login attempts, suspicious activity, and access violations.', 1, NULL, 'ACTIVE', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '100 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 minutes'),
+                ('Test Channel', NULL, 1, NULL, 'ACTIVE', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days'),
+                ('Mobile App Events', 'User interactions and errors from the iOS and Android mobile applications.', 1, NULL, 'ACTIVE', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '40 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 hours'),
+                ('Payment Processing', 'Transaction events, payment failures, refunds, and billing notifications.', 1, NULL, 'ACTIVE', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 hours'),
+                ('API Gateway Logs', 'Request/response logging for the API gateway with latency metrics.', 1, NULL, 'ACTIVE', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 minutes'),
+                ('Scheduled Jobs', 'Cron job executions, batch processing results, and background task monitoring.', 1, NULL, 'ACTIVE', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour');
+        </sql>
+    </changeSet>
+
+    <!-- ==================== ORGANIZATION CHANNELS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-5" author="jordi.jaspers" context="acc">
+        <comment>Insert organization channels for Acme, Beta, Gamma, Delta, and Epsilon.</comment>
+        <sql>
+            -- Acme Corp channels
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Acme Production Events', 'All production environment events for Acme Corp applications.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'acme-corp'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '44 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 minutes';
+
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Acme Staging Events', 'Pre-production testing and QA events.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'acme-corp'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '42 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours';
+
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Acme CI/CD Pipeline', 'Build, test, and deployment pipeline events.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'acme-corp'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '40 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 minutes';
+
+            -- Beta Industries channels
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Beta Manufacturing Line', 'Real-time events from the manufacturing floor sensors.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'beta-industries'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '39 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 minutes';
+
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Beta Quality Control', 'Quality inspection results and defect tracking.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'beta-industries'), 'PAUSED',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '38 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days';
+
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Beta Inventory System', 'Stock level changes, reorder alerts, and warehouse events.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'beta-industries'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour';
+
+            -- Gamma Solutions channels
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Gamma Client Portal', 'Events from the client-facing web portal.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'gamma-solutions'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '34 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour';
+
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Gamma Support Tickets', 'Customer support ticket lifecycle events.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'gamma-solutions'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '32 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes';
+
+            -- Delta Technologies channels
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Delta RnD Lab', 'Research and development experiment tracking.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'delta-tech'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '29 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 hours';
+
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Delta Test Automation', 'Automated test suite execution results.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'delta-tech'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '28 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours';
+
+            -- Epsilon Systems channels
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Epsilon Infrastructure', 'Cloud infrastructure monitoring and alerts.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'epsilon-systems'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '24 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 minutes';
+
+            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT 'Epsilon Database Ops', 'Database performance metrics and maintenance events.', 1, 
+                   (SELECT id FROM organization WHERE slug = 'epsilon-systems'), 'ACTIVE',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days', (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 minutes';
+        </sql>
+    </changeSet>
+
+    <!-- ==================== PERSONAL WATCHLISTS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-6" author="jordi.jaspers" context="acc">
+        <comment>Insert extensive personal watchlists for admin with channel groups and filters.</comment>
+        <sql>
+            -- Watchlist 1: Production Monitoring - grouped critical channels
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Production Monitoring',
+                'Critical production services including backend errors, deployments, and security alerts. Configured for high-priority event tracking.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1 AND organization_id IS NULL)
+                    ),
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'acc-g1-critical-services',
+                            'name', 'Critical Services',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Backend Errors' AND user_id = 1 AND organization_id IS NULL),
+                                (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1 AND organization_id IS NULL)
+                            )
+                        )
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', true,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '40 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours';
+
+            -- Watchlist 2: Frontend Performance - single channel focus
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Frontend Performance',
+                'Web application performance and user behavior tracking.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Frontend Analytics' AND user_id = 1 AND organization_id IS NULL)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day';
+
+            -- Watchlist 3: All Personal Channels - comprehensive overview with groups
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'All Channels Overview',
+                'Complete view of all personal channels organized by category.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Marketing Campaigns' AND user_id = 1 AND organization_id IS NULL),
+                        (SELECT id FROM channel WHERE name = 'Test Channel' AND user_id = 1 AND organization_id IS NULL)
+                    ),
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'acc-g2-application',
+                            'name', 'Application',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Backend Errors' AND user_id = 1 AND organization_id IS NULL),
+                                (SELECT id FROM channel WHERE name = 'Frontend Analytics' AND user_id = 1 AND organization_id IS NULL),
+                                (SELECT id FROM channel WHERE name = 'Mobile App Events' AND user_id = 1 AND organization_id IS NULL)
+                            )
+                        ),
+                        jsonb_build_object(
+                            'id', 'acc-g3-operations',
+                            'name', 'Operations',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1 AND organization_id IS NULL),
+                                (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1 AND organization_id IS NULL),
+                                (SELECT id FROM channel WHERE name = 'Scheduled Jobs' AND user_id = 1 AND organization_id IS NULL)
+                            )
+                        ),
+                        jsonb_build_object(
+                            'id', 'acc-g4-integrations',
+                            'name', 'Integrations',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'API Gateway Logs' AND user_id = 1 AND organization_id IS NULL),
+                                (SELECT id FROM channel WHERE name = 'Payment Processing' AND user_id = 1 AND organization_id IS NULL)
+                            )
+                        )
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '7d',
+                    'onlyCritical', false,
+                    'sortBySeverity', false,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 minutes';
+
+            -- Watchlist 4: Security Focus
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Security Alerts Only',
+                'Focused view for security monitoring. Shows only critical security events.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1 AND organization_id IS NULL)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '30d',
+                    'onlyCritical', true,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes';
+
+            -- Watchlist 5: Mobile and Payments
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Mobile and Payments Dashboard',
+                'Monitoring mobile app events alongside payment processing for end-to-end mobile commerce tracking.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', '[]'::jsonb,
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'acc-g5-mobile-commerce',
+                            'name', 'Mobile Commerce',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Mobile App Events' AND user_id = 1 AND organization_id IS NULL),
+                                (SELECT id FROM channel WHERE name = 'Payment Processing' AND user_id = 1 AND organization_id IS NULL)
+                            )
+                        )
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 hours';
+
+            -- Watchlist 6: DevOps Pipeline
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'DevOps Pipeline Monitor',
+                'Deployment events, scheduled jobs, and API gateway monitoring for DevOps visibility.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', '[]'::jsonb,
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'acc-g6-devops',
+                            'name', 'DevOps',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1 AND organization_id IS NULL),
+                                (SELECT id FROM channel WHERE name = 'Scheduled Jobs' AND user_id = 1 AND organization_id IS NULL),
+                                (SELECT id FROM channel WHERE name = 'API Gateway Logs' AND user_id = 1 AND organization_id IS NULL)
+                            )
+                        )
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour';
+        </sql>
+    </changeSet>
+
+    <!-- ==================== ORGANIZATION WATCHLISTS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-7" author="jordi.jaspers" context="acc">
+        <comment>Insert organization watchlists for Acme, Beta, Gamma with channel groups.</comment>
+        <sql>
+            -- Acme Corp: Full Stack Monitoring
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Acme Full Stack',
+                'Complete monitoring of Acme Corp production and staging environments with CI/CD pipeline.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Acme CI/CD Pipeline' AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp'))
+                    ),
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'acc-acme-g1-environments',
+                            'name', 'Environments',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Acme Production Events' AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp')),
+                                (SELECT id FROM channel WHERE name = 'Acme Staging Events' AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp'))
+                            )
+                        )
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '40 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour';
+
+            -- Acme Corp: Production Only
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Acme Production Critical',
+                'Production-only view for on-call monitoring.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Acme Production Events' AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp'))
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', true,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes';
+
+            -- Beta Industries: Manufacturing Dashboard
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Beta Manufacturing Dashboard',
+                'Real-time manufacturing and inventory monitoring.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'beta-industries'),
+                jsonb_build_object(
+                    'channelIds', '[]'::jsonb,
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'acc-beta-g1-operations',
+                            'name', 'Manufacturing Operations',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Beta Manufacturing Line' AND organization_id = (SELECT id FROM organization WHERE slug = 'beta-industries')),
+                                (SELECT id FROM channel WHERE name = 'Beta Quality Control' AND organization_id = (SELECT id FROM organization WHERE slug = 'beta-industries')),
+                                (SELECT id FROM channel WHERE name = 'Beta Inventory System' AND organization_id = (SELECT id FROM organization WHERE slug = 'beta-industries'))
+                            )
+                        )
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 minutes';
+
+            -- Gamma Solutions: Client Operations
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Gamma Client Operations',
+                'Client portal and support ticket monitoring.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'gamma-solutions'),
+                jsonb_build_object(
+                    'channelIds', '[]'::jsonb,
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'acc-gamma-g1-client',
+                            'name', 'Client Experience',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Gamma Client Portal' AND organization_id = (SELECT id FROM organization WHERE slug = 'gamma-solutions')),
+                                (SELECT id FROM channel WHERE name = 'Gamma Support Tickets' AND organization_id = (SELECT id FROM organization WHERE slug = 'gamma-solutions'))
+                            )
+                        )
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '28 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 minutes';
+
+            -- Delta Technologies: RnD Monitoring
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Delta RnD Monitor',
+                'Research lab and test automation tracking.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'delta-tech'),
+                jsonb_build_object(
+                    'channelIds', '[]'::jsonb,
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'acc-delta-g1-rd',
+                            'name', 'Research and Testing',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Delta RnD Lab' AND organization_id = (SELECT id FROM organization WHERE slug = 'delta-tech')),
+                                (SELECT id FROM channel WHERE name = 'Delta Test Automation' AND organization_id = (SELECT id FROM organization WHERE slug = 'delta-tech'))
+                            )
+                        )
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '7d',
+                    'onlyCritical', false,
+                    'sortBySeverity', false,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 hours';
+
+            -- Epsilon Systems: Infrastructure
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Epsilon Infrastructure Dashboard',
+                'Cloud infrastructure and database operations monitoring.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'epsilon-systems'),
+                jsonb_build_object(
+                    'channelIds', '[]'::jsonb,
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'acc-epsilon-g1-infra',
+                            'name', 'Infrastructure',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Epsilon Infrastructure' AND organization_id = (SELECT id FROM organization WHERE slug = 'epsilon-systems')),
+                                (SELECT id FROM channel WHERE name = 'Epsilon Database Ops' AND organization_id = (SELECT id FROM organization WHERE slug = 'epsilon-systems'))
+                            )
+                        )
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour';
+        </sql>
+    </changeSet>
+
+    <!-- ==================== USER API KEYS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-8" author="jordi.jaspers" context="acc">
+        <comment>Insert USER-scoped API keys for admin with varied expiration and usage patterns.</comment>
+        <sql>
+            -- Key 1: Expired 5 days ago (for testing expired key display)
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'a1b2',
+                '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_KEY_1_NOT_REAL_USE_FOR_DISPLAY_ONLY_a1b2',
+                'Production Server Key (Expired)',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 days',
+                15234
+            );
+
+            -- Key 2: Expiring in 5 days (approaching expiration warning)
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'c3d4',
+                '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_KEY_2_NOT_REAL_USE_FOR_DISPLAY_ONLY_c3d4',
+                'Development API Key',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '5 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours',
+                8921
+            );
+
+            -- Key 3: No expiration, heavily used
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'e5f6',
+                '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_KEY_3_NOT_REAL_USE_FOR_DISPLAY_ONLY_e5f6',
+                'CI/CD Pipeline Key',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '90 days',
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes',
+                142567
+            );
+
+            -- Key 4: No expiration, never used (backup)
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'g7h8',
+                '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_KEY_4_NOT_REAL_USE_FOR_DISPLAY_ONLY_g7h8',
+                'Backup Key (unused)',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
+                NULL,
+                NULL,
+                0
+            );
+
+            -- Key 5: Moderate usage, 30 day expiry
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'i9j0',
+                '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_KEY_5_NOT_REAL_USE_FOR_DISPLAY_ONLY_i9j0',
+                'Mobile App Backend Key',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '30 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day',
+                5234
+            );
+
+            -- Key 6: Testing key with 90 day expiry
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'k1l2',
+                '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_KEY_6_NOT_REAL_USE_FOR_DISPLAY_ONLY_k1l2',
+                'Integration Testing Key',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '90 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 hours',
+                1823
+            );
+        </sql>
+    </changeSet>
+
+    <!-- ==================== ORGANIZATION API KEYS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-9" author="jordi.jaspers" context="acc">
+        <comment>Insert ORGANIZATION-scoped API keys for Acme, Beta, Gamma, Delta, Epsilon orgs.</comment>
+        <sql>
+            -- Acme Corp: Production key, no expiry
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT 'm3n4', '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_ORG_KEY_1_ACME_PROD_m3n4',
+                   'Acme Production API', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '40 days', NULL,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour', 89432;
+
+            -- Acme Corp: Staging key, expiring soon
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT 'o5p6', '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_ORG_KEY_2_ACME_STAG_o5p6',
+                   'Acme Staging API', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '3 days',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 hours', 12045;
+
+            -- Acme Corp: CI/CD key
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT 'q7r8', '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_ORG_KEY_3_ACME_CICD_q7r8',
+                   'Acme CI/CD Pipeline Key', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days', NULL,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 minutes', 45678;
+
+            -- Beta Industries: Production key
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT 's9t0', '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_ORG_KEY_4_BETA_PROD_s9t0',
+                   'Beta Manufacturing API', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'beta-industries'),
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '60 days',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 hours', 23456;
+
+            -- Beta Industries: Expired key
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT 'u1v2', '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_ORG_KEY_5_BETA_OLD_u1v2',
+                   'Beta Legacy Integration (Expired)', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'beta-industries'),
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '50 days',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '11 days', 5678;
+
+            -- Gamma Solutions: Webhook handler
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT 'w3x4', '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_ORG_KEY_6_GAMMA_HOOK_w3x4',
+                   'Gamma Webhook Handler', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'gamma-solutions'),
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '28 days',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '6 days',
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days', 7823;
+
+            -- Delta Technologies: RnD key
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT 'y5z6', '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_ORG_KEY_7_DELTA_RD_y5z6',
+                   'Delta RnD Lab Key', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'delta-tech'),
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days', NULL,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 hours', 3421;
+
+            -- Epsilon Systems: Infrastructure key
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT 'a7b8', '{bcrypt}$2a$10$ACC_HASH_PLACEHOLDER_ORG_KEY_8_EPSILON_INFRA_a7b8',
+                   'Epsilon Infrastructure Key', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'epsilon-systems'),
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days', NULL,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes', 15678;
+        </sql>
+    </changeSet>
+
+    <!-- ==================== API KEY AUDIT (REVOKED KEYS) ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-10" author="jordi.jaspers" context="acc">
+        <comment>Insert API key audit records for revoked keys - admin user and organizations.</comment>
+        <sql>
+            -- Revoked USER-scoped keys
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES 
+                ('z9y8', 'Old Production Key', 'USER', 1, NULL, 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '120 days', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days', 245678),
+                ('v5u4', 'Test Environment Key', 'USER', 1, NULL, 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days', 1523),
+                ('x7w6', 'Deprecated Mobile Key', 'USER', 1, NULL, 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '80 days', 1, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days', 34521);
+
+            -- Revoked ORGANIZATION-scoped keys
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT 't3s2', 'Acme Old Integration', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'acme-corp'), 1,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '90 days', 1,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days', 156234;
+
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT 'r1q0', 'Beta Deprecated API', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'beta-industries'), 1,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '70 days', 1,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days', 34567;
+
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT 'p9o8', 'Gamma Rotated Key', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'gamma-solutions'), 1,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '50 days', 1,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 days', 78234;
+
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT 'l5k4', 'Acme Security Rotation', 'ORGANIZATION', 1,
+                   (SELECT id FROM organization WHERE slug = 'acme-corp'), 1,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days', 1,
+                   (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day', 45678;
+        </sql>
+    </changeSet>
+
+    <!-- ==================== USER QUOTA ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-11" author="jordi.jaspers" context="acc">
+        <comment>Insert user event quota record for admin - 45% usage for realistic dashboard display.</comment>
+        <sql>
+            INSERT INTO user_event_quota (user_id, event_count, period_start, updated_at)
+            VALUES (
+                1,
+                450,
+                DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours'
+            );
+        </sql>
+    </changeSet>
+
+    <!-- ==================== EVENTS - PERSONAL CHANNELS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-12" author="jordi.jaspers" context="acc">
+        <comment>Insert 7 days of events for admin's personal channels with realistic patterns and variance.</comment>
+        <sql><![CDATA[
+            -- Generate events for personal channels with 5-minute intervals and 50% variance
+            WITH time_slots AS (
+                SELECT generate_series(
+                    (NOW() - INTERVAL '7 days')::timestamptz,
+                    NOW()::timestamptz,
+                    INTERVAL '5 minutes'
+                ) AS slot
+            ),
+            random_slots AS (
+                SELECT slot FROM time_slots WHERE random() < 0.5
+            )
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                c.id AS channel_id,
+                CASE 
+                    WHEN random() < 0.70 THEN 'OK'
+                    WHEN random() < 0.90 THEN 'WARNING'
+                    ELSE 'CRITICAL'
+                END AS severity,
+                CASE c.name
+                    WHEN 'Backend Errors' THEN 
+                        (ARRAY['API Response', 'Database Query', 'Service Call', 'Cache Hit', 'Request Processed'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Frontend Analytics' THEN 
+                        (ARRAY['Page View', 'User Click', 'Form Submit', 'Navigation', 'Session Start'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Deployment Events' THEN 
+                        (ARRAY['Build Started', 'Tests Passed', 'Deploy Complete', 'Rollback', 'Health Check'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Security Alerts' THEN 
+                        (ARRAY['Login Attempt', 'Token Refresh', 'Access Denied', 'Rate Limited', 'Session Valid'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Mobile App Events' THEN
+                        (ARRAY['App Launch', 'Screen View', 'User Action', 'Push Received', 'Crash Report'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Payment Processing' THEN
+                        (ARRAY['Payment Init', 'Payment Success', 'Payment Failed', 'Refund Issued', 'Subscription Renewed'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'API Gateway Logs' THEN
+                        (ARRAY['Request Received', 'Response Sent', 'Rate Limit Hit', 'Auth Failed', 'Route Matched'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Scheduled Jobs' THEN
+                        (ARRAY['Job Started', 'Job Completed', 'Job Failed', 'Job Skipped', 'Job Retrying'])[FLOOR(random() * 5 + 1)::int]
+                    ELSE 
+                        (ARRAY['Event Received', 'Status Update', 'Metric Report', 'Heartbeat', 'Notification'])[FLOOR(random() * 5 + 1)::int]
+                END AS title,
+                CASE 
+                    WHEN random() < 0.1 THEN 'Critical issue detected - immediate attention required for ' || c.name
+                    WHEN random() < 0.3 THEN 'Warning threshold exceeded in ' || c.name || ' - monitoring closely'
+                    ELSE 'Normal operation for ' || c.name || ' - all systems nominal'
+                END AS message,
+                jsonb_build_object(
+                    'source', (ARRAY['api-server', 'worker-1', 'worker-2', 'scheduler', 'gateway'])[FLOOR(random() * 5 + 1)::int],
+                    'channel_name', c.name,
+                    'environment', (ARRAY['production', 'staging', 'development'])[FLOOR(random() * 3 + 1)::int],
+                    'region', (ARRAY['us-east-1', 'eu-west-1', 'ap-southeast-1'])[FLOOR(random() * 3 + 1)::int],
+                    'cpu_usage', ROUND((random() * 80 + 10)::numeric, 1),
+                    'memory_mb', (random() * 4096)::int,
+                    'response_time_ms', (random() * 500)::int,
+                    'request_count', (random() * 1000)::int
+                ) AS metadata,
+                rs.slot + (random() * INTERVAL '4 minutes' - INTERVAL '2 minutes') AS timestamp
+            FROM
+                channel c
+                CROSS JOIN random_slots rs
+            WHERE
+                c.status = 'ACTIVE'
+                AND c.user_id = 1
+                AND c.organization_id IS NULL
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <!-- ==================== EVENTS - INCIDENT BURSTS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-13" author="jordi.jaspers" context="acc">
+        <comment>Insert incident burst events to simulate realistic incident patterns.</comment>
+        <sql><![CDATA[
+            -- Simulate 3 incident bursts in the last 7 days
+            WITH incident_times AS (
+                SELECT unnest(ARRAY[
+                    NOW() - INTERVAL '6 days' + INTERVAL '14 hours',
+                    NOW() - INTERVAL '3 days' + INTERVAL '9 hours',
+                    NOW() - INTERVAL '1 day' + INTERVAL '16 hours'
+                ]) AS incident_start
+            ),
+            burst_events AS (
+                SELECT 
+                    it.incident_start + (n * INTERVAL '30 seconds') AS event_time,
+                    n
+                FROM incident_times it
+                CROSS JOIN generate_series(0, 20) AS n
+            )
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                c.id AS channel_id,
+                CASE 
+                    WHEN be.n < 5 THEN 'CRITICAL'
+                    WHEN be.n < 15 THEN 'WARNING'
+                    ELSE 'OK'
+                END AS severity,
+                CASE 
+                    WHEN be.n < 5 THEN 'Incident Detected'
+                    WHEN be.n < 15 THEN 'Recovery In Progress'
+                    ELSE 'Service Restored'
+                END AS title,
+                CASE 
+                    WHEN be.n < 5 THEN 'Critical incident detected in ' || c.name || ' - escalating to on-call team'
+                    WHEN be.n < 15 THEN 'Recovery actions in progress for ' || c.name || ' - monitoring metrics'
+                    ELSE 'Service fully restored for ' || c.name || ' - incident resolved'
+                END AS message,
+                jsonb_build_object(
+                    'source', 'incident-detector',
+                    'channel_name', c.name,
+                    'incident_id', 'INC-' || LPAD((random() * 9999)::int::text, 4, '0'),
+                    'severity_level', CASE WHEN be.n < 5 THEN 'P1' WHEN be.n < 15 THEN 'P2' ELSE 'P3' END,
+                    'affected_users', (random() * 1000)::int
+                ) AS metadata,
+                be.event_time AS timestamp
+            FROM
+                channel c
+                CROSS JOIN burst_events be
+            WHERE
+                c.status = 'ACTIVE'
+                AND c.user_id = 1
+                AND c.organization_id IS NULL
+                AND c.name IN ('Backend Errors', 'Security Alerts')
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <!-- ==================== EVENTS - ORGANIZATION CHANNELS ==================== -->
+    <changeSet id="202601271000-ACC-admin-data-14" author="jordi.jaspers" context="acc">
+        <comment>Insert 7 days of events for organization channels.</comment>
+        <sql><![CDATA[
+            -- Generate events for organization channels
+            WITH time_slots AS (
+                SELECT generate_series(
+                    (NOW() - INTERVAL '7 days')::timestamptz,
+                    NOW()::timestamptz,
+                    INTERVAL '10 minutes'
+                ) AS slot
+            ),
+            random_slots AS (
+                SELECT slot FROM time_slots WHERE random() < 0.4
+            )
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                c.id AS channel_id,
+                CASE 
+                    WHEN random() < 0.75 THEN 'OK'
+                    WHEN random() < 0.92 THEN 'WARNING'
+                    ELSE 'CRITICAL'
+                END AS severity,
+                CASE 
+                    WHEN c.name LIKE 'Acme%' THEN 
+                        (ARRAY['Deployment', 'Build Success', 'Test Pass', 'API Call', 'User Action'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN c.name LIKE 'Beta%' THEN
+                        (ARRAY['Sensor Reading', 'Machine Status', 'Quality Check', 'Inventory Update', 'Maintenance Alert'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN c.name LIKE 'Gamma%' THEN
+                        (ARRAY['Portal Login', 'Ticket Created', 'Ticket Resolved', 'User Feedback', 'Report Generated'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN c.name LIKE 'Delta%' THEN
+                        (ARRAY['Experiment Run', 'Test Executed', 'Data Collected', 'Analysis Complete', 'Model Trained'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN c.name LIKE 'Epsilon%' THEN
+                        (ARRAY['Instance Scaled', 'DB Query', 'Backup Complete', 'Alert Triggered', 'Resource Usage'])[FLOOR(random() * 5 + 1)::int]
+                    ELSE 
+                        (ARRAY['Event', 'Update', 'Status', 'Alert', 'Info'])[FLOOR(random() * 5 + 1)::int]
+                END AS title,
+                'Event from ' || c.name || ' - ' || 
+                CASE 
+                    WHEN random() < 0.1 THEN 'requires attention'
+                    WHEN random() < 0.3 THEN 'threshold warning'
+                    ELSE 'normal operation'
+                END AS message,
+                jsonb_build_object(
+                    'source', 'org-monitor',
+                    'channel_name', c.name,
+                    'organization', (SELECT slug FROM organization WHERE id = c.organization_id),
+                    'environment', (ARRAY['production', 'staging'])[FLOOR(random() * 2 + 1)::int],
+                    'metric_value', ROUND((random() * 100)::numeric, 2)
+                ) AS metadata,
+                rs.slot + (random() * INTERVAL '8 minutes' - INTERVAL '4 minutes') AS timestamp
+            FROM
+                channel c
+                CROSS JOIN random_slots rs
+            WHERE
+                c.status = 'ACTIVE'
+                AND c.organization_id IS NOT NULL
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+</databaseChangeLog>

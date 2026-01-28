@@ -14,6 +14,7 @@ import io.github.eventify.api.token.service.TokenService;
 import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserService;
+import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.support.config.BeanConfiguration;
 import io.github.eventify.support.container.TimescaleContainer;
 import io.github.jframe.autoconfigure.properties.ApplicationProperties;
@@ -113,6 +114,9 @@ public class TestContextInitializer {
 
     @Autowired
     protected UserEventQuotaRepository userEventQuotaRepository;
+
+    @Autowired
+    protected WatchlistRepository watchlistRepository;
 
     @Autowired
     protected PasswordEncoder passwordEncoder;

@@ -91,16 +91,16 @@
 <!-- Content Container -->
 <div class="max-w-md mx-auto">
     <!-- Logo/Branding Section -->
-    <div class="mb-8">
+    <div class="mb-8 text-center">
         <AppLogo size="medium" subtitle="Real-time monitoring and event tracking"/>
     </div>
 
     <!-- Glassmorphism Card -->
-    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl dark:shadow-primary/5">
+    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg dark:shadow-primary/5">
         <!-- Card Content -->
         <CardHeader class="space-y-1">
-            <CardTitle class="text-2xl flex items-center gap-2">
-                <Shield class="w-5 h-5 text-primary"/>
+            <CardTitle class="text-2xl font-bold flex items-center gap-2 text-primary">
+                <Shield class="w-5 h-5"/>
                 Sign In
             </CardTitle>
             <CardDescription>
@@ -150,7 +150,7 @@
                             placeholder="you@example.com"
                             bind:value={email}
                             disabled={isSubmitting}
-                            class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            class="bg-background/50"
                     />
                 </div>
 
@@ -158,11 +158,11 @@
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
                         <Label for="password">Password</Label>
-                         <a
+                        <a
                                 href={CLIENT_ROUTES.FORGOT_PASSWORD_PAGE.path}
-                                class="text-sm text-primary hover:text-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+                                class="text-sm text-primary hover:underline transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
                                 tabindex={isSubmitting ? -1 : 0}
-                         >
+                        >
                             Forgot password?
                         </a>
                     </div>
@@ -173,13 +173,13 @@
                                 placeholder="Enter your password"
                                 bind:value={password}
                                 disabled={isSubmitting}
-                                class="pr-10 bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                class="pr-10 bg-background/50"
                         />
                         <button
                                 type="button"
                                 onclick={togglePasswordVisibility}
                                 disabled={isSubmitting}
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+                                class="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground hover:text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                                 tabindex="0"
                         >
@@ -195,7 +195,7 @@
                 <!-- Submit Button -->
                 <Button
                         type="submit"
-                        class="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-primary/50"
+                        class="w-full"
                         disabled={isSubmitting}
                 >
                     {#if isSubmitting}
@@ -215,7 +215,7 @@
                         Don't have an account?{' '}
                         <a
                                 href={CLIENT_ROUTES.REGISTER_PAGE.path}
-                                class="text-primary hover:text-primary/80 transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+                                class="text-primary hover:underline transition-all font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
                                 tabindex={isSubmitting ? -1 : 0}
                         >
                             Sign up
@@ -229,9 +229,17 @@
     <!-- Dev Credentials Block -->
     {#if showDevCredentials}
         <div class="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 backdrop-blur-sm">
-            <div class="flex items-center gap-2 text-amber-500 text-sm font-medium mb-2">
-                <Terminal class="w-4 h-4"/>
-                Dev Credentials
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2 text-amber-500 text-sm font-medium">
+                    <Terminal class="w-4 h-4"/>
+                    Dev Credentials
+                </div>
+                <a 
+                    href="/dev-playbook" 
+                    class="text-xs text-primary hover:underline"
+                >
+                    Component Playbook →
+                </a>
             </div>
             {#if devCredentialsLoading}
                 <div class="text-xs text-muted-foreground flex items-center gap-2">

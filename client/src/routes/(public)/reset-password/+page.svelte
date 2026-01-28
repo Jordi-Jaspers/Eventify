@@ -102,7 +102,7 @@
 </svelte:head>
 
 <div class="max-w-md mx-auto">
-	<div class="mb-8">
+	<div class="mb-8 text-center">
 		<AppLogo size="medium" subtitle="Real-time monitoring and event tracking" />
 	</div>
 
@@ -128,7 +128,7 @@
 
 				<Button
 					href={CLIENT_ROUTES.FORGOT_PASSWORD_PAGE.path}
-					class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+					class="w-full"
 				>
 					Request New Reset Link
 				</Button>
@@ -231,7 +231,7 @@
 
 					<Button
 						type="submit"
-						class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+						class="w-full"
 						disabled={isSubmitting}
 					>
 						{#if isSubmitting}

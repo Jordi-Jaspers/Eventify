@@ -16,17 +16,36 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { env } from '$env/dynamic/public';
 	import { authStore, currentUser } from '$lib/stores/auth';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw } from '@lucide/svelte';
+	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette } from '@lucide/svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { toast } from 'svelte-sonner';
 	import { handleError } from '$lib/utils/error-handler';
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
+	import { onMount } from 'svelte';
+
+	// Theme state
+	let isDarkMode: boolean = $state(true);
+	const showDevPlaybook: boolean = env.PUBLIC_SHOW_DEV_CREDENTIALS === 'true';
+
+	onMount(() => {
+		isDarkMode = document.documentElement.classList.contains('dark');
+	});
+
+	function toggleTheme(): void {
+		isDarkMode = !isDarkMode;
+		if (isDarkMode) {
+			document.documentElement.classList.add('dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+		}
+	}
 
 	// Organization state
 	const loading: boolean = $derived(organizationStore.loading);
@@ -213,6 +232,32 @@
 							<User class="mr-2 h-4 w-4" />
 							<span>Profile</span>
 						</DropdownMenu.Item>
+						<DropdownMenu.Item
+							class="cursor-pointer hover:bg-primary/10"
+							onclick={toggleTheme}
+						>
+							{#if isDarkMode}
+								<Sun class="mr-2 h-4 w-4" />
+								<span>Light Mode</span>
+							{:else}
+								<Moon class="mr-2 h-4 w-4" />
+								<span>Dark Mode</span>
+							{/if}
+						</DropdownMenu.Item>
+						{#if showDevPlaybook}
+							<DropdownMenu.Item
+								class="cursor-pointer hover:bg-primary/10"
+								onclick={() => goto('/dev-playbook')}
+							>
+								<Palette class="mr-2 h-4 w-4" />
+								<span>Component Playbook</span>
+							</DropdownMenu.Item>
+						{/if}
+					</div>
+
+					<DropdownMenu.Separator />
+
+					<div class="p-1">
 						<DropdownMenu.Item
 							class="cursor-pointer hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
 							onclick={handleLogout}

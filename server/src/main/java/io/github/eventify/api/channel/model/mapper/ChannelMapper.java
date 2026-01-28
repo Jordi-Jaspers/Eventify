@@ -2,6 +2,7 @@ package io.github.eventify.api.channel.model.mapper;
 
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.response.ChannelDetailsResponse;
+import io.github.eventify.api.channel.model.response.ChannelResponse;
 import io.github.jframe.datasource.search.model.mapper.PageMapper;
 import io.github.jframe.util.mapper.DateTimeMapper;
 import io.github.jframe.util.mapper.config.SharedMapperConfig;
@@ -46,22 +47,28 @@ public abstract class ChannelMapper extends PageMapper<ChannelDetailsResponse, C
     public abstract List<ChannelDetailsResponse> toResourceObjects(List<Channel> channels);
 
     /**
-     * Maps Channel entity to ChannelDetailsResponse (alias for consistency).
+     * Maps a list of Channels to ChannelResponses.
      *
-     * @param channel the channel entity
-     * @return the response DTO
+     * @param channels the channels
+     * @return channel responses
      */
-    public ChannelDetailsResponse toDetailsResponse(final Channel channel) {
-        return toResourceObject(channel);
-    }
+    @IterableMapping(qualifiedByName = "toChannelResponse")
+    public abstract List<ChannelResponse> toChannelResponses(List<Channel> channels);
 
     /**
-     * Maps list of Channel entities to list of ChannelDetailsResponse (alias for consistency).
+     * Maps a Channel to ChannelResponse.
      *
-     * @param channels the list of channel entities
-     * @return the list of response DTOs
+     * @param channel the channel
+     * @return channel response
      */
-    public List<ChannelDetailsResponse> toDetailsResponseList(final List<Channel> channels) {
-        return toResourceObjects(channels);
-    }
+    @Named("toChannelResponse")
+    @Mapping(
+        source = "id",
+        target = "channelId"
+    )
+    @Mapping(
+        source = "name",
+        target = "channelName"
+    )
+    public abstract ChannelResponse toChannelResponse(Channel channel);
 }

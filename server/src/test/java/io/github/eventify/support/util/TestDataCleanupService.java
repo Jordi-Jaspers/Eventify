@@ -61,20 +61,23 @@ public class TestDataCleanupService {
         // 5. Channels
         jdbcTemplate.execute("DELETE FROM channel WHERE user_id IN " + userIdList);
 
-        // 6. Organization memberships
+        // 6. Watchlists
+        jdbcTemplate.execute("DELETE FROM watchlist WHERE user_id IN " + userIdList);
+
+        // 7. Organization memberships
         jdbcTemplate.execute("DELETE FROM organization_membership WHERE user_id IN " + userIdList);
         jdbcTemplate.execute(
             "DELETE FROM organization_membership WHERE organization_id IN " +
                 "(SELECT id FROM organization WHERE created_by IN " + userIdList + ")"
         );
 
-        // 7. Organizations
+        // 8. Organizations
         jdbcTemplate.execute("DELETE FROM organization WHERE created_by IN " + userIdList);
 
-        // 8. Tokens
+        // 9. Tokens
         jdbcTemplate.execute("DELETE FROM token WHERE user_id IN " + userIdList);
 
-        // 9. Users (table name is "user" with quotes - reserved word in PostgreSQL)
+        // 10. Users (table name is "user" with quotes - reserved word in PostgreSQL)
         jdbcTemplate.execute("DELETE FROM \"user\" WHERE id IN " + userIdList);
 
         // Also clean up by name pattern

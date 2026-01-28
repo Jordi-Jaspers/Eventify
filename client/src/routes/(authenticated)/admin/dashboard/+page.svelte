@@ -24,6 +24,7 @@
     } from '@lucide/svelte';
     import type {AdminStatsResponse, GrowthDataPoint} from '$lib/api/models.ts';
     import type {ChartConfig} from '$lib/components/ui/chart/types';
+    import {StatCard} from '$lib/components/admin';
 
     let stats: AdminStatsResponse | null = $state(null);
     let loading: boolean = $state(true);
@@ -130,7 +131,7 @@
         <!-- Header -->
         <div class="mb-8">
             <h1
-                    class="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
+                    class="text-3xl font-bold text-primary"
             >
                 Admin Dashboard
             </h1>
@@ -154,102 +155,51 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Total Organizations Card -->
-            <Card
-                    class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300"
+            <StatCard
+                title="Total Organizations"
+                value={stats?.totalOrganizations?.toLocaleString() || '0'}
+                icon={Building2}
+                variant="purple"
+                {loading}
             >
-                <div
-                        class="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-purple-500/5 opacity-50"
-                ></div>
-                <CardHeader class="relative z-10">
-                    <div class="flex items-center justify-between">
-                        <CardTitle class="text-sm font-medium text-muted-foreground"
-                        >Total Organizations
-                        </CardTitle
-                        >
-                        <Building2 class="h-5 w-5 text-purple-500"/>
-                    </div>
-                </CardHeader>
-                <CardContent class="relative z-10">
-                    {#if loading}
-                        <div class="h-12 bg-muted/50 rounded animate-pulse"></div>
-                    {:else}
-                        <div class="flex items-end gap-3">
-                            <div
-                                    class="text-3xl font-bold bg-gradient-to-r from-purple-500 to-purple-400 bg-clip-text text-transparent"
-                            >
-                                {stats?.totalOrganizations?.toLocaleString() || '0'}
-                            </div>
-                            {#if getLatestGrowth()?.newOrganizationsGrowthPercentage !== null && getLatestGrowth()?.newOrganizationsGrowthPercentage !== undefined}
-                                <Badge variant={getBadgeVariant(getLatestGrowth()?.newOrganizationsGrowthPercentage)} class="mb-1.5">
-                                    {formatPercentage(getLatestGrowth()?.newOrganizationsGrowthPercentage)}
-                                </Badge>
-                            {/if}
-                        </div>
+                {#snippet trailing()}
+                    {#if getLatestGrowth()?.newOrganizationsGrowthPercentage !== null && getLatestGrowth()?.newOrganizationsGrowthPercentage !== undefined}
+                        <Badge variant={getBadgeVariant(getLatestGrowth()?.newOrganizationsGrowthPercentage)} class="mb-1.5">
+                            {formatPercentage(getLatestGrowth()?.newOrganizationsGrowthPercentage)}
+                        </Badge>
                     {/if}
-                </CardContent>
-            </Card>
+                {/snippet}
+            </StatCard>
 
             <!-- Total Users Card -->
-            <Card
-                    class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden hover:shadow-blue-500/20 hover:border-blue-500/50 transition-all duration-300"
+            <StatCard
+                title="Total Users"
+                value={stats?.totalUsers?.toLocaleString() || '0'}
+                icon={Users}
+                variant="blue"
+                {loading}
             >
-                <div
-                        class="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-blue-500/5 opacity-50"
-                ></div>
-                <CardHeader class="relative z-10">
-                    <div class="flex items-center justify-between">
-                        <CardTitle class="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
-                        <Users class="h-5 w-5 text-blue-500"/>
-                    </div>
-                </CardHeader>
-                <CardContent class="relative z-10">
-                    {#if loading}
-                        <div class="h-12 bg-muted/50 rounded animate-pulse"></div>
-                    {:else}
-                        <div class="flex items-end gap-3">
-                            <div
-                                    class="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-400 bg-clip-text text-transparent"
-                            >
-                                {stats?.totalUsers?.toLocaleString() || '0'}
-                            </div>
-                            {#if getLatestGrowth()?.newUsersGrowthPercentage !== null && getLatestGrowth()?.newUsersGrowthPercentage !== undefined}
-                                <Badge variant={getBadgeVariant(getLatestGrowth()?.newUsersGrowthPercentage)} class="mb-1.5">
-                                    {formatPercentage(getLatestGrowth()?.newUsersGrowthPercentage)}
-                                </Badge>
-                            {/if}
-                        </div>
+                {#snippet trailing()}
+                    {#if getLatestGrowth()?.newUsersGrowthPercentage !== null && getLatestGrowth()?.newUsersGrowthPercentage !== undefined}
+                        <Badge variant={getBadgeVariant(getLatestGrowth()?.newUsersGrowthPercentage)} class="mb-1.5">
+                            {formatPercentage(getLatestGrowth()?.newUsersGrowthPercentage)}
+                        </Badge>
                     {/if}
-                </CardContent>
-            </Card>
+                {/snippet}
+            </StatCard>
 
             <!-- Active Users Card -->
-            <Card
-                    class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden hover:shadow-green-500/20 hover:border-green-500/50 transition-all duration-300"
+            <StatCard
+                title="Active Users"
+                value={stats?.activeUsers?.toLocaleString() || '0'}
+                icon={Activity}
+                variant="green"
+                {loading}
             >
-                <div
-                        class="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-green-500/5 opacity-50"
-                ></div>
-                <CardHeader class="relative z-10">
-                    <div class="flex items-center justify-between">
-                        <CardTitle class="text-sm font-medium text-muted-foreground">Active Users</CardTitle>
-                        <Activity class="h-5 w-5 text-green-500"/>
-                    </div>
-                </CardHeader>
-                <CardContent class="relative z-10">
-                    {#if loading}
-                        <div class="h-12 bg-muted/50 rounded animate-pulse"></div>
-                    {:else}
-                        <div class="flex items-baseline gap-2">
-                            <div
-                                    class="text-3xl font-bold bg-gradient-to-r from-green-500 to-green-400 bg-clip-text text-transparent"
-                            >
-                                {stats?.activeUsers?.toLocaleString() || '0'}
-                            </div>
-                            <div class="text-sm text-muted-foreground">({getActiveUserPercentage()}%)</div>
-                        </div>
-                    {/if}
-                </CardContent>
-            </Card>
+                {#snippet trailing()}
+                    <div class="text-sm text-muted-foreground mb-1">({getActiveUserPercentage()}%)</div>
+                {/snippet}
+            </StatCard>
         </div>
 
         <!-- Growth Chart -->
@@ -393,11 +343,22 @@
                 <CardDescription>Manage platform resources</CardDescription>
             </CardHeader>
             <CardContent class="relative z-10">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                    <!-- Manage Organizations -->
+                    <Button
+                            class="h-auto py-4"
+                            onclick={() => (window.location.href = CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
+                    >
+                        <div class="flex flex-col items-center gap-2">
+                            <Building class="h-5 w-5"/>
+                            <span>Manage Organizations</span>
+                        </div>
+                    </Button>
+
                     <!-- Create Organization -->
                     <Button
-                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                            onclick={() => (window.location.href = CLIENT_ROUTES.ADMIN_ORGANIZATIONS_NEW.path)}
+                            class="h-auto py-4"
+                            onclick={() => goto(CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
                             <Plus class="h-5 w-5"/>
@@ -407,7 +368,7 @@
 
                     <!-- Manage Users -->
                     <Button
-                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                            class="h-auto py-4"
                             onclick={() => goto(CLIENT_ROUTES.ADMIN_USERS_PAGE.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
@@ -416,14 +377,14 @@
                         </div>
                     </Button>
 
-                    <!-- Manage Organizations (Future) -->
+                    <!-- Manage API keys -->
                     <Button
-                            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50 h-auto py-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                            onclick={() => (window.location.href = CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
+                            class="h-auto py-4"
+                            onclick={() => goto(CLIENT_ROUTES.ADMIN_API_KEYS_PAGE.path)}
                     >
                         <div class="flex flex-col items-center gap-2">
-                            <Building class="h-5 w-5"/>
-                            <span>Manage Organizations</span>
+                            <UserCog class="h-5 w-5"/>
+                            <span>Manage API Keys</span>
                         </div>
                     </Button>
                 </div>

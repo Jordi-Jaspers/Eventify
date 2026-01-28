@@ -39,7 +39,8 @@
 </script>
 
 <div
-	class="hidden md:grid grid-cols-12 gap-4 px-4 py-3 border-b border-border/50 font-medium text-sm text-muted-foreground bg-muted/30"
+	class="hidden md:grid gap-4 px-4 py-3 border-b border-border/50 font-medium text-sm text-muted-foreground bg-muted/30"
+	style="grid-template-columns: repeat({totalCols}, minmax(0, 1fr));"
 >
 	{#each columns as column}
 		{@const colSpan = column.colSpan ?? 1}

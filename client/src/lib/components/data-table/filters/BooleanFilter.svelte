@@ -27,9 +27,7 @@
 		variant={value === null ? 'default' : 'outline'}
 		size="sm"
 		onclick={() => handleChange(null)}
-		class={value === null
-			? 'bg-gradient-to-r from-primary to-accent'
-			: 'bg-background/50 border-border/50'}
+		class={value !== null ? 'bg-background/50 border-border/50' : ''}
 	>
 		{allLabel}
 	</Button>
@@ -38,9 +36,7 @@
 		variant={value === true ? 'default' : 'outline'}
 		size="sm"
 		onclick={() => handleChange(true)}
-		class={value === true
-			? 'bg-gradient-to-r from-primary to-accent'
-			: 'bg-background/50 border-border/50'}
+		class={value !== true ? 'bg-background/50 border-border/50' : ''}
 	>
 		{trueLabel}
 	</Button>
@@ -49,9 +45,7 @@
 		variant={value === false ? 'default' : 'outline'}
 		size="sm"
 		onclick={() => handleChange(false)}
-		class={value === false
-			? 'bg-gradient-to-r from-primary to-accent'
-			: 'bg-background/50 border-border/50'}
+		class={value !== false ? 'bg-background/50 border-border/50' : ''}
 	>
 		{falseLabel}
 	</Button>

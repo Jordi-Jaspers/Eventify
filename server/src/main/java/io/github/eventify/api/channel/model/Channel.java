@@ -1,5 +1,8 @@
 package io.github.eventify.api.channel.model;
 
+import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.monitor.model.Timeline;
+import io.github.eventify.api.monitor.model.TimelineSource;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
 import io.github.jframe.datasource.search.model.PageableItem;
@@ -18,13 +21,14 @@ import static io.github.eventify.Main.SERIAL_VERSION_UID;
 
 /**
  * Entity representing a channel for event streaming.
+ * Implements {@link TimelineSource} to participate in timeline consolidation.
  */
 @Getter
 @Setter
 @Entity
 @NoArgsConstructor
 @Table(name = "channel")
-public class Channel implements PageableItem, Serializable {
+public class Channel implements PageableItem, Serializable, TimelineSource {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;
@@ -75,6 +79,12 @@ public class Channel implements PageableItem, Serializable {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
+    @Transient
+    private Timeline timeline;
+
+    @Transient
+    private Severity currentSeverity;
+
     /**
      * Creates a new channel with the specified name, user, and organization.
      *
@@ -87,5 +97,12 @@ public class Channel implements PageableItem, Serializable {
         this.user = user;
         this.organization = organization;
         this.status = ChannelStatus.ACTIVE;
+    }
+
+    /**
+     * Creates a Channel with only the id populated.
+     */
+    public Channel(final Long id) {
+        this.id = id;
     }
 }

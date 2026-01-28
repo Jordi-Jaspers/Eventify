@@ -41,6 +41,10 @@ export const CLIENT_ROUTES = {
 		path: '/oauth2/redirect',
 		type: RouteType.PUBLIC
 	},
+	DEV_PLAYBOOK_PAGE: {
+		path: '/dev-playbook',
+		type: RouteType.PUBLIC
+	},
 
 	// Private routes
 	DASHBOARD_PAGE: {
@@ -63,16 +67,20 @@ export const CLIENT_ROUTES = {
 		path: '/channels',
 		type: RouteType.PRIVATE
 	},
+	WATCHLISTS_PAGE: {
+		path: '/watchlists',
+		type: RouteType.PRIVATE
+	},
+	WATCHLISTS_MONITOR_PAGE: {
+		path: '/watchlists/monitor',
+		type: RouteType.PRIVATE
+	},
 	ADMIN_DASHBOARD_PAGE: {
 		path: '/admin/dashboard',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_USERS_PAGE: {
 		path: '/admin/users',
-		type: RouteType.PRIVATE
-	},
-	ADMIN_ORGANIZATIONS_NEW: {
-		path: '/admin/organizations/new',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_ORGANIZATIONS_PAGE: {
@@ -109,6 +117,14 @@ export const CLIENT_ROUTES = {
 	}),
 	ORGANIZATION_CHANNELS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/channels`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_WATCHLISTS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/watchlists`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_MONITOR_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/watchlists/monitor`,
 		type: RouteType.PRIVATE
 	})
 } as const;

@@ -80,63 +80,61 @@
 <!-- Navigation Bar -->
 <nav
 	class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 {scrolled
-		? 'bg-card/90 backdrop-blur-xl border-b border-border/50 shadow-xl'
+		? 'bg-card/90 backdrop-blur-xl border-b border-border/50 shadow-sm'
 		: 'bg-transparent'}"
 >
 	<div class="container mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex items-center justify-between h-16">
 			<!-- Logo -->
-			<a href={CLIENT_ROUTES.LANDING_PAGE.path} class="flex items-center gap-2">
-				<div
-					class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent"
-				>
-					<Activity class="w-4 h-4 text-primary-foreground" />
-				</div>
-				<span class="text-xl font-bold gradient-text">Eventify</span>
-			</a>
+			<AppLogo size="small" href={CLIENT_ROUTES.LANDING_PAGE.path} />
 
 			<!-- Desktop Navigation -->
-			<div class="hidden md:flex items-center gap-8">
-				<button
+			<div class="hidden md:flex items-center gap-2">
+				<Button
+					variant="ghost"
 					onclick={() => scrollToSection('features')}
-					class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md px-2 py-1"
+					class="text-sm font-medium text-muted-foreground hover:text-primary"
 				>
 					Features
-				</button>
-				<button
+				</Button>
+				<Button
+					variant="ghost"
 					onclick={() => scrollToSection('how-it-works')}
-					class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md px-2 py-1"
+					class="text-sm font-medium text-muted-foreground hover:text-primary"
 				>
 					How It Works
-				</button>
-				<button
+				</Button>
+				<Button
+					variant="ghost"
 					onclick={() => scrollToSection('cta')}
-					class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md px-2 py-1"
+					class="text-sm font-medium text-muted-foreground hover:text-primary"
 				>
 					Get Started
-				</button>
+				</Button>
 			</div>
 
 			<!-- Desktop Auth Buttons -->
 			<div class="hidden md:flex items-center gap-3">
 				{#if $isAuthenticated}
-					<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all">
-						Dashboard
-					</Button>
+				<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path}>
+					Dashboard
+				</Button>
 				{:else}
 					<Button href={CLIENT_ROUTES.LOGIN_PAGE.path} variant="outline">
 						Login
 					</Button>
-					<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all">
-						Sign Up Free
-					</Button>
+				<Button href={CLIENT_ROUTES.REGISTER_PAGE.path}>
+					Sign Up Free
+				</Button>
 				{/if}
 			</div>
 
 			<!-- Mobile Menu Button -->
-			<button
+			<Button
+				variant="ghost"
+				size="icon"
 				onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-				class="md:hidden p-2 text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md"
+				class="md:hidden text-muted-foreground hover:text-primary"
 				aria-label="Toggle menu"
 				aria-expanded={mobileMenuOpen}
 			>
@@ -145,7 +143,7 @@
 				{:else}
 					<Menu class="w-6 h-6" />
 				{/if}
-			</button>
+			</Button>
 		</div>
 
 	</div>
@@ -162,41 +160,48 @@
 		></button>
 		
 		<!-- Menu Panel -->
-		<div class="absolute inset-x-0 top-16 bottom-0 bg-background/95 backdrop-blur-xl border-t border-border/50 animate-fade-in-up overflow-y-auto">
+		<div
+			class="absolute inset-x-0 top-16 bottom-0 bg-background/95 backdrop-blur-xl border-t border-border/50 animate-fade-in-up overflow-y-auto"
+			role="dialog"
+			aria-modal="true"
+		>
 			<div class="flex flex-col h-full px-6 py-8">
 				<!-- Navigation Links -->
 				<nav class="flex-1 space-y-2">
-					<button
+					<Button
+						variant="ghost"
 						onclick={() => scrollToSection('features')}
-						class="flex items-center w-full px-4 py-4 text-lg font-medium text-foreground hover:text-primary hover:bg-accent/10 rounded-xl transition-colors"
+						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-muted/50 rounded-md"
 					>
 						Features
-					</button>
-					<button
+					</Button>
+					<Button
+						variant="ghost"
 						onclick={() => scrollToSection('how-it-works')}
-						class="flex items-center w-full px-4 py-4 text-lg font-medium text-foreground hover:text-primary hover:bg-accent/10 rounded-xl transition-colors"
+						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-muted/50 rounded-md"
 					>
 						How It Works
-					</button>
-					<button
+					</Button>
+					<Button
+						variant="ghost"
 						onclick={() => scrollToSection('cta')}
-						class="flex items-center w-full px-4 py-4 text-lg font-medium text-foreground hover:text-primary hover:bg-accent/10 rounded-xl transition-colors"
+						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-muted/50 rounded-md"
 					>
 						Get Started
-					</button>
+					</Button>
 				</nav>
 				
 				<!-- Auth Buttons at Bottom -->
 				<div class="pt-6 border-t border-border/50 space-y-3">
 					{#if $isAuthenticated}
-						<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="w-full h-12 text-base bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all">
+						<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="w-full h-12 text-base">
 							Dashboard
 						</Button>
 					{:else}
 						<Button href={CLIENT_ROUTES.LOGIN_PAGE.path} variant="outline" class="w-full h-12 text-base">
 							Login
 						</Button>
-						<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="w-full h-12 text-base bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all">
+						<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="w-full h-12 text-base">
 							Sign Up Free
 						</Button>
 					{/if}
@@ -206,133 +211,133 @@
 	</div>
 {/if}
 
-<!-- Main Content -->
-<main>
-	<!-- Hero Section -->
-	<section id="hero" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-		<div class="container mx-auto max-w-7xl">
-			<div class="grid lg:grid-cols-2 gap-12 items-center">
-				<!-- Hero Text -->
-				<div class="animate-fade-in-up space-y-6">
-					<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-						<span class="gradient-text-animated">Real-Time Event Monitoring</span>
-						<br class="block" />
-						<span class="text-foreground relative z-10">for Modern Teams</span>
-					</h1>
-					<p class="text-lg sm:text-xl text-muted-foreground">
-						Track, analyze, and act on events across your distributed systems. Get instant insights
-						with WebSocket-powered live updates.
-					</p>
-					<div class="flex flex-col sm:flex-row gap-4 pt-4">
+	<!-- Main Content -->
+	<main class="overflow-x-hidden">
+		<!-- Hero Section -->
+		<section id="hero" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+			<div class="container mx-auto max-w-7xl">
+				<div class="grid lg:grid-cols-2 gap-12 items-center">
+					<!-- Hero Text -->
+					<div class="animate-fade-in-up space-y-6">
+						<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+							<span class="text-primary">Real-Time Event Monitoring</span>
+							<br class="block" />
+							<span class="text-foreground relative z-10">for Modern Teams</span>
+						</h1>
+						<p class="text-lg sm:text-xl text-muted-foreground">
+							Track, analyze, and act on events across your distributed systems. Get instant insights
+							with WebSocket-powered live updates.
+						</p>
+						<div class="flex flex-col sm:flex-row gap-4 pt-4">
 						<Button
 							href={CLIENT_ROUTES.REGISTER_PAGE.path}
 							size="lg"
-							class="text-base bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-primary/50"
+							class="text-base w-full sm:w-auto"
 						>
 							Get Started Free
 						</Button>
-						<Button
-							onclick={() => scrollToSection('features')}
-							size="lg"
-							variant="outline"
-							class="text-base"
+							<Button
+								onclick={() => scrollToSection('features')}
+								size="lg"
+								variant="outline"
+								class="text-base w-full sm:w-auto"
+							>
+								Learn More
+								<ChevronDown class="ml-2 h-4 w-4" />
+							</Button>
+						</div>
+					</div>
+
+					<!-- Hero Visual - Animated Dashboard Mockup -->
+					<div class="relative animate-fade-in mt-8 lg:mt-0">
+						<!-- Main Dashboard -->
+						<div
+							class="rounded-lg border border-border/50 bg-card/60 backdrop-blur-xl p-6 shadow-xl"
 						>
-							Learn More
-							<ChevronDown class="ml-2 h-4 w-4" />
-						</Button>
-					</div>
-				</div>
-
-				<!-- Hero Visual - Animated Dashboard Mockup -->
-				<div class="relative animate-fade-in">
-					<!-- Main Dashboard -->
-					<div
-						class="rounded-xl border border-border/50 bg-card/60 backdrop-blur-xl p-6 shadow-2xl"
-					>
-						<div class="space-y-4">
-							<!-- Header -->
-							<div class="flex items-center justify-between pb-4 border-b border-border/50">
-								<div class="flex items-center gap-2">
-									<Activity class="h-5 w-5 text-primary" />
-									<span class="font-semibold">Live Events</span>
-								</div>
-								<div class="flex items-center gap-2">
-									<span class="relative flex h-3 w-3">
-										<span
-											class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
-										></span>
-										<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-									</span>
-									<span class="text-xs text-muted-foreground">Connected</span>
-								</div>
-							</div>
-
-							<!-- Event Cards -->
-							<div class="space-y-3">
-								<div class="animate-fade-in-up rounded-lg border border-green-500/20 bg-green-500/10 p-3">
+							<div class="space-y-4">
+								<!-- Header -->
+								<div class="flex items-center justify-between pb-4 border-b border-border/50">
 									<div class="flex items-center gap-2">
-										<span class="text-green-500">●</span>
-										<span class="text-sm font-mono">user.login</span>
+										<Activity class="h-5 w-5 text-primary" />
+										<span class="font-semibold">Live Events</span>
 									</div>
-									<p class="text-xs text-muted-foreground mt-1">User authenticated successfully</p>
+									<div class="flex items-center gap-2">
+										<span class="relative flex h-3 w-3">
+											<span
+												class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+											></span>
+											<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+										</span>
+										<span class="text-xs text-muted-foreground">Connected</span>
+									</div>
 								</div>
 
-								<div
-									class="animate-fade-in-up rounded-lg border border-blue-500/20 bg-blue-500/10 p-3"
-									style="animation-delay: 0.2s;"
-								>
-									<div class="flex items-center gap-2">
-										<span class="text-blue-500">●</span>
-										<span class="text-sm font-mono">payment.success</span>
+								<!-- Event Cards -->
+								<div class="space-y-3">
+									<div class="animate-fade-in-up rounded-md border border-green-500/20 bg-green-500/10 p-3">
+										<div class="flex items-center gap-2">
+											<span class="text-green-500">●</span>
+											<span class="text-sm font-mono">user.login</span>
+										</div>
+										<p class="text-xs text-muted-foreground mt-1">User authenticated successfully</p>
 									</div>
-									<p class="text-xs text-muted-foreground mt-1">Payment processed - $99.99 USD</p>
-								</div>
 
-								<div
-									class="animate-fade-in-up rounded-lg border border-amber-500/20 bg-amber-500/10 p-3"
-									style="animation-delay: 0.4s;"
-								>
-									<div class="flex items-center gap-2">
-										<span class="text-amber-500">●</span>
-										<span class="text-sm font-mono">api.rate_limit</span>
+									<div
+										class="animate-fade-in-up rounded-md border border-blue-500/20 bg-blue-500/10 p-3"
+										style="animation-delay: 0.2s;"
+									>
+										<div class="flex items-center gap-2">
+											<span class="text-blue-500">●</span>
+											<span class="text-sm font-mono">payment.success</span>
+										</div>
+										<p class="text-xs text-muted-foreground mt-1">Payment processed - $99.99 USD</p>
 									</div>
-									<p class="text-xs text-muted-foreground mt-1">Rate limit warning - 80% capacity</p>
+
+									<div
+										class="animate-fade-in-up rounded-md border border-amber-500/20 bg-amber-500/10 p-3"
+										style="animation-delay: 0.4s;"
+									>
+										<div class="flex items-center gap-2">
+											<span class="text-amber-500">●</span>
+											<span class="text-sm font-mono">api.rate_limit</span>
+										</div>
+										<p class="text-xs text-muted-foreground mt-1">Rate limit warning - 80% capacity</p>
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
 
-					<!-- Floating Notification Cards -->
-					<div
-						class="absolute -top-4 -right-4 max-w-[200px] animate-fade-in-up rounded-lg border border-border/50 bg-card backdrop-blur-xl p-3 shadow-xl"
-						style="animation-delay: 0.6s;"
-					>
-						<div class="flex items-center gap-2">
-							<Shield class="h-4 w-4 text-primary" />
-							<span class="text-xs font-medium">Secure & Encrypted</span>
+						<!-- Floating Notification Cards -->
+						<div
+							class="absolute -top-4 right-0 sm:-right-4 max-w-[200px] animate-fade-in-up rounded-md border border-border/50 bg-card/80 backdrop-blur-xl p-3 shadow-lg"
+							style="animation-delay: 0.6s;"
+						>
+							<div class="flex items-center gap-2">
+								<Shield class="h-4 w-4 text-primary" />
+								<span class="text-xs font-medium">Secure & Encrypted</span>
+							</div>
 						</div>
-					</div>
 
-					<div
-						class="absolute -bottom-4 -left-4 max-w-[180px] animate-fade-in-up rounded-lg border border-border/50 bg-card backdrop-blur-xl p-3 shadow-xl"
-						style="animation-delay: 0.8s;"
-					>
-						<div class="flex items-center gap-2">
-							<Activity class="h-4 w-4 text-primary" />
-							<span class="text-xs font-medium">Real-Time Updates</span>
+						<div
+							class="absolute -bottom-4 left-0 sm:-left-4 max-w-[180px] animate-fade-in-up rounded-md border border-border/50 bg-card/80 backdrop-blur-xl p-3 shadow-lg"
+							style="animation-delay: 0.8s;"
+						>
+							<div class="flex items-center gap-2">
+								<Activity class="h-4 w-4 text-primary" />
+								<span class="text-xs font-medium">Real-Time Updates</span>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	</section>
+		</section>
 
 	<!-- Features Section -->
 	<section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
 		<div class="container mx-auto max-w-7xl">
 			<div class="text-center mb-16 animate-fade-in-up">
-				<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-					<span class="gradient-text">Powerful Features</span>
+					<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
+					Powerful Features
 				</h2>
 				<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
 					Everything you need to monitor, analyze, and respond to events in real-time
@@ -342,10 +347,10 @@
 			<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 				<!-- Feature 1: Real-Time Streaming -->
 				<div
-					class="group rounded-xl border border-border/60 bg-card/50 backdrop-blur-xl shadow-xl p-6 transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Activity class="h-6 w-6 text-primary" />
 					</div>
@@ -358,11 +363,11 @@
 
 				<!-- Feature 2: Multi-Organization Support -->
 				<div
-					class="group rounded-xl border border-border/60 bg-card/50 backdrop-blur-xl shadow-xl p-6 transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.1s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Building2 class="h-6 w-6 text-primary" />
 					</div>
@@ -375,11 +380,11 @@
 
 				<!-- Feature 3: Channel-Based Routing -->
 				<div
-					class="group rounded-xl border border-border/60 bg-card/50 backdrop-blur-xl shadow-xl p-6 transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.2s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<GitBranch class="h-6 w-6 text-primary" />
 					</div>
@@ -392,11 +397,11 @@
 
 				<!-- Feature 4: Developer-First API -->
 				<div
-					class="group rounded-xl border border-border/60 bg-card/50 backdrop-blur-xl shadow-xl p-6 transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.3s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Code2 class="h-6 w-6 text-primary" />
 					</div>
@@ -409,11 +414,11 @@
 
 				<!-- Feature 5: Team Collaboration -->
 				<div
-					class="group rounded-xl border border-border/60 bg-card/50 backdrop-blur-xl shadow-xl p-6 transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.4s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Users class="h-6 w-6 text-primary" />
 					</div>
@@ -425,11 +430,11 @@
 
 				<!-- Feature 6: Enterprise Security -->
 				<div
-					class="group rounded-xl border border-border/60 bg-card/50 backdrop-blur-xl shadow-xl p-6 transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 animate-fade-in-up"
+					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
 					style="animation-delay: 0.5s;"
 				>
 					<div
-						class="mb-4 inline-flex rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 p-3"
+						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
 					>
 						<Shield class="h-6 w-6 text-primary" />
 					</div>
@@ -446,8 +451,8 @@
 	<section id="how-it-works" class="py-20 px-4 sm:px-6 lg:px-8">
 		<div class="container mx-auto max-w-7xl">
 			<div class="text-center mb-16 animate-fade-in-up">
-				<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-					<span class="gradient-text">How It Works</span>
+				<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
+					How It Works
 				</h2>
 				<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
 					Get started in three simple steps
@@ -457,14 +462,14 @@
 			<div class="grid md:grid-cols-3 gap-8 lg:gap-12">
 				<!-- Step 1 -->
 				<div class="relative animate-fade-in-up">
-					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-lg p-8 rounded-xl">
+					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-lg h-full">
 						<div
-							class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 mb-6"
+							class="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 border border-primary/20 mb-6"
 						>
 							<Plug class="h-8 w-8 text-primary" />
 						</div>
 						<div
-							class="inline-flex items-center justify-center bg-primary/20 text-primary rounded-full w-8 h-8 flex items-center justify-center font-semibold mb-4 mx-auto"
+							class="inline-flex items-center justify-center bg-primary/20 text-primary rounded-full w-8 h-8 font-semibold mb-4 mx-auto"
 						>
 							1
 						</div>
@@ -475,20 +480,20 @@
 					</div>
 					<!-- Connector Line (hidden on mobile) -->
 					<div
-						class="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-gradient-to-r from-primary/50 to-transparent"
+						class="hidden md:block absolute top-8 left-1/2 w-full h-[1px] bg-border"
 					></div>
 				</div>
 
 				<!-- Step 2 -->
 				<div class="relative animate-fade-in-up" style="animation-delay: 0.2s;">
-					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-lg p-8 rounded-xl">
+					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-lg h-full">
 						<div
-							class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 mb-6"
+							class="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 border border-primary/20 mb-6"
 						>
 							<Radio class="h-8 w-8 text-primary" />
 						</div>
 						<div
-							class="inline-flex items-center justify-center bg-primary/20 text-primary rounded-full w-8 h-8 flex items-center justify-center font-semibold mb-4 mx-auto"
+							class="inline-flex items-center justify-center bg-primary/20 text-primary rounded-full w-8 h-8 font-semibold mb-4 mx-auto"
 						>
 							2
 						</div>
@@ -499,20 +504,20 @@
 					</div>
 					<!-- Connector Line (hidden on mobile) -->
 					<div
-						class="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-gradient-to-r from-primary/50 to-transparent"
+						class="hidden md:block absolute top-8 left-1/2 w-full h-[1px] bg-border"
 					></div>
 				</div>
 
 				<!-- Step 3 -->
 				<div class="animate-fade-in-up" style="animation-delay: 0.4s;">
-					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-lg p-8 rounded-xl">
+					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-lg h-full">
 						<div
-							class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 mb-6"
+							class="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 border border-primary/20 mb-6"
 						>
 							<BarChart3 class="h-8 w-8 text-primary" />
 						</div>
 						<div
-							class="inline-flex items-center justify-center bg-primary/20 text-primary rounded-full w-8 h-8 flex items-center justify-center font-semibold mb-4 mx-auto"
+							class="inline-flex items-center justify-center bg-primary/20 text-primary rounded-full w-8 h-8 font-semibold mb-4 mx-auto"
 						>
 							3
 						</div>
@@ -530,8 +535,8 @@
 	<section class="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
 		<div class="container mx-auto max-w-4xl">
 			<div class="text-center mb-12 animate-fade-in-up">
-				<h2 class="text-3xl sm:text-4xl font-bold mb-4">
-					<span class="gradient-text">Simple Integration</span>
+				<h2 class="text-3xl sm:text-4xl font-bold mb-4 text-foreground">
+					Simple Integration
 				</h2>
 				<p class="text-lg text-muted-foreground">
 					Start sending events with a single API call
@@ -539,26 +544,28 @@
 			</div>
 
 			<div class="animate-fade-in-up">
-				<Card class="bg-card/50 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden">
+				<Card class="bg-card/50 backdrop-blur-xl border border-border/50 shadow-md overflow-hidden">
 					<!-- Code Header -->
 					<div class="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-muted/30">
 						<div class="flex items-center gap-2">
 							<Code2 class="h-4 w-4 text-primary" />
 							<span class="text-sm font-medium">cURL</span>
 						</div>
-						<button
+						<Button
+							variant="ghost"
+							size="sm"
 							onclick={copyCode}
-							class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+							class="h-8 text-xs font-medium hover:bg-primary/20 hover:text-primary"
 							aria-label="Copy code"
 						>
 							{#if copied}
-								<Check class="h-3 w-3" />
+								<Check class="h-3 w-3 mr-1.5" />
 								Copied!
 							{:else}
-								<Copy class="h-3 w-3" />
+								<Copy class="h-3 w-3 mr-1.5" />
 								Copy
 							{/if}
-						</button>
+						</Button>
 					</div>
 
 					<!-- Code Block -->
@@ -578,9 +585,9 @@
 				<div class="text-center mt-8">
 					<p class="text-sm text-muted-foreground">
 						Want to learn more?
-						<button class="text-primary hover:underline font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm px-1">
+						<Button variant="link" class="text-primary hover:underline px-1 h-auto font-medium">
 							See the documentation →
-						</button>
+						</Button>
 					</p>
 				</div>
 			</div>
@@ -591,39 +598,34 @@
 	<section id="cta" class="py-20 px-4 sm:px-6 lg:px-8">
 		<div class="container mx-auto max-w-4xl text-center">
 			<div class="animate-fade-in-up space-y-8">
-				<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold">
-					<span class="gradient-text-animated">Start Monitoring in Minutes</span>
+				<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
+					Start Monitoring in Minutes
 				</h2>
 				<p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
 					Free to get started. No credit card required.
 				</p>
 				<div class="pt-4">
-					<Button
-						href={CLIENT_ROUTES.REGISTER_PAGE.path}
-						size="lg"
-						class="text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-primary/50"
-					>
-						Create Free Account
-					</Button>
+				<Button
+					href={CLIENT_ROUTES.REGISTER_PAGE.path}
+					size="lg"
+					class="text-lg px-8 py-6"
+				>
+					Create Free Account
+				</Button>
 				</div>
 			</div>
 		</div>
 	</section>
 </main>
 
-<!-- Footer -->
+		<!-- Footer -->
 <footer class="border-t border-border/50 bg-muted/30 py-12 px-4 sm:px-6 lg:px-8">
 	<div class="container mx-auto max-w-7xl">
 		<div class="grid md:grid-cols-4 gap-8 mb-8">
 			<!-- Brand -->
 			<div class="md:col-span-2">
-				<div class="flex items-center gap-2 mb-4">
-					<div
-						class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent"
-					>
-						<Activity class="w-4 h-4 text-primary-foreground" />
-					</div>
-					<span class="text-lg font-bold gradient-text">Eventify</span>
+				<div class="mb-4">
+					<AppLogo size="small" />
 				</div>
 				<p class="text-sm text-muted-foreground max-w-sm">
 					Real-time event monitoring for modern teams. Track, analyze, and act on events across
@@ -636,20 +638,22 @@
 				<h4 class="font-semibold mb-4">Product</h4>
 				<ul class="space-y-2 text-sm">
 					<li>
-						<button
+						<Button
+							variant="link"
 							onclick={() => scrollToSection('features')}
-							class="text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline"
+							class="text-muted-foreground hover:text-primary p-0 h-auto font-normal"
 						>
 							Features
-						</button>
+						</Button>
 					</li>
 					<li>
-						<button
+						<Button
+							variant="link"
 							onclick={() => scrollToSection('how-it-works')}
-							class="text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline"
+							class="text-muted-foreground hover:text-primary p-0 h-auto font-normal"
 						>
 							How It Works
-						</button>
+						</Button>
 					</li>
 				</ul>
 			</div>
@@ -659,14 +663,22 @@
 				<h4 class="font-semibold mb-4">Account</h4>
 				<ul class="space-y-2 text-sm">
 					<li>
-						<a href={CLIENT_ROUTES.LOGIN_PAGE.path} class="text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline">
+						<Button
+							href={CLIENT_ROUTES.LOGIN_PAGE.path}
+							variant="link"
+							class="text-muted-foreground hover:text-primary p-0 h-auto font-normal"
+						>
 							Login
-						</a>
+						</Button>
 					</li>
 					<li>
-						<a href={CLIENT_ROUTES.REGISTER_PAGE.path} class="text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline">
+						<Button
+							href={CLIENT_ROUTES.REGISTER_PAGE.path}
+							variant="link"
+							class="text-muted-foreground hover:text-primary p-0 h-auto font-normal"
+						>
 							Register
-						</a>
+						</Button>
 					</li>
 				</ul>
 			</div>

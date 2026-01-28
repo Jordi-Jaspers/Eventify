@@ -142,7 +142,7 @@
 			<Button
 				onclick={handleSaveClick}
 				disabled={!hasChanged || saving}
-				class="w-full bg-gradient-to-r from-primary via-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all shadow-lg hover:shadow-primary/50"
+				class="w-full"
 			>
 				{#if saving}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />

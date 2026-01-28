@@ -11,7 +11,7 @@
 
 	let { config, class: className, children }: Props = $props();
 
-	setContext('chart-config', config);
+	setContext('chart-config', () => config);
 </script>
 
 <div class={className}>

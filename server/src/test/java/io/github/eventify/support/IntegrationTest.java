@@ -267,6 +267,44 @@ public class IntegrationTest extends WebMvcConfigurator {
         return event;
     }
 
+    protected Event anEventForChannel(final Channel channel, final Severity severity, final OffsetDateTime timestamp) {
+        final Event event = new Event();
+        event.setChannel(channel);
+        event.setSeverity(severity);
+        event.setTitle("Test Event - " + severity);
+        event.setMessage("Test message");
+        event.setTimestamp(timestamp);
+        return eventRepository.save(event);
+    }
+
+    // ========================= WATCHLIST FACTORY METHODS =========================
+
+    protected io.github.eventify.api.watchlist.model.Watchlist aWatchlistForUser(final User user, final String name) {
+        final io.github.eventify.api.watchlist.model.Watchlist watchlist = new io.github.eventify.api.watchlist.model.Watchlist(
+            name,
+            user,
+            null
+        );
+        return watchlistRepository.save(watchlist);
+    }
+
+    protected io.github.eventify.api.watchlist.model.Watchlist aWatchlistForOrganization(final User user, final Organization org,
+        final String name) {
+        final io.github.eventify.api.watchlist.model.Watchlist watchlist = new io.github.eventify.api.watchlist.model.Watchlist(
+            name,
+            user,
+            org
+        );
+        return watchlistRepository.save(watchlist);
+    }
+
+    protected void addChannelToWatchlist(final io.github.eventify.api.watchlist.model.Watchlist watchlist, final Channel channel) {
+        final io.github.eventify.api.watchlist.model.WatchlistConfiguration config = watchlist.getConfiguration();
+        config.getChannels().add(channel);
+        watchlist.setConfiguration(config);
+        watchlistRepository.save(watchlist);
+    }
+
     // ========================= QUOTA HELPER METHODS =========================
 
     protected void seedUserEventQuota(final User user, final int eventCount) {

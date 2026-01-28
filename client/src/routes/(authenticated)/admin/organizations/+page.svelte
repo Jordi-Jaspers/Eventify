@@ -4,11 +4,17 @@
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import { searchOrganizations } from '$lib/api/organization/OrganizationController';
-	import type { OrganizationResponse, OrganizationStatus } from '$lib/api/models';
+	import type { OrganizationResponse } from '$lib/api/models';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Building2, Users, Key } from '@lucide/svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
+	import { formatDate } from '$lib/utils/date';
+	import {
+		getOrganizationStatusBadgeVariant,
+		getOwnerDisplayName
+	} from '$lib/utils/organization';
+	import CreateOrganizationSheet from '$lib/components/admin/CreateOrganizationSheet.svelte';
 
 	const columns: DataTableColumn<OrganizationResponse>[] = [
 		{
@@ -35,7 +41,8 @@
 				{ value: 'TRIAL', label: 'Trial' },
 				{ value: 'ACTIVE', label: 'Active' },
 				{ value: 'SUSPENDED', label: 'Suspended' }
-			]
+			],
+			colSpan: 2
 		},
 		{
 			key: 'owner',
@@ -45,16 +52,18 @@
 		{
 			key: 'memberCount',
 			label: 'Members',
-			sortable: true
+			sortable: true,
+			colSpan: 1
 		},
 		{
 			key: 'createdAt',
 			label: 'Created',
 			sortable: true,
-			colSpan: 2
+			colSpan: 1
 		},
 		{
-			key: 'actions'
+			key: 'actions',
+			colSpan: 1
 		}
 	];
 
@@ -65,38 +74,10 @@
 		defaultSort: [{name: 'name', direction: 'ASC'}]
 	});
 
-	// Helper functions
-	function getStatusBadgeVariant(
-		status: OrganizationStatus | undefined
-	): 'default' | 'success' | 'destructive' {
-		switch (status) {
-			case 'ACTIVE':
-				return 'success';
-			case 'SUSPENDED':
-				return 'destructive';
-			case 'TRIAL':
-			default:
-				return 'default';
-		}
-	}
+	// Create organization sheet state
+	let isCreateSheetOpen: boolean = $state(false);
 
-	function getOwnerName(owner: { firstName?: string; lastName?: string } | undefined): string {
-		if (!owner || (!owner.firstName && !owner.lastName)) {
-			return 'No owner';
-		}
-		return `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim();
-	}
-
-	function formatDate(dateString: string | undefined): string {
-		if (!dateString) return 'N/A';
-		const date: Date = new Date(dateString);
-		return date.toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
-		});
-	}
-
+	// Navigation helpers
 	function navigateToMembers(orgId: number | undefined): void {
 		if (orgId) {
 			goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(orgId).path);
@@ -109,6 +90,11 @@
 		}
 	}
 
+	// Handle successful organization creation
+	function handleOrganizationCreated(): void {
+		service.load();
+	}
+
 	onMount(() => service.load());
 </script>
 
@@ -119,20 +105,24 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
-		<div class="mb-8">
-			<h1
-				class="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
-			>
-				Organizations
-			</h1>
-			<p class="text-muted-foreground mt-2">Manage and monitor all organizations on the platform</p>
+		<div class="mb-8 flex items-center justify-between">
+			<div>
+				<h1 class="text-3xl font-bold text-primary">
+					Organizations
+				</h1>
+				<p class="text-muted-foreground mt-2">Manage and monitor all organizations on the platform</p>
+			</div>
+			<Button onclick={() => (isCreateSheetOpen = true)}>
+				<Building2 class="mr-2 h-4 w-4" />
+				New Organization
+			</Button>
 		</div>
 
 		<!-- DataTable -->
 		<DataTable {columns} {service} title="All Organizations" icon={Building2}>
 			{#snippet row(org: OrganizationResponse)}
 				<div
-					class="grid grid-cols-1 md:grid-cols-11 items-center gap-2 md:gap-4 p-4 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm hover:bg-accent/10 hover:border-border transition-all duration-200 shadow-sm hover:shadow-md"
+					class="grid grid-cols-1 md:grid-cols-11 items-center gap-2 md:gap-4 p-4 hover:bg-muted/30 transition-all"
 				>
 					<!-- Name -->
 					<div class="col-span-1 md:col-span-2 flex items-center">
@@ -150,20 +140,20 @@
 						<span class="text-sm text-muted-foreground">{org.slug}</span>
 					</div>
 
-					<!-- Status -->
-					<div class="col-span-1 md:col-span-1 flex items-center">
-						<Badge variant={getStatusBadgeVariant(org.status)} class="min-w-[90px] justify-center">
-							{org.status}
-						</Badge>
-					</div>
+				<!-- Status -->
+				<div class="col-span-1 md:col-span-2 flex items-center">
+					<Badge variant={getOrganizationStatusBadgeVariant(org.status)} class="min-w-[90px] justify-center">
+						{org.status}
+					</Badge>
+				</div>
 
-					<!-- Owner -->
-					<div class="col-span-1 md:col-span-2 flex items-center">
-						<span class="text-sm {org.owner ? '' : 'text-muted-foreground italic'}">
-							<span class="md:hidden font-medium">Owner: </span>
-							{getOwnerName(org.owner)}
-						</span>
-					</div>
+				<!-- Owner -->
+				<div class="col-span-1 md:col-span-2 flex items-center">
+					<span class="text-sm {org.owner ? '' : 'text-muted-foreground italic'}">
+						<span class="md:hidden font-medium">Owner: </span>
+						{getOwnerDisplayName(org.owner)}
+					</span>
+				</div>
 
 					<!-- Members -->
 					<div class="col-span-1 md:col-span-1 flex items-center">
@@ -174,10 +164,10 @@
 					</div>
 
 					<!-- Created -->
-					<div class="col-span-1 md:col-span-2 flex items-center">
+					<div class="col-span-1 md:col-span-1 flex items-center">
 						<span class="text-sm text-muted-foreground">
 							<span class="md:hidden">Created: </span>
-							{formatDate(org.createdAt)}
+							{org.createdAt ? formatDate(org.createdAt ?? '') : 'N/A'}
 						</span>
 					</div>
 
@@ -209,5 +199,12 @@
 				</div>
 			{/snippet}
 		</DataTable>
+
+		<!-- Create Organization Sheet -->
+		<CreateOrganizationSheet
+			open={isCreateSheetOpen}
+			onOpenChange={(open: boolean) => (isCreateSheetOpen = open)}
+			onSuccess={handleOrganizationCreated}
+		/>
 	</div>
 </main>

@@ -206,6 +206,14 @@ public enum ApiErrorCode implements ApiError {
     CHANNEL_PAUSED(
         "ERR-0048",
         "Your channel is paused. Resume the channel to continue sending events."
+    ),
+    DUPLICATE_WATCHLIST_NAME(
+        "ERR-0049",
+        "Duplicate watchlist name: A watchlist with this name already exists for this user."
+    ),
+    WATCHLIST_NOT_FOUND(
+        "ERR-0050",
+        "The requested watchlist has been deleted or does not exist."
     );
 
     /* The error code for this reason. */
