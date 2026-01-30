@@ -3,6 +3,16 @@
 Raw ideas and future work. Items here need refinement before development.
 
 ---
+## Epic: Bugs & Technical Debt
+
+**Context**: Address known bugs and technical debt to improve system stability and maintainability.
+
+### Items
+- [ ] **Unsecured channel endpoints**: There is no check in the controller to verify if the user owns the channel. This could allow unauthorized access if someone guesses a channel ID. Add ownership check in controller methods.
+
+- [ ] **No security tests on the `/search` endpoint**: The search endpoint lacks tests to verify that users cannot access items they do not own. Add security tests to ensure proper access control.
+
+---
 
 ## Epic: Retention & Data Lifecycle
 
