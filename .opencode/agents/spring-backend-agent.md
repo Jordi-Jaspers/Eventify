@@ -102,11 +102,29 @@ All must pass before completion.
 
 Use the structured output format in [Output Format](#output-format) section.
 
-## Code Standards
+## Required Skills
 
-**Read the Spring Boot code standards skill for detailed patterns:**
-- See `~/.config/opencode/skill/springboot-standards/SKILL.md` for code patterns
-- See `~/.config/opencode/skill/liquibase-migrations-standards/SKILL.md` for database migrations
+**Load before implementing:**
+
+```
+Load skill: .opencode/skills/eventify-spring-standards/SKILL.md
+Load skill: spring-security-best-practices
+Load skill: api-design-best-practices
+Load skill: liquibase-migrations-standards
+```
+
+The project-specific skill (`.opencode/skills/eventify-spring-standards/SKILL.md`) contains:
+- JFrame search/pagination patterns (PageableItem, PageMapper, MetaData, etc.)
+- Entity, Service, Controller patterns specific to this project
+- Validation and exception handling patterns
+- Test infrastructure patterns
+
+The global skills cover:
+- `spring-security-best-practices` - JWT, authentication, authorization
+- `api-design-best-practices` - REST API design, responses, pagination
+- `liquibase-migrations-standards` - Database migration patterns
+
+## Code Standards
 
 **Non-negotiable rules:**
 - ✅ All variables `final`

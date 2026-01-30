@@ -27,14 +27,24 @@ Build functional, accessible UIs. Create screenshot tests. Return to orchestrato
 
 ## Required Skills
 
-Load before implementing:
+**Load before implementing:**
 
 ```
-Load skill: sveltekit-standards
+Load skill: .opencode/skills/eventify-svelte-standards/SKILL.md
+Load skill: svelte5-best-practices
 Load skill: screenshot-tests
 ```
 
-Skills are located at `~/.config/opencode/skill/`
+The project-specific skill (`.opencode/skills/eventify-svelte-standards/SKILL.md`) contains:
+- Controller → Service → Page architecture patterns
+- API client patterns with openapi-fetch
+- DataTable and pagination patterns
+- Reusable components reference
+- Error handling with `handleError()`
+
+The global skills cover:
+- `svelte5-best-practices` - Svelte 5 runes, reactivity, component composition
+- `screenshot-tests` - Playwright screenshot test patterns
 
 ## CRITICAL: Check Existing Code First
 
@@ -423,7 +433,7 @@ Test: test/components/[page].spec.ts
 3. **Run `bun run sync:api` FIRST** - Before ANY API integration code
 4. **Use openapi-fetch client ONLY** - Never custom fetch wrappers
 5. **Types from `components['schemas']`** - Never manual types in models.ts
-6. **Load sveltekit-standards skill first** - Contains all patterns/standards (at `~/.config/opencode/skill/sveltekit-standards/SKILL.md`)
+6. **Load project skill first** - Contains all patterns/standards (at `.opencode/skills/eventify-svelte-standards/SKILL.md`)
 7. **Explicit types EVERYWHERE** - No type inference
 8. **Use CLIENT_ROUTES** - Never hardcode paths
 9. **Route minimalism** - Routes are adapters, keep slim (extract to services)

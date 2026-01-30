@@ -21,6 +21,7 @@ All project-specific files are in `.opencode/`:
 | `refined/` | Refined stories ready for development |
 | `completed/` | Audit copies of completed work |
 | `agents/` | Project-specific agent overrides |
+| `skills/` | Project-specific skill files |
 
 ## Tech Stack
 
@@ -65,15 +66,22 @@ They override the global agents of the same name when working on this project.
 | github-actions-agent | CI/CD workflows |
 | email-composer-agent | MJML email templates |
 
-## Skills (Global)
+## Skills
 
-All skills are in the global config at `~/.config/opencode/skill/`:
+### Project-Specific Skills (in `.opencode/skills/`)
 
 | Skill | Purpose |
 |-------|---------|
-| springboot-standards | Spring Boot code standards, entities, services, controllers |
+| eventify-spring-standards | Spring Boot patterns: JFrame search/pagination, entities, services, controllers, tests |
+| eventify-svelte-standards | SvelteKit patterns: Controller→Service→Page, API client, DataTable, reusable components |
+
+**Note:** Project-specific skills contain patterns tailored to this codebase. Agents should load these first.
+
+### Global Skills (in `~/.config/opencode/skill/`)
+
+| Skill | Purpose |
+|-------|---------|
 | liquibase-migrations-standards | Database migration patterns with raw SQL |
-| sveltekit-standards | SvelteKit/Svelte 5 frontend conventions |
 | ui-validation | Playwright UI validation with ui-polish-loop |
 | screenshot-tests | Playwright screenshot test creation |
 | gradle-test-reports | Analyze Gradle test failures from reports |

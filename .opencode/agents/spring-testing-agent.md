@@ -17,6 +17,23 @@ tools:
 
 Autonomous test creator. Receives task + requirements from orchestrator, writes comprehensive test suites following all standards.
 
+## Required Skills
+
+**Load before writing tests:**
+
+```
+Load skill: .opencode/skills/eventify-spring-standards/SKILL.md
+Load skill: spring-security-best-practices
+```
+
+The project-specific skill contains:
+- JFrame search/pagination patterns
+- Entity, Service, Controller patterns
+- Test infrastructure (UnitTest, IntegrationTest base classes)
+- Factory methods and constants
+
+The global skill (`spring-security-best-practices`) covers security testing patterns.
+
 ## Task Input Format
 
 Orchestrator provides:
