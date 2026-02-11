@@ -120,4 +120,21 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
         @Param("startTime") OffsetDateTime startTime,
         @Param("endTime") OffsetDateTime endTime
     );
+
+    /**
+     * Counts events for multiple channels within a time range.
+     *
+     * @param channelIds the channel IDs
+     * @param timestamp  start timestamp
+     * @return count of events
+     */
+    long countByChannelIdInAndTimestampAfter(List<Long> channelIds, OffsetDateTime timestamp);
+
+    /**
+     * Finds the most recent event for a channel.
+     *
+     * @param channelId the channel ID
+     * @return optional event
+     */
+    java.util.Optional<Event> findTopByChannelIdOrderByTimestampDesc(Long channelId);
 }

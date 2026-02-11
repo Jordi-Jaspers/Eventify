@@ -51,6 +51,8 @@ public final class Paths {
 
     public static final String STATS_PART = "/stats";
 
+    public static final String DASHBOARD_PART = "/dashboard";
+
     public static final String RETENTION_SETTINGS_PART = "/settings/retention";
 
     public static final String WATCHLISTS_PART = "/watchlist";
@@ -153,6 +155,8 @@ public final class Paths {
 
     public static final String USER_EVENTS_SEARCH_PATH = USER_EVENTS_PATH + SEARCH_PART;
 
+    public static final String USER_DASHBOARD_STATS_PATH = USERS_PATH + DASHBOARD_PART + STATS_PART;
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;
@@ -220,6 +224,8 @@ public final class Paths {
     public static final String ORGANIZATION_EVENTS_PATH = ORGANIZATION_PATH + EVENTS_PART;
 
     public static final String ORGANIZATION_EVENTS_SEARCH_PATH = ORGANIZATION_EVENTS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_DASHBOARD_STATS_PATH = ORGANIZATION_PATH + DASHBOARD_PART + STATS_PART;
 
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 

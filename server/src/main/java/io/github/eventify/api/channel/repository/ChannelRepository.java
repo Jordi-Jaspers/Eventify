@@ -121,4 +121,22 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
             """
     )
     List<Channel> findAllByIdInAndOrganizationId(@Param("ids") List<Long> ids, @Param("organizationId") Long organizationId);
+
+    /**
+     * Finds personal channels by user ID and status.
+     *
+     * @param userId the user ID
+     * @param status the channel status
+     * @return list of channels
+     */
+    List<Channel> findByUserIdAndOrganizationIsNullAndStatus(Long userId, ChannelStatus status);
+
+    /**
+     * Finds organization channels by organization ID and status.
+     *
+     * @param organizationId the organization ID
+     * @param status         the channel status
+     * @return list of channels
+     */
+    List<Channel> findByOrganizationIdAndStatus(Long organizationId, ChannelStatus status);
 }

@@ -48,6 +48,16 @@ Raw ideas and future work. Items here need refinement before development.
 
 ---
 
+## Epic: Infrastructure & Performance
+
+**Context**: Cross-cutting concerns for caching, performance optimization, and infrastructure improvements.
+
+### Items
+
+- [ ] **Add TTL-based Caching Infrastructure**: Add Caffeine cache with `@EnableCaching` support. Required for caching dashboard stats (~30s TTL), and other frequently-accessed, slowly-changing data. Currently project only uses request-scoped caches. Dependencies needed: `com.github.ben-manes.caffeine:caffeine`. Create `CacheConfig.java` with cache definitions. Priority endpoints: dashboard stats, user quotas, org membership checks.
+
+---
+
 ## Epic: Future Considerations
 
 Ideas to keep in mind for architecture decisions but not for immediate development.
