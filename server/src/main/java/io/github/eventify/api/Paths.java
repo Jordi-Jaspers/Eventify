@@ -55,6 +55,8 @@ public final class Paths {
 
     public static final String WATCHLISTS_PART = "/watchlist";
 
+    public static final String EVENTS_PART = "/events";
+
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
     public static final String PUBLIC_SWAGGER_PATH = PUBLIC_PATH + "/docs";
@@ -147,6 +149,10 @@ public final class Paths {
 
     public static final String USER_WATCHLIST_PATH = USER_WATCHLISTS_PATH + ID_PART;
 
+    public static final String USER_EVENTS_PATH = USERS_PATH + EVENTS_PART;
+
+    public static final String USER_EVENTS_SEARCH_PATH = USER_EVENTS_PATH + SEARCH_PART;
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;
@@ -211,6 +217,10 @@ public final class Paths {
 
     public static final String ORGANIZATION_WATCHLIST_PATH = ORGANIZATION_WATCHLISTS_PATH + ID_PART;
 
+    public static final String ORGANIZATION_EVENTS_PATH = ORGANIZATION_PATH + EVENTS_PART;
+
+    public static final String ORGANIZATION_EVENTS_SEARCH_PATH = ORGANIZATION_EVENTS_PATH + SEARCH_PART;
+
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 
     public static final String OPTIONS_PATH = BASE_PATH + "/options";
@@ -221,7 +231,7 @@ public final class Paths {
 
     /* ------------------------------- EVENT API ENDPOINTS ------------------------------- */
 
-    public static final String EVENTS_PATH = BASE_PATH + "/events";
+    public static final String EVENTS_PATH = BASE_PATH + EVENTS_PART;
 
     public static final String EVENTS_BATCH_PATH = EVENTS_PATH + "/batch";
 

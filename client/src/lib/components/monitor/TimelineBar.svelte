@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { Timeline } from '$lib/api/models';
+	import type { Timeline, TimelineDuration } from '$lib/api/models';
 	import TimelineSegment from './TimelineSegment.svelte';
 
 	interface Props {
 		timeline: Timeline;
 		rangeStart: Date;
 		rangeEnd: Date;
-		onSegmentClick?: (startTime: string, endTime: string) => void;
+		onSegmentClick?: (duration: TimelineDuration) => void;
 	}
 
 	let { timeline, rangeStart, rangeEnd, onSegmentClick }: Props = $props();
@@ -18,7 +18,7 @@
 			{duration}
 			{rangeStart}
 			{rangeEnd}
-			onclick={onSegmentClick ? () => onSegmentClick(duration.startTime, duration.endTime) : undefined}
+			onclick={onSegmentClick ? () => onSegmentClick(duration) : undefined}
 		/>
 	{/each}
 </div>

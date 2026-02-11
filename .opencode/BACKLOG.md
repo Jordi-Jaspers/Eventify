@@ -12,6 +12,7 @@ Raw ideas and future work. Items here need refinement before development.
 
 - [ ] **No security tests on the `/search` endpoint**: The search endpoint lacks tests to verify that users cannot access items they do not own. Add security tests to ensure proper access control.
 
+- [ ] **Duration Details API Endpoint**: Create a new REST endpoint to retrieve the full duration details for a channel. Currently, the modal uses the clamped timeline data from the monitor page (e.g., a 2-hour duration is clamped to the 1-hour visible window). The new endpoint should return: (1) The selected duration with its ACTUAL start/end times from the database, (2) Adjacent durations (previous/next) with their actual times. This will allow the frontend MiniTimeline to show accurate time ranges even when durations extend beyond the monitor's visible window. Related: Events are now correctly fetched using the duration's actual times, but the timeline visualization still uses clamped data. 
 ---
 
 ## Epic: Retention & Data Lifecycle

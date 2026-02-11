@@ -4,7 +4,7 @@
 	import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '$lib/components/ui/collapsible';
 	import TimelineBar from './TimelineBar.svelte';
 	import MonitorRow from './MonitorRow.svelte';
-	import type { Timeline, ChannelResponse } from '$lib/api/models';
+	import type { Timeline, ChannelResponse, TimelineDuration, Severity } from '$lib/api/models';
 	import { getSeverityColors, getCurrentSeverityFromTimeline } from './types';
 
 	interface Props {
@@ -13,9 +13,10 @@
 		channels: ChannelResponse[];
 		rangeStart: Date;
 		rangeEnd: Date;
+		onSegmentClick?: (channelId: number, name: string, severity: Severity | null, duration: TimelineDuration, timeline: TimelineDuration[]) => void;
 	}
 
-	let { name, timeline, channels, rangeStart, rangeEnd }: Props = $props();
+	let { name, timeline, channels, rangeStart, rangeEnd, onSegmentClick }: Props = $props();
 
 	let isExpanded = $state(false);
 
@@ -85,6 +86,9 @@
 					status={channel.status ?? null}
 					{rangeStart}
 					{rangeEnd}
+					onSegmentClick={onSegmentClick 
+						? (d) => onSegmentClick(channel.channelId!, channel.channelName!, channel.currentSeverity ?? null, d, channel.timeline!.durations!)
+						: undefined}
 				/>
 			{/if}
 		{/each}

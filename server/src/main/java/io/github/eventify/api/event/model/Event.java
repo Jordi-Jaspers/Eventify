@@ -2,6 +2,7 @@ package io.github.eventify.api.event.model;
 
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.event.model.request.CreateEventRequest;
+import io.github.jframe.datasource.search.model.PageableItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +28,7 @@ import static io.github.eventify.Main.SERIAL_VERSION_UID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "event")
-public class Event implements Serializable {
+public class Event implements PageableItem, Serializable {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;

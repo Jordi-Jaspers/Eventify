@@ -6,6 +6,7 @@ import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.model.request.BatchEventRequest;
 import io.github.eventify.api.event.model.request.CreateEventRequest;
 import io.github.eventify.common.security.principal.ApiKeyPrincipal;
+import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -68,6 +69,42 @@ public class ChannelSecurityService {
         return isEmptyBatch(request) || hasAccessToAllChannels(request, principal);
     }
 
+    /**
+     * Check if a user can access a channel as a personal channel owner.
+     *
+     * @param channelId the channel ID to access
+     * @param principal the user token principal attempting access
+     * @return true if user owns the personal channel, false otherwise
+     */
+    public boolean canAccessChannelAsUser(final Long channelId, final UserTokenPrincipal principal) {
+        if (principal == null || channelId == null) {
+            return false;
+        }
+
+        return channelRepository.findActiveChannelById(channelId)
+            .filter(channel -> isPersonalChannel(channel) && isChannelOwner(channel, principal))
+            .isPresent();
+    }
+
+    /**
+     * Check if a channel belongs to an organization and user has access.
+     *
+     * @param channelId the channel ID to access
+     * @param orgId     the organization ID
+     * @param principal the user token principal attempting access
+     * @return true if channel belongs to org, false otherwise
+     */
+    public boolean canAccessChannelInOrganization(final Long channelId, final Long orgId,
+        final UserTokenPrincipal principal) {
+        if (principal == null || channelId == null || orgId == null) {
+            return false;
+        }
+
+        return channelRepository.findActiveChannelById(channelId)
+            .filter(channel -> belongsToOrganization(channel, orgId))
+            .isPresent();
+    }
+
     private boolean cacheAndGrantAccess(final Channel channel) {
         channelCache.put(channel);
         return true;
@@ -110,5 +147,18 @@ public class ChannelSecurityService {
 
         return principal.getOrganizationId() == null
             && channel.getUser().getId().equals(principal.getUserId());
+    }
+
+    private boolean isPersonalChannel(final Channel channel) {
+        return channel.getOrganization() == null;
+    }
+
+    private boolean isChannelOwner(final Channel channel, final UserTokenPrincipal principal) {
+        return channel.getUser().getId().equals(principal.getUser().getId());
+    }
+
+    private boolean belongsToOrganization(final Channel channel, final Long orgId) {
+        return channel.getOrganization() != null
+            && channel.getOrganization().getId().equals(orgId);
     }
 }

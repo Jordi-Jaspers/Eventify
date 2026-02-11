@@ -43,3 +43,15 @@ export function formatRelativeDate(dateString: string): string {
 	if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
 	return `${Math.floor(diffDays / 365)} years ago`;
 }
+
+/**
+ * Format a date string as time only (e.g., "14:30")
+ */
+export function formatTime(dateString: string): string {
+	const date = new Date(dateString);
+	return date.toLocaleTimeString('en-US', {
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false
+	});
+}

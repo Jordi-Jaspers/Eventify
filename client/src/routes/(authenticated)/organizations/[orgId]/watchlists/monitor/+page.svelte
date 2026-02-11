@@ -29,9 +29,11 @@
 		OrganizationWatchlistSelector,
 		ConfigurePopover,
 		TimeAxisHeader,
+		DurationDetailsModal,
 		calculateTimeTicks,
 		getCurrentSeverityFromTimeline
 	} from '$lib/components/monitor';
+	import type { TimelineDuration, Severity } from '$lib/api/models';
 
 	// Get orgId from route params
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0', 10));
@@ -51,8 +53,25 @@
 	let noWatchlistSelected = $state(false);
 	let lastUpdated: Date | null = $state(null);
 
+	// Modal State
+	let modalOpen = $state(false);
+	let selectedChannelId = $state<number | undefined>(undefined);
+	let selectedChannelName = $state('');
+	let selectedSeverity = $state<Severity | null>(null);
+	let selectedDuration = $state<TimelineDuration | null>(null);
+	let selectedTimelineDurations = $state<TimelineDuration[]>([]);
+
 	// Auto-refresh for live mode
 	const autoRefresh = createAutoRefresh(() => loadMonitorData());
+
+	function openDetailsModal(channelId: number, name: string, severity: Severity | null, duration: TimelineDuration, timeline: TimelineDuration[]) {
+		selectedChannelId = channelId;
+		selectedChannelName = name;
+		selectedSeverity = severity;
+		selectedDuration = duration;
+		selectedTimelineDurations = timeline;
+		modalOpen = true;
+	}
 
 	// Derived state from session
 	const watchlistId = $derived(session.value.watchlistId);
@@ -368,6 +387,7 @@
 										channels={group.channels}
 										{rangeStart}
 										{rangeEnd}
+										onSegmentClick={(channelId, name, severity, d, timeline) => openDetailsModal(channelId, name, severity, d, timeline)}
 									/>
 								{/if}
 							{/each}
@@ -385,6 +405,7 @@
 										status={channel.status ?? null}
 										{rangeStart}
 										{rangeEnd}
+										onSegmentClick={(d) => openDetailsModal(channel.channelId!, channel.channelName!, channel.currentSeverity ?? null, d, channel.timeline!.durations!)}
 									/>
 								{/if}
 							{/each}
@@ -401,4 +422,16 @@
 			</Card>
 		{/if}
 	</div>
+
+	<!-- Details Modal -->
+	<DurationDetailsModal
+		bind:open={modalOpen}
+		onOpenChange={(v) => modalOpen = v}
+		channelName={selectedChannelName}
+		currentSeverity={selectedSeverity}
+		bind:selectedDuration={selectedDuration}
+		allDurations={selectedTimelineDurations}
+		channelId={selectedChannelId}
+		{orgId}
+	/>
 </main>

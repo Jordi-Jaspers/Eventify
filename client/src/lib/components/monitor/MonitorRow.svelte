@@ -2,7 +2,7 @@
 	import { Radio, Folder, Pause, LayoutList } from '@lucide/svelte';
 	import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import TimelineBar from './TimelineBar.svelte';
-	import type { Timeline, Severity } from '$lib/api/models';
+	import type { Timeline, Severity, TimelineDuration } from '$lib/api/models';
 	import { getSeverityColors } from './types';
 
 	type RowType = 'dashboard' | 'channel' | 'group' | 'sub-channel';
@@ -16,9 +16,10 @@
 		status: ChannelStatus | null;
 		rangeStart: Date;
 		rangeEnd: Date;
+		onSegmentClick?: (duration: TimelineDuration) => void;
 	}
 
-	let { type, name, timeline, currentSeverity, status, rangeStart, rangeEnd }: Props = $props();
+	let { type, name, timeline, currentSeverity, status, rangeStart, rangeEnd, onSegmentClick }: Props = $props();
 
 	const isPaused: boolean = $derived(status === 'PAUSED');
 
@@ -69,6 +70,7 @@
 				{timeline}
 				{rangeStart}
 				{rangeEnd}
+				{onSegmentClick}
 			/>
 		{/if}
 	</div>

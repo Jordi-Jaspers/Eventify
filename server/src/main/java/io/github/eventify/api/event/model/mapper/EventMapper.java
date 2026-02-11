@@ -2,6 +2,8 @@ package io.github.eventify.api.event.model.mapper;
 
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.response.EventCreatedResponse;
+import io.github.eventify.api.event.model.response.EventSearchResponse;
+import io.github.jframe.datasource.search.model.mapper.PageMapper;
 import io.github.jframe.util.mapper.DateTimeMapper;
 import io.github.jframe.util.mapper.config.SharedMapperConfig;
 
@@ -18,7 +20,7 @@ import org.mapstruct.Named;
     config = SharedMapperConfig.class,
     uses = DateTimeMapper.class
 )
-public abstract class EventMapper {
+public abstract class EventMapper extends PageMapper<EventSearchResponse, Event> {
 
     /**
      * Maps Event entity to EventCreatedResponse.
@@ -37,4 +39,23 @@ public abstract class EventMapper {
      */
     @IterableMapping(qualifiedByName = "toCreatedResponse")
     public abstract List<EventCreatedResponse> toCreatedResponseList(List<Event> events);
+
+    /**
+     * Maps Event entity to EventSearchResponse.
+     *
+     * @param event the event entity
+     * @return the search response DTO
+     */
+    @Override
+    @Named("toResourceObject")
+    public abstract EventSearchResponse toResourceObject(Event event);
+
+    /**
+     * Maps list of Event entities to list of EventSearchResponse.
+     *
+     * @param events the list of event entities
+     * @return the list of search response DTOs
+     */
+    @IterableMapping(qualifiedByName = "toResourceObject")
+    public abstract List<EventSearchResponse> toResourceObjects(List<Event> events);
 }

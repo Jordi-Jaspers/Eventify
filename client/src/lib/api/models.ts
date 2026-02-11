@@ -76,6 +76,8 @@ export type ChannelResponse = components['schemas']['ChannelResponse'];
 export type ChannelGroupResponse = components['schemas']['ChannelGroupResponse'];
 export type Timeline = components['schemas']['Timeline'];
 export type TimelineDuration = components['schemas']['TimelineDuration'];
+export type EventSearchResponse = components['schemas']['EventSearchResponse'];
+export type PageResourceEventSearchResponse = components['schemas']['PageResourceEventSearchResponse'];
 export type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
 export type Severity = 'CRITICAL' | 'WARNING' | 'OK' | 'NO_DATA';
 

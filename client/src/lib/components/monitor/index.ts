@@ -7,4 +7,5 @@ export { default as TimeAxisHeader } from './TimeAxisHeader.svelte';
 export { default as WatchlistSelector } from './WatchlistSelector.svelte';
 export { default as OrganizationWatchlistSelector } from './OrganizationWatchlistSelector.svelte';
 export { default as ConfigurePopover } from './ConfigurePopover.svelte';
+export { default as DurationDetailsModal } from './DurationDetailsModal.svelte';
 export * from './types';
