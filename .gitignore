@@ -202,3 +202,7 @@ server/**config/*.local.properties
 /client/node_modules/
 /client/.svelte-kit/
 /client/.env
+/server/.classpath
+/server/.factorypath
+/server/.project
+/server/.settings/org.eclipse.buildship.core.prefs
