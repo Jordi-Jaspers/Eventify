@@ -45,6 +45,27 @@ export function formatRelativeDate(dateString: string): string {
 }
 
 /**
+ * Format a date string as a relative time with high precision for recent events
+ * (e.g., "Just now", "5 min ago", "2 hours ago")
+ */
+export function formatRelativeTime(isoString: string | null | undefined): string {
+	if (!isoString) return 'Never';
+	const date = new Date(isoString);
+	const now = new Date();
+	const diffMs = now.getTime() - date.getTime();
+	const diffMins = Math.floor(diffMs / 60000);
+
+	if (diffMins < 1) return 'Just now';
+	if (diffMins < 60) return `${diffMins} min ago`;
+
+	const diffHours = Math.floor(diffMins / 60);
+	if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+
+	const diffDays = Math.floor(diffHours / 24);
+	return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+}
+
+/**
  * Format a date string as time only (e.g., "14:30")
  */
 export function formatTime(dateString: string): string {

@@ -1,15 +1,42 @@
 <script lang="ts">
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Building2, Users, Clock, Sparkles } from '@lucide/svelte';
+	import { Building2, Users, Clock, Sparkles, Activity, Radio, AlertTriangle } from '@lucide/svelte';
 	import { organizationStore } from '$lib/stores/organization.svelte';
-	import type { UserOrganizationResponse } from '$lib/api/models';
-	import { formatDate } from '$lib/utils/date';
+	import type { UserOrganizationResponse, DashboardStatsResponse } from '$lib/api/models';
+	import { formatDate, formatRelativeTime } from '$lib/utils/date';
 	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
+	import { getOrgDashboardStats, getErrorRateVariant } from '$lib/services/dashboard.service';
+	import { handleError } from '$lib/utils/error-handler';
+	import { toast } from 'svelte-sonner';
+	import { StatCard } from '$lib/components/ui/stat-card';
+	import { page } from '$app/stores';
 
 	const currentOrganization: UserOrganizationResponse | null = $derived(
 		organizationStore.currentOrganization
 	);
+
+	let stats: DashboardStatsResponse | null = $state(null);
+	let statsLoading: boolean = $state(true);
+
+	$effect(() => {
+		const orgId = Number($page.params.orgId);
+		if (!isNaN(orgId)) {
+			loadStats(orgId);
+		}
+	});
+
+	async function loadStats(orgId: number) {
+		statsLoading = true;
+		try {
+			stats = await getOrgDashboardStats(orgId);
+		} catch (err) {
+			const { message } = handleError(err, 'Failed to load organization stats');
+			toast.error(message);
+		} finally {
+			statsLoading = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -26,6 +53,38 @@
 				{currentOrganization?.organizationName || 'Organization'} Dashboard
 			</h1>
 			<p class="text-muted-foreground mt-2">Welcome to your organization workspace</p>
+		</div>
+
+		<!-- Stats Grid -->
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+			<StatCard
+				title="Events Today"
+				value={stats?.eventsToday?.toLocaleString() ?? '0'}
+				icon={Activity}
+				variant="blue"
+				loading={statsLoading}
+			/>
+			<StatCard
+				title="Active Channels"
+				value={stats?.activeChannels?.toString() ?? '0'}
+				icon={Radio}
+				variant="purple"
+				loading={statsLoading}
+			/>
+			<StatCard
+				title="Error Rate"
+				value={`${(stats?.errorRate ?? 0).toFixed(1)}%`}
+				icon={AlertTriangle}
+				variant={getErrorRateVariant(stats?.errorRate ?? 0)}
+				loading={statsLoading}
+			/>
+			<StatCard
+				title="Last Event"
+				value={formatRelativeTime(stats?.lastEventAt)}
+				icon={Clock}
+				variant="primary"
+				loading={statsLoading}
+			/>
 		</div>
 
 		<!-- Organization Info Card -->

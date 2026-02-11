@@ -72,6 +72,7 @@ export type MonitorRequest = components['schemas']['MonitorRequest'];
 export type MonitorResponse = components['schemas']['MonitorResponse'];
 export type MonitorFilters = components['schemas']['MonitorFilters'];
 export type DashboardResponse = components['schemas']['DashboardResponse'];
+export type DashboardStatsResponse = components['schemas']['DashboardStatsResponse'];
 export type ChannelResponse = components['schemas']['ChannelResponse'];
 export type ChannelGroupResponse = components['schemas']['ChannelGroupResponse'];
 export type Timeline = components['schemas']['Timeline'];

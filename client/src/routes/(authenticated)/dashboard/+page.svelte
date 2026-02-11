@@ -2,17 +2,39 @@
     import { goto } from '$app/navigation';
     import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '$lib/components/ui/card';
     import { Badge } from '$lib/components/ui/badge';
-    import {Clock, Shield, User, Building2} from '@lucide/svelte';
+    import {Clock, Shield, User, Building2, Activity, Radio, AlertTriangle} from '@lucide/svelte';
     import {authStore} from '$lib/stores/auth';
     import { organizationStore } from '$lib/stores/organization.svelte';
-    import type { UserOrganizationResponse } from '$lib/api/models';
+    import type { UserOrganizationResponse, DashboardStatsResponse } from '$lib/api/models';
     import { CLIENT_ROUTES } from '$lib/config/routes';
     import {getOrganizationalRoleBadgeClass, getUserRoleBadgeClass} from '$lib/utils/role';
-    import { formatDate } from '$lib/utils/date';
+    import { formatDate, formatRelativeTime } from '$lib/utils/date';
+    import { getDashboardStats, getErrorRateVariant } from '$lib/services/dashboard.service';
+    import { handleError } from '$lib/utils/error-handler';
+    import { toast } from 'svelte-sonner';
+    import { StatCard } from '$lib/components/ui/stat-card';
 
     const organizations: UserOrganizationResponse[] = $derived(organizationStore.organizations);
     const loading: boolean = $derived(organizationStore.loading);
     const hasOrganizations: boolean = $derived(organizations.length > 0);
+
+    let stats: DashboardStatsResponse | null = $state(null);
+    let statsLoading: boolean = $state(true);
+
+    $effect(() => {
+        loadStats();
+    });
+
+    async function loadStats() {
+        try {
+            stats = await getDashboardStats();
+        } catch (err) {
+            const { message } = handleError(err, 'Failed to load dashboard stats');
+            toast.error(message);
+        } finally {
+            statsLoading = false;
+        }
+    }
 
     async function handleOrgClick(orgId: number): Promise<void> {
         organizationStore.switchOrganization(orgId);
@@ -78,6 +100,38 @@
                 </div>
             </CardContent>
         </Card>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+                title="Events Today"
+                value={stats?.eventsToday?.toLocaleString() ?? '0'}
+                icon={Activity}
+                variant="blue"
+                loading={statsLoading}
+            />
+            <StatCard
+                title="Active Channels"
+                value={stats?.activeChannels?.toString() ?? '0'}
+                icon={Radio}
+                variant="purple"
+                loading={statsLoading}
+            />
+            <StatCard
+                title="Error Rate"
+                value={`${(stats?.errorRate ?? 0).toFixed(1)}%`}
+                icon={AlertTriangle}
+                variant={getErrorRateVariant(stats?.errorRate ?? 0)}
+                loading={statsLoading}
+            />
+            <StatCard
+                title="Last Event"
+                value={formatRelativeTime(stats?.lastEventAt)}
+                icon={Clock}
+                variant="primary"
+                loading={statsLoading}
+            />
+        </div>
 
         <!-- Organizations Section -->
         {#if hasOrganizations && !loading}
