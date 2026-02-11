@@ -7,6 +7,7 @@ import io.github.eventify.api.dashboard.model.response.DashboardStatsResponse;
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.repository.EventRepository;
+import io.github.eventify.common.util.TimeProvider;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
@@ -73,7 +74,7 @@ public class DashboardStatsService {
             .toList();
 
         // Count events from last 24 hours
-        final OffsetDateTime twentyFourHoursAgo = OffsetDateTime.now().minusHours(24);
+        final OffsetDateTime twentyFourHoursAgo = TimeProvider.now().minusHours(24);
         final long eventsToday = eventRepository.countByChannelIdInAndTimestampAfter(
             channelIds,
             twentyFourHoursAgo

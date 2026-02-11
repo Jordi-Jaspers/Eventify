@@ -2,6 +2,7 @@ package io.github.eventify.api.event.model;
 
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.event.model.request.CreateEventRequest;
+import io.github.eventify.common.util.TimeProvider;
 import io.github.jframe.datasource.search.model.PageableItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -81,7 +82,7 @@ public class Event implements PageableItem, Serializable {
      * @param channel the associated channel
      */
     public Event(final CreateEventRequest request, final Channel channel) {
-        this(request, channel, OffsetDateTime.now());
+        this(request, channel, TimeProvider.now());
     }
 
     /**

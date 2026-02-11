@@ -10,12 +10,12 @@ import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.service.OrganizationService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.DuplicateChannelNameException;
+import io.github.eventify.common.util.TimeProvider;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -141,7 +141,7 @@ public class OrganizationChannelService {
         // Update fields
         channel.setName(request.getName());
         channel.setDescription(request.getDescription());
-        channel.setUpdatedAt(OffsetDateTime.now());
+        channel.setUpdatedAt(TimeProvider.now());
 
         return channelRepository.save(channel);
     }
@@ -158,7 +158,7 @@ public class OrganizationChannelService {
     public Channel pauseOrganizationChannel(final Long organizationId, final Long channelId) {
         final Channel channel = getOrganizationChannel(organizationId, channelId);
         channel.setStatus(ChannelStatus.PAUSED);
-        channel.setUpdatedAt(OffsetDateTime.now());
+        channel.setUpdatedAt(TimeProvider.now());
         return channelRepository.save(channel);
     }
 
@@ -174,7 +174,7 @@ public class OrganizationChannelService {
     public Channel resumeOrganizationChannel(final Long organizationId, final Long channelId) {
         final Channel channel = getOrganizationChannel(organizationId, channelId);
         channel.setStatus(ChannelStatus.ACTIVE);
-        channel.setUpdatedAt(OffsetDateTime.now());
+        channel.setUpdatedAt(TimeProvider.now());
         return channelRepository.save(channel);
     }
 
@@ -190,7 +190,7 @@ public class OrganizationChannelService {
     public Channel deleteOrganizationChannel(final Long organizationId, final Long channelId) {
         final Channel channel = getOrganizationChannel(organizationId, channelId);
         channel.setStatus(ChannelStatus.PENDING_DELETION);
-        channel.setUpdatedAt(OffsetDateTime.now());
+        channel.setUpdatedAt(TimeProvider.now());
         return channelRepository.save(channel);
     }
 }

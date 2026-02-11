@@ -22,6 +22,7 @@ import io.github.eventify.api.user.model.request.UpdateRoleRequest;
 import io.github.eventify.api.user.model.request.UpdateUserDetailsRequest;
 import io.github.eventify.common.security.principal.JwtUserPrincipalAuthenticationToken;
 import io.github.eventify.common.security.principal.UserTokenPrincipal;
+import io.github.eventify.common.util.TimeProvider;
 import io.github.eventify.support.util.WebMvcConfigurator;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -222,7 +223,7 @@ public class IntegrationTest extends WebMvcConfigurator {
     }
 
     protected ApiKey anExpiredApiKeyForUser(final User user, final String name) {
-        return anApiKeyForUserWithExpiry(user, name, OffsetDateTime.now().minusDays(1));
+        return anApiKeyForUserWithExpiry(user, name, TimeProvider.now().minusDays(1));
     }
 
     protected ApiKey anApiKeyForUserWithExpiry(final User user, final String name, final OffsetDateTime expiresAt) {
@@ -263,7 +264,7 @@ public class IntegrationTest extends WebMvcConfigurator {
         event.setSeverity(Severity.OK);
         event.setTitle("Test Event");
         event.setMessage("Test message");
-        event.setTimestamp(OffsetDateTime.now().minusDays(daysAgo));
+        event.setTimestamp(TimeProvider.now().minusDays(daysAgo));
         return event;
     }
 
@@ -273,7 +274,7 @@ public class IntegrationTest extends WebMvcConfigurator {
         event.setSeverity(severity);
         event.setTitle("Test Event - " + severity);
         event.setMessage("Test message");
-        event.setTimestamp(timestamp);
+        event.setTimestamp(TimeProvider.truncateToMicros(timestamp));
         return eventRepository.save(event);
     }
 

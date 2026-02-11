@@ -8,12 +8,12 @@ import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.DuplicateChannelNameException;
+import io.github.eventify.common.util.TimeProvider;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -163,7 +163,7 @@ public class ChannelService {
         // Update fields
         channel.setName(request.getName());
         channel.setDescription(request.getDescription());
-        channel.setUpdatedAt(OffsetDateTime.now());
+        channel.setUpdatedAt(TimeProvider.now());
 
         return channelRepository.save(channel);
     }
@@ -179,7 +179,7 @@ public class ChannelService {
     public Channel pauseUserChannel(final Long channelId) {
         final Channel channel = getChannelWithAdminFallback(channelId);
         channel.setStatus(ChannelStatus.PAUSED);
-        channel.setUpdatedAt(OffsetDateTime.now());
+        channel.setUpdatedAt(TimeProvider.now());
         return channelRepository.save(channel);
     }
 
@@ -194,7 +194,7 @@ public class ChannelService {
     public Channel resumeUserChannel(final Long channelId) {
         final Channel channel = getChannelWithAdminFallback(channelId);
         channel.setStatus(ChannelStatus.ACTIVE);
-        channel.setUpdatedAt(OffsetDateTime.now());
+        channel.setUpdatedAt(TimeProvider.now());
         return channelRepository.save(channel);
     }
 
@@ -209,7 +209,7 @@ public class ChannelService {
     public Channel deleteUserChannel(final Long channelId) {
         final Channel channel = getChannelWithAdminFallback(channelId);
         channel.setStatus(ChannelStatus.PENDING_DELETION);
-        channel.setUpdatedAt(OffsetDateTime.now());
+        channel.setUpdatedAt(TimeProvider.now());
         return channelRepository.save(channel);
     }
 }
