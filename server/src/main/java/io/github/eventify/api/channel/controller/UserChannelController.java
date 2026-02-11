@@ -15,11 +15,13 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import static io.github.eventify.api.Paths.*;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -66,9 +68,7 @@ public class UserChannelController {
         summary = "Search channels",
         description = "Searches personal channels with pagination, filtering, and sorting"
     )
-    public ResponseEntity<PageResource<ChannelDetailsResponse>> searchChannels(
-        @RequestBody final SortablePageInput input
-    ) {
+    public ResponseEntity<PageResource<ChannelDetailsResponse>> searchChannels(@RequestBody final SortablePageInput input) {
         final Page<Channel> page = channelService.searchUserChannels(input);
         return ResponseEntity.status(OK).body(channelMapper.toPageResource(page));
     }
@@ -78,12 +78,13 @@ public class UserChannelController {
         produces = APPLICATION_JSON_VALUE
     )
     @ResponseStatus(OK)
+    @PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal) or hasAuthority('MANAGE_USERS')")
     @Operation(
         summary = "Get channel",
         description = "Gets a personal channel by ID"
     )
     public ResponseEntity<ChannelDetailsResponse> getChannel(@PathVariable final Long id) {
-        final Channel channel = channelService.getUserChannel(id);
+        final Channel channel = channelService.getChannelWithAdminFallback(id);
         return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
     }
 
@@ -93,6 +94,7 @@ public class UserChannelController {
         produces = APPLICATION_JSON_VALUE
     )
     @ResponseStatus(OK)
+    @PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal) or hasAuthority('MANAGE_USERS')")
     @Operation(
         summary = "Update channel",
         description = "Updates a personal channel's details"
@@ -111,6 +113,7 @@ public class UserChannelController {
         produces = APPLICATION_JSON_VALUE
     )
     @ResponseStatus(OK)
+    @PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal) or hasAuthority('MANAGE_USERS')")
     @Operation(
         summary = "Pause channel",
         description = "Pauses a personal channel (idempotent)"
@@ -125,6 +128,7 @@ public class UserChannelController {
         produces = APPLICATION_JSON_VALUE
     )
     @ResponseStatus(OK)
+    @PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal) or hasAuthority('MANAGE_USERS')")
     @Operation(
         summary = "Resume channel",
         description = "Resumes a paused channel (idempotent)"
@@ -139,6 +143,7 @@ public class UserChannelController {
         produces = APPLICATION_JSON_VALUE
     )
     @ResponseStatus(OK)
+    @PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal) or hasAuthority('MANAGE_USERS')")
     @Operation(
         summary = "Delete channel",
         description = "Soft deletes a personal channel (sets status to PENDING_DELETION)"

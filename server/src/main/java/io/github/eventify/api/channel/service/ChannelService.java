@@ -24,9 +24,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static io.github.eventify.api.authentication.model.Permission.MANAGE_USERS;
 import static io.github.eventify.api.channel.model.ChannelMetaData.USER_TERM;
 import static io.github.eventify.common.exception.ApiErrorCode.CHANNEL_NOT_FOUND;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
+import static io.github.eventify.common.security.SecurityUtil.hasAuthority;
 
 /**
  * Service for managing user channels.
@@ -106,6 +108,37 @@ public class ChannelService {
     }
 
     /**
+     * Gets a channel by ID without user filtering.
+     * This is used by admin users who have bypassed the ownership check via @PreAuthorize.
+     *
+     * @param channelId the channel ID
+     * @return the channel
+     * @throws DataNotFoundException if channel not found
+     */
+    @Transactional(readOnly = true)
+    public Channel getChannelById(final Long channelId) {
+        return channelRepository.findActiveChannelById(channelId)
+            .orElseThrow(() -> new DataNotFoundException(CHANNEL_NOT_FOUND));
+    }
+
+    /**
+     * Gets a channel using admin-aware logic.
+     * If caller has MANAGE_USERS authority, fetches without user filtering.
+     * Otherwise, fetches only if the logged-in user owns the channel.
+     *
+     * @param channelId the channel ID
+     * @return the channel
+     * @throws DataNotFoundException if channel not found or access denied
+     */
+    @Transactional(readOnly = true)
+    public Channel getChannelWithAdminFallback(final Long channelId) {
+        if (hasAuthority(MANAGE_USERS.name())) {
+            return getChannelById(channelId);
+        }
+        return getUserChannel(channelId);
+    }
+
+    /**
      * Updates a personal channel for the logged-in user.
      *
      * @param channelId the channel ID
@@ -116,12 +149,11 @@ public class ChannelService {
      */
     @Transactional
     public Channel updateUserChannel(final Long channelId, final UpdateChannelRequest request) {
-        final User user = getLoggedInUser();
-        final Channel channel = getUserChannel(channelId);
+        final Channel channel = getChannelWithAdminFallback(channelId);
 
-        // Check for duplicate name (excluding current channel)
+        // Check for duplicate name (excluding current channel) for the channel owner
         final Optional<Channel> existing = channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(
-            user.getId(),
+            channel.getUser().getId(),
             request.getName()
         );
         if (existing.isPresent() && !existing.get().getId().equals(channelId)) {
@@ -145,7 +177,7 @@ public class ChannelService {
      */
     @Transactional
     public Channel pauseUserChannel(final Long channelId) {
-        final Channel channel = getUserChannel(channelId);
+        final Channel channel = getChannelWithAdminFallback(channelId);
         channel.setStatus(ChannelStatus.PAUSED);
         channel.setUpdatedAt(OffsetDateTime.now());
         return channelRepository.save(channel);
@@ -160,7 +192,7 @@ public class ChannelService {
      */
     @Transactional
     public Channel resumeUserChannel(final Long channelId) {
-        final Channel channel = getUserChannel(channelId);
+        final Channel channel = getChannelWithAdminFallback(channelId);
         channel.setStatus(ChannelStatus.ACTIVE);
         channel.setUpdatedAt(OffsetDateTime.now());
         return channelRepository.save(channel);
@@ -175,7 +207,7 @@ public class ChannelService {
      */
     @Transactional
     public Channel deleteUserChannel(final Long channelId) {
-        final Channel channel = getUserChannel(channelId);
+        final Channel channel = getChannelWithAdminFallback(channelId);
         channel.setStatus(ChannelStatus.PENDING_DELETION);
         channel.setUpdatedAt(OffsetDateTime.now());
         return channelRepository.save(channel);
