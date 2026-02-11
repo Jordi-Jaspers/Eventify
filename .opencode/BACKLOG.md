@@ -44,7 +44,7 @@ Raw ideas and future work. Items here need refinement before development.
 
 ### Items
 
-- [x] **Dashboard Stats Cards**: Add 3-4 stat cards at the top of the user dashboard showing key metrics at a glance: Events Today (count), Active Channels (count), Error Rate (percentage, last 24h), Last Event (relative time). Cards should use the glassmorphism style from the design system. Error Rate card should change color based on threshold (green <1%, amber 1-5%, red >5%). Responsive layout: 4 columns on desktop, 2x2 on tablet, stacked on mobile. Create a reusable `StatCard` component. Backend needs a new endpoint `GET /api/dashboard/stats` that aggregates these metrics. *Note: Good candidate for live demo - visual impact, full-stack, ~25 min.* (refined: DASHBOARD-01, DASHBOARD-02, DASHBOARD-03)
+- [x] **Dashboard Stats Cards**: Add 3-4 stat cards at the top of the user dashboard showing key metrics at a glance: Events Today (count), Active Channels (count), Error Rate (percentage, last 24h), Last Event (relative time). Cards should use the glassmorphism style from the design system. Error Rate card should change color based on threshold (green <1%, amber 1-5%, red >5%). Responsive layout: 4 columns on desktop, 2x2 on tablet, stacked on mobile. Create a reusable `StatCard` component. Backend needs a new endpoint `GET /api/dashboard/stats` that aggregates these metrics. *Note: Good candidate for live demo - visual impact, full-stack, ~25 min.* (refined: DASHBOARD-01, DASHBOARD-02)
 
 ---
 
