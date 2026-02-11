@@ -22,9 +22,15 @@ Autonomous test creator. Receives task + requirements from orchestrator, writes 
 **Load before writing tests:**
 
 ```
+Load skill: .opencode/skills/eventify-architecture/SKILL.md
 Load skill: .opencode/skills/eventify-spring-standards/SKILL.md
 Load skill: spring-security-best-practices
 ```
+
+The architecture skill (`.opencode/skills/eventify-architecture/SKILL.md`) contains:
+- System overview and project structure
+- Backend package organization (feature-first)
+- Where to put different code types
 
 The project-specific skill contains:
 - JFrame search/pagination patterns

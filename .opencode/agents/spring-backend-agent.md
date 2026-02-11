@@ -107,11 +107,18 @@ Use the structured output format in [Output Format](#output-format) section.
 **Load before implementing:**
 
 ```
+Load skill: .opencode/skills/eventify-architecture/SKILL.md
 Load skill: .opencode/skills/eventify-spring-standards/SKILL.md
 Load skill: spring-security-best-practices
 Load skill: api-design-best-practices
 Load skill: liquibase-migrations-standards
 ```
+
+The architecture skill (`.opencode/skills/eventify-architecture/SKILL.md`) contains:
+- System overview and project structure
+- Backend package organization (feature-first)
+- Where to put different code types
+- Build commands and key files
 
 The project-specific skill (`.opencode/skills/eventify-spring-standards/SKILL.md`) contains:
 - JFrame search/pagination patterns (PageableItem, PageMapper, MetaData, etc.)

@@ -30,10 +30,17 @@ Build functional, accessible UIs. Create screenshot tests. Return to orchestrato
 **Load before implementing:**
 
 ```
+Load skill: .opencode/skills/eventify-architecture/SKILL.md
 Load skill: .opencode/skills/eventify-svelte-standards/SKILL.md
 Load skill: svelte5-best-practices
 Load skill: screenshot-tests
 ```
+
+The architecture skill (`.opencode/skills/eventify-architecture/SKILL.md`) contains:
+- System overview and project structure
+- Frontend route structure and component organization
+- Where to put different code types
+- Build commands and key files
 
 The project-specific skill (`.opencode/skills/eventify-svelte-standards/SKILL.md`) contains:
 - Controller → Service → Page architecture patterns
