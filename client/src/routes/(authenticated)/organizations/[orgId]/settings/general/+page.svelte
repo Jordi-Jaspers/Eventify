@@ -11,7 +11,7 @@
 		RoleBadgeCard,
 		OrganizationIdentifierCard
 	} from '$lib/components/organization';
-	import { StatCard } from '$lib/components/admin';
+	import { StatCard } from '$lib/components/ui/stat-card';
 	import { AccessDeniedCard } from '$lib/components/ui/access-denied-card';
 	import { LoadingCard } from '$lib/components/ui/loading-card';
 

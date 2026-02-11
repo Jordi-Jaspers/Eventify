@@ -24,7 +24,7 @@
     } from '@lucide/svelte';
     import type {AdminStatsResponse, GrowthDataPoint} from '$lib/api/models.ts';
     import type {ChartConfig} from '$lib/components/ui/chart/types';
-    import {StatCard} from '$lib/components/admin';
+    import {StatCard} from '$lib/components/ui/stat-card';
 
     let stats: AdminStatsResponse | null = $state(null);
     let loading: boolean = $state(true);

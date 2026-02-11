@@ -35,13 +35,13 @@
 		AlertTriangle
 	} from '@lucide/svelte';
 	import {
-		StatCard,
 		RecentRevocations,
 		RevokeApiKeyDialog,
 		getScopeBadgeClass,
 		formatNumber,
 		formatLastUsed
 	} from '$lib/components/admin';
+	import { StatCard } from '$lib/components/ui/stat-card';
 
 	let stats: AdminApiKeyStatsResponse | null = $state(null);
 	let recentRevocations: AdminApiKeyAuditResponse[] = $state([]);

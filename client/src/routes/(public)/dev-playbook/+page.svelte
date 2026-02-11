@@ -8,7 +8,7 @@
     import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2, Menu, LayoutList, AlertCircle, Mail, User, Settings, ShieldCheck } from '@lucide/svelte';
     import { Badge } from '$lib/components/ui/badge';
     import { DateTimePicker } from '$lib/components/ui/date-time-picker';
-    import { StatCard } from '$lib/components/admin';
+    import { StatCard } from '$lib/components/ui/stat-card';
     import { Key, Users, Building2, Activity, AlertTriangle, Clock, TrendingUp, Shield } from '@lucide/svelte';
     import { LoadingCard } from '$lib/components/ui/loading-card';
     import { AccessDeniedCard } from '$lib/components/ui/access-denied-card';
