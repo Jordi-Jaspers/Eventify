@@ -6,6 +6,7 @@ import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationalRole;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
+import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
 
@@ -428,5 +429,186 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
             response.andReturn().getResponse().getStatus(),
             anyOf(is(SC_FORBIDDEN), is(SC_NOT_FOUND))
         );
+    }
+
+    @Test
+    @DisplayName("Should return only active channels when filtering by status ACTIVE")
+    public void searchByStatus_shouldReturnOnlyActiveChannels() throws Exception {
+        // Given: An organization owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // And: Organization has 2 active channels
+        final CreateChannelRequest activeRequest1 = new CreateChannelRequest()
+            .setName("Active Channel 1");
+        final ResultActions createActiveResponse1 = mockMvc.perform(
+            post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(activeRequest1))
+        );
+        createActiveResponse1.andExpect(status().is(SC_CREATED));
+
+        final CreateChannelRequest activeRequest2 = new CreateChannelRequest()
+            .setName("Active Channel 2");
+        final ResultActions createActiveResponse2 = mockMvc.perform(
+            post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(activeRequest2))
+        );
+        createActiveResponse2.andExpect(status().is(SC_CREATED));
+
+        // And: Organization has 1 paused channel
+        final CreateChannelRequest pausedRequest = new CreateChannelRequest()
+            .setName("Paused Channel");
+        final ResultActions createPausedResponse = mockMvc.perform(
+            post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(pausedRequest))
+        );
+        createPausedResponse.andExpect(status().is(SC_CREATED));
+
+        final String pausedContent = createPausedResponse.andReturn().getResponse().getContentAsString();
+        final io.github.eventify.api.channel.model.response.ChannelDetailsResponse pausedChannel =
+            fromJson(pausedContent, io.github.eventify.api.channel.model.response.ChannelDetailsResponse.class);
+
+        // And: Pause the third channel
+        mockMvc.perform(
+            post(
+                ORGANIZATION_CHANNEL_PAUSE_PATH
+                    .replace("{orgId}", org.getId().toString())
+                    .replace("{id}", pausedChannel.getId().toString())
+            )
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+        );
+
+        // When: Searching channels with status filter ACTIVE
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        final SearchInput statusFilter = new SearchInput();
+        statusFilter.setFieldName("status");
+        statusFilter.setTextValue("ACTIVE");
+        searchInput.getSearchInputs().add(statusFilter);
+
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_CHANNELS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Only active channels should be returned
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<?> searchResponse = fromJson(content, PageResource.class);
+
+        assertThat(searchResponse.getContent(), hasSize(2));
+        assertThat(searchResponse.getTotalElements(), is(2L));
+    }
+
+    @Test
+    @DisplayName("Should return only paused channels when filtering by status PAUSED")
+    public void searchByStatus_shouldReturnOnlyPausedChannels() throws Exception {
+        // Given: An organization owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // And: Organization has 1 active channel
+        final CreateChannelRequest activeRequest = new CreateChannelRequest()
+            .setName("Active Channel");
+        final ResultActions createActiveResponse = mockMvc.perform(
+            post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(activeRequest))
+        );
+        createActiveResponse.andExpect(status().is(SC_CREATED));
+
+        // And: Organization has 2 paused channels
+        final CreateChannelRequest pausedRequest1 = new CreateChannelRequest()
+            .setName("Paused Channel 1");
+        final ResultActions createPausedResponse1 = mockMvc.perform(
+            post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(pausedRequest1))
+        );
+        createPausedResponse1.andExpect(status().is(SC_CREATED));
+
+        final String pausedContent1 = createPausedResponse1.andReturn().getResponse().getContentAsString();
+        final io.github.eventify.api.channel.model.response.ChannelDetailsResponse pausedChannel1 =
+            fromJson(pausedContent1, io.github.eventify.api.channel.model.response.ChannelDetailsResponse.class);
+
+        mockMvc.perform(
+            post(
+                ORGANIZATION_CHANNEL_PAUSE_PATH
+                    .replace("{orgId}", org.getId().toString())
+                    .replace("{id}", pausedChannel1.getId().toString())
+            )
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+        );
+
+        final CreateChannelRequest pausedRequest2 = new CreateChannelRequest()
+            .setName("Paused Channel 2");
+        final ResultActions createPausedResponse2 = mockMvc.perform(
+            post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(pausedRequest2))
+        );
+        createPausedResponse2.andExpect(status().is(SC_CREATED));
+
+        final String pausedContent2 = createPausedResponse2.andReturn().getResponse().getContentAsString();
+        final io.github.eventify.api.channel.model.response.ChannelDetailsResponse pausedChannel2 =
+            fromJson(pausedContent2, io.github.eventify.api.channel.model.response.ChannelDetailsResponse.class);
+
+        mockMvc.perform(
+            post(
+                ORGANIZATION_CHANNEL_PAUSE_PATH
+                    .replace("{orgId}", org.getId().toString())
+                    .replace("{id}", pausedChannel2.getId().toString())
+            )
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+        );
+
+        // When: Searching channels with status filter PAUSED
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        final SearchInput statusFilter = new SearchInput();
+        statusFilter.setFieldName("status");
+        statusFilter.setTextValue("PAUSED");
+        searchInput.getSearchInputs().add(statusFilter);
+
+        final MockHttpServletRequestBuilder searchRequest = post(
+            ORGANIZATION_CHANNELS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Only paused channels should be returned
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<?> searchResponse = fromJson(content, PageResource.class);
+
+        assertThat(searchResponse.getContent(), hasSize(2));
+        assertThat(searchResponse.getTotalElements(), is(2L));
     }
 }

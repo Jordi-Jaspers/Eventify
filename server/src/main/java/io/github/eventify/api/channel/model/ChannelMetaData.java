@@ -46,7 +46,7 @@ public class ChannelMetaData extends AbstractSortSearchMetaData {
         super();
         addField(NAME, NAME, SearchType.FUZZY_TEXT, true);
         addField(DESCRIPTION, DESCRIPTION, SearchType.FUZZY_TEXT, true);
-        addField(STATUS, STATUS, SearchType.ENUM, true);
+        addField(STATUS, STATUS, SearchType.ENUM, ChannelStatus.class, true);
         addField(USER_TERM, USER_FIELD, SearchType.NUMERIC, true);
         addField(ORGANIZATION_TERM, ORGANIZATION_ID_FIELD, SearchType.NUMERIC, true);
         addField(CREATED_AT, CREATED_AT, SearchType.DATE, true);

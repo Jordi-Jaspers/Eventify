@@ -5,6 +5,8 @@ import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.model.response.ChannelDetailsResponse;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
+import io.github.jframe.datasource.search.model.input.SearchInput;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
 import io.github.jframe.exception.resource.ValidationErrorResponseResource;
@@ -822,5 +824,81 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // Then: Response should be NOT_FOUND (not FORBIDDEN to avoid leaking)
         response.andExpect(status().is(SC_NOT_FOUND));
+    }
+
+    @Test
+    @DisplayName("Should return only active channels when filtering by status ACTIVE")
+    public void searchByStatus_shouldReturnOnlyActiveChannels() throws Exception {
+        // Given: An authenticated user
+        final User user = aValidatedUser();
+
+        // And: User has 2 active channels
+        final CreateChannelRequest activeRequest1 = new CreateChannelRequest()
+            .setName("Active Channel 1");
+        final ResultActions createActiveResponse1 = mockMvc.perform(
+            post(USER_CHANNELS_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(activeRequest1))
+        );
+        createActiveResponse1.andExpect(status().is(SC_CREATED));
+
+        final CreateChannelRequest activeRequest2 = new CreateChannelRequest()
+            .setName("Active Channel 2");
+        final ResultActions createActiveResponse2 = mockMvc.perform(
+            post(USER_CHANNELS_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(activeRequest2))
+        );
+        createActiveResponse2.andExpect(status().is(SC_CREATED));
+
+        // And: User has 1 paused channel
+        final CreateChannelRequest pausedRequest = new CreateChannelRequest()
+            .setName("Paused Channel");
+        final ResultActions createPausedResponse = mockMvc.perform(
+            post(USER_CHANNELS_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(pausedRequest))
+        );
+        createPausedResponse.andExpect(status().is(SC_CREATED));
+
+        final String pausedContent = createPausedResponse.andReturn().getResponse().getContentAsString();
+        final ChannelDetailsResponse pausedChannel = fromJson(pausedContent, ChannelDetailsResponse.class);
+
+        // And: Pause the third channel
+        mockMvc.perform(
+            post(USER_CHANNEL_PAUSE_PATH.replace("{id}", pausedChannel.getId().toString()))
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+        );
+
+        // When: Searching channels with status filter ACTIVE
+        final SortablePageInput searchInput = new SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+
+        final SearchInput statusFilter = new SearchInput();
+        statusFilter.setFieldName("status");
+        statusFilter.setTextValue("ACTIVE");
+        searchInput.getSearchInputs().add(statusFilter);
+
+        final MockHttpServletRequestBuilder searchRequest = post(USER_CHANNELS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(searchInput));
+
+        final ResultActions response = mockMvc.perform(searchRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Only active channels should be returned
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<?> searchResponse = fromJson(content, PageResource.class);
+
+        assertThat(searchResponse.getContent(), hasSize(2));
+        assertThat(searchResponse.getTotalElements(), is(2L));
     }
 }
