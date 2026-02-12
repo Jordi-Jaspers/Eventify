@@ -53,6 +53,7 @@ Raw ideas and future work. Items here need refinement before development.
 
 ### Items
 
+- [ ] **not loading correct filter values in timeline** - Fix bug when on the edit watchlist page and you clicked on default filters, then went back to timeline via "monitor" button, the filters would be wrong.
 
 ---
 
