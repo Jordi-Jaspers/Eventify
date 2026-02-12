@@ -62,6 +62,7 @@ Ideas to keep in mind for architecture decisions but not for immediate developme
 
 ### Items
 
+- [ ] **What is new message** - Show modal on login after a new release with highlights of new features and improvements.
 - [ ] **TRIAL account limitations** - Limit users, event quota, and API keys for organizations in TRIAL status. Enforce limits in backend, show upgrade prompts in UI.
 - [ ] **Organization status change audit log** - Track when admin changes org status, with reason field. Part of broader admin audit log feature.
 - [ ] **Organization status change notifications** - Notify org owner when their organization is suspended or reactivated.
