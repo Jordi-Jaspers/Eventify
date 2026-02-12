@@ -13,6 +13,7 @@ on:
 permissions:
   contents: write
   packages: write
+  checks: write
 
 env:
   REGISTRY: ghcr.io
@@ -54,6 +55,14 @@ jobs:
           echo "Commit: ${GITHUB_SHA::7}"
           ./gradlew clean build
           echo "=== Build completed successfully ==="
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: server/build/test-results/**/*.xml
+          check_name: Test Results
+          comment_mode: off
 
       - name: Upload server build artifacts
         uses: actions/upload-artifact@v4
