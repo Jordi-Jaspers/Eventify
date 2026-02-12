@@ -1943,6 +1943,12 @@ export interface components {
              * @example 2026-01-30T10:30:00Z
              */
             timestamp: string;
+            /**
+             * @description Event severity level
+             * @example OK
+             * @enum {string}
+             */
+            severity: "CRITICAL" | "WARNING" | "OK" | "NO_DATA";
         };
         PageResourceEventSearchResponse: {
             /**

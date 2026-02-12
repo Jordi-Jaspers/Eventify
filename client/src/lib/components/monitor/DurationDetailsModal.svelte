@@ -184,12 +184,13 @@
 		<!-- Events List (Scrollable) -->
 		<div class="flex-1 min-h-0 relative">
 			{#if selectedDuration && channelId}
-				{#key `${actualStartTime}-${actualEndTime}`}
+				{#key `${actualStartTime}-${actualEndTime}-${selectedDuration.severity}`}
 					<EventsList 
 						{channelId}
 						{orgId}
 						startTime={actualStartTime}
 						endTime={actualEndTime}
+						severity={selectedDuration.severity}
 					/>
 				{/key}
 			{:else}

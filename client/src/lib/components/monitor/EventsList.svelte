@@ -3,22 +3,24 @@
 	import { onMount } from 'svelte';
 	import { formatDateTime } from '$lib/utils/date';
 	import { createEventService } from '$lib/services/event-service.svelte';
+	import { getSeverityColors } from './types';
 
 	interface Props {
 		channelId: number;
 		startTime: string;
 		endTime: string;
 		orgId?: number;
+		severity?: string;
 	}
 
-	let { channelId, startTime, endTime, orgId }: Props = $props();
+	let { channelId, startTime, endTime, orgId, severity }: Props = $props();
 
 	// Use extracted service for logic
 	const eventService = createEventService(channelId, orgId);
 
 	// Initial load on mount
 	onMount(() => {
-		eventService.load(startTime, endTime, true);
+		eventService.load(startTime, endTime, true, severity);
 	});
 
 	// Infinite scroll observer
@@ -32,7 +34,7 @@
 		observer?.disconnect();
 		observer = new IntersectionObserver((entries) => {
 			if (entries[0].isIntersecting && !eventService.loading && eventService.hasMore) {
-				eventService.load(startTime, endTime, false);
+				eventService.load(startTime, endTime, false, severity);
 			}
 		}, { root: listContainer, threshold: 0.1 });
 
@@ -44,17 +46,17 @@
 
 <div 
 	bind:this={listContainer} 
-	class="overflow-y-auto min-h-[300px] max-h-[400px] relative"
+	class="overflow-y-auto h-[350px] relative"
 >
 	<!-- Initial Loading State -->
 	{#if eventService.initialLoad && eventService.loading}
-		<div class="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+		<div class="flex flex-col items-center justify-center h-full text-muted-foreground">
 			<LoaderCircle class="h-8 w-8 animate-spin text-primary mb-3" />
 			<p class="text-sm">Loading events...</p>
 		</div>
 	<!-- Empty State -->
 	{:else if eventService.events.length === 0 && !eventService.loading && !eventService.error}
-		<div class="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+		<div class="flex flex-col items-center justify-center h-full text-muted-foreground">
 			<div class="h-16 w-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
 				<Inbox class="h-8 w-8 opacity-50" />
 			</div>
@@ -71,9 +73,10 @@
 			
 			<div class="relative pl-6 border-l-2 border-border/40 space-y-4">
 				{#each eventService.events as event, idx (event.timestamp + '-' + idx)}
+					{@const severityColors = getSeverityColors(event.severity)}
 					<div class="relative group animate-fade-in">
-						<!-- Timeline dot - centered on the border line -->
-						<div class="absolute -left-[22px] -translate-x-1/2 top-[3px] h-3 w-3 rounded-full bg-primary/80 border-2 border-background shadow-sm shadow-primary/20 transition-transform group-hover:scale-125"></div>
+						<!-- Timeline dot - colored by severity -->
+						<div class="absolute -left-[22px] -translate-x-1/2 top-[3px] h-3 w-3 rounded-full {severityColors.bg} border-2 border-background shadow-sm transition-transform group-hover:scale-125"></div>
 						
 						<!-- Event content -->
 						<div class="pl-2">

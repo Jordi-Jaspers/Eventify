@@ -15,17 +15,20 @@ export function createEventService(channelId: number, orgId?: number) {
 	// Keep track of current request parameters to prevent race conditions or invalid state
 	let currentStartTime = '';
 	let currentEndTime = '';
+	let currentSeverity: string | undefined = undefined;
 
-	async function load(startTime: string, endTime: string, reset: boolean = false): Promise<void> {
-		// Update current time window
+	async function load(startTime: string, endTime: string, reset: boolean = false, severity?: string): Promise<void> {
+		// Update current time window and severity
 		if (reset) {
 			currentStartTime = startTime;
 			currentEndTime = endTime;
-		} else if (startTime !== currentStartTime || endTime !== currentEndTime) {
+			currentSeverity = severity;
+		} else if (startTime !== currentStartTime || endTime !== currentEndTime || severity !== currentSeverity) {
 			// If parameters changed but reset wasn't requested, we should probably reset anyway
 			// but strict adherence to the function signature means we just update our tracking
 			currentStartTime = startTime;
 			currentEndTime = endTime;
+			currentSeverity = severity;
 		}
 
 		if (loading && !reset) return;
@@ -45,9 +48,9 @@ export function createEventService(channelId: number, orgId?: number) {
 			let response: PageResourceEventSearchResponse;
 
 			if (orgId) {
-				response = await searchOrgEvents(orgId, channelId, startTime, endTime, page);
+				response = await searchOrgEvents(orgId, channelId, startTime, endTime, page, currentSeverity);
 			} else {
-				response = await searchUserEvents(channelId, startTime, endTime, page);
+				response = await searchUserEvents(channelId, startTime, endTime, page, currentSeverity);
 			}
 
 			const newEvents = response.content || [];
