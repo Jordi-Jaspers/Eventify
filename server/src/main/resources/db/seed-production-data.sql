@@ -437,6 +437,7 @@ VALUES (
 -- ============================================================================
 -- EVENTS - 7 DAYS FOR PERSONAL CHANNELS
 -- ============================================================================
+-- Pre-generate severity to ensure message matches
 WITH time_slots AS (
     SELECT generate_series(
         (NOW() - INTERVAL '7 days')::timestamptz,
@@ -446,16 +447,30 @@ WITH time_slots AS (
 ),
 random_slots AS (
     SELECT slot FROM time_slots WHERE random() < 0.5
+),
+event_data AS (
+    SELECT
+        c.id AS channel_id,
+        c.name AS channel_name,
+        rs.slot,
+        CASE 
+            WHEN random() < 0.70 THEN 'OK'
+            WHEN random() < 0.90 THEN 'WARNING'
+            ELSE 'CRITICAL'
+        END AS severity
+    FROM
+        channel c
+        CROSS JOIN random_slots rs
+    WHERE
+        c.status = 'ACTIVE'
+        AND c.user_id = 1
+        AND c.organization_id IS NULL
 )
 INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
 SELECT
-    c.id AS channel_id,
-    CASE 
-        WHEN random() < 0.70 THEN 'OK'
-        WHEN random() < 0.90 THEN 'WARNING'
-        ELSE 'CRITICAL'
-    END AS severity,
-    CASE c.name
+    ed.channel_id,
+    ed.severity,
+    CASE ed.channel_name
         WHEN 'Backend Errors' THEN 
             (ARRAY['API Response', 'Database Query', 'Service Call', 'Cache Hit', 'Request Processed'])[FLOOR(random() * 5 + 1)::int]
         WHEN 'Frontend Analytics' THEN 
@@ -475,14 +490,14 @@ SELECT
         ELSE 
             (ARRAY['Event Received', 'Status Update', 'Metric Report', 'Heartbeat', 'Notification'])[FLOOR(random() * 5 + 1)::int]
     END AS title,
-    CASE 
-        WHEN random() < 0.1 THEN 'Critical issue detected - immediate attention required for ' || c.name
-        WHEN random() < 0.3 THEN 'Warning threshold exceeded in ' || c.name || ' - monitoring closely'
-        ELSE 'Normal operation for ' || c.name || ' - all systems nominal'
+    CASE ed.severity
+        WHEN 'CRITICAL' THEN 'Critical issue detected - immediate attention required for ' || ed.channel_name
+        WHEN 'WARNING' THEN 'Warning threshold exceeded in ' || ed.channel_name || ' - monitoring closely'
+        ELSE 'Normal operation for ' || ed.channel_name || ' - all systems nominal'
     END AS message,
     jsonb_build_object(
         'source', (ARRAY['api-server', 'worker-1', 'worker-2', 'scheduler', 'gateway'])[FLOOR(random() * 5 + 1)::int],
-        'channel_name', c.name,
+        'channel_name', ed.channel_name,
         'environment', (ARRAY['production', 'staging', 'development'])[FLOOR(random() * 3 + 1)::int],
         'region', (ARRAY['us-east-1', 'eu-west-1', 'ap-southeast-1'])[FLOOR(random() * 3 + 1)::int],
         'cpu_usage', ROUND((random() * 80 + 10)::numeric, 1),
@@ -490,14 +505,8 @@ SELECT
         'response_time_ms', (random() * 500)::int,
         'request_count', (random() * 1000)::int
     ) AS metadata,
-    rs.slot + (random() * INTERVAL '4 minutes' - INTERVAL '2 minutes') AS timestamp
-FROM
-    channel c
-    CROSS JOIN random_slots rs
-WHERE
-    c.status = 'ACTIVE'
-    AND c.user_id = 1
-    AND c.organization_id IS NULL
+    ed.slot + (random() * INTERVAL '4 minutes' - INTERVAL '2 minutes') AS timestamp
+FROM event_data ed
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
