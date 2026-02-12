@@ -16,8 +16,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import static io.github.eventify.api.Paths.CHANNELS_PATH;
-import static io.github.eventify.api.Paths.EVENTS_PATH;
+import static io.github.eventify.common.config.RequestMatcherConfig.getExternalMatchers;
 import static org.springframework.util.StringUtils.hasText;
 
 /**
@@ -34,9 +33,9 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(@NonNull final HttpServletRequest request) {
-        final String apiKey = request.getHeader(API_KEY_HEADER);
-        final String requestUri = request.getRequestURI();
-        return !hasText(apiKey) || (!requestUri.startsWith(EVENTS_PATH) && !requestUri.startsWith(CHANNELS_PATH));
+        // Only process external endpoints - all other paths should skip this filter
+        final boolean isExternal = getExternalMatchers().stream().anyMatch(matcher -> matcher.matches(request));
+        return !isExternal;
     }
 
     @Override
@@ -45,6 +44,15 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         @NonNull final HttpServletResponse response,
         @NonNull final FilterChain filterChain) {
         final String apiKey = request.getHeader(API_KEY_HEADER);
+
+        // External endpoints require API key - reject if missing
+        if (!hasText(apiKey)) {
+            log.debug("Missing API key for external endpoint: {}", request.getRequestURI());
+            SecurityContextHolder.clearContext();
+            UnauthorizedHandler.handleAuthenticationFailure(request, response, "API key is required for external endpoints");
+            return;
+        }
+
         try {
             final ApiKeyPrincipal principal = apiKeyAuthenticationService.authenticate(apiKey);
             setSecurityContext(principal, request);

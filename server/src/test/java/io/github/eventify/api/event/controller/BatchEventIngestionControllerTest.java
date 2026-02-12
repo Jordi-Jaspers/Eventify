@@ -24,7 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import static io.github.eventify.api.Paths.EVENTS_BATCH_PATH;
+import static io.github.eventify.api.Paths.EXTERNAL_EVENTS_BATCH_PATH;
 import static io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter.API_KEY_HEADER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
 import static io.github.jframe.util.mapper.ObjectMappers.toJson;
@@ -73,7 +73,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(event1, event2, event3));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -122,7 +122,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(validEvent, futureEvent));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -170,7 +170,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(accessibleEvent, inaccessibleEvent));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, user1ApiKey.getKey())
             .content(toJson(request));
@@ -211,7 +211,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(events);
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -256,7 +256,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(eventWithTimestamp, eventWithoutTimestamp));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -293,7 +293,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of());
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -346,7 +346,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(event1, event2, event3));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -394,7 +394,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(validEvent1, invalidEvent, validEvent2));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -436,7 +436,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(event1, event2));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request));
@@ -477,7 +477,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(events);
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -513,7 +513,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(currentEvent));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -542,7 +542,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(invalidEvent));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -581,7 +581,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(invalidEvent));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -619,7 +619,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(invalidEvent));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -654,7 +654,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(event));
 
         // When: Posting batch without API key header
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .content(toJson(request));
 
@@ -699,7 +699,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
             .setEvents(List.of(event1, event2));
 
         // When: Posting batch events
-        final MockHttpServletRequestBuilder batchRequest = post(EVENTS_BATCH_PATH)
+        final MockHttpServletRequestBuilder batchRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));

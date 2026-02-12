@@ -11,6 +11,8 @@ public final class Paths {
 
     public static final String PUBLIC_PATH = BASE_PATH + "/public";
 
+    public static final String EXTERNAL_PATH = BASE_PATH + "/external";
+
     public static final String AUTH_PATH = BASE_PATH + "/auth";
 
     public static final String ADMIN_PATH = BASE_PATH + "/admin";
@@ -57,7 +59,7 @@ public final class Paths {
 
     public static final String WATCHLISTS_PART = "/watchlist";
 
-    public static final String EVENTS_PART = "/events";
+    public static final String EVENTS_PART = "/event";
 
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
@@ -235,13 +237,13 @@ public final class Paths {
 
     public static final String DEV_CREDENTIALS_PATH = PUBLIC_PATH + "/dev/credentials";
 
-    /* ------------------------------- EVENT API ENDPOINTS ------------------------------- */
+    /* ------------------------------- EXTERNAL API ENDPOINTS ------------------------------- */
 
-    public static final String EVENTS_PATH = BASE_PATH + EVENTS_PART;
+    public static final String EXTERNAL_EVENTS_PATH = EXTERNAL_PATH + EVENTS_PART;
 
-    public static final String EVENTS_BATCH_PATH = EVENTS_PATH + "/batch";
+    public static final String EXTERNAL_EVENTS_BATCH_PATH = EXTERNAL_EVENTS_PATH + "/batch";
 
-    public static final String CHANNELS_PATH = BASE_PATH + CHANNELS_PART;
+    public static final String EXTERNAL_CHANNELS_PATH = EXTERNAL_PATH + CHANNELS_PART;
 
     /* ------------------------------- MONITOR ENDPOINTS ------------------------------- */
 

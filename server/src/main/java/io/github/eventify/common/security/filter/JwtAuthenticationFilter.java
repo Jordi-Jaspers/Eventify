@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import static io.github.eventify.api.Paths.LOGOUT_PATH;
+import static io.github.eventify.common.config.RequestMatcherConfig.getExternalMatchers;
 import static io.github.eventify.common.config.RequestMatcherConfig.getPublicMatchers;
 import static io.github.eventify.common.constant.Constants.Security.*;
 import static io.github.eventify.common.exception.ApiErrorCode.INVALID_TOKEN_ERROR;
@@ -67,8 +68,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(@NonNull final HttpServletRequest request) {
         final boolean isPublic = getPublicMatchers().stream().anyMatch(matcher -> matcher.matches(request));
+        final boolean isExternal = getExternalMatchers().stream().anyMatch(matcher -> matcher.matches(request));
         final boolean isLogout = request.getRequestURI().startsWith(LOGOUT_PATH);
-        return (isPublic) && !isLogout;
+        return (isPublic || isExternal) && !isLogout;
     }
 
     @Override

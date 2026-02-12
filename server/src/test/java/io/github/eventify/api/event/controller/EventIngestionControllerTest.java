@@ -24,7 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import static io.github.eventify.api.Paths.EVENTS_PATH;
+import static io.github.eventify.api.Paths.EXTERNAL_EVENTS_PATH;
 import static io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter.API_KEY_HEADER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
 import static io.github.jframe.util.mapper.ObjectMappers.toJson;
@@ -61,7 +61,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setMetadata(metadata);
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -95,7 +95,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("System healthy");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -126,7 +126,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setChannelId(channel.getId());
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -158,7 +158,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -193,7 +193,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -220,7 +220,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, user2ApiKey.getKey())
             .content(toJson(request));
@@ -247,7 +247,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -274,7 +274,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event without API key header
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .content(toJson(request));
 
@@ -299,7 +299,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -333,7 +333,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         final OffsetDateTime beforeIngest = OffsetDateTime.now();
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -370,7 +370,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Org Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request));
@@ -403,7 +403,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, personalKey.getKey())
             .content(toJson(request));
@@ -430,7 +430,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle(longTitle);
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -467,7 +467,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle(maxTitle);
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -495,7 +495,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setMessage(largeMessage);
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -523,7 +523,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setMetadata(emptyMetadata);
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -552,7 +552,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -583,7 +583,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -623,7 +623,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -656,7 +656,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("First Event");
 
         // When: Ingesting first event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -687,7 +687,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -718,7 +718,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Test Event");
 
         // When: Ingesting event
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, apiKey.getKey())
             .content(toJson(request));
@@ -746,7 +746,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setTitle("Org Event");
 
         // When: Sending event via org API key
-        final MockHttpServletRequestBuilder ingestRequest = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request));
@@ -777,7 +777,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setSeverity(Severity.OK)
             .setTitle("Event 1");
 
-        final MockHttpServletRequestBuilder ingestRequest1 = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest1 = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request1));
@@ -791,7 +791,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setSeverity(Severity.OK)
             .setTitle("Event 2");
 
-        final MockHttpServletRequestBuilder ingestRequest2 = post(EVENTS_PATH)
+        final MockHttpServletRequestBuilder ingestRequest2 = post(EXTERNAL_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, orgApiKey.getKey())
             .content(toJson(request2));

@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import static io.github.eventify.api.Paths.EVENTS_BATCH_PATH;
-import static io.github.eventify.api.Paths.EVENTS_PATH;
+import static io.github.eventify.api.Paths.EXTERNAL_EVENTS_BATCH_PATH;
+import static io.github.eventify.api.Paths.EXTERNAL_EVENTS_PATH;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -53,7 +53,7 @@ public class EventIngestionController {
         description = "Creates a new event in the specified channel"
     )
     @PostMapping(
-        path = EVENTS_PATH,
+        path = EXTERNAL_EVENTS_PATH,
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
@@ -72,7 +72,7 @@ public class EventIngestionController {
         description = "Creates multiple events in a single request with client-provided timestamps. All-or-nothing semantics."
     )
     @PostMapping(
-        path = EVENTS_BATCH_PATH,
+        path = EXTERNAL_EVENTS_BATCH_PATH,
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
