@@ -21,7 +21,7 @@ RUN jlink \
     --no-man-pages \
     --compress=zip-6 \
     --strip-debug \
-    --add-modules java.base,java.compiler,java.desktop,jdk.crypto.cryptoki,java.xml,jdk.unsupported,java.sql,java.naming,java.logging,java.management,java.security.jgss,java.instrument,jdk.zipfs,jdk.attach \
+    --add-modules java.base,java.compiler,java.desktop,jdk.crypto.cryptoki,java.xml,jdk.unsupported,java.sql,java.naming,java.logging,java.management,java.security.jgss,java.instrument,jdk.zipfs,jdk.attach,jdk.net \
     --output slimjre
 
 # Extract the JAR file so it can be run directly from disk
