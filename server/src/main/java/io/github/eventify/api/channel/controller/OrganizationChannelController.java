@@ -7,6 +7,9 @@ import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.model.response.ChannelDetailsResponse;
 import io.github.eventify.api.channel.model.validator.ChannelValidator;
 import io.github.eventify.api.channel.service.OrganizationChannelService;
+import io.github.eventify.api.monitor.model.request.DurationDetailsRequest;
+import io.github.eventify.api.monitor.model.response.DurationDetailsResponse;
+import io.github.eventify.api.monitor.service.DurationService;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +42,8 @@ public class OrganizationChannelController {
     private final ChannelMapper channelMapper;
 
     private final ChannelValidator channelValidator;
+
+    private final DurationService durationService;
 
     @PostMapping(
         path = ORGANIZATION_CHANNELS_PATH,
@@ -171,5 +176,31 @@ public class OrganizationChannelController {
     ) {
         final Channel channel = organizationChannelService.deleteOrganizationChannel(orgId, id);
         return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
+    }
+
+    @PostMapping(
+        path = ORGANIZATION_CHANNEL_DURATIONS_PATH,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    @ResponseStatus(OK)
+    @PreAuthorize(
+        "@orgSecurity.isMember(#orgId, principal.user.id) and @channelSecurity.canAccessChannelInOrganization(#id, #orgId, principal)"
+    )
+    @Operation(
+        summary = "Get organization channel duration details",
+        description = "Fetches duration details around a specific timestamp for an organization channel"
+    )
+    public ResponseEntity<DurationDetailsResponse> getOrganizationChannelDurations(
+        @PathVariable final Long orgId,
+        @PathVariable final Long id,
+        @RequestBody final DurationDetailsRequest request
+    ) {
+        final DurationDetailsResponse response = durationService.getDurations(
+            id,
+            request.getTimestamp(),
+            request.getDirection()
+        );
+        return ResponseEntity.status(OK).body(response);
     }
 }

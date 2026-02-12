@@ -137,4 +137,106 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
      * @return optional event
      */
     java.util.Optional<Event> findTopByChannelIdOrderByTimestampDesc(Long channelId);
+
+    /**
+     * Finds events around a timestamp for duration details.
+     * Returns events both before and after the timestamp, plus the prior event if exists.
+     *
+     * @param channelId the channel ID
+     * @param timestamp the timestamp to center around
+     * @param limit     maximum number of events to return
+     * @return list of events ordered by timestamp
+     */
+    @Query(
+        value = """
+            WITH prior_event AS (
+                SELECT *
+                FROM event
+                WHERE channel_id = :channelId
+                  AND timestamp <= :timestamp
+                ORDER BY timestamp DESC
+                LIMIT 1
+            ),
+            before_events AS (
+                SELECT *
+                FROM event
+                WHERE channel_id = :channelId
+                  AND timestamp < :timestamp
+                ORDER BY timestamp DESC
+                LIMIT :limit
+            ),
+            after_events AS (
+                SELECT *
+                FROM event
+                WHERE channel_id = :channelId
+                  AND timestamp >= :timestamp
+                ORDER BY timestamp ASC
+                LIMIT :limit
+            )
+            SELECT * FROM (
+                SELECT * FROM prior_event
+                UNION
+                SELECT * FROM before_events
+                UNION
+                SELECT * FROM after_events
+            ) AS combined
+            ORDER BY timestamp ASC
+            """,
+        nativeQuery = true
+    )
+    List<Event> findEventsAroundTimestamp(
+        @Param("channelId") Long channelId,
+        @Param("timestamp") OffsetDateTime timestamp,
+        @Param("limit") int limit
+    );
+
+    /**
+     * Finds events before a timestamp for duration details.
+     *
+     * @param channelId the channel ID
+     * @param timestamp the timestamp boundary
+     * @param limit     maximum number of events to return
+     * @return list of events ordered by timestamp
+     */
+    @Query(
+        value = """
+            SELECT *
+            FROM event
+            WHERE channel_id = :channelId
+              AND timestamp < :timestamp
+            ORDER BY timestamp DESC
+            LIMIT :limit
+            """,
+        nativeQuery = true
+    )
+    List<Event> findEventsBefore(
+        @Param("channelId") Long channelId,
+        @Param("timestamp") OffsetDateTime timestamp,
+        @Param("limit") int limit
+    );
+
+    /**
+     * Finds events after a timestamp for duration details.
+     *
+     * @param channelId the channel ID
+     * @param timestamp the timestamp boundary
+     * @param limit     maximum number of events to return
+     * @return list of events ordered by timestamp
+     */
+    @Query(
+        value = """
+            SELECT *
+            FROM event
+            WHERE channel_id = :channelId
+              AND timestamp >= :timestamp
+            ORDER BY timestamp ASC
+            LIMIT :limit
+            """,
+        nativeQuery = true
+    )
+    List<Event> findEventsAfter(
+        @Param("channelId") Long channelId,
+        @Param("timestamp") OffsetDateTime timestamp,
+        @Param("limit") int limit
+    );
 }

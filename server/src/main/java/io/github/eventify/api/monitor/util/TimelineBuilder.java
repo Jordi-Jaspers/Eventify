@@ -59,7 +59,7 @@ public class TimelineBuilder {
      */
     public Timeline createNoDataTimeline(final OffsetDateTime rangeStart, final OffsetDateTime rangeEnd) {
         return Timeline.builder()
-            .durations(List.of(createDuration(Severity.NO_DATA, rangeStart, rangeEnd)))
+            .durations(List.of(TimelineDuration.of(Severity.NO_DATA, rangeStart, rangeEnd)))
             .build();
     }
 
@@ -123,14 +123,14 @@ public class TimelineBuilder {
 
         // If no events in range, entire range has the initial severity
         if (eventsInRange.isEmpty()) {
-            durations.add(createDuration(initialSeverity, rangeStart, rangeEnd));
+            durations.add(TimelineDuration.of(initialSeverity, rangeStart, rangeEnd));
             return Timeline.builder().durations(durations).build();
         }
 
         // Add prefix from range start to first event
         final OffsetDateTime firstEventTime = eventsInRange.getFirst().getTimestamp();
         if (firstEventTime.isAfter(rangeStart)) {
-            durations.add(createDuration(initialSeverity, rangeStart, firstEventTime));
+            durations.add(TimelineDuration.of(initialSeverity, rangeStart, firstEventTime));
         }
 
         // Build durations from events, merging consecutive same-severity events
@@ -142,7 +142,7 @@ public class TimelineBuilder {
                 currentSeverity = event.getSeverity();
                 durationStart = event.getTimestamp();
             } else if (!event.getSeverity().equals(currentSeverity)) {
-                durations.add(createDuration(currentSeverity, durationStart, event.getTimestamp()));
+                durations.add(TimelineDuration.of(currentSeverity, durationStart, event.getTimestamp()));
                 currentSeverity = event.getSeverity();
                 durationStart = event.getTimestamp();
             }
@@ -153,20 +153,9 @@ public class TimelineBuilder {
             final OffsetDateTime endTime = extendToEnd
                 ? rangeEnd
                 : eventsInRange.getLast().getTimestamp();
-            durations.add(createDuration(currentSeverity, durationStart, endTime));
+            durations.add(TimelineDuration.of(currentSeverity, durationStart, endTime));
         }
 
         return Timeline.builder().durations(durations).build();
-    }
-
-    private TimelineDuration createDuration(
-        final Severity severity,
-        final OffsetDateTime start,
-        final OffsetDateTime end
-    ) {
-        return new TimelineDuration()
-            .setSeverity(severity)
-            .setStartTime(start)
-            .setEndTime(end);
     }
 }

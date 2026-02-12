@@ -1,13 +1,15 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Radio, Clock, Calendar } from '@lucide/svelte';
+	import { Radio, Clock, Calendar, LoaderCircle } from '@lucide/svelte';
 	import type { TimelineDuration, Severity } from '$lib/api/models';
 	import { getSeverityColors } from './types';
 	import MiniTimeline from './MiniTimeline.svelte';
 	import EventsList from './EventsList.svelte';
 	import { formatTime, formatDate } from '$lib/utils/date';
 	import { formatDurationLength } from '$lib/utils/duration';
+	import { createDurationService } from '$lib/api/monitor/service/DurationService.svelte';
+	import { untrack } from 'svelte';
 
 	interface Props {
 		open: boolean;
@@ -15,7 +17,6 @@
 		channelName: string;
 		currentSeverity: Severity | null;
 		selectedDuration: TimelineDuration | null;
-		allDurations: TimelineDuration[];
 		orgId?: number; // If present, use org API
 		channelId?: number;
 	}
@@ -26,40 +27,61 @@
 		channelName, 
 		currentSeverity, 
 		selectedDuration = $bindable(null), 
-		allDurations,
 		orgId,
 		channelId
 	}: Props = $props();
 
-	// Derived
+	const service = createDurationService();
+	
+	// Derived values for reactivity - service getters need to be tracked
+	const serviceDurations = $derived(service.durations);
+	const serviceCanGoPrevious = $derived(service.canGoPrevious);
+	const serviceCanGoNext = $derived(service.canGoNext);
+	const serviceHasPrevious = $derived(service.hasPrevious);
+	const serviceLoading = $derived(service.loading);
+
+	// Load data when modal opens
+	let wasOpen = false;
+	$effect(() => {
+		if (open && !wasOpen) {
+			untrack(() => {
+				if (channelId && selectedDuration) {
+					service.load(channelId, orgId, selectedDuration.startTime);
+				}
+			});
+		}
+		wasOpen = open;
+	});
+
+	// Sync service selection back to prop
+	$effect(() => {
+		if (service.selectedDuration) {
+			selectedDuration = service.selectedDuration;
+		}
+	});
+
+	// Derived from selectedDuration (which is synced with service)
 	const severityColors = $derived(
 		currentSeverity ? getSeverityColors(currentSeverity) : null
 	);
 
-	// Calculate actual duration from the selected segment (not clamped to view window)
 	const actualStartTime = $derived(selectedDuration?.startTime ?? '');
-	const actualEndTime = $derived(selectedDuration?.endTime ?? '');
+	// For ongoing durations (null endTime), use current time for event search
+	const actualEndTime = $derived(selectedDuration?.endTime ?? new Date().toISOString());
 
-	// Format duration for display
 	const durationTimeRange = $derived(
 		selectedDuration 
-			? `${formatTime(actualStartTime)} → ${formatTime(actualEndTime)}` 
+			? `${formatTime(actualStartTime)} → ${actualEndTime ? formatTime(actualEndTime) : 'Now'}` 
 			: ''
 	);
 
-	// Calculate duration length in human readable format
 	const durationLength = $derived(
-		selectedDuration ? formatDurationLength(actualStartTime, actualEndTime) : ''
+		selectedDuration ? formatDurationLength(actualStartTime, actualEndTime || new Date()) : ''
 	);
 
-	// Format date for header
 	const durationDate = $derived(
 		selectedDuration ? formatDate(actualStartTime) : ''
 	);
-
-	function handleDurationClick(duration: TimelineDuration): void {
-		selectedDuration = duration;
-	}
 </script>
 
 <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -110,12 +132,30 @@
 			</Dialog.Description>
 
 			<!-- Mini Timeline -->
-			<div class="pt-2">
-				<MiniTimeline 
-					durations={allDurations} 
-					{selectedDuration}
-					onDurationClick={handleDurationClick}
-				/>
+			<div class="pt-2 relative min-h-[60px]">
+				{#if serviceLoading && serviceDurations.length === 0}
+					<div class="absolute inset-0 flex items-center justify-center z-10">
+						<LoaderCircle class="h-6 w-6 animate-spin text-primary" />
+					</div>
+				{:else}
+					<!-- Show loading overlay if loading more but keep content -->
+					{#if serviceLoading}
+						<div class="absolute inset-0 bg-background/20 z-20 flex items-center justify-center backdrop-blur-[1px]">
+							<LoaderCircle class="h-5 w-5 animate-spin text-primary" />
+						</div>
+					{/if}
+					
+					<MiniTimeline 
+						durations={serviceDurations} 
+						selectedDuration={selectedDuration}
+                        canGoPrevious={serviceCanGoPrevious}
+                        canGoNext={serviceCanGoNext}
+                        hasPrevious={serviceHasPrevious}
+						onDurationClick={(d) => service.selectDuration(d)}
+                        onPrevious={() => service.goToPrevious()}
+                        onNext={() => service.goToNext()}
+					/>
+				{/if}
 			</div>
 		</Dialog.Header>
 
@@ -141,7 +181,7 @@
 			{/if}
 		</div>
 
-		<!-- Events List (Scrollable) - Use ACTUAL duration times, not clamped -->
+		<!-- Events List (Scrollable) -->
 		<div class="flex-1 min-h-0 relative">
 			{#if selectedDuration && channelId}
 				{#key `${actualStartTime}-${actualEndTime}`}

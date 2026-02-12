@@ -46,4 +46,23 @@ public class TimelineDuration implements Serializable {
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     private OffsetDateTime endTime;
+
+    /**
+     * Creates a new TimelineDuration with the given parameters.
+     *
+     * @param severity  the severity level
+     * @param startTime the start time
+     * @param endTime   the end time (null for live/ongoing durations)
+     * @return a new TimelineDuration instance
+     */
+    public static TimelineDuration of(
+        final Severity severity,
+        final OffsetDateTime startTime,
+        final OffsetDateTime endTime
+    ) {
+        return new TimelineDuration()
+            .setSeverity(severity)
+            .setStartTime(startTime)
+            .setEndTime(endTime);
+    }
 }

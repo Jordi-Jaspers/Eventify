@@ -7,6 +7,9 @@ import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.model.response.ChannelDetailsResponse;
 import io.github.eventify.api.channel.model.validator.ChannelValidator;
 import io.github.eventify.api.channel.service.ChannelService;
+import io.github.eventify.api.monitor.model.request.DurationDetailsRequest;
+import io.github.eventify.api.monitor.model.response.DurationDetailsResponse;
+import io.github.eventify.api.monitor.service.DurationService;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,6 +43,8 @@ public class UserChannelController {
     private final ChannelMapper channelMapper;
 
     private final ChannelValidator channelValidator;
+
+    private final DurationService durationService;
 
     @PostMapping(
         path = USER_CHANNELS_PATH,
@@ -151,5 +156,28 @@ public class UserChannelController {
     public ResponseEntity<ChannelDetailsResponse> deleteChannel(@PathVariable final Long id) {
         final Channel channel = channelService.deleteUserChannel(id);
         return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
+    }
+
+    @PostMapping(
+        path = USER_CHANNEL_DURATIONS_PATH,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    @ResponseStatus(OK)
+    @PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal)")
+    @Operation(
+        summary = "Get channel duration details",
+        description = "Fetches duration details around a specific timestamp for a user-owned channel"
+    )
+    public ResponseEntity<DurationDetailsResponse> getChannelDurations(
+        @PathVariable final Long id,
+        @RequestBody final DurationDetailsRequest request
+    ) {
+        final DurationDetailsResponse response = durationService.getDurations(
+            id,
+            request.getTimestamp(),
+            request.getDirection()
+        );
+        return ResponseEntity.status(OK).body(response);
     }
 }

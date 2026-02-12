@@ -251,6 +251,12 @@ public final class Paths {
 
     public static final String ORGANIZATION_MONITOR_PATH = ORGANIZATION_PATH + MONITOR_PART;
 
+    public static final String DURATIONS_PART = "/durations";
+
+    public static final String USER_CHANNEL_DURATIONS_PATH = USER_CHANNELS_PATH + ID_PART + DURATIONS_PART;
+
+    public static final String ORGANIZATION_CHANNEL_DURATIONS_PATH = ORGANIZATION_CHANNELS_PATH + ID_PART + DURATIONS_PART;
+
     /* ------------------------------- END ------------------------------- */
 
     private Paths() {

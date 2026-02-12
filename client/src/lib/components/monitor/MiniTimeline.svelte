@@ -1,94 +1,85 @@
 <script lang="ts">
-	import { formatTime } from '$lib/utils/date';
+	import { formatTime, formatDate } from '$lib/utils/date';
 	import { formatDurationLength } from '$lib/utils/duration';
 	import type { TimelineDuration, Severity } from '$lib/api/models';
 	import { getSeverityColors } from './types';
 	import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '$lib/components/ui/tooltip';
+    import { ChevronLeft, ChevronRight, MoreVertical, ArrowRight } from 'lucide-svelte';
 
 	interface Props {
 		durations: TimelineDuration[];
 		selectedDuration: TimelineDuration | null;
+        canGoPrevious: boolean;
+        canGoNext: boolean;
+        hasPrevious: boolean;  // For visual indicators (cutoff markers)
 		onDurationClick: (duration: TimelineDuration) => void;
+        onPrevious: () => void;
+        onNext: () => void;
 	}
 
-	let { durations, selectedDuration, onDurationClick }: Props = $props();
-
-	// Find index of selected duration
-	const selectedIndex = $derived.by(() => {
-		if (!selectedDuration) return -1;
-		return durations.findIndex(d => 
-			d.startTime === selectedDuration.startTime && d.endTime === selectedDuration.endTime
-		);
-	});
-
-	// Get the durations to display: previous (if exists), selected, next (if exists)
-	const visibleDurations = $derived.by(() => {
-		if (selectedIndex === -1 || durations.length === 0) return [];
-		
-		const result: { duration: TimelineDuration; position: 'previous' | 'selected' | 'next' }[] = [];
-		
-		// Previous duration (if exists)
-		if (selectedIndex > 0) {
-			result.push({ duration: durations[selectedIndex - 1], position: 'previous' });
-		}
-		
-		// Selected duration
-		result.push({ duration: durations[selectedIndex], position: 'selected' });
-		
-		// Next duration (if exists)
-		if (selectedIndex < durations.length - 1) {
-			result.push({ duration: durations[selectedIndex + 1], position: 'next' });
-		}
-		
-		return result;
-	});
-
-	// Calculate the time range for the visible window
-	const timeRange = $derived.by(() => {
-		if (visibleDurations.length === 0) return { start: 0, end: 0, totalMs: 0 };
-		
-		const start = new Date(visibleDurations[0].duration.startTime).getTime();
-		const end = new Date(visibleDurations[visibleDurations.length - 1].duration.endTime).getTime();
-		
-		return { start, end, totalMs: end - start };
-	});
-
-	// Calculate width and position for each duration
-	function getSegmentStyle(duration: TimelineDuration): { left: string; width: string } {
-		if (timeRange.totalMs === 0) return { left: '0%', width: '100%' };
-		
-		const start = new Date(duration.startTime).getTime();
-		const end = new Date(duration.endTime).getTime();
-		
-		const leftPercent = ((start - timeRange.start) / timeRange.totalMs) * 100;
-		const widthPercent = ((end - start) / timeRange.totalMs) * 100;
-		
-		return {
-			left: `${Math.max(0, leftPercent)}%`,
-			width: `${Math.max(1, widthPercent)}%`
-		};
-	}
-
-	// Time markers for the visible range
-	const timeMarkers = $derived.by(() => {
-		if (visibleDurations.length === 0) return [];
-		
-		const markers: { label: string; left: number }[] = [];
-		
-		// Add start time of first visible duration
-		markers.push({
-			label: formatTime(visibleDurations[0].duration.startTime),
-			left: 0
+	let props: Props = $props();
+	
+	// Derived values to maintain reactivity from props
+	const durations = $derived(props.durations);
+	const selectedDuration = $derived(props.selectedDuration);
+	const canGoPrevious = $derived(props.canGoPrevious);
+	const canGoNext = $derived(props.canGoNext);
+	const hasPrevious = $derived(props.hasPrevious);
+	const onDurationClick = $derived(props.onDurationClick);
+	const onPrevious = $derived(props.onPrevious);
+	const onNext = $derived(props.onNext);
+	
+	// Debug logging
+	$effect(() => {
+		console.log('[MiniTimeline] props changed:', {
+			canGoPrevious: props.canGoPrevious,
+			canGoNext: props.canGoNext,
+			derivedCanGoPrevious: canGoPrevious,
+			derivedCanGoNext: canGoNext
 		});
-		
-		// Add end time of last visible duration
-		markers.push({
-			label: formatTime(visibleDurations[visibleDurations.length - 1].duration.endTime),
-			left: 100
-		});
-		
-		return markers;
 	});
+
+    const COLLAPSE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+    // Process durations for display (calculate widths, visual weights)
+    const segments = $derived.by(() => {
+        if (!durations || durations.length === 0) return [];
+
+        const now = Date.now();
+        const processed = durations.map(d => {
+            const start = new Date(d.startTime).getTime();
+            const end = d.endTime ? new Date(d.endTime).getTime() : now;
+            const realDuration = end - start;
+            const isOngoing = !d.endTime;
+            const isCollapsed = realDuration >= COLLAPSE_THRESHOLD_MS;
+            
+            // Visual weight logic
+            const visualWeight = isCollapsed ? (COLLAPSE_THRESHOLD_MS / 4) : realDuration;
+
+            return {
+                duration: d,
+                realDuration,
+                visualWeight,
+                isOngoing,
+                isCollapsed,
+                start,
+                end
+            };
+        });
+
+        const totalVisualWeight = processed.reduce((sum, p) => sum + p.visualWeight, 0);
+
+        return processed.map(p => {
+            // Calculate percentage width
+            // Ensure a minimum width logic is handled by CSS min-width if needed
+            let widthPercent = totalVisualWeight > 0 ? (p.visualWeight / totalVisualWeight) * 100 : 0;
+            
+            return {
+                ...p,
+                widthPercent
+            };
+        });
+    });
 
 	function getSegmentClasses(severity: Severity): string {
 		switch (severity) {
@@ -98,147 +89,142 @@
 				return 'bg-amber-500 shadow-amber-500/30';
 			case 'OK':
 				return 'bg-green-500 shadow-green-500/30';
-			default:
+			case 'NO_DATA':
 				return 'bg-gray-400 shadow-gray-400/20';
 		}
 	}
-
-	// Navigation helpers
-	const hasPrevious = $derived(selectedIndex > 0);
-	const hasNext = $derived(selectedIndex < durations.length - 1);
-
-	function goToPrevious(): void {
-		if (hasPrevious) {
-			onDurationClick(durations[selectedIndex - 1]);
-		}
-	}
-
-	function goToNext(): void {
-		if (hasNext) {
-			onDurationClick(durations[selectedIndex + 1]);
-		}
-	}
+    
+    // Formatting helpers
+    function formatCollapsedLabel(ms: number): string {
+        const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+        return `${days}d`;
+    }
 </script>
 
 <div class="space-y-1.5 select-none">
-	<!-- Navigation and Position Indicator -->
+	<!-- Navigation and Stats -->
 	<div class="flex items-center justify-between text-xs text-muted-foreground">
-		<div class="flex items-center gap-2">
-			<button
-				type="button"
-				class="px-2 py-0.5 rounded hover:bg-muted/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-				disabled={!hasPrevious}
-				onclick={goToPrevious}
-			>
-				← Previous
-			</button>
-		</div>
+		<button
+			type="button"
+			class="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-muted/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-primary font-medium"
+			disabled={!canGoPrevious}
+			onclick={onPrevious}
+		>
+            <ChevronLeft class="h-3 w-3" />
+			Previous
+		</button>
 		
-		<span class="font-mono text-[10px]">
-			Duration {selectedIndex + 1} of {durations.length}
-		</span>
+        {#if selectedDuration}
+            <span class="font-mono text-[10px]">
+                {formatDate(selectedDuration.startTime)}
+            </span>
+        {/if}
 		
-		<div class="flex items-center gap-2">
-			<button
-				type="button"
-				class="px-2 py-0.5 rounded hover:bg-muted/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-				disabled={!hasNext}
-				onclick={goToNext}
-			>
-				Next →
-			</button>
-		</div>
+		<button
+			type="button"
+			class="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-muted/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-primary font-medium"
+			disabled={!canGoNext}
+			onclick={onNext}
+		>
+			Next
+            <ChevronRight class="h-3 w-3" />
+		</button>
 	</div>
 
-	<!-- Time Labels -->
-	<div class="relative h-4 text-[10px] text-muted-foreground/70 font-mono">
-		{#each timeMarkers as marker}
-			<div 
-				class="absolute transform transition-opacity"
-				class:-translate-x-full={marker.left === 100}
-				style="left: {marker.left}%"
-			>
-				{marker.label}
-			</div>
-		{/each}
+	<!-- Timeline Track (Flexbox for non-linear time) -->
+	<div class="relative h-10 bg-muted/10 rounded-md border border-border/20 overflow-hidden flex w-full">
+		{#each segments as item, i (item.duration.startTime)}
+            {@const isSelected = selectedDuration && 
+                item.duration.startTime === selectedDuration.startTime && 
+                item.duration.endTime === selectedDuration.endTime}
+            {@const colors = getSeverityColors(item.duration.severity)}
+            
+            <!-- Segment -->
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger 
+                        class="relative h-full transition-all duration-200 ease-out group focus:outline-none flex-shrink-0"
+                        style="width: {item.widthPercent}%; min-width: 4px;"
+                        onclick={() => onDurationClick(item.duration)}
+                    >
+                        <div class="h-full w-full py-1 px-[1px]">
+                            <div 
+                                class="h-full rounded-sm shadow-sm transition-all duration-200 flex items-center justify-center relative overflow-hidden
+                                    {getSegmentClasses(item.duration.severity)}
+                                    {isSelected 
+                                        ? 'ring-2 ring-primary ring-offset-1 ring-offset-card shadow-lg z-10' 
+                                        : 'opacity-60 hover:opacity-90 group-hover:shadow-md'
+                                    }"
+                            >
+                                <!-- Collapsed Indicator -->
+                                {#if item.isCollapsed}
+                                    <div class="flex items-center justify-center gap-0.5 text-white/90 text-[10px] font-bold z-10 relative">
+                                        {#if i === 0 && hasPrevious}
+                                            <MoreVertical class="h-3 w-3 -ml-1 opacity-70" />
+                                        {/if}
+                                        {formatCollapsedLabel(item.realDuration)}
+                                    </div>
+                                    <!-- Hatched pattern overlay for collapsed -->
+                                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8cGF0aCBkPSJNLTEgMUw1IC0xTS0xIDVMNSAzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] opacity-30"></div>
+                                {/if}
+
+                                <!-- Ongoing Indicator -->
+                                {#if item.isOngoing}
+                                    <div class="absolute right-0 top-0 bottom-0 w-1 bg-white/50 animate-pulse"></div>
+                                    <ArrowRight class="h-3 w-3 text-white absolute right-1 top-1/2 -translate-y-1/2 opacity-80" />
+                                {/if}
+
+                                <!-- Start Cutoff Indicator (for first item if previous exists) -->
+                                {#if i === 0 && hasPrevious && !item.isCollapsed}
+                                    <MoreVertical class="absolute left-1 h-3 w-3 text-white/70" />
+                                {/if}
+                            </div>
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" class="text-xs bg-popover text-popover-foreground border border-border shadow-lg">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold {colors.text}">{item.duration.severity}</span>
+                                {#if item.isCollapsed}
+                                    <span class="text-[10px] bg-muted px-1 rounded">Collapsed (>24h)</span>
+                                {/if}
+                                {#if item.isOngoing}
+                                    <span class="text-[10px] bg-primary/20 text-primary px-1 rounded animate-pulse">Ongoing</span>
+                                {/if}
+                            </div>
+                            <p class="text-muted-foreground font-mono">
+                                {formatTime(item.duration.startTime)} – {item.duration.endTime ? formatTime(item.duration.endTime) : 'Now'}
+                            </p>
+                            <p class="text-muted-foreground/80">
+                                Duration: {formatDurationLength(item.duration.startTime, item.duration.endTime ?? new Date())}
+                            </p>
+                            {#if i === 0 && hasPrevious}
+                                <p class="text-[10px] text-muted-foreground mt-1 border-t border-border/50 pt-1">
+                                    Started: {formatDate(item.duration.startTime)}
+                                </p>
+                            {/if}
+                        </div>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        {/each}
 	</div>
-
-	<!-- Timeline Track -->
-	<div class="relative h-8 bg-muted/10 rounded-md border border-border/20 overflow-hidden">
-		<!-- Segments -->
-		{#each visibleDurations as item (item.duration.startTime)}
-			{@const style = getSegmentStyle(item.duration)}
-			{@const isSelected = item.position === 'selected'}
-			{@const colors = getSeverityColors(item.duration.severity)}
-			
-			<TooltipProvider>
-				<Tooltip>
-					<TooltipTrigger 
-						class="absolute h-full top-0 cursor-pointer transition-all duration-200 ease-out z-10 group"
-						style="left: {style.left}; width: {style.width}"
-						onclick={() => onDurationClick(item.duration)}
-					>
-						<div class="h-full w-full py-1 px-0.5">
-							<div 
-								class="h-full rounded-sm shadow-sm transition-all duration-200 flex items-center justify-center
-									{getSegmentClasses(item.duration.severity)}
-									{isSelected 
-										? 'ring-2 ring-primary ring-offset-1 ring-offset-card shadow-lg' 
-										: 'opacity-50 hover:opacity-80 group-hover:shadow-md'
-									}"
-							>
-								<!-- Show duration length inside if wide enough -->
-								{#if isSelected}
-									<span class="text-[10px] font-medium text-white drop-shadow-sm truncate px-1">
-										{formatDurationLength(item.duration.startTime, item.duration.endTime)}
-									</span>
-								{/if}
-							</div>
-						</div>
-					</TooltipTrigger>
-					<TooltipContent side="bottom" class="text-xs">
-						<div class="space-y-1">
-							<p class="font-semibold {colors.text}">{item.duration.severity}</p>
-							<p class="text-muted-foreground font-mono">
-								{formatTime(item.duration.startTime)} – {formatTime(item.duration.endTime)}
-							</p>
-							<p class="text-muted-foreground/80">
-								Duration: {formatDurationLength(item.duration.startTime, item.duration.endTime)}
-							</p>
-							{#if item.position === 'previous'}
-								<p class="text-primary text-[10px]">Click to view previous duration</p>
-							{:else if item.position === 'next'}
-								<p class="text-primary text-[10px]">Click to view next duration</p>
-							{/if}
-						</div>
-					</TooltipContent>
-				</Tooltip>
-			</TooltipProvider>
-		{/each}
-
-		<!-- Edge indicators when there are more durations -->
-		{#if hasPrevious && visibleDurations[0]?.position !== 'previous'}
-			<div class="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-muted/50 to-transparent pointer-events-none z-20 flex items-center justify-start pl-0.5">
-				<span class="text-muted-foreground/50 text-xs">‹</span>
-			</div>
-		{/if}
-		{#if hasNext && visibleDurations[visibleDurations.length - 1]?.position !== 'next'}
-			<div class="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-muted/50 to-transparent pointer-events-none z-20 flex items-center justify-end pr-0.5">
-				<span class="text-muted-foreground/50 text-xs">›</span>
-			</div>
-		{/if}
-	</div>
-
-	<!-- Legend for context -->
-	{#if visibleDurations.length > 1}
-		<div class="flex items-center justify-center gap-4 text-[10px] text-muted-foreground/60">
-			{#if visibleDurations.some(v => v.position === 'previous')}
-				<span>← Previous duration</span>
-			{/if}
-			<span class="font-medium text-foreground/60">Selected</span>
-			{#if visibleDurations.some(v => v.position === 'next')}
-				<span>Next duration →</span>
-			{/if}
-		</div>
-	{/if}
+    
+    <!-- Legend / Hints -->
+    <div class="flex justify-between px-1">
+         <!-- Start Time of Window -->
+         <span class="text-[10px] text-muted-foreground/50 font-mono">
+            {#if segments.length > 0}
+                {formatTime(segments[0].duration.startTime)}
+            {/if}
+         </span>
+         
+         <!-- End Time of Window -->
+         <span class="text-[10px] text-muted-foreground/50 font-mono">
+            {#if segments.length > 0}
+                {@const last = segments[segments.length-1]}
+                {last.duration.endTime ? formatTime(last.duration.endTime) : 'Now'}
+            {/if}
+         </span>
+    </div>
 </div>

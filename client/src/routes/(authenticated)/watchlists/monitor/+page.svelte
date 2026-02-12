@@ -420,7 +420,6 @@
 		channelName={selectedChannelName}
 		currentSeverity={selectedSeverity}
 		bind:selectedDuration={selectedDuration}
-		allDurations={selectedTimelineDurations}
 		channelId={selectedChannelId}
 	/>
 </main>
