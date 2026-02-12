@@ -21,7 +21,7 @@ export async function searchOrgEvents(
 		searchInputs.push({ fieldName: 'severity', textValue: severity });
 	}
 
-	const { data, error } = await client.POST('/v1/organization/{orgId}/events/search', {
+	const { data, error } = await client.POST('/v1/organization/{orgId}/event/search', {
 		params: {
 			path: { orgId }
 		},

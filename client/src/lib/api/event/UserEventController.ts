@@ -20,7 +20,7 @@ export async function searchUserEvents(
 		searchInputs.push({ fieldName: 'severity', textValue: severity });
 	}
 
-	const { data, error } = await client.POST('/v1/user/events/search', {
+	const { data, error } = await client.POST('/v1/user/event/search', {
 		body: {
 			pageNumber: page,
 			pageSize: 20,
