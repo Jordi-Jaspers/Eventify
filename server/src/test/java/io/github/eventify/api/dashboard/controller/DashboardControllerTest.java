@@ -5,6 +5,7 @@ import io.github.eventify.api.dashboard.model.response.DashboardStatsResponse;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.util.TimeProvider;
 import io.github.eventify.support.IntegrationTest;
 
 import java.time.OffsetDateTime;
@@ -180,9 +181,9 @@ public class DashboardControllerTest extends IntegrationTest {
         final Channel channel1 = aChannelForUser(user, "Channel 1");
         final Channel channel2 = aChannelForUser(user, "Channel 2");
 
-        // And: Events with different timestamps
-        final OffsetDateTime older = OffsetDateTime.now().minusHours(5);
-        final OffsetDateTime newer = OffsetDateTime.now().minusMinutes(10);
+        // And: Events with different timestamps (use TimeProvider for microsecond precision)
+        final OffsetDateTime older = TimeProvider.now().minusHours(5);
+        final OffsetDateTime newer = TimeProvider.now().minusMinutes(10);
 
         anEventForChannel(channel1, Severity.OK, older);
         anEventForChannel(channel2, Severity.OK, newer);
