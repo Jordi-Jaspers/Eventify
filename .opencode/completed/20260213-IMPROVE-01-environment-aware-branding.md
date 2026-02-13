@@ -40,15 +40,16 @@ Environment-aware visual branding so developers can instantly identify which env
 
 ### Favicon Variants
 **Files created:**
-- `client/src/lib/assets/favicon-dev.svg` - Radar icon with red dot in top-right corner
-- `client/src/lib/assets/favicon-tst.svg` - Radar icon with green dot in top-right corner
-- Production uses original favicon (no dot)
+- `client/src/lib/assets/favicon-dev.svg` - Radar icon with red "DEV" text pill in top-right corner
+- `client/src/lib/assets/favicon-tst.svg` - Radar icon with green "TST" text pill in top-right corner
+- Production uses original favicon (no badge)
 
 ### AppLogo Component
 **File:** `client/src/lib/components/layout/AppLogo.svelte`
 - Added `showEnvBadge` prop (default: true)
 - Added `forceEnvironment` prop for playbook demos
-- Shows small colored dot (DEV=red, TST=green) in top-right corner of icon on non-production
+- Shows small text badge (DEV=red, TST=green) positioned to top-right of icon on non-production
+- Badge sizes scale with logo size (6px/7px/8px font for small/medium/large)
 
 ### Dynamic Favicon
 **File:** `client/src/routes/+layout.svelte`
@@ -99,6 +100,7 @@ Environment-aware visual branding so developers can instantly identify which env
 
 ## Notes
 
-- Favicon indicator uses simple colored dot instead of text - text rendering in tiny 16px favicons was unreadable
+- Favicon uses text pill badges (DEV/TST) with colored backgrounds for clear environment identification
+- AppLogo uses matching text badges that scale with logo size - kept small to avoid covering the Radar icon
 - Single `PUBLIC_ENVIRONMENT` env var controls both visual branding AND dev feature visibility (simpler than two separate vars)
 - Fail-safe default: If `PUBLIC_ENVIRONMENT` is not set or has invalid value, defaults to 'production' (no dev features shown)

@@ -287,7 +287,7 @@
                     <Card class="border-border/50">
                         <CardHeader>
                             <CardTitle class="text-base">Environment Variants</CardTitle>
-                            <CardDescription>Colored dot indicators for dev/test/production</CardDescription>
+                            <CardDescription>Text badge indicators for dev/test environments</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div class="flex flex-wrap items-center justify-center gap-12 py-4">
@@ -295,7 +295,7 @@
                                     <div class={currentEnvironment === 'local' ? 'ring-2 ring-primary ring-offset-2 ring-offset-background rounded-lg p-4' : 'p-4'}>
                                         <AppLogo size="medium" forceEnvironment="local" />
                                     </div>
-                                    <p class="text-xs text-muted-foreground mt-4">Local (red dot)</p>
+                                    <p class="text-xs text-muted-foreground mt-4">Local (DEV badge)</p>
                                     {#if currentEnvironment === 'local'}
                                         <Badge variant="default" class="mt-2">Current</Badge>
                                     {/if}
@@ -304,7 +304,7 @@
                                     <div class={currentEnvironment === 'test' ? 'ring-2 ring-primary ring-offset-2 ring-offset-background rounded-lg p-4' : 'p-4'}>
                                         <AppLogo size="medium" forceEnvironment="test" />
                                     </div>
-                                    <p class="text-xs text-muted-foreground mt-4">Test (green dot)</p>
+                                    <p class="text-xs text-muted-foreground mt-4">Test (TST badge)</p>
                                     {#if currentEnvironment === 'test'}
                                         <Badge variant="default" class="mt-2">Current</Badge>
                                     {/if}
@@ -313,7 +313,7 @@
                                     <div class={currentEnvironment === 'production' ? 'ring-2 ring-primary ring-offset-2 ring-offset-background rounded-lg p-4' : 'p-4'}>
                                         <AppLogo size="medium" forceEnvironment="production" />
                                     </div>
-                                    <p class="text-xs text-muted-foreground mt-4">Production (no dot)</p>
+                                    <p class="text-xs text-muted-foreground mt-4">Production (no badge)</p>
                                     {#if currentEnvironment === 'production'}
                                         <Badge variant="default" class="mt-2">Current</Badge>
                                     {/if}
