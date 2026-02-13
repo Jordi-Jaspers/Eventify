@@ -56,6 +56,9 @@ Raw ideas and future work. Items here need refinement before development.
 ---
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
+
+- [ ] **Redirect to org incorrect** - on user profile page clicking on organization name redirects to wrong location. Fix routing logic to redirect to correct org dashboard.
+
 ---
 ## Epic: General Improvements
 **Context**: Small improvements that don't fit into other epics but would enhance user experience.
