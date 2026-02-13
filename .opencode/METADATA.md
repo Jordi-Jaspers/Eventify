@@ -8,7 +8,7 @@
 | Setting | Value | Description |
 |---------|-------|-------------|
 | `screenshot_tests_enabled` | `true` | Enable screenshot tests for UI validation |
-| `update_whats_new` | `true` | Add completed stories to What's New changelog (`client/src/lib/data/changelog.ts`) |
+| `update_whats_new` | `true` | Add user-facing changes to What's New changelog (see `eventify-whats-new` skill) |
 
 ## Project Files
 
@@ -176,6 +176,7 @@ They override the global agents of the same name when working on this project.
 | eventify-architecture | Project structure, layer architecture, where code belongs (REQUIRED) |
 | eventify-spring-standards | Spring Boot patterns: JFrame search/pagination, entities, services, controllers, tests |
 | eventify-svelte-standards | SvelteKit patterns: Controller→Service→Page, API client, DataTable, reusable components |
+| eventify-whats-new | When and how to update the user-facing What's New changelog |
 
 **Note:** Project-specific skills contain patterns tailored to this codebase. Agents should load these first.
 
