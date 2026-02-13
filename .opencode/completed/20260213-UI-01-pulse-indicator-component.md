@@ -58,8 +58,9 @@ The `animate-pulse` animation smoothly fades opacity (1 → 0.5 → 1), providin
 ## Files Changed
 
 ### New Files
-- `client/src/lib/components/ui/pulse-indicator/pulse-indicator.svelte` - Component implementation
-- `client/src/lib/components/ui/pulse-indicator/index.ts` - Barrel export
+- `client/src/lib/components/ui/pulse-indicator/PulseIndicator.svelte` - Component implementation
+- `client/src/lib/components/ui/pulse-indicator/constants.ts` - Configuration constants & types
+- `client/src/lib/components/ui/pulse-indicator/index.ts` - Barrel export with type re-exports
 
 ### Modified Files
 - `client/src/lib/components/monitor/ConfigurePopover.svelte` - Live indicator in popover
@@ -71,50 +72,75 @@ The `animate-pulse` animation smoothly fades opacity (1 → 0.5 → 1), providin
 
 ## Implementation Details
 
-The component uses Tailwind CSS classes for all styling:
+The component uses an optimized structure with extracted constants:
 
+### constants.ts
+```typescript
+export type PulseIndicatorSize = 'xs' | 'sm' | 'md' | 'lg';
+export type PulseIndicatorVariant = 'green' | 'primary' | 'red' | 'yellow' | 'blue';
+
+export const SIZE_CLASSES: Record<PulseIndicatorSize, string> = {
+  xs: 'h-1.5 w-1.5',
+  sm: 'h-2 w-2',
+  md: 'h-2.5 w-2.5',
+  lg: 'h-3 w-3'
+} as const;
+
+export const VARIANT_CLASSES: Record<PulseIndicatorVariant, string> = {
+  green: 'bg-green-500',
+  primary: 'bg-primary',
+  red: 'bg-red-500',
+  yellow: 'bg-yellow-500',
+  blue: 'bg-blue-500'
+} as const;
+
+export const LABEL_COLOR_CLASSES: Record<PulseIndicatorVariant, string> = {
+  green: 'text-green-500',
+  primary: 'text-primary',
+  red: 'text-red-500',
+  yellow: 'text-yellow-500',
+  blue: 'text-blue-500'
+} as const;
+```
+
+### PulseIndicator.svelte
 ```svelte
 <script lang="ts">
   import { cn } from '$lib/utils';
-  
-  type Variant = 'green' | 'primary' | 'red' | 'yellow' | 'blue';
-  type Size = 'xs' | 'sm' | 'md' | 'lg';
-  
+  import {
+    SIZE_CLASSES,
+    VARIANT_CLASSES,
+    LABEL_COLOR_CLASSES,
+    type PulseIndicatorSize,
+    type PulseIndicatorVariant
+  } from './constants';
+
   interface Props {
-    variant?: Variant;
-    size?: Size;
+    variant?: PulseIndicatorVariant;
+    size?: PulseIndicatorSize;
     label?: string;
     class?: string;
   }
-  
-  let { variant = 'green', size = 'sm', label, class: className }: Props = $props();
-  
-  const sizeClasses: Record<Size, string> = {
-    xs: 'h-1.5 w-1.5',
-    sm: 'h-2 w-2',
-    md: 'h-2.5 w-2.5',
-    lg: 'h-3 w-3'
-  };
-  
-  const variantClasses: Record<Variant, string> = {
-    green: 'bg-green-500',
-    primary: 'bg-primary',
-    red: 'bg-red-500',
-    yellow: 'bg-yellow-500',
-    blue: 'bg-blue-500'
-  };
+
+  const { variant = 'green', size = 'sm', label, class: className }: Props = $props();
+
+  const indicatorClasses: string = $derived(
+    cn('rounded-full animate-pulse', SIZE_CLASSES[size], VARIANT_CLASSES[variant])
+  );
+
+  const wrapperClasses: string = $derived(
+    cn('flex items-center gap-1.5', label && LABEL_COLOR_CLASSES[variant], className)
+  );
 </script>
 
-<span class={cn('inline-flex items-center gap-1.5', className)}>
-  <span class={cn(
-    'rounded-full animate-pulse',
-    sizeClasses[size],
-    variantClasses[variant]
-  )}></span>
-  {#if label}
-    <span class="text-xs font-medium text-muted-foreground">{label}</span>
-  {/if}
-</span>
+{#if label}
+  <span class={wrapperClasses}>
+    <span class={indicatorClasses}></span>
+    <span class="text-xs font-medium">{label}</span>
+  </span>
+{:else}
+  <span class={cn(indicatorClasses, className)}></span>
+{/if}
 ```
 
 ## Usage Examples
@@ -134,8 +160,21 @@ The component uses Tailwind CSS classes for all styling:
 
 The component is documented in the Dev Playbook under "Status Indicators" with examples of all variants and sizes.
 
+## Optimization Pass
+
+After initial implementation, the frontend optimizer improved the component:
+
+| Improvement | Description |
+|-------------|-------------|
+| **PascalCase naming** | Renamed to `PulseIndicator.svelte` (matches project convention) |
+| **Constants extraction** | Separated configuration into `constants.ts` with JSDoc |
+| **Type exports** | Consumers can import `PulseIndicatorSize` and `PulseIndicatorVariant` |
+| **$derived reactive state** | Uses Svelte 5 `$derived()` for reactive class computation |
+| **Label color matching** | Labels now match their variant color (green label for green dot, etc.) |
+
 ## Notes
 
 - The `animate-pulse` animation is built into Tailwind CSS (keyframes: `pulse { 0%, 100% { opacity: 1 } 50% { opacity: .5 } }`)
 - No JavaScript animation logic needed - pure CSS
-- Consistent with shadcn-svelte naming conventions (kebab-case folder, barrel export)
+- PascalCase component file with kebab-case folder (project convention)
+- Types exported for consumer type-checking
