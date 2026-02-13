@@ -11,7 +11,8 @@ export const changelog: ChangelogEntry[] = [
 		],
 		improvements: [
 			'Centralized environment detection module',
-			'Single PUBLIC_ENVIRONMENT variable controls all env features'
+			'Single PUBLIC_ENVIRONMENT variable controls all env features',
+			'PulseIndicator component for consistent animated status dots'
 		],
 		fixes: [
 			'Organization API keys no longer incorrectly enforce personal quota',

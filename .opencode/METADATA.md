@@ -8,6 +8,7 @@
 | Setting | Value | Description |
 |---------|-------|-------------|
 | `screenshot_tests_enabled` | `true` | Enable screenshot tests for UI validation |
+| `update_whats_new` | `true` | Add completed stories to What's New changelog (`client/src/lib/data/changelog.ts`) |
 
 ## Project Files
 

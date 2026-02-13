@@ -14,6 +14,7 @@
     import { StatusIndicator } from '$lib/components/ui/status-indicator';
     import { InfoField } from '$lib/components/ui/info-field';
     import { SectionHeader } from '$lib/components/ui/section-header';
+    import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
     import { getEnvironment, showDevCredentials } from '$lib/config/env';
     import type { Environment } from '$lib/config/env';
     
@@ -775,60 +776,99 @@
 
             <!-- Live Indicator -->
             <section id="live-indicator" class="mb-20 scroll-mt-20">
-                <h2 class="text-2xl font-semibold mb-2">Live Indicator</h2>
-                <p class="text-muted-foreground mb-6">Pulsing animation for real-time features</p>
+                <h2 class="text-2xl font-semibold mb-2">Pulse Indicator</h2>
+                <p class="text-muted-foreground mb-6">Smooth pulsing animation for real-time status</p>
                 
-                <div class="grid gap-6 md:grid-cols-2">
+                <div class="grid gap-6">
                     <Card class="border-border/50 border-primary/30">
                         <CardHeader>
                             <CardTitle class="text-base flex items-center gap-2">
-                                Live Badge
-                                <Badge variant="outline" class="text-xs">PREFERRED</Badge>
+                                PulseIndicator
+                                <Badge variant="outline" class="text-xs">COMPONENT</Badge>
                             </CardTitle>
-                            <CardDescription>Pulsing dot with label</CardDescription>
+                            <CardDescription>Import from $lib/components/ui/pulse-indicator</CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
-                            <div class="flex items-center gap-4">
-                                <span class="text-sm font-medium text-green-500 flex items-center gap-1.5">
-                                    <span class="relative flex h-2 w-2">
-                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                                    </span>
-                                    Live
-                                </span>
-                                <code class="text-xs text-muted-foreground">With label</code>
+                            <!-- Sizes -->
+                            <div>
+                                <p class="text-sm font-medium mb-3">Sizes</p>
+                                <div class="flex items-center gap-6">
+                                    <div class="flex items-center gap-2">
+                                        <PulseIndicator size="xs" />
+                                        <code class="text-xs text-muted-foreground">xs</code>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <PulseIndicator size="sm" />
+                                        <code class="text-xs text-muted-foreground">sm</code>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <PulseIndicator size="md" />
+                                        <code class="text-xs text-muted-foreground">md</code>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <PulseIndicator size="lg" />
+                                        <code class="text-xs text-muted-foreground">lg</code>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <span class="relative flex h-2.5 w-2.5">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                                </span>
-                                <code class="text-xs text-muted-foreground">Dot only</code>
+                            
+                            <!-- Variants -->
+                            <div>
+                                <p class="text-sm font-medium mb-3">Color Variants</p>
+                                <div class="flex items-center gap-6">
+                                    <div class="flex items-center gap-2">
+                                        <PulseIndicator variant="green" />
+                                        <code class="text-xs text-muted-foreground">green</code>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <PulseIndicator variant="primary" />
+                                        <code class="text-xs text-muted-foreground">primary</code>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <PulseIndicator variant="blue" />
+                                        <code class="text-xs text-muted-foreground">blue</code>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <PulseIndicator variant="yellow" />
+                                        <code class="text-xs text-muted-foreground">yellow</code>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <PulseIndicator variant="red" />
+                                        <code class="text-xs text-muted-foreground">red</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- With Label -->
+                            <div>
+                                <p class="text-sm font-medium mb-3">With Label</p>
+                                <div class="flex items-center gap-6">
+                                    <PulseIndicator variant="green" label="Live" />
+                                    <PulseIndicator variant="primary" label="Connected" />
+                                    <PulseIndicator variant="yellow" label="Pending" />
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     <Card class="border-border/50">
                         <CardHeader>
-                            <CardTitle class="text-base">Usage Example</CardTitle>
+                            <CardTitle class="text-base">Usage Examples</CardTitle>
                             <CardDescription>In context</CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent class="space-y-4">
                             <div class="p-3 rounded-md bg-muted/30 border border-border/50 space-y-2">
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-medium">Monitor Status</span>
-                                    <span class="text-xs font-medium text-green-500 flex items-center gap-1.5">
-                                        <span class="relative flex h-1.5 w-1.5">
-                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
-                                        </span>
-                                        Live
-                                    </span>
+                                    <PulseIndicator variant="green" size="xs" label="Live" />
                                 </div>
                                 <p class="text-xs text-muted-foreground">Last updated 14:32</p>
                             </div>
-                            <p class="text-xs text-muted-foreground mt-3">
-                                Use in headers, status bars, real-time dashboards
+                            <div class="p-4 bg-muted/20 rounded-md">
+                                <code class="text-xs block whitespace-pre">&lt;PulseIndicator variant="green" size="xs" label="Live" /&gt;</code>
+                            </div>
+                            <p class="text-xs text-muted-foreground">
+                                Use in headers, status bars, real-time dashboards, and notification badges.
                             </p>
                         </CardContent>
                     </Card>

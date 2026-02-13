@@ -13,6 +13,7 @@
     import { handleError } from '$lib/utils/error-handler';
     import { toast } from 'svelte-sonner';
     import { StatCard } from '$lib/components/ui/stat-card';
+    import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
 
     const organizations: UserOrganizationResponse[] = $derived(organizationStore.organizations);
     const loading: boolean = $derived(organizationStore.loading);
@@ -87,10 +88,7 @@
                 <!-- Status -->
                 <div class="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
                     <div class="flex items-center gap-3">
-                        <div class="relative">
-                            <div class="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
-                            <div class="absolute inset-0 h-3 w-3 rounded-full bg-green-500 animate-ping"></div>
-                        </div>
+                        <PulseIndicator variant="green" size="lg" />
                         <div>
                             <p class="text-sm font-medium text-green-400">Account Active</p>
                             <p class="text-xs text-muted-foreground">All systems operational</p>

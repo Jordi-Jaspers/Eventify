@@ -21,6 +21,7 @@
 	} from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { Card } from '$lib/components/ui/card';
+	import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
 
 	// Mobile menu state
 	let mobileMenuOpen: boolean = $state(false);
@@ -262,12 +263,7 @@
 										<span class="font-semibold">Live Events</span>
 									</div>
 									<div class="flex items-center gap-2">
-										<span class="relative flex h-3 w-3">
-											<span
-												class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
-											></span>
-											<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-										</span>
+										<PulseIndicator variant="green" size="md" />
 										<span class="text-xs text-muted-foreground">Connected</span>
 									</div>
 								</div>

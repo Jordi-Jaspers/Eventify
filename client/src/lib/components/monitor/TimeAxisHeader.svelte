@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { TimeTick } from './types';
+	import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
 
 	interface Props {
 		rangeStart: Date;
@@ -18,10 +19,7 @@
 	<div class="col-span-2 flex flex-col pb-0.5 pl-4">
 		{#if isLive}
 			<span class="text-[11px] font-medium text-green-500 flex items-center gap-1">
-				<span class="relative flex h-1.5 w-1.5">
-					<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-					<span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
-				</span>
+				<PulseIndicator variant="green" size="xs" />
 				Live
 			</span>
 		{/if}

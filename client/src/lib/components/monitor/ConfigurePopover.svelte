@@ -11,6 +11,7 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { DateTimePicker } from '$lib/components/ui/date-time-picker';
+	import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
 
 	type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
 
@@ -121,13 +122,7 @@
 					<div
 						class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30"
 					>
-						<span class="relative flex h-2 w-2">
-							<span
-								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
-							></span>
-							<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-						</span>
-						<span class="text-xs font-medium text-primary">Live</span>
+						<PulseIndicator variant="primary" size="sm" label="Live" />
 					</div>
 				{/if}
 			</div>
