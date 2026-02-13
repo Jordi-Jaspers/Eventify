@@ -7,16 +7,9 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
-- [x] **not loading correct filter values in timeline** - Fix bug when on the edit watchlist page and you clicked on default filters, then went back to timeline via "monitor" button, the filters would be wrong. (refined: BUG-01-monitor-filter-loading.md)
-- [x] **Fix monthly quota** - organisations should have no limits, but currently they do. Need to fix the logic. got complaint on TST environment. (refined: BUG-02-organization-quota-bypass.md)
-
 ---
 ## Epic: General Improvements
 **Context**: Small improvements that don't fit into other epics but would enhance user experience.
-
-- [ ] **Update Favicon** - Depending on local, TST, PRD the favicon should have a banner with the environment name to avoid confusion when users have multiple tabs open. This is especially important for support and debugging.
-- [ ] **Support / Help buttons** - guide users to docs or support chat from the avatar modal in sidebar.
-- [ ] **Changelog** - Show modal on login after a new release with highlights of new features and improvements. or have a changelog page linked from the sidebar. should be discussed what is more professional and user-friendly way to show updates.
 
 ---
 
@@ -91,3 +84,4 @@ Ideas to keep in mind for architecture decisions but not for immediate developme
 - [ ] **Multi-region**: Consider event ingestion in multiple regions
 - [ ] **Export**: Download events as CSV/JSON for compliance/backup
 - [ ] **Stripe Integration**: manage subscriptions/payments
+- [ ] **Support / Help buttons** - guide users to docs or support chat from the avatar modal in sidebar.
