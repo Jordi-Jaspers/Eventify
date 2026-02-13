@@ -48,7 +48,7 @@ Environment-aware visual branding so developers can instantly identify which env
 **File:** `client/src/lib/components/layout/AppLogo.svelte`
 - Added `showEnvBadge` prop (default: true)
 - Added `forceEnvironment` prop for playbook demos
-- Shows colored pill badge (DEV=red, TST=green) next to logo text on non-production
+- Shows small colored dot (DEV=red, TST=green) in top-right corner of icon on non-production
 
 ### Dynamic Favicon
 **File:** `client/src/routes/+layout.svelte`

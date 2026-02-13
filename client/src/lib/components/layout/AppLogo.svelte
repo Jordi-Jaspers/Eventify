@@ -51,21 +51,21 @@
             text: 'text-lg',
             gap: 'gap-2',
             subtitle: 'text-xs',
-            badge: 'text-[0.5rem] px-1 py-0.5'
+            dot: 'h-1.5 w-1.5'
         },
         medium: {
             icon: 'h-8 w-8',
             text: 'text-3xl',
             gap: 'gap-3',
             subtitle: 'text-sm',
-            badge: 'text-[0.6rem] px-1.5 py-0.5'
+            dot: 'h-2 w-2'
         },
         large: {
             icon: 'h-12 w-12',
             text: 'text-5xl',
             gap: 'gap-4',
             subtitle: 'text-base',
-            badge: 'text-xs px-2 py-1'
+            dot: 'h-2.5 w-2.5'
         }
     };
 
@@ -79,12 +79,12 @@
     // Badge config per environment
     const badgeConfig = $derived(() => {
         if (environment === 'local') {
-            return { bg: 'bg-red-500', text: 'DEV' };
+            return { bg: 'bg-red-500' };
         }
         if (environment === 'test') {
-            return { bg: 'bg-green-500', text: 'TST' };
+            return { bg: 'bg-green-500' };
         }
-        return { bg: '', text: '' };
+        return { bg: '' };
     });
 </script>
 
@@ -95,12 +95,10 @@
                 <Radar class={cn(currentSize.icon, "text-primary")} />
                 {#if shouldShowBadge}
                     <span class={cn(
-                        "absolute -top-1 -right-1 rounded font-bold text-white",
-                        currentSize.badge,
+                        "absolute -top-0.5 -right-0.5 rounded-full",
+                        currentSize.dot,
                         badgeConfig().bg
-                    )}>
-                        {badgeConfig().text}
-                    </span>
+                    )}></span>
                 {/if}
             </div>
         {/if}
