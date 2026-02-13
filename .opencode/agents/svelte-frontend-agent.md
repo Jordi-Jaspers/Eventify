@@ -2,7 +2,7 @@
 description: SvelteKit expert creating enterprise UIs with glassmorphism, gradients, shadcn-svelte. Builds functional UI, creates screenshot tests, returns for UI Agent to polish.
 temperature: 0.1
 mode: subagent
-model: github-copilot/gemini-3-pro-preview
+model: github-copilot/claude-sonnet-4.5
 tools:
   write: true
   read: true
