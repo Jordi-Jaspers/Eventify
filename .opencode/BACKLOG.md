@@ -8,21 +8,27 @@ Raw ideas and future work. Items here need refinement before development.
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
 - [ ] **not loading correct filter values in timeline** - Fix bug when on the edit watchlist page and you clicked on default filters, then went back to timeline via "monitor" button, the filters would be wrong.
+- [ ] **Fix monthly quota** - organisations should have no limits, but currently they do. Need to fix the logic. got complaint on TST environment.
 
 ---
 ## Epic: General Improvements
 **Context**: Small improvements that don't fit into other epics but would enhance user experience.
 
+- [ ] **Update Favicon** - Depending on local, TST, PRD the favicon should have a banner with the environment name to avoid confusion when users have multiple tabs open. This is especially important for support and debugging.
 - [ ] **Support / Help buttons** - guide users to docs or support chat from the avatar modal in sidebar.
-- [ ] **What is new message** - Show modal on login after a new release with highlights of new features and improvements.
+- [ ] **Changelog** - Show modal on login after a new release with highlights of new features and improvements. or have a changelog page linked from the sidebar. should be discussed what is more professional and user-friendly way to show updates.
 
 ---
 
 ## Epic: Channel Management
 **Context**: Users need better ways to manage their channels.
 
-- [ ] **change Channel ids to uuid** - Consider switching from numeric IDs to UUIDs for channels for better security and scalability. Requires DB schema change and API updates.
-- [ ] **Show channel id in table** - Add channel ID column to events table for easier debugging and support.
+- [ ] **Change Channel ids to uuid** - Consider switching from numeric IDs to UUIDs for channels for better security and scalability. Requires DB schema change and API updates.
+- [ ] **Copy channel id action in table** - Add channel ID column to events table for easier debugging and support.
+- [ ] **Create channel via API** - Allow users to create channels programmatically using API keys, enabling automation and infrastructure-as-code setups.
+- [ ] **Channel archiving | Deleting via API** - Consider deleting or arching channels via API. Archiving would keep data but hide from UI, deleting would remove all data.
+- [ ] **Flag channels as "Stale"** - If a channel hasn't received events in X days, mark it as "Stale" in the UI to help users identify unused channels. Optionally send a notification to channel owner after Y days of inactivity. should also be able to filter on that in the channels table.
+- [ ] **Mass channel actions** - Allow users to select multiple channels in the table and perform bulk actions like delete, pause, unpause. add select all checkbox in header, and bulk action buttons that appear when channels are selected.
 
 ---
 ## Epic: Organization Management
