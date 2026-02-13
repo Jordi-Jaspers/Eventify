@@ -1,7 +1,6 @@
 <script lang="ts">
     import {goto} from '$app/navigation';
     import {page} from '$app/state';
-    import {env} from '$env/dynamic/public';
     import {authStore, isAuthenticated, isUnverified} from '$lib/stores/auth';
     import {CLIENT_ROUTES} from '$lib/config/routes';
     import Button from '$lib/components/ui/button/button.svelte';
@@ -17,6 +16,7 @@
     import {handleError} from '$lib/utils/error-handler';
     import {getDevCredentials} from '$lib/api/dev/DevController';
     import type {DevCredentialsResponse} from '$lib/api/models';
+    import {showDevCredentials} from '$lib/config/env';
 
     $effect(() => {
         if ($isAuthenticated) {
@@ -33,10 +33,10 @@
     let devCredentials: DevCredentialsResponse | null = $state(null);
     let devCredentialsLoading: boolean = $state(false);
 
-    const showDevCredentials: boolean = env.PUBLIC_SHOW_DEV_CREDENTIALS === 'true';
+    const shouldShowDevCredentials: boolean = showDevCredentials();
 
     $effect(() => {
-        if (showDevCredentials && !devCredentials && !devCredentialsLoading) {
+        if (shouldShowDevCredentials && !devCredentials && !devCredentialsLoading) {
             devCredentialsLoading = true;
             getDevCredentials()
                 .then((data: DevCredentialsResponse) => {
@@ -227,7 +227,7 @@
     </Card>
 
     <!-- Dev Credentials Block -->
-    {#if showDevCredentials}
+    {#if shouldShowDevCredentials}
         <div class="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 backdrop-blur-sm">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2 text-amber-500 text-sm font-medium">

@@ -16,10 +16,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { env } from '$env/dynamic/public';
 	import { authStore, currentUser } from '$lib/stores/auth';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
+	import { showDevCredentials } from '$lib/config/env';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette } from '@lucide/svelte';
@@ -32,7 +32,7 @@
 
 	// Theme state
 	let isDarkMode: boolean = $state(true);
-	const showDevPlaybook: boolean = env.PUBLIC_SHOW_DEV_CREDENTIALS === 'true';
+	const shouldShowDevPlaybook: boolean = showDevCredentials();
 
 	onMount(() => {
 		isDarkMode = document.documentElement.classList.contains('dark');
@@ -244,7 +244,7 @@
 								<span>Dark Mode</span>
 							{/if}
 						</DropdownMenu.Item>
-						{#if showDevPlaybook}
+						{#if shouldShowDevPlaybook}
 							<DropdownMenu.Item
 								class="cursor-pointer hover:bg-primary/10"
 								onclick={() => goto('/dev-playbook')}

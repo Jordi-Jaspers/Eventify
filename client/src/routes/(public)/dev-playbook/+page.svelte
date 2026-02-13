@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { env } from '$env/dynamic/public';
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
@@ -15,6 +14,8 @@
     import { StatusIndicator } from '$lib/components/ui/status-indicator';
     import { InfoField } from '$lib/components/ui/info-field';
     import { SectionHeader } from '$lib/components/ui/section-header';
+    import { getEnvironment, showDevCredentials } from '$lib/config/env';
+    import type { Environment } from '$lib/config/env';
     
     // DateTimePicker state
     let dateTimeValue1: string = $state('');
@@ -22,7 +23,7 @@
     let dateTimeValue3: string = $state('');
     
     // Redirect if not in dev mode
-    const isDev = env.PUBLIC_SHOW_DEV_CREDENTIALS === 'true';
+    const isDev = showDevCredentials();
     
     onMount(() => {
         if (!isDev) {
@@ -46,6 +47,9 @@
     onMount(() => {
         isDarkMode = document.documentElement.classList.contains('dark');
     });
+
+    // Get current environment
+    const currentEnvironment: Environment = $derived(getEnvironment());
 
     // Navigation sections
     const navSections = [
@@ -275,6 +279,53 @@
                         <CardContent class="py-8">
                             <div class="flex justify-center">
                                 <AppLogo size="medium" subtitle="Real-time monitoring and event tracking" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Environment Variants -->
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Environment Variants</CardTitle>
+                            <CardDescription>Environment badges for dev/test/production</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="flex flex-wrap items-center justify-center gap-12 py-4">
+                                <div class="text-center">
+                                    <div class={currentEnvironment === 'local' ? 'ring-2 ring-primary ring-offset-2 ring-offset-background rounded-lg p-4' : 'p-4'}>
+                                        <AppLogo size="medium" forceEnvironment="local" />
+                                    </div>
+                                    <p class="text-xs text-muted-foreground mt-4">Local (DEV badge)</p>
+                                    {#if currentEnvironment === 'local'}
+                                        <Badge variant="default" class="mt-2">Current</Badge>
+                                    {/if}
+                                </div>
+                                <div class="text-center">
+                                    <div class={currentEnvironment === 'test' ? 'ring-2 ring-primary ring-offset-2 ring-offset-background rounded-lg p-4' : 'p-4'}>
+                                        <AppLogo size="medium" forceEnvironment="test" />
+                                    </div>
+                                    <p class="text-xs text-muted-foreground mt-4">Test (TST badge)</p>
+                                    {#if currentEnvironment === 'test'}
+                                        <Badge variant="default" class="mt-2">Current</Badge>
+                                    {/if}
+                                </div>
+                                <div class="text-center">
+                                    <div class={currentEnvironment === 'production' ? 'ring-2 ring-primary ring-offset-2 ring-offset-background rounded-lg p-4' : 'p-4'}>
+                                        <AppLogo size="medium" forceEnvironment="production" />
+                                    </div>
+                                    <p class="text-xs text-muted-foreground mt-4">Production (no badge)</p>
+                                    {#if currentEnvironment === 'production'}
+                                        <Badge variant="default" class="mt-2">Current</Badge>
+                                    {/if}
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-muted/30 rounded-lg">
+                                <p class="text-sm text-muted-foreground mb-2">
+                                    <strong>Current environment:</strong> <code class="bg-background px-2 py-1 rounded">{currentEnvironment}</code>
+                                </p>
+                                <p class="text-xs text-muted-foreground">
+                                    Set via <code class="bg-background px-1 py-0.5 rounded">PUBLIC_ENVIRONMENT</code> in .env
+                                </p>
                             </div>
                         </CardContent>
                     </Card>

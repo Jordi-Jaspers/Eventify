@@ -8,57 +8,101 @@
   - variant: 'full' | 'icon' | 'text' (default: 'full')
   - subtitle: Optional subtitle text
   - href: Optional link (defaults to undefined for no link)
+  - showEnvBadge: Show environment badge on non-production (default: true)
+  - forceEnvironment: Override detected environment (for playbook demos)
   - class: Optional additional classes
 
   Usage:
   <AppLogo size="large" subtitle="Real-time monitoring" />
   <AppLogo size="small" variant="icon" />
-  <AppLogo variant="text" />
+  <AppLogo variant="text" showEnvBadge={false} />
+  <AppLogo forceEnvironment="local" />
 -->
 <script lang="ts">
     import { Radar } from '@lucide/svelte';
     import { cn } from '$lib/utils';
+    import { getEnvironment } from '$lib/config/env';
+    import type { Environment } from '$lib/config/env';
 
     interface Props {
         size?: 'small' | 'medium' | 'large';
         variant?: 'full' | 'icon' | 'text';
         subtitle?: string;
         href?: string;
+        showEnvBadge?: boolean;
+        /** Override environment for demo/playbook purposes */
+        forceEnvironment?: Environment;
         class?: string;
     }
 
-    let { size = 'medium', variant = 'full', subtitle, href, class: className }: Props = $props();
+    let { 
+        size = 'medium', 
+        variant = 'full', 
+        subtitle, 
+        href, 
+        showEnvBadge = true,
+        forceEnvironment,
+        class: className 
+    }: Props = $props();
 
     const sizes = {
         small: {
             icon: 'h-5 w-5',
             text: 'text-lg',
             gap: 'gap-2',
-            subtitle: 'text-xs'
+            subtitle: 'text-xs',
+            badge: 'text-[0.5rem] px-1 py-0.5'
         },
         medium: {
             icon: 'h-8 w-8',
             text: 'text-3xl',
             gap: 'gap-3',
-            subtitle: 'text-sm'
+            subtitle: 'text-sm',
+            badge: 'text-[0.6rem] px-1.5 py-0.5'
         },
         large: {
             icon: 'h-12 w-12',
             text: 'text-5xl',
             gap: 'gap-4',
-            subtitle: 'text-base'
+            subtitle: 'text-base',
+            badge: 'text-xs px-2 py-1'
         }
     };
 
     const currentSize = $derived(sizes[size]);
     const showIcon = $derived(variant === 'full' || variant === 'icon');
     const showText = $derived(variant === 'full' || variant === 'text');
+    
+    const environment: Environment = $derived(forceEnvironment ?? getEnvironment());
+    const shouldShowBadge: boolean = $derived(showEnvBadge && environment !== 'production' && showIcon);
+    
+    // Badge config per environment
+    const badgeConfig = $derived(() => {
+        if (environment === 'local') {
+            return { bg: 'bg-red-500', text: 'DEV' };
+        }
+        if (environment === 'test') {
+            return { bg: 'bg-green-500', text: 'TST' };
+        }
+        return { bg: '', text: '' };
+    });
 </script>
 
 {#snippet logoContent()}
     <div class={cn("flex items-center", currentSize.gap)}>
         {#if showIcon}
-            <Radar class={cn(currentSize.icon, "text-primary")} />
+            <div class="relative">
+                <Radar class={cn(currentSize.icon, "text-primary")} />
+                {#if shouldShowBadge}
+                    <span class={cn(
+                        "absolute -top-1 -right-1 rounded font-bold text-white",
+                        currentSize.badge,
+                        badgeConfig().bg
+                    )}>
+                        {badgeConfig().text}
+                    </span>
+                {/if}
+            </div>
         {/if}
         {#if showText}
             <span class={cn(currentSize.text, "font-light tracking-wide")}>eventify</span>
