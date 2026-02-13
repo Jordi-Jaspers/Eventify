@@ -7,6 +7,7 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Channel Management
 **Context**: Users need better ways to manage their channels.
 
+- [ ] **Possibly add unique identifier to channel** - instead of using id or uuid maybe add a unique identifier field that is human readable (seperations with '.') and can be used in API calls.
 - [ ] **Change Channel ids to uuid** - Consider switching from numeric IDs to UUIDs for channels for better security and scalability. Requires DB schema change and API updates.
 - [ ] **Copy channel id action in table** - Add channel ID column to events table for easier debugging and support.
 - [ ] **Create channel via API** - Allow users to create channels programmatically using API keys, enabling automation and infrastructure-as-code setups.
@@ -58,6 +59,9 @@ Raw ideas and future work. Items here need refinement before development.
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
 - [ ] **Redirect to org incorrect** - on user profile page clicking on organization name redirects to wrong location. Fix routing logic to redirect to correct org dashboard.
+- [ ] **Adjust "how it works" landing page** - Update copy and design of the landing page to better explain the product and guide users to sign up or explore features. Consider adding screenshots, diagrams, or a video demo.
+- [ ] **Landing page curl command** - Update the example curl command on the landing page to reflect the current API structure and authentication method. Ensure it works with the latest API version and provides a clear example for developers.
+- [ ] **Update curl command API key generation** -- during creation of the api key, the curl command example should be updated to reflect the new API key format and endpoint structure. This ensures that users can easily copy and use the command without confusion.
 
 ---
 ## Epic: General Improvements
