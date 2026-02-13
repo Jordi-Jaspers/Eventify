@@ -7,8 +7,8 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
-- [ ] **not loading correct filter values in timeline** - Fix bug when on the edit watchlist page and you clicked on default filters, then went back to timeline via "monitor" button, the filters would be wrong.
-- [ ] **Fix monthly quota** - organisations should have no limits, but currently they do. Need to fix the logic. got complaint on TST environment.
+- [x] **not loading correct filter values in timeline** - Fix bug when on the edit watchlist page and you clicked on default filters, then went back to timeline via "monitor" button, the filters would be wrong. (refined: BUG-01-monitor-filter-loading.md)
+- [x] **Fix monthly quota** - organisations should have no limits, but currently they do. Need to fix the logic. got complaint on TST environment. (refined: BUG-02-organization-quota-bypass.md)
 
 ---
 ## Epic: General Improvements
@@ -55,6 +55,7 @@ Raw ideas and future work. Items here need refinement before development.
 
 - [ ] **Admin Events/Usage Dashboard**: High-level stats: total events today/week/month, events by severity. Top channels by volume. Users/orgs approaching or exceeding quotas. Storage usage trends.
 - [ ] **Admin Audit Log**: Track admin actions: key revocations, channel archives, user impersonation. Searchable log with: action, target, admin user, timestamp.
+- [ ] **Monthly Quota Analytics Tracking** - Track monthly event counts for both personal users and organizations separately for analytics and reporting purposes. Even though organizations have no limits, we want visibility into usage patterns. Requires new database table or extending existing quota tracking.
 
 ---
 
@@ -62,7 +63,7 @@ Raw ideas and future work. Items here need refinement before development.
 
 **Context**: Cross-cutting concerns for caching, performance optimization, and infrastructure improvements.
 
-- [ ] **Add TTL-based Caching Infrastructure**: Add Caffeine cache with `@EnableCaching` support. Required for caching dashboard stats (~30s TTL), and other frequently-accessed, slowly-changing data. Currently project only uses request-scoped caches. Dependencies needed: `com.github.ben-manes.caffeine:caffeine`. Create `CacheConfig.java` with cache definitions. Priority endpoints: dashboard stats, user quotas, org membership checks.
+- [ ] **Add TTL-based Caching Infrastructure**: Add `@Cacheable` annotations or something similar for frequently accessed data like dashboard calls.
 
 ---
 
