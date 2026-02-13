@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Settings, Clock, Filter, Calendar, Radio, CheckCircle2 } from '@lucide/svelte';
+	import { Settings, Clock, Filter, Calendar, Radio, CheckCircle2, RotateCcw } from '@lucide/svelte';
 	import {
 		Popover,
 		PopoverContent,
@@ -22,6 +22,9 @@
 		isLive: boolean;
 		customStartTime: string;
 		customEndTime: string;
+		showResetButton?: boolean;
+		showModifiedIndicator?: boolean;
+		onResetToDefaults?: () => void;
 		onTimeRangeChange: (range: TimeRange) => void;
 		onToggleOnlyCritical: () => void;
 		onToggleSortBySeverity: () => void;
@@ -38,6 +41,9 @@
 		isLive,
 		customStartTime,
 		customEndTime,
+		showResetButton = false,
+		showModifiedIndicator = false,
+		onResetToDefaults,
 		onTimeRangeChange,
 		onToggleOnlyCritical,
 		onToggleSortBySeverity,
@@ -84,12 +90,9 @@
 				<Settings class="h-4 w-4" />
 				<span class="hidden sm:inline">Configure</span>
 				<span class="sm:hidden">Config</span>
-				{#if isLive}
+				{#if showModifiedIndicator}
 					<span class="flex h-2 w-2 absolute -top-1 -right-1">
-						<span
-							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
-						></span>
-						<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+						<span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
 					</span>
 				{/if}
 			</Button>
@@ -299,6 +302,22 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Reset to Defaults Button -->
+		{#if showResetButton && onResetToDefaults}
+			<div class="px-6 pb-4">
+				<Separator class="bg-border/30 mb-4" />
+				<Button
+					variant="ghost"
+					size="sm"
+					onclick={onResetToDefaults}
+					class="w-full justify-start gap-2"
+				>
+					<RotateCcw class="h-4 w-4" />
+					Reset to defaults
+				</Button>
+			</div>
+		{/if}
 
 		<!-- Footer hint -->
 		<div class="px-6 py-3 border-t border-border/30 bg-muted/5">
