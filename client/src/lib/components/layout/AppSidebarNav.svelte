@@ -5,7 +5,7 @@
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { LayoutDashboard, Clock, Shield, Building2, Users, UserCog, Settings, Key, Radio, ClipboardList, Activity } from '@lucide/svelte';
+	import { LayoutDashboard, Shield, Building2, Users, UserCog, Settings, Key, Radio, ClipboardList, Activity } from '@lucide/svelte';
 
 	interface Props {
 		currentPath: string;

@@ -8,6 +8,9 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+
+	/** App version from package.json, injected at build time */
+	const __APP_VERSION__: string;
 }
 
 export {};

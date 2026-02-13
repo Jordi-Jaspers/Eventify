@@ -20,9 +20,11 @@
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { showDevCredentials } from '$lib/config/env';
+	import { APP_VERSION } from '$lib/config/version';
+	import { versionStore } from '$lib/stores/version.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette } from '@lucide/svelte';
+	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette, Sparkles } from '@lucide/svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { toast } from 'svelte-sonner';
 	import { handleError } from '$lib/utils/error-handler';
@@ -33,6 +35,7 @@
 	// Theme state
 	let isDarkMode: boolean = $state(true);
 	const shouldShowDevPlaybook: boolean = showDevCredentials();
+	const hasNewVersion: boolean = $derived(versionStore.hasNewVersion);
 
 	onMount(() => {
 		isDarkMode = document.documentElement.classList.contains('dark');
@@ -108,6 +111,34 @@
 </script>
 
 <Sidebar.Footer class="border-t border-border/50">
+	<!-- Quick Actions above user menu -->
+	<Sidebar.Menu>
+		<Sidebar.MenuItem>
+			<Sidebar.MenuButton
+				onclick={() => goto(CLIENT_ROUTES.CHANGELOG_PAGE.path)}
+				class="hover:bg-sidebar-accent"
+			>
+				<Sparkles class="size-4" />
+				<span>What's New</span>
+				{#if hasNewVersion}
+					<span class="ml-auto h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+				{/if}
+			</Sidebar.MenuButton>
+		</Sidebar.MenuItem>
+		{#if shouldShowDevPlaybook}
+			<Sidebar.MenuItem>
+				<Sidebar.MenuButton
+					onclick={() => goto('/dev-playbook')}
+					class="hover:bg-sidebar-accent"
+				>
+					<Palette class="size-4" />
+					<span>Component Playbook</span>
+				</Sidebar.MenuButton>
+			</Sidebar.MenuItem>
+		{/if}
+	</Sidebar.Menu>
+
+	<!-- User Menu -->
 	<Sidebar.Menu>
 		<Sidebar.MenuItem>
 			<DropdownMenu.Root>
@@ -244,15 +275,6 @@
 								<span>Dark Mode</span>
 							{/if}
 						</DropdownMenu.Item>
-						{#if shouldShowDevPlaybook}
-							<DropdownMenu.Item
-								class="cursor-pointer hover:bg-primary/10"
-								onclick={() => goto('/dev-playbook')}
-							>
-								<Palette class="mr-2 h-4 w-4" />
-								<span>Component Playbook</span>
-							</DropdownMenu.Item>
-						{/if}
 					</div>
 
 					<DropdownMenu.Separator />
@@ -270,4 +292,9 @@
 			</DropdownMenu.Root>
 		</Sidebar.MenuItem>
 	</Sidebar.Menu>
+	
+	<!-- Version Display -->
+	<div class="px-4 py-2 border-t border-border/50">
+		<p class="text-xs text-muted-foreground text-center">{APP_VERSION}</p>
+	</div>
 </Sidebar.Footer>

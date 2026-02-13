@@ -153,7 +153,7 @@
                     Dark Mode
                 {/if}
             </Button>
-            <Button variant="ghost" class="w-full justify-start" href="/">
+            <Button variant="ghost" class="w-full justify-start" onclick={() => history.back()}>
                 <ArrowLeft class="h-4 w-4 mr-2" />
                 Back to App
             </Button>
@@ -201,7 +201,7 @@
                     </div>
                 {/each}
                 <div class="pt-4 border-t border-border/50">
-                    <Button variant="ghost" class="w-full justify-start" href="/">
+                    <Button variant="ghost" class="w-full justify-start" onclick={() => history.back()}>
                         <ArrowLeft class="h-4 w-4 mr-2" />
                         Back to App
                     </Button>
