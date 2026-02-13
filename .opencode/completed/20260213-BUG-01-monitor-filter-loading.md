@@ -5,26 +5,45 @@
 
 ## Summary
 
-Fixed bug where Monitor page ignored watchlist's saved default filters. Users can now configure filters on the watchlist edit page and have them automatically applied when opening the Monitor view.
+Fixed bug where Monitor page ignored watchlist's saved default filters. Added visual indicators and reset functionality for filter state management.
 
-**Root Cause:** `loadWatchlist()` fetched watchlist data but never read `watchlist.filters` into the session state.
+## Approved Plan
 
-## Changes
+### Requirements Summary
+- Apply watchlist saved filters on first load (no existing session)
+- Apply watchlist saved filters when switching watchlists
+- URL params still take highest priority
+- Add "Reset to defaults" button when filters differ from saved
+- Add visual indicator when filters are modified
+
+### Technical Approach
+- **Backend:** None required - watchlist already returns `filters` in response
+- **Frontend:** Modify monitor pages to read `watchlist.filters` on load, add UI indicators
+
+### Execution Order
+| Phase | Agent | Type | Task |
+|-------|-------|------|------|
+| 1 | deep-research-agent | global | Research existing monitor page implementation |
+| 2 | svelte-frontend-agent | project | Implement filter loading fix + UI indicators |
+| 3 | frontend-optimizer-agent | global | Extract shared service, reduce duplication |
+
+## Implementation
+
+### Root Cause
+`loadWatchlist()` fetched watchlist data but never read `watchlist.filters` into the session state.
 
 ### Filter Priority (implemented)
 1. URL params (highest) - unchanged
 2. Session state within tab - unchanged  
 3. Watchlist saved defaults (new) - applied on first load or watchlist switch
 
-### Features Added
-- Watchlist default filters load on first visit (no session)
-- Switching watchlists loads new watchlist's saved defaults
-- "Reset to defaults" button in ConfigurePopover when filters differ
-- Amber indicator dot on Configure button when filters modified
+### Frontend
+- Modified both monitor pages to apply `watchlist.filters` on initial load
+- Added "Reset to defaults" button in ConfigurePopover (visible when filters differ)
+- Added amber indicator dot on Configure button when filters modified
+- Extracted shared logic into `MonitorPageService.svelte.ts`
 
 ### Code Optimization
-Extracted shared monitor page logic into a reusable service:
-
 | File | Before | After | Change |
 |------|--------|-------|--------|
 | User Monitor Page | 474 | 221 | **-53%** |
@@ -32,33 +51,23 @@ Extracted shared monitor page logic into a reusable service:
 | New MonitorPageService | 0 | 356 | +356 |
 | **Net Total** | 1288 | 1136 | **-12%** |
 
+### Deviations from Plan
+- None - implementation followed the approved plan
+
 ## Agents Used
 
-| Agent | Task |
-|-------|------|
-| deep-research-agent | Researched existing monitor page implementation |
-| svelte-frontend-agent | Implemented filter loading fix |
-| frontend-optimizer-agent | Extracted shared service, reduced code duplication |
+| Agent | Task | Result |
+|-------|------|--------|
+| deep-research-agent | Researched existing monitor page implementation | ✅ Complete |
+| svelte-frontend-agent | Implemented filter loading fix + UI indicators | ✅ Complete |
+| frontend-optimizer-agent | Extracted shared service, reduced code duplication | ✅ Complete |
 
 ## Files Modified
 
-- `client/src/routes/(authenticated)/watchlists/monitor/+page.svelte`
-  - Refactored to use MonitorPageService (474 → 221 lines)
-  - Now pure presentation component
-
-- `client/src/routes/(authenticated)/organizations/[orgId]/watchlists/monitor/+page.svelte`
-  - Refactored to use MonitorPageService (485 → 230 lines)
-  - Now pure presentation component
-
-- `client/src/lib/components/monitor/ConfigurePopover.svelte`
-  - Added `showResetButton` and `showModifiedIndicator` props
-  - Added "Reset to defaults" button with RotateCcw icon
-  - Amber indicator dot on button when filters modified
-
-- `client/src/lib/api/monitor/service/MonitorPageService.svelte.ts` (NEW)
-  - Factory service encapsulating all monitor page logic
-  - Configuration-driven for user vs org contexts
-  - State management, filter logic, API orchestration, event handlers
+- `client/src/routes/(authenticated)/watchlists/monitor/+page.svelte` - Refactored to use MonitorPageService (474 → 221 lines)
+- `client/src/routes/(authenticated)/organizations/[orgId]/watchlists/monitor/+page.svelte` - Refactored to use MonitorPageService (485 → 230 lines)
+- `client/src/lib/components/monitor/ConfigurePopover.svelte` - Added reset button and modified indicator props
+- `client/src/lib/api/monitor/service/MonitorPageService.svelte.ts` - NEW: Factory service encapsulating all monitor page logic
 
 ## Tests
 
