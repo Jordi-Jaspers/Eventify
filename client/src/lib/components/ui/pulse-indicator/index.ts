@@ -1,3 +1,2 @@
-import PulseIndicator from './pulse-indicator.svelte';
-
-export { PulseIndicator };
+export { default as PulseIndicator } from './PulseIndicator.svelte';
+export type { PulseIndicatorSize, PulseIndicatorVariant } from './constants';
