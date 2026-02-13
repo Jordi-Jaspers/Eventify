@@ -61,7 +61,10 @@ public class EventIngestionController {
     public ResponseEntity<EventCreatedResponse> ingestEvent(@RequestBody final CreateEventRequest request,
         @AuthenticationPrincipal final ApiKeyPrincipal principal) {
         eventValidator.validateAndThrow(request);
-        userQuotaService.checkAndIncrementOrThrow(principal.getUserId(), 1);
+        // Only enforce quota for personal API keys (organization API keys have unlimited usage)
+        if (principal.isUserKey()) {
+            userQuotaService.checkAndIncrementOrThrow(principal.getUserId(), 1);
+        }
         final Event event = eventIngestionService.ingestEvent(request);
         return ResponseEntity.status(CREATED).body(eventMapper.toCreatedResponse(event));
     }
@@ -80,7 +83,10 @@ public class EventIngestionController {
     public ResponseEntity<List<EventCreatedResponse>> ingestBatch(@RequestBody final BatchEventRequest request,
         @AuthenticationPrincipal final ApiKeyPrincipal principal) {
         eventValidator.validateAndThrow(request);
-        userQuotaService.checkAndIncrementOrThrow(principal.getUserId(), request.getEvents().size());
+        // Only enforce quota for personal API keys (organization API keys have unlimited usage)
+        if (principal.isUserKey()) {
+            userQuotaService.checkAndIncrementOrThrow(principal.getUserId(), request.getEvents().size());
+        }
         final List<Event> events = eventIngestionService.ingestBatch(request);
         return ResponseEntity.status(CREATED).body(eventMapper.toCreatedResponseList(events));
     }

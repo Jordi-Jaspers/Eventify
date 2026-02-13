@@ -3,10 +3,12 @@ package io.github.eventify.api.event.controller;
 import io.github.eventify.api.apikey.model.ApiKey;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.event.model.request.BatchEventRequest;
 import io.github.eventify.api.event.model.request.CreateEventRequest;
 import io.github.eventify.api.event.model.response.EventCreatedResponse;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.util.TimeProvider;
 import io.github.eventify.support.IntegrationTest;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
 import io.github.jframe.exception.resource.ErrorResponseResource;
@@ -15,6 +17,7 @@ import io.github.jframe.exception.resource.ValidationErrorResponseResource;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import static io.github.eventify.api.Paths.EXTERNAL_EVENTS_BATCH_PATH;
 import static io.github.eventify.api.Paths.EXTERNAL_EVENTS_PATH;
 import static io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter.API_KEY_HEADER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
@@ -730,8 +734,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should count org API key events against user quota")
-    public void ingestEventWithOrgKeyCountsAgainstUserQuota() throws Exception {
+    @DisplayName("Should not count org API key events against user quota")
+    public void ingestEventWithOrgKeyDoesNotCountAgainstUserQuota() throws Exception {
         // Given: User A creates org and has 900 events
         final User userA = aValidatedUser();
         final Organization org = anOrganisationWithOwner(userA);
@@ -756,53 +760,99 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // Then: Response should be CREATED
         response.andExpect(status().is(SC_CREATED));
 
-        // And: User A's quota should be incremented to 901
+        // And: User A's quota should remain at 900 (NOT incremented)
         final int updatedCount = getUserQuotaEventCount(userA);
-        assertThat(updatedCount, is(901));
+        assertThat(updatedCount, is(900));
     }
 
     @Test
-    @DisplayName("Should reject org API key events when user reaches quota")
-    public void ingestEventWithOrgKeyFailsWhenUserReachesQuota() throws Exception {
-        // Given: User A has 999 events and sends 2 events via org key
+    @DisplayName("Should accept org API key events when user quota exhausted")
+    public void ingestEventWithOrgKeySucceedsWhenUserQuotaExhausted() throws Exception {
+        // Given: User A has 1000 events (quota exhausted) and org API key
+        final User userA = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(userA);
+        final Channel orgChannel = aChannelForOrganisation(userA, org, "Org Channel");
+        final ApiKey orgApiKey = anApiKeyForOrganisation(userA, org, "Org Key");
+        seedUserEventQuota(userA, 1000);
+
+        // And: Valid event request
+        final CreateEventRequest request = new CreateEventRequest()
+            .setChannelId(orgChannel.getId())
+            .setSeverity(Severity.OK)
+            .setTitle("Org Event");
+
+        // When: Sending event via org API key
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(API_KEY_HEADER, orgApiKey.getKey())
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(ingestRequest);
+
+        // Then: Event should be accepted despite exhausted quota
+        response.andExpect(status().is(SC_CREATED));
+
+        // And: User quota should remain at 1000 (NOT incremented)
+        final int finalCount = getUserQuotaEventCount(userA);
+        assertThat(finalCount, is(1000));
+    }
+
+    @Test
+    @DisplayName("Should not count batch events against user quota when using org API key")
+    public void ingestBatchWithOrgKeyBypassesQuota() throws Exception {
+        // Given: User A with org API key and quota at 999
         final User userA = aValidatedUser();
         final Organization org = anOrganisationWithOwner(userA);
         final Channel orgChannel = aChannelForOrganisation(userA, org, "Org Channel");
         final ApiKey orgApiKey = anApiKeyForOrganisation(userA, org, "Org Key");
         seedUserEventQuota(userA, 999);
 
-        // And: First event should succeed
-        final CreateEventRequest request1 = new CreateEventRequest()
-            .setChannelId(orgChannel.getId())
-            .setSeverity(Severity.OK)
-            .setTitle("Event 1");
+        // And: Batch request with 5 events (using past timestamps with microsecond precision)
+        final OffsetDateTime now = TimeProvider.now();
+        final BatchEventRequest batchRequest = new BatchEventRequest()
+            .setEvents(
+                List.of(
+                    new CreateEventRequest()
+                        .setChannelId(orgChannel.getId())
+                        .setSeverity(Severity.OK)
+                        .setTitle("Event 1")
+                        .setTimestamp(now.minusSeconds(5)),
+                    new CreateEventRequest()
+                        .setChannelId(orgChannel.getId())
+                        .setSeverity(Severity.OK)
+                        .setTitle("Event 2")
+                        .setTimestamp(now.minusSeconds(4)),
+                    new CreateEventRequest()
+                        .setChannelId(orgChannel.getId())
+                        .setSeverity(Severity.OK)
+                        .setTitle("Event 3")
+                        .setTimestamp(now.minusSeconds(3)),
+                    new CreateEventRequest()
+                        .setChannelId(orgChannel.getId())
+                        .setSeverity(Severity.OK)
+                        .setTitle("Event 4")
+                        .setTimestamp(now.minusSeconds(2)),
+                    new CreateEventRequest()
+                        .setChannelId(orgChannel.getId())
+                        .setSeverity(Severity.OK)
+                        .setTitle("Event 5")
+                        .setTimestamp(now.minusSeconds(1))
+                )
+            );
 
-        final MockHttpServletRequestBuilder ingestRequest1 = post(EXTERNAL_EVENTS_PATH)
+        // When: Sending batch via org API key
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
             .contentType(APPLICATION_JSON)
             .header(API_KEY_HEADER, orgApiKey.getKey())
-            .content(toJson(request1));
+            .content(toJson(batchRequest));
 
-        final ResultActions response1 = mockMvc.perform(ingestRequest1);
-        response1.andExpect(status().is(SC_CREATED));
+        final ResultActions response = mockMvc.perform(ingestRequest);
 
-        // When: Sending second event (should exceed quota)
-        final CreateEventRequest request2 = new CreateEventRequest()
-            .setChannelId(orgChannel.getId())
-            .setSeverity(Severity.OK)
-            .setTitle("Event 2");
+        // Then: All events should be accepted
+        response.andExpect(status().is(SC_CREATED));
 
-        final MockHttpServletRequestBuilder ingestRequest2 = post(EXTERNAL_EVENTS_PATH)
-            .contentType(APPLICATION_JSON)
-            .header(API_KEY_HEADER, orgApiKey.getKey())
-            .content(toJson(request2));
-
-        final ResultActions response2 = mockMvc.perform(ingestRequest2);
-
-        // Then: Second event should be rejected
-        response2.andExpect(status().is(HttpStatus.TOO_MANY_REQUESTS.value()));
-
-        // And: User quota should be exactly 1000
-        final int finalCount = getUserQuotaEventCount(userA);
-        assertThat(finalCount, is(1000));
+        // And: User quota should remain at 999 (unchanged)
+        final int updatedCount = getUserQuotaEventCount(userA);
+        assertThat(updatedCount, is(999));
     }
 }
