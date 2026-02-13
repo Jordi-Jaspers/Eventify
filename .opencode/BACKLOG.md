@@ -4,15 +4,6 @@ Raw ideas and future work. Items here need refinement before development.
 
 ---
 
-## Epic: Bugs & Technical Debt
-**Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
-
----
-## Epic: General Improvements
-**Context**: Small improvements that don't fit into other epics but would enhance user experience.
-
----
-
 ## Epic: Channel Management
 **Context**: Users need better ways to manage their channels.
 
@@ -52,14 +43,6 @@ Raw ideas and future work. Items here need refinement before development.
 
 ---
 
-## Epic: Infrastructure & Performance
-
-**Context**: Cross-cutting concerns for caching, performance optimization, and infrastructure improvements.
-
-- [ ] **Add TTL-based Caching Infrastructure**: Add `@Cacheable` annotations or something similar for frequently accessed data like dashboard calls.
-
----
-
 ## Epic: OAUTH2 Authentication
 **Context**: Support third-party authentication via OAUTH2 providers (Google, GitHub, etc.) in addition to existing JWT and API Key methods.
 
@@ -71,10 +54,14 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **OAuth2 Enhancements - account linking**
 
 ---
-
+## Epic: Bugs & Technical Debt
+**Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
+---
+## Epic: General Improvements
+**Context**: Small improvements that don't fit into other epics but would enhance user experience.
+---
 ## Epic: Future Considerations
-
-Ideas to keep in mind for architecture decisions but not for immediate development.
+**Context**: Ideas to keep in mind for architecture decisions but not for immediate development.
 
 - [ ] **Webhooks/Notifications**: Alert users when specific events occur (ERROR severity, keyword match)
 - [ ] **Real-time Updates**: WebSocket or SSE for live timeline updates
@@ -85,3 +72,4 @@ Ideas to keep in mind for architecture decisions but not for immediate developme
 - [ ] **Export**: Download events as CSV/JSON for compliance/backup
 - [ ] **Stripe Integration**: manage subscriptions/payments
 - [ ] **Support / Help buttons** - guide users to docs or support chat from the avatar modal in sidebar.
+- [ ] **Add TTL-based Caching Infrastructure**: Add `@Cacheable` annotations or something similar for frequently accessed data like dashboard calls.

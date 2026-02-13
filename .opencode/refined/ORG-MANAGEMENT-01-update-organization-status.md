@@ -1,6 +1,6 @@
 # Update Organization Status
 
-**Epic**: Admin Global Oversight
+**Epic**: Organization Management
 **Status**: Ready for Dev
 **Estimate**: M
 **Created Date**: 2026-02-11

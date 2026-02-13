@@ -1,6 +1,6 @@
 # Channel Creation via API
 
-**Epic**: Developer Experience
+**Epic**: Channel Management
 **Status**: Ready for Dev
 **Estimate**: S
 **Created Date**: 2026-02-11
