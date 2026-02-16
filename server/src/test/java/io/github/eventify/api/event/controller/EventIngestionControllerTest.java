@@ -58,7 +58,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         metadata.put("region", "us-east-1");
 
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Production Server Down")
             .setMessage("Server experienced critical failure at 10:30 AM")
@@ -94,7 +94,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request with only required fields
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("System healthy");
 
@@ -127,7 +127,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Request missing severity and title
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId());
+            .setSlug(channel.getSlug());
 
         // When: Ingesting event
         final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
@@ -157,7 +157,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Request with invalid severity
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(null)
             .setTitle("Test Event");
 
@@ -184,15 +184,15 @@ public class EventIngestionControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should reject non-existent channel with 403 to avoid leaking existence")
-    public void ingestEventFailsWhenChannelNotFound() throws Exception {
-        // Given: Valid API key but non-existent channel
+    @DisplayName("Should reject non-existent slug with 404")
+    public void ingestEventFailsWhenSlugNotFound() throws Exception {
+        // Given: Valid API key but non-existent slug
         final User user = aValidatedUser();
         final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
-        // And: Request with non-existent channel
+        // And: Request with non-existent slug
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(99999L)
+            .setSlug("non.existent.slug.12345678")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
@@ -204,22 +204,22 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         final ResultActions response = mockMvc.perform(ingestRequest);
 
-        // Then: Response should be FORBIDDEN (not 404, to avoid leaking channel existence)
-        response.andExpect(status().is(SC_FORBIDDEN));
+        // Then: Response should be NOT_FOUND (404)
+        response.andExpect(status().is(SC_NOT_FOUND));
     }
 
     @Test
-    @DisplayName("Should reject channel not owned by API key")
-    public void ingestEventFailsWhenChannelAccessDenied() throws Exception {
+    @DisplayName("Should reject slug belonging to different owner with 404")
+    public void ingestEventFailsWhenSlugBelongsToDifferentOwner() throws Exception {
         // Given: Two users with separate channels
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
         final Channel user1Channel = aChannelForUser(user1, "User 1 Channel");
         final ApiKey user2ApiKey = anApiKeyForUser(user2, "User 2 Key");
 
-        // And: User 2 tries to access User 1's channel
+        // And: User 2 tries to access User 1's channel by slug
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(user1Channel.getId())
+            .setSlug(user1Channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
@@ -231,8 +231,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         final ResultActions response = mockMvc.perform(ingestRequest);
 
-        // Then: Response should be FORBIDDEN (Spring Security handles access denied)
-        response.andExpect(status().is(SC_FORBIDDEN));
+        // Then: Response should be NOT_FOUND (not 403, to avoid leaking slug existence)
+        response.andExpect(status().is(SC_NOT_FOUND));
     }
 
     @Test
@@ -246,7 +246,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
@@ -273,7 +273,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
     public void ingestEventFailsWhenNoApiKey() throws Exception {
         // Given: Valid request but no API key
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("any-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
@@ -298,7 +298,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
@@ -330,7 +330,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Request (client cannot provide timestamp in request)
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Test Event");
 
@@ -369,7 +369,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(orgChannel.getId())
+            .setSlug(orgChannel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Org Event");
 
@@ -402,7 +402,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(orgChannel.getId())
+            .setSlug(orgChannel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
@@ -414,8 +414,8 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         final ResultActions response = mockMvc.perform(ingestRequest);
 
-        // Then: Response should be FORBIDDEN (Spring Security handles access denied)
-        response.andExpect(status().is(SC_FORBIDDEN));
+        // Then: Response should be NOT_FOUND (slug not found for personal scope)
+        response.andExpect(status().is(SC_NOT_FOUND));
     }
 
     @Test
@@ -429,7 +429,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // And: Request with title exceeding 255 characters
         final String longTitle = "a".repeat(256);
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle(longTitle);
 
@@ -466,7 +466,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // And: Request with title exactly 255 characters
         final String maxTitle = "a".repeat(255);
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle(maxTitle);
 
@@ -493,7 +493,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // And: Request with message exceeding 10KB
         final String largeMessage = "a".repeat(10241);
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event")
             .setMessage(largeMessage);
@@ -521,7 +521,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // And: Request with empty metadata
         final Map<String, Object> emptyMetadata = new HashMap<>();
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Test Event")
             .setMetadata(emptyMetadata);
@@ -551,7 +551,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Test Event");
 
@@ -582,7 +582,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
@@ -622,7 +622,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Test Event");
 
@@ -655,7 +655,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("First Event");
 
@@ -686,7 +686,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Test Event");
 
@@ -717,7 +717,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
@@ -745,7 +745,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(orgChannel.getId())
+            .setSlug(orgChannel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Org Event");
 
@@ -777,7 +777,7 @@ public class EventIngestionControllerTest extends IntegrationTest {
 
         // And: Valid event request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(orgChannel.getId())
+            .setSlug(orgChannel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Org Event");
 
@@ -813,27 +813,27 @@ public class EventIngestionControllerTest extends IntegrationTest {
             .setEvents(
                 List.of(
                     new CreateEventRequest()
-                        .setChannelId(orgChannel.getId())
+                        .setSlug(orgChannel.getSlug())
                         .setSeverity(Severity.OK)
                         .setTitle("Event 1")
                         .setTimestamp(now.minusSeconds(5)),
                     new CreateEventRequest()
-                        .setChannelId(orgChannel.getId())
+                        .setSlug(orgChannel.getSlug())
                         .setSeverity(Severity.OK)
                         .setTitle("Event 2")
                         .setTimestamp(now.minusSeconds(4)),
                     new CreateEventRequest()
-                        .setChannelId(orgChannel.getId())
+                        .setSlug(orgChannel.getSlug())
                         .setSeverity(Severity.OK)
                         .setTitle("Event 3")
                         .setTimestamp(now.minusSeconds(3)),
                     new CreateEventRequest()
-                        .setChannelId(orgChannel.getId())
+                        .setSlug(orgChannel.getSlug())
                         .setSeverity(Severity.OK)
                         .setTitle("Event 4")
                         .setTimestamp(now.minusSeconds(2)),
                     new CreateEventRequest()
-                        .setChannelId(orgChannel.getId())
+                        .setSlug(orgChannel.getSlug())
                         .setSeverity(Severity.OK)
                         .setTitle("Event 5")
                         .setTimestamp(now.minusSeconds(1))
@@ -854,5 +854,112 @@ public class EventIngestionControllerTest extends IntegrationTest {
         // And: User quota should remain at 999 (unchanged)
         final int updatedCount = getUserQuotaEventCount(userA);
         assertThat(updatedCount, is(999));
+    }
+
+    // ===== Slug-based Event Routing Tests =====
+
+    @Test
+    @DisplayName("Should ingest event by slug successfully")
+    public void ingestEventBySlugSuccess() throws Exception {
+        // Given: Channel with known slug
+        final User user = aValidatedUser();
+        final Channel channel = aChannelForUser(user, "Production Alerts");
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
+
+        // And: Request with slug
+        final CreateEventRequest request = new CreateEventRequest()
+            .setSlug(channel.getSlug())
+            .setSeverity(Severity.WARNING)
+            .setTitle("Alert via Slug");
+
+        // When: Ingesting event by slug
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(API_KEY_HEADER, apiKey.getKey())
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(ingestRequest);
+
+        // Then: Response should be CREATED
+        response.andExpect(status().is(SC_CREATED));
+
+        // And: Response should contain event ID
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final EventCreatedResponse eventResponse = fromJson(content, EventCreatedResponse.class);
+
+        assertThat(eventResponse.getId(), is(notNullValue()));
+    }
+
+    @Test
+    @DisplayName("Should ingest batch events by slug successfully")
+    public void ingestBatchEventsBySlugSuccess() throws Exception {
+        // Given: User with channel and API key
+        final User user = aValidatedUser();
+        final Channel channel = aChannelForUser(user, "Batch Channel");
+        final ApiKey apiKey = anApiKeyForUser(user, "Batch Key");
+
+        // And: Batch request with events using slug
+        final OffsetDateTime now = TimeProvider.now();
+        final BatchEventRequest batchRequest = new BatchEventRequest()
+            .setEvents(
+                List.of(
+                    new CreateEventRequest()
+                        .setSlug(channel.getSlug())
+                        .setSeverity(Severity.OK)
+                        .setTitle("Event 1")
+                        .setTimestamp(now.minusSeconds(3)),
+                    new CreateEventRequest()
+                        .setSlug(channel.getSlug())
+                        .setSeverity(Severity.WARNING)
+                        .setTitle("Event 2")
+                        .setTimestamp(now.minusSeconds(2)),
+                    new CreateEventRequest()
+                        .setSlug(channel.getSlug())
+                        .setSeverity(Severity.CRITICAL)
+                        .setTitle("Event 3")
+                        .setTimestamp(now.minusSeconds(1))
+                )
+            );
+
+        // When: Sending batch via slug
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_BATCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(API_KEY_HEADER, apiKey.getKey())
+            .content(toJson(batchRequest));
+
+        final ResultActions response = mockMvc.perform(ingestRequest);
+
+        // Then: All events should be accepted
+        response.andExpect(status().is(SC_CREATED));
+    }
+
+    @Test
+    @DisplayName("Should reject event when slug not provided")
+    public void ingestEventFailsWhenSlugNotProvided() throws Exception {
+        // Given: Valid API key
+        final User user = aValidatedUser();
+        final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
+
+        // And: Request with no slug
+        final CreateEventRequest request = new CreateEventRequest()
+            .setSeverity(Severity.CRITICAL)
+            .setTitle("Test Event");
+
+        // When: Ingesting event
+        final MockHttpServletRequestBuilder ingestRequest = post(EXTERNAL_EVENTS_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(API_KEY_HEADER, apiKey.getKey())
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(ingestRequest);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+
+        // And: Error should mention missing slug
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final ValidationErrorResponseResource error = fromJson(content, ValidationErrorResponseResource.class);
+
+        assertThat(error.getErrors().size(), is(greaterThanOrEqualTo(1)));
     }
 }

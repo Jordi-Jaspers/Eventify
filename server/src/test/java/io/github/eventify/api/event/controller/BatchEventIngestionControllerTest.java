@@ -49,21 +49,21 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: Batch request with 3 valid events
         final CreateEventRequest event1 = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("First Event")
             .setMessage("First message")
             .setTimestamp(OffsetDateTime.now().minusHours(2));
 
         final CreateEventRequest event2 = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Second Event")
             .setMessage("Second message")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
 
         final CreateEventRequest event3 = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Third Event")
             .setMessage("Third message")
@@ -107,13 +107,13 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: Batch with one future timestamp
         final CreateEventRequest validEvent = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Valid Event")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
 
         final CreateEventRequest futureEvent = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Future Event")
             .setTimestamp(OffsetDateTime.now().plusHours(1));
@@ -155,13 +155,13 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: User 1 tries batch with both channels
         final CreateEventRequest accessibleEvent = new CreateEventRequest()
-            .setChannelId(user1Channel.getId())
+            .setSlug(user1Channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Accessible Event")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
 
         final CreateEventRequest inaccessibleEvent = new CreateEventRequest()
-            .setChannelId(user2Channel.getId())
+            .setSlug(user2Channel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Inaccessible Event")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
@@ -177,8 +177,8 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         final ResultActions response = mockMvc.perform(batchRequest);
 
-        // Then: Response should be FORBIDDEN
-        response.andExpect(status().is(SC_FORBIDDEN));
+        // Then: Response should be NOT_FOUND (not 403, to prevent enumeration)
+        response.andExpect(status().is(SC_NOT_FOUND));
 
         // And: No events should be stored
         final long storedEventCount = eventRepository.countByChannelIdIn(
@@ -200,7 +200,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         for (int i = 0; i < 101; i++) {
             events.add(
                 new CreateEventRequest()
-                    .setChannelId(channel.getId())
+                    .setSlug(channel.getSlug())
                     .setSeverity(Severity.OK)
                     .setTitle("Event " + i)
                     .setTimestamp(OffsetDateTime.now().minusHours(i))
@@ -242,13 +242,13 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: Batch with one event missing timestamp
         final CreateEventRequest eventWithTimestamp = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Valid Event")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
 
         final CreateEventRequest eventWithoutTimestamp = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Missing Timestamp");
 
@@ -325,19 +325,19 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: Batch with events targeting both channels
         final CreateEventRequest event1 = new CreateEventRequest()
-            .setChannelId(channel1.getId())
+            .setSlug(channel1.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Channel 1 Event")
             .setTimestamp(OffsetDateTime.now().minusHours(2));
 
         final CreateEventRequest event2 = new CreateEventRequest()
-            .setChannelId(channel2.getId())
+            .setSlug(channel2.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Channel 2 Event")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
 
         final CreateEventRequest event3 = new CreateEventRequest()
-            .setChannelId(channel1.getId())
+            .setSlug(channel1.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Channel 1 Event 2")
             .setTimestamp(OffsetDateTime.now().minusMinutes(30));
@@ -373,19 +373,19 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: Batch where second event has invalid data
         final CreateEventRequest validEvent1 = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("First Valid Event")
             .setTimestamp(OffsetDateTime.now().minusHours(2));
 
         final CreateEventRequest invalidEvent = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Invalid Event")
             .setTimestamp(OffsetDateTime.now().plusHours(1));
 
         final CreateEventRequest validEvent2 = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Third Valid Event")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
@@ -421,13 +421,13 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: Batch with events targeting org channels
         final CreateEventRequest event1 = new CreateEventRequest()
-            .setChannelId(orgChannel1.getId())
+            .setSlug(orgChannel1.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Org Event 1")
             .setTimestamp(OffsetDateTime.now().minusHours(2));
 
         final CreateEventRequest event2 = new CreateEventRequest()
-            .setChannelId(orgChannel2.getId())
+            .setSlug(orgChannel2.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Org Event 2")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
@@ -466,7 +466,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         for (int i = 0; i < 100; i++) {
             events.add(
                 new CreateEventRequest()
-                    .setChannelId(channel.getId())
+                    .setSlug(channel.getSlug())
                     .setSeverity(Severity.OK)
                     .setTitle("Event " + i)
                     .setTimestamp(OffsetDateTime.now().minusHours(i))
@@ -504,7 +504,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: Event with current timestamp
         final CreateEventRequest currentEvent = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Current Event")
             .setTimestamp(OffsetDateTime.now());
@@ -534,7 +534,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: Batch with event missing severity
         final CreateEventRequest invalidEvent = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setTitle("Missing Severity")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
 
@@ -573,7 +573,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
 
         // And: Batch with event missing title
         final CreateEventRequest invalidEvent = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTimestamp(OffsetDateTime.now().minusHours(1));
 
@@ -603,13 +603,13 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should reject batch with missing channelId")
-    public void ingestBatchFailsWhenMissingChannelId() throws Exception {
+    @DisplayName("Should reject batch with missing slug")
+    public void ingestBatchFailsWhenMissingSlug() throws Exception {
         // Given: An active channel and valid API key
         final User user = aValidatedUser();
         final ApiKey apiKey = anApiKeyForUser(user, "Test Key");
 
-        // And: Batch with event missing channelId
+        // And: Batch with event missing slug
         final CreateEventRequest invalidEvent = new CreateEventRequest()
             .setSeverity(Severity.OK)
             .setTitle("Missing Channel")
@@ -629,13 +629,13 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         // Then: Response should be BAD_REQUEST
         response.andExpect(status().is(SC_BAD_REQUEST));
 
-        // And: Error should mention channelId
+        // And: Error should mention slug
         final String content = response.andReturn().getResponse().getContentAsString();
         final ValidationErrorResponseResource error = fromJson(content, ValidationErrorResponseResource.class);
 
         assertThat(
             error.getErrors().stream()
-                .anyMatch(e -> e.getField().contains("channelId")),
+                .anyMatch(e -> e.getField().contains("slug")),
             is(true)
         );
     }
@@ -645,7 +645,7 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
     public void ingestBatchFailsWhenNoApiKey() throws Exception {
         // Given: Valid batch request but no API key
         final CreateEventRequest event = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.OK)
             .setTitle("Test Event")
             .setTimestamp(OffsetDateTime.now().minusHours(1));
@@ -682,14 +682,14 @@ public class BatchEventIngestionControllerTest extends IntegrationTest {
         metadata2.put("region", "us-west-2");
 
         final CreateEventRequest event1 = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("Event with metadata 1")
             .setMetadata(metadata1)
             .setTimestamp(OffsetDateTime.now().minusHours(2));
 
         final CreateEventRequest event2 = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("Event with metadata 2")
             .setMetadata(metadata2)

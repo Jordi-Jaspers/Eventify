@@ -21,7 +21,7 @@ import java.util.Map;
 @Accessors(chain = true)
 public class CreateEventRequest {
 
-    private Long channelId;
+    private String slug;
     private Severity severity;
     private String title;
     private String message;

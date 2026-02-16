@@ -43,6 +43,9 @@ public class ChannelServiceTest extends UnitTest {
     @Mock
     private ChannelRepository channelRepository;
 
+    @Mock
+    private ChannelCreationService channelCreationService;
+
     @Spy
     private ChannelMetaData channelMetaData = new ChannelMetaData();
 
@@ -77,13 +80,11 @@ public class ChannelServiceTest extends UnitTest {
             .setSlug("test.channel.1")
             .setDescription("Error logs from production");
 
-        when(channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(user.getId(), "My App Errors"))
-            .thenReturn(Optional.empty());
-        when(channelRepository.save(any(Channel.class))).thenAnswer(invocation -> {
-            final Channel channel = invocation.getArgument(0);
-            channel.setId(1L);
-            return channel;
-        });
+        final Channel createdChannel = new Channel("My App Errors", "test.channel.1", user, null);
+        createdChannel.setId(1L);
+        createdChannel.setDescription("Error logs from production");
+
+        when(channelCreationService.createPersonalChannel(request, user)).thenReturn(createdChannel);
 
         // When: Creating personal channel
         final Channel channel = channelService.createUserChannel(request);
@@ -96,7 +97,7 @@ public class ChannelServiceTest extends UnitTest {
         assertThat(channel.getStatus(), is(ChannelStatus.ACTIVE));
         assertThat(channel.getUser().getId(), is(user.getId()));
 
-        verify(channelRepository).save(any(Channel.class));
+        verify(channelCreationService).createPersonalChannel(request, user);
     }
 
     @Test
@@ -107,13 +108,10 @@ public class ChannelServiceTest extends UnitTest {
             .setName("Simple Channel")
             .setSlug("test.channel.2");
 
-        when(channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(user.getId(), "Simple Channel"))
-            .thenReturn(Optional.empty());
-        when(channelRepository.save(any(Channel.class))).thenAnswer(invocation -> {
-            final Channel channel = invocation.getArgument(0);
-            channel.setId(1L);
-            return channel;
-        });
+        final Channel createdChannel = new Channel("Simple Channel", "test.channel.2", user, null);
+        createdChannel.setId(1L);
+
+        when(channelCreationService.createPersonalChannel(request, user)).thenReturn(createdChannel);
 
         // When: Creating channel
         final Channel channel = channelService.createUserChannel(request);
@@ -130,17 +128,14 @@ public class ChannelServiceTest extends UnitTest {
             .setName("Errors")
             .setSlug("test.channel.3");
 
-        final Channel existingChannel = new Channel("Errors", "errors", user, null);
-        when(channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(user.getId(), "Errors"))
-            .thenReturn(Optional.of(existingChannel));
+        when(channelCreationService.createPersonalChannel(request, user))
+            .thenThrow(new DuplicateChannelNameException());
 
         // When & Then: Should throw DuplicateChannelNameException
         assertThrows(
             DuplicateChannelNameException.class,
             () -> channelService.createUserChannel(request)
         );
-
-        verify(channelRepository, never()).save(any(Channel.class));
     }
 
     @Test
@@ -151,24 +146,19 @@ public class ChannelServiceTest extends UnitTest {
             .setName("Personal Channel")
             .setSlug("test.channel.4");
 
-        when(channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(user.getId(), "Personal Channel"))
-            .thenReturn(Optional.empty());
-        when(channelRepository.save(any(Channel.class))).thenAnswer(invocation -> {
-            final Channel channel = invocation.getArgument(0);
-            channel.setId(1L);
-            return channel;
-        });
+        final Channel createdChannel = new Channel("Personal Channel", "test.channel.4", user, null);
+        createdChannel.setId(1L);
+
+        when(channelCreationService.createPersonalChannel(request, user)).thenReturn(createdChannel);
 
         // When: Creating channel
-        channelService.createUserChannel(request);
+        final Channel channel = channelService.createUserChannel(request);
 
-        // Then: Should save with organization null
-        verify(channelRepository).save(
-            argThat(
-                channel -> channel.getOrganization() == null &&
-                    channel.getUser().getId().equals(user.getId())
-            )
-        );
+        // Then: Should have null organization
+        assertThat(channel.getOrganization(), is(nullValue()));
+        assertThat(channel.getUser().getId(), is(user.getId()));
+
+        verify(channelCreationService).createPersonalChannel(request, user);
     }
 
     @Test
@@ -366,9 +356,13 @@ public class ChannelServiceTest extends UnitTest {
         final Channel channel = createChannel(1L, "Active Channel", user);
         channel.setStatus(ChannelStatus.ACTIVE);
 
+        final Channel pausedChannel = createChannel(1L, "Active Channel", user);
+        pausedChannel.setStatus(ChannelStatus.PAUSED);
+        pausedChannel.setUpdatedAt(OffsetDateTime.now());
+
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
-        when(channelRepository.save(any(Channel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(channelCreationService.updateStatus(channel, ChannelStatus.PAUSED)).thenReturn(pausedChannel);
 
         // When: Pausing channel
         final Channel paused = channelService.pauseUserChannel(1L);
@@ -377,7 +371,7 @@ public class ChannelServiceTest extends UnitTest {
         assertThat(paused.getStatus(), is(ChannelStatus.PAUSED));
         assertThat(paused.getUpdatedAt(), is(notNullValue()));
 
-        verify(channelRepository).save(channel);
+        verify(channelCreationService).updateStatus(channel, ChannelStatus.PAUSED);
     }
 
     @Test
@@ -387,9 +381,12 @@ public class ChannelServiceTest extends UnitTest {
         final Channel channel = createChannel(1L, "Paused Channel", user);
         channel.setStatus(ChannelStatus.PAUSED);
 
+        final Channel pausedChannel = createChannel(1L, "Paused Channel", user);
+        pausedChannel.setStatus(ChannelStatus.PAUSED);
+
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
-        when(channelRepository.save(any(Channel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(channelCreationService.updateStatus(channel, ChannelStatus.PAUSED)).thenReturn(pausedChannel);
 
         // When: Pausing again
         final Channel paused = channelService.pauseUserChannel(1L);
@@ -397,7 +394,7 @@ public class ChannelServiceTest extends UnitTest {
         // Then: Channel should still be paused
         assertThat(paused.getStatus(), is(ChannelStatus.PAUSED));
 
-        verify(channelRepository).save(channel);
+        verify(channelCreationService).updateStatus(channel, ChannelStatus.PAUSED);
     }
 
     @Test
@@ -407,9 +404,13 @@ public class ChannelServiceTest extends UnitTest {
         final Channel channel = createChannel(1L, "Paused Channel", user);
         channel.setStatus(ChannelStatus.PAUSED);
 
+        final Channel resumedChannel = createChannel(1L, "Paused Channel", user);
+        resumedChannel.setStatus(ChannelStatus.ACTIVE);
+        resumedChannel.setUpdatedAt(OffsetDateTime.now());
+
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
-        when(channelRepository.save(any(Channel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(channelCreationService.updateStatus(channel, ChannelStatus.ACTIVE)).thenReturn(resumedChannel);
 
         // When: Resuming channel
         final Channel resumed = channelService.resumeUserChannel(1L);
@@ -418,7 +419,7 @@ public class ChannelServiceTest extends UnitTest {
         assertThat(resumed.getStatus(), is(ChannelStatus.ACTIVE));
         assertThat(resumed.getUpdatedAt(), is(notNullValue()));
 
-        verify(channelRepository).save(channel);
+        verify(channelCreationService).updateStatus(channel, ChannelStatus.ACTIVE);
     }
 
     @Test
@@ -428,9 +429,12 @@ public class ChannelServiceTest extends UnitTest {
         final Channel channel = createChannel(1L, "Active Channel", user);
         channel.setStatus(ChannelStatus.ACTIVE);
 
+        final Channel activeChannel = createChannel(1L, "Active Channel", user);
+        activeChannel.setStatus(ChannelStatus.ACTIVE);
+
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
-        when(channelRepository.save(any(Channel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(channelCreationService.updateStatus(channel, ChannelStatus.ACTIVE)).thenReturn(activeChannel);
 
         // When: Resuming active channel
         final Channel resumed = channelService.resumeUserChannel(1L);
@@ -438,7 +442,7 @@ public class ChannelServiceTest extends UnitTest {
         // Then: Channel should still be active
         assertThat(resumed.getStatus(), is(ChannelStatus.ACTIVE));
 
-        verify(channelRepository).save(channel);
+        verify(channelCreationService).updateStatus(channel, ChannelStatus.ACTIVE);
     }
 
     @Test
@@ -448,9 +452,13 @@ public class ChannelServiceTest extends UnitTest {
         final Channel channel = createChannel(1L, "Channel to Delete", user);
         channel.setStatus(ChannelStatus.ACTIVE);
 
+        final Channel deletedChannel = createChannel(1L, "Channel to Delete", user);
+        deletedChannel.setStatus(ChannelStatus.PENDING_DELETION);
+        deletedChannel.setUpdatedAt(OffsetDateTime.now());
+
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
-        when(channelRepository.save(any(Channel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(channelCreationService.updateStatus(channel, ChannelStatus.PENDING_DELETION)).thenReturn(deletedChannel);
 
         // When: Deleting channel
         final Channel deleted = channelService.deleteUserChannel(1L);
@@ -459,7 +467,7 @@ public class ChannelServiceTest extends UnitTest {
         assertThat(deleted.getStatus(), is(ChannelStatus.PENDING_DELETION));
         assertThat(deleted.getUpdatedAt(), is(notNullValue()));
 
-        verify(channelRepository).save(channel);
+        verify(channelCreationService).updateStatus(channel, ChannelStatus.PENDING_DELETION);
     }
 
     @Test
@@ -485,9 +493,12 @@ public class ChannelServiceTest extends UnitTest {
         final Channel channel = createChannel(1L, "Paused Channel", user);
         channel.setStatus(ChannelStatus.PAUSED);
 
+        final Channel deletedChannel = createChannel(1L, "Paused Channel", user);
+        deletedChannel.setStatus(ChannelStatus.PENDING_DELETION);
+
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
-        when(channelRepository.save(any(Channel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(channelCreationService.updateStatus(channel, ChannelStatus.PENDING_DELETION)).thenReturn(deletedChannel);
 
         // When: Deleting channel
         final Channel deleted = channelService.deleteUserChannel(1L);

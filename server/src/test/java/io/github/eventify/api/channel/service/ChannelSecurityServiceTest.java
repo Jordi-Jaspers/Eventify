@@ -57,47 +57,52 @@ public class ChannelSecurityServiceTest extends UnitTest {
     public void shouldReturnTrueWhenPersonalPrincipalAccessesOwnChannel() {
         // Given: Personal API key principal, personal channel owned by same user
         final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
-        final Channel channel = aPersonalChannel(user1);
+        final Channel channel = aPersonalChannel("my-channel", user1);
 
-        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelRepository.findBySlugAndPrincipal(channel.getSlug(), principal))
+            .thenReturn(Optional.of(channel));
 
         // When: canAccess called
-        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+        final boolean result = channelSecurityService.canAccess(channel.getSlug(), principal);
 
         // Then: Returns true
         assertThat(result, is(true));
     }
 
     @Test
-    @DisplayName("Should return false when personal principal accesses another users channel")
-    public void shouldReturnFalseWhenPersonalPrincipalAccessesAnotherUsersChannel() {
-        // Given: Personal principal, personal channel owned by different user
+    @DisplayName("Should return true when channel not in scope - service handles 404")
+    public void shouldReturnTrueWhenChannelNotInScopeToLetServiceHandle404() {
+        // Given: Personal principal, slug that doesn't resolve in their scope
         final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
-        final Channel channel = aPersonalChannel(user2);
+        final String slug = "other-user-channel";
 
-        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
+        // Slug not found for user1's scope (could be another user's or non-existent)
+        when(channelRepository.findBySlugAndPrincipal(slug, principal))
+            .thenReturn(Optional.empty());
 
         // When: canAccess called
-        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+        final boolean result = channelSecurityService.canAccess(slug, principal);
 
-        // Then: Returns false (Spring Security handles 403)
-        assertThat(result, is(false));
+        // Then: Returns true (let service layer handle 404 to prevent enumeration)
+        assertThat(result, is(true));
     }
 
     @Test
-    @DisplayName("Should return false when personal principal accesses org channel")
-    public void shouldReturnFalseWhenPersonalPrincipalAccessesOrgChannel() {
-        // Given: Personal principal, organization channel
+    @DisplayName("Should return true when personal principal accesses org channel - service handles 404")
+    public void shouldReturnTrueWhenPersonalPrincipalAccessesOrgChannel() {
+        // Given: Personal principal, organization channel (not in personal scope)
         final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
-        final Channel channel = anOrgChannel(user1, org1);
+        final String slug = "org-channel";
 
-        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
+        // Slug not found in personal scope (it's an org channel)
+        when(channelRepository.findBySlugAndPrincipal(slug, principal))
+            .thenReturn(Optional.empty());
 
         // When: canAccess called
-        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+        final boolean result = channelSecurityService.canAccess(slug, principal);
 
-        // Then: Returns false (Spring Security handles 403)
-        assertThat(result, is(false));
+        // Then: Returns true (let service layer handle 404)
+        assertThat(result, is(true));
     }
 
     @Test
@@ -105,77 +110,111 @@ public class ChannelSecurityServiceTest extends UnitTest {
     public void shouldReturnTrueWhenOrgPrincipalAccessesOrgChannel() {
         // Given: Org principal for Org A, channel belonging to Org A
         final ApiKeyPrincipal principal = anOrgPrincipal(user1, org1);
-        final Channel channel = anOrgChannel(user1, org1);
+        final Channel channel = anOrgChannel("org-channel", user1, org1);
 
-        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelRepository.findBySlugAndPrincipal(channel.getSlug(), principal))
+            .thenReturn(Optional.of(channel));
 
         // When: canAccess called
-        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+        final boolean result = channelSecurityService.canAccess(channel.getSlug(), principal);
 
         // Then: Returns true
         assertThat(result, is(true));
     }
 
     @Test
-    @DisplayName("Should return false when org principal accesses different org channel")
-    public void shouldReturnFalseWhenOrgPrincipalAccessesDifferentOrgChannel() {
-        // Given: Org principal for Org A, channel belonging to Org B
+    @DisplayName("Should return true when org principal accesses different org channel - service handles 404")
+    public void shouldReturnTrueWhenOrgPrincipalAccessesDifferentOrgChannel() {
+        // Given: Org principal for Org A, slug not in Org A's scope
         final ApiKeyPrincipal principal = anOrgPrincipal(user1, org1);
-        final Channel channel = anOrgChannel(user2, org2);
+        final String slug = "other-org-channel";
 
-        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
+        // Slug not found in org1's scope (it belongs to org2 or doesn't exist)
+        when(channelRepository.findBySlugAndPrincipal(slug, principal))
+            .thenReturn(Optional.empty());
 
         // When: canAccess called
-        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+        final boolean result = channelSecurityService.canAccess(slug, principal);
 
-        // Then: Returns false (Spring Security handles 403)
-        assertThat(result, is(false));
+        // Then: Returns true (let service layer handle 404)
+        assertThat(result, is(true));
     }
 
     @Test
-    @DisplayName("Should return false when org principal accesses personal channel")
-    public void shouldReturnFalseWhenOrgPrincipalAccessesPersonalChannel() {
-        // Given: Org principal, personal channel
+    @DisplayName("Should return true when org principal accesses personal channel - service handles 404")
+    public void shouldReturnTrueWhenOrgPrincipalAccessesPersonalChannel() {
+        // Given: Org principal, personal channel slug (not in org scope)
         final ApiKeyPrincipal principal = anOrgPrincipal(user1, org1);
-        final Channel channel = aPersonalChannel(user1);
+        final String slug = "personal-channel";
 
-        when(channelRepository.findActiveChannelById(channel.getId())).thenReturn(Optional.of(channel));
+        // Slug not found in org scope (it's a personal channel)
+        when(channelRepository.findBySlugAndPrincipal(slug, principal))
+            .thenReturn(Optional.empty());
 
         // When: canAccess called
-        final boolean result = channelSecurityService.canAccess(channel.getId(), principal);
+        final boolean result = channelSecurityService.canAccess(slug, principal);
 
-        // Then: Returns false (Spring Security handles 403)
-        assertThat(result, is(false));
+        // Then: Returns true (let service layer handle 404)
+        assertThat(result, is(true));
     }
 
     @Test
     @DisplayName("Should return false when principal is null")
     public void shouldReturnFalseWhenPrincipalIsNull() {
-        // Given: Null principal, valid channel ID
+        // Given: Null principal, valid channel slug
         final ApiKeyPrincipal nullPrincipal = null;
-        final Long channelId = 1L;
+        final String slug = "some-channel";
 
         // When: canAccess called
-        final boolean result = channelSecurityService.canAccess(channelId, nullPrincipal);
+        final boolean result = channelSecurityService.canAccess(slug, nullPrincipal);
 
         // Then: Returns false (Spring Security handles 403)
         assertThat(result, is(false));
     }
 
     @Test
-    @DisplayName("Should return false when channel does not exist (no 404 to avoid leaking existence)")
-    public void shouldReturnFalseWhenChannelDoesNotExist() {
-        // Given: Valid principal, non-existent channel ID
+    @DisplayName("Should return true when slug is null - let validation handle 400")
+    public void shouldReturnTrueWhenSlugIsNullToLetValidationHandle400() {
+        // Given: Valid principal, null slug
         final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
-        final Long nonExistentChannelId = 999L;
+        final String nullSlug = null;
 
-        when(channelRepository.findActiveChannelById(nonExistentChannelId)).thenReturn(Optional.empty());
+        // When: canAccess called
+        final boolean result = channelSecurityService.canAccess(nullSlug, principal);
+
+        // Then: Returns true (let validation layer throw 400, not security 403)
+        assertThat(result, is(true));
+    }
+
+    @Test
+    @DisplayName("Should return true when slug is blank - let validation handle 400")
+    public void shouldReturnTrueWhenSlugIsBlankToLetValidationHandle400() {
+        // Given: Valid principal, blank slug
+        final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
+        final String blankSlug = "   ";
+
+        // When: canAccess called
+        final boolean result = channelSecurityService.canAccess(blankSlug, principal);
+
+        // Then: Returns true (let validation layer throw 400, not security 403)
+        assertThat(result, is(true));
+    }
+
+    @Test
+    @DisplayName("Should return true when channel does not exist - service handles 404")
+    public void shouldReturnTrueWhenChannelDoesNotExistToLetServiceHandle404() {
+        // Given: Valid principal, non-existent channel slug
+        final ApiKeyPrincipal principal = aPersonalPrincipal(user1);
+        final String nonExistentSlug = "non-existent-channel";
+
+        when(channelRepository.findBySlugAndPrincipal(nonExistentSlug, principal))
+            .thenReturn(Optional.empty());
 
         // When: Checking access
-        final boolean result = channelSecurityService.canAccess(nonExistentChannelId, principal);
+        final boolean result = channelSecurityService.canAccess(nonExistentSlug, principal);
 
-        // Then: Returns false (Spring Security will convert to 403)
-        assertThat(result, is(false));
+        // Then: Returns true (let service layer throw 404 to prevent enumeration)
+        assertThat(result, is(true));
     }
 
     // ===== Factory Methods =====
@@ -183,12 +222,14 @@ public class ChannelSecurityServiceTest extends UnitTest {
     /**
      * Creates a personal channel (organization=null).
      *
+     * @param slug the channel slug
      * @param user the user who owns the channel
      * @return personal channel
      */
-    private Channel aPersonalChannel(final User user) {
+    private Channel aPersonalChannel(final String slug, final User user) {
         final Channel channel = new Channel();
         channel.setId(1L);
+        channel.setSlug(slug);
         channel.setName("Personal Channel");
         channel.setUser(user);
         channel.setOrganization(null);
@@ -199,13 +240,15 @@ public class ChannelSecurityServiceTest extends UnitTest {
     /**
      * Creates an organization channel (organization!=null).
      *
+     * @param slug the channel slug
      * @param user the user who created the channel
      * @param org  the organization that owns the channel
      * @return organization channel
      */
-    private Channel anOrgChannel(final User user, final Organization org) {
+    private Channel anOrgChannel(final String slug, final User user, final Organization org) {
         final Channel channel = new Channel();
         channel.setId(1L);
+        channel.setSlug(slug);
         channel.setName("Organization Channel");
         channel.setUser(user);
         channel.setOrganization(org);

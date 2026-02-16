@@ -2,6 +2,7 @@ package io.github.eventify.api.channel.repository;
 
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
+import io.github.eventify.common.security.principal.ApiKeyPrincipal;
 
 import java.util.Collection;
 import java.util.List;
@@ -58,6 +59,24 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * @return true if exists, false otherwise
      */
     boolean existsByUserIdAndSlugAndOrganizationIdIsNull(Long userId, String slug);
+
+    /**
+     * Finds a personal channel by slug and user ID.
+     *
+     * @param slug   the channel slug
+     * @param userId the user ID
+     * @return optional channel
+     */
+    Optional<Channel> findBySlugAndUserIdAndOrganizationIdIsNull(String slug, Long userId);
+
+    /**
+     * Finds an organization channel by slug and organization ID.
+     *
+     * @param slug           the channel slug
+     * @param organizationId the organization ID
+     * @return optional channel
+     */
+    Optional<Channel> findBySlugAndOrganizationId(String slug, Long organizationId);
 
     /**
      * Finds a channel by ID and user ID excluding deleted ones.
@@ -157,4 +176,19 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * @return list of channels
      */
     List<Channel> findByOrganizationIdAndStatus(Long organizationId, ChannelStatus status);
+
+    /**
+     * Finds a channel by slug within the principal's scope (organization or personal).
+     * Uses scoped query: returns only channels owned by principal's user/org.
+     *
+     * @param slug      the channel slug
+     * @param principal the API key principal
+     * @return optional channel
+     */
+    default Optional<Channel> findBySlugAndPrincipal(final String slug, final ApiKeyPrincipal principal) {
+        if (principal.getOrganizationId() != null) {
+            return findBySlugAndOrganizationId(slug, principal.getOrganizationId());
+        }
+        return findBySlugAndUserIdAndOrganizationIdIsNull(slug, principal.getUserId());
+    }
 }

@@ -57,15 +57,14 @@ public class EventIngestionController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("@channelSecurity.canAccess(#request.channelId, principal)")
+    @PreAuthorize("@channelSecurity.canAccess(#request.slug, #principal)")
     public ResponseEntity<EventCreatedResponse> ingestEvent(@RequestBody final CreateEventRequest request,
         @AuthenticationPrincipal final ApiKeyPrincipal principal) {
         eventValidator.validateAndThrow(request);
-        // Only enforce quota for personal API keys (organization API keys have unlimited usage)
         if (principal.isUserKey()) {
             userQuotaService.checkAndIncrementOrThrow(principal.getUserId(), 1);
         }
-        final Event event = eventIngestionService.ingestEvent(request);
+        final Event event = eventIngestionService.ingestEvent(request, principal);
         return ResponseEntity.status(CREATED).body(eventMapper.toCreatedResponse(event));
     }
 
@@ -79,15 +78,14 @@ public class EventIngestionController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("@channelSecurity.canAccessBatch(#request, principal)")
+    @PreAuthorize("@channelSecurity.canAccessBatch(#request, #principal)")
     public ResponseEntity<List<EventCreatedResponse>> ingestBatch(@RequestBody final BatchEventRequest request,
         @AuthenticationPrincipal final ApiKeyPrincipal principal) {
         eventValidator.validateAndThrow(request);
-        // Only enforce quota for personal API keys (organization API keys have unlimited usage)
         if (principal.isUserKey()) {
             userQuotaService.checkAndIncrementOrThrow(principal.getUserId(), request.getEvents().size());
         }
-        final List<Event> events = eventIngestionService.ingestBatch(request);
+        final List<Event> events = eventIngestionService.ingestBatch(request, principal);
         return ResponseEntity.status(CREATED).body(eventMapper.toCreatedResponseList(events));
     }
 }

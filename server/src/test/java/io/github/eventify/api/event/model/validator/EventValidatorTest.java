@@ -39,7 +39,7 @@ public class EventValidatorTest extends UnitTest {
         metadata.put("key", "value");
 
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Production Server Down")
             .setMessage("Server experienced critical failure")
@@ -59,7 +59,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldAcceptValidRequestWithMinimalFields() {
         // Given: Valid request with only required fields
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.OK)
             .setTitle("System healthy");
 
@@ -93,9 +93,9 @@ public class EventValidatorTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should reject null channel ID")
-    public void shouldRejectNullChannelId() {
-        // Given: Request with null channel ID
+    @DisplayName("Should reject missing slug")
+    public void shouldRejectMissingSlug() {
+        // Given: Request without slug
         final CreateEventRequest request = new CreateEventRequest()
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
@@ -112,8 +112,8 @@ public class EventValidatorTest extends UnitTest {
         assertThat(
             exception.getValidationResult().getErrors().stream()
                 .anyMatch(
-                    error -> error.getField().equals(CHANNEL_ID) &&
-                        error.getCode().equals(CHANNEL_ID_REQUIRED)
+                    error -> error.getField().equals(SLUG) &&
+                        error.getCode().equals(SLUG_REQUIRED)
                 ),
             is(true)
         );
@@ -124,7 +124,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldRejectNullSeverity() {
         // Given: Request with null severity
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setTitle("Test Event");
 
         final ValidationResult result = new ValidationResult();
@@ -151,7 +151,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldAcceptOkSeverity() {
         // Given: Request with OK severity
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.OK)
             .setTitle("Test Event");
 
@@ -169,7 +169,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldAcceptWarningSeverity() {
         // Given: Request with WARNING severity
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.WARNING)
             .setTitle("Test Event");
 
@@ -187,7 +187,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldAcceptCriticalSeverity() {
         // Given: Request with CRITICAL severity
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
@@ -205,7 +205,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldRejectNullTitle() {
         // Given: Request with null title
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL);
 
         final ValidationResult result = new ValidationResult();
@@ -232,7 +232,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldRejectEmptyTitle() {
         // Given: Request with empty title
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("");
 
@@ -260,7 +260,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldRejectBlankTitle() {
         // Given: Request with blank title
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("   ");
 
@@ -289,7 +289,7 @@ public class EventValidatorTest extends UnitTest {
         // Given: Request with title of exactly 255 characters
         final String maxTitle = "a".repeat(255);
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle(maxTitle);
 
@@ -308,7 +308,7 @@ public class EventValidatorTest extends UnitTest {
         // Given: Request with title exceeding 255 characters
         final String longTitle = "a".repeat(256);
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle(longTitle);
 
@@ -336,7 +336,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldAcceptNullMessage() {
         // Given: Request with null message
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event")
             .setMessage(null);
@@ -356,7 +356,7 @@ public class EventValidatorTest extends UnitTest {
         // Given: Request with message of exactly 10240 bytes (10KB)
         final String maxMessage = "a".repeat(10240);
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event")
             .setMessage(maxMessage);
@@ -376,7 +376,7 @@ public class EventValidatorTest extends UnitTest {
         // Given: Request with message exceeding 10240 bytes (10KB)
         final String longMessage = "a".repeat(10241);
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event")
             .setMessage(longMessage);
@@ -406,7 +406,7 @@ public class EventValidatorTest extends UnitTest {
         // Given: Request with empty metadata
         final Map<String, Object> emptyMetadata = new HashMap<>();
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event")
             .setMetadata(emptyMetadata);
@@ -425,7 +425,7 @@ public class EventValidatorTest extends UnitTest {
     public void shouldAcceptNullMetadata() {
         // Given: Request with null metadata
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event")
             .setMetadata(null);
@@ -448,7 +448,7 @@ public class EventValidatorTest extends UnitTest {
         metadata.put("data", "a".repeat(10200));
 
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event")
             .setMetadata(metadata);
@@ -471,7 +471,7 @@ public class EventValidatorTest extends UnitTest {
         metadata.put("data", "a".repeat(10500));
 
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(1L)
+            .setSlug("test-slug")
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event")
             .setMetadata(metadata);
@@ -498,7 +498,7 @@ public class EventValidatorTest extends UnitTest {
     @Test
     @DisplayName("Should reject multiple validation errors")
     public void shouldRejectMultipleValidationErrors() {
-        // Given: Request with multiple validation errors (missing channelId, severity, title)
+        // Given: Request with multiple validation errors (missing slug, severity, title)
         final CreateEventRequest request = new CreateEventRequest();
 
         final ValidationResult result = new ValidationResult();
@@ -509,7 +509,7 @@ public class EventValidatorTest extends UnitTest {
             () -> validator.validate(request, result)
         );
 
-        // Then: Should have multiple errors (channelId, severity, title)
+        // Then: Should have multiple errors (slug, severity, title)
         assertThat(exception.getValidationResult().hasErrors(), is(true));
         assertThat(exception.getValidationResult().getErrors().size(), is(greaterThanOrEqualTo(3)));
     }

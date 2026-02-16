@@ -9,12 +9,12 @@ import io.github.eventify.api.event.model.request.BatchEventRequest;
 import io.github.eventify.api.event.model.request.CreateEventRequest;
 import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.common.exception.ChannelPausedException;
+import io.github.eventify.common.security.principal.ApiKeyPrincipal;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +25,8 @@ import static io.github.eventify.common.exception.ApiErrorCode.CHANNEL_NOT_FOUND
 
 /**
  * Service for event ingestion.
+ * Channels are resolved by slug within the principal's scope (userId or orgId).
+ * Security layer (@PreAuthorize) runs first and caches resolved channels.
  */
 @Service
 @RequiredArgsConstructor
@@ -37,59 +39,58 @@ public class EventIngestionService {
     private final ChannelCache channelCache;
 
     /**
-     * Ingests an event into a channel. Access validation is performed at controller level via @PreAuthorize.
-     * Uses request-scoped cache populated by security layer to avoid duplicate database queries.
-     *
-     * @param request the event creation request
-     * @return the saved event entity
+     * Ingests a single event. Channel resolved from cache (populated by security layer) or DB.
      */
-    public Event ingestEvent(final CreateEventRequest request) {
-        final Channel channel = channelCache.getOrLoad(request.getChannelId(), channelRepository::findById)
-            .orElseThrow(() -> new DataNotFoundException(CHANNEL_NOT_FOUND));
-
-        if (channel.getStatus() == ChannelStatus.PAUSED) {
-            throw new ChannelPausedException();
-        }
-
+    public Event ingestEvent(final CreateEventRequest request, final ApiKeyPrincipal principal) {
+        final Channel channel = resolveChannel(request.getSlug(), principal);
+        validateChannelActive(channel);
         return eventRepository.save(new Event(request, channel));
     }
 
     /**
-     * Ingests a batch of events. Access validation is performed at controller level via @PreAuthorize.
-     * All-or-nothing semantics: entire batch is saved or none at all via @Transactional.
-     * Uses request-scoped cache populated by security layer to avoid duplicate database queries.
-     *
-     * @param request the batch event request
-     * @return list of saved event entities in the same order as the request
+     * Ingests a batch of events. All-or-nothing semantics via @Transactional.
      */
     @Transactional
-    public List<Event> ingestBatch(final BatchEventRequest request) {
-        final List<CreateEventRequest> eventRequests = request.getEvents();
-        final Set<Long> requiredChannelIds = eventRequests.stream()
-            .map(CreateEventRequest::getChannelId)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
+    public List<Event> ingestBatch(final BatchEventRequest request, final ApiKeyPrincipal principal) {
+        final Map<String, Channel> channelMap = resolveChannels(request.getEvents(), principal);
+        channelMap.values().forEach(this::validateChannelActive);
 
-        final Map<Long, Channel> channelMap = channelCache.getAllOrLoad(requiredChannelIds, channelRepository::findAllById);
-
-        validateNoChannelsPaused(channelMap);
         return eventRepository.saveAll(
-            eventRequests.stream()
-                .map(eventRequest -> toEvent(eventRequest, channelMap))
+            request.getEvents().stream()
+                .map(
+                    eventRequest -> new Event(
+                        eventRequest,
+                        channelMap.get(eventRequest.getSlug()),
+                        eventRequest.getTimestamp()
+                    )
+                )
                 .toList()
         );
     }
 
-    private void validateNoChannelsPaused(final Map<Long, Channel> channelMap) {
-        final boolean anyPaused = channelMap.values().stream()
-            .anyMatch(channel -> channel.getStatus() == ChannelStatus.PAUSED);
-
-        if (anyPaused) {
-            throw new ChannelPausedException();
-        }
+    private Channel resolveChannel(final String slug, final ApiKeyPrincipal principal) {
+        return channelCache.getBySlug(slug)
+            .orElseGet(() -> resolveFromDatabase(slug, principal));
     }
 
-    private Event toEvent(final CreateEventRequest request, final Map<Long, Channel> channelMap) {
-        return new Event(request, channelMap.get(request.getChannelId()), request.getTimestamp());
+    private Map<String, Channel> resolveChannels(final List<CreateEventRequest> requests,
+        final ApiKeyPrincipal principal) {
+        final Set<String> slugs = requests.stream()
+            .map(CreateEventRequest::getSlug)
+            .collect(Collectors.toSet());
+
+        return slugs.stream()
+            .collect(Collectors.toMap(slug -> slug, slug -> resolveChannel(slug, principal)));
+    }
+
+    private Channel resolveFromDatabase(final String slug, final ApiKeyPrincipal principal) {
+        return channelRepository.findBySlugAndPrincipal(slug, principal)
+            .orElseThrow(() -> new DataNotFoundException(CHANNEL_NOT_FOUND));
+    }
+
+    private void validateChannelActive(final Channel channel) {
+        if (channel.getStatus() == ChannelStatus.PAUSED) {
+            throw new ChannelPausedException();
+        }
     }
 }

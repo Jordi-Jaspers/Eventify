@@ -26,9 +26,9 @@ import static java.util.Objects.isNull;
 @Component
 public class EventValidator implements Validator<CreateEventRequest> {
 
-    // Error messages - shared
+    // Error messages
     public static final String BODY_IS_MISSING = "Request body is missing";
-    public static final String CHANNEL_ID_REQUIRED = "Channel ID is required";
+    public static final String SLUG_REQUIRED = "Channel slug is required";
     public static final String SEVERITY_REQUIRED = "Severity is required";
     public static final String TITLE_REQUIRED = "Title is required";
     public static final String TITLE_TOO_LONG = "Title must not exceed 255 characters";
@@ -43,7 +43,7 @@ public class EventValidator implements Validator<CreateEventRequest> {
     public static final String TIMESTAMP_IN_FUTURE_MESSAGE = "Event timestamp cannot be in the future";
 
     // Fields
-    public static final String CHANNEL_ID = "channelId";
+    public static final String SLUG = "slug";
     public static final String SEVERITY = "severity";
     public static final String TITLE = "title";
     public static final String MESSAGE = "message";
@@ -136,8 +136,10 @@ public class EventValidator implements Validator<CreateEventRequest> {
     private void validateEventFields(final CreateEventRequest request, final String fieldPrefix,
         final ValidationResult result) {
 
-        result.rejectField(fieldPrefix + CHANNEL_ID, request.getChannelId())
-            .whenNull(CHANNEL_ID_REQUIRED);
+        result.rejectField(fieldPrefix + SLUG, request.getSlug())
+            .whenNull(SLUG_REQUIRED)
+            .orWhen(String::isEmpty, SLUG_REQUIRED)
+            .orWhen(String::isBlank, SLUG_REQUIRED);
 
         result.rejectField(fieldPrefix + SEVERITY, request.getSeverity())
             .whenNull(SEVERITY_REQUIRED);

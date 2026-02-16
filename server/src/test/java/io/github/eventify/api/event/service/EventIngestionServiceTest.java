@@ -1,5 +1,6 @@
 package io.github.eventify.api.event.service;
 
+import io.github.eventify.api.apikey.model.ApiKeyScope;
 import io.github.eventify.api.channel.cache.ChannelCache;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
@@ -11,6 +12,7 @@ import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.quota.service.UserQuotaService;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.security.principal.ApiKeyPrincipal;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.exception.core.DataNotFoundException;
 
@@ -51,21 +53,17 @@ public class EventIngestionServiceTest extends UnitTest {
 
     private User user;
     private Channel channel;
+    private ApiKeyPrincipal principal;
 
     @BeforeEach
     public void setUp() {
         user = aValidUser();
         user.setId(1L);
 
-        channel = aChannel(1L, "Test Channel", user, null);
+        channel = aChannel(1L, "test-channel", "Test Channel", user, null);
         channel.setStatus(ChannelStatus.ACTIVE);
 
-        // Configure cache to delegate to repository for getOrLoad
-        when(channelCache.getOrLoad(any(), any())).thenAnswer(invocation -> {
-            final Long id = invocation.getArgument(0);
-            final java.util.function.Function<Long, Optional<Channel>> loader = invocation.getArgument(1);
-            return loader.apply(id);
-        });
+        principal = aPersonalPrincipal(user);
     }
 
     @Test
@@ -77,13 +75,15 @@ public class EventIngestionServiceTest extends UnitTest {
         metadata.put("region", "us-east-1");
 
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Server Down")
             .setMessage("Production server experienced critical failure")
             .setMetadata(metadata);
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelCache.getBySlug(channel.getSlug())).thenReturn(Optional.empty());
+        when(channelRepository.findBySlugAndPrincipal(channel.getSlug(), principal))
+            .thenReturn(Optional.of(channel));
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
             final Event event = invocation.getArgument(0);
             event.setId(100L);
@@ -91,7 +91,7 @@ public class EventIngestionServiceTest extends UnitTest {
         });
 
         // When: Ingesting event
-        final Event result = eventIngestionService.ingestEvent(request);
+        final Event result = eventIngestionService.ingestEvent(request, principal);
 
         // Then: Returned event should have ID and timestamp
         assertThat(result.getId(), is(equalTo(100L)));
@@ -115,11 +115,13 @@ public class EventIngestionServiceTest extends UnitTest {
     public void shouldIngestEventWithMinimalFieldsSuccessfully() {
         // Given: Valid request with only required fields
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.OK)
             .setTitle("System healthy");
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelCache.getBySlug(channel.getSlug())).thenReturn(Optional.empty());
+        when(channelRepository.findBySlugAndPrincipal(channel.getSlug(), principal))
+            .thenReturn(Optional.of(channel));
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
             final Event event = invocation.getArgument(0);
             event.setId(101L);
@@ -127,7 +129,7 @@ public class EventIngestionServiceTest extends UnitTest {
         });
 
         // When: Ingesting event
-        final Event result = eventIngestionService.ingestEvent(request);
+        final Event result = eventIngestionService.ingestEvent(request, principal);
 
         // Then: Returned event should have ID and timestamp
         assertThat(result.getId(), is(equalTo(101L)));
@@ -149,11 +151,13 @@ public class EventIngestionServiceTest extends UnitTest {
     public void shouldAssignServerTimestamp() {
         // Given: Valid request
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.WARNING)
             .setTitle("High Memory Usage");
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelCache.getBySlug(channel.getSlug())).thenReturn(Optional.empty());
+        when(channelRepository.findBySlugAndPrincipal(channel.getSlug(), principal))
+            .thenReturn(Optional.of(channel));
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
             final Event event = invocation.getArgument(0);
             event.setId(102L);
@@ -161,7 +165,7 @@ public class EventIngestionServiceTest extends UnitTest {
         });
 
         // When: Ingesting event
-        final Event result = eventIngestionService.ingestEvent(request);
+        final Event result = eventIngestionService.ingestEvent(request, principal);
 
         // Then: Server should assign its own timestamp (set in Event constructor)
         assertThat(result.getTimestamp(), is(notNullValue()));
@@ -177,18 +181,21 @@ public class EventIngestionServiceTest extends UnitTest {
     @Test
     @DisplayName("Should throw not found when channel does not exist")
     public void shouldThrowNotFoundWhenChannelDoesNotExist() {
-        // Given: Request with non-existent channel
+        // Given: Request with non-existent channel slug
+        final String nonExistentSlug = "non-existent-channel";
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(999L)
+            .setSlug(nonExistentSlug)
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event");
 
-        when(channelRepository.findById(999L)).thenReturn(Optional.empty());
+        when(channelCache.getBySlug(nonExistentSlug)).thenReturn(Optional.empty());
+        when(channelRepository.findBySlugAndPrincipal(nonExistentSlug, principal))
+            .thenReturn(Optional.empty());
 
         // When & Then: Should throw DataNotFoundException
         assertThrows(
             DataNotFoundException.class,
-            () -> eventIngestionService.ingestEvent(request)
+            () -> eventIngestionService.ingestEvent(request, principal)
         );
 
         // And: Event should not be saved
@@ -205,12 +212,14 @@ public class EventIngestionServiceTest extends UnitTest {
         metadata.put("boolean", true);
 
         final CreateEventRequest request = new CreateEventRequest()
-            .setChannelId(channel.getId())
+            .setSlug(channel.getSlug())
             .setSeverity(Severity.CRITICAL)
             .setTitle("Test Event")
             .setMetadata(metadata);
 
-        when(channelRepository.findById(channel.getId())).thenReturn(Optional.of(channel));
+        when(channelCache.getBySlug(channel.getSlug())).thenReturn(Optional.empty());
+        when(channelRepository.findBySlugAndPrincipal(channel.getSlug(), principal))
+            .thenReturn(Optional.of(channel));
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
             final Event event = invocation.getArgument(0);
             event.setId(108L);
@@ -218,7 +227,7 @@ public class EventIngestionServiceTest extends UnitTest {
         });
 
         // When: Ingesting event
-        eventIngestionService.ingestEvent(request);
+        eventIngestionService.ingestEvent(request, principal);
 
         // Then: Metadata structure should be preserved
         final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
@@ -231,19 +240,57 @@ public class EventIngestionServiceTest extends UnitTest {
         assertThat(capturedEvent.getMetadata().get("boolean"), is(true));
     }
 
+    @Test
+    @DisplayName("Should use cached channel when available")
+    public void shouldUseCachedChannelWhenAvailable() {
+        // Given: Channel is already cached (populated by @PreAuthorize security layer)
+        final CreateEventRequest request = new CreateEventRequest()
+            .setSlug(channel.getSlug())
+            .setSeverity(Severity.OK)
+            .setTitle("Test Event");
+
+        when(channelCache.getBySlug(channel.getSlug())).thenReturn(Optional.of(channel));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            final Event event = invocation.getArgument(0);
+            event.setId(109L);
+            return event;
+        });
+
+        // When: Ingesting event
+        eventIngestionService.ingestEvent(request, principal);
+
+        // Then: Should NOT query database (cache hit)
+        verify(channelRepository, never()).findBySlugAndPrincipal(any(), any());
+        verify(eventRepository).save(any(Event.class));
+    }
+
     // NOTE: Quota enforcement tests omitted from unit tests
     // These are tested at integration level in EventIngestionControllerTest
     // where the full flow including UserQuotaService is validated
 
     // ===== Factory Methods =====
 
-    private Channel aChannel(final Long id, final String name, final User owner, final Organization org) {
+    private Channel aChannel(final Long id, final String slug, final String name, final User owner,
+        final Organization org) {
         final Channel ch = new Channel();
         ch.setId(id);
+        ch.setSlug(slug);
         ch.setName(name);
         ch.setUser(owner);
         ch.setOrganization(org);
         ch.setStatus(ChannelStatus.ACTIVE);
         return ch;
+    }
+
+    private ApiKeyPrincipal aPersonalPrincipal(final User user) {
+        return new ApiKeyPrincipal(
+            1L,
+            "evt_",
+            ApiKeyScope.USER,
+            user.getId(),
+            user,
+            null,
+            null
+        );
     }
 }

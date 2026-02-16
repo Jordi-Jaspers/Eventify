@@ -10,21 +10,21 @@ import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 /**
- * Security service for channel access control.
- * Bean name "channelSecurity" for use in SpEL expressions with @PreAuthorize.
+ * Security service for channel access control. Bean name "channelSecurity" for use in SpEL expressions with @PreAuthorize.
  *
- * <p>Returns boolean only - never throws exceptions.
- * Spring Security converts false to 403 Forbidden.
- * Non-existent channels return false (not 404) to avoid leaking resource existence.
+ * <p>Authorization flow for event ingestion:
+ * <ol>
+ * <li>Resolves channel by slug within principal's scope (userId or orgId)</li>
+ * <li>If found: caches channel and grants access (ownership implicit via scoped query)</li>
+ * <li>If not found: returns true to let service layer handle 404 (prevents enumeration)</li>
+ * </ol>
  */
 @Service("channelSecurity")
 @RequiredArgsConstructor
@@ -35,126 +35,100 @@ public class ChannelSecurityService {
     private final ChannelCache channelCache;
 
     /**
-     * Check if an API key principal can access a specific channel.
+     * Check if an API key principal can access a channel by slug.
+     * Caches the channel if found to avoid duplicate DB queries in service layer.
+     * Not found or invalid slug → return true, let service/validator handle errors.
      *
-     * @param channelId the channel ID to access
+     * <p>This prevents 403 for validation errors (missing slug should be 400, not 403)
+     * and prevents channel enumeration (non-existent slug should be 404 from service).
+     *
+     * @param slug      the channel slug to access
      * @param principal the API key principal attempting access
-     * @return true if access is granted, false if denied or channel not found
+     * @return true if authorized or passthrough for validation/service, false only if principal is invalid
      */
-    public boolean canAccess(final Long channelId, final ApiKeyPrincipal principal) {
-        if (principal == null || channelId == null) {
+    public boolean canAccess(final String slug, final ApiKeyPrincipal principal) {
+        if (principal == null) {
             return false;
         }
-
-        return channelRepository.findActiveChannelById(channelId)
-            .filter(channel -> hasOwnership(principal, channel))
-            .map(this::cacheAndGrantAccess)
-            .orElse(false);
+        // Let validation handle missing/blank slug (400), not security (403)
+        // Otherwise, cache the channel if found
+        if (slug != null && !slug.isBlank()) {
+            channelRepository.findBySlugAndPrincipal(slug, principal).ifPresent(channelCache::put);
+        }
+        return true;
     }
 
     /**
      * Check if an API key principal can access all channels in a batch request.
+     * Caches all resolved channels to avoid duplicate DB queries in service layer.
      *
-     * <p>Returns true for empty batches to allow validator to handle those cases.
+     * <p>Returns true for empty/invalid batches to let validation handle 400 errors.
+     * Security layer should only return false (403) for authentication issues.
      *
-     * @param request   the batch event request containing events with channel IDs
+     * @param request   the batch event request containing events with channel slugs
      * @param principal the API key principal attempting access
-     * @return true if access is granted to all channels, false if denied or any channel not found
+     * @return true if authorized or passthrough for validation/service, false only if principal is invalid
      */
     public boolean canAccessBatch(final BatchEventRequest request, final ApiKeyPrincipal principal) {
         if (principal == null) {
             return false;
         }
+        // Let validation handle empty/invalid batch (400), not security (403)
+        // Otherwise, cache all resolved channels
+        if (hasValidSlugs(request)) {
+            final List<Channel> channels = extractSlugs(request).stream()
+                .map(slug -> channelRepository.findBySlugAndPrincipal(slug, principal))
+                .flatMap(java.util.Optional::stream)
+                .toList();
+            channelCache.putAll(channels);
+        }
+        return true;
+    }
 
-        return isEmptyBatch(request) || hasAccessToAllChannels(request, principal);
+    private boolean hasValidSlugs(final BatchEventRequest request) {
+        return !isEmptyBatch(request) && !extractSlugs(request).isEmpty();
     }
 
     /**
      * Check if a user can access a channel as a personal channel owner.
-     *
-     * @param channelId the channel ID to access
-     * @param principal the user token principal attempting access
-     * @return true if user owns the personal channel, false otherwise
      */
     public boolean canAccessChannelAsUser(final Long channelId, final UserTokenPrincipal principal) {
         if (principal == null || channelId == null) {
             return false;
         }
-
         return channelRepository.findActiveChannelById(channelId)
-            .filter(channel -> isPersonalChannel(channel) && isChannelOwner(channel, principal))
+            .filter(channel -> isPersonalChannelOwnedBy(channel, principal))
             .isPresent();
     }
 
     /**
-     * Check if a channel belongs to an organization and user has access.
-     *
-     * @param channelId the channel ID to access
-     * @param orgId     the organization ID
-     * @param principal the user token principal attempting access
-     * @return true if channel belongs to org, false otherwise
+     * Check if a channel belongs to an organization.
      */
     public boolean canAccessChannelInOrganization(final Long channelId, final Long orgId,
         final UserTokenPrincipal principal) {
         if (principal == null || channelId == null || orgId == null) {
             return false;
         }
-
         return channelRepository.findActiveChannelById(channelId)
             .filter(channel -> belongsToOrganization(channel, orgId))
             .isPresent();
-    }
-
-    private boolean cacheAndGrantAccess(final Channel channel) {
-        channelCache.put(channel);
-        return true;
     }
 
     private boolean isEmptyBatch(final BatchEventRequest request) {
         return request == null || request.getEvents() == null || request.getEvents().isEmpty();
     }
 
-    private boolean hasAccessToAllChannels(final BatchEventRequest request, final ApiKeyPrincipal principal) {
-        final Set<Long> channelIds = extractChannelIds(request);
-        final Map<Long, Channel> channels = fetchAndCacheChannels(channelIds);
-
-        return channels.size() == channelIds.size()
-            && channels.values().stream().allMatch(channel -> hasOwnership(principal, channel));
-    }
-
-    private Set<Long> extractChannelIds(final BatchEventRequest request) {
+    private Set<String> extractSlugs(final BatchEventRequest request) {
         return request.getEvents().stream()
-            .map(CreateEventRequest::getChannelId)
+            .map(CreateEventRequest::getSlug)
             .filter(Objects::nonNull)
+            .filter(slug -> !slug.isBlank())
             .collect(Collectors.toSet());
     }
 
-    private Map<Long, Channel> fetchAndCacheChannels(final Set<Long> channelIds) {
-        if (channelIds.isEmpty()) {
-            return Map.of();
-        }
-
-        final List<Channel> channels = channelRepository.findActiveChannelsByIds(channelIds);
-        channelCache.putAll(channels);
-
-        return channels.stream().collect(Collectors.toMap(Channel::getId, Function.identity()));
-    }
-
-    private boolean hasOwnership(final ApiKeyPrincipal principal, final Channel channel) {
-        if (channel.getOrganization() != null) {
-            return channel.getOrganization().getId().equals(principal.getOrganizationId());
-        }
-
-        return principal.getOrganizationId() == null
-            && channel.getUser().getId().equals(principal.getUserId());
-    }
-
-    private boolean isPersonalChannel(final Channel channel) {
-        return channel.getOrganization() == null;
-    }
-
-    private boolean isChannelOwner(final Channel channel, final UserTokenPrincipal principal) {
-        return channel.getUser().getId().equals(principal.getUser().getId());
+    private boolean isPersonalChannelOwnedBy(final Channel channel, final UserTokenPrincipal principal) {
+        return channel.getOrganization() == null
+            && channel.getUser().getId().equals(principal.getUser().getId());
     }
 
     private boolean belongsToOrganization(final Channel channel, final Long orgId) {

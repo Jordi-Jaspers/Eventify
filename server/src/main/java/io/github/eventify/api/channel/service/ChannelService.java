@@ -8,7 +8,6 @@ import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.DuplicateChannelNameException;
-import io.github.eventify.common.exception.DuplicateChannelSlugException;
 import io.github.eventify.common.util.TimeProvider;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
@@ -32,7 +31,7 @@ import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 import static io.github.eventify.common.security.SecurityUtil.hasAuthority;
 
 /**
- * Service for managing user channels.
+ * Service for managing user channels via web UI.
  */
 @Service
 @RequiredArgsConstructor
@@ -44,6 +43,8 @@ public class ChannelService {
 
     private final ChannelMetaData channelMetaData;
 
+    private final ChannelCreationService channelCreationService;
+
     /**
      * Creates a new personal channel for the logged-in user.
      *
@@ -52,23 +53,7 @@ public class ChannelService {
      */
     @Transactional
     public Channel createUserChannel(final CreateChannelRequest request) {
-        final User user = getLoggedInUser();
-        final Optional<Channel> existing = channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(
-            user.getId(),
-            request.getName()
-        );
-
-        if (existing.isPresent()) {
-            throw new DuplicateChannelNameException();
-        }
-
-        if (channelRepository.existsByUserIdAndSlugAndOrganizationIdIsNull(user.getId(), request.getSlug())) {
-            throw new DuplicateChannelSlugException();
-        }
-
-        final Channel channel = new Channel(request.getName(), request.getSlug(), user, null);
-        channel.setDescription(request.getDescription());
-        return channelRepository.save(channel);
+        return channelCreationService.createPersonalChannel(request, getLoggedInUser());
     }
 
     /**
@@ -181,9 +166,7 @@ public class ChannelService {
     @Transactional
     public Channel pauseUserChannel(final Long channelId) {
         final Channel channel = getChannelWithAdminFallback(channelId);
-        channel.setStatus(ChannelStatus.PAUSED);
-        channel.setUpdatedAt(TimeProvider.now());
-        return channelRepository.save(channel);
+        return channelCreationService.updateStatus(channel, ChannelStatus.PAUSED);
     }
 
     /**
@@ -196,9 +179,7 @@ public class ChannelService {
     @Transactional
     public Channel resumeUserChannel(final Long channelId) {
         final Channel channel = getChannelWithAdminFallback(channelId);
-        channel.setStatus(ChannelStatus.ACTIVE);
-        channel.setUpdatedAt(TimeProvider.now());
-        return channelRepository.save(channel);
+        return channelCreationService.updateStatus(channel, ChannelStatus.ACTIVE);
     }
 
     /**
@@ -211,8 +192,6 @@ public class ChannelService {
     @Transactional
     public Channel deleteUserChannel(final Long channelId) {
         final Channel channel = getChannelWithAdminFallback(channelId);
-        channel.setStatus(ChannelStatus.PENDING_DELETION);
-        channel.setUpdatedAt(TimeProvider.now());
-        return channelRepository.save(channel);
+        return channelCreationService.updateStatus(channel, ChannelStatus.PENDING_DELETION);
     }
 }

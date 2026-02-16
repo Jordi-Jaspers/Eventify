@@ -8,9 +8,7 @@ import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.service.OrganizationService;
-import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.DuplicateChannelNameException;
-import io.github.eventify.common.exception.DuplicateChannelSlugException;
 import io.github.eventify.common.util.TimeProvider;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
@@ -46,6 +44,8 @@ public class OrganizationChannelService {
 
     private final OrganizationService organizationService;
 
+    private final ChannelCreationService channelCreationService;
+
     /**
      * Creates a new organization channel.
      *
@@ -56,23 +56,7 @@ public class OrganizationChannelService {
     @Transactional
     public Channel createOrganizationChannel(final Long organizationId, final CreateChannelRequest request) {
         final Organization organization = organizationService.findOrganizationById(organizationId);
-        final Optional<Channel> existing = channelRepository.findByOrganizationIdAndName(
-            organizationId,
-            request.getName()
-        );
-
-        if (existing.isPresent()) {
-            throw new DuplicateChannelNameException();
-        }
-
-        if (channelRepository.existsByOrganizationIdAndSlug(organizationId, request.getSlug())) {
-            throw new DuplicateChannelSlugException();
-        }
-
-        final User user = getLoggedInUser();
-        final Channel channel = new Channel(request.getName(), request.getSlug(), user, organization);
-        channel.setDescription(request.getDescription());
-        return channelRepository.save(channel);
+        return channelCreationService.createOrganizationChannel(request, getLoggedInUser(), organization);
     }
 
     /**
@@ -160,9 +144,7 @@ public class OrganizationChannelService {
     @Transactional
     public Channel pauseOrganizationChannel(final Long organizationId, final Long channelId) {
         final Channel channel = getOrganizationChannel(organizationId, channelId);
-        channel.setStatus(ChannelStatus.PAUSED);
-        channel.setUpdatedAt(TimeProvider.now());
-        return channelRepository.save(channel);
+        return channelCreationService.updateStatus(channel, ChannelStatus.PAUSED);
     }
 
     /**
@@ -176,9 +158,7 @@ public class OrganizationChannelService {
     @Transactional
     public Channel resumeOrganizationChannel(final Long organizationId, final Long channelId) {
         final Channel channel = getOrganizationChannel(organizationId, channelId);
-        channel.setStatus(ChannelStatus.ACTIVE);
-        channel.setUpdatedAt(TimeProvider.now());
-        return channelRepository.save(channel);
+        return channelCreationService.updateStatus(channel, ChannelStatus.ACTIVE);
     }
 
     /**
@@ -192,8 +172,6 @@ public class OrganizationChannelService {
     @Transactional
     public Channel deleteOrganizationChannel(final Long organizationId, final Long channelId) {
         final Channel channel = getOrganizationChannel(organizationId, channelId);
-        channel.setStatus(ChannelStatus.PENDING_DELETION);
-        channel.setUpdatedAt(TimeProvider.now());
-        return channelRepository.save(channel);
+        return channelCreationService.updateStatus(channel, ChannelStatus.PENDING_DELETION);
     }
 }
