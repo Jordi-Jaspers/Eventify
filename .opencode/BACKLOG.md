@@ -67,7 +67,7 @@ Raw ideas and future work. Items here need refinement before development.
 **Context**: Small improvements that don't fit into other epics but would enhance user experience.
 
 - [ ] **Native Compilation** - Explore using GraalVM native image compilation for faster startup times and lower memory usage, especially for serverless deployments.
-- [ ] **Improve server Test suite** - currently 1200+ tests which is taking around 5 minutes to run. Explore ways to optimize test execution time, such as parallel test execution, test selection based on code changes, or refactoring slow tests.
+- [ ] **Improve server Test suite** - currently 1200+ tests which is taking around 5 minutes to run. Explore ways to optimize test execution time, such as parallel test execution, test selection based on code changes, or refactoring slow tests. extracting util methods to base classes. most culprits are unit tests having duplicate helper methods. our method is to always create a valid object and adjust the relevant field for the test instead of creating multiple variations of the same object with different fields set.
 
 ---
 ## Epic: Future Considerations
