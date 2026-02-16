@@ -3,7 +3,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Edit, Pause, Play, Trash2, Terminal, MoreVertical } from '@lucide/svelte';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
-	import { toast } from 'svelte-sonner';
+	import { copyCurlToClipboard } from '$lib/utils/channel';
 
 	interface Props {
 		channel: ChannelDetailsResponse;
@@ -14,28 +14,6 @@
 	}
 
 	let { channel, onEdit, onPause, onResume, onDelete }: Props = $props();
-
-	function copyCurlCommand(): void {
-		const curlCommand: string = `curl -X POST https://api.eventify.dev/v1/events \\
-  -H "Authorization: Bearer <YOUR_API_KEY>" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "slug": "${channel.slug}",
-    "severity": "INFO",
-    "title": "Event Title",
-    "message": "Event message here",
-    "metadata": []
-  }'`;
-
-		navigator.clipboard
-			.writeText(curlCommand)
-			.then(() => {
-				toast.success('Curl command copied to clipboard');
-			})
-			.catch(() => {
-				toast.error('Failed to copy to clipboard');
-			});
-	}
 </script>
 
 <div class="flex items-center justify-end">
@@ -51,7 +29,7 @@
 			</Button>
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content align="end" class="w-48 bg-card/95 backdrop-blur-xl border-border/50">
-			<DropdownMenu.Item onclick={copyCurlCommand} class="cursor-pointer">
+			<DropdownMenu.Item onclick={() => copyCurlToClipboard(channel.slug)} class="cursor-pointer">
 				<Terminal class="mr-2 h-4 w-4" />
 				Copy Curl
 			</DropdownMenu.Item>

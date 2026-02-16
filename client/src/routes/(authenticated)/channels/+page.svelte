@@ -1,53 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
-	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import { searchChannels } from '$lib/api/channel/UserChannelController';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Radio, Plus } from '@lucide/svelte';
-	import { CreateChannelSheet, EditChannelSheet, ChannelRow } from '$lib/components/channels';
+	import { CreateChannelSheet, EditChannelSheet, ChannelRow, channelColumns } from '$lib/components/channels';
 	import { UserChannelService } from '$lib/services/user-channel-service';
 
-	// Columns configuration
-	const columns: DataTableColumn<ChannelDetailsResponse>[] = [
-		{
-			key: 'name',
-			label: 'Channel',
-			sortable: true,
-			filterable: true,
-			filterType: 'FUZZY_TEXT',
-			filterPlaceholder: 'Search channels...',
-			colSpan: 3
-		},
-		{
-			key: 'description',
-			label: 'Description',
-			colSpan: 5
-		},
-		{
-			key: 'status',
-			label: 'Status',
-			sortable: true,
-			filterable: true,
-			filterType: 'MULTI_ENUM',
-			filterOptions: [
-				{ value: 'ACTIVE', label: 'Active' },
-				{ value: 'PAUSED', label: 'Paused' }
-			],
-			colSpan: 1
-		},
-		{
-			key: 'createdAt',
-			label: 'Created',
-			sortable: true,
-			colSpan: 2
-		},
-		{
-			key: 'actions',
-			colSpan: 1
-		}
-	];
+
 
 	// Services
 	const dataTableService = createDataTableService<ChannelDetailsResponse>({
@@ -146,7 +107,7 @@
 		</div>
 
 		<!-- DataTable -->
-		<DataTable {columns} service={dataTableService} title="All Channels" icon={Radio}>
+		<DataTable columns={channelColumns} service={dataTableService} title="All Channels" icon={Radio}>
 			{#snippet row(channel: ChannelDetailsResponse)}
 				<ChannelRow
 					{channel}

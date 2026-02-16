@@ -2,14 +2,14 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Radio } from '@lucide/svelte';
 	import { formatDate } from '$lib/utils/date';
+	import { truncateText } from '$lib/utils/string';
 	import {
-		truncateDescription,
 		getChannelStatusVariant,
-		getChannelStatusLabel
+		getChannelStatusLabel,
+		copySlugToClipboard
 	} from '$lib/utils/channel';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 	import ChannelActions from './ChannelActions.svelte';
-	import { toast } from 'svelte-sonner';
 
 	interface Props {
 		channel: ChannelDetailsResponse;
@@ -21,45 +21,33 @@
 	}
 
 	let { channel, canManage, onEdit, onPause, onResume, onDelete }: Props = $props();
-
-	function copySlug(): void {
-		if (!channel.slug) return;
-		navigator.clipboard
-			.writeText(channel.slug)
-			.then(() => {
-				toast.success('Slug copied to clipboard');
-			})
-			.catch(() => {
-				toast.error('Failed to copy slug');
-			});
-	}
 </script>
 
 <div
 	class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all text-left w-full"
 >
 	<!-- Channel Name (clickable to copy slug) -->
-	<div class="col-span-1 md:col-span-3">
+	<div class="col-span-1 md:col-span-2">
 		<button
 			type="button"
 			class="flex items-center gap-3 cursor-pointer hover:text-primary transition-colors text-left w-full"
-			onclick={copySlug}
+			onclick={() => copySlugToClipboard(channel)}
 			title="Click to copy slug: {channel.slug}"
 		>
 			<Radio class="h-5 w-5 text-primary shrink-0" />
 			<div class="min-w-0">
 				<div class="font-medium truncate">{channel.name}</div>
 				<div class="text-sm text-muted-foreground truncate md:hidden">
-					{truncateDescription(channel.description, 40)}
+					{truncateText(channel.description, 40)}
 				</div>
 			</div>
 		</button>
 	</div>
 
 	<!-- Description (desktop only) -->
-	<div class="hidden md:flex md:col-span-5 items-center">
+	<div class="hidden md:flex md:col-span-6 items-center">
 		<span class="text-sm text-muted-foreground truncate">
-			{truncateDescription(channel.description, 180)}
+			{truncateText(channel.description, 220)}
 		</span>
 	</div>
 

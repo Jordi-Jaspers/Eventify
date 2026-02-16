@@ -4,6 +4,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { Radio, LoaderCircle, Tag, FileText, Hash } from '@lucide/svelte';
+	import { validateSlug, SLUG_PATTERN } from '$lib/utils/channel';
 
 	interface Props {
 		open: boolean;
@@ -19,31 +20,21 @@
 	let description: string = $state('');
 	let slugError: string = $state('');
 
-	const SLUG_PATTERN: RegExp = /^[a-z0-9]+(\.[a-z0-9]+)*$/;
-
-	function validateSlug(value: string): boolean {
-		if (!value.trim()) {
-			slugError = 'Slug is required';
-			return false;
-		}
-		if (!SLUG_PATTERN.test(value)) {
-			slugError = 'Use only lowercase letters, numbers, and dots';
-			return false;
-		}
-		slugError = '';
-		return true;
-	}
-
 	function handleSlugInput(): void {
 		if (slug) {
-			validateSlug(slug);
+			const result = validateSlug(slug);
+			slugError = result.error;
 		} else {
 			slugError = '';
 		}
 	}
 
 	function handleSubmit(): void {
-		if (!name.trim() || !validateSlug(slug)) return;
+		const validation = validateSlug(slug);
+		if (!name.trim() || !validation.valid) {
+			slugError = validation.error;
+			return;
+		}
 		onSubmit(name.trim(), slug.trim(), description.trim() || undefined);
 		// Reset form
 		name = '';
