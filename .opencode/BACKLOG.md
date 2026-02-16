@@ -3,19 +3,6 @@
 Raw ideas and future work. Items here need refinement before development.
 
 ---
-
-## Epic: Channel Management
-**Context**: Users need better ways to manage their channels.
-
-- [ ] **Possibly add unique identifier to channel** - instead of using id or uuid maybe add a unique identifier field that is human readable (seperations with '.') and can be used in API calls.
-- [ ] **Change Channel ids to uuid** - Consider switching from numeric IDs to UUIDs for channels for better security and scalability. Requires DB schema change and API updates.
-- [ ] **Copy channel id action in table** - Add channel ID column to events table for easier debugging and support.
-- [ ] **Create channel via API** - Allow users to create channels programmatically using API keys, enabling automation and infrastructure-as-code setups.
-- [ ] **Channel archiving | Deleting via API** - Consider deleting or arching channels via API. Archiving would keep data but hide from UI, deleting would remove all data.
-- [ ] **Flag channels as "Stale"** - If a channel hasn't received events in X days, mark it as "Stale" in the UI to help users identify unused channels. Optionally send a notification to channel owner after Y days of inactivity. should also be able to filter on that in the channels table.
-- [ ] **Mass channel actions** - Allow users to select multiple channels in the table and perform bulk actions like delete, pause, unpause. add select all checkbox in header, and bulk action buttons that appear when channels are selected.
-
----
 ## Epic: Organization Management
 **Context**: Admins need better tools to manage organizations, especially around trial limitations and status
 
@@ -41,6 +28,16 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Admin Events/Usage Dashboard**: High-level stats: total events today/week/month, events by severity. Top channels by volume. Users/orgs approaching or exceeding quotas. Storage usage trends.
 - [ ] **Admin Audit Log**: Track admin actions: key revocations, channel archives, user impersonation. Searchable log with: action, target, admin user, timestamp.
 - [ ] **Monthly Quota Analytics Tracking** - Track monthly event counts for both personal users and organizations separately for analytics and reporting purposes. Even though organizations have no limits, we want visibility into usage patterns. Requires new database table or extending existing quota tracking.
+
+---
+
+## Epic: Audit System
+**Context**: Cross-cutting audit trail for security, compliance, and debugging. Identified during Channel Management refinement.
+
+- [ ] **Audit infrastructure** - Create audit log table, service, and base patterns for tracking user actions across the platform.
+- [ ] **Bulk action audit trail** - Record bulk operations (channel deletes, etc.) with user, action, targets, timestamp.
+- [ ] **Admin action audit** - Track admin-specific actions: status changes, user management, system configuration.
+- [ ] **Audit log UI** - Admin interface to search and view audit trail.
 
 ---
 
