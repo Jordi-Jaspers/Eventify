@@ -34,6 +34,8 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Audit System
 **Context**: Cross-cutting audit trail for security, compliance, and debugging. Identified during Channel Management refinement.
 
+**NOTE** something like Axiom's frontend logging to capture user interactions for audits?
+
 - [ ] **Audit infrastructure** - Create audit log table, service, and base patterns for tracking user actions across the platform.
 - [ ] **Bulk action audit trail** - Record bulk operations (channel deletes, etc.) with user, action, targets, timestamp.
 - [ ] **Admin action audit** - Track admin-specific actions: status changes, user management, system configuration.
@@ -58,11 +60,15 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Redirect to org incorrect** - on user profile page clicking on organization name redirects to wrong location. Fix routing logic to redirect to correct org dashboard.
 - [ ] **Adjust "how it works" landing page** - Update copy and design of the landing page to better explain the product and guide users to sign up or explore features. Consider adding screenshots, diagrams, or a video demo.
 - [ ] **Landing page curl command** - Update the example curl command on the landing page to reflect the current API structure and authentication method. Ensure it works with the latest API version and provides a clear example for developers.
-- [ ] **Update curl command API key generation** -- during creation of the api key, the curl command example should be updated to reflect the new API key format and endpoint structure. This ensures that users can easily copy and use the command without confusion.
+- [ ] **Update curl command API key generation** -- during creation of the api key, the curl command example should be updated to reflect the new API key format and endpoint structure. This ensures that users can easily copy and use the command without confusion. there is a util method used in the channel.
 
 ---
 ## Epic: General Improvements
 **Context**: Small improvements that don't fit into other epics but would enhance user experience.
+
+- [ ] **Native Compilation** - Explore using GraalVM native image compilation for faster startup times and lower memory usage, especially for serverless deployments.
+- [ ] **Improve server Test suite** - currently 1200+ tests which is taking around 5 minutes to run. Explore ways to optimize test execution time, such as parallel test execution, test selection based on code changes, or refactoring slow tests.
+
 ---
 ## Epic: Future Considerations
 **Context**: Ideas to keep in mind for architecture decisions but not for immediate development.
