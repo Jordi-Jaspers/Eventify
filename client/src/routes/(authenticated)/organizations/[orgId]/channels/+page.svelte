@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { browser } from '$app/environment';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
-	import type { DataTableService } from '$lib/components/data-table/types';
+	import type { DataTableService, DataTableColumn } from '$lib/components/data-table/types';
 	import { searchOrganizationChannels } from '$lib/api/organization/OrganizationChannelController';
 	import { getOrganizationById } from '$lib/api/organization/OrganizationController';
 	import type {
@@ -14,10 +14,50 @@
 	} from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Radio, Plus } from '@lucide/svelte';
-	import { CreateChannelSheet, EditChannelSheet, ChannelRow, channelColumns } from '$lib/components/channels';
+	import { CreateChannelSheet, EditChannelSheet, ChannelRow } from '$lib/components/channels';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
 	import { ChannelService } from '$lib/services/channel-service';
+
+	// Column definitions (inline like other tables)
+	const columns: DataTableColumn<ChannelDetailsResponse>[] = [
+		{
+			key: 'name',
+			label: 'Channel',
+			sortable: true,
+			filterable: true,
+			filterType: 'FUZZY_TEXT',
+			filterPlaceholder: 'Search channels...',
+			colSpan: 4
+		},
+		{
+			key: 'description',
+			label: 'Description',
+			colSpan: 9
+		},
+		{
+			key: 'status',
+			label: 'Status',
+			sortable: true,
+			filterable: true,
+			filterType: 'MULTI_ENUM',
+			filterOptions: [
+				{ value: 'ACTIVE', label: 'Active' },
+				{ value: 'PAUSED', label: 'Paused' }
+			],
+			colSpan: 2
+		},
+		{
+			key: 'createdAt',
+			label: 'Created',
+			sortable: true,
+			colSpan: 2
+		},
+		{
+			key: 'actions',
+			colSpan: 1
+		}
+	];
 
 	// Reactive orgId from route params
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
@@ -193,7 +233,7 @@
 
 		<!-- DataTable -->
 		{#if dataTableService}
-			<DataTable columns={channelColumns} service={dataTableService} title="All Channels" icon={Radio}>
+			<DataTable columns={columns} service={dataTableService} title="All Channels" icon={Radio}>
 				{#snippet row(channel: ChannelDetailsResponse)}
 					<ChannelRow
 						{channel}

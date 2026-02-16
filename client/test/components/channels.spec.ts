@@ -82,6 +82,9 @@ test.describe('Channels Page Screenshots', () => {
 				await nameInput.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
 				await nameInput.fill('Production Events');
 
+				const slugInput = page.locator('#channel-slug');
+				await slugInput.fill('myapp.prod.events');
+
 				const descriptionInput = page.locator('#channel-description');
 				await descriptionInput.fill('All production environment events and alerts');
 

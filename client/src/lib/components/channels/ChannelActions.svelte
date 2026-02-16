@@ -29,7 +29,7 @@
 			</Button>
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content align="end" class="w-48 bg-card/95 backdrop-blur-xl border-border/50">
-			<DropdownMenu.Item onclick={() => copyCurlToClipboard(channel.slug)} class="cursor-pointer">
+			<DropdownMenu.Item onclick={() => copyCurlToClipboard(channel.id)} class="cursor-pointer">
 				<Terminal class="mr-2 h-4 w-4" />
 				Copy Curl
 			</DropdownMenu.Item>

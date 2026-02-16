@@ -24,10 +24,10 @@
 </script>
 
 <div
-	class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all text-left w-full"
+	class="grid grid-cols-1 md:grid-cols-18 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all text-left w-full"
 >
 	<!-- Channel Name (clickable to copy slug) -->
-	<div class="col-span-1 md:col-span-2">
+	<div class="col-span-1 md:col-span-4">
 		<button
 			type="button"
 			class="flex items-center gap-3 cursor-pointer hover:text-primary transition-colors text-left w-full"
@@ -45,14 +45,14 @@
 	</div>
 
 	<!-- Description (desktop only) -->
-	<div class="hidden md:flex md:col-span-6 items-center">
+	<div class="hidden md:flex md:col-span-9 items-center">
 		<span class="text-sm text-muted-foreground truncate">
 			{truncateText(channel.description, 220)}
 		</span>
 	</div>
 
 	<!-- Status -->
-	<div class="col-span-1 md:col-span-1 flex items-center">
+	<div class="col-span-1 md:col-span-2 flex items-center">
 		<Badge variant={getChannelStatusVariant(channel.status)}>
 			{getChannelStatusLabel(channel.status)}
 		</Badge>

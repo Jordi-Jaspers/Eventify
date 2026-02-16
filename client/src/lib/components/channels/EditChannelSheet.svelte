@@ -3,7 +3,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { Radio, LoaderCircle, Tag, FileText, Hash } from '@lucide/svelte';
+	import { Radio, LoaderCircle, Hash, FileText } from '@lucide/svelte';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 
 	interface Props {
@@ -45,101 +45,90 @@
 </script>
 
 <Sheet.Root {open} onOpenChange={handleOpenChange}>
-	<Sheet.Content class="bg-card/95 backdrop-blur-xl border-border/50 flex flex-col px-6 sm:max-w-lg">
+	<Sheet.Content class="bg-card/95 backdrop-blur-xl border-border/50 flex flex-col px-6 sm:max-w-md">
 		<Sheet.Header class="pt-6">
-			<Sheet.Title class="flex items-center gap-2 text-lg">
-				<div
-					class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30"
-				>
+			<Sheet.Title class="flex items-center gap-3 text-lg">
+				<div class="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 border border-primary/20">
 					<Radio class="h-4 w-4 text-primary" />
 				</div>
 				Edit Channel
 			</Sheet.Title>
-			<Sheet.Description class="text-sm">
+			<Sheet.Description class="text-sm text-muted-foreground">
 				Update the name and description of your channel.
 			</Sheet.Description>
 		</Sheet.Header>
 
-		<div class="flex-1 py-6 space-y-6">
-			<!-- Name Input Card -->
-			<div
-				class="rounded-xl border border-border/50 bg-background/30 backdrop-blur-sm p-4 space-y-3"
-			>
-				<div class="flex items-center gap-2">
-					<Tag class="h-4 w-4 text-primary" />
-					<Label for="edit-channel-name" class="text-sm font-medium">Channel Name</Label>
-					<span class="text-destructive text-sm">*</span>
+		<div class="flex-1 py-6 space-y-4">
+			<!-- Channel Name & Slug Card -->
+			<div class="rounded-md border border-border/50 bg-muted/20 p-4 space-y-4">
+				<!-- Channel Name -->
+				<div class="space-y-2">
+					<Label for="edit-channel-name" class="text-sm font-medium flex items-center gap-2">
+						<Radio class="h-3.5 w-3.5 text-primary" />
+						Channel Name <span class="text-destructive">*</span>
+					</Label>
+					<input
+						id="edit-channel-name"
+						type="text"
+						bind:value={name}
+						placeholder="e.g., Production Events"
+						disabled={updating}
+						class="flex h-9 w-full rounded-md border border-border/50 bg-background/80 px-3 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+					/>
 				</div>
-				<input
-					id="edit-channel-name"
-					type="text"
-					bind:value={name}
-					placeholder="e.g., Production Events, User Notifications"
-					disabled={updating}
-					class="flex h-10 w-full rounded-lg border border-border/50 bg-background/50 px-3 text-sm shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-				/>
+
+				<!-- Slug (Read-only) -->
+				<div class="space-y-2">
+					<Label for="edit-channel-slug" class="text-sm font-medium flex items-center gap-2">
+						<Hash class="h-3.5 w-3.5 text-muted-foreground" />
+						Slug
+					</Label>
+					<input
+						id="edit-channel-slug"
+						type="text"
+						value={channel?.slug || ''}
+						disabled
+						class="flex h-9 w-full rounded-md border border-border/30 bg-muted/30 px-3 text-sm font-mono cursor-not-allowed opacity-60"
+					/>
+					<p class="text-xs text-muted-foreground">
+						The slug cannot be changed after creation
+					</p>
+				</div>
 			</div>
 
-			<!-- Slug Display Card (Read-only) -->
-			<div
-				class="rounded-xl border border-border/50 bg-background/30 backdrop-blur-sm p-4 space-y-3"
-			>
-				<div class="flex items-center gap-2">
-					<Hash class="h-4 w-4 text-primary" />
-					<Label for="edit-channel-slug" class="text-sm font-medium">Slug</Label>
-				</div>
-				<input
-					id="edit-channel-slug"
-					type="text"
-					value={channel?.slug || ''}
-					disabled
-					class="flex h-10 w-full rounded-lg border border-border/50 bg-muted/30 px-3 text-sm font-mono shadow-sm cursor-not-allowed opacity-70"
-				/>
-				<p class="text-xs text-muted-foreground">
-					The slug cannot be changed after creation
-				</p>
-			</div>
-
-			<!-- Description Textarea Card -->
-			<div
-				class="rounded-xl border border-border/50 bg-background/30 backdrop-blur-sm p-4 space-y-3"
-			>
-				<div class="flex items-center gap-2">
-					<FileText class="h-4 w-4 text-primary" />
-					<Label for="edit-channel-description" class="text-sm font-medium">Description</Label>
-					<span class="text-muted-foreground text-xs">(Optional)</span>
-				</div>
+			<!-- Description Card -->
+			<div class="rounded-md border border-border/50 bg-muted/20 p-4 space-y-2">
+				<Label for="edit-channel-description" class="text-sm font-medium flex items-center gap-2">
+					<FileText class="h-3.5 w-3.5 text-primary" />
+					Description
+					<span class="text-xs text-muted-foreground font-normal">(optional)</span>
+				</Label>
 				<Textarea
 					id="edit-channel-description"
 					bind:value={description}
-					placeholder="Describe the purpose and use case of this channel..."
+					placeholder="Describe the purpose of this channel..."
 					disabled={updating}
-					rows={4}
-					class="resize-none bg-background/50 border-border/50 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary"
+					rows={3}
+					class="resize-none bg-background/80 border-border/50 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
 				/>
 			</div>
 		</div>
 
-		<Sheet.Footer class="flex-row gap-3 sm:flex-row pb-6">
+		<Sheet.Footer class="flex-row gap-3 pb-6">
 			<Button
 				variant="outline"
 				onclick={() => handleOpenChange(false)}
 				disabled={updating}
-				class="flex-1 bg-background/50 border-border/50 hover:bg-background/70"
+				class="flex-1"
 			>
 				Cancel
 			</Button>
-			<Button
-				onclick={handleSubmit}
-				disabled={!canSubmit}
-				class="flex-1"
-			>
+			<Button onclick={handleSubmit} disabled={!canSubmit} class="flex-1">
 				{#if updating}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 					Updating...
 				{:else}
-					<Radio class="mr-2 h-4 w-4" />
-					Update Channel
+					Save Changes
 				{/if}
 			</Button>
 		</Sheet.Footer>
