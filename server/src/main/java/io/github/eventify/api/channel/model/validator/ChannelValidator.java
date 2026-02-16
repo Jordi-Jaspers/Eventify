@@ -20,11 +20,19 @@ public class ChannelValidator implements Validator<Object> {
     public static final String BODY_IS_MISSING = "Request body is missing";
     public static final String NAME_REQUIRED = "Name is required";
     public static final String NAME_TOO_LONG = "Name must not exceed 100 characters";
+    public static final String SLUG_REQUIRED = "Slug is required";
+    public static final String SLUG_TOO_LONG = "Slug must not exceed 100 characters";
+    public static final String SLUG_INVALID_FORMAT =
+        "Slug must contain only lowercase letters, numbers, and dots. Cannot start or end with dots, or have consecutive dots";
     public static final String DESCRIPTION_TOO_LONG = "Description must not exceed 500 characters";
 
     // Fields
     public static final String NAME = "name";
+    public static final String SLUG = "slug";
     public static final String DESCRIPTION = "description";
+
+    // Slug pattern: lowercase letters, numbers, dots (not at start/end, no consecutive dots)
+    private static final String SLUG_PATTERN = "^[a-z0-9]+(\\.[a-z0-9]+)*$";
 
     /**
      * Validates a CreateChannelRequest.
@@ -43,6 +51,13 @@ public class ChannelValidator implements Validator<Object> {
             .orWhen(String::isEmpty, NAME_REQUIRED)
             .orWhen(String::isBlank, NAME_REQUIRED)
             .orWhen(name -> name.length() > 100, NAME_TOO_LONG);
+
+        result.rejectField(SLUG, request.getSlug())
+            .whenNull(SLUG_REQUIRED)
+            .orWhen(String::isEmpty, SLUG_REQUIRED)
+            .orWhen(String::isBlank, SLUG_REQUIRED)
+            .orWhen(slug -> slug.length() > 100, SLUG_TOO_LONG)
+            .orWhen(slug -> !slug.matches(SLUG_PATTERN), SLUG_INVALID_FORMAT);
 
         result.rejectField(DESCRIPTION, request.getDescription())
             .when(desc -> desc != null && desc.length() > 500, DESCRIPTION_TOO_LONG);

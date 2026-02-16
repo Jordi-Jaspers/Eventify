@@ -42,6 +42,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
         // And: A valid create channel request
         final CreateChannelRequest request = new CreateChannelRequest()
             .setName("Production Errors")
+            .setSlug("test.channel.1")
             .setDescription("Critical error logs");
 
         // When: Creating organization channel
@@ -77,7 +78,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: A valid create channel request
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Admin Created Channel");
+            .setName("Admin Created Channel")
+            .setSlug("test.channel.2");
 
         // When: Creating organization channel as admin
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -109,7 +111,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: A valid create channel request
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Member Channel");
+            .setName("Member Channel")
+            .setSlug("test.channel.3");
 
         // When: Creating organization channel as member
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -133,7 +136,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: A valid create channel request
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Non-member Channel");
+            .setName("Non-member Channel")
+            .setSlug("test.channel.4");
 
         // When: Creating organization channel as non-member
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -157,7 +161,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: A valid create channel request
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Global Admin Channel");
+            .setName("Global Admin Channel")
+            .setSlug("test.channel.5");
 
         // When: Creating organization channel as global admin
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -186,7 +191,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Request without description
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Simple Channel");
+            .setName("Simple Channel")
+            .setSlug("test.channel.6");
 
         // When: Creating organization channel
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -215,7 +221,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization already has channel named "Errors"
         final CreateChannelRequest firstRequest = new CreateChannelRequest()
-            .setName("Errors");
+            .setName("Errors")
+            .setSlug("test.channel.7");
 
         mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -226,7 +233,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // When: Creating another channel with same name
         final CreateChannelRequest duplicateRequest = new CreateChannelRequest()
-            .setName("Errors");
+            .setName("Errors")
+            .setSlug("test.channel.8");
 
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
             .contentType(APPLICATION_JSON)
@@ -255,7 +263,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Org1 has channel named "Errors"
         final CreateChannelRequest request1 = new CreateChannelRequest()
-            .setName("Errors");
+            .setName("Errors")
+            .setSlug("test.channel.9");
 
         mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org1.getId().toString()))
@@ -266,7 +275,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // When: Org2 creates channel with same name
         final CreateChannelRequest request2 = new CreateChannelRequest()
-            .setName("Errors");
+            .setName("Errors")
+            .setSlug("test.channel.10");
 
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org2.getId().toString()))
             .contentType(APPLICATION_JSON)
@@ -288,7 +298,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Request with empty name
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("");
+            .setName("")
+            .setSlug("test.channel.11");
 
         // When: Creating organization channel
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -317,7 +328,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
         // And: Request with name exceeding 100 characters
         final String longName = "a".repeat(101);
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName(longName);
+            .setName(longName)
+            .setSlug("test.channel.12");
 
         // When: Creating organization channel
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -342,6 +354,7 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
         final String longDescription = "a".repeat(501);
         final CreateChannelRequest request = new CreateChannelRequest()
             .setName("Valid Name")
+            .setSlug("test.channel.13")
             .setDescription(longDescription);
 
         // When: Creating organization channel
@@ -365,7 +378,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: A valid request
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Unauthorized Channel");
+            .setName("Unauthorized Channel")
+            .setSlug("test.channel.14");
 
         // When: Creating channel without authentication
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -386,7 +400,8 @@ public class CreateOrgChannelControllerTest extends IntegrationTest {
 
         // And: A valid create channel request
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Invalid Org Channel");
+            .setName("Invalid Org Channel")
+            .setSlug("test.channel.15");
 
         // When: Creating channel for non-existent organization
         final MockHttpServletRequestBuilder createRequest = post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", "99999"))

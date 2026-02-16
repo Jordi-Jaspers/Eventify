@@ -9,9 +9,10 @@
         <sql>
             -- Personal channels for admin (id=1)
             -- Channel 1: Active, production use
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             VALUES (
                 'Backend Errors',
+                'backend.errors',
                 'Production error tracking for backend services. Monitors API failures, database issues, and service exceptions.',
                 1,
                 NULL,
@@ -21,9 +22,10 @@
             );
 
             -- Channel 2: Active, monitoring
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             VALUES (
                 'Frontend Analytics',
+                'frontend.analytics',
                 'User behavior and performance metrics from the web application.',
                 1,
                 NULL,
@@ -33,9 +35,10 @@
             );
 
             -- Channel 3: Active, CI/CD
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             VALUES (
                 'Deployment Events',
+                'deployment.events',
                 'Tracks deployments, rollbacks, and infrastructure changes across all environments.',
                 1,
                 NULL,
@@ -45,9 +48,10 @@
             );
 
             -- Channel 4: Paused, seasonal use
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             VALUES (
                 'Marketing Campaigns',
+                'marketing.campaigns',
                 'Event tracking for seasonal marketing campaigns. Paused between campaigns.',
                 1,
                 NULL,
@@ -57,9 +61,10 @@
             );
 
             -- Channel 5: Active, security
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             VALUES (
                 'Security Alerts',
+                'security.alerts',
                 'Critical security events including failed login attempts, suspicious activity, and access violations.',
                 1,
                 NULL,
@@ -69,9 +74,10 @@
             );
 
             -- Channel 6: Active, no description
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             VALUES (
                 'Test Channel',
+                'test',
                 NULL,
                 1,
                 NULL,
@@ -86,9 +92,10 @@
         <comment>Insert personal channels for other test users.</comment>
         <sql>
             -- Personal channels for Alice
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'Mobile App Events',
+                'mobile.app.events',
                 'User interactions and errors from the iOS and Android applications.',
                 (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
                 NULL,
@@ -96,9 +103,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 hours';
 
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'Payment Processing',
+                'payment.processing',
                 'Transaction events, payment failures, and refund tracking.',
                 (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
                 NULL,
@@ -107,9 +115,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 hours';
 
             -- Personal channels for Bob
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'API Gateway Logs',
+                'api.gateway.logs',
                 'Request/response logging for the API gateway.',
                 (SELECT id FROM "user" WHERE email = 'bob.brown@example.com'),
                 NULL,
@@ -117,9 +126,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 minutes';
 
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'Legacy System',
+                'legacy.system',
                 'Events from the legacy monolith being phased out.',
                 (SELECT id FROM "user" WHERE email = 'bob.brown@example.com'),
                 NULL,
@@ -128,9 +138,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days';
 
             -- Personal channels for Carol
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'IoT Sensor Data',
+                'iot.sensor.data',
                 'Temperature, humidity, and motion sensor readings from smart devices.',
                 (SELECT id FROM "user" WHERE email = 'carol.clark@example.com'),
                 NULL,
@@ -139,9 +150,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 minutes';
 
             -- Personal channels for David
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'E-commerce Orders',
+                'ecommerce.orders',
                 'Order lifecycle events from placement to delivery.',
                 (SELECT id FROM "user" WHERE email = 'david.davis@example.com'),
                 NULL,
@@ -149,9 +161,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour';
 
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'Customer Support Tickets',
+                'support.tickets',
                 'Ticket creation, updates, and resolution events.',
                 (SELECT id FROM "user" WHERE email = 'david.davis@example.com'),
                 NULL,
@@ -165,9 +178,10 @@
         <comment>Insert organization channels for Acme, Beta, and Gamma.</comment>
         <sql>
             -- Organization channels for Acme Corp
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'Acme Production Events',
+                'acme.prod.events',
                 'All production environment events for Acme Corp applications.',
                 1,
                 (SELECT id FROM organization WHERE slug = 'acme-corp'),
@@ -175,9 +189,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '50 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 minutes';
 
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'Acme Staging Events',
+                'acme.staging.events',
                 'Pre-production testing and QA events.',
                 1,
                 (SELECT id FROM organization WHERE slug = 'acme-corp'),
@@ -186,9 +201,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours';
 
             -- Organization channels for Beta Industries
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'Beta Manufacturing Line',
+                'beta.manufacturing.line',
                 'Real-time events from the manufacturing floor sensors.',
                 1,
                 (SELECT id FROM organization WHERE slug = 'beta-industries'),
@@ -196,9 +212,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '75 days',
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 minutes';
 
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'Beta Quality Control',
+                'beta.quality.control',
                 'Quality inspection results and defect tracking.',
                 1,
                 (SELECT id FROM organization WHERE slug = 'beta-industries'),
@@ -207,9 +224,10 @@
                 (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days';
 
             -- Organization channels for Gamma Solutions
-            INSERT INTO channel (name, description, user_id, organization_id, status, created_at, updated_at)
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
             SELECT
                 'Gamma Client Portal',
+                'gamma.client.portal',
                 'Events from the client-facing web portal.',
                 1,
                 (SELECT id FROM organization WHERE slug = 'gamma-solutions'),

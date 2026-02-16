@@ -40,6 +40,7 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
             .setName("Test Channel")
+            .setSlug("test.channel.1")
             .setDescription("Test Description");
 
         final ResultActions createResponse = mockMvc.perform(
@@ -86,7 +87,8 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Admin Viewable Channel");
+            .setName("Admin Viewable Channel")
+            .setSlug("test.channel.2");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -130,7 +132,8 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Member Viewable Channel");
+            .setName("Member Viewable Channel")
+            .setSlug("test.channel.3");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -173,7 +176,8 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Protected Channel");
+            .setName("Protected Channel")
+            .setSlug("test.channel.4");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -210,7 +214,8 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Global Admin Viewable Channel");
+            .setName("Global Admin Viewable Channel")
+            .setSlug("test.channel.5");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -276,7 +281,8 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
 
         // And: Org1 has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Org1 Channel");
+            .setName("Org1 Channel")
+            .setSlug("test.channel.6");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org1.getId().toString()))
@@ -312,7 +318,8 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a deleted channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Deleted Channel");
+            .setName("Deleted Channel")
+            .setSlug("test.channel.7");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -358,7 +365,8 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Test Channel");
+            .setName("Test Channel")
+            .setSlug("test.channel.8");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))

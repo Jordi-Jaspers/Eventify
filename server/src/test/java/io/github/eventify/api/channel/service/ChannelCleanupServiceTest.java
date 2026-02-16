@@ -280,7 +280,7 @@ public class ChannelCleanupServiceTest extends UnitTest {
     }
 
     private Channel createChannelPendingDeletion(final Long id, final String name, final User channelUser) {
-        final Channel channel = new Channel(name, channelUser, null);
+        final Channel channel = new Channel(name, "test.slug." + id, channelUser, null);
         channel.setId(id);
         channel.setStatus(ChannelStatus.PENDING_DELETION);
         channel.setCreatedAt(OffsetDateTime.now().minusDays(7));

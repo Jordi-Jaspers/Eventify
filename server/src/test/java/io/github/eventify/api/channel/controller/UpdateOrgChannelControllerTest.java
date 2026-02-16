@@ -42,7 +42,8 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Old Name");
+            .setName("Old Name")
+            .setSlug("test.channel.1");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -57,6 +58,7 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
         // When: Updating channel details
         final UpdateChannelRequest updateRequest = new UpdateChannelRequest()
             .setName("New Name")
+
             .setDescription("New Description");
 
         final MockHttpServletRequestBuilder updateRequestBuilder = put(
@@ -93,7 +95,8 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Old Name");
+            .setName("Old Name")
+            .setSlug("test.channel.2");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -141,7 +144,8 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Protected Channel");
+            .setName("Protected Channel")
+            .setSlug("test.channel.3");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -182,7 +186,8 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Protected Channel");
+            .setName("Protected Channel")
+            .setSlug("test.channel.4");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -223,7 +228,8 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Old Name");
+            .setName("Old Name")
+            .setSlug("test.channel.5");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -269,7 +275,8 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has two channels
         final CreateChannelRequest createRequest1 = new CreateChannelRequest()
-            .setName("Channel 1");
+            .setName("Channel 1")
+            .setSlug("test.channel.6");
 
         mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -279,7 +286,8 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
         );
 
         final CreateChannelRequest createRequest2 = new CreateChannelRequest()
-            .setName("Channel 2");
+            .setName("Channel 2")
+            .setSlug("test.channel.7");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -353,7 +361,8 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
 
         // And: Org1 has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Org1 Channel");
+            .setName("Org1 Channel")
+            .setSlug("test.channel.8");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org1.getId().toString()))
@@ -392,7 +401,8 @@ public class UpdateOrgChannelControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Test Channel");
+            .setName("Test Channel")
+            .setSlug("test.channel.9");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))

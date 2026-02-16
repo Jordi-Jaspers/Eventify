@@ -199,6 +199,10 @@ public enum ApiErrorCode implements ApiError {
         "ERR-0046",
         "Duplicate channel name: A channel with this name already exists for this user."
     ),
+    DUPLICATE_CHANNEL_SLUG(
+        "ERR-0051",
+        "Duplicate channel slug: A channel with this slug already exists for this owner."
+    ),
     CHANNEL_NOT_FOUND(
         "ERR-0047",
         "The requested channel has been deleted or does not exist."

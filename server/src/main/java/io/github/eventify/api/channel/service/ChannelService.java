@@ -8,6 +8,7 @@ import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.DuplicateChannelNameException;
+import io.github.eventify.common.exception.DuplicateChannelSlugException;
 import io.github.eventify.common.util.TimeProvider;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
@@ -52,18 +53,20 @@ public class ChannelService {
     @Transactional
     public Channel createUserChannel(final CreateChannelRequest request) {
         final User user = getLoggedInUser();
-
-        // Check for duplicate name
         final Optional<Channel> existing = channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(
             user.getId(),
             request.getName()
         );
+
         if (existing.isPresent()) {
             throw new DuplicateChannelNameException();
         }
 
-        // Create new channel
-        final Channel channel = new Channel(request.getName(), user, null);
+        if (channelRepository.existsByUserIdAndSlugAndOrganizationIdIsNull(user.getId(), request.getSlug())) {
+            throw new DuplicateChannelSlugException();
+        }
+
+        final Channel channel = new Channel(request.getName(), request.getSlug(), user, null);
         channel.setDescription(request.getDescription());
         return channelRepository.save(channel);
     }

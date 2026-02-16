@@ -43,7 +43,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
         // And: Organization has 3 channels
         for (int i = 1; i <= 3; i++) {
             final CreateChannelRequest createRequest = new CreateChannelRequest()
-                .setName("Channel " + i);
+                .setName("Channel " + i)
+                .setSlug("test.channel.1." + i);
 
             mockMvc.perform(
                 post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -89,7 +90,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has channels
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Admin Viewable Channel");
+            .setName("Admin Viewable Channel")
+            .setSlug("test.channel.2");
 
         mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -131,7 +133,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has channels
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Member Viewable Channel");
+            .setName("Member Viewable Channel")
+            .setSlug("test.channel.3");
 
         mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -198,7 +201,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has channels
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Global Admin Viewable Channel");
+            .setName("Global Admin Viewable Channel")
+            .setSlug("test.channel.4");
 
         mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -241,7 +245,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
         // And: Org1 has 2 channels
         for (int i = 1; i <= 2; i++) {
             final CreateChannelRequest request = new CreateChannelRequest()
-                .setName("Org1 Channel " + i);
+                .setName("Org1 Channel " + i)
+                .setSlug("test.channel.5." + i);
 
             mockMvc.perform(
                 post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org1.getId().toString()))
@@ -253,7 +258,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Org2 has 1 channel
         final CreateChannelRequest org2Request = new CreateChannelRequest()
-            .setName("Org2 Channel");
+            .setName("Org2 Channel")
+            .setSlug("test.channel.6");
 
         mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org2.getId().toString()))
@@ -293,7 +299,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has 2 channels
         final CreateChannelRequest createRequest1 = new CreateChannelRequest()
-            .setName("Active Channel");
+            .setName("Active Channel")
+            .setSlug("test.channel.7");
 
         mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -303,7 +310,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
         );
 
         final CreateChannelRequest createRequest2 = new CreateChannelRequest()
-            .setName("Deleted Channel");
+            .setName("Deleted Channel")
+            .setSlug("test.channel.8");
 
         final ResultActions createResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
@@ -440,7 +448,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has 2 active channels
         final CreateChannelRequest activeRequest1 = new CreateChannelRequest()
-            .setName("Active Channel 1");
+            .setName("Active Channel 1")
+            .setSlug("test.channel.9");
         final ResultActions createActiveResponse1 = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
                 .contentType(APPLICATION_JSON)
@@ -450,7 +459,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
         createActiveResponse1.andExpect(status().is(SC_CREATED));
 
         final CreateChannelRequest activeRequest2 = new CreateChannelRequest()
-            .setName("Active Channel 2");
+            .setName("Active Channel 2")
+            .setSlug("test.channel.10");
         final ResultActions createActiveResponse2 = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
                 .contentType(APPLICATION_JSON)
@@ -461,7 +471,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has 1 paused channel
         final CreateChannelRequest pausedRequest = new CreateChannelRequest()
-            .setName("Paused Channel");
+            .setName("Paused Channel")
+            .setSlug("test.channel.11");
         final ResultActions createPausedResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
                 .contentType(APPLICATION_JSON)
@@ -524,7 +535,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has 1 active channel
         final CreateChannelRequest activeRequest = new CreateChannelRequest()
-            .setName("Active Channel");
+            .setName("Active Channel")
+            .setSlug("test.channel.12");
         final ResultActions createActiveResponse = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
                 .contentType(APPLICATION_JSON)
@@ -535,7 +547,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Organization has 2 paused channels
         final CreateChannelRequest pausedRequest1 = new CreateChannelRequest()
-            .setName("Paused Channel 1");
+            .setName("Paused Channel 1")
+            .setSlug("test.channel.13");
         final ResultActions createPausedResponse1 = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
                 .contentType(APPLICATION_JSON)
@@ -559,7 +572,8 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
         );
 
         final CreateChannelRequest pausedRequest2 = new CreateChannelRequest()
-            .setName("Paused Channel 2");
+            .setName("Paused Channel 2")
+            .setSlug("test.channel.14");
         final ResultActions createPausedResponse2 = mockMvc.perform(
             post(ORGANIZATION_CHANNELS_PATH.replace("{orgId}", org.getId().toString()))
                 .contentType(APPLICATION_JSON)

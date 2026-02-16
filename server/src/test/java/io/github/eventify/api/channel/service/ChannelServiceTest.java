@@ -74,6 +74,7 @@ public class ChannelServiceTest extends UnitTest {
         // Given: A valid create request
         final CreateChannelRequest request = new CreateChannelRequest()
             .setName("My App Errors")
+            .setSlug("test.channel.1")
             .setDescription("Error logs from production");
 
         when(channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(user.getId(), "My App Errors"))
@@ -103,7 +104,8 @@ public class ChannelServiceTest extends UnitTest {
     public void shouldCreateChannelWithoutDescription() {
         // Given: Request without description
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Simple Channel");
+            .setName("Simple Channel")
+            .setSlug("test.channel.2");
 
         when(channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(user.getId(), "Simple Channel"))
             .thenReturn(Optional.empty());
@@ -125,9 +127,10 @@ public class ChannelServiceTest extends UnitTest {
     public void shouldThrowWhenDuplicateChannelName() {
         // Given: User already has channel named "Errors"
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Errors");
+            .setName("Errors")
+            .setSlug("test.channel.3");
 
-        final Channel existingChannel = new Channel("Errors", user, null);
+        final Channel existingChannel = new Channel("Errors", "errors", user, null);
         when(channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(user.getId(), "Errors"))
             .thenReturn(Optional.of(existingChannel));
 
@@ -145,7 +148,8 @@ public class ChannelServiceTest extends UnitTest {
     public void shouldCreateChannelWithOrganizationNull() {
         // Given: A valid personal channel request
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Personal Channel");
+            .setName("Personal Channel")
+            .setSlug("test.channel.4");
 
         when(channelRepository.findByUserIdAndNameAndOrganizationIdIsNull(user.getId(), "Personal Channel"))
             .thenReturn(Optional.empty());
@@ -290,6 +294,7 @@ public class ChannelServiceTest extends UnitTest {
         // When: Updating channel
         final UpdateChannelRequest request = new UpdateChannelRequest()
             .setName("New Name")
+
             .setDescription("New Description");
 
         final Channel updated = channelService.updateUserChannel(1L, request);
@@ -343,6 +348,7 @@ public class ChannelServiceTest extends UnitTest {
         // When: Updating with same name but different description
         final UpdateChannelRequest request = new UpdateChannelRequest()
             .setName("Same Name")
+
             .setDescription("Updated description");
 
         final Channel updated = channelService.updateUserChannel(1L, request);
@@ -512,7 +518,7 @@ public class ChannelServiceTest extends UnitTest {
     }
 
     private Channel createChannel(final Long id, final String name, final User user) {
-        final Channel channel = new Channel(name, user, null);
+        final Channel channel = new Channel(name, "test.slug." + id, user, null);
         channel.setId(id);
         channel.setStatus(ChannelStatus.ACTIVE);
         channel.setCreatedAt(OffsetDateTime.now().minusDays(1));

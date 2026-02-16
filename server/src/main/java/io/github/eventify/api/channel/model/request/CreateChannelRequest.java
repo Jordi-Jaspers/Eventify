@@ -22,6 +22,13 @@ public class CreateChannelRequest {
     private String name;
 
     @Schema(
+        description = "Channel slug identifier (lowercase, dots allowed, alphanumeric only)",
+        example = "myapp.prod.backend.errors",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String slug;
+
+    @Schema(
         description = "Channel description",
         example = "Error logs from production",
         requiredMode = Schema.RequiredMode.NOT_REQUIRED

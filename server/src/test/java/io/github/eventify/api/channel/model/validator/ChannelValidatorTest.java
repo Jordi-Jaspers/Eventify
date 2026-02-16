@@ -36,6 +36,7 @@ public class ChannelValidatorTest extends UnitTest {
         // Given: Valid create request
         final CreateChannelRequest request = new CreateChannelRequest()
             .setName("Valid Channel Name")
+            .setSlug("valid.channel.name")
             .setDescription("Valid description");
         final ValidationResult result = new ValidationResult();
 
@@ -51,7 +52,8 @@ public class ChannelValidatorTest extends UnitTest {
     public void shouldAcceptCreateRequestWithoutDescription() {
         // Given: Valid request without description
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Valid Channel Name");
+            .setName("Valid Channel Name")
+            .setSlug("valid.channel.name");
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -187,7 +189,8 @@ public class ChannelValidatorTest extends UnitTest {
         // Given: Request with name of exactly 100 characters
         final String maxName = "a".repeat(100);
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName(maxName);
+            .setName(maxName)
+            .setSlug("valid.slug");
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -231,6 +234,7 @@ public class ChannelValidatorTest extends UnitTest {
         final String maxDescription = "a".repeat(500);
         final CreateChannelRequest request = new CreateChannelRequest()
             .setName("Valid Name")
+            .setSlug("valid.slug")
             .setDescription(maxDescription);
         final ValidationResult result = new ValidationResult();
 

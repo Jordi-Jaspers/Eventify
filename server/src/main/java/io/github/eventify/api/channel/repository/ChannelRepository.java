@@ -51,6 +51,15 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
     Optional<Channel> findByUserIdAndNameAndOrganizationIdIsNull(Long userId, String name);
 
     /**
+     * Checks if a personal channel with the given slug exists for a user.
+     *
+     * @param userId the user ID
+     * @param slug   the channel slug
+     * @return true if exists, false otherwise
+     */
+    boolean existsByUserIdAndSlugAndOrganizationIdIsNull(Long userId, String slug);
+
+    /**
      * Finds a channel by ID and user ID excluding deleted ones.
      *
      * @param id     the channel ID
@@ -86,6 +95,15 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * @return optional channel
      */
     Optional<Channel> findByOrganizationIdAndName(Long organizationId, String name);
+
+    /**
+     * Checks if an organization channel with the given slug exists.
+     *
+     * @param organizationId the organization ID
+     * @param slug           the channel slug
+     * @return true if exists, false otherwise
+     */
+    boolean existsByOrganizationIdAndSlug(Long organizationId, String slug);
 
     /**
      * Finds a channel by ID and organization ID excluding deleted ones.

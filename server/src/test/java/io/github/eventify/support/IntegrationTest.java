@@ -194,8 +194,10 @@ public class IntegrationTest extends WebMvcConfigurator {
     // ========================= CHANNEL FACTORY METHODS =========================
 
     protected Channel aChannelForUser(final User user, final String name) {
+        final String slug = generateSlugFromName(name);
         final Channel channel = new Channel();
         channel.setName(name);
+        channel.setSlug(slug);
         channel.setUser(user);
         channel.setOrganization(null);
         channel.setStatus(ChannelStatus.ACTIVE);
@@ -203,12 +205,22 @@ public class IntegrationTest extends WebMvcConfigurator {
     }
 
     protected Channel aChannelForOrganisation(final User user, final Organization org, final String name) {
+        final String slug = generateSlugFromName(name);
         final Channel channel = new Channel();
         channel.setName(name);
+        channel.setSlug(slug);
         channel.setUser(user);
         channel.setOrganization(org);
         channel.setStatus(ChannelStatus.ACTIVE);
         return channelRepository.save(channel);
+    }
+
+    private String generateSlugFromName(final String name) {
+        final String baseSlug = name.toLowerCase()
+            .replaceAll("[^a-z0-9]+", ".")
+            .replaceAll("^\\.+|\\.+$", "")
+            .replaceAll("\\.{2,}", ".");
+        return baseSlug + "." + UUID.randomUUID().toString().substring(0, 8);
     }
 
     protected void pauseChannel(final Channel channel) {

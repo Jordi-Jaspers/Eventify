@@ -45,6 +45,13 @@ public class Channel implements PageableItem, Serializable, TimelineSource {
     private String name;
 
     @Column(
+        name = "slug",
+        nullable = false,
+        length = 100
+    )
+    private String slug;
+
+    @Column(
         name = "description",
         length = 500
     )
@@ -86,14 +93,16 @@ public class Channel implements PageableItem, Serializable, TimelineSource {
     private Severity currentSeverity;
 
     /**
-     * Creates a new channel with the specified name, user, and organization.
+     * Creates a new channel with the specified name, slug, user, and organization.
      *
      * @param name         the channel name
+     * @param slug         the channel slug identifier
      * @param user         the user who owns (personal) or created (org) this channel
      * @param organization the organization this channel belongs to, or null for personal channels
      */
-    public Channel(final String name, final User user, final Organization organization) {
+    public Channel(final String name, final String slug, final User user, final Organization organization) {
         this.name = name;
+        this.slug = slug;
         this.user = user;
         this.organization = organization;
         this.status = ChannelStatus.ACTIVE;

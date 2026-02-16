@@ -1,0 +1,40 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601111100-PRD-channel-slug.xml">
+
+    <changeSet id="202602161000-PRD-channel-slug-1" author="backend-agent">
+        <comment>Add slug column to channel table for hierarchical identifiers.</comment>
+        <sql>
+            ALTER TABLE channel ADD COLUMN IF NOT EXISTS slug VARCHAR(100) NOT NULL DEFAULT '';
+        </sql>
+    </changeSet>
+
+    <changeSet id="202602161000-PRD-channel-slug-2" author="backend-agent">
+        <comment>Create unique index for user channels slug (scoped to user).</comment>
+        <sql>
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_channel_user_slug 
+            ON channel (user_id, slug) 
+            WHERE organization_id IS NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202602161000-PRD-channel-slug-3" author="backend-agent">
+        <comment>Create unique index for organization channels slug (scoped to org).</comment>
+        <sql>
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_channel_org_slug 
+            ON channel (organization_id, slug) 
+            WHERE organization_id IS NOT NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202602161000-PRD-channel-slug-4" author="backend-agent">
+        <comment>Add documentation for slug column and indexes.</comment>
+        <sql>
+            COMMENT ON COLUMN channel.slug IS 'Hierarchical identifier for channel routing (e.g. errors, myapp.errors, myapp.prod.backend.errors)';
+            COMMENT ON INDEX uq_channel_user_slug IS 'Ensures slug uniqueness per user for personal channels';
+            COMMENT ON INDEX uq_channel_org_slug IS 'Ensures slug uniqueness per organization for org channels';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

@@ -41,6 +41,7 @@ public class UserChannelControllerTest extends IntegrationTest {
         // And: A valid create channel request
         final CreateChannelRequest request = new CreateChannelRequest()
             .setName("My App Errors")
+            .setSlug("test.channel.1")
             .setDescription("Error logs from production");
 
         // When: Creating personal channel
@@ -73,7 +74,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: Request without description
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Simple Channel");
+            .setName("Simple Channel")
+            .setSlug("test.channel.2");
 
         // When: Creating personal channel
         final MockHttpServletRequestBuilder createRequest = post(USER_CHANNELS_PATH)
@@ -101,7 +103,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: Request with empty name
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("");
+            .setName("")
+            .setSlug("test.channel.3");
 
         // When: Creating personal channel
         final MockHttpServletRequestBuilder createRequest = post(USER_CHANNELS_PATH)
@@ -129,7 +132,8 @@ public class UserChannelControllerTest extends IntegrationTest {
         // And: Request with name exceeding 100 characters
         final String longName = "a".repeat(101);
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName(longName);
+            .setName(longName)
+            .setSlug("test.channel.4");
 
         // When: Creating personal channel
         final MockHttpServletRequestBuilder createRequest = post(USER_CHANNELS_PATH)
@@ -153,6 +157,7 @@ public class UserChannelControllerTest extends IntegrationTest {
         final String longDescription = "a".repeat(501);
         final CreateChannelRequest request = new CreateChannelRequest()
             .setName("Valid Name")
+            .setSlug("test.channel.5")
             .setDescription(longDescription);
 
         // When: Creating personal channel
@@ -175,7 +180,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User already has channel named "Errors"
         final CreateChannelRequest firstRequest = new CreateChannelRequest()
-            .setName("Errors");
+            .setName("Errors")
+            .setSlug("test.channel.6");
 
         mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -186,7 +192,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // When: Creating another channel with same name
         final CreateChannelRequest duplicateRequest = new CreateChannelRequest()
-            .setName("Errors");
+            .setName("Errors")
+            .setSlug("test.channel.7");
 
         final MockHttpServletRequestBuilder createRequest = post(USER_CHANNELS_PATH)
             .contentType(APPLICATION_JSON)
@@ -209,7 +216,8 @@ public class UserChannelControllerTest extends IntegrationTest {
     public void createChannelFailsWhenUnauthenticated() throws Exception {
         // Given: A valid request
         final CreateChannelRequest request = new CreateChannelRequest()
-            .setName("Unauthorized Channel");
+            .setName("Unauthorized Channel")
+            .setSlug("test.channel.8");
 
         // When: Creating channel without authentication
         final MockHttpServletRequestBuilder createRequest = post(USER_CHANNELS_PATH)
@@ -231,7 +239,8 @@ public class UserChannelControllerTest extends IntegrationTest {
         // And: User has 3 personal channels
         for (int i = 1; i <= 3; i++) {
             final CreateChannelRequest createRequest = new CreateChannelRequest()
-                .setName("Channel " + i);
+                .setName("Channel " + i)
+                .setSlug("test.channel.9." + i);
 
             mockMvc.perform(
                 post(USER_CHANNELS_PATH)
@@ -270,7 +279,8 @@ public class UserChannelControllerTest extends IntegrationTest {
         // And: User1 has 2 channels
         for (int i = 1; i <= 2; i++) {
             final CreateChannelRequest request = new CreateChannelRequest()
-                .setName("User1 Channel " + i);
+                .setName("User1 Channel " + i)
+                .setSlug("test.channel.10." + i);
 
             mockMvc.perform(
                 post(USER_CHANNELS_PATH)
@@ -282,7 +292,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User2 has 1 channel
         final CreateChannelRequest user2Request = new CreateChannelRequest()
-            .setName("User2 Channel");
+            .setName("User2 Channel")
+            .setSlug("test.channel.11");
 
         mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -339,7 +350,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Test Channel");
+            .setName("Test Channel")
+            .setSlug("test.channel.12");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -396,7 +408,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User1 has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("User1 Channel");
+            .setName("User1 Channel")
+            .setSlug("test.channel.13");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -427,7 +440,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Old Name");
+            .setName("Old Name")
+            .setSlug("test.channel.14");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -442,6 +456,7 @@ public class UserChannelControllerTest extends IntegrationTest {
         // When: Updating channel details
         final UpdateChannelRequest updateRequest = new UpdateChannelRequest()
             .setName("New Name")
+
             .setDescription("New Description");
 
         final MockHttpServletRequestBuilder updateRequestBuilder = put(USER_CHANNEL_PATH.replace("{id}", createdChannel.getId().toString()))
@@ -494,7 +509,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has an active channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Active Channel");
+            .setName("Active Channel")
+            .setSlug("test.channel.15");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -531,7 +547,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has a paused channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Paused Channel");
+            .setName("Paused Channel")
+            .setSlug("test.channel.16");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -575,7 +592,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has a paused channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Paused Channel");
+            .setName("Paused Channel")
+            .setSlug("test.channel.17");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -621,7 +639,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has an active channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Active Channel");
+            .setName("Active Channel")
+            .setSlug("test.channel.18");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -660,7 +679,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Channel to Delete");
+            .setName("Channel to Delete")
+            .setSlug("test.channel.19");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -697,7 +717,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has 2 channels, one deleted
         final CreateChannelRequest createRequest1 = new CreateChannelRequest()
-            .setName("Active Channel");
+            .setName("Active Channel")
+            .setSlug("test.channel.20");
 
         mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -707,7 +728,8 @@ public class UserChannelControllerTest extends IntegrationTest {
         );
 
         final CreateChannelRequest createRequest2 = new CreateChannelRequest()
-            .setName("Deleted Channel");
+            .setName("Deleted Channel")
+            .setSlug("test.channel.21");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -750,7 +772,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has a deleted channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Deleted Channel");
+            .setName("Deleted Channel")
+            .setSlug("test.channel.22");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -808,7 +831,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User1 has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("User1 Channel");
+            .setName("User1 Channel")
+            .setSlug("test.channel.23");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -839,7 +863,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has 2 active channels
         final CreateChannelRequest activeRequest1 = new CreateChannelRequest()
-            .setName("Active Channel 1");
+            .setName("Active Channel 1")
+            .setSlug("test.channel.24");
         final ResultActions createActiveResponse1 = mockMvc.perform(
             post(USER_CHANNELS_PATH)
                 .contentType(APPLICATION_JSON)
@@ -849,7 +874,8 @@ public class UserChannelControllerTest extends IntegrationTest {
         createActiveResponse1.andExpect(status().is(SC_CREATED));
 
         final CreateChannelRequest activeRequest2 = new CreateChannelRequest()
-            .setName("Active Channel 2");
+            .setName("Active Channel 2")
+            .setSlug("test.channel.25");
         final ResultActions createActiveResponse2 = mockMvc.perform(
             post(USER_CHANNELS_PATH)
                 .contentType(APPLICATION_JSON)
@@ -860,7 +886,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User has 1 paused channel
         final CreateChannelRequest pausedRequest = new CreateChannelRequest()
-            .setName("Paused Channel");
+            .setName("Paused Channel")
+            .setSlug("test.channel.26");
         final ResultActions createPausedResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
                 .contentType(APPLICATION_JSON)
@@ -916,7 +943,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User1 has a channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("User1 Channel");
+            .setName("User1 Channel")
+            .setSlug("test.channel.27");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -952,7 +980,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User1 has an active channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("User1 Active Channel");
+            .setName("User1 Active Channel")
+            .setSlug("test.channel.28");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -984,7 +1013,8 @@ public class UserChannelControllerTest extends IntegrationTest {
 
         // And: User1 has a paused channel
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("User1 Paused Channel");
+            .setName("User1 Paused Channel")
+            .setSlug("test.channel.29");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -1023,7 +1053,8 @@ public class UserChannelControllerTest extends IntegrationTest {
         final User regularUser = aValidatedUser();
 
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Regular User Channel");
+            .setName("Regular User Channel")
+            .setSlug("test.channel.30");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)
@@ -1062,7 +1093,8 @@ public class UserChannelControllerTest extends IntegrationTest {
         final User regularUser = aValidatedUser();
 
         final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Regular User Channel");
+            .setName("Regular User Channel")
+            .setSlug("test.channel.31");
 
         final ResultActions createResponse = mockMvc.perform(
             post(USER_CHANNELS_PATH)

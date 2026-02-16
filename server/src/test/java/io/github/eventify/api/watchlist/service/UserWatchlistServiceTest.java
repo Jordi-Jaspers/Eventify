@@ -421,7 +421,7 @@ public class UserWatchlistServiceTest extends UnitTest {
     }
 
     private Channel createChannel(final Long id, final String name, final User user) {
-        final Channel channel = new Channel(name, user, null);
+        final Channel channel = new Channel(name, "test.slug." + id, user, null);
         channel.setId(id);
         channel.setStatus(ChannelStatus.ACTIVE);
         channel.setCreatedAt(OffsetDateTime.now().minusDays(1));
