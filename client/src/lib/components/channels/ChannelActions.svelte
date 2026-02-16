@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { Edit, Pause, Play, Trash2, Terminal } from '@lucide/svelte';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { Edit, Pause, Play, Trash2, Terminal, MoreVertical } from '@lucide/svelte';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 	import { toast } from 'svelte-sonner';
 
@@ -19,10 +20,11 @@
   -H "Authorization: Bearer <YOUR_API_KEY>" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "channelSlug": "${channel.slug}",
+    "slug": "${channel.slug}",
     "severity": "INFO",
     "title": "Event Title",
-    "message": "Event message here"
+    "message": "Event message here",
+    "metadata": []
   }'`;
 
 		navigator.clipboard
@@ -36,53 +38,44 @@
 	}
 </script>
 
-<div class="flex items-center justify-end gap-1">
-	<Button
-		variant="ghost"
-		size="icon"
-		class="h-8 w-8 text-muted-foreground hover:text-primary"
-		onclick={copyCurlCommand}
-		aria-label="Copy curl command"
-	>
-		<Terminal class="h-4 w-4" />
-	</Button>
-	<Button
-		variant="ghost"
-		size="icon"
-		class="h-8 w-8 text-muted-foreground hover:text-primary"
-		onclick={() => onEdit(channel)}
-		aria-label="Edit channel"
-	>
-		<Edit class="h-4 w-4" />
-	</Button>
-	{#if channel.status === 'ACTIVE'}
-		<Button
-			variant="ghost"
-			size="icon"
-			class="h-8 w-8 text-muted-foreground hover:text-yellow-500"
-			onclick={() => onPause(channel)}
-			aria-label="Pause channel"
-		>
-			<Pause class="h-4 w-4" />
-		</Button>
-	{:else}
-		<Button
-			variant="ghost"
-			size="icon"
-			class="h-8 w-8 text-muted-foreground hover:text-green-500"
-			onclick={() => onResume(channel)}
-			aria-label="Resume channel"
-		>
-			<Play class="h-4 w-4" />
-		</Button>
-	{/if}
-	<Button
-		variant="ghost"
-		size="icon"
-		class="h-8 w-8 text-muted-foreground hover:text-destructive"
-		onclick={() => onDelete(channel)}
-		aria-label="Delete channel"
-	>
-		<Trash2 class="h-4 w-4" />
-	</Button>
+<div class="flex items-center justify-end">
+	<DropdownMenu.Root>
+		<DropdownMenu.Trigger>
+			<Button
+				variant="ghost"
+				size="icon"
+				class="h-8 w-8 text-muted-foreground hover:text-primary"
+				aria-label="Channel actions"
+			>
+				<MoreVertical class="h-4 w-4" />
+			</Button>
+		</DropdownMenu.Trigger>
+		<DropdownMenu.Content align="end" class="w-48 bg-card/95 backdrop-blur-xl border-border/50">
+			<DropdownMenu.Item onclick={copyCurlCommand} class="cursor-pointer">
+				<Terminal class="mr-2 h-4 w-4" />
+				Copy Curl
+			</DropdownMenu.Item>
+			<DropdownMenu.Separator />
+			<DropdownMenu.Item onclick={() => onEdit(channel)} class="cursor-pointer">
+				<Edit class="mr-2 h-4 w-4" />
+				Edit
+			</DropdownMenu.Item>
+			{#if channel.status === 'ACTIVE'}
+				<DropdownMenu.Item onclick={() => onPause(channel)} class="cursor-pointer">
+					<Pause class="mr-2 h-4 w-4" />
+					Pause
+				</DropdownMenu.Item>
+			{:else}
+				<DropdownMenu.Item onclick={() => onResume(channel)} class="cursor-pointer">
+					<Play class="mr-2 h-4 w-4" />
+					Resume
+				</DropdownMenu.Item>
+			{/if}
+			<DropdownMenu.Separator />
+			<DropdownMenu.Item onclick={() => onDelete(channel)} class="cursor-pointer text-destructive">
+				<Trash2 class="mr-2 h-4 w-4" />
+				Delete
+			</DropdownMenu.Item>
+		</DropdownMenu.Content>
+	</DropdownMenu.Root>
 </div>

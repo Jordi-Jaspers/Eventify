@@ -12,22 +12,18 @@
 	// Columns configuration
 	const columns: DataTableColumn<ChannelDetailsResponse>[] = [
 		{
-			key: 'search',
+			key: 'name',
 			label: 'Channel',
+			sortable: true,
 			filterable: true,
 			filterType: 'FUZZY_TEXT',
 			filterPlaceholder: 'Search channels...',
-			colSpan: 2
-		},
-		{
-			key: 'slug',
-			label: 'Slug',
-			colSpan: 2
+			colSpan: 3
 		},
 		{
 			key: 'description',
 			label: 'Description',
-			colSpan: 4
+			colSpan: 5
 		},
 		{
 			key: 'status',
@@ -49,7 +45,7 @@
 		},
 		{
 			key: 'actions',
-			colSpan: 2
+			colSpan: 1
 		}
 	];
 
