@@ -17,11 +17,13 @@ export class UserChannelService {
 	 */
 	async createChannel(
 		name: string,
+		slug: string,
 		description: string | undefined
 	): Promise<ChannelDetailsResponse> {
 		try {
 			const channel: ChannelDetailsResponse = await createChannel({
 				name,
+				slug,
 				description
 			});
 			toast.success('Channel created successfully');

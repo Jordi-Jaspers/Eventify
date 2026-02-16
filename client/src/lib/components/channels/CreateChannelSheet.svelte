@@ -3,26 +3,53 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { Radio, LoaderCircle, Tag, FileText } from '@lucide/svelte';
+	import { Radio, LoaderCircle, Tag, FileText, Hash } from '@lucide/svelte';
 
 	interface Props {
 		open: boolean;
 		creating: boolean;
 		onOpenChange: (open: boolean) => void;
-		onSubmit: (name: string, description: string | undefined) => void;
+		onSubmit: (name: string, slug: string, description: string | undefined) => void;
 	}
 
 	let { open, creating, onOpenChange, onSubmit }: Props = $props();
 
 	let name: string = $state('');
+	let slug: string = $state('');
 	let description: string = $state('');
+	let slugError: string = $state('');
+
+	const SLUG_PATTERN: RegExp = /^[a-z0-9]+(\.[a-z0-9]+)*$/;
+
+	function validateSlug(value: string): boolean {
+		if (!value.trim()) {
+			slugError = 'Slug is required';
+			return false;
+		}
+		if (!SLUG_PATTERN.test(value)) {
+			slugError = 'Use only lowercase letters, numbers, and dots';
+			return false;
+		}
+		slugError = '';
+		return true;
+	}
+
+	function handleSlugInput(): void {
+		if (slug) {
+			validateSlug(slug);
+		} else {
+			slugError = '';
+		}
+	}
 
 	function handleSubmit(): void {
-		if (!name.trim()) return;
-		onSubmit(name.trim(), description.trim() || undefined);
+		if (!name.trim() || !validateSlug(slug)) return;
+		onSubmit(name.trim(), slug.trim(), description.trim() || undefined);
 		// Reset form
 		name = '';
+		slug = '';
 		description = '';
+		slugError = '';
 	}
 
 	function handleOpenChange(newOpen: boolean): void {
@@ -30,11 +57,15 @@
 		if (!newOpen) {
 			// Reset form when closing
 			name = '';
+			slug = '';
 			description = '';
+			slugError = '';
 		}
 	}
 
-	const canSubmit: boolean = $derived(name.trim().length > 0 && !creating);
+	const canSubmit: boolean = $derived(
+		name.trim().length > 0 && slug.trim().length > 0 && !slugError && !creating
+	);
 </script>
 
 <Sheet.Root {open} onOpenChange={handleOpenChange}>
@@ -74,6 +105,34 @@
 				<p class="text-xs text-muted-foreground">
 					Use a descriptive name to identify this channel's purpose
 				</p>
+			</div>
+
+			<!-- Slug Input Card -->
+			<div
+				class="rounded-xl border border-border/50 bg-background/30 backdrop-blur-sm p-4 space-y-3"
+			>
+				<div class="flex items-center gap-2">
+					<Hash class="h-4 w-4 text-primary" />
+					<Label for="channel-slug" class="text-sm font-medium">Slug</Label>
+					<span class="text-destructive text-sm">*</span>
+				</div>
+				<input
+					id="channel-slug"
+					type="text"
+					bind:value={slug}
+					oninput={handleSlugInput}
+					placeholder="e.g., myapp.prod.errors"
+					disabled={creating}
+					class="flex h-10 w-full rounded-lg border border-border/50 bg-background/50 px-3 text-sm font-mono shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+					class:border-destructive={slugError}
+				/>
+				{#if slugError}
+					<p class="text-xs text-destructive">{slugError}</p>
+				{:else}
+					<p class="text-xs text-muted-foreground">
+						Unique identifier using lowercase letters, numbers, and dots
+					</p>
+				{/if}
 			</div>
 
 			<!-- Description Textarea Card -->

@@ -17,12 +17,17 @@
 			filterable: true,
 			filterType: 'FUZZY_TEXT',
 			filterPlaceholder: 'Search channels...',
-			colSpan: 3
+			colSpan: 2
+		},
+		{
+			key: 'slug',
+			label: 'Slug',
+			colSpan: 2
 		},
 		{
 			key: 'description',
 			label: 'Description',
-			colSpan: 5
+			colSpan: 4
 		},
 		{
 			key: 'status',
@@ -73,10 +78,14 @@
 		editingChannel = null;
 	}
 
-	async function handleCreateChannel(name: string, description: string | undefined): Promise<void> {
+	async function handleCreateChannel(
+		name: string,
+		slug: string,
+		description: string | undefined
+	): Promise<void> {
 		processing = true;
 		try {
-			await channelService.createChannel(name, description);
+			await channelService.createChannel(name, slug, description);
 			showCreateSheet = false;
 			dataTableService.load();
 		} finally {

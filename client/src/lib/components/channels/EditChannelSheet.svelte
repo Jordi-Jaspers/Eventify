@@ -3,7 +3,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { Radio, LoaderCircle, Tag, FileText } from '@lucide/svelte';
+	import { Radio, LoaderCircle, Tag, FileText, Hash } from '@lucide/svelte';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 
 	interface Props {
@@ -78,6 +78,26 @@
 					disabled={updating}
 					class="flex h-10 w-full rounded-lg border border-border/50 bg-background/50 px-3 text-sm shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
 				/>
+			</div>
+
+			<!-- Slug Display Card (Read-only) -->
+			<div
+				class="rounded-xl border border-border/50 bg-background/30 backdrop-blur-sm p-4 space-y-3"
+			>
+				<div class="flex items-center gap-2">
+					<Hash class="h-4 w-4 text-primary" />
+					<Label for="edit-channel-slug" class="text-sm font-medium">Slug</Label>
+				</div>
+				<input
+					id="edit-channel-slug"
+					type="text"
+					value={channel?.slug || ''}
+					disabled
+					class="flex h-10 w-full rounded-lg border border-border/50 bg-muted/30 px-3 text-sm font-mono shadow-sm cursor-not-allowed opacity-70"
+				/>
+				<p class="text-xs text-muted-foreground">
+					The slug cannot be changed after creation
+				</p>
 			</div>
 
 			<!-- Description Textarea Card -->

@@ -26,7 +26,7 @@
 	class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-4 px-4 py-3 hover:bg-muted/30 transition-all text-left w-full"
 >
 	<!-- Channel Name -->
-	<div class="col-span-1 md:col-span-3">
+	<div class="col-span-1 md:col-span-2">
 		<div class="flex items-center gap-3">
 			<Radio class="h-5 w-5 text-primary shrink-0" />
 			<div class="min-w-0">
@@ -38,10 +38,17 @@
 		</div>
 	</div>
 
+	<!-- Slug -->
+	<div class="col-span-1 md:col-span-2 flex items-center">
+		<span class="text-sm font-mono text-muted-foreground truncate">
+			{channel.slug}
+		</span>
+	</div>
+
 	<!-- Description (desktop only) -->
-	<div class="hidden md:flex md:col-span-5 items-center">
+	<div class="hidden md:flex md:col-span-4 items-center">
 		<span class="text-sm text-muted-foreground truncate">
-			{truncateDescription(channel.description, 240)}
+			{truncateDescription(channel.description, 180)}
 		</span>
 	</div>
 
