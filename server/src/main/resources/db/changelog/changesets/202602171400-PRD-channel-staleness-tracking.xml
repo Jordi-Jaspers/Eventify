@@ -1,0 +1,83 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202602171400-PRD-channel-staleness-tracking.xml">
+
+    <changeSet id="202602171400-PRD-channel-staleness-tracking-1" author="jordi.jaspers">
+        <comment>Add staleness tracking columns to channel table</comment>
+        <sql>
+            -- Add columns as nullable first
+            ALTER TABLE channel ADD COLUMN IF NOT EXISTS last_event_at TIMESTAMPTZ;
+            ALTER TABLE channel ADD COLUMN IF NOT EXISTS is_stale BOOLEAN;
+            
+            -- Set default value for existing rows
+            UPDATE channel SET is_stale = false WHERE is_stale IS NULL;
+            
+            -- Now make it NOT NULL with default
+            ALTER TABLE channel ALTER COLUMN is_stale SET NOT NULL;
+            ALTER TABLE channel ALTER COLUMN is_stale SET DEFAULT false;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202602171400-PRD-channel-staleness-tracking-2" author="jordi.jaspers">
+        <comment>Create indexes for staleness tracking</comment>
+        <sql>
+            CREATE INDEX IF NOT EXISTS idx_channel_is_stale ON channel (is_stale) WHERE is_stale = true;
+            CREATE INDEX IF NOT EXISTS idx_channel_last_event_at ON channel (last_event_at);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202602171400-PRD-channel-staleness-tracking-3" author="jordi.jaspers">
+        <comment>Add column documentation</comment>
+        <sql>
+            COMMENT ON COLUMN channel.last_event_at IS 'Timestamp of the most recent event in this channel';
+            COMMENT ON COLUMN channel.is_stale IS 'Flag indicating if channel has not received events recently';
+            COMMENT ON INDEX idx_channel_is_stale IS 'Partial index for filtering stale channels';
+            COMMENT ON INDEX idx_channel_last_event_at IS 'Index for sorting channels by last event time';
+        </sql>
+    </changeSet>
+
+    <!--
+        PERFORMANCE NOTE: Trigger-based approach for updating last_event_at
+        
+        Current implementation uses a row-level trigger that fires on every event INSERT.
+        This is simple and provides real-time accuracy, but has overhead considerations:
+        
+        Thresholds (when to reconsider this approach):
+        - < 100 events/sec globally: Trigger is fine, negligible overhead
+        - 100-1000 events/sec: Monitor for lock contention on hot channels
+        - > 1000 events/sec OR > 50 events/sec per single channel: Consider alternatives
+        
+        Alternative approaches if thresholds are exceeded:
+        1. Scheduled job: Remove trigger, update last_event_at via hourly batch query
+           (SELECT MAX(timestamp) FROM event GROUP BY channel_id)
+        2. Debounced trigger: Only UPDATE if last_event_at is older than N minutes
+        3. Application-level: Update in EventIngestionService with batching support
+        
+        The scheduled job approach has zero overhead during event ingestion and is
+        recommended for high-volume scenarios. Hourly precision is sufficient since
+        staleness is measured in days (7-day threshold).
+        
+        See: ChannelStalenessJob.java for the staleness marking logic.
+    -->
+    <changeSet id="202602171400-PRD-channel-staleness-tracking-4" author="jordi.jaspers">
+        <comment>Create trigger function to update channel last_event_at on event insert</comment>
+        <sqlFile
+            path="../triggers/update_channel_last_event.sql"
+            relativeToChangelogFile="true"
+            splitStatements="false"
+            stripComments="false"/>
+        <sql>
+            DROP TRIGGER IF EXISTS trg_update_channel_last_event ON event;
+
+            CREATE TRIGGER trg_update_channel_last_event
+            AFTER INSERT
+            ON event
+            FOR EACH ROW
+            EXECUTE FUNCTION update_channel_last_event();
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

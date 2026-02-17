@@ -4,15 +4,18 @@ import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.common.security.principal.ApiKeyPrincipal;
 
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for Channel entity.
@@ -191,4 +194,36 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
         }
         return findBySlugAndUserIdAndOrganizationIdIsNull(slug, principal.getUserId());
     }
+
+    /**
+     * Marks channels as stale based on staleness and grace period thresholds.
+     * Updates isStale=true for channels where:
+     * - lastEventAt is older than stalenessThreshold OR lastEventAt is NULL
+     * - createdAt is older than gracePeriodThreshold (grace period protection)
+     * - isStale is currently false (idempotent)
+     * - status is not PENDING_DELETION
+     *
+     * @param stalenessThreshold   threshold for determining staleness (e.g., 7 days ago)
+     * @param gracePeriodThreshold threshold for grace period (e.g., 7 days ago)
+     * @return count of channels marked as stale
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional
+    @Query(
+        """
+            UPDATE Channel c
+            SET c.isStale = true
+            WHERE (c.lastEventAt < :stalenessThreshold OR c.lastEventAt IS NULL)
+            AND c.createdAt < :gracePeriodThreshold
+            AND c.isStale = false
+            AND c.status != 'PENDING_DELETION'
+            """
+    )
+    int markChannelsAsStale(
+        @Param("stalenessThreshold") OffsetDateTime stalenessThreshold,
+        @Param("gracePeriodThreshold") OffsetDateTime gracePeriodThreshold
+    );
 }

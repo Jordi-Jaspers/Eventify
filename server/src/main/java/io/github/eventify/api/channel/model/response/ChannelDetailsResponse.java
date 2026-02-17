@@ -67,4 +67,18 @@ public class ChannelDetailsResponse implements PageableItemResource {
         requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private OffsetDateTime updatedAt;
+
+    @Schema(
+        description = "Timestamp of the most recent event in this channel",
+        example = "2026-02-15T12:30:00Z",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private OffsetDateTime lastEventAt;
+
+    @Schema(
+        description = "Flag indicating if channel has not received events recently",
+        example = "false",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private Boolean isStale;
 }

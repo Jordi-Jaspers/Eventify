@@ -24,6 +24,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
@@ -66,6 +67,10 @@ public class TestContextInitializer {
     @NonNull
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @NonNull
+    @Autowired
+    protected JdbcTemplate jdbcTemplate;
 
     // ========================= CONTAINERS =========================
     @Autowired

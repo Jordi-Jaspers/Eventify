@@ -37,6 +37,10 @@ public class ChannelMetaData extends AbstractSortSearchMetaData {
 
     public static final String UPDATED_AT = "updatedAt";
 
+    public static final String LAST_EVENT_AT = "lastEventAt";
+
+    public static final String IS_STALE = "isStale";
+
     private static final String ORGANIZATION_ENTITY_FIELD = "organization";
 
     /**
@@ -51,6 +55,8 @@ public class ChannelMetaData extends AbstractSortSearchMetaData {
         addField(ORGANIZATION_TERM, ORGANIZATION_ID_FIELD, SearchType.NUMERIC, true);
         addField(CREATED_AT, CREATED_AT, SearchType.DATE, true);
         addField(UPDATED_AT, UPDATED_AT, SearchType.DATE, true);
+        addField(LAST_EVENT_AT, LAST_EVENT_AT, SearchType.DATE, true);
+        addField(IS_STALE, IS_STALE, SearchType.BOOLEAN, true);
 
         addField(
             SEARCH_TERM,

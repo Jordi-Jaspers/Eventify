@@ -86,6 +86,15 @@ public class Channel implements PageableItem, Serializable, TimelineSource {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
+    @Column(name = "last_event_at")
+    private OffsetDateTime lastEventAt;
+
+    @Column(
+        name = "is_stale",
+        nullable = false
+    )
+    private Boolean isStale;
+
     @Transient
     private Timeline timeline;
 
@@ -106,6 +115,7 @@ public class Channel implements PageableItem, Serializable, TimelineSource {
         this.user = user;
         this.organization = organization;
         this.status = ChannelStatus.ACTIVE;
+        this.isStale = false;
     }
 
     /**

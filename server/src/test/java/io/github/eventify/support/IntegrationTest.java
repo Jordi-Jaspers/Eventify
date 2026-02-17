@@ -201,6 +201,7 @@ public class IntegrationTest extends WebMvcConfigurator {
         channel.setUser(user);
         channel.setOrganization(null);
         channel.setStatus(ChannelStatus.ACTIVE);
+        channel.setIsStale(false);
         return channelRepository.save(channel);
     }
 
@@ -212,6 +213,7 @@ public class IntegrationTest extends WebMvcConfigurator {
         channel.setUser(user);
         channel.setOrganization(org);
         channel.setStatus(ChannelStatus.ACTIVE);
+        channel.setIsStale(false);
         return channelRepository.save(channel);
     }
 
@@ -226,6 +228,25 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected void pauseChannel(final Channel channel) {
         channel.setStatus(ChannelStatus.PAUSED);
         channelRepository.save(channel);
+    }
+
+    /**
+     * Updates a channel's created_at timestamp using direct SQL.
+     * Required because the Channel entity has @CreationTimestamp and updatable=false on created_at,
+     * which prevents JPA from updating this field after initial persist.
+     *
+     * @param channel   the channel to update
+     * @param createdAt the new created_at timestamp
+     */
+    protected void updateChannelCreatedAt(final Channel channel, final OffsetDateTime createdAt) {
+        final OffsetDateTime truncated = TimeProvider.truncateToMicros(createdAt);
+        jdbcTemplate.update(
+            "UPDATE channel SET created_at = ? WHERE id = ?",
+            java.sql.Timestamp.from(truncated.toInstant()),
+            channel.getId()
+        );
+        // Refresh entity to reflect the change
+        channelRepository.findById(channel.getId()).ifPresent(c -> channel.setCreatedAt(c.getCreatedAt()));
     }
 
     // ========================= API KEY FACTORY METHODS =========================

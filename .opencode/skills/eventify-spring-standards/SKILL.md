@@ -864,3 +864,58 @@ cd server/
 ./gradlew spotlessApply           # Fix formatting
 ./gradlew checkQualityMain        # Quality checks
 ```
+
+## TimeProvider for Timestamps
+
+**CRITICAL:** Always use `TimeProvider` for timestamps to ensure PostgreSQL compatibility.
+
+PostgreSQL `TIMESTAMPTZ` has microsecond precision (6 decimal places), while Java's `OffsetDateTime.now()` has nanosecond precision (9 decimal places). This causes precision mismatches when comparing timestamps before and after database operations.
+
+### In Production Code
+
+```java
+import static io.github.eventify.common.util.TimeProvider.now;
+
+// ✅ CORRECT - Use TimeProvider.now()
+final OffsetDateTime threshold = now().minusDays(7);
+channel.setLastEventAt(now());
+
+// ❌ WRONG - Direct OffsetDateTime.now()
+final OffsetDateTime threshold = OffsetDateTime.now().minusDays(7);
+```
+
+### In Tests
+
+```java
+import static io.github.eventify.common.util.TimeProvider.now;
+import static io.github.eventify.common.util.TimeProvider.truncateToMicros;
+
+// ✅ CORRECT - Use now() for test data
+channel.setLastEventAt(now().minusDays(10));
+assertThat(result.getCreatedAt(), is(now().minusDays(30)));
+
+// ✅ CORRECT - Use truncateToMicros() for external timestamps
+final OffsetDateTime externalTimestamp = someExternalSource();
+jdbcTemplate.update("UPDATE channel SET created_at = ?", 
+    java.sql.Timestamp.from(truncateToMicros(externalTimestamp).toInstant()));
+```
+
+### TimeProvider API
+
+```java
+// Get current time with microsecond precision
+TimeProvider.now()  // → OffsetDateTime truncated to micros
+
+// Truncate existing timestamp to microsecond precision
+TimeProvider.truncateToMicros(timestamp)  // → OffsetDateTime or null if input null
+```
+
+### When to Use
+
+| Scenario | Method |
+|----------|--------|
+| Current timestamp in code | `TimeProvider.now()` |
+| Calculating thresholds | `now().minusDays(7)` |
+| Setting entity timestamps | `entity.setTimestamp(now())` |
+| Test assertions with time | `assertThat(result.getTime(), is(now().minusDays(1)))` |
+| JDBC/SQL with external timestamps | `truncateToMicros(externalTimestamp)` |
