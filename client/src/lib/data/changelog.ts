@@ -2,6 +2,31 @@ import type { ChangelogEntry } from '$lib/types/changelog';
 
 export const changelog: ChangelogEntry[] = [
 	{
+		version: '0.0.9',
+		date: '2026-02-17',
+		features: [
+			'Channel slugs: human-readable identifiers like "myapp.prod.errors" for channels',
+			'Channel Details Sheet with hero header, inline editing, and quick actions',
+			'Stale channel detection: amber "Stale" badge for channels with no events in 7+ days',
+			'Last Activity column with relative time display and sorting',
+			'Send Events help modal with cURL examples for single and batch ingestion',
+			'API channel creation via POST /api/v1/channels using API key authentication',
+			'Event routing by slug: send events using channelSlug instead of channelId'
+		],
+		improvements: [
+			'Click anywhere on channel row to open details',
+			'Copy Slug and Copy cURL quick actions in channel details',
+			'Slug column displayed in channel tables',
+			'Reusable InlineEditableText, InfoCard, and CodeBlockWithCopy components',
+			'Consolidated channel creation validation across Web UI and API'
+		],
+		fixes: [
+			'Scheduled jobs now run immediately on startup (stale detection, event retention)',
+			'Resolved Svelte 5 reactivity warnings in Monitor EventsList',
+			'Existing channels backfilled with last activity timestamp'
+		]
+	},
+	{
 		version: '0.0.8',
 		date: '2026-02-13',
 		features: [
