@@ -3,7 +3,7 @@ import { searchUserEvents } from '$lib/api/event/UserEventController';
 import { searchOrgEvents } from '$lib/api/event/OrganizationEventController';
 import { handleError } from '$lib/utils/error-handler';
 
-export function createEventService(channelId: number, orgId?: number) {
+export function createEventService() {
 	let events = $state<EventSearchResponse[]>([]);
 	let loading = $state(false);
 	let initialLoad = $state(true);
@@ -13,19 +13,34 @@ export function createEventService(channelId: number, orgId?: number) {
 	let totalEvents = $state(0);
 	
 	// Keep track of current request parameters to prevent race conditions or invalid state
+	let currentChannelId: number | undefined = undefined;
+	let currentOrgId: number | undefined = undefined;
 	let currentStartTime = '';
 	let currentEndTime = '';
 	let currentSeverity: string | undefined = undefined;
 
-	async function load(startTime: string, endTime: string, reset: boolean = false, severity?: string): Promise<void> {
+	async function load(
+		channelId: number,
+		startTime: string,
+		endTime: string,
+		reset: boolean = false,
+		severity?: string,
+		orgId?: number
+	): Promise<void> {
+		// Check if channel/org changed - force reset
+		const channelChanged = channelId !== currentChannelId || orgId !== currentOrgId;
+		if (channelChanged) {
+			reset = true;
+			currentChannelId = channelId;
+			currentOrgId = orgId;
+		}
+
 		// Update current time window and severity
 		if (reset) {
 			currentStartTime = startTime;
 			currentEndTime = endTime;
 			currentSeverity = severity;
 		} else if (startTime !== currentStartTime || endTime !== currentEndTime || severity !== currentSeverity) {
-			// If parameters changed but reset wasn't requested, we should probably reset anyway
-			// but strict adherence to the function signature means we just update our tracking
 			currentStartTime = startTime;
 			currentEndTime = endTime;
 			currentSeverity = severity;

@@ -15,12 +15,12 @@
 
 	let { channelId, startTime, endTime, orgId, severity }: Props = $props();
 
-	// Use extracted service for logic
-	const eventService = createEventService(channelId, orgId);
+	// Create service instance (no longer captures channelId/orgId)
+	const eventService = createEventService();
 
 	// Initial load on mount
 	onMount(() => {
-		eventService.load(startTime, endTime, true, severity);
+		eventService.load(channelId, startTime, endTime, true, severity, orgId);
 	});
 
 	// Infinite scroll observer
@@ -31,10 +31,17 @@
 	$effect(() => {
 		if (!listContainer || !sentinel) return;
 		
+		// Capture current values for the callback
+		const currentChannelId = channelId;
+		const currentOrgId = orgId;
+		const currentStartTime = startTime;
+		const currentEndTime = endTime;
+		const currentSeverity = severity;
+		
 		observer?.disconnect();
 		observer = new IntersectionObserver((entries) => {
 			if (entries[0].isIntersecting && !eventService.loading && eventService.hasMore) {
-				eventService.load(startTime, endTime, false, severity);
+				eventService.load(currentChannelId, currentStartTime, currentEndTime, false, currentSeverity, currentOrgId);
 			}
 		}, { root: listContainer, threshold: 0.1 });
 
@@ -113,7 +120,7 @@
 				<p class="text-sm text-muted-foreground mb-4">{eventService.error}</p>
 				<button 
 					class="text-sm text-primary hover:underline"
-					onclick={() => eventService.load(startTime, endTime, true)}
+					onclick={() => eventService.load(channelId, startTime, endTime, true, severity, orgId)}
 				>
 					Try again
 				</button>
