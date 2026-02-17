@@ -37,7 +37,7 @@
 				fetchFn: (input: SortablePageInput): Promise<PageResource<OrganizationMembershipResponse>> =>
 					searchCurrentMembers(currentOrgId, input),
 				pageSize: 10,
-				defaultSort: [{ name: 'email', direction: 'ASC' }]
+				defaultSort: [{ name: 'role', direction: 'ASC' }]
 			});
 			memberService = createMemberManagementService(currentOrgId, () => {
 				dataTableService?.load();
