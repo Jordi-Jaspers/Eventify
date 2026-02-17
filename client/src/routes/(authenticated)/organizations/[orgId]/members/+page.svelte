@@ -2,21 +2,20 @@
 	import { page } from '$app/state';
 	import { browser } from '$app/environment';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { UserPlus, Shield, Crown, Trash2, MoreVertical, ChevronDown, User as UserIcon, Users } from '@lucide/svelte';
+	import { UserPlus, Users } from '@lucide/svelte';
 	import type { OrganizationMembershipResponse, OrganizationalRole, SortablePageInput, PageResource } from '$lib/api/models';
 	import { currentUser } from '$lib/stores/auth';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn, DataTableService } from '$lib/components/data-table/types';
-	import { Badge } from '$lib/components/ui/badge';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { getInitials } from '$lib/utils/string';
 	import { formatRelativeDate } from '$lib/utils/date';
-	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
 	import {
 		AddMemberSheet,
 		RemoveMemberSheet,
+		ChangeRoleSheet,
 		TransferOwnershipSheet,
-		RoleBadge
+		RoleBadge,
+		MemberActions
 	} from '$lib/components/members';
 	import { searchCurrentMembers } from '$lib/api/organization/OrganizationMembershipController';
 	import { createMemberManagementService } from '$lib/api/organization/service/MemberManagementService.svelte';
@@ -116,13 +115,25 @@
 	// Sheet state
 	let showAddSheet: boolean = $state(false);
 	let showRemoveSheet: boolean = $state(false);
+	let showChangeRoleSheet: boolean = $state(false);
 	let showTransferSheet: boolean = $state(false);
+
+	// Change role state
+	let memberToChangeRole: OrganizationMembershipResponse | null = $state(null);
+	let selectedRoleForChange: OrganizationalRole = $state('MEMBER');
+	let isChangingRole: boolean = $state(false);
 
 	// Sheet handlers
 	function openAddSheet(): void {
 		if (!memberService) return;
 		memberService.resetAddState();
 		showAddSheet = true;
+	}
+
+	function openChangeRoleSheet(member: OrganizationMembershipResponse): void {
+		memberToChangeRole = member;
+		selectedRoleForChange = member.role ?? 'MEMBER';
+		showChangeRoleSheet = true;
 	}
 
 	function openRemoveSheet(member: OrganizationMembershipResponse): void {
@@ -143,6 +154,13 @@
 		if (!open && memberService) memberService.resetAddState();
 	}
 
+	function handleChangeRoleSheetOpenChange(open: boolean): void {
+		showChangeRoleSheet = open;
+		if (!open) {
+			memberToChangeRole = null;
+		}
+	}
+
 	function handleRemoveSheetOpenChange(open: boolean): void {
 		showRemoveSheet = open;
 		if (!open && memberService) memberService.setMemberToRemove(null);
@@ -156,6 +174,19 @@
 		}
 	}
 
+	// Delegate handler for role change
+	async function handleChangeRole(): Promise<void> {
+		if (!memberService || !memberToChangeRole) return;
+		isChangingRole = true;
+		try {
+			await memberService.handleUpdateRole(memberToChangeRole, selectedRoleForChange);
+			showChangeRoleSheet = false;
+			memberToChangeRole = null;
+		} finally {
+			isChangingRole = false;
+		}
+	}
+
 	// Delegate handler for transfer
 	function handleTransfer(): void {
 		if (!memberService || !dataTableService) return;
@@ -166,7 +197,6 @@
 		memberService.handleTransfer(currentOwner);
 		showTransferSheet = false;
 	}
-
 </script>
 
 <svelte:head>
@@ -178,9 +208,7 @@
 		<!-- Header -->
 		<div class="flex items-center justify-between">
 			<div>
-				<h1
-					class="text-3xl font-bold text-primary"
-				>
+				<h1 class="text-3xl font-bold text-primary">
 					Organization Members
 				</h1>
 				<p class="text-muted-foreground mt-2">Manage members and permissions</p>
@@ -198,22 +226,17 @@
 		{#if dataTableService && memberService}
 			<DataTable {columns} service={dataTableService} title="Members" icon={Users}>
 				{#snippet row(member: OrganizationMembershipResponse)}
-					<div
-						class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 hover:bg-muted/30 transition-all"
-					>
+					<div class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 hover:bg-muted/30 transition-all">
 						<!-- Avatar & Name -->
 						<div class="col-span-1 md:col-span-4 flex items-center gap-3">
-							<div
-								class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 flex-shrink-0"
-							>
+							<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 flex-shrink-0">
 								<span class="text-sm font-medium text-primary">
 									{getInitials(member.userFirstName ?? '', member.userLastName ?? '')}
 								</span>
 							</div>
 							<div class="min-w-0">
 								<p class="font-medium truncate">
-									{member.userFirstName ?? ''}
-									{member.userLastName ?? ''}
+									{member.userFirstName ?? ''} {member.userLastName ?? ''}
 								</p>
 								<p class="text-sm text-muted-foreground md:hidden truncate">
 									{member.userEmail ?? ''}
@@ -226,48 +249,9 @@
 							<p class="text-sm text-muted-foreground truncate">{member.userEmail ?? ''}</p>
 						</div>
 
-						<!-- Role Badge/Selector -->
+						<!-- Role Badge -->
 						<div class="col-span-1 md:col-span-2 flex items-center">
-							{#if member.role === 'OWNER'}
-								<RoleBadge role={member.role} />
-							{:else if canManageMembers && member.role}
-								<DropdownMenu.Root>
-									<DropdownMenu.Trigger>
-										{#snippet child({ props })}
-											<Button
-												{...props}
-												variant="outline"
-												size="sm"
-												class="bg-background/50 border-border/50 hover:bg-accent/10 transition-all"
-											>
-											<Badge class={getOrganizationalRoleBadgeClass(member.role ?? 'MEMBER')}>
-												{#if member.role === 'ADMIN'}
-													<Shield class="mr-1 h-3 w-3" />
-												{/if}
-												{member.role}
-											</Badge>
-												<ChevronDown class="ml-1 h-3 w-3" />
-											</Button>
-										{/snippet}
-									</DropdownMenu.Trigger>
-									<DropdownMenu.Content class="bg-card/95 backdrop-blur-xl border-border/50">
-										<DropdownMenu.Item
-											onclick={() => memberService?.handleUpdateRole(member, 'ADMIN')}
-											class="hover:bg-accent/10"
-										>
-											<Shield class="mr-2 h-4 w-4" />
-											ADMIN
-										</DropdownMenu.Item>
-										<DropdownMenu.Item
-											onclick={() => memberService?.handleUpdateRole(member, 'MEMBER')}
-											class="hover:bg-accent/10"
-										>
-											<UserIcon class="mr-2 h-4 w-4" />
-											MEMBER
-										</DropdownMenu.Item>
-									</DropdownMenu.Content>
-								</DropdownMenu.Root>
-							{:else if member.role}
+							{#if member.role}
 								<RoleBadge role={member.role} />
 							{/if}
 						</div>
@@ -280,41 +264,15 @@
 						</div>
 
 						<!-- Actions -->
-						<div class="col-span-1 md:col-span-1 flex items-center justify-center">
-							{#if canManageMembers && member.role !== 'OWNER'}
-								<DropdownMenu.Root>
-									<DropdownMenu.Trigger>
-										{#snippet child({ props })}
-											<Button
-												{...props}
-												variant="outline"
-												size="sm"
-												class="bg-background/50 border-border/50 hover:bg-accent/10 transition-all"
-											>
-												<MoreVertical class="h-4 w-4" />
-											</Button>
-										{/snippet}
-									</DropdownMenu.Trigger>
-									<DropdownMenu.Content class="bg-card/95 backdrop-blur-xl border-border/50">
-										{#if isOwner}
-											<DropdownMenu.Item
-												onclick={() => openTransferSheet(member)}
-												class="hover:bg-accent/10"
-											>
-												<Crown class="mr-2 h-4 w-4 text-primary" />
-												Transfer Ownership
-											</DropdownMenu.Item>
-										{/if}
-										<DropdownMenu.Item
-											onclick={() => openRemoveSheet(member)}
-											class="hover:bg-destructive/10 text-destructive"
-										>
-											<Trash2 class="mr-2 h-4 w-4" />
-											Remove
-										</DropdownMenu.Item>
-									</DropdownMenu.Content>
-								</DropdownMenu.Root>
-							{/if}
+						<div class="col-span-1 md:col-span-1 flex items-center justify-end">
+							<MemberActions
+								{member}
+								canManage={canManageMembers}
+								{isOwner}
+								onChangeRole={openChangeRoleSheet}
+								onTransferOwnership={openTransferSheet}
+								onRemove={openRemoveSheet}
+							/>
 						</div>
 					</div>
 				{/snippet}
@@ -348,6 +306,16 @@
 				memberService.setShowSearchDropdown(true);
 			}
 		}}
+	/>
+
+	<ChangeRoleSheet
+		open={showChangeRoleSheet}
+		member={memberToChangeRole}
+		selectedRole={selectedRoleForChange}
+		changing={isChangingRole}
+		onOpenChange={handleChangeRoleSheetOpenChange}
+		onRoleChange={(role) => selectedRoleForChange = role}
+		onConfirm={handleChangeRole}
 	/>
 
 	<RemoveMemberSheet
