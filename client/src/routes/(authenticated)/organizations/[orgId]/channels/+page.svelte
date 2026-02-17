@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { browser } from '$app/environment';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
-	import type { DataTableService, DataTableColumn } from '$lib/components/data-table/types';
+	import type { DataTableService } from '$lib/components/data-table/types';
 	import { searchOrganizationChannels } from '$lib/api/organization/OrganizationChannelController';
 	import { getOrganizationById } from '$lib/api/organization/OrganizationController';
 	import type {
@@ -23,63 +23,7 @@
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
 	import { ChannelService } from '$lib/services/channel-service';
-
-	// Column definitions (inline like other tables)
-	const columns: DataTableColumn<ChannelDetailsResponse>[] = [
-		{
-			key: 'name',
-			label: 'Channel',
-			sortable: true,
-			filterable: true,
-			filterType: 'FUZZY_TEXT',
-			filterPlaceholder: 'Search channels...',
-			colSpan: 4
-		},
-		{
-			key: 'description',
-			label: 'Description',
-			colSpan: 7
-		},
-		{
-			key: 'status',
-			label: 'Status',
-			sortable: true,
-			filterable: true,
-			filterType: 'MULTI_ENUM',
-			filterOptions: [
-				{ value: 'ACTIVE', label: 'Active' },
-				{ value: 'PAUSED', label: 'Paused' }
-			],
-			colSpan: 2
-		},
-		{
-			key: 'lastEventAt',
-			label: 'Last Activity',
-			sortable: true,
-			colSpan: 2
-		},
-		{
-			key: 'createdAt',
-			label: 'Created',
-			sortable: true,
-			colSpan: 2
-		},
-		{
-			key: 'isStale',
-			label: 'Stale',
-			filterable: true,
-			filterType: 'BOOLEAN',
-			filterOptions: [
-				{ value: 'true', label: 'Stale only' },
-				{ value: 'false', label: 'Active only' }
-			],
-			colSpan: 0
-		},
-		{
-			key: 'actions',
-			colSpan: 1
-		}
-	];
+	import { channelTableColumns } from '$lib/config/channel-table-columns';
 
 	// Reactive orgId from route params
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
@@ -257,7 +201,7 @@
 
 		<!-- DataTable -->
 		{#if dataTableService}
-			<DataTable columns={columns} service={dataTableService} title="All Channels" icon={Radio}>
+			<DataTable columns={channelTableColumns} service={dataTableService} title="All Channels" icon={Radio}>
 				{#snippet headerActions()}
 					<SendEventsHelpModal
 						apiKeySettingsUrl="/organizations/{orgId}/settings/api-keys"

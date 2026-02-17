@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
-	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Radio } from '@lucide/svelte';
 	import { formatDate } from '$lib/utils/date';
 	import { truncateText } from '$lib/utils/string';
@@ -8,11 +7,11 @@
 		getChannelStatusVariant,
 		getChannelStatusLabel,
 		copySlugToClipboard,
-		getRelativeActivityTime,
-		getStaleBadgeProps
+		getRelativeActivityTime
 	} from '$lib/utils/channel';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 	import ChannelActions from './ChannelActions.svelte';
+	import StaleActivityBadge from './StaleActivityBadge.svelte';
 
 	interface Props {
 		channel: ChannelDetailsResponse;
@@ -25,7 +24,6 @@
 
 	let { channel, canManage, onEdit, onPause, onResume, onDelete }: Props = $props();
 	
-	const staleBadge = $derived(getStaleBadgeProps(channel.isStale ?? false));
 	const lastActivity: string = $derived(getRelativeActivityTime(channel.lastEventAt));
 	const isNoActivity: boolean = $derived(!channel.lastEventAt);
 </script>
@@ -63,18 +61,7 @@
 		<Badge variant={getChannelStatusVariant(channel.status)}>
 			{getChannelStatusLabel(channel.status)}
 		</Badge>
-		{#if staleBadge.show}
-			<Tooltip.Root>
-				<Tooltip.Trigger>
-					<Badge class={staleBadge.className}>
-						{staleBadge.label}
-					</Badge>
-				</Tooltip.Trigger>
-				<Tooltip.Content>
-					<p>{staleBadge.tooltip}</p>
-				</Tooltip.Content>
-			</Tooltip.Root>
-		{/if}
+		<StaleActivityBadge isStale={channel.isStale ?? false} />
 	</div>
 
 	<!-- Last Activity -->

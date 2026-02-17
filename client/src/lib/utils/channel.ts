@@ -2,6 +2,7 @@ import type {ChannelDetailsResponse} from '$lib/api/models';
 import type {components} from '$lib/types/api';
 import {SERVER_BASE_URL} from '$lib/config/constants';
 import {toast} from 'svelte-sonner';
+import {formatRelativeTime} from './date';
 
 // Type alias for the event request from OpenAPI spec
 type CreateEventRequest = components['schemas']['CreateEventRequest'];
@@ -131,26 +132,7 @@ export function copyCurlToClipboard(slug: string | undefined): void {
  */
 export function getRelativeActivityTime(lastEventAt: string | null | undefined): string {
     if (!lastEventAt) return 'No activity';
-    
-    const date: Date = new Date(lastEventAt);
-    const now: Date = new Date();
-    const diffMs: number = now.getTime() - date.getTime();
-    const diffMins: number = Math.floor(diffMs / 60000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} min ago`;
-
-    const diffHours: number = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-
-    const diffDays: number = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-
-    const diffWeeks: number = Math.floor(diffDays / 7);
-    if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
-
-    const diffMonths: number = Math.floor(diffDays / 30);
-    return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
+    return formatRelativeTime(lastEventAt);
 }
 
 /**
