@@ -57,7 +57,7 @@
 					<CardHeader>
 						<div class="flex items-center justify-between flex-wrap gap-2">
 							<CardTitle class="text-xl flex items-center gap-2">
-								<span class="font-mono text-primary">v{entry.version}</span>
+								<span class="font-mono text-primary">{entry.version}</span>
 							</CardTitle>
 							<div class="flex items-center gap-2 text-sm text-muted-foreground">
 								<Calendar class="w-4 h-4" />
