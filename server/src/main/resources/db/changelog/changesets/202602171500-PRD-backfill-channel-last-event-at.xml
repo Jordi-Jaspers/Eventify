@@ -21,16 +21,4 @@
             );
         </sql>
     </changeSet>
-
-    <changeSet id="202602171500-PRD-backfill-channel-last-event-at-2" author="jordi.jaspers">
-        <comment>Mark channels as stale if their last event was more than 7 days ago</comment>
-        <sql><![CDATA[
-            -- Update is_stale flag based on last_event_at
-            UPDATE channel
-            SET is_stale = true
-            WHERE last_event_at IS NOT NULL
-              AND last_event_at < NOW() - INTERVAL '7 days';
-        ]]></sql>
-    </changeSet>
-
 </databaseChangeLog>
