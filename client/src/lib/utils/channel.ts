@@ -59,10 +59,10 @@ export function copySlugToClipboard(channel: ChannelDetailsResponse): void {
  * Generate curl command for posting events to a channel.
  * Uses OpenAPI spec types and configured API base URL.
  */
-export function generateCurlCommand(channelId: number | undefined): string {
+export function generateCurlCommand(slug: string | undefined): string {
     const apiUrl = `${SERVER_BASE_URL}/v1/external/event`;
     const exampleBody: CreateEventRequest = {
-        channelId: channelId,
+        slug: slug,
         severity: 'OK',
         title: 'Event Title',
         message: 'Event message here',
@@ -85,7 +85,7 @@ export function generateBatchCurlCommand(): string {
     const apiUrl = `${SERVER_BASE_URL}/v1/external/event/batch`;
     const exampleEvents: CreateEventRequest[] = [
         {
-            channelId: 1,
+            slug: 'your.channel.slug',
             severity: 'WARNING',
             title: 'Historical Event 1',
             message: 'First event from batch import',
@@ -93,7 +93,7 @@ export function generateBatchCurlCommand(): string {
             metadata: {}
         },
         {
-            channelId: 1,
+            slug: 'your.channel.slug',
             severity: 'OK',
             title: 'Historical Event 2',
             message: 'Second event from batch import',
@@ -113,8 +113,8 @@ export function generateBatchCurlCommand(): string {
 /**
  * Copy curl command to clipboard with toast notification
  */
-export function copyCurlToClipboard(channelId: number | undefined): void {
-    const curlCommand: string = generateCurlCommand(channelId);
+export function copyCurlToClipboard(slug: string | undefined): void {
+    const curlCommand: string = generateCurlCommand(slug);
     navigator.clipboard
         .writeText(curlCommand)
         .then(() => {

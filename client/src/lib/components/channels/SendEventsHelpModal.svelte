@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { HelpCircle, Send, Zap, Package, Key } from '@lucide/svelte';
+	import { CircleQuestionMark, Send, Zap, Package, Key } from '@lucide/svelte';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
@@ -28,7 +28,7 @@
 				class="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
 				aria-label="How to Send Events"
 			>
-				<HelpCircle class="h-4 w-4" />
+				<CircleQuestionMark class="h-4 w-4" />
 			</Button>
 		{/snippet}
 	</Dialog.Trigger>
@@ -39,7 +39,7 @@
 		<Dialog.Header class="px-6 py-4 border-b border-border/30 sticky top-0 bg-card/95 backdrop-blur-xl z-10">
 			<div class="flex items-center gap-2.5">
 				<div
-					class="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30"
+					class="p-2 rounded-lg bg-linear-to-br from-primary/20 to-accent/20 border border-primary/30"
 				>
 					<Send class="h-4 w-4 text-primary" />
 				</div>
@@ -55,7 +55,7 @@
 			<div
 				class="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-primary/5 border border-primary/20"
 			>
-				<Key class="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
+				<Key class="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
 				<p class="text-xs text-primary/90 leading-relaxed">
 					Get your API key at <a
 						href={apiKeySettingsUrl}
