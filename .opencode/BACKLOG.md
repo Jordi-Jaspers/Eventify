@@ -70,6 +70,18 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Improve server Test suite** - currently 1200+ tests which is taking around 5 minutes to run. Explore ways to optimize test execution time, such as parallel test execution, test selection based on code changes, or refactoring slow tests. extracting util methods to base classes. most culprits are unit tests having duplicate helper methods. our method is to always create a valid object and adjust the relevant field for the test instead of creating multiple variations of the same object with different fields set.
 
 ---
+## Epic: Developer API Documentation
+**Context**: Developers integrating with Eventify need comprehensive documentation to understand the API and get started quickly.
+
+- [ ] **Getting Started Guide** - Step-by-step guide: create API key, create channel, send first event. Interactive examples with copy-paste commands.
+- [ ] **API Reference Page** - Full endpoint documentation: Events (single, batch), Channels (CRUD). Request/response schemas, authentication headers, error codes.
+- [ ] **Code Examples** - cURL, Python, Node.js, Go examples for common operations. Copyable snippets with syntax highlighting.
+- [ ] **Authentication Guide** - API key types (personal vs org), header format, security best practices, key rotation.
+- [ ] **Rate Limits & Quotas** - Document rate limits, quota system, error responses (429), best practices for high-volume senders.
+- [ ] **SDKs (future)** - Official client libraries for popular languages. Auto-generated from OpenAPI spec.
+- [ ] **Changelog/Versioning** - API versioning strategy, deprecation policy, changelog for breaking changes.
+
+---
 ## Epic: Future Considerations
 **Context**: Ideas to keep in mind for architecture decisions but not for immediate development.
 
