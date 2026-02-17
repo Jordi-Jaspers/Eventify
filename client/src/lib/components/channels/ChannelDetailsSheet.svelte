@@ -13,7 +13,8 @@
 		Pause,
 		Play,
 		Trash2,
-		Eye
+		Eye,
+		Pencil
 	} from '@lucide/svelte';
 	import type { ChannelDetailsResponse, TimelineDuration, Severity } from '$lib/api/models';
 	import {
@@ -114,23 +115,33 @@
 					</div>
 					
 					<!-- Name (Editable) -->
-					<div class="mt-4 w-full max-w-xs">
-						<InlineEditableText
-							value={channel.name ?? ''}
-							editing={service.nameEdit.state.editing}
-							saving={service.nameEdit.state.saving}
-							tempValue={service.nameEdit.state.tempValue}
-							canEdit={canManage}
-							onStartEdit={() => service.nameEdit.startEdit(channel.name ?? '')}
-							onSave={() => service.nameEdit.save(saveName)}
-							onCancel={() => service.nameEdit.cancel()}
-							onTempValueChange={(v) => service.nameEdit.updateTempValue(v)}
-							onKeydown={(e) => service.nameEdit.handleKeydown(e, saveName)}
-							class="justify-center"
-							inputClass="text-center font-semibold bg-background/80 border-border"
-						>
-							<h2 class="text-xl font-semibold">{channel.name}</h2>
-						</InlineEditableText>
+					<div class="mt-4 w-full max-w-xs flex flex-col items-center">
+						{#if service.nameEdit.state.editing}
+							<InlineEditableText
+								value={channel.name ?? ''}
+								editing={service.nameEdit.state.editing}
+								saving={service.nameEdit.state.saving}
+								tempValue={service.nameEdit.state.tempValue}
+								canEdit={canManage}
+								onStartEdit={() => service.nameEdit.startEdit(channel.name ?? '')}
+								onSave={() => service.nameEdit.save(saveName)}
+								onCancel={() => service.nameEdit.cancel()}
+								onTempValueChange={(v) => service.nameEdit.updateTempValue(v)}
+								onKeydown={(e) => service.nameEdit.handleKeydown(e, saveName)}
+								inputClass="text-center font-semibold bg-background/80 border-border"
+							/>
+						{:else}
+							<button
+								class="group flex items-center justify-center gap-2 hover:text-primary transition-colors"
+								onclick={() => service.nameEdit.startEdit(channel.name ?? '')}
+								disabled={!canManage}
+							>
+								<h2 class="text-xl font-semibold">{channel.name}</h2>
+								{#if canManage}
+									<Pencil class="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground" />
+								{/if}
+							</button>
+						{/if}
 					</div>
 
 					<!-- Slug (Click to Copy) -->
@@ -203,9 +214,7 @@
 								{channel.description || 'No description'}
 							</p>
 							{#if canManage}
-								<span class="text-muted-foreground hover:text-primary transition-colors p-1 hover:bg-muted/50 rounded opacity-0 group-hover:opacity-100">
-									✏️
-								</span>
+								<Pencil class="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
 							{/if}
 						</button>
 					{/if}
