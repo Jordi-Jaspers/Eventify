@@ -124,3 +124,57 @@ export function copyCurlToClipboard(slug: string | undefined): void {
             toast.error('Failed to copy to clipboard');
         });
 }
+
+/**
+ * Get relative activity time for last event
+ * Returns "No activity" if lastEventAt is null
+ */
+export function getRelativeActivityTime(lastEventAt: string | null | undefined): string {
+    if (!lastEventAt) return 'No activity';
+    
+    const date: Date = new Date(lastEventAt);
+    const now: Date = new Date();
+    const diffMs: number = now.getTime() - date.getTime();
+    const diffMins: number = Math.floor(diffMs / 60000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+
+    const diffHours: number = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+
+    const diffDays: number = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    const diffWeeks: number = Math.floor(diffDays / 7);
+    if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
+
+    const diffMonths: number = Math.floor(diffDays / 30);
+    return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
+}
+
+/**
+ * Get badge properties for stale status
+ */
+export function getStaleBadgeProps(isStale: boolean): {
+    show: boolean;
+    label: string;
+    tooltip: string;
+    className: string;
+} {
+    if (!isStale) {
+        return {
+            show: false,
+            label: '',
+            tooltip: '',
+            className: ''
+        };
+    }
+    
+    return {
+        show: true,
+        label: 'Stale',
+        tooltip: 'No events received in over 7 days',
+        className: 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/50'
+    };
+}

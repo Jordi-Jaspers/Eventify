@@ -28,7 +28,7 @@
 		{
 			key: 'description',
 			label: 'Description',
-			colSpan: 9
+			colSpan: 7
 		},
 		{
 			key: 'status',
@@ -43,10 +43,27 @@
 			colSpan: 2
 		},
 		{
+			key: 'lastEventAt',
+			label: 'Last Activity',
+			sortable: true,
+			colSpan: 2
+		},
+		{
 			key: 'createdAt',
 			label: 'Created',
 			sortable: true,
 			colSpan: 2
+		},
+		{
+			key: 'isStale',
+			label: 'Stale',
+			filterable: true,
+			filterType: 'BOOLEAN',
+			filterOptions: [
+				{ value: 'true', label: 'Stale only' },
+				{ value: 'false', label: 'Active only' }
+			],
+			colSpan: 0
 		},
 		{
 			key: 'actions',

@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Radio } from '@lucide/svelte';
 	import { formatDate } from '$lib/utils/date';
 	import { truncateText } from '$lib/utils/string';
 	import {
 		getChannelStatusVariant,
 		getChannelStatusLabel,
-		copySlugToClipboard
+		copySlugToClipboard,
+		getRelativeActivityTime,
+		getStaleBadgeProps
 	} from '$lib/utils/channel';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 	import ChannelActions from './ChannelActions.svelte';
@@ -21,6 +24,10 @@
 	}
 
 	let { channel, canManage, onEdit, onPause, onResume, onDelete }: Props = $props();
+	
+	const staleBadge = $derived(getStaleBadgeProps(channel.isStale ?? false));
+	const lastActivity: string = $derived(getRelativeActivityTime(channel.lastEventAt));
+	const isNoActivity: boolean = $derived(!channel.lastEventAt);
 </script>
 
 <div
@@ -45,17 +52,37 @@
 	</div>
 
 	<!-- Description (desktop only) -->
-	<div class="hidden md:flex md:col-span-9 items-center">
+	<div class="hidden md:flex md:col-span-7 items-center">
 		<span class="text-sm text-muted-foreground truncate">
-			{truncateText(channel.description, 220)}
+			{truncateText(channel.description, 180)}
 		</span>
 	</div>
 
-	<!-- Status -->
-	<div class="col-span-1 md:col-span-2 flex items-center">
+	<!-- Status with Stale Badge -->
+	<div class="col-span-1 md:col-span-2 flex items-center gap-2">
 		<Badge variant={getChannelStatusVariant(channel.status)}>
 			{getChannelStatusLabel(channel.status)}
 		</Badge>
+		{#if staleBadge.show}
+			<Tooltip.Root>
+				<Tooltip.Trigger>
+					<Badge class={staleBadge.className}>
+						{staleBadge.label}
+					</Badge>
+				</Tooltip.Trigger>
+				<Tooltip.Content>
+					<p>{staleBadge.tooltip}</p>
+				</Tooltip.Content>
+			</Tooltip.Root>
+		{/if}
+	</div>
+
+	<!-- Last Activity -->
+	<div class="col-span-1 md:col-span-2 flex items-center">
+		<span class="text-sm whitespace-nowrap" class:text-muted-foreground={isNoActivity}>
+			<span class="md:hidden">Last: </span>
+			{lastActivity}
+		</span>
 	</div>
 
 	<!-- Created -->
