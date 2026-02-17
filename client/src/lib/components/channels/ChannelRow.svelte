@@ -31,7 +31,7 @@
 <div
 	class="grid grid-cols-1 md:grid-cols-18 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all text-left w-full"
 >
-	<!-- Channel Name (clickable to copy slug) -->
+	<!-- Channel Name (clickable to copy slug) with Stale Badge -->
 	<div class="col-span-1 md:col-span-4">
 		<button
 			type="button"
@@ -40,13 +40,14 @@
 			title="Click to copy slug: {channel.slug}"
 		>
 			<Radio class="h-5 w-5 text-primary shrink-0" />
-			<div class="min-w-0">
-				<div class="font-medium truncate">{channel.name}</div>
-				<div class="text-sm text-muted-foreground truncate md:hidden">
-					{truncateText(channel.description, 40)}
-				</div>
+			<div class="min-w-0 flex items-center gap-2">
+				<span class="font-medium truncate">{channel.name}</span>
+				<StaleActivityBadge isStale={channel.isStale ?? false} />
 			</div>
 		</button>
+		<div class="text-sm text-muted-foreground truncate md:hidden pl-8">
+			{truncateText(channel.description, 40)}
+		</div>
 	</div>
 
 	<!-- Description (desktop only) -->
@@ -56,12 +57,11 @@
 		</span>
 	</div>
 
-	<!-- Status with Stale Badge -->
-	<div class="col-span-1 md:col-span-2 flex items-center gap-2">
+	<!-- Status -->
+	<div class="col-span-1 md:col-span-2 flex items-center">
 		<Badge variant={getChannelStatusVariant(channel.status)}>
 			{getChannelStatusLabel(channel.status)}
 		</Badge>
-		<StaleActivityBadge isStale={channel.isStale ?? false} />
 	</div>
 
 	<!-- Last Activity -->
