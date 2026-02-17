@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableService } from '$lib/components/data-table/types';
-	import { searchOrganizationChannels } from '$lib/api/organization/OrganizationChannelController';
+	import { searchOrganizationChannels, getOrganizationChannel } from '$lib/api/organization/OrganizationChannelController';
 	import { getOrganizationById } from '$lib/api/organization/OrganizationController';
 	import type {
 		ChannelDetailsResponse,
@@ -16,7 +16,7 @@
 	import { Radio, Plus } from '@lucide/svelte';
 	import {
 		CreateChannelSheet,
-		EditChannelSheet,
+		ChannelDetailsSheet,
 		ChannelRow,
 		SendEventsHelpModal
 	} from '$lib/components/channels';
@@ -104,28 +104,21 @@
 
 
 
-	// Sheet state - consolidated into single object
-	let sheetState: {
-		showCreate: boolean;
-		showEdit: boolean;
-		editingChannel: ChannelDetailsResponse | null;
-		processing: boolean;
-	} = $state({
-		showCreate: false,
-		showEdit: false,
-		editingChannel: null,
-		processing: false
-	});
+	// Sheet state
+	let showCreateSheet: boolean = $state(false);
+	let showDetailsSheet: boolean = $state(false);
+	let selectedChannel: ChannelDetailsResponse | null = $state(null);
+	let processing: boolean = $state(false);
 
 	// Sheet handlers
-	function openEditSheet(channel: ChannelDetailsResponse): void {
-		sheetState.editingChannel = channel;
-		sheetState.showEdit = true;
+	function openDetailsSheet(channel: ChannelDetailsResponse): void {
+		selectedChannel = channel;
+		showDetailsSheet = true;
 	}
 
-	function closeEditSheet(): void {
-		sheetState.showEdit = false;
-		sheetState.editingChannel = null;
+	function closeDetailsSheet(): void {
+		showDetailsSheet = false;
+		selectedChannel = null;
 	}
 
 	async function handleCreateChannel(
@@ -133,13 +126,13 @@
 		slug: string,
 		description: string | undefined
 	): Promise<void> {
-		sheetState.processing = true;
+		processing = true;
 		try {
 			await channelService.createChannel(name, slug, description);
-			sheetState.showCreate = false;
+			showCreateSheet = false;
 			dataTableService?.load();
 		} finally {
-			sheetState.processing = false;
+			processing = false;
 		}
 	}
 
@@ -148,28 +141,35 @@
 		name: string,
 		description: string | undefined
 	): Promise<void> {
-		sheetState.processing = true;
-		try {
-			await channelService.updateChannel(channelId, name, description);
-			closeEditSheet();
-			dataTableService?.load();
-		} finally {
-			sheetState.processing = false;
+		await channelService.updateChannel(channelId, name, description);
+		// Refresh the selected channel to show updated data
+		if (selectedChannel?.id === channelId) {
+			selectedChannel = await getOrganizationChannel(orgId, channelId);
 		}
+		dataTableService?.load();
 	}
 
 	async function handlePauseChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.pauseChannel(channel.id ?? 0);
+		// Refresh the selected channel to show updated status
+		if (selectedChannel?.id === channel.id) {
+			selectedChannel = await getOrganizationChannel(orgId, channel.id!);
+		}
 		dataTableService?.load();
 	}
 
 	async function handleResumeChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.resumeChannel(channel.id ?? 0);
+		// Refresh the selected channel to show updated status
+		if (selectedChannel?.id === channel.id) {
+			selectedChannel = await getOrganizationChannel(orgId, channel.id!);
+		}
 		dataTableService?.load();
 	}
 
 	async function handleDeleteChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.deleteChannel(channel);
+		closeDetailsSheet();
 		dataTableService?.load();
 	}
 </script>
@@ -191,7 +191,7 @@
 		</div>
 		{#if canManage}
 			<div class="flex items-center gap-3">
-				<Button onclick={() => (sheetState.showCreate = true)}>
+				<Button onclick={() => (showCreateSheet = true)}>
 					<Plus class="mr-2 h-4 w-4" />
 					New Channel
 				</Button>
@@ -211,7 +211,7 @@
 					<ChannelRow
 						{channel}
 						{canManage}
-						onEdit={openEditSheet}
+						onEdit={openDetailsSheet}
 						onPause={handlePauseChannel}
 						onResume={handleResumeChannel}
 						onDelete={handleDeleteChannel}
@@ -225,19 +225,23 @@
 <!-- Modals/Sheets -->
 {#if canManage}
 	<CreateChannelSheet
-		open={sheetState.showCreate}
-		creating={sheetState.processing}
-		onOpenChange={(o) => (sheetState.showCreate = o)}
+		open={showCreateSheet}
+		creating={processing}
+		onOpenChange={(o: boolean) => (showCreateSheet = o)}
 		onSubmit={handleCreateChannel}
 	/>
-	<EditChannelSheet
-		open={sheetState.showEdit}
-		channel={sheetState.editingChannel}
-		updating={sheetState.processing}
-		onOpenChange={(o) => {
-			sheetState.showEdit = o;
-			if (!o) closeEditSheet();
+	<ChannelDetailsSheet
+		open={showDetailsSheet}
+		channel={selectedChannel}
+		{orgId}
+		{canManage}
+		onOpenChange={(o: boolean) => {
+			showDetailsSheet = o;
+			if (!o) closeDetailsSheet();
 		}}
-		onSubmit={handleUpdateChannel}
+		onUpdate={handleUpdateChannel}
+		onPause={handlePauseChannel}
+		onResume={handleResumeChannel}
+		onDelete={handleDeleteChannel}
 	/>
 {/if}

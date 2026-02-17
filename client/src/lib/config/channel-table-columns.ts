@@ -4,6 +4,8 @@ import type { ChannelDetailsResponse } from '$lib/api/models';
 /**
  * Shared column definitions for channel tables across user and organization pages.
  * Centralizes table configuration to avoid duplication.
+ * 
+ * Note: "Created" column removed - now shown in ChannelDetailsSheet.
  */
 export const channelTableColumns: DataTableColumn<ChannelDetailsResponse>[] = [
 	{
@@ -35,12 +37,6 @@ export const channelTableColumns: DataTableColumn<ChannelDetailsResponse>[] = [
 	{
 		key: 'lastEventAt',
 		label: 'Last Activity',
-		sortable: true,
-		colSpan: 2
-	},
-	{
-		key: 'createdAt',
-		label: 'Created',
 		sortable: true,
 		colSpan: 2
 	},

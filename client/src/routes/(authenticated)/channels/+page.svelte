@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
-	import { searchChannels } from '$lib/api/channel/UserChannelController';
+	import { searchChannels, getChannel } from '$lib/api/channel/UserChannelController';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Radio, Plus } from '@lucide/svelte';
 	import {
 		CreateChannelSheet,
-		EditChannelSheet,
+		ChannelDetailsSheet,
 		ChannelRow,
 		SendEventsHelpModal
 	} from '$lib/components/channels';
@@ -24,19 +24,19 @@
 
 	// Sheet state
 	let showCreateSheet: boolean = $state(false);
-	let showEditSheet: boolean = $state(false);
-	let editingChannel: ChannelDetailsResponse | null = $state(null);
+	let showDetailsSheet: boolean = $state(false);
+	let selectedChannel: ChannelDetailsResponse | null = $state(null);
 	let processing: boolean = $state(false);
 
-	// Sheet handlers
-	function openEditSheet(channel: ChannelDetailsResponse): void {
-		editingChannel = channel;
-		showEditSheet = true;
+	// Open details sheet for a channel
+	function openDetailsSheet(channel: ChannelDetailsResponse): void {
+		selectedChannel = channel;
+		showDetailsSheet = true;
 	}
 
-	function closeEditSheet(): void {
-		showEditSheet = false;
-		editingChannel = null;
+	function closeDetailsSheet(): void {
+		showDetailsSheet = false;
+		selectedChannel = null;
 	}
 
 	async function handleCreateChannel(
@@ -59,28 +59,35 @@
 		name: string,
 		description: string | undefined
 	): Promise<void> {
-		processing = true;
-		try {
-			await channelService.updateChannel(channelId, name, description);
-			closeEditSheet();
-			dataTableService.load();
-		} finally {
-			processing = false;
+		await channelService.updateChannel(channelId, name, description);
+		// Refresh the selected channel to show updated data
+		if (selectedChannel?.id === channelId) {
+			selectedChannel = await getChannel(channelId);
 		}
+		dataTableService.load();
 	}
 
 	async function handlePauseChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.pauseChannel(channel.id ?? 0);
+		// Refresh the selected channel to show updated status
+		if (selectedChannel?.id === channel.id) {
+			selectedChannel = await getChannel(channel.id!);
+		}
 		dataTableService.load();
 	}
 
 	async function handleResumeChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.resumeChannel(channel.id ?? 0);
+		// Refresh the selected channel to show updated status
+		if (selectedChannel?.id === channel.id) {
+			selectedChannel = await getChannel(channel.id!);
+		}
 		dataTableService.load();
 	}
 
 	async function handleDeleteChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.deleteChannel(channel);
+		closeDetailsSheet();
 		dataTableService.load();
 	}
 
@@ -121,7 +128,7 @@
 				<ChannelRow
 					{channel}
 					canManage={true}
-					onEdit={openEditSheet}
+					onEdit={openDetailsSheet}
 					onPause={handlePauseChannel}
 					onResume={handleResumeChannel}
 					onDelete={handleDeleteChannel}
@@ -138,13 +145,16 @@
 	onOpenChange={(o) => (showCreateSheet = o)}
 	onSubmit={handleCreateChannel}
 />
-<EditChannelSheet
-	open={showEditSheet}
-	channel={editingChannel}
-	updating={processing}
+<ChannelDetailsSheet
+	open={showDetailsSheet}
+	channel={selectedChannel}
+	canManage={true}
 	onOpenChange={(o) => {
-		showEditSheet = o;
-		if (!o) closeEditSheet();
+		showDetailsSheet = o;
+		if (!o) closeDetailsSheet();
 	}}
-	onSubmit={handleUpdateChannel}
+	onUpdate={handleUpdateChannel}
+	onPause={handlePauseChannel}
+	onResume={handleResumeChannel}
+	onDelete={handleDeleteChannel}
 />

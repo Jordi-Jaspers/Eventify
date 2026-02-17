@@ -6,7 +6,6 @@
 	import {
 		getChannelStatusVariant,
 		getChannelStatusLabel,
-		copySlugToClipboard,
 		getRelativeActivityTime
 	} from '$lib/utils/channel';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
@@ -26,25 +25,31 @@
 	
 	const lastActivity: string = $derived(getRelativeActivityTime(channel.lastEventAt));
 	const isNoActivity: boolean = $derived(!channel.lastEventAt);
+
+	function handleRowClick(): void {
+		onEdit(channel);
+	}
+
+	function handleActionsClick(event: MouseEvent): void {
+		// Stop propagation to prevent row click from firing when clicking actions
+		event.stopPropagation();
+	}
 </script>
 
-<div
-	class="grid grid-cols-1 md:grid-cols-18 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all text-left w-full"
+<button
+	type="button"
+	class="grid grid-cols-1 md:grid-cols-16 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all text-left w-full cursor-pointer"
+	onclick={handleRowClick}
 >
-	<!-- Channel Name (clickable to copy slug) with Stale Badge -->
+	<!-- Channel Name with Stale Badge -->
 	<div class="col-span-1 md:col-span-4">
-		<button
-			type="button"
-			class="flex items-center gap-3 cursor-pointer hover:text-primary transition-colors text-left w-full"
-			onclick={() => copySlugToClipboard(channel)}
-			title="Click to copy slug: {channel.slug}"
-		>
+		<div class="flex items-center gap-3">
 			<Radio class="h-5 w-5 text-primary shrink-0" />
 			<div class="min-w-0 flex items-center gap-2">
 				<span class="font-medium truncate">{channel.name}</span>
 				<StaleActivityBadge isStale={channel.isStale ?? false} />
 			</div>
-		</button>
+		</div>
 		<div class="text-sm text-muted-foreground truncate md:hidden pl-8">
 			{truncateText(channel.description, 40)}
 		</div>
@@ -72,20 +77,14 @@
 		</span>
 	</div>
 
-	<!-- Created -->
-	<div class="col-span-1 md:col-span-2 flex items-center">
-		<span class="text-sm text-muted-foreground whitespace-nowrap">
-			<span class="md:hidden">Created: </span>
-			{formatDate(channel.createdAt ?? '')}
-		</span>
-	</div>
-
 	<!-- Actions -->
 	{#if canManage}
-		<div class="col-span-1 md:col-span-1 flex justify-end">
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="col-span-1 md:col-span-1 flex justify-end" onclick={handleActionsClick}>
 			<ChannelActions {channel} {onEdit} {onPause} {onResume} {onDelete} />
 		</div>
 	{:else}
 		<div class="col-span-1 md:col-span-1"></div>
 	{/if}
-</div>
+</button>

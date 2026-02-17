@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Edit, Pause, Play, Trash2, Terminal, MoreVertical } from '@lucide/svelte';
+	import { Eye, Copy, Pause, Play, Trash2, Terminal, MoreVertical } from '@lucide/svelte';
 	import type { ChannelDetailsResponse } from '$lib/api/models';
-	import { copyCurlToClipboard } from '$lib/utils/channel';
+	import { copyCurlToClipboard, copySlugToClipboard } from '$lib/utils/channel';
 
 	interface Props {
 		channel: ChannelDetailsResponse;
@@ -29,15 +29,20 @@
 			</Button>
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content align="end" class="w-48 bg-card/95 backdrop-blur-xl border-border/50">
-			<DropdownMenu.Item onclick={() => copyCurlToClipboard(channel.slug)} class="cursor-pointer">
-				<Terminal class="mr-2 h-4 w-4" />
-				Copy Curl
+			<DropdownMenu.Item onclick={() => onEdit(channel)} class="cursor-pointer">
+				<Eye class="mr-2 h-4 w-4" />
+				View Details
 			</DropdownMenu.Item>
 			<DropdownMenu.Separator />
-			<DropdownMenu.Item onclick={() => onEdit(channel)} class="cursor-pointer">
-				<Edit class="mr-2 h-4 w-4" />
-				Edit
+			<DropdownMenu.Item onclick={() => copySlugToClipboard(channel)} class="cursor-pointer">
+				<Copy class="mr-2 h-4 w-4" />
+				Copy Slug
 			</DropdownMenu.Item>
+			<DropdownMenu.Item onclick={() => copyCurlToClipboard(channel.slug)} class="cursor-pointer">
+				<Terminal class="mr-2 h-4 w-4" />
+				Copy cURL
+			</DropdownMenu.Item>
+			<DropdownMenu.Separator />
 			{#if channel.status === 'ACTIVE'}
 				<DropdownMenu.Item onclick={() => onPause(channel)} class="cursor-pointer">
 					<Pause class="mr-2 h-4 w-4" />
