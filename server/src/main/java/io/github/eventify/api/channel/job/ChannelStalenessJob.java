@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import static io.github.eventify.common.util.TimeProvider.now;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * Scheduled job for marking stale channels.
@@ -27,9 +28,12 @@ public class ChannelStalenessJob {
      * Updates channel staleness status.
      * - Marks channels as stale if no events in 7 days
      * - Clears stale flag for channels with recent activity (safety net for trigger bypass)
-     * Runs every 5 minutes for responsive staleness detection.
+     * Runs at startup and every 5 minutes for responsive staleness detection.
      */
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(
+        fixedDelay = 5,
+        timeUnit = MINUTES
+    )
     public void markStaleChannels() {
         log.info("[CRON JOB] Channel staleness job started at {}", now());
 
