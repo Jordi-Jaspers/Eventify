@@ -226,4 +226,29 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
         @Param("stalenessThreshold") OffsetDateTime stalenessThreshold,
         @Param("gracePeriodThreshold") OffsetDateTime gracePeriodThreshold
     );
+
+    /**
+     * Clears stale flag for channels that have recent activity.
+     * Safety net in case trigger was bypassed (maintenance, manual imports, etc).
+     * Updates isStale=false for channels where:
+     * - lastEventAt is newer than or equal to threshold
+     * - isStale is currently true
+     *
+     * @param threshold threshold for recent activity (e.g., 7 days ago)
+     * @return count of channels cleared from stale status
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional
+    @Query(
+        """
+            UPDATE Channel c
+            SET c.isStale = false
+            WHERE c.lastEventAt >= :threshold
+            AND c.isStale = true
+            """
+    )
+    int clearStaleForActiveChannels(@Param("threshold") OffsetDateTime threshold);
 }

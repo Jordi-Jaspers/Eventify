@@ -36,12 +36,14 @@ public class ChannelStalenessJobTest extends UnitTest {
         // Given: Repository will return count of marked channels
         final int expectedMarkedCount = 5;
         given(channelRepository.markChannelsAsStale(any(), any())).willReturn(expectedMarkedCount);
+        given(channelRepository.clearStaleForActiveChannels(any())).willReturn(0);
 
         // When: Job executes on schedule
         channelStalenessJob.markStaleChannels();
 
-        // Then: Should call repository to mark channels as stale
+        // Then: Should call repository to mark channels as stale and clear active ones
         verify(channelRepository).markChannelsAsStale(any(), any());
+        verify(channelRepository).clearStaleForActiveChannels(any());
         verifyNoMoreInteractions(channelRepository);
     }
 
@@ -51,12 +53,14 @@ public class ChannelStalenessJobTest extends UnitTest {
         // Given: Repository will mark 3 channels as stale
         final int markedCount = 3;
         given(channelRepository.markChannelsAsStale(any(), any())).willReturn(markedCount);
+        given(channelRepository.clearStaleForActiveChannels(any())).willReturn(0);
 
         // When: Job executes
         channelStalenessJob.markStaleChannels();
 
         // Then: Should complete successfully with count logged
         verify(channelRepository).markChannelsAsStale(any(), any());
+        verify(channelRepository).clearStaleForActiveChannels(any());
     }
 
     @Test
@@ -64,12 +68,14 @@ public class ChannelStalenessJobTest extends UnitTest {
     public void shouldHandleZeroMarkedChannelsGracefully() {
         // Given: No channels to mark as stale
         given(channelRepository.markChannelsAsStale(any(), any())).willReturn(0);
+        given(channelRepository.clearStaleForActiveChannels(any())).willReturn(0);
 
         // When: Job executes
         channelStalenessJob.markStaleChannels();
 
         // Then: Should complete without errors
         verify(channelRepository).markChannelsAsStale(any(), any());
+        verify(channelRepository).clearStaleForActiveChannels(any());
         verifyNoMoreInteractions(channelRepository);
     }
 
@@ -78,6 +84,7 @@ public class ChannelStalenessJobTest extends UnitTest {
     public void shouldBeIdempotentWhenCalledMultipleTimes() {
         // Given: Repository marks channels on each call
         given(channelRepository.markChannelsAsStale(any(), any())).willReturn(2);
+        given(channelRepository.clearStaleForActiveChannels(any())).willReturn(1);
 
         // When: Job runs twice
         channelStalenessJob.markStaleChannels();
@@ -85,6 +92,7 @@ public class ChannelStalenessJobTest extends UnitTest {
 
         // Then: Should delegate to repository both times
         verify(channelRepository, org.mockito.Mockito.times(2)).markChannelsAsStale(any(), any());
+        verify(channelRepository, org.mockito.Mockito.times(2)).clearStaleForActiveChannels(any());
     }
 
     @Test
@@ -100,5 +108,21 @@ public class ChannelStalenessJobTest extends UnitTest {
         } catch (final RuntimeException e) {
             verify(channelRepository).markChannelsAsStale(any(), any());
         }
+    }
+
+    @Test
+    @DisplayName("Should clear stale flag for channels with recent activity")
+    public void shouldClearStaleFlagForChannelsWithRecentActivity() {
+        // Given: Repository will clear some channels from stale status
+        given(channelRepository.markChannelsAsStale(any(), any())).willReturn(0);
+        given(channelRepository.clearStaleForActiveChannels(any())).willReturn(3);
+
+        // When: Job executes
+        channelStalenessJob.markStaleChannels();
+
+        // Then: Should call both mark and clear methods
+        verify(channelRepository).markChannelsAsStale(any(), any());
+        verify(channelRepository).clearStaleForActiveChannels(any());
+        verifyNoMoreInteractions(channelRepository);
     }
 }

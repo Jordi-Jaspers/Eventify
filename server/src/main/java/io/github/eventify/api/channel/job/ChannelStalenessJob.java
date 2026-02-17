@@ -24,7 +24,9 @@ public class ChannelStalenessJob {
     private final ChannelRepository channelRepository;
 
     /**
-     * Marks channels as stale if they haven't received events in 7 days.
+     * Updates channel staleness status.
+     * - Marks channels as stale if no events in 7 days
+     * - Clears stale flag for channels with recent activity (safety net for trigger bypass)
      * Runs every 5 minutes for responsive staleness detection.
      */
     @Scheduled(cron = "0 */5 * * * *")
@@ -32,8 +34,10 @@ public class ChannelStalenessJob {
         log.info("[CRON JOB] Channel staleness job started at {}", now());
 
         final OffsetDateTime threshold = now().minusDays(STALENESS_THRESHOLD_DAYS);
-        final int markedCount = channelRepository.markChannelsAsStale(threshold, threshold);
 
-        log.info("[CRON JOB] Channel staleness job completed. Marked {} channels as stale.", markedCount);
+        final int markedCount = channelRepository.markChannelsAsStale(threshold, threshold);
+        final int clearedCount = channelRepository.clearStaleForActiveChannels(threshold);
+
+        log.info("[CRON JOB] Channel staleness job completed. Marked {} as stale, cleared {} from stale.", markedCount, clearedCount);
     }
 }

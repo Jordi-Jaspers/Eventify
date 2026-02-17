@@ -248,4 +248,78 @@ public class ChannelRepositoryStalenessTest extends IntegrationTest {
         final Channel updatedChannel = channelRepository.findById(channel.getId()).orElseThrow();
         assertThat(updatedChannel.getIsStale(), is(true));
     }
+
+    @Test
+    @DisplayName("Should clear stale flag for channels with recent activity")
+    public void shouldClearStaleFlagForChannelsWithRecentActivity() {
+        // Given: User with a stale channel
+        final User user = aValidatedUser();
+        final Channel channel = aChannelForUser(user, "Was Stale Channel");
+
+        // And: Channel is marked stale but has recent activity (simulating trigger bypass scenario)
+        channel.setLastEventAt(now().minusDays(3)); // Recent activity (within 7 days)
+        channel.setIsStale(true); // But marked stale
+        channelRepository.save(channel);
+
+        // And: Threshold is 7 days ago
+        final OffsetDateTime threshold = now().minusDays(7);
+
+        // When: Clearing stale for active channels
+        final int clearedCount = channelRepository.clearStaleForActiveChannels(threshold);
+
+        // Then: One channel should be cleared
+        assertThat(clearedCount, is(1));
+
+        // And: Channel should no longer be stale
+        final Channel updatedChannel = channelRepository.findById(channel.getId()).orElseThrow();
+        assertThat(updatedChannel.getIsStale(), is(false));
+    }
+
+    @Test
+    @DisplayName("Should NOT clear stale flag for channels with old activity")
+    public void shouldNotClearStaleFlagForChannelsWithOldActivity() {
+        // Given: User with a correctly stale channel
+        final User user = aValidatedUser();
+        final Channel channel = aChannelForUser(user, "Still Stale Channel");
+
+        // And: Channel is stale and has old activity
+        channel.setLastEventAt(now().minusDays(10)); // Old activity (beyond 7 days)
+        channel.setIsStale(true);
+        channelRepository.save(channel);
+
+        // And: Threshold is 7 days ago
+        final OffsetDateTime threshold = now().minusDays(7);
+
+        // When: Clearing stale for active channels
+        final int clearedCount = channelRepository.clearStaleForActiveChannels(threshold);
+
+        // Then: No channels should be cleared
+        assertThat(clearedCount, is(0));
+
+        // And: Channel should remain stale
+        final Channel updatedChannel = channelRepository.findById(channel.getId()).orElseThrow();
+        assertThat(updatedChannel.getIsStale(), is(true));
+    }
+
+    @Test
+    @DisplayName("Should NOT clear stale flag for channels that are not stale")
+    public void shouldNotClearStaleFlagForChannelsThatAreNotStale() {
+        // Given: User with an active (non-stale) channel
+        final User user = aValidatedUser();
+        final Channel channel = aChannelForUser(user, "Active Channel");
+
+        // And: Channel is not stale and has recent activity
+        channel.setLastEventAt(now().minusDays(3));
+        channel.setIsStale(false);
+        channelRepository.save(channel);
+
+        // And: Threshold is 7 days ago
+        final OffsetDateTime threshold = now().minusDays(7);
+
+        // When: Clearing stale for active channels
+        final int clearedCount = channelRepository.clearStaleForActiveChannels(threshold);
+
+        // Then: No channels should be cleared (already not stale)
+        assertThat(clearedCount, is(0));
+    }
 }
