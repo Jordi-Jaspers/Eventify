@@ -178,23 +178,61 @@ test.describe('Channels Page Screenshots', () => {
 				});
 			});
 
-			test(`filter panel`, async ({ page }, testInfo) => {
-				await page.waitForTimeout(DATA_LOAD_MS);
+		test(`filter panel`, async ({ page }, testInfo) => {
+			await page.waitForTimeout(DATA_LOAD_MS);
 
-				// Try to find and open filter panel if it exists
-				const filterButton = page.getByRole('button', { name: /filter/i }).first();
-				const filterExists = await filterButton.isVisible().catch(() => false);
+			// Try to find and open filter panel if it exists
+			const filterButton = page.getByRole('button', { name: /filter/i }).first();
+			const filterExists = await filterButton.isVisible().catch(() => false);
 
-				if (filterExists) {
-					await filterButton.click();
-					await page.waitForTimeout(ANIMATION_SETTLE_MS);
-				}
+			if (filterExists) {
+				await filterButton.click();
+				await page.waitForTimeout(ANIMATION_SETTLE_MS);
+			}
 
-				await page.screenshot({
-					path: getScreenshot(`09-filters-${theme}`, testInfo.project.name),
-					fullPage: true
-				});
+			await page.screenshot({
+				path: getScreenshot(`09-filters-${theme}`, testInfo.project.name),
+				fullPage: true
 			});
 		});
-	}
+
+		test(`send events help modal`, async ({ page }, testInfo) => {
+			await page.waitForTimeout(DATA_LOAD_MS);
+
+			// Find and click the help icon button in DataTable header
+			const helpButton = page.getByRole('button', { name: /How to Send Events/i });
+			await helpButton.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+			await helpButton.click();
+			await page.waitForTimeout(ANIMATION_SETTLE_MS);
+
+			await page.screenshot({
+				path: getScreenshot(`10-help-modal-${theme}`, testInfo.project.name),
+				fullPage: true
+			});
+		});
+
+		test(`send events help modal - batch section`, async ({ page }, testInfo) => {
+			await page.waitForTimeout(DATA_LOAD_MS);
+
+			// Find and click the help icon button in DataTable header
+			const helpButton = page.getByRole('button', { name: /How to Send Events/i });
+			await helpButton.waitFor({ state: 'visible', timeout: ELEMENT_WAIT_TIMEOUT_MS });
+			await helpButton.click();
+			await page.waitForTimeout(ANIMATION_SETTLE_MS);
+
+			// Scroll to batch section to ensure it's visible
+			const batchSection = page.locator('text=Batch Insert').first();
+			const batchExists = await batchSection.isVisible().catch(() => false);
+			if (batchExists) {
+				await batchSection.scrollIntoViewIfNeeded();
+				await page.waitForTimeout(300);
+			}
+
+			await page.screenshot({
+				path: getScreenshot(`11-help-modal-batch-${theme}`, testInfo.project.name),
+				fullPage: true
+			});
+		});
+	});
+}
 });

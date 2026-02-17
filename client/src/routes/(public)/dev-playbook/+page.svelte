@@ -15,6 +15,7 @@
     import { InfoField } from '$lib/components/ui/info-field';
     import { SectionHeader } from '$lib/components/ui/section-header';
     import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
+    import { CodeBlockWithCopy } from '$lib/components/ui/code-block-with-copy';
     import { getEnvironment, showDevCredentials } from '$lib/config/env';
     import type { Environment } from '$lib/config/env';
     
@@ -80,7 +81,8 @@
                 { id: 'access-denied-card', label: 'Access Denied Card' },
                 { id: 'status-indicator', label: 'Status Indicator' },
                 { id: 'info-field', label: 'Info Field' },
-                { id: 'section-header', label: 'Section Header' }
+                { id: 'section-header', label: 'Section Header' },
+                { id: 'code-block-with-copy', label: 'Code Block with Copy' }
             ]
         },
         {
@@ -1261,6 +1263,143 @@
                                 <div class="flex items-start gap-2">
                                     <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
                                     <p>Forms with multiple logical sections</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </section>
+
+            <!-- Code Block with Copy -->
+            <section id="code-block-with-copy" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">Code Block with Copy</h2>
+                <p class="text-muted-foreground mb-6">Code display with animated copy button</p>
+                
+                <div class="grid gap-6">
+                    <Card class="border-border/50 border-primary/30">
+                        <CardHeader>
+                            <CardTitle class="text-base flex items-center gap-2">
+                                Usage
+                                <Badge variant="outline" class="text-xs">COMPONENT</Badge>
+                            </CardTitle>
+                            <CardDescription>Import from $lib/components/ui/code-block-with-copy</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-6">
+                                <div>
+                                    <p class="text-sm font-medium mb-3">Basic Usage</p>
+                                    <CodeBlockWithCopy headerText="Installation" code="npm install @eventify/sdk" />
+                                </div>
+                                
+                                <div>
+                                    <p class="text-sm font-medium mb-3">Multi-line Code</p>
+                                    <CodeBlockWithCopy headerText="POST /events" code={`curl -X POST https://api.eventify.dev/events \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"event": "user.signup", "data": {"userId": "123"}}'`} />
+                                </div>
+
+                                <div class="p-4 bg-muted/20 rounded-md">
+                                    <code class="text-xs block">
+                                        &lt;CodeBlockWithCopy<br/>
+                                        &nbsp;&nbsp;headerText="POST /events"<br/>
+                                        &nbsp;&nbsp;code="curl -X POST ..."<br/>
+                                        /&gt;
+                                    </code>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Props</CardTitle>
+                            <CardDescription>Available properties</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-2 text-sm">
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30 font-medium text-muted-foreground">
+                                    <div>Prop</div>
+                                    <div>Type</div>
+                                    <div>Default</div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">code</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">headerText</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">-</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2 border-b border-border/30">
+                                    <code class="text-xs">errorMessage</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">'Failed to copy...'</code>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 py-2">
+                                    <code class="text-xs">class</code>
+                                    <code class="text-xs">string</code>
+                                    <code class="text-xs">''</code>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Features</CardTitle>
+                            <CardDescription>Component behavior</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Animated icon transition (Copy to Check) on click</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Icon resets after 2 seconds</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Toast notification only shown on copy failure</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Horizontal scroll for long code lines</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Monospace font with proper text wrapping</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="border-border/50">
+                        <CardHeader>
+                            <CardTitle class="text-base">Use Cases</CardTitle>
+                            <CardDescription>When to use CodeBlockWithCopy</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>API examples (cURL commands, SDK snippets)</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Configuration snippets (JSON, YAML)</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Terminal commands (install, setup instructions)</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <Check class="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                    <p>Keys/tokens that users need to copy</p>
                                 </div>
                             </div>
                         </CardContent>

@@ -16,6 +16,7 @@
 		service: DataTableService<T>;
 		row: Snippet<[T]>;
 		empty?: Snippet;
+		headerActions?: Snippet;
 		skeletonRows?: number;
 		title?: string;
 		description?: string;
@@ -27,6 +28,7 @@
 		service,
 		row,
 		empty,
+		headerActions,
 		skeletonRows = 5,
 		title,
 		description,
@@ -71,20 +73,29 @@
 <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
 	{#if title || description}
 		<CardHeader>
-			{#if title}
-				<div class="flex items-center gap-2">
-					{#if icon}
-						{@const IconComponent = icon}
-						<IconComponent class="w-5 h-5 text-primary" />
+			<div class="flex items-center justify-between">
+				<div class="flex-1">
+					{#if title}
+						<div class="flex items-center gap-2">
+							{#if icon}
+								{@const IconComponent = icon}
+								<IconComponent class="w-5 h-5 text-primary" />
+							{/if}
+							<CardTitle class="text-xl">{title}</CardTitle>
+						</div>
 					{/if}
-					<CardTitle class="text-xl">{title}</CardTitle>
+					{#if description}
+						<CardDescription>{description}</CardDescription>
+					{:else if !service.loading}
+						<CardDescription>{service.showingRange}</CardDescription>
+					{/if}
 				</div>
-			{/if}
-			{#if description}
-				<CardDescription>{description}</CardDescription>
-			{:else if !service.loading}
-				<CardDescription>{service.showingRange}</CardDescription>
-			{/if}
+				{#if headerActions}
+					<div class="flex items-center gap-2">
+						{@render headerActions()}
+					</div>
+				{/if}
+			</div>
 		</CardHeader>
 	{/if}
 

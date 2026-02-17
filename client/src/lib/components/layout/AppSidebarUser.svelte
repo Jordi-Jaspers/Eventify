@@ -293,8 +293,8 @@
 		</Sidebar.MenuItem>
 	</Sidebar.Menu>
 	
-	<!-- Version Display -->
-	<div class="px-4 py-2 border-t border-border/50">
+	<!-- Version Display - hidden when sidebar is collapsed -->
+	<div class="px-4 py-2 border-t border-border/50 group-data-[collapsible=icon]:hidden">
 		<p class="text-xs text-muted-foreground text-center">{APP_VERSION}</p>
 	</div>
 </Sidebar.Footer>

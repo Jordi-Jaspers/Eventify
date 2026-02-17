@@ -14,7 +14,12 @@
 	} from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Radio, Plus } from '@lucide/svelte';
-	import { CreateChannelSheet, EditChannelSheet, ChannelRow } from '$lib/components/channels';
+	import {
+		CreateChannelSheet,
+		EditChannelSheet,
+		ChannelRow,
+		SendEventsHelpModal
+	} from '$lib/components/channels';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
 	import { ChannelService } from '$lib/services/channel-service';
@@ -215,25 +220,32 @@
 <!-- Main Content -->
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
-		<!-- Header -->
-		<div class="flex items-center justify-between mb-8">
-			<div>
-				<h1 class="text-3xl font-bold text-primary">Organization Channels</h1>
-				<p class="text-muted-foreground mt-2">
-					Manage channels for {orgName}
-				</p>
-			</div>
-			{#if canManage}
+	<!-- Header -->
+	<div class="flex items-center justify-between mb-8">
+		<div>
+			<h1 class="text-3xl font-bold text-primary">Organization Channels</h1>
+			<p class="text-muted-foreground mt-2">
+				Manage channels for {orgName}
+			</p>
+		</div>
+		{#if canManage}
+			<div class="flex items-center gap-3">
 				<Button onclick={() => (sheetState.showCreate = true)}>
 					<Plus class="mr-2 h-4 w-4" />
 					New Channel
 				</Button>
-			{/if}
-		</div>
+			</div>
+		{/if}
+	</div>
 
 		<!-- DataTable -->
 		{#if dataTableService}
 			<DataTable columns={columns} service={dataTableService} title="All Channels" icon={Radio}>
+				{#snippet headerActions()}
+					<SendEventsHelpModal
+						apiKeySettingsUrl="/organizations/{orgId}/settings/api-keys"
+					/>
+				{/snippet}
 				{#snippet row(channel: ChannelDetailsResponse)}
 					<ChannelRow
 						{channel}

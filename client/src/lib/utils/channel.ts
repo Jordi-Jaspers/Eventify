@@ -77,6 +77,40 @@ export function generateCurlCommand(channelId: number | undefined): string {
 }
 
 /**
+ * Generate curl command for batch posting events to channels.
+ * Uses OpenAPI spec types and configured API base URL.
+ * Includes timestamp field to show historical import capability.
+ */
+export function generateBatchCurlCommand(): string {
+    const apiUrl = `${SERVER_BASE_URL}/v1/external/event/batch`;
+    const exampleEvents: CreateEventRequest[] = [
+        {
+            channelId: 1,
+            severity: 'WARNING',
+            title: 'Historical Event 1',
+            message: 'First event from batch import',
+            timestamp: '2024-01-15T10:30:00Z',
+            metadata: {}
+        },
+        {
+            channelId: 1,
+            severity: 'OK',
+            title: 'Historical Event 2',
+            message: 'Second event from batch import',
+            timestamp: '2024-01-15T11:00:00Z',
+            metadata: {}
+        }
+    ];
+
+    const batchBody = { events: exampleEvents };
+    const bodyJson = JSON.stringify(batchBody, null, 2).replaceAll('\n', '\n  ');
+    return String.raw`curl -X POST ${apiUrl} \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '${bodyJson}'`;
+}
+
+/**
  * Copy curl command to clipboard with toast notification
  */
 export function copyCurlToClipboard(channelId: number | undefined): void {

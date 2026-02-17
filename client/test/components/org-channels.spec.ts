@@ -86,15 +86,33 @@ test.describe('Organization Channels Screenshots', () => {
 				});
 			});
 
-			test(`channel list view`, async ({ page }, testInfo) => {
-				await page.waitForTimeout(DATA_LOAD_MS);
+		test(`channel list view`, async ({ page }, testInfo) => {
+			await page.waitForTimeout(DATA_LOAD_MS);
 
-				// Just capture the channels list - this is more reliable than hover tests
-				await page.screenshot({
-					path: getScreenshot(`04-channels-list-${theme}`, testInfo.project.name),
-					fullPage: true
-				});
+			// Just capture the channels list - this is more reliable than hover tests
+			await page.screenshot({
+				path: getScreenshot(`04-channels-list-${theme}`, testInfo.project.name),
+				fullPage: true
 			});
 		});
-	}
+
+		test(`send events help popover`, async ({ page }, testInfo) => {
+			await page.waitForTimeout(DATA_LOAD_MS);
+
+			// Find and click the help button
+			const helpButton = page.getByRole('button', { name: /How to Send Events/i });
+			const isVisible = await helpButton.isVisible().catch(() => false);
+
+			if (isVisible) {
+				await helpButton.click();
+				await page.waitForTimeout(ANIMATION_SETTLE_MS);
+			}
+
+			await page.screenshot({
+				path: getScreenshot(`05-help-popover-${theme}`, testInfo.project.name),
+				fullPage: true
+			});
+		});
+	});
+}
 });

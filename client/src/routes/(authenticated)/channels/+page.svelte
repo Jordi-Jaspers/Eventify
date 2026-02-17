@@ -6,7 +6,12 @@
 	import type { ChannelDetailsResponse } from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Radio, Plus } from '@lucide/svelte';
-	import { CreateChannelSheet, EditChannelSheet, ChannelRow } from '$lib/components/channels';
+	import {
+		CreateChannelSheet,
+		EditChannelSheet,
+		ChannelRow,
+		SendEventsHelpModal
+	} from '$lib/components/channels';
 	import { UserChannelService } from '$lib/services/user-channel-service';
 
 	// Column definitions (inline like other tables)
@@ -131,24 +136,29 @@
 <!-- Main Content -->
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
-		<!-- Header -->
-		<div class="flex items-center justify-between mb-8">
-			<div>
-				<h1 class="text-3xl font-bold text-primary">
-					My Channels
-				</h1>
-				<p class="text-muted-foreground mt-2">
-					Manage your personal channels for organizing events
-				</p>
-			</div>
+	<!-- Header -->
+	<div class="flex items-center justify-between mb-8">
+		<div>
+			<h1 class="text-3xl font-bold text-primary">
+				My Channels
+			</h1>
+			<p class="text-muted-foreground mt-2">
+				Manage your personal channels for organizing events
+			</p>
+		</div>
+		<div class="flex items-center gap-3">
 			<Button onclick={() => (showCreateSheet = true)}>
 				<Plus class="mr-2 h-4 w-4" />
 				New Channel
 			</Button>
 		</div>
+	</div>
 
 		<!-- DataTable -->
 		<DataTable columns={columns} service={dataTableService} title="All Channels" icon={Radio}>
+			{#snippet headerActions()}
+				<SendEventsHelpModal apiKeySettingsUrl="/developer" />
+			{/snippet}
 			{#snippet row(channel: ChannelDetailsResponse)}
 				<ChannelRow
 					{channel}
