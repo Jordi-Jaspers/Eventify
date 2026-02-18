@@ -3,6 +3,7 @@
 Raw ideas and future work. Items here need refinement before development.
 
 ---
+
 ## Epic: Organization Management
 **Context**: Admins need better tools to manage organizations, especially around trial limitations and status
 
@@ -11,6 +12,35 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Organization status change notifications** - Notify org owner when their organization is suspended or reactivated.
 - [ ] **Refactor user/org dashboards to something useful**
 - [ ] **Configurable Event Quotas** - Allow users to configure their monthly event limit (tied to subscription tier). organisation have no limitations.
+
+---
+## Epic: Bugs & Technical Debt
+**Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
+
+- [ ] **Redirect to org incorrect** - on user profile page clicking on organization name redirects to wrong location. Fix routing logic to redirect to correct org dashboard.
+- [ ] **Adjust "how it works" landing page** - Update copy and design of the landing page to better explain the product and guide users to sign up or explore features. Consider adding screenshots, diagrams, or a video demo.
+- [ ] **Landing page curl command** - Update the example curl command on the landing page to reflect the current API structure and authentication method. Ensure it works with the latest API version and provides a clear example for developers.
+- [ ] **Update curl command API key generation** -- during creation of the api key, the curl command example should be updated to reflect the new API key format and endpoint structure. This ensures that users can easily copy and use the command without confusion. there is a util method used in the channel.
+
+---
+## Epic: General Improvements
+**Context**: Small improvements that don't fit into other epics but would enhance user experience.
+
+- [ ] **More obvious indication for What's New events** - Currently, the "What's New" indicator is a small blue dot next page link in the sidebar. maybe we should add a popup or banner on the dashboard when there are new features/events to check out. This would increase visibility and encourage users to explore new capabilities.
+- [ ] **Native Compilation** - Explore using GraalVM native image compilation for faster startup times and lower memory usage, especially for serverless deployments.
+- [ ] **Improve server Test suite** - currently 1200+ tests which is taking around 5 minutes to run. Explore ways to optimize test execution time, such as parallel test execution, test selection based on code changes, or refactoring slow tests. extracting util methods to base classes. most culprits are unit tests having duplicate helper methods. our method is to always create a valid object and adjust the relevant field for the test instead of creating multiple variations of the same object with different fields set.
+
+---
+
+## Epic: OAUTH2 Authentication
+**Context**: Support third-party authentication via OAUTH2 providers (Google, GitHub, etc.) in addition to existing JWT and API Key methods.
+
+- [ ] **Review current authentication mechanisms** - Evaluate if current JWT-based auth meets all needs or if we should add OAuth2 for better SSO support.
+- [ ] **Company Login SSO / SAML** - enterprise authentication, user not searchable by regular users / org.
+- [ ] **Long-Lived Refresh Tokens / Remember me**
+- [ ] **Multi-Token Support / Management up to 5**
+- [ ] **Token Revocation - single/all**
+- [ ] **OAuth2 Enhancements - account linking**
 
 ---
 
@@ -40,34 +70,6 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Bulk action audit trail** - Record bulk operations (channel deletes, etc.) with user, action, targets, timestamp.
 - [ ] **Admin action audit** - Track admin-specific actions: status changes, user management, system configuration.
 - [ ] **Audit log UI** - Admin interface to search and view audit trail.
-
----
-
-## Epic: OAUTH2 Authentication
-**Context**: Support third-party authentication via OAUTH2 providers (Google, GitHub, etc.) in addition to existing JWT and API Key methods.
-
-- [ ] **Review current authentication mechanisms** - Evaluate if current JWT-based auth meets all needs or if we should add OAuth2 for better SSO support.
-- [ ] **Company Login SSO / SAML** - enterprise authentication, user not searchable by regular users / org.
-- [ ] **Long-Lived Refresh Tokens / Remember me**
-- [ ] **Multi-Token Support / Management up to 5**
-- [ ] **Token Revocation - single/all**
-- [ ] **OAuth2 Enhancements - account linking**
-
----
-## Epic: Bugs & Technical Debt
-**Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
-
-- [ ] **Redirect to org incorrect** - on user profile page clicking on organization name redirects to wrong location. Fix routing logic to redirect to correct org dashboard.
-- [ ] **Adjust "how it works" landing page** - Update copy and design of the landing page to better explain the product and guide users to sign up or explore features. Consider adding screenshots, diagrams, or a video demo.
-- [ ] **Landing page curl command** - Update the example curl command on the landing page to reflect the current API structure and authentication method. Ensure it works with the latest API version and provides a clear example for developers.
-- [ ] **Update curl command API key generation** -- during creation of the api key, the curl command example should be updated to reflect the new API key format and endpoint structure. This ensures that users can easily copy and use the command without confusion. there is a util method used in the channel.
-
----
-## Epic: General Improvements
-**Context**: Small improvements that don't fit into other epics but would enhance user experience.
-
-- [ ] **Native Compilation** - Explore using GraalVM native image compilation for faster startup times and lower memory usage, especially for serverless deployments.
-- [ ] **Improve server Test suite** - currently 1200+ tests which is taking around 5 minutes to run. Explore ways to optimize test execution time, such as parallel test execution, test selection based on code changes, or refactoring slow tests. extracting util methods to base classes. most culprits are unit tests having duplicate helper methods. our method is to always create a valid object and adjust the relevant field for the test instead of creating multiple variations of the same object with different fields set.
 
 ---
 ## Epic: Developer API Documentation
