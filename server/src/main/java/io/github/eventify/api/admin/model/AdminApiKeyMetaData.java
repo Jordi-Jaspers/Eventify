@@ -2,9 +2,9 @@ package io.github.eventify.api.admin.model;
 
 import io.github.eventify.api.apikey.model.ApiKey;
 import io.github.eventify.api.apikey.model.ApiKeyScope;
+import io.github.jframe.datasource.search.JpaSearchSpecification;
 import io.github.jframe.datasource.search.SearchType;
 import io.github.jframe.datasource.search.model.AbstractSortSearchMetaData;
-import io.github.jframe.datasource.search.model.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;

@@ -96,8 +96,8 @@ dependencies {
     implementation("org.springdoc", "springdoc-openapi-starter-webmvc-ui", retrieve("springdocVersion"))
 
     // JFrame Starters - common libraries for JFrame based applications
-    implementation("io.github.jframeoss", "starter-jpa", retrieve("jframeStarterVersion"))
-    implementation("io.github.jframeoss", "starter-otlp", retrieve("jframeStarterVersion"))
+    implementation("io.github.jframeoss", "jframe-spring-jpa", retrieve("jframeStarterVersion"))
+    implementation("io.github.jframeoss", "jframe-spring-otlp", retrieve("jframeStarterVersion"))
 
     // Used to validate entities and beans
     implementation("jakarta.servlet", "jakarta.servlet-api", retrieve("jakartaServletVersion"))

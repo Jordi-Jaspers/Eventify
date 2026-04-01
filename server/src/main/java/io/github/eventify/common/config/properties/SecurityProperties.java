@@ -15,8 +15,14 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "security")
 public class SecurityProperties {
 
+    /**
+     * Allowed origin patterns for CORS (e.g., "http://localhost:*").
+     * Supports wildcards when used with allowCredentials=true.
+     */
     @Value("${security.cors.allowed-origins}")
-    private String[] allowedOrigins;
+    private String[] allowedOrigins = new String[] {
+        "http://localhost:*"
+    };
 
     private TokenProperties accessToken;
 

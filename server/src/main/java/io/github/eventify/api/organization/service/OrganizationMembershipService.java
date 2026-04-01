@@ -13,7 +13,7 @@ import io.github.eventify.common.exception.DisabledUserException;
 import io.github.eventify.common.exception.OwnerRoleException;
 import io.github.eventify.common.exception.OwnershipTransferException;
 import io.github.eventify.common.exception.UserAlreadyMemberException;
-import io.github.jframe.datasource.search.model.JpaSearchSpecification;
+import io.github.jframe.datasource.search.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;

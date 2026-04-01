@@ -1,8 +1,8 @@
 package io.github.eventify.api.watchlist.model;
 
+import io.github.jframe.datasource.search.JpaSearchSpecification;
 import io.github.jframe.datasource.search.SearchType;
 import io.github.jframe.datasource.search.model.AbstractSortSearchMetaData;
-import io.github.jframe.datasource.search.model.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 
