@@ -12,7 +12,7 @@ jframe:
     response-length: ${LOGGING_RESPONSE_LENGTH:-1}
 
   otlp:
-    disabled: ${OTLP_DISABLED:true}
+    disabled: ${OTLP_DISABLED:false}
     url: ${OTLP_URL:http://localhost:4318}
     timeout: ${OTLP_TIMEOUT:10s}
     sampling-rate: ${OTLP_SAMPLING_RATE:1.0}
@@ -66,6 +66,7 @@ springdoc:
   enable-data-rest: false
   enable-hateoas: false
   swagger-ui:
+    document-title: Eventify API
     disable-swagger-default-url: true
     default-models-expand-depth: -1
     path: /v1/public/docs/openapi.html

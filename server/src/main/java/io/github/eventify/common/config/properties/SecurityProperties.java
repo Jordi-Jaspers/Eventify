@@ -20,8 +20,8 @@ public class SecurityProperties {
      * Supports wildcards when used with allowCredentials=true.
      */
     @Value("${security.cors.allowed-origins}")
-    private String[] allowedOrigins = new String[] {
-        "http://localhost:*"
+    private String[] allowedOrigins = {
+        "http://localhost:*",
     };
 
     private TokenProperties accessToken;

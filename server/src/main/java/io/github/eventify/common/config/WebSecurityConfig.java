@@ -97,6 +97,9 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return http.build();
     }
 
+    /**
+     * Configures CORS settings for the application.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
