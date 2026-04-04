@@ -2,7 +2,7 @@
 description: Creates comprehensive test suites following Spring Boot testing standards. Receives requirements from orchestrator, writes tests with Given-When-Then pattern, ensures >90% coverage.
 temperature: 0.1
 mode: subagent
-model: github-copilot/claude-sonnet-4.5
+model: github-copilot/claude-sonnet-4.6
 tools:
   write: true
   read: true

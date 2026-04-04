@@ -10,7 +10,7 @@ import io.github.eventify.common.exception.AuthorizationException;
 import io.github.eventify.common.exception.DemoteLastAdminException;
 import io.github.eventify.common.exception.SelfLockingException;
 import io.github.eventify.common.exception.UserAlreadyExistsException;
-import io.github.jframe.datasource.search.model.JpaSearchSpecification;
+import io.github.jframe.datasource.search.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;

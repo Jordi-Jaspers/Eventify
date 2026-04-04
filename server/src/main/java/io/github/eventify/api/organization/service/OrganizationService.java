@@ -9,7 +9,7 @@ import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.exception.NonExistingUserException;
-import io.github.jframe.datasource.search.model.JpaSearchSpecification;
+import io.github.jframe.datasource.search.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;

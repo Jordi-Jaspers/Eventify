@@ -206,3 +206,4 @@ server/**config/*.local.properties
 /server/.factorypath
 /server/.project
 /server/.settings/org.eclipse.buildship.core.prefs
+/demo-application/

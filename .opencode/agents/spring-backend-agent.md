@@ -2,7 +2,7 @@
 description: Spring Boot implementation specialist. Receives requirements from orchestrator, implements backend features following TDD, ensures all tests pass and build succeeds.
 temperature: 0.1
 mode: subagent
-model: github-copilot/claude-sonnet-4.5
+model: github-copilot/claude-sonnet-4.6
 tools:
   write: true
   read: true

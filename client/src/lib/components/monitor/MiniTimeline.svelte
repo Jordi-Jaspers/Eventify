@@ -4,7 +4,7 @@
 	import type { TimelineDuration, Severity } from '$lib/api/models';
 	import { getSeverityColors } from './types';
 	import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '$lib/components/ui/tooltip';
-    import { ChevronLeft, ChevronRight, MoreVertical, ArrowRight } from 'lucide-svelte';
+    import { ChevronLeft, ChevronRight, MoreVertical, ArrowRight } from '@lucide/svelte';
 
 	interface Props {
 		durations: TimelineDuration[];

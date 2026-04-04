@@ -11,7 +11,7 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Organization status change audit log** - Track when admin changes org status, with reason field. Part of broader admin audit log feature.
 - [ ] **Organization status change notifications** - Notify org owner when their organization is suspended or reactivated.
 - [ ] **Refactor user/org dashboards to something useful**
-- [ ] **Configurable Event Quotas** - Allow users to configure their monthly event limit (tied to subscription tier). organisation have no limitations.
+- [ ] **Configurable Event Quotas** - Allow users to configure their monthly event limit (tied to subscription tier). organisations have no limitations.
 
 ---
 ## Epic: Bugs & Technical Debt
@@ -36,7 +36,7 @@ Raw ideas and future work. Items here need refinement before development.
 **Context**: Support third-party authentication via OAUTH2 providers (Google, GitHub, etc.) in addition to existing JWT and API Key methods.
 
 - [ ] **Review current authentication mechanisms** - Evaluate if current JWT-based auth meets all needs or if we should add OAuth2 for better SSO support.
-- [ ] **Company Login SSO / SAML** - enterprise authentication, user not searchable by regular users / org.
+- [ ] **Company Login SSO / SAML** - entraID authentication, configuring entraID during org creation? user not searchable by regular users / org.
 - [ ] **Long-Lived Refresh Tokens / Remember me**
 - [ ] **Multi-Token Support / Management up to 5**
 - [ ] **Token Revocation - single/all**

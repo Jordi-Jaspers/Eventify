@@ -10,7 +10,7 @@ import io.github.eventify.api.apikey.model.mapper.ApiKeyMapper;
 import io.github.eventify.api.apikey.repository.ApiKeyAuditRepository;
 import io.github.eventify.api.apikey.repository.ApiKeyRepository;
 import io.github.eventify.api.user.model.User;
-import io.github.jframe.datasource.search.model.JpaSearchSpecification;
+import io.github.jframe.datasource.search.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;

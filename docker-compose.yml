@@ -18,6 +18,21 @@ services:
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
 
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/jaeger:latest
+    restart: unless-stopped
+    networks:
+      - internal
+    ports:
+      - "16686:16686"   # UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    volumes:
+      - jaeger_data:/data
+
   inbucket:
     container_name: inbucket
     image: inbucket/inbucket:latest
@@ -34,3 +49,4 @@ services:
 volumes:
   timescaledb_data:
   inbucket_data:
+  jaeger_data:

@@ -4,7 +4,7 @@
     <appender name="HUMANREADABLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>
-                %d{HH:mm:ss.SSS} %highlight(%level) [%green(TX:%X{tx_id})/%yellow(TRACE:%X{traceId})] [%magenta(T:%thread)] [%cyan(L:%logger:%line)]:\n%msg%n\n
+                %d{HH:mm:ss.SSS} %highlight(%level) [%yellow(%X{trace.id})] [%magenta(T:%thread)] [%cyan(L:%logger:%line)]:\n%msg%n\n
             </pattern>
         </encoder>
     </appender>
