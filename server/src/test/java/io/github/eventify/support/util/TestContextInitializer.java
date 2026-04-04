@@ -16,6 +16,7 @@ import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.support.config.BeanConfiguration;
+import io.github.eventify.support.config.TimescaleLiquibaseConfiguration;
 import io.github.eventify.support.container.TimescaleContainer;
 import io.github.jframe.autoconfigure.properties.ApplicationProperties;
 import tools.jackson.databind.ObjectMapper;
@@ -39,6 +40,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Import(
     {
         BeanConfiguration.class,
+        TimescaleLiquibaseConfiguration.class,
         TimescaleContainer.class
     }
 )

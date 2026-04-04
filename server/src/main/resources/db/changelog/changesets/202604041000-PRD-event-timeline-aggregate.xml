@@ -1,0 +1,55 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202604041000-PRD-event-timeline-aggregate.xml">
+
+    <changeSet id="202604041000-PRD-event-timeline-aggregate-1" author="eventify" runInTransaction="false">
+        <comment>Create continuous aggregate for hourly event timeline data</comment>
+        <sql>
+            CREATE MATERIALIZED VIEW event_timeline_hourly
+            WITH (timescaledb.continuous) AS
+            SELECT
+                channel_id,
+                time_bucket('1 hour', timestamp) AS bucket,
+                FIRST(severity, timestamp) AS first_severity,
+                LAST(severity, timestamp) AS last_severity,
+                COUNT(*) AS event_count,
+                MIN(timestamp) AS first_event_time,
+                MAX(timestamp) AS last_event_time
+            FROM event
+            GROUP BY channel_id, bucket;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202604041000-PRD-event-timeline-aggregate-2" author="eventify" runInTransaction="false">
+        <comment>Add hourly refresh policy for event_timeline_hourly</comment>
+        <sql>
+            SELECT add_continuous_aggregate_policy('event_timeline_hourly',
+                start_offset => INTERVAL '7 days',
+                end_offset => INTERVAL '1 hour',
+                schedule_interval => INTERVAL '1 hour');
+        </sql>
+    </changeSet>
+
+    <changeSet id="202604041000-PRD-event-timeline-aggregate-3" author="eventify" runInTransaction="false">
+        <comment>Enable compression on event_timeline_hourly and add compression policy</comment>
+        <sql>
+            ALTER MATERIALIZED VIEW event_timeline_hourly SET (
+                timescaledb.compress,
+                timescaledb.compress_segmentby = 'channel_id'
+            );
+            SELECT add_compression_policy('event_timeline_hourly', INTERVAL '30 days');
+        </sql>
+    </changeSet>
+
+    <changeSet id="202604041000-PRD-event-timeline-aggregate-4" author="eventify">
+        <comment>Add composite index for channel and time bucket queries</comment>
+        <sql>
+            CREATE INDEX idx_timeline_hourly_channel_bucket
+            ON event_timeline_hourly (channel_id, bucket DESC);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
