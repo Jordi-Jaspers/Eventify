@@ -44,4 +44,10 @@ public class MonitorResult {
      */
     private WatchlistConfiguration configuration;
 
+    /**
+     * The LOD bucket size used for aggregate queries (e.g. PT30M, PT2H, PT4H).
+     * Null when raw event data is used (ranges <= 4h).
+     */
+    private BucketSize bucketSize;
+
 }

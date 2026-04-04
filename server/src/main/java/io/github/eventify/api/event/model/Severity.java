@@ -20,6 +20,24 @@ public enum Severity {
     private final int priority;
 
     /**
+     * Parses a severity string, returning {@link #NO_DATA} for null or unrecognised values.
+     *
+     * @param text the severity name (nullable)
+     * @return the matching Severity, or NO_DATA
+     */
+    public static Severity fromString(final String text) {
+        Severity result = NO_DATA;
+        if (text != null) {
+            try {
+                result = valueOf(text);
+            } catch (final IllegalArgumentException e) {
+                result = NO_DATA;
+            }
+        }
+        return result;
+    }
+
+    /**
      * Returns the worst (highest priority) severity between two.
      * Lower priority number = worse severity.
      *

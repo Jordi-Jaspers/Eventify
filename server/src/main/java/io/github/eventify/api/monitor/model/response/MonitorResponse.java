@@ -1,5 +1,6 @@
 package io.github.eventify.api.monitor.model.response;
 
+import io.github.eventify.api.monitor.model.BucketSize;
 import io.github.eventify.api.monitor.model.MonitorFilters;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -61,6 +62,12 @@ public class MonitorResponse {
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     private DashboardResponse dashboard;
+
+    @Schema(
+        description = "LOD bucket size (e.g. PT30M, PT2H, PT4H). Null when using raw events.",
+        example = "PT30M"
+    )
+    private BucketSize bucketSize;
 
     @Schema(
         description = "Applied filter settings",

@@ -13,7 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Utility class for building timelines from events.
+ * Utility class for building timelines from raw events.
  * Creates a sequence of severity durations representing state changes over time.
  */
 @UtilityClass

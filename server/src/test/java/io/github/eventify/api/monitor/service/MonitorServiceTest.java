@@ -7,10 +7,12 @@ import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.repository.EventRepository;
+import io.github.eventify.api.monitor.model.BucketSize;
 import io.github.eventify.api.monitor.model.MonitorFilters;
 import io.github.eventify.api.monitor.model.MonitorResult;
 import io.github.eventify.api.monitor.model.TimeRange;
 import io.github.eventify.api.monitor.model.request.MonitorRequest;
+import io.github.eventify.api.monitor.repository.TimelineAggregateRepository;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
@@ -38,8 +40,11 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for MonitorService business logic.
@@ -52,17 +57,20 @@ class MonitorServiceTest extends UnitTest {
     private WatchlistRepository watchlistRepository;
     private ChannelRepository channelRepository;
     private EventRepository eventRepository;
+    private TimelineAggregateRepository timelineAggregateRepository;
 
     @BeforeEach
     void setUp() {
         watchlistRepository = mock(WatchlistRepository.class);
         channelRepository = mock(ChannelRepository.class);
         eventRepository = mock(EventRepository.class);
+        timelineAggregateRepository = mock(TimelineAggregateRepository.class);
 
         monitorService = new MonitorService(
             watchlistRepository,
             channelRepository,
-            eventRepository
+            eventRepository,
+            timelineAggregateRepository
         );
     }
 
@@ -563,6 +571,184 @@ class MonitorServiceTest extends UnitTest {
             // Then: Groups should be empty
             assertThat(result.getConfiguration().getChannels(), hasSize(1));
             assertThat(result.getConfiguration().getGroups(), is(empty()));
+        }
+    }
+
+
+    @Nested
+    @DisplayName("LOD Routing")
+    class LodRouting {
+
+        @Test
+        @DisplayName("Should use raw events for last 2h range")
+        void shouldUseRawEventsForLast2hRange() {
+            // Given: Watchlist with channels, 2h time range
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
+            final Channel channel = aChannel(1L, "test-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_2H);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(channel));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(new ArrayList<>());
+
+            // When: Getting monitor data for 2h range
+            monitorService.monitorWatchlist(request);
+
+            // Then: eventRepository should be called (raw events path)
+            verify(eventRepository).findEventsWithLastBeforeRange(anyList(), any(), any());
+            // And: timelineAggregateRepository should NOT be called
+            verify(timelineAggregateRepository, never()).findBucketsForChannels(anyList(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("Should use raw events for last 4h range")
+        void shouldUseRawEventsForLast4hRange() {
+            // Given: Watchlist with channels, 4h time range
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
+            final Channel channel = aChannel(1L, "test-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_4H);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(channel));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(new ArrayList<>());
+
+            // When: Getting monitor data for 4h range
+            monitorService.monitorWatchlist(request);
+
+            // Then: eventRepository should be called (raw events path)
+            verify(eventRepository).findEventsWithLastBeforeRange(anyList(), any(), any());
+            // And: timelineAggregateRepository should NOT be called
+            verify(timelineAggregateRepository, never()).findBucketsForChannels(anyList(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("Should use aggregate query for last 12h range")
+        void shouldUseAggregateQueryForLast12hRange() {
+            // Given: Watchlist with channels, 12h time range
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
+            final Channel channel = aChannel(1L, "test-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_12H);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(channel));
+            given(timelineAggregateRepository.findBucketsForChannels(anyList(), any(), any(), any()))
+                .willReturn(List.of());
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(new ArrayList<>());
+
+            // When: Getting monitor data for 12h range
+            monitorService.monitorWatchlist(request);
+
+            // Then: timelineAggregateRepository should be called (aggregate path)
+            verify(timelineAggregateRepository).findBucketsForChannels(anyList(), any(), any(), any());
+            // And: eventRepository is called only for the recent stitch window (last ~1h), not the full 12h range
+            final OffsetDateTime twoHoursAgo = OffsetDateTime.now().minusHours(2);
+            verify(eventRepository).findEventsWithLastBeforeRange(
+                anyList(),
+                argThat(start -> start.isAfter(twoHoursAgo)),
+                any()
+            );
+        }
+
+        @Test
+        @DisplayName("Should use aggregate query for last 30d range")
+        void shouldUseAggregateQueryForLast30dRange() {
+            // Given: Watchlist with channels, 30d time range
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
+            final Channel channel = aChannel(1L, "test-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_30D);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(channel));
+            given(timelineAggregateRepository.findBucketsForChannels(anyList(), any(), any(), any()))
+                .willReturn(List.of());
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(new ArrayList<>());
+
+            // When: Getting monitor data for 30d range
+            monitorService.monitorWatchlist(request);
+
+            // Then: timelineAggregateRepository should be called
+            verify(timelineAggregateRepository).findBucketsForChannels(anyList(), any(), any(), any());
+            // And: eventRepository is called only for the recent stitch window (last ~1h), not the full 30d range
+            final OffsetDateTime twoHoursAgo = OffsetDateTime.now().minusHours(2);
+            verify(eventRepository).findEventsWithLastBeforeRange(
+                anyList(),
+                argThat(start -> start.isAfter(twoHoursAgo)),
+                any()
+            );
+        }
+
+        @Test
+        @DisplayName("Should set bucketSize on result for aggregate range (24h → PT30M)")
+        void shouldSetBucketSizeOnResultForAggregateRange() {
+            // Given: Watchlist with channels, 24h time range (→ PT30M buckets)
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
+            final Channel channel = aChannel(1L, "test-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(channel));
+            given(timelineAggregateRepository.findBucketsForChannels(anyList(), any(), any(), any()))
+                .willReturn(List.of());
+
+            // When: Getting monitor data for 24h range
+            final MonitorResult result = monitorService.monitorWatchlist(request);
+
+            // Then: bucketSize should be PT30M
+            assertThat(result.getBucketSize(), is(equalTo(BucketSize.PT30M)));
+        }
+
+        @Test
+        @DisplayName("Should not set bucketSize for raw range (4h → null)")
+        void shouldNotSetBucketSizeForRawRange() {
+            // Given: Watchlist with channels, 4h time range (raw events)
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
+            final Channel channel = aChannel(1L, "test-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_4H);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(channel));
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(new ArrayList<>());
+
+            // When: Getting monitor data for 4h range
+            final MonitorResult result = monitorService.monitorWatchlist(request);
+
+            // Then: bucketSize should be null (no aggregation)
+            assertThat(result.getBucketSize(), is(nullValue()));
+        }
+
+        @Test
+        @DisplayName("Should stitch live data with aggregate for last 12h live range")
+        void shouldStitchLiveDataWithAggregateForLast12hLiveRange() {
+            // Given: Watchlist with channels, 12h live time range
+            final User user = aValidUser();
+            final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user, null);
+            final Channel channel = aChannel(1L, "test-channel", ChannelStatus.ACTIVE);
+            final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_12H);
+
+            given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
+            given(channelRepository.findAllById(anyList())).willReturn(List.of(channel));
+            given(timelineAggregateRepository.findBucketsForChannels(anyList(), any(), any(), any()))
+                .willReturn(List.of());
+            given(eventRepository.findEventsWithLastBeforeRange(anyList(), any(), any()))
+                .willReturn(new ArrayList<>());
+
+            // When: Getting monitor data for live 12h range
+            monitorService.monitorWatchlist(request);
+
+            // Then: BOTH aggregate repo (historical) AND event repo (last hour raw stitching) should be called
+            verify(timelineAggregateRepository).findBucketsForChannels(anyList(), any(), any(), any());
+            verify(eventRepository).findEventsWithLastBeforeRange(anyList(), any(), any());
         }
     }
 
