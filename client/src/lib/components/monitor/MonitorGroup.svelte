@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Radio, Folder, ChevronRight } from '@lucide/svelte';
+	import { Folder, ChevronRight } from '@lucide/svelte';
 	import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '$lib/components/ui/collapsible';
 	import TimelineBar from './TimelineBar.svelte';
@@ -13,10 +13,11 @@
 		channels: ChannelResponse[];
 		rangeStart: Date;
 		rangeEnd: Date;
+		isAggregated?: boolean;
 		onSegmentClick?: (channelId: number, name: string, severity: Severity | null, duration: TimelineDuration, timeline: TimelineDuration[]) => void;
 	}
 
-	let { name, timeline, channels, rangeStart, rangeEnd, onSegmentClick }: Props = $props();
+	let { name, timeline, channels, rangeStart, rangeEnd, isAggregated = false, onSegmentClick }: Props = $props();
 
 	let isExpanded = $state(false);
 
@@ -48,6 +49,7 @@
 					{timeline}
 					{rangeStart}
 					{rangeEnd}
+					{isAggregated}
 				/>
 			</div>
 
@@ -86,6 +88,7 @@
 					status={channel.status ?? null}
 					{rangeStart}
 					{rangeEnd}
+					{isAggregated}
 					onSegmentClick={onSegmentClick 
 						? (d) => onSegmentClick(channel.channelId!, channel.channelName!, channel.currentSeverity ?? null, d, channel.timeline!.durations!)
 						: undefined}

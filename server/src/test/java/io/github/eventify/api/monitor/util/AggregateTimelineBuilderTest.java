@@ -9,6 +9,7 @@ import io.github.eventify.api.monitor.model.TimelineDuration;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -55,8 +56,7 @@ class AggregateTimelineBuilderTest extends UnitTest {
         final TimeSpan range = new TimeSpan(rangeStart, rangeEnd);
         final BucketSize bucketSize = BucketSize.PT30M;
 
-        final OffsetDateTime bucketTime = rangeStart;
-        final TimelineBucket bucket = aTimelineBucket(1L, bucketTime, "OK", "OK", 5L);
+        final TimelineBucket bucket = aTimelineBucket(1, rangeStart, "OK", "OK", 5L);
 
         // When: Building timeline from single bucket
         final Timeline timeline = AggregateTimelineBuilder.fromBuckets(List.of(bucket), range, bucketSize);
@@ -79,9 +79,9 @@ class AggregateTimelineBuilderTest extends UnitTest {
         final BucketSize bucketSize = BucketSize.PT30M;
 
         final List<TimelineBucket> buckets = List.of(
-            aTimelineBucket(1L, rangeStart, "OK", "OK", 3L),
-            aTimelineBucket(1L, rangeStart.plusMinutes(30), "OK", "OK", 2L),
-            aTimelineBucket(1L, rangeStart.plusMinutes(60), "OK", "OK", 4L)
+            aTimelineBucket(1, rangeStart, "OK", "OK", 3L),
+            aTimelineBucket(1, rangeStart.plusMinutes(30), "OK", "OK", 2L),
+            aTimelineBucket(1, rangeStart.plusMinutes(60), "OK", "OK", 4L)
         );
 
         // When: Building timeline from consecutive same-severity buckets
@@ -105,8 +105,8 @@ class AggregateTimelineBuilderTest extends UnitTest {
 
         // Bucket at start and bucket 2 hours later — 1.5h gap between them
         final List<TimelineBucket> buckets = List.of(
-            aTimelineBucket(1L, rangeStart, "OK", "OK", 2L),
-            aTimelineBucket(1L, rangeStart.plusHours(2), "WARNING", "WARNING", 3L)
+            aTimelineBucket(1, rangeStart, "OK", "OK", 2L),
+            aTimelineBucket(1, rangeStart.plusHours(2), "WARNING", "WARNING", 3L)
         );
 
         // When: Building timeline
@@ -134,8 +134,8 @@ class AggregateTimelineBuilderTest extends UnitTest {
         // Prior bucket is before range start
         final OffsetDateTime priorBucketTime = rangeStart.minusMinutes(30);
         final List<TimelineBucket> buckets = List.of(
-            aTimelineBucket(1L, priorBucketTime, "WARNING", "WARNING", 2L), // prior
-            aTimelineBucket(1L, rangeStart.plusHours(2), "OK", "OK", 3L)   // in range
+            aTimelineBucket(1, priorBucketTime, "WARNING", "WARNING", 2L), // prior
+            aTimelineBucket(1, rangeStart.plusHours(2), "OK", "OK", 3L)   // in range
         );
 
         // When: Building timeline from buckets including prior bucket
@@ -156,7 +156,7 @@ class AggregateTimelineBuilderTest extends UnitTest {
         final TimeSpan range = new TimeSpan(rangeStart, rangeEnd);
         final BucketSize bucketSize = BucketSize.PT30M;
 
-        final TimelineBucket bucket = aTimelineBucket(1L, rangeStart, "CRITICAL", "CRITICAL", 2L);
+        final TimelineBucket bucket = aTimelineBucket(1, rangeStart, "CRITICAL", "CRITICAL", 2L);
 
         // When: Building timeline in live mode
         final Timeline timeline = AggregateTimelineBuilder.fromBuckets(List.of(bucket), range, bucketSize);
@@ -167,26 +167,26 @@ class AggregateTimelineBuilderTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should not extend last duration in non-live mode")
-    void shouldNotExtendLastDurationInNonLiveMode() {
+    @DisplayName("Should extend last duration to range end in non-live mode")
+    void shouldExtendLastDurationToRangeEndInNonLiveMode() {
         // Given: One bucket in a non-live range (end is in the past)
-        final OffsetDateTime rangeEnd = OffsetDateTime.now().minusMinutes(5);
+        final OffsetDateTime rangeEnd = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(5);
         final OffsetDateTime rangeStart = rangeEnd.minusHours(12);
         final TimeSpan range = new TimeSpan(rangeStart, rangeEnd);
         final BucketSize bucketSize = BucketSize.PT30M;
 
-        // Place bucket at range start — the duration should end at bucket + bucketSize
-        final TimelineBucket bucket = aTimelineBucket(1L, rangeStart, "OK", "OK", 3L);
+        // Place bucket at range start — the duration should extend to rangeEnd
+        final TimelineBucket bucket = aTimelineBucket(1, rangeStart, "OK", "OK", 3L);
 
         // When: Building timeline in non-live mode
         final Timeline timeline = AggregateTimelineBuilder.fromBuckets(List.of(bucket), range, bucketSize);
 
-        // Then: Last OK duration should end at bucket time + bucketSize (not at rangeEnd)
+        // Then: Last OK duration should extend to rangeEnd (last known severity fills the gap)
         final TimelineDuration okDuration = timeline.getDurations().stream()
             .filter(d -> d.getSeverity() == Severity.OK)
             .findFirst()
             .orElseThrow();
-        assertThat(okDuration.getEndTime(), is(equalTo(rangeStart.plus(bucketSize.getDuration()))));
+        assertThat(okDuration.getEndTime(), is(equalTo(rangeEnd)));
     }
 
     @Test
@@ -200,7 +200,7 @@ class AggregateTimelineBuilderTest extends UnitTest {
 
         // Prior bucket ends in CRITICAL state
         final TimelineBucket priorBucket = aTimelineBucket(
-            1L,
+            1,
             rangeStart.minusMinutes(30),
             "OK",
             "CRITICAL",
@@ -220,48 +220,20 @@ class AggregateTimelineBuilderTest extends UnitTest {
     // ========================= HELPER METHODS =========================
 
     private TimelineBucket aTimelineBucket(
-        final Long channelId,
+        final long channelId,
         final OffsetDateTime bucket,
         final String firstSeverity,
         final String lastSeverity,
-        final Long eventCount
+        final long eventCount
     ) {
-        return new TimelineBucket() {
-
-            @Override
-            public Long getChannelId() {
-                return channelId;
-            }
-
-            @Override
-            public OffsetDateTime getBucket() {
-                return bucket;
-            }
-
-            @Override
-            public String getFirstSeverity() {
-                return firstSeverity;
-            }
-
-            @Override
-            public String getLastSeverity() {
-                return lastSeverity;
-            }
-
-            @Override
-            public Long getEventCount() {
-                return eventCount;
-            }
-
-            @Override
-            public OffsetDateTime getFirstEventTime() {
-                return bucket;
-            }
-
-            @Override
-            public OffsetDateTime getLastEventTime() {
-                return bucket.plusMinutes(29);
-            }
-        };
+        return TimelineBucket.of(
+            channelId,
+            bucket,
+            firstSeverity,
+            lastSeverity,
+            eventCount,
+            bucket,
+            bucket.plusMinutes(29)
+        );
     }
 }

@@ -1965,6 +1965,12 @@ export interface components {
             dashboard: components["schemas"]["DashboardResponse"];
             /** @description Applied filter settings */
             filters: components["schemas"]["MonitorFilters"];
+            /**
+             * @description LOD bucket size (e.g. PT30M, PT2H, PT4H). Null when using raw events.
+             * @example PT30M
+             * @enum {string}
+             */
+            bucketSize?: "PT30M" | "PT2H" | "PT4H";
         };
         /** @description Event search result */
         EventSearchResponse: {
@@ -2994,6 +3000,11 @@ export interface components {
             /** @description Top 5 API keys by request volume */
             topKeysByUsage?: components["schemas"]["ApiKeyResponse"][];
         };
+        /**
+         * @description LOD bucket size for timeline aggregation
+         * @enum {string}
+         */
+        BucketSize: "PT30M" | "PT2H" | "PT4H";
     };
     responses: never;
     parameters: never;

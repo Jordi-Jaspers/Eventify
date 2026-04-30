@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -31,11 +32,9 @@ public enum BucketSize {
      */
     @JsonCreator
     public static BucketSize fromValue(final String value) {
-        for (final BucketSize size : values()) {
-            if (size.value.equals(value)) {
-                return size;
-            }
-        }
-        throw new IllegalArgumentException("Unknown BucketSize: " + value);
+        return Arrays.stream(values())
+            .filter(size -> size.value.equals(value))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Unknown BucketSize: " + value));
     }
 }

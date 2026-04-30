@@ -5,9 +5,10 @@
 	import { getUserMonitor } from '$lib/api/monitor/UserMonitorController';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { AlertCircle, Edit, Share2, LayoutList } from '@lucide/svelte';
+	import { AlertCircle, Edit, Share2, LayoutList, LoaderCircle, SearchX } from '@lucide/svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { createMonitorPageService } from '$lib/api/monitor/service/MonitorPageService.svelte';
+	import type { TimelineDuration, Severity } from '$lib/api/models';
 	import {
 		MonitorRow,
 		MonitorGroup,
@@ -16,8 +17,10 @@
 		ConfigurePopover,
 		TimeAxisHeader,
 		DurationDetailsModal,
+		ZoomBreadcrumb,
 		calculateTimeTicks,
-		getCurrentSeverityFromTimeline
+		getCurrentSeverityFromTimeline,
+		formatZoomRangeLabel
 	} from '$lib/components/monitor';
 
 	// Create monitor service with user-specific configuration
@@ -38,6 +41,28 @@
 		service.rangeStart && service.rangeEnd ? calculateTimeTicks(service.rangeStart, service.rangeEnd) : []
 	);
 
+	// Current zoom label for breadcrumb display
+	const currentZoomLabel: string = $derived(
+		service.rangeStart && service.rangeEnd
+			? formatZoomRangeLabel(service.rangeStart, service.rangeEnd)
+			: 'Current view'
+	);
+
+	// Segment click handler — zoom in if aggregated, otherwise open modal
+	function handleSegmentClick(
+		channelId: number,
+		channelName: string,
+		severity: Severity | null,
+		duration: TimelineDuration,
+		timeline: TimelineDuration[]
+	): void {
+		if (service.canZoomIn) {
+			service.zoomIn(duration);
+		} else {
+			service.openDetailsModal(channelId, channelName, severity, duration, timeline);
+		}
+	}
+
 	// Initial load
 	onMount(() => {
 		service.initializePage();
@@ -52,10 +77,10 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
-		<div class="flex items-center justify-between mb-8">
+		<div class="flex items-center justify-between mb-4">
 			<div>
 				<h1 class="text-3xl font-bold text-primary">Monitor</h1>
-				<p class="text-muted-foreground mt-2">
+				<p class="text-muted-foreground mt-1">
 					Real-time monitoring with timeline visualization
 				</p>
 			</div>
@@ -111,9 +136,19 @@
 			</div>
 		</div>
 
+		<!-- Zoom Breadcrumb -->
+		{#if service.currentZoomLevel > 0}
+			<ZoomBreadcrumb
+				breadcrumbs={service.zoomBreadcrumbs}
+				currentLabel={currentZoomLabel}
+				onNavigate={(level) => service.zoomOut(level)}
+			/>
+		{/if}
+
 		<!-- Loading State -->
 		{#if service.loading}
 			<div class="flex items-center justify-center py-12">
+				<LoaderCircle class="h-6 w-6 text-muted-foreground animate-spin mr-2" />
 				<div class="text-muted-foreground">Loading...</div>
 			</div>
 		{:else if service.noWatchlistSelected}
@@ -148,7 +183,8 @@
 						rangeEnd={service.rangeEnd} 
 						{timeTicks} 
 						isLive={service.isLive} 
-						lastUpdated={service.lastUpdated} 
+						lastUpdated={service.lastUpdated}
+						bucketSizeLabel={service.bucketSizeLabel}
 					/>
 
 					<div class="divide-y divide-border/30">
@@ -161,6 +197,7 @@
 							status={null}
 							rangeStart={service.rangeStart}
 							rangeEnd={service.rangeEnd}
+							isAggregated={service.isAggregated}
 						/>
 
 						<!-- Grouped View -->
@@ -173,7 +210,9 @@
 										channels={group.channels}
 										rangeStart={service.rangeStart}
 										rangeEnd={service.rangeEnd}
-										onSegmentClick={(channelId, name, severity, d, timeline) => service.openDetailsModal(channelId, name, severity, d, timeline)}
+										isAggregated={service.isAggregated}
+										onSegmentClick={(channelId, name, severity, d, timeline) =>
+											handleSegmentClick(channelId, name, severity, d, timeline)}
 									/>
 								{/if}
 							{/each}
@@ -191,7 +230,8 @@
 										status={channel.status ?? null}
 										rangeStart={service.rangeStart}
 										rangeEnd={service.rangeEnd}
-										onSegmentClick={(d) => service.openDetailsModal(channel.channelId!, channel.channelName!, channel.currentSeverity ?? null, d, channel.timeline!.durations!)}
+										isAggregated={service.isAggregated}
+										onSegmentClick={(d) => handleSegmentClick(channel.channelId!, channel.channelName!, channel.currentSeverity ?? null, d, channel.timeline!.durations!)}
 									/>
 								{/if}
 							{/each}
@@ -199,8 +239,9 @@
 
 						<!-- No Data State -->
 						{#if !service.hasMonitorData}
-							<div class="p-8 text-center text-muted-foreground">
-								No data available for the selected filters
+							<div class="p-8 text-center flex flex-col items-center gap-2 text-muted-foreground">
+								<SearchX class="h-8 w-8 opacity-40" />
+								<span class="text-sm">No data available for the selected filters</span>
 							</div>
 						{/if}
 					</div>

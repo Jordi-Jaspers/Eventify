@@ -81,6 +81,7 @@ export type EventSearchResponse = components['schemas']['EventSearchResponse'];
 export type PageResourceEventSearchResponse = components['schemas']['PageResourceEventSearchResponse'];
 export type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
 export type Severity = 'CRITICAL' | 'WARNING' | 'OK' | 'NO_DATA';
+export type BucketSize = NonNullable<MonitorResponse['bucketSize']>;
 
 // ================ Pagination ===================
 export type SearchInput = components['schemas']['SearchInput'];

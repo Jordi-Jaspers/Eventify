@@ -8,9 +8,10 @@
 		timeTicks: TimeTick[];
 		isLive: boolean;
 		lastUpdated: Date | null;
+		bucketSizeLabel?: string | null;
 	}
 
-	let { rangeStart, rangeEnd, timeTicks, isLive, lastUpdated }: Props = $props();
+	let { rangeStart, rangeEnd, timeTicks, isLive, lastUpdated, bucketSizeLabel = null }: Props = $props();
 </script>
 
 <!-- Grid layout matching MonitorRow: 32px icon, minmax name, 1fr timeline, 32px status -->
@@ -69,5 +70,9 @@
 	</div>
 
 	<!-- Status placeholder -->
-	<div></div>
+	<div class="flex items-center justify-center">
+		{#if bucketSizeLabel}
+			<span class="text-[10px] text-muted-foreground/70 font-medium">{bucketSizeLabel}</span>
+		{/if}
+	</div>
 </div>

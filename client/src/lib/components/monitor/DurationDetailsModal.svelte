@@ -33,13 +33,6 @@
 
 	const service = createDurationService();
 	
-	// Derived values for reactivity - service getters need to be tracked
-	const serviceDurations = $derived(service.durations);
-	const serviceCanGoPrevious = $derived(service.canGoPrevious);
-	const serviceCanGoNext = $derived(service.canGoNext);
-	const serviceHasPrevious = $derived(service.hasPrevious);
-	const serviceLoading = $derived(service.loading);
-
 	// Load data when modal opens
 	let wasOpen = false;
 	$effect(() => {
@@ -133,29 +126,29 @@
 
 			<!-- Mini Timeline -->
 			<div class="pt-2 relative min-h-[60px]">
-				{#if serviceLoading && serviceDurations.length === 0}
-					<div class="absolute inset-0 flex items-center justify-center z-10">
-						<LoaderCircle class="h-6 w-6 animate-spin text-primary" />
+			{#if service.loading && service.durations.length === 0}
+				<div class="absolute inset-0 flex items-center justify-center z-10">
+					<LoaderCircle class="h-6 w-6 animate-spin text-primary" />
+				</div>
+			{:else}
+				<!-- Show loading overlay if loading more but keep content -->
+				{#if service.loading}
+					<div class="absolute inset-0 bg-background/20 z-20 flex items-center justify-center backdrop-blur-[1px]">
+						<LoaderCircle class="h-5 w-5 animate-spin text-primary" />
 					</div>
-				{:else}
-					<!-- Show loading overlay if loading more but keep content -->
-					{#if serviceLoading}
-						<div class="absolute inset-0 bg-background/20 z-20 flex items-center justify-center backdrop-blur-[1px]">
-							<LoaderCircle class="h-5 w-5 animate-spin text-primary" />
-						</div>
-					{/if}
-					
-					<MiniTimeline 
-						durations={serviceDurations} 
-						selectedDuration={selectedDuration}
-                        canGoPrevious={serviceCanGoPrevious}
-                        canGoNext={serviceCanGoNext}
-                        hasPrevious={serviceHasPrevious}
-						onDurationClick={(d) => service.selectDuration(d)}
-                        onPrevious={() => service.goToPrevious()}
-                        onNext={() => service.goToNext()}
-					/>
 				{/if}
+				
+				<MiniTimeline 
+					durations={service.durations} 
+					selectedDuration={selectedDuration}
+                    canGoPrevious={service.canGoPrevious}
+                    canGoNext={service.canGoNext}
+                    hasPrevious={service.hasPrevious}
+					onDurationClick={(d) => service.selectDuration(d)}
+                    onPrevious={() => service.goToPrevious()}
+                    onNext={() => service.goToNext()}
+				/>
+			{/if}
 			</div>
 		</Dialog.Header>
 

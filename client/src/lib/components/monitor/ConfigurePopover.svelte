@@ -12,8 +12,7 @@
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { DateTimePicker } from '$lib/components/ui/date-time-picker';
 	import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
-
-	type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
+	import type { TimeRange } from '$lib/api/models';
 
 	interface Props {
 		timeRange: TimeRange;

@@ -1,8 +1,29 @@
 import type {
 	TimelineDuration,
 	Severity,
-	Timeline
+	Timeline,
+	TimeRange
 } from '$lib/api/models';
+
+// ============ Zoom Types ============
+
+export interface ZoomEntry {
+	timeRange: TimeRange;
+	customStartTime: string;
+	customEndTime: string;
+	label: string;
+}
+
+export interface ZoomBreadcrumb {
+	level: number;
+	label: string;
+}
+
+export const BUCKET_INFO: Record<string, { label: string; zoomWindowHours: number }> = {
+	PT4H: { label: '4h resolution', zoomWindowHours: 24 },
+	PT2H: { label: '2h resolution', zoomWindowHours: 12 },
+	PT30M: { label: '30m resolution', zoomWindowHours: 3 }
+};
 
 /**
  * Segment position and width as percentage of time range
@@ -42,8 +63,11 @@ export function calculateSegmentStyle(
 ): SegmentStyle {
 	const totalMs: number = rangeEnd.getTime() - rangeStart.getTime();
 	const startOffset: number = new Date(duration.startTime).getTime() - rangeStart.getTime();
-	const segmentDuration: number =
-		new Date(duration.endTime).getTime() - new Date(duration.startTime).getTime();
+	// Use rangeEnd for ongoing durations (null endTime)
+	const endMs: number = duration.endTime
+		? new Date(duration.endTime).getTime()
+		: rangeEnd.getTime();
+	const segmentDuration: number = endMs - new Date(duration.startTime).getTime();
 
 	return {
 		left: (startOffset / totalMs) * 100,
@@ -71,18 +95,6 @@ export function getSeverityColors(severity: Severity): {
 	}
 }
 
-/**
- * Format timestamp for display (European format)
- */
-export function formatTimestamp(isoString: string): string {
-	const date: Date = new Date(isoString);
-	return date.toLocaleString('en-GB', {
-		month: 'short',
-		day: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit'
-	});
-}
 
 /**
  * Calculate time axis ticks based on range
@@ -136,4 +148,48 @@ export function calculateTimeTicks(rangeStart: Date, rangeEnd: Date): TimeTick[]
 	}
 
 	return ticks;
+}
+
+/**
+ * Format a date range as a human-readable zoom label
+ */
+export function formatZoomRangeLabel(start: Date, end: Date): string {
+	const rangeHours: number = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+	if (rangeHours <= 24) {
+		return `${start.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })} ${start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}-${end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+	}
+	return `${start.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}`;
+}
+
+/**
+ * Merge consecutive same-severity durations that are sub-pixel wide
+ */
+export function mergeSubPixelDurations(
+	durations: TimelineDuration[],
+	rangeStart: Date,
+	rangeEnd: Date,
+	containerWidth: number
+): TimelineDuration[] {
+	if (containerWidth <= 0 || durations.length === 0) return durations;
+
+	const totalMs: number = rangeEnd.getTime() - rangeStart.getTime();
+	const result: TimelineDuration[] = [];
+	let current: TimelineDuration | null = null;
+
+	for (const d of durations) {
+		// Use rangeEnd for ongoing durations (null endTime)
+		const endMs: number = d.endTime ? new Date(d.endTime).getTime() : rangeEnd.getTime();
+		const widthPx: number =
+			((endMs - new Date(d.startTime).getTime()) / totalMs) *
+			containerWidth;
+
+		if (current && current.severity === d.severity && widthPx < 1) {
+			current = { ...current, endTime: d.endTime } as TimelineDuration;
+		} else {
+			if (current) result.push(current);
+			current = { ...d } as TimelineDuration;
+		}
+	}
+	if (current) result.push(current);
+	return result;
 }

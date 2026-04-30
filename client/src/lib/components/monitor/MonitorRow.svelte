@@ -16,10 +16,11 @@
 		status: ChannelStatus | null;
 		rangeStart: Date;
 		rangeEnd: Date;
+		isAggregated?: boolean;
 		onSegmentClick?: (duration: TimelineDuration) => void;
 	}
 
-	let { type, name, timeline, currentSeverity, status, rangeStart, rangeEnd, onSegmentClick }: Props = $props();
+	let { type, name, timeline, currentSeverity, status, rangeStart, rangeEnd, isAggregated = false, onSegmentClick }: Props = $props();
 
 	const isPaused: boolean = $derived(status === 'PAUSED');
 
@@ -70,6 +71,7 @@
 				{timeline}
 				{rangeStart}
 				{rangeEnd}
+				{isAggregated}
 				{onSegmentClick}
 			/>
 		{/if}

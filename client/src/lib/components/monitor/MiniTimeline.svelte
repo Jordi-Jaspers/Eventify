@@ -17,27 +17,7 @@
         onNext: () => void;
 	}
 
-	let props: Props = $props();
-	
-	// Derived values to maintain reactivity from props
-	const durations = $derived(props.durations);
-	const selectedDuration = $derived(props.selectedDuration);
-	const canGoPrevious = $derived(props.canGoPrevious);
-	const canGoNext = $derived(props.canGoNext);
-	const hasPrevious = $derived(props.hasPrevious);
-	const onDurationClick = $derived(props.onDurationClick);
-	const onPrevious = $derived(props.onPrevious);
-	const onNext = $derived(props.onNext);
-	
-	// Debug logging
-	$effect(() => {
-		console.log('[MiniTimeline] props changed:', {
-			canGoPrevious: props.canGoPrevious,
-			canGoNext: props.canGoNext,
-			derivedCanGoPrevious: canGoPrevious,
-			derivedCanGoNext: canGoNext
-		});
-	});
+	let { durations, selectedDuration, canGoPrevious, canGoNext, hasPrevious, onDurationClick, onPrevious, onNext }: Props = $props();
 
     const COLLAPSE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
 

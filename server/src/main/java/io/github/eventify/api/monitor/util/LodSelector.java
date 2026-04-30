@@ -32,16 +32,16 @@ public class LodSelector {
     public BucketSize selectBucket(final TimeSpan timeRange) {
         final Duration effective = Duration.between(timeRange.getStart(), timeRange.getEnd()).abs();
 
-        final BucketSize result;
         if (effective.compareTo(Duration.ofHours(4)) <= 0) {
-            result = null;
-        } else if (effective.compareTo(Duration.ofHours(24)) <= 0) {
-            result = BucketSize.PT30M;
-        } else if (effective.compareTo(Duration.ofDays(7)) <= 0) {
-            result = BucketSize.PT2H;
-        } else {
-            result = BucketSize.PT4H;
+            return null;
         }
-        return result;
+        return resolveAggregateBucket(effective);
+    }
+
+    private BucketSize resolveAggregateBucket(final Duration effective) {
+        if (effective.compareTo(Duration.ofHours(24)) <= 0) {
+            return BucketSize.PT30M;
+        }
+        return effective.compareTo(Duration.ofDays(7)) <= 0 ? BucketSize.PT2H : BucketSize.PT4H;
     }
 }

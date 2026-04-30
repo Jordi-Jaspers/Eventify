@@ -13,6 +13,7 @@ export function createDurationService() {
 
     let currentChannelId: number | null = null;
     let currentOrgId: number | undefined = undefined;
+    let fetchRequestId: number = 0;
 
     const selectedDuration = $derived(
         selectedIndex >= 0 && selectedIndex < durations.length 
@@ -26,9 +27,10 @@ export function createDurationService() {
     // Can navigate to next: either move within window OR fetch newer window
     const canGoNext = $derived(selectedIndex < durations.length - 1 || hasNext);
 
-    async function fetch(timestamp: string, direction: 'AROUND' | 'BEFORE' | 'AFTER') {
+    async function fetch(timestamp: string, direction: 'AROUND' | 'BEFORE' | 'AFTER'): Promise<void> {
         if (!currentChannelId) return;
         
+        const requestId: number = ++fetchRequestId;
         loading = true;
         error = null;
         
@@ -38,28 +40,34 @@ export function createDurationService() {
                 : () => fetchUserChannelDurations(currentChannelId!, timestamp, direction);
                 
             const response = await fetchFn();
+
+            // Discard stale response if a newer request has been fired
+            if (requestId !== fetchRequestId) return;
             
             durations = response.durations;
             selectedIndex = response.selectedIndex;
             hasPrevious = response.hasPrevious;
             hasNext = response.hasNext;
             
-        } catch (err) {
+        } catch (err: unknown) {
+            if (requestId !== fetchRequestId) return;
             const { message } = handleError(err, 'Failed to load durations');
             error = message;
             toast.error(message);
         } finally {
-            loading = false;
+            if (requestId === fetchRequestId) {
+                loading = false;
+            }
         }
     }
 
-    async function load(channelId: number, orgId: number | undefined, timestamp: string) {
+    async function load(channelId: number, orgId: number | undefined, timestamp: string): Promise<void> {
         currentChannelId = channelId;
         currentOrgId = orgId;
         await fetch(timestamp, 'AROUND');
     }
 
-    async function goToPrevious() {
+    async function goToPrevious(): Promise<void> {
         if (loading) return;
         
         if (selectedIndex > 0) {
@@ -69,7 +77,7 @@ export function createDurationService() {
         }
     }
 
-    async function goToNext() {
+    async function goToNext(): Promise<void> {
         if (loading) return;
         
         if (selectedIndex < durations.length - 1) {
@@ -80,7 +88,7 @@ export function createDurationService() {
         }
     }
     
-    function selectDuration(duration: TimelineDuration) {
+    function selectDuration(duration: TimelineDuration): void {
         const index = durations.findIndex(d => d.startTime === duration.startTime && d.endTime === duration.endTime);
         if (index !== -1) {
             selectedIndex = index;

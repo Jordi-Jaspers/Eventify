@@ -55,12 +55,15 @@ public class AggregateTimelineBuilder {
         final TimeSpan range,
         final Duration bucketDuration
     ) {
+        final OffsetDateTime rangeStart = range.getStart();
+        final OffsetDateTime rangeEnd = range.getEnd();
+
         final List<TimelineBucket> sortedBuckets = buckets.stream()
-            .sorted(Comparator.comparing(TimelineBucket::getBucket))
+            .sorted(Comparator.comparing(TimelineBucket::getBucketTime))
             .toList();
 
-        final TimelineBucket priorBucket = findPriorBucket(sortedBuckets, range.getStart());
-        final List<TimelineBucket> inRangeBuckets = filterInRangeBuckets(sortedBuckets, range);
+        final TimelineBucket priorBucket = findPriorBucket(sortedBuckets, rangeStart);
+        final List<TimelineBucket> inRangeBuckets = filterInRangeBuckets(sortedBuckets, rangeStart, rangeEnd);
         final Severity initialSeverity = resolveInitialSeverity(priorBucket);
 
         if (inRangeBuckets.isEmpty()) {
@@ -69,12 +72,13 @@ public class AggregateTimelineBuilder {
 
         final List<TimelineDuration> durations = buildDurationsFromBuckets(
             inRangeBuckets,
-            range,
+            range.getStart(),
+            range.getEnd(),
             bucketDuration,
             initialSeverity
         );
 
-        if (range.isLive() && !durations.isEmpty()) {
+        if (!durations.isEmpty()) {
             durations.getLast().setEndTime(range.getEnd());
         }
 
@@ -86,17 +90,18 @@ public class AggregateTimelineBuilder {
         final OffsetDateTime rangeStart
     ) {
         return sortedBuckets.stream()
-            .filter(b -> b.getBucket().isBefore(rangeStart))
+            .filter(b -> b.getBucketTime().isBefore(rangeStart))
             .reduce((a, b) -> b)
             .orElse(null);
     }
 
     private List<TimelineBucket> filterInRangeBuckets(
         final List<TimelineBucket> sortedBuckets,
-        final TimeSpan range
+        final OffsetDateTime start,
+        final OffsetDateTime end
     ) {
         return sortedBuckets.stream()
-            .filter(b -> !b.getBucket().isBefore(range.getStart()) && b.getBucket().isBefore(range.getEnd()))
+            .filter(b -> !b.getBucketTime().isBefore(start) && b.getBucketTime().isBefore(end))
             .toList();
     }
 
@@ -109,23 +114,24 @@ public class AggregateTimelineBuilder {
 
     private List<TimelineDuration> buildDurationsFromBuckets(
         final List<TimelineBucket> inRangeBuckets,
-        final TimeSpan range,
+        final OffsetDateTime rangeStart,
+        final OffsetDateTime rangeEnd,
         final Duration bucketDuration,
         final Severity initialSeverity
     ) {
         final List<TimelineDuration> durations = new ArrayList<>();
 
-        final OffsetDateTime firstBucketStart = inRangeBuckets.getFirst().getBucket();
-        if (firstBucketStart.isAfter(range.getStart())) {
-            durations.add(TimelineDuration.of(initialSeverity, range.getStart(), firstBucketStart));
+        final OffsetDateTime firstBucketStart = inRangeBuckets.getFirst().getBucketTime();
+        if (firstBucketStart.isAfter(rangeStart)) {
+            durations.add(TimelineDuration.of(initialSeverity, rangeStart, firstBucketStart));
         }
 
         OffsetDateTime prevEnd = firstBucketStart;
         Severity prevSeverity = null;
 
         for (final TimelineBucket bucket : inRangeBuckets) {
-            final OffsetDateTime bucketStart = bucket.getBucket();
-            final OffsetDateTime bucketEnd = computeBucketEnd(bucketStart, bucketDuration, range.getEnd());
+            final OffsetDateTime bucketStart = bucket.getBucketTime();
+            final OffsetDateTime bucketEnd = computeBucketEnd(bucketStart, bucketDuration, rangeEnd);
 
             if (bucketStart.isAfter(prevEnd)) {
                 durations.add(TimelineDuration.of(Severity.NO_DATA, prevEnd, bucketStart));
@@ -158,10 +164,7 @@ public class AggregateTimelineBuilder {
         final OffsetDateTime rangeEnd
     ) {
         final OffsetDateTime naturalEnd = bucketStart.plus(bucketDuration);
-        if (naturalEnd.isAfter(rangeEnd)) {
-            return rangeEnd;
-        }
-        return naturalEnd;
+        return naturalEnd.isAfter(rangeEnd) ? rangeEnd : naturalEnd;
     }
 
 }

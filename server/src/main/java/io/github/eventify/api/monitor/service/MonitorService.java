@@ -21,6 +21,7 @@ import io.github.eventify.api.monitor.util.TimelineBuilder;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
+import io.github.eventify.common.util.TimeProvider;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -174,7 +175,7 @@ public class MonitorService {
         final TimeSpan timeRange,
         final BucketSize bucketSize
     ) {
-        final OffsetDateTime historicalEnd = OffsetDateTime.now().minus(AGGREGATE_END_OFFSET);
+        final OffsetDateTime historicalEnd = TimeProvider.now().minus(AGGREGATE_END_OFFSET);
 
         final Map<Long, List<TimelineBucket>> bucketsByChannel = fetchAndMergeBuckets(
             allChannelIds,

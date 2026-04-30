@@ -1,5 +1,6 @@
 package io.github.eventify.api.monitor.model;
 
+import io.github.eventify.common.util.TimeProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -23,6 +24,6 @@ public class TimeSpan {
      * Returns true if this is a live time span (end is within 1 minute of now).
      */
     public boolean isLive() {
-        return Duration.between(end, OffsetDateTime.now()).abs().toSeconds() < LIVE_THRESHOLD_SECONDS;
+        return Duration.between(end, TimeProvider.now()).abs().toSeconds() < LIVE_THRESHOLD_SECONDS;
     }
 }

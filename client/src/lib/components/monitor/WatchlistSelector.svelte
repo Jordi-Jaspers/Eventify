@@ -10,7 +10,8 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import { searchWatchlists } from '$lib/api/watchlist/UserWatchlistController';
+	import { searchWatchlists as searchUserWatchlists } from '$lib/api/watchlist/UserWatchlistController';
+	import { searchWatchlists as searchOrgWatchlists } from '$lib/api/watchlist/OrganizationWatchlistController';
 	import type { WatchlistDetailsResponse, SearchInput } from '$lib/api/models';
 	import { toast } from 'svelte-sonner';
 	import { handleError } from '$lib/utils/error-handler';
@@ -18,10 +19,11 @@
 	interface Props {
 		currentWatchlistId: number;
 		currentWatchlistName: string;
+		orgId?: number;
 		onSelect?: (watchlistId: number) => void;
 	}
 
-	let { currentWatchlistId, currentWatchlistName, onSelect }: Props = $props();
+	let { currentWatchlistId, currentWatchlistName, orgId, onSelect }: Props = $props();
 
 	let watchlists: WatchlistDetailsResponse[] = $state([]);
 	let loading: boolean = $state(true);
@@ -39,15 +41,15 @@
 	async function loadWatchlists(): Promise<void> {
 		loading = true;
 		try {
-			const sortOrder = [{ name: 'name', direction: 'ASC' }];
-			const searchInputs: SearchInput[] = [];
-			
-			const result = await searchWatchlists({
+			const params = {
 				pageNumber: 0,
 				pageSize: 100,
-				sortOrder,
-				searchInputs
-			});
+				sortOrder: [{ name: 'name', direction: 'ASC' }],
+				searchInputs: [] as SearchInput[]
+			};
+			const result = orgId
+				? await searchOrgWatchlists(orgId, params)
+				: await searchUserWatchlists(params);
 			watchlists = result.content ?? [];
 		} catch (err: unknown) {
 			const { message } = handleError(err, 'Failed to load watchlists');

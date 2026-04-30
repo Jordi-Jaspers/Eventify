@@ -27,30 +27,10 @@ public class DurationBuilder {
      * @return list of durations
      */
     public List<TimelineDuration> fromEvents(final List<Event> sortedEvents) {
-        final List<TimelineDuration> durations = new ArrayList<>();
-
         if (sortedEvents.isEmpty()) {
-            return durations;
+            return new ArrayList<>();
         }
-
-        Severity currentSeverity = sortedEvents.getFirst().getSeverity();
-        OffsetDateTime durationStart = sortedEvents.getFirst().getTimestamp();
-
-        for (int i = 1; i < sortedEvents.size(); i++) {
-            final Event event = sortedEvents.get(i);
-
-            // When severity changes, close the current duration and start a new one
-            if (event.getSeverity() != currentSeverity) {
-                durations.add(TimelineDuration.of(currentSeverity, durationStart, event.getTimestamp()));
-                currentSeverity = event.getSeverity();
-                durationStart = event.getTimestamp();
-            }
-        }
-
-        // Add the final duration (ongoing, so endTime is null)
-        durations.add(TimelineDuration.of(currentSeverity, durationStart, null));
-
-        return durations;
+        return buildDurations(sortedEvents, null);
     }
 
     /**
@@ -66,35 +46,14 @@ public class DurationBuilder {
         final List<Event> sortedEvents,
         final OffsetDateTime boundary
     ) {
-        final List<TimelineDuration> durations = new ArrayList<>();
-
-        // Filter to events before boundary
         final List<Event> eventsBeforeBoundary = sortedEvents.stream()
             .filter(e -> e.getTimestamp().isBefore(boundary))
             .toList();
 
         if (eventsBeforeBoundary.isEmpty()) {
-            return durations;
+            return new ArrayList<>();
         }
-
-        Severity currentSeverity = eventsBeforeBoundary.getFirst().getSeverity();
-        OffsetDateTime durationStart = eventsBeforeBoundary.getFirst().getTimestamp();
-
-        for (int i = 1; i < eventsBeforeBoundary.size(); i++) {
-            final Event event = eventsBeforeBoundary.get(i);
-
-            // When severity changes, close the current duration and start a new one
-            if (event.getSeverity() != currentSeverity) {
-                durations.add(TimelineDuration.of(currentSeverity, durationStart, event.getTimestamp()));
-                currentSeverity = event.getSeverity();
-                durationStart = event.getTimestamp();
-            }
-        }
-
-        // Add the final duration, cut off at the boundary
-        durations.add(TimelineDuration.of(currentSeverity, durationStart, boundary));
-
-        return durations;
+        return buildDurations(eventsBeforeBoundary, boundary);
     }
 
     /**
@@ -110,34 +69,14 @@ public class DurationBuilder {
         final List<Event> sortedEvents,
         final OffsetDateTime boundary
     ) {
-        final List<TimelineDuration> durations = new ArrayList<>();
-
         final List<Event> eventsAfterBoundary = sortedEvents.stream()
             .filter(e -> e.getTimestamp().isAfter(boundary))
             .toList();
 
         if (eventsAfterBoundary.isEmpty()) {
-            return durations;
+            return new ArrayList<>();
         }
-
-        Severity currentSeverity = eventsAfterBoundary.getFirst().getSeverity();
-        OffsetDateTime durationStart = eventsAfterBoundary.getFirst().getTimestamp();
-
-        for (int i = 1; i < eventsAfterBoundary.size(); i++) {
-            final Event event = eventsAfterBoundary.get(i);
-
-            // When severity changes, close the current duration and start a new one
-            if (event.getSeverity() != currentSeverity) {
-                durations.add(TimelineDuration.of(currentSeverity, durationStart, event.getTimestamp()));
-                currentSeverity = event.getSeverity();
-                durationStart = event.getTimestamp();
-            }
-        }
-
-        // Add the final duration (ongoing, so endTime is null)
-        durations.add(TimelineDuration.of(currentSeverity, durationStart, null));
-
-        return durations;
+        return buildDurations(eventsAfterBoundary, null);
     }
 
     /**
@@ -154,8 +93,6 @@ public class DurationBuilder {
         return TimelineDuration.of(Severity.NO_DATA, channelCreatedAt, firstEventTime);
     }
 
-
-
     /**
      * Sorts events by timestamp.
      *
@@ -166,5 +103,28 @@ public class DurationBuilder {
         return events.stream()
             .sorted(Comparator.comparing(Event::getTimestamp))
             .toList();
+    }
+
+    /**
+     * Core loop: merges consecutive same-severity events into durations.
+     * If {@code endTime} is non-null, it overrides the last duration's end; otherwise null (live/ongoing).
+     */
+    private List<TimelineDuration> buildDurations(final List<Event> events, final OffsetDateTime endTime) {
+        final List<TimelineDuration> durations = new ArrayList<>();
+
+        Severity currentSeverity = events.getFirst().getSeverity();
+        OffsetDateTime durationStart = events.getFirst().getTimestamp();
+
+        for (int i = 1; i < events.size(); i++) {
+            final Event event = events.get(i);
+            if (event.getSeverity() != currentSeverity) {
+                durations.add(TimelineDuration.of(currentSeverity, durationStart, event.getTimestamp()));
+                currentSeverity = event.getSeverity();
+                durationStart = event.getTimestamp();
+            }
+        }
+
+        durations.add(TimelineDuration.of(currentSeverity, durationStart, endTime));
+        return durations;
     }
 }
