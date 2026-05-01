@@ -6,6 +6,7 @@ import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.monitor.model.TimelineDuration;
 import io.github.eventify.api.monitor.model.response.DurationDetailsResponse;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;
@@ -46,9 +47,9 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime t3 = OffsetDateTime.of(2026, 2, 12, 10, 45, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, t1),
-            anEvent(channel, Severity.CRITICAL, t2),
-            anEvent(channel, Severity.OK, t3)
+            TestBuilders.anEvent(channel, Severity.OK, t1),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, t2),
+            TestBuilders.anEvent(channel, Severity.OK, t3)
         );
 
         given(eventRepository.findEventsAroundTimestamp(eq(channel.getId()), any(), anyInt()))
@@ -92,9 +93,9 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime recentTime = OffsetDateTime.of(2026, 2, 12, 10, 45, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, veryOldStart),
-            anEvent(channel, Severity.CRITICAL, selectedTime),
-            anEvent(channel, Severity.OK, recentTime)
+            TestBuilders.anEvent(channel, Severity.OK, veryOldStart),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, selectedTime),
+            TestBuilders.anEvent(channel, Severity.OK, recentTime)
         );
 
         given(eventRepository.findEventsAroundTimestamp(eq(channel.getId()), any(), anyInt()))
@@ -118,13 +119,13 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime base = OffsetDateTime.of(2026, 2, 12, 10, 0, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, base),
-            anEvent(channel, Severity.CRITICAL, base.plusMinutes(2)),
-            anEvent(channel, Severity.OK, base.plusMinutes(4)),
-            anEvent(channel, Severity.WARNING, base.plusMinutes(6)),
-            anEvent(channel, Severity.CRITICAL, base.plusMinutes(8)),
-            anEvent(channel, Severity.OK, base.plusMinutes(10)),
-            anEvent(channel, Severity.CRITICAL, base.plusMinutes(12))
+            TestBuilders.anEvent(channel, Severity.OK, base),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, base.plusMinutes(2)),
+            TestBuilders.anEvent(channel, Severity.OK, base.plusMinutes(4)),
+            TestBuilders.anEvent(channel, Severity.WARNING, base.plusMinutes(6)),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, base.plusMinutes(8)),
+            TestBuilders.anEvent(channel, Severity.OK, base.plusMinutes(10)),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, base.plusMinutes(12))
         );
 
         given(eventRepository.findEventsAroundTimestamp(eq(channel.getId()), any(), anyInt()))
@@ -150,8 +151,8 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime now = OffsetDateTime.of(2026, 2, 12, 10, 20, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, longAgo),
-            anEvent(channel, Severity.CRITICAL, now)
+            TestBuilders.anEvent(channel, Severity.OK, longAgo),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, now)
         );
 
         given(eventRepository.findEventsAroundTimestamp(eq(channel.getId()), any(), anyInt()))
@@ -177,7 +178,7 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime firstEvent = OffsetDateTime.of(2026, 2, 12, 10, 0, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, firstEvent)
+            TestBuilders.anEvent(channel, Severity.OK, firstEvent)
         );
 
         given(eventRepository.findEventsAroundTimestamp(eq(channel.getId()), any(), anyInt()))
@@ -202,8 +203,8 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime t2 = OffsetDateTime.of(2026, 2, 12, 10, 30, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, t1),
-            anEvent(channel, Severity.CRITICAL, t2)
+            TestBuilders.anEvent(channel, Severity.OK, t1),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, t2)
         );
 
         given(eventRepository.findEventsAroundTimestamp(eq(channel.getId()), any(), anyInt()))
@@ -225,10 +226,10 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime base = OffsetDateTime.of(2026, 2, 12, 10, 0, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, base.minusHours(2)),
-            anEvent(channel, Severity.WARNING, base.minusHours(1)),
-            anEvent(channel, Severity.CRITICAL, base),
-            anEvent(channel, Severity.OK, base.plusHours(1))
+            TestBuilders.anEvent(channel, Severity.OK, base.minusHours(2)),
+            TestBuilders.anEvent(channel, Severity.WARNING, base.minusHours(1)),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, base),
+            TestBuilders.anEvent(channel, Severity.OK, base.plusHours(1))
         );
 
         given(eventRepository.findEventsBefore(eq(channel.getId()), any(), anyInt()))
@@ -251,10 +252,10 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime base = OffsetDateTime.of(2026, 2, 12, 10, 0, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, base.minusHours(1)),
-            anEvent(channel, Severity.CRITICAL, base),
-            anEvent(channel, Severity.WARNING, base.plusHours(1)),
-            anEvent(channel, Severity.OK, base.plusHours(2))
+            TestBuilders.anEvent(channel, Severity.OK, base.minusHours(1)),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, base),
+            TestBuilders.anEvent(channel, Severity.WARNING, base.plusHours(1)),
+            TestBuilders.anEvent(channel, Severity.OK, base.plusHours(2))
         );
 
         given(eventRepository.findEventsAfter(eq(channel.getId()), any(), anyInt()))
@@ -277,19 +278,19 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime base = OffsetDateTime.of(2026, 2, 12, 10, 0, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, base),
-            anEvent(channel, Severity.CRITICAL, base.plusMinutes(1)),
-            anEvent(channel, Severity.OK, base.plusMinutes(2)),
-            anEvent(channel, Severity.WARNING, base.plusMinutes(3)),
-            anEvent(channel, Severity.CRITICAL, base.plusMinutes(4)),
-            anEvent(channel, Severity.OK, base.plusMinutes(5)),
-            anEvent(channel, Severity.WARNING, base.plusMinutes(6)),
-            anEvent(channel, Severity.CRITICAL, base.plusMinutes(7)),
-            anEvent(channel, Severity.OK, base.plusMinutes(8)),
-            anEvent(channel, Severity.WARNING, base.plusMinutes(9)),
-            anEvent(channel, Severity.CRITICAL, base.plusMinutes(10)),
-            anEvent(channel, Severity.OK, base.plusMinutes(11)),
-            anEvent(channel, Severity.WARNING, base.plusMinutes(12))
+            TestBuilders.anEvent(channel, Severity.OK, base),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, base.plusMinutes(1)),
+            TestBuilders.anEvent(channel, Severity.OK, base.plusMinutes(2)),
+            TestBuilders.anEvent(channel, Severity.WARNING, base.plusMinutes(3)),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, base.plusMinutes(4)),
+            TestBuilders.anEvent(channel, Severity.OK, base.plusMinutes(5)),
+            TestBuilders.anEvent(channel, Severity.WARNING, base.plusMinutes(6)),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, base.plusMinutes(7)),
+            TestBuilders.anEvent(channel, Severity.OK, base.plusMinutes(8)),
+            TestBuilders.anEvent(channel, Severity.WARNING, base.plusMinutes(9)),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, base.plusMinutes(10)),
+            TestBuilders.anEvent(channel, Severity.OK, base.plusMinutes(11)),
+            TestBuilders.anEvent(channel, Severity.WARNING, base.plusMinutes(12))
         );
 
         given(eventRepository.findEventsAroundTimestamp(eq(channel.getId()), any(), anyInt()))
@@ -311,8 +312,8 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime t2 = OffsetDateTime.of(2026, 2, 12, 10, 30, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.OK, t1),
-            anEvent(channel, Severity.CRITICAL, t2)
+            TestBuilders.anEvent(channel, Severity.OK, t1),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, t2)
         );
 
         given(eventRepository.findEventsAroundTimestamp(eq(channel.getId()), any(), anyInt()))
@@ -335,9 +336,9 @@ public class DurationServiceTest extends UnitTest {
         final OffsetDateTime t3 = OffsetDateTime.of(2026, 2, 12, 10, 30, 0, 0, UTC);
 
         final List<Event> events = List.of(
-            anEvent(channel, Severity.WARNING, t1),
-            anEvent(channel, Severity.OK, t2),
-            anEvent(channel, Severity.CRITICAL, t3)
+            TestBuilders.anEvent(channel, Severity.WARNING, t1),
+            TestBuilders.anEvent(channel, Severity.OK, t2),
+            TestBuilders.anEvent(channel, Severity.CRITICAL, t3)
         );
 
         given(eventRepository.findEventsAroundTimestamp(eq(channel.getId()), any(), anyInt()))
@@ -358,13 +359,5 @@ public class DurationServiceTest extends UnitTest {
         channel.setName("Test Channel");
         channel.setCreatedAt(OffsetDateTime.of(2026, 2, 12, 9, 0, 0, 0, UTC));
         return channel;
-    }
-
-    private Event anEvent(final Channel channel, final Severity severity, final OffsetDateTime timestamp) {
-        final Event event = new Event();
-        event.setChannel(channel);
-        event.setSeverity(severity);
-        event.setTimestamp(timestamp);
-        return event;
     }
 }

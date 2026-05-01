@@ -1,7 +1,6 @@
 package io.github.eventify.api.watchlist.service;
 
 import io.github.eventify.api.channel.model.Channel;
-import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
@@ -11,11 +10,11 @@ import io.github.eventify.api.watchlist.model.WatchlistMetaData;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.common.exception.DuplicateWatchlistNameException;
 import io.github.eventify.common.security.SecurityUtil;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -118,8 +117,8 @@ public class UserWatchlistServiceTest extends UnitTest {
         input.setName("My Watchlist");
         input.setConfiguration(configuration);
 
-        final Channel channel1 = createChannel(1L, "Channel 1", user);
-        final Channel channel2 = createChannel(2L, "Channel 2", user);
+        final Channel channel1 = aChannel(1L, "Channel 1", user);
+        final Channel channel2 = aChannel(2L, "Channel 2", user);
 
         when(watchlistRepository.findByUserIdAndName(user.getId(), "My Watchlist"))
             .thenReturn(Optional.empty());
@@ -218,7 +217,7 @@ public class UserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should get user watchlist successfully")
     public void shouldGetUserWatchlistSuccessfully() {
         // Given: User has a watchlist
-        final Watchlist watchlist = createWatchlist(1L, "My Watchlist", user);
+        final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user);
 
         when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
             .thenReturn(Optional.of(watchlist));
@@ -250,7 +249,7 @@ public class UserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should update watchlist successfully")
     public void shouldUpdateWatchlistSuccessfully() {
         // Given: User has a watchlist
-        final Watchlist existing = createWatchlist(1L, "Old Name", user);
+        final Watchlist existing = aWatchlist(1L, "Old Name", user);
 
         final Watchlist updated = new Watchlist();
         updated.setName("New Name");
@@ -277,10 +276,10 @@ public class UserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should fail to update with duplicate name")
     public void shouldFailToUpdateWithDuplicateName() {
         // Given: User has a watchlist
-        final Watchlist existing = createWatchlist(1L, "Old Name", user);
+        final Watchlist existing = aWatchlist(1L, "Old Name", user);
 
         // And: Another watchlist with target name exists
-        final Watchlist anotherWatchlist = createWatchlist(2L, "New Name", user);
+        final Watchlist anotherWatchlist = aWatchlist(2L, "New Name", user);
 
         final Watchlist updated = new Watchlist();
         updated.setName("New Name");
@@ -303,9 +302,9 @@ public class UserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should update configuration successfully")
     public void shouldUpdateConfigurationSuccessfully() {
         // Given: User has a watchlist
-        final Watchlist existing = createWatchlist(1L, "My Watchlist", user);
-        final Channel channel1 = createChannel(1L, "Channel 1", user);
-        final Channel channel2 = createChannel(2L, "Channel 2", user);
+        final Watchlist existing = aWatchlist(1L, "My Watchlist", user);
+        final Channel channel1 = aChannel(1L, "Channel 1", user);
+        final Channel channel2 = aChannel(2L, "Channel 2", user);
 
         final WatchlistConfiguration configuration = WatchlistConfiguration.builder()
             .channels(channelsWithIds(2L, 1L))
@@ -335,7 +334,7 @@ public class UserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should delete watchlist successfully")
     public void shouldDeleteWatchlistSuccessfully() {
         // Given: User has a watchlist
-        final Watchlist watchlist = createWatchlist(1L, "My Watchlist", user);
+        final Watchlist watchlist = aWatchlist(1L, "My Watchlist", user);
 
         when(watchlistRepository.findByIdAndUserId(1L, user.getId()))
             .thenReturn(Optional.of(watchlist));
@@ -367,9 +366,9 @@ public class UserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should search personal watchlists successfully")
     public void shouldSearchPersonalWatchlistsSuccessfully() {
         // Given: User has 3 watchlists
-        final Watchlist watchlist1 = createWatchlist(1L, "Watchlist 1", user);
-        final Watchlist watchlist2 = createWatchlist(2L, "Watchlist 2", user);
-        final Watchlist watchlist3 = createWatchlist(3L, "Watchlist 3", user);
+        final Watchlist watchlist1 = aWatchlist(1L, "Watchlist 1", user);
+        final Watchlist watchlist2 = aWatchlist(2L, "Watchlist 2", user);
+        final Watchlist watchlist3 = aWatchlist(3L, "Watchlist 3", user);
 
         final Page<Watchlist> mockPage = new PageImpl<>(List.of(watchlist1, watchlist2, watchlist3));
 
@@ -379,7 +378,7 @@ public class UserWatchlistServiceTest extends UnitTest {
             .thenReturn(mockPage);
 
         // When: Searching watchlists
-        final SortablePageInput input = createDefaultPageInput();
+        final SortablePageInput input = TestBuilders.aPageInput();
         final Page<Watchlist> watchlists = userWatchlistService.searchWatchlists(input);
 
         // Then: Should return all 3 watchlists
@@ -402,30 +401,11 @@ public class UserWatchlistServiceTest extends UnitTest {
             .thenReturn(emptyPage);
 
         // When: Searching watchlists
-        final SortablePageInput input = createDefaultPageInput();
+        final SortablePageInput input = TestBuilders.aPageInput();
         final Page<Watchlist> watchlists = userWatchlistService.searchWatchlists(input);
 
         // Then: Should return empty list
         assertThat(watchlists.getContent(), is(empty()));
-    }
-
-    private Watchlist createWatchlist(final Long id, final String name, final User user) {
-        final Watchlist watchlist = new Watchlist();
-        watchlist.setId(id);
-        watchlist.setName(name);
-        watchlist.setUser(user);
-        watchlist.setConfiguration(WatchlistConfiguration.empty());
-        watchlist.setFilters(WatchlistFilters.defaults());
-        watchlist.setCreatedAt(OffsetDateTime.now().minusDays(1));
-        return watchlist;
-    }
-
-    private Channel createChannel(final Long id, final String name, final User user) {
-        final Channel channel = new Channel(name, "test.slug." + id, user, null);
-        channel.setId(id);
-        channel.setStatus(ChannelStatus.ACTIVE);
-        channel.setCreatedAt(OffsetDateTime.now().minusDays(1));
-        return channel;
     }
 
     private List<Channel> channelsWithIds(final Long... ids) {
@@ -436,12 +416,5 @@ public class UserWatchlistServiceTest extends UnitTest {
             channels.add(channel);
         }
         return channels;
-    }
-
-    private SortablePageInput createDefaultPageInput() {
-        final SortablePageInput input = new SortablePageInput();
-        input.setPageNumber(0);
-        input.setPageSize(20);
-        return input;
     }
 }

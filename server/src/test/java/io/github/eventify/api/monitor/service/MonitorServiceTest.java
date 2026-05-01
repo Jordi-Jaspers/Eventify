@@ -19,6 +19,7 @@ import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
 import io.github.eventify.api.watchlist.model.WatchlistFilters;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.exception.core.DataNotFoundException;
 
@@ -156,8 +157,8 @@ class MonitorServiceTest extends UnitTest {
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
             request.setFilters(MonitorFilters.builder().onlyCritical(true).groupedView(false).build());
 
-            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
-            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+            final Event okEvent = TestBuilders.anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = TestBuilders.anEvent(2L, criticalChannel, Severity.CRITICAL);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
@@ -183,8 +184,8 @@ class MonitorServiceTest extends UnitTest {
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
             request.setFilters(MonitorFilters.builder().onlyCritical(true).groupedView(true).build());
 
-            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
-            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+            final Event okEvent = TestBuilders.anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = TestBuilders.anEvent(2L, criticalChannel, Severity.CRITICAL);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
@@ -211,8 +212,8 @@ class MonitorServiceTest extends UnitTest {
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
             request.setFilters(MonitorFilters.builder().onlyCritical(true).groupedView(true).build());
 
-            final Event okEvent1 = anEvent(1L, okChannel1, Severity.OK);
-            final Event okEvent2 = anEvent(2L, okChannel2, Severity.WARNING);
+            final Event okEvent1 = TestBuilders.anEvent(1L, okChannel1, Severity.OK);
+            final Event okEvent2 = TestBuilders.anEvent(2L, okChannel2, Severity.WARNING);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel1, okChannel2));
@@ -237,8 +238,8 @@ class MonitorServiceTest extends UnitTest {
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
             request.setFilters(MonitorFilters.builder().onlyCritical(true).groupedView(true).build());
 
-            final Event okEvent = anEvent(1L, standaloneOk, Severity.OK);
-            final Event criticalEvent = anEvent(2L, groupedCritical, Severity.CRITICAL);
+            final Event okEvent = TestBuilders.anEvent(1L, standaloneOk, Severity.OK);
+            final Event criticalEvent = TestBuilders.anEvent(2L, groupedCritical, Severity.CRITICAL);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList())).willReturn(List.of(standaloneOk, groupedCritical));
@@ -272,9 +273,9 @@ class MonitorServiceTest extends UnitTest {
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
             request.setFilters(MonitorFilters.builder().sortBySeverity(true).groupedView(false).build());
 
-            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
-            final Event warningEvent = anEvent(2L, warningChannel, Severity.WARNING);
-            final Event criticalEvent = anEvent(3L, criticalChannel, Severity.CRITICAL);
+            final Event okEvent = TestBuilders.anEvent(1L, okChannel, Severity.OK);
+            final Event warningEvent = TestBuilders.anEvent(2L, warningChannel, Severity.WARNING);
+            final Event criticalEvent = TestBuilders.anEvent(3L, criticalChannel, Severity.CRITICAL);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList()))
@@ -303,8 +304,8 @@ class MonitorServiceTest extends UnitTest {
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
             request.setFilters(MonitorFilters.builder().sortBySeverity(true).groupedView(true).build());
 
-            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
-            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+            final Event okEvent = TestBuilders.anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = TestBuilders.anEvent(2L, criticalChannel, Severity.CRITICAL);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
@@ -333,8 +334,8 @@ class MonitorServiceTest extends UnitTest {
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
             request.setFilters(MonitorFilters.builder().sortBySeverity(true).groupedView(true).build());
 
-            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
-            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+            final Event okEvent = TestBuilders.anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = TestBuilders.anEvent(2L, criticalChannel, Severity.CRITICAL);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
@@ -361,8 +362,8 @@ class MonitorServiceTest extends UnitTest {
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
             request.setFilters(MonitorFilters.builder().sortBySeverity(true).groupedView(true).build());
 
-            final Event okEvent = anEvent(1L, okChannel, Severity.OK);
-            final Event criticalEvent = anEvent(2L, criticalChannel, Severity.CRITICAL);
+            final Event okEvent = TestBuilders.anEvent(1L, okChannel, Severity.OK);
+            final Event criticalEvent = TestBuilders.anEvent(2L, criticalChannel, Severity.CRITICAL);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList())).willReturn(List.of(okChannel, criticalChannel));
@@ -497,8 +498,8 @@ class MonitorServiceTest extends UnitTest {
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
 
             // Events for the group channels
-            final Event okEvent = anEvent(1L, channel1, Severity.OK);
-            final Event warningEvent = anEvent(2L, channel2, Severity.WARNING);
+            final Event okEvent = TestBuilders.anEvent(1L, channel1, Severity.OK);
+            final Event warningEvent = TestBuilders.anEvent(2L, channel2, Severity.WARNING);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList())).willReturn(List.of(channel1, channel2));
@@ -531,8 +532,8 @@ class MonitorServiceTest extends UnitTest {
             final Channel groupedChannel = aChannel(2L, "grouped", ChannelStatus.ACTIVE);
             final MonitorRequest request = aMonitorRequestWithTimeRange(1L, TimeRange.LAST_24H);
 
-            final Event criticalEvent = anEvent(1L, standaloneChannel, Severity.CRITICAL);
-            final Event okEvent = anEvent(2L, groupedChannel, Severity.OK);
+            final Event criticalEvent = TestBuilders.anEvent(1L, standaloneChannel, Severity.CRITICAL);
+            final Event okEvent = TestBuilders.anEvent(2L, groupedChannel, Severity.OK);
 
             given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
             given(channelRepository.findAllById(anyList())).willReturn(List.of(standaloneChannel, groupedChannel));
@@ -871,15 +872,5 @@ class MonitorServiceTest extends UnitTest {
         request.setWatchlistId(watchlistId);
         request.setFilters(MonitorFilters.builder().timeRange(timeRange).build());
         return request;
-    }
-
-    private Event anEvent(final Long id, final Channel channel, final Severity severity) {
-        final Event event = new Event();
-        event.setId(id);
-        event.setChannel(channel);
-        event.setSeverity(severity);
-        event.setTitle("Test Event");
-        event.setTimestamp(OffsetDateTime.now().minusMinutes(30));
-        return event;
     }
 }

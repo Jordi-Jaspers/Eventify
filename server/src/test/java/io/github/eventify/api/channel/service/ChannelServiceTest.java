@@ -9,6 +9,7 @@ import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.DuplicateChannelNameException;
 import io.github.eventify.common.security.SecurityUtil;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
@@ -165,9 +166,9 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should search personal channels successfully")
     public void shouldSearchPersonalChannelsSuccessfully() {
         // Given: User has 3 personal channels
-        final Channel channel1 = createChannel(1L, "Channel 1", user);
-        final Channel channel2 = createChannel(2L, "Channel 2", user);
-        final Channel channel3 = createChannel(3L, "Channel 3", user);
+        final Channel channel1 = aChannel(1L, "Channel 1", user);
+        final Channel channel2 = aChannel(2L, "Channel 2", user);
+        final Channel channel3 = aChannel(3L, "Channel 3", user);
 
         final Page<Channel> mockPage = new PageImpl<>(List.of(channel1, channel2, channel3));
 
@@ -175,7 +176,7 @@ public class ChannelServiceTest extends UnitTest {
             .thenReturn(mockPage);
 
         // When: Searching personal channels
-        final SortablePageInput input = createDefaultPageInput();
+        final SortablePageInput input = TestBuilders.aPageInput();
         final Page<Channel> channels = channelService.searchUserChannels(input);
 
         // Then: Should return all 3 channels
@@ -190,7 +191,7 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should exclude deleted channels from search")
     public void shouldExcludeDeletedChannelsFromSearch() {
         // Given: User has channels, some deleted
-        final Channel activeChannel = createChannel(1L, "Active", user);
+        final Channel activeChannel = aChannel(1L, "Active", user);
 
         final Page<Channel> mockPage = new PageImpl<>(List.of(activeChannel));
 
@@ -198,7 +199,7 @@ public class ChannelServiceTest extends UnitTest {
             .thenReturn(mockPage);
 
         // When: Searching channels
-        final SortablePageInput input = createDefaultPageInput();
+        final SortablePageInput input = TestBuilders.aPageInput();
         final Page<Channel> channels = channelService.searchUserChannels(input);
 
         // Then: Only active channel should be returned
@@ -216,7 +217,7 @@ public class ChannelServiceTest extends UnitTest {
             .thenReturn(emptyPage);
 
         // When: Searching channels
-        final SortablePageInput input = createDefaultPageInput();
+        final SortablePageInput input = TestBuilders.aPageInput();
         final Page<Channel> channels = channelService.searchUserChannels(input);
 
         // Then: Should return empty list
@@ -227,7 +228,7 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should get channel by ID successfully")
     public void shouldGetChannelByIdSuccessfully() {
         // Given: User has a channel
-        final Channel channel = createChannel(1L, "Test Channel", user);
+        final Channel channel = aChannel(1L, "Test Channel", user);
 
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
@@ -273,7 +274,7 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should update channel details successfully")
     public void shouldUpdateChannelDetailsSuccessfully() {
         // Given: User has a channel
-        final Channel channel = createChannel(1L, "Old Name", user);
+        final Channel channel = aChannel(1L, "Old Name", user);
 
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
@@ -301,10 +302,10 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should throw when updating to duplicate name")
     public void shouldThrowWhenUpdatingToDuplicateName() {
         // Given: User has a channel
-        final Channel channel = createChannel(1L, "Old Name", user);
+        final Channel channel = aChannel(1L, "Old Name", user);
 
         // And: Another channel with target name exists
-        final Channel existingChannel = createChannel(2L, "New Name", user);
+        final Channel existingChannel = aChannel(2L, "New Name", user);
 
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
@@ -327,7 +328,7 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should allow updating to same name")
     public void shouldAllowUpdatingToSameName() {
         // Given: User has a channel
-        final Channel channel = createChannel(1L, "Same Name", user);
+        final Channel channel = aChannel(1L, "Same Name", user);
 
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
             .thenReturn(Optional.of(channel));
@@ -353,10 +354,10 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should pause channel successfully")
     public void shouldPauseChannelSuccessfully() {
         // Given: User has an active channel
-        final Channel channel = createChannel(1L, "Active Channel", user);
+        final Channel channel = aChannel(1L, "Active Channel", user);
         channel.setStatus(ChannelStatus.ACTIVE);
 
-        final Channel pausedChannel = createChannel(1L, "Active Channel", user);
+        final Channel pausedChannel = aChannel(1L, "Active Channel", user);
         pausedChannel.setStatus(ChannelStatus.PAUSED);
         pausedChannel.setUpdatedAt(OffsetDateTime.now());
 
@@ -378,10 +379,10 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should be idempotent when pausing already paused channel")
     public void shouldBeIdempotentWhenPausingAlreadyPausedChannel() {
         // Given: User has a paused channel
-        final Channel channel = createChannel(1L, "Paused Channel", user);
+        final Channel channel = aChannel(1L, "Paused Channel", user);
         channel.setStatus(ChannelStatus.PAUSED);
 
-        final Channel pausedChannel = createChannel(1L, "Paused Channel", user);
+        final Channel pausedChannel = aChannel(1L, "Paused Channel", user);
         pausedChannel.setStatus(ChannelStatus.PAUSED);
 
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
@@ -401,10 +402,10 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should resume channel successfully")
     public void shouldResumeChannelSuccessfully() {
         // Given: User has a paused channel
-        final Channel channel = createChannel(1L, "Paused Channel", user);
+        final Channel channel = aChannel(1L, "Paused Channel", user);
         channel.setStatus(ChannelStatus.PAUSED);
 
-        final Channel resumedChannel = createChannel(1L, "Paused Channel", user);
+        final Channel resumedChannel = aChannel(1L, "Paused Channel", user);
         resumedChannel.setStatus(ChannelStatus.ACTIVE);
         resumedChannel.setUpdatedAt(OffsetDateTime.now());
 
@@ -426,10 +427,10 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should be idempotent when resuming already active channel")
     public void shouldBeIdempotentWhenResumingAlreadyActiveChannel() {
         // Given: User has an active channel
-        final Channel channel = createChannel(1L, "Active Channel", user);
+        final Channel channel = aChannel(1L, "Active Channel", user);
         channel.setStatus(ChannelStatus.ACTIVE);
 
-        final Channel activeChannel = createChannel(1L, "Active Channel", user);
+        final Channel activeChannel = aChannel(1L, "Active Channel", user);
         activeChannel.setStatus(ChannelStatus.ACTIVE);
 
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
@@ -449,10 +450,10 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should delete channel successfully")
     public void shouldDeleteChannelSuccessfully() {
         // Given: User has a channel
-        final Channel channel = createChannel(1L, "Channel to Delete", user);
+        final Channel channel = aChannel(1L, "Channel to Delete", user);
         channel.setStatus(ChannelStatus.ACTIVE);
 
-        final Channel deletedChannel = createChannel(1L, "Channel to Delete", user);
+        final Channel deletedChannel = aChannel(1L, "Channel to Delete", user);
         deletedChannel.setStatus(ChannelStatus.PENDING_DELETION);
         deletedChannel.setUpdatedAt(OffsetDateTime.now());
 
@@ -490,10 +491,10 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should delete paused channel successfully")
     public void shouldDeletePausedChannelSuccessfully() {
         // Given: User has a paused channel
-        final Channel channel = createChannel(1L, "Paused Channel", user);
+        final Channel channel = aChannel(1L, "Paused Channel", user);
         channel.setStatus(ChannelStatus.PAUSED);
 
-        final Channel deletedChannel = createChannel(1L, "Paused Channel", user);
+        final Channel deletedChannel = aChannel(1L, "Paused Channel", user);
         deletedChannel.setStatus(ChannelStatus.PENDING_DELETION);
 
         when(channelRepository.findByIdAndUserIdAndStatusNot(1L, user.getId(), ChannelStatus.PENDING_DELETION))
@@ -511,7 +512,7 @@ public class ChannelServiceTest extends UnitTest {
     @DisplayName("Should only search channels excluding organization channels")
     public void shouldOnlySearchPersonalChannels() {
         // Given: User has personal channels
-        final Channel personalChannel = createChannel(1L, "Personal", user);
+        final Channel personalChannel = aChannel(1L, "Personal", user);
 
         final Page<Channel> mockPage = new PageImpl<>(List.of(personalChannel));
 
@@ -519,7 +520,7 @@ public class ChannelServiceTest extends UnitTest {
             .thenReturn(mockPage);
 
         // When: Searching channels
-        final SortablePageInput input = createDefaultPageInput();
+        final SortablePageInput input = TestBuilders.aPageInput();
         final Page<Channel> channels = channelService.searchUserChannels(input);
 
         // Then: Should return only personal channels
@@ -528,18 +529,4 @@ public class ChannelServiceTest extends UnitTest {
         verify(channelRepository).findAll(any(Specification.class), any(Pageable.class));
     }
 
-    private Channel createChannel(final Long id, final String name, final User user) {
-        final Channel channel = new Channel(name, "test.slug." + id, user, null);
-        channel.setId(id);
-        channel.setStatus(ChannelStatus.ACTIVE);
-        channel.setCreatedAt(OffsetDateTime.now().minusDays(1));
-        return channel;
-    }
-
-    private SortablePageInput createDefaultPageInput() {
-        final SortablePageInput input = new SortablePageInput();
-        input.setPageNumber(0);
-        input.setPageSize(20);
-        return input;
-    }
 }

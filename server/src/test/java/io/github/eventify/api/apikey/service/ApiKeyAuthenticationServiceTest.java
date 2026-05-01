@@ -9,6 +9,7 @@ import io.github.eventify.common.exception.ApiKeyExpiredException;
 import io.github.eventify.common.exception.InvalidApiKeyException;
 import io.github.eventify.common.exception.UserDisabledException;
 import io.github.eventify.common.security.principal.ApiKeyPrincipal;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;
@@ -58,7 +59,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldAuthenticateWithValidUserApiKey() {
         // Given: A valid user API key
         final String rawKey = "evt_abcdefghijklmnopqrstuvwxyz123456";
-        final ApiKey apiKey = createUserApiKey(1L, "3456", "Production Key");
+        final ApiKey apiKey = anApiKey(1L, "3456", "Production Key", user);
         apiKey.setHashedKey("hashed_key");
         apiKey.setExpiresAt(null); // No expiration
 
@@ -85,7 +86,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldAuthenticateWithValidOrgApiKey() {
         // Given: A valid organization API key
         final String rawKey = "org_abcdefghijklmnopqrstuvwxyz123456";
-        final ApiKey apiKey = createOrgApiKey(2L, "3456", "Org Production Key", organization);
+        final ApiKey apiKey = TestBuilders.anOrgApiKey(2L, "3456", "Org Production Key", user, organization);
         apiKey.setHashedKey("hashed_key");
         apiKey.setExpiresAt(null);
 
@@ -111,7 +112,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldRejectExpiredApiKey() {
         // Given: An expired API key
         final String rawKey = "evt_abcdefghijklmnopqrstuvwxyz123456";
-        final ApiKey apiKey = createUserApiKey(1L, "3456", "Expired Key");
+        final ApiKey apiKey = anApiKey(1L, "3456", "Expired Key", user);
         apiKey.setHashedKey("hashed_key");
         apiKey.setExpiresAt(OffsetDateTime.now().minusDays(1)); // Expired yesterday
 
@@ -130,7 +131,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldRejectInvalidKeyHash() {
         // Given: API key with wrong hash
         final String rawKey = "evt_abcdefghijklmnopqrstuvwxyz123456";
-        final ApiKey apiKey = createUserApiKey(1L, "3456", "Production Key");
+        final ApiKey apiKey = anApiKey(1L, "3456", "Production Key", user);
         apiKey.setHashedKey("different_hash");
 
         when(apiKeyRepository.findBySuffix("3456")).thenReturn(Optional.of(apiKey));
@@ -189,7 +190,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldRejectKeyWhenUserDisabled() {
         // Given: API key with disabled user
         final String rawKey = "evt_abcdefghijklmnopqrstuvwxyz123456";
-        final ApiKey apiKey = createUserApiKey(1L, "3456", "Production Key");
+        final ApiKey apiKey = anApiKey(1L, "3456", "Production Key", user);
         apiKey.setHashedKey("hashed_key");
         apiKey.getUser().setEnabled(false); // User is disabled
 
@@ -208,7 +209,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldUpdateLastUsedAtAndTotalRequests() {
         // Given: A valid API key with existing usage stats
         final String rawKey = "evt_abcdefghijklmnopqrstuvwxyz123456";
-        final ApiKey apiKey = createUserApiKey(1L, "3456", "Production Key");
+        final ApiKey apiKey = anApiKey(1L, "3456", "Production Key", user);
         apiKey.setHashedKey("hashed_key");
         apiKey.setTotalRequests(100L);
         apiKey.setLastUsedAt(OffsetDateTime.now().minusHours(5));
@@ -234,7 +235,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldGrantSendEventsAuthorityOnly() {
         // Given: A valid API key
         final String rawKey = "evt_abcdefghijklmnopqrstuvwxyz123456";
-        final ApiKey apiKey = createUserApiKey(1L, "3456", "Production Key");
+        final ApiKey apiKey = anApiKey(1L, "3456", "Production Key", user);
         apiKey.setHashedKey("hashed_key");
 
         when(apiKeyRepository.findBySuffix("3456")).thenReturn(Optional.of(apiKey));
@@ -258,7 +259,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldHandleKeyWithNoExpirationDate() {
         // Given: A valid API key with no expiration
         final String rawKey = "evt_abcdefghijklmnopqrstuvwxyz123456";
-        final ApiKey apiKey = createUserApiKey(1L, "3456", "Never Expires");
+        final ApiKey apiKey = anApiKey(1L, "3456", "Never Expires", user);
         apiKey.setHashedKey("hashed_key");
         apiKey.setExpiresAt(null);
 
@@ -279,7 +280,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldHandleKeyWithFutureExpirationDate() {
         // Given: A valid API key expiring in the future
         final String rawKey = "evt_abcdefghijklmnopqrstuvwxyz123456";
-        final ApiKey apiKey = createUserApiKey(1L, "3456", "Expires Later");
+        final ApiKey apiKey = anApiKey(1L, "3456", "Expires Later", user);
         apiKey.setHashedKey("hashed_key");
         apiKey.setExpiresAt(OffsetDateTime.now().plusDays(30));
 
@@ -300,7 +301,7 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
     public void shouldExtractCorrectSuffixFromKey() {
         // Given: A valid API key with known suffix (4 prefix + 32 random = 36 chars)
         final String rawKey = "evt_abcdefghijklmnopqrstuvwxyz12test";
-        final ApiKey apiKey = createUserApiKey(1L, "test", "Test Key");
+        final ApiKey apiKey = anApiKey(1L, "test", "Test Key", user);
         apiKey.setHashedKey("hashed_key");
 
         when(apiKeyRepository.findBySuffix("test")).thenReturn(Optional.of(apiKey));
@@ -315,29 +316,4 @@ public class ApiKeyAuthenticationServiceTest extends UnitTest {
         verify(apiKeyRepository).findBySuffix("test");
     }
 
-    private ApiKey createUserApiKey(final Long id, final String suffix, final String name) {
-        final ApiKey key = new ApiKey();
-        key.setId(id);
-        key.setSuffix(suffix);
-        key.setName(name);
-        key.setScope(ApiKeyScope.USER);
-        key.setUser(user);
-        key.setOrganization(null);
-        key.setCreatedAt(OffsetDateTime.now().minusDays(1));
-        key.setTotalRequests(0L);
-        return key;
-    }
-
-    private ApiKey createOrgApiKey(final Long id, final String suffix, final String name, final Organization org) {
-        final ApiKey key = new ApiKey();
-        key.setId(id);
-        key.setSuffix(suffix);
-        key.setName(name);
-        key.setScope(ApiKeyScope.ORGANIZATION);
-        key.setUser(user);
-        key.setOrganization(org);
-        key.setCreatedAt(OffsetDateTime.now().minusDays(1));
-        key.setTotalRequests(0L);
-        return key;
-    }
 }

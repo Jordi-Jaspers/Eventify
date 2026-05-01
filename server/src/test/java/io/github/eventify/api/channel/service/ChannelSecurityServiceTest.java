@@ -8,6 +8,7 @@ import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.security.principal.ApiKeyPrincipal;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 
 import java.util.Optional;
@@ -48,8 +49,8 @@ public class ChannelSecurityServiceTest extends UnitTest {
         user2.setId(2L);
         user2.setEmail("user2@example.com");
 
-        org1 = anOrganization(1L, "Test Org 1", "test-org-1");
-        org2 = anOrganization(2L, "Test Org 2", "test-org-2");
+        org1 = TestBuilders.anOrganization(1L, "Test Org 1", "test-org-1");
+        org2 = TestBuilders.anOrganization(2L, "Test Org 2", "test-org-2");
     }
 
     @Test
@@ -254,22 +255,6 @@ public class ChannelSecurityServiceTest extends UnitTest {
         channel.setOrganization(org);
         channel.setStatus(ChannelStatus.ACTIVE);
         return channel;
-    }
-
-    /**
-     * Creates an organization without invoking the constructor that requires security context.
-     *
-     * @param id   the organization ID
-     * @param name the organization name
-     * @param slug the organization slug
-     * @return organization
-     */
-    private Organization anOrganization(final Long id, final String name, final String slug) {
-        final Organization org = new Organization();
-        org.setId(id);
-        org.setName(name);
-        org.setSlug(slug);
-        return org;
     }
 
     /**

@@ -222,6 +222,7 @@ tasks.withType<Test> {
     systemProperty("jframe.version", retrieve("version"))
     useJUnitPlatform()
     jvmArgs(sharedJvmArgs)
+    maxParallelForks = Runtime.getRuntime().availableProcessors()
     testLogging {
         showCauses = true
         showExceptions = true

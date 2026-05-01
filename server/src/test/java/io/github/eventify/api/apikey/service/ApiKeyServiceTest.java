@@ -198,8 +198,8 @@ public class ApiKeyServiceTest extends UnitTest {
     @DisplayName("Should list user API keys successfully")
     public void shouldListUserApiKeysSuccessfully() {
         // Given: User has API keys
-        final ApiKey key1 = createApiKey(1L, "efgh", "Production");
-        final ApiKey key2 = createApiKey(2L, "mnop", "Development");
+        final ApiKey key1 = anApiKey(1L, "efgh", "Production", user);
+        final ApiKey key2 = anApiKey(2L, "mnop", "Development", user);
 
         when(apiKeyRepository.findAllByUserIdAndOrganizationIdIsNull(user.getId()))
             .thenReturn(List.of(key1, key2));
@@ -218,7 +218,7 @@ public class ApiKeyServiceTest extends UnitTest {
     @DisplayName("Should build correct masked display format")
     public void shouldBuildCorrectMaskedDisplayFormat() {
         // Given: User has API key with known suffix
-        final ApiKey key = createApiKey(1L, "efgh", "Test Key");
+        final ApiKey key = anApiKey(1L, "efgh", "Test Key", user);
 
         when(apiKeyRepository.findAllByUserIdAndOrganizationIdIsNull(user.getId()))
             .thenReturn(List.of(key));
@@ -236,7 +236,7 @@ public class ApiKeyServiceTest extends UnitTest {
     @DisplayName("Should return only personal keys excluding organization keys")
     public void shouldReturnOnlyPersonalKeys() {
         // Given: User has personal keys
-        final ApiKey personalKey = createApiKey(1L, "onal", "Personal");
+        final ApiKey personalKey = anApiKey(1L, "onal", "Personal", user);
         personalKey.setOrganization(null);
 
         when(apiKeyRepository.findAllByUserIdAndOrganizationIdIsNull(user.getId()))
@@ -270,7 +270,7 @@ public class ApiKeyServiceTest extends UnitTest {
     @DisplayName("Should revoke user API key successfully")
     public void shouldRevokeUserApiKeySuccessfully() {
         // Given: User has an API key
-        final ApiKey key = createApiKey(1L, "efgh", "Key to Revoke");
+        final ApiKey key = anApiKey(1L, "efgh", "Key to Revoke", user);
 
         when(apiKeyRepository.findByIdAndUserId(1L, user.getId())).thenReturn(Optional.of(key));
 
@@ -285,7 +285,7 @@ public class ApiKeyServiceTest extends UnitTest {
     @DisplayName("Should create audit record when revoking API key")
     public void shouldCreateAuditRecordWhenRevokingApiKey() {
         // Given: User has an API key
-        final ApiKey key = createApiKey(1L, "efgh", "Audited Key");
+        final ApiKey key = anApiKey(1L, "efgh", "Audited Key", user);
         key.setTotalRequests(100L);
 
         when(apiKeyRepository.findByIdAndUserId(1L, user.getId())).thenReturn(Optional.of(key));
@@ -367,7 +367,7 @@ public class ApiKeyServiceTest extends UnitTest {
     @DisplayName("Should include usage statistics in list response")
     public void shouldIncludeUsageStatisticsInListResponse() {
         // Given: User has API key with usage stats
-        final ApiKey key = createApiKey(1L, "efgh", "Used Key");
+        final ApiKey key = anApiKey(1L, "efgh", "Used Key", user);
         key.setTotalRequests(1542L);
         key.setLastUsedAt(OffsetDateTime.now().minusHours(2));
 
@@ -383,16 +383,4 @@ public class ApiKeyServiceTest extends UnitTest {
         assertThat(keyResult.getLastUsedAt(), is(notNullValue()));
     }
 
-    private ApiKey createApiKey(final Long id, final String suffix, final String name) {
-        final ApiKey key = new ApiKey();
-        key.setId(id);
-        key.setSuffix(suffix);
-        key.setName(name);
-        key.setHashedKey("hashed_" + suffix);
-        key.setScope(ApiKeyScope.USER);
-        key.setUser(user);
-        key.setCreatedAt(OffsetDateTime.now().minusDays(1));
-        key.setTotalRequests(0L);
-        return key;
-    }
 }

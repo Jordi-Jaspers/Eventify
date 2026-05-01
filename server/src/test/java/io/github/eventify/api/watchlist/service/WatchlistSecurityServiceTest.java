@@ -5,6 +5,7 @@ import io.github.eventify.api.organization.repository.OrganizationMembershipRepo
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 
 import java.util.Optional;
@@ -43,7 +44,7 @@ class WatchlistSecurityServiceTest extends UnitTest {
         // Given: User owns watchlist
         final User user = aValidUser();
         user.setId(1L);
-        final Watchlist watchlist = aUserWatchlist(1L, user);
+        final Watchlist watchlist = TestBuilders.aWatchlist(1L, "Test Watchlist", user);
 
         given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
 
@@ -60,7 +61,7 @@ class WatchlistSecurityServiceTest extends UnitTest {
         // Given: Watchlist owned by different user
         final User owner = aValidUser();
         owner.setId(1L);
-        final Watchlist watchlist = aUserWatchlist(1L, owner);
+        final Watchlist watchlist = TestBuilders.aWatchlist(1L, "Test Watchlist", owner);
 
         given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
 
@@ -112,8 +113,8 @@ class WatchlistSecurityServiceTest extends UnitTest {
         // Given: User is member of organization
         final User user = aValidUser();
         user.setId(1L);
-        final Organization org = anOrganization(1L);
-        final Watchlist watchlist = anOrgWatchlist(1L, user, org);
+        final Organization org = TestBuilders.anOrganization(1L);
+        final Watchlist watchlist = TestBuilders.anOrgWatchlist(1L, "Org Watchlist", user, org);
 
         given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
         given(membershipRepository.existsByOrganizationIdAndUserId(1L, 1L)).willReturn(true);
@@ -131,8 +132,8 @@ class WatchlistSecurityServiceTest extends UnitTest {
         // Given: User is not member of organization
         final User user = aValidUser();
         user.setId(1L);
-        final Organization org = anOrganization(1L);
-        final Watchlist watchlist = anOrgWatchlist(1L, user, org);
+        final Organization org = TestBuilders.anOrganization(1L);
+        final Watchlist watchlist = TestBuilders.anOrgWatchlist(1L, "Org Watchlist", user, org);
 
         given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
         given(membershipRepository.existsByOrganizationIdAndUserId(1L, 1L)).willReturn(false);
@@ -150,8 +151,8 @@ class WatchlistSecurityServiceTest extends UnitTest {
         // Given: Watchlist belongs to different organization
         final User user = aValidUser();
         user.setId(1L);
-        final Organization org = anOrganization(2L);
-        final Watchlist watchlist = anOrgWatchlist(1L, user, org);
+        final Organization org = TestBuilders.anOrganization(2L);
+        final Watchlist watchlist = TestBuilders.anOrgWatchlist(1L, "Org Watchlist", user, org);
 
         given(watchlistRepository.findById(1L)).willReturn(Optional.of(watchlist));
 
@@ -169,26 +170,5 @@ class WatchlistSecurityServiceTest extends UnitTest {
         assertThat(securityService.canAccessOrgWatchlist(null, 1L, 1L), is(false));
         assertThat(securityService.canAccessOrgWatchlist(1L, null, 1L), is(false));
         assertThat(securityService.canAccessOrgWatchlist(1L, 1L, null), is(false));
-    }
-
-    // ========================= HELPER METHODS =========================
-
-    private Watchlist aUserWatchlist(final Long id, final User user) {
-        final Watchlist watchlist = new Watchlist("Test Watchlist", user, null);
-        watchlist.setId(id);
-        return watchlist;
-    }
-
-    private Watchlist anOrgWatchlist(final Long id, final User user, final Organization org) {
-        final Watchlist watchlist = new Watchlist("Org Watchlist", user, org);
-        watchlist.setId(id);
-        return watchlist;
-    }
-
-    private Organization anOrganization(final Long id) {
-        final Organization org = new Organization();
-        org.setId(id);
-        org.setName("Test Organization");
-        return org;
     }
 }

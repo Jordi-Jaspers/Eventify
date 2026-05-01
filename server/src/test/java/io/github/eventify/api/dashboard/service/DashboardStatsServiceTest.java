@@ -9,6 +9,7 @@ import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;
@@ -49,9 +50,9 @@ public class DashboardStatsServiceTest extends UnitTest {
             .willReturn(channels);
 
         // And: 2 channels have CRITICAL as last event
-        final Event criticalEvent1 = createMockEvent(channels.get(0), Severity.CRITICAL, OffsetDateTime.now());
-        final Event criticalEvent2 = createMockEvent(channels.get(1), Severity.CRITICAL, OffsetDateTime.now());
-        final Event okEvent = createMockEvent(channels.get(2), Severity.OK, OffsetDateTime.now());
+        final Event criticalEvent1 = TestBuilders.anEvent(channels.get(0), Severity.CRITICAL, OffsetDateTime.now());
+        final Event criticalEvent2 = TestBuilders.anEvent(channels.get(1), Severity.CRITICAL, OffsetDateTime.now());
+        final Event okEvent = TestBuilders.anEvent(channels.get(2), Severity.OK, OffsetDateTime.now());
 
         given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channels.get(0).getId()))
             .willReturn(Optional.of(criticalEvent1));
@@ -105,7 +106,7 @@ public class DashboardStatsServiceTest extends UnitTest {
 
         // And: Mock last events for channels
         for (final Channel channel : channels) {
-            final Event okEvent = createMockEvent(channel, Severity.OK, OffsetDateTime.now());
+            final Event okEvent = TestBuilders.anEvent(channel, Severity.OK, OffsetDateTime.now());
             given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channel.getId()))
                 .willReturn(Optional.of(okEvent));
         }
@@ -155,11 +156,11 @@ public class DashboardStatsServiceTest extends UnitTest {
         final OffsetDateTime twoHoursAgo = now.minusHours(2);
 
         given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channels.get(0).getId()))
-            .willReturn(Optional.of(createMockEvent(channels.get(0), Severity.OK, twoHoursAgo)));
+            .willReturn(Optional.of(TestBuilders.anEvent(channels.get(0), Severity.OK, twoHoursAgo)));
         given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channels.get(1).getId()))
-            .willReturn(Optional.of(createMockEvent(channels.get(1), Severity.OK, now)));
+            .willReturn(Optional.of(TestBuilders.anEvent(channels.get(1), Severity.OK, now)));
         given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channels.get(2).getId()))
-            .willReturn(Optional.of(createMockEvent(channels.get(2), Severity.OK, oneHourAgo)));
+            .willReturn(Optional.of(TestBuilders.anEvent(channels.get(2), Severity.OK, oneHourAgo)));
 
         given(eventRepository.countByChannelIdInAndTimestampAfter(any(), any())).willReturn(0L);
 
@@ -251,7 +252,7 @@ public class DashboardStatsServiceTest extends UnitTest {
 
         // And: All channels have CRITICAL as last event
         for (final Channel channel : channels) {
-            final Event criticalEvent = createMockEvent(channel, Severity.CRITICAL, OffsetDateTime.now());
+            final Event criticalEvent = TestBuilders.anEvent(channel, Severity.CRITICAL, OffsetDateTime.now());
             given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channel.getId()))
                 .willReturn(Optional.of(criticalEvent));
         }
@@ -276,13 +277,13 @@ public class DashboardStatsServiceTest extends UnitTest {
 
         // And: Various severity levels (only 1 CRITICAL)
         given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channels.get(0).getId()))
-            .willReturn(Optional.of(createMockEvent(channels.get(0), Severity.CRITICAL, OffsetDateTime.now())));
+            .willReturn(Optional.of(TestBuilders.anEvent(channels.get(0), Severity.CRITICAL, OffsetDateTime.now())));
         given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channels.get(1).getId()))
-            .willReturn(Optional.of(createMockEvent(channels.get(1), Severity.WARNING, OffsetDateTime.now())));
+            .willReturn(Optional.of(TestBuilders.anEvent(channels.get(1), Severity.WARNING, OffsetDateTime.now())));
         given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channels.get(2).getId()))
-            .willReturn(Optional.of(createMockEvent(channels.get(2), Severity.OK, OffsetDateTime.now())));
+            .willReturn(Optional.of(TestBuilders.anEvent(channels.get(2), Severity.OK, OffsetDateTime.now())));
         given(eventRepository.findTopByChannelIdOrderByTimestampDesc(channels.get(3).getId()))
-            .willReturn(Optional.of(createMockEvent(channels.get(3), Severity.NO_DATA, OffsetDateTime.now())));
+            .willReturn(Optional.of(TestBuilders.anEvent(channels.get(3), Severity.NO_DATA, OffsetDateTime.now())));
 
         given(eventRepository.countByChannelIdInAndTimestampAfter(any(), any())).willReturn(0L);
 
@@ -309,13 +310,4 @@ public class DashboardStatsServiceTest extends UnitTest {
         return channels;
     }
 
-    private Event createMockEvent(final Channel channel, final Severity severity, final OffsetDateTime timestamp) {
-        final Event event = new Event();
-        event.setId(1L);
-        event.setChannel(channel);
-        event.setSeverity(severity);
-        event.setTitle("Test Event");
-        event.setTimestamp(timestamp);
-        return event;
-    }
 }

@@ -7,6 +7,7 @@ import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.monitor.model.TimeSpan;
 import io.github.eventify.api.monitor.model.Timeline;
 import io.github.eventify.api.monitor.model.TimelineDuration;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;
@@ -70,7 +71,7 @@ class TimelineBuilderTest extends UnitTest {
         final Channel channel = aChannel(1L, "test", ChannelStatus.ACTIVE);
         final OffsetDateTime rangeEnd = OffsetDateTime.now();
         final OffsetDateTime rangeStart = rangeEnd.minusHours(2);
-        final List<Event> events = List.of(anEvent(1L, channel, Severity.WARNING, rangeStart));
+        final List<Event> events = List.of(TestBuilders.anEvent(1L, channel, Severity.WARNING, rangeStart));
 
         // When: Building timeline
         final Timeline timeline = TimelineBuilder.fromEvents(events, new TimeSpan(rangeStart, rangeEnd));
@@ -92,7 +93,7 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime rangeEnd = OffsetDateTime.now();
         final OffsetDateTime rangeStart = rangeEnd.minusHours(4);
         final OffsetDateTime eventTime = rangeEnd.minusHours(1);
-        final List<Event> events = List.of(anEvent(1L, channel, Severity.OK, eventTime));
+        final List<Event> events = List.of(TestBuilders.anEvent(1L, channel, Severity.OK, eventTime));
 
         // When: Building timeline in live mode
         final Timeline timeline = TimelineBuilder.fromEvents(events, new TimeSpan(rangeStart, rangeEnd));
@@ -123,9 +124,9 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime event3Time = rangeStart.plusHours(3);
 
         final List<Event> events = List.of(
-            anEvent(1L, channel, Severity.WARNING, event1Time),
-            anEvent(2L, channel, Severity.WARNING, event2Time),
-            anEvent(3L, channel, Severity.WARNING, event3Time)
+            TestBuilders.anEvent(1L, channel, Severity.WARNING, event1Time),
+            TestBuilders.anEvent(2L, channel, Severity.WARNING, event2Time),
+            TestBuilders.anEvent(3L, channel, Severity.WARNING, event3Time)
         );
 
         // When: Building timeline
@@ -154,9 +155,9 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime criticalTime = rangeStart.plusHours(3);
 
         final List<Event> events = List.of(
-            anEvent(1L, channel, Severity.OK, okTime),
-            anEvent(2L, channel, Severity.WARNING, warningTime),
-            anEvent(3L, channel, Severity.CRITICAL, criticalTime)
+            TestBuilders.anEvent(1L, channel, Severity.OK, okTime),
+            TestBuilders.anEvent(2L, channel, Severity.WARNING, warningTime),
+            TestBuilders.anEvent(3L, channel, Severity.CRITICAL, criticalTime)
         );
 
         // When: Building timeline (non-live mode)
@@ -179,7 +180,7 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime rangeEnd = OffsetDateTime.now();
         final OffsetDateTime rangeStart = rangeEnd.minusHours(2);
         final OffsetDateTime eventTime = rangeEnd.minusHours(1);
-        final List<Event> events = List.of(anEvent(1L, channel, Severity.CRITICAL, eventTime));
+        final List<Event> events = List.of(TestBuilders.anEvent(1L, channel, Severity.CRITICAL, eventTime));
 
         // When: Building timeline in live mode
         final Timeline timeline = TimelineBuilder.fromEvents(events, new TimeSpan(rangeStart, rangeEnd));
@@ -199,7 +200,7 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime rangeEnd = OffsetDateTime.now().minusMinutes(5); // Non-live: end is 5 minutes ago
         final OffsetDateTime rangeStart = rangeEnd.minusHours(2);
         final OffsetDateTime eventTime = rangeEnd.minusHours(1);
-        final List<Event> events = List.of(anEvent(1L, channel, Severity.OK, eventTime));
+        final List<Event> events = List.of(TestBuilders.anEvent(1L, channel, Severity.OK, eventTime));
 
         // When: Building timeline in non-live mode
         final Timeline timeline = TimelineBuilder.fromEvents(events, new TimeSpan(rangeStart, rangeEnd));
@@ -218,7 +219,7 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime rangeEnd = OffsetDateTime.now();
         final OffsetDateTime rangeStart = rangeEnd.minusHours(2);
         final OffsetDateTime priorEventTime = rangeEnd.minusHours(5);
-        final List<Event> events = List.of(anEvent(1L, channel, Severity.OK, priorEventTime));
+        final List<Event> events = List.of(TestBuilders.anEvent(1L, channel, Severity.OK, priorEventTime));
 
         // When: Building timeline
         final Timeline timeline = TimelineBuilder.fromEvents(events, new TimeSpan(rangeStart, rangeEnd));
@@ -240,8 +241,8 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime priorEventTime = rangeEnd.minusHours(6);
         final OffsetDateTime eventInRangeTime = rangeEnd.minusHours(1);
         final List<Event> events = List.of(
-            anEvent(1L, channel, Severity.WARNING, priorEventTime),
-            anEvent(2L, channel, Severity.CRITICAL, eventInRangeTime)
+            TestBuilders.anEvent(1L, channel, Severity.WARNING, priorEventTime),
+            TestBuilders.anEvent(2L, channel, Severity.CRITICAL, eventInRangeTime)
         );
 
         // When: Building timeline
@@ -271,8 +272,8 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime oldPriorTime = rangeEnd.minusHours(10);
         final OffsetDateTime recentPriorTime = rangeEnd.minusHours(5);
         final List<Event> events = List.of(
-            anEvent(1L, channel, Severity.OK, oldPriorTime),
-            anEvent(2L, channel, Severity.CRITICAL, recentPriorTime)
+            TestBuilders.anEvent(1L, channel, Severity.OK, oldPriorTime),
+            TestBuilders.anEvent(2L, channel, Severity.CRITICAL, recentPriorTime)
         );
 
         // When: Building timeline
@@ -308,9 +309,9 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime rangeEnd = OffsetDateTime.now();
 
         final List<Event> events = List.of(
-            anEvent(1L, channel, Severity.OK, rangeStart.plusHours(1)),
-            anEvent(2L, channel, Severity.CRITICAL, rangeStart.plusHours(2)),
-            anEvent(3L, channel, Severity.WARNING, rangeStart.plusMinutes(90))
+            TestBuilders.anEvent(1L, channel, Severity.OK, rangeStart.plusHours(1)),
+            TestBuilders.anEvent(2L, channel, Severity.CRITICAL, rangeStart.plusHours(2)),
+            TestBuilders.anEvent(3L, channel, Severity.WARNING, rangeStart.plusMinutes(90))
         );
 
         // When: Getting current severity
@@ -329,8 +330,8 @@ class TimelineBuilderTest extends UnitTest {
         final OffsetDateTime rangeEnd = OffsetDateTime.now();
 
         final List<Event> events = List.of(
-            anEvent(1L, channel, Severity.OK, rangeStart.minusHours(5)),
-            anEvent(2L, channel, Severity.WARNING, rangeStart.minusHours(3))
+            TestBuilders.anEvent(1L, channel, Severity.OK, rangeStart.minusHours(5)),
+            TestBuilders.anEvent(2L, channel, Severity.WARNING, rangeStart.minusHours(3))
         );
 
         // When: Getting current severity
@@ -348,15 +349,5 @@ class TimelineBuilderTest extends UnitTest {
         channel.setName(name);
         channel.setStatus(status);
         return channel;
-    }
-
-    private Event anEvent(final Long id, final Channel channel, final Severity severity, final OffsetDateTime timestamp) {
-        final Event event = new Event();
-        event.setId(id);
-        event.setChannel(channel);
-        event.setSeverity(severity);
-        event.setTitle("Test Event");
-        event.setTimestamp(timestamp);
-        return event;
     }
 }

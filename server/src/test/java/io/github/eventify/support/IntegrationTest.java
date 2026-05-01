@@ -35,6 +35,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -62,6 +64,7 @@ import static io.github.eventify.common.exception.ApiErrorCode.TOKEN_NOT_FOUND_E
  * <p>Cleanup uses efficient bulk SQL deletes in a single transaction.</p>
  */
 @Slf4j
+@Execution(ExecutionMode.SAME_THREAD)
 public class IntegrationTest extends WebMvcConfigurator {
 
     protected static final String FIRST_NAME = "John";

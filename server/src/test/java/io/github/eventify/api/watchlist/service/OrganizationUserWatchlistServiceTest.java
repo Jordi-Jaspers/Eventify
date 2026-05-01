@@ -1,7 +1,6 @@
 package io.github.eventify.api.watchlist.service;
 
 import io.github.eventify.api.channel.model.Channel;
-import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.service.OrganizationService;
@@ -13,11 +12,11 @@ import io.github.eventify.api.watchlist.model.WatchlistMetaData;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.common.exception.DuplicateWatchlistNameException;
 import io.github.eventify.common.security.SecurityUtil;
+import io.github.eventify.support.TestBuilders;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,8 +127,8 @@ public class OrganizationUserWatchlistServiceTest extends UnitTest {
         input.setName("Org Watchlist");
         input.setConfiguration(configuration);
 
-        final Channel channel1 = createOrgChannel(1L, "Channel 1", user, organization);
-        final Channel channel2 = createOrgChannel(2L, "Channel 2", user, organization);
+        final Channel channel1 = aChannel(1L, "Channel 1", user, organization);
+        final Channel channel2 = aChannel(2L, "Channel 2", user, organization);
 
         when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
         when(watchlistRepository.findByOrganizationIdAndName(organization.getId(), "Org Watchlist"))
@@ -266,7 +265,7 @@ public class OrganizationUserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should get organization watchlist successfully")
     public void shouldGetOrganizationWatchlistSuccessfully() {
         // Given: Organization has a watchlist
-        final Watchlist watchlist = createOrgWatchlist(1L, "Org Watchlist", user, organization);
+        final Watchlist watchlist = anOrgWatchlist(1L, "Org Watchlist", user, organization);
 
         when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
         when(watchlistRepository.findByIdAndOrganizationId(1L, organization.getId()))
@@ -301,7 +300,7 @@ public class OrganizationUserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should update organization watchlist successfully")
     public void shouldUpdateOrganizationWatchlistSuccessfully() {
         // Given: Organization has a watchlist
-        final Watchlist existing = createOrgWatchlist(1L, "Old Name", user, organization);
+        final Watchlist existing = anOrgWatchlist(1L, "Old Name", user, organization);
 
         final Watchlist updated = new Watchlist();
         updated.setName("New Name");
@@ -329,10 +328,10 @@ public class OrganizationUserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should fail to update with duplicate name")
     public void shouldFailToUpdateWithDuplicateName() {
         // Given: Organization has a watchlist
-        final Watchlist existing = createOrgWatchlist(1L, "Old Name", user, organization);
+        final Watchlist existing = anOrgWatchlist(1L, "Old Name", user, organization);
 
         // And: Another watchlist with target name exists
-        final Watchlist anotherWatchlist = createOrgWatchlist(2L, "New Name", user, organization);
+        final Watchlist anotherWatchlist = anOrgWatchlist(2L, "New Name", user, organization);
 
         final Watchlist updated = new Watchlist();
         updated.setName("New Name");
@@ -356,7 +355,7 @@ public class OrganizationUserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should delete organization watchlist successfully")
     public void shouldDeleteOrganizationWatchlistSuccessfully() {
         // Given: Organization has a watchlist
-        final Watchlist watchlist = createOrgWatchlist(1L, "Org Watchlist", user, organization);
+        final Watchlist watchlist = anOrgWatchlist(1L, "Org Watchlist", user, organization);
 
         when(organizationService.getOrganization(organization.getId())).thenReturn(organization);
         when(watchlistRepository.findByIdAndOrganizationId(1L, organization.getId()))
@@ -373,9 +372,9 @@ public class OrganizationUserWatchlistServiceTest extends UnitTest {
     @DisplayName("Should search organization watchlists successfully")
     public void shouldSearchOrganizationWatchlistsSuccessfully() {
         // Given: Organization has 3 watchlists
-        final Watchlist watchlist1 = createOrgWatchlist(1L, "Watchlist 1", user, organization);
-        final Watchlist watchlist2 = createOrgWatchlist(2L, "Watchlist 2", user, organization);
-        final Watchlist watchlist3 = createOrgWatchlist(3L, "Watchlist 3", user, organization);
+        final Watchlist watchlist1 = anOrgWatchlist(1L, "Watchlist 1", user, organization);
+        final Watchlist watchlist2 = anOrgWatchlist(2L, "Watchlist 2", user, organization);
+        final Watchlist watchlist3 = anOrgWatchlist(3L, "Watchlist 3", user, organization);
 
         final Page<Watchlist> mockPage = new PageImpl<>(List.of(watchlist1, watchlist2, watchlist3));
 
@@ -387,7 +386,7 @@ public class OrganizationUserWatchlistServiceTest extends UnitTest {
             .thenReturn(mockPage);
 
         // When: Searching watchlists
-        final SortablePageInput input = createDefaultPageInput();
+        final SortablePageInput input = TestBuilders.aPageInput();
         final Page<Watchlist> watchlists = organizationWatchlistService.searchWatchlists(organization.getId(), input);
 
         // Then: Should return all 3 watchlists
@@ -398,26 +397,6 @@ public class OrganizationUserWatchlistServiceTest extends UnitTest {
         assertThat(watchlists.getContent().get(2).getName(), is("Watchlist 3"));
     }
 
-    private Watchlist createOrgWatchlist(final Long id, final String name, final User user, final Organization org) {
-        final Watchlist watchlist = new Watchlist();
-        watchlist.setId(id);
-        watchlist.setName(name);
-        watchlist.setUser(user);
-        watchlist.setOrganization(org);
-        watchlist.setConfiguration(WatchlistConfiguration.empty());
-        watchlist.setFilters(WatchlistFilters.defaults());
-        watchlist.setCreatedAt(OffsetDateTime.now().minusDays(1));
-        return watchlist;
-    }
-
-    private Channel createOrgChannel(final Long id, final String name, final User user, final Organization org) {
-        final Channel channel = new Channel(name, "test.slug." + id, user, org);
-        channel.setId(id);
-        channel.setStatus(ChannelStatus.ACTIVE);
-        channel.setCreatedAt(OffsetDateTime.now().minusDays(1));
-        return channel;
-    }
-
     private List<Channel> channelsWithIds(final Long... ids) {
         final List<Channel> channels = new java.util.ArrayList<>();
         for (final Long id : ids) {
@@ -426,12 +405,5 @@ public class OrganizationUserWatchlistServiceTest extends UnitTest {
             channels.add(channel);
         }
         return channels;
-    }
-
-    private SortablePageInput createDefaultPageInput() {
-        final SortablePageInput input = new SortablePageInput();
-        input.setPageNumber(0);
-        input.setPageSize(20);
-        return input;
     }
 }

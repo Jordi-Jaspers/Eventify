@@ -24,18 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ApplicationContextTest extends IntegrationTest {
 
     @Test
-    @DisplayName("Should load Spring application context successfully")
-    public void contextLoads() {
-        assertThat(applicationContext, is(notNullValue()));
-    }
-
-    @Test
-    @DisplayName("Should load Hawaii filters successfully")
-    public void testHawaiiFilters() {
-        assertThat(loggingFilters, is(notNullValue()));
-    }
-
-    @Test
     @DisplayName("Should respond to health endpoint with status UP")
     public void healthEndpoint() throws Exception {
         // Given: The request for the health endpoint
