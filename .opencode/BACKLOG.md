@@ -26,8 +26,7 @@ Raw ideas and future work. Items here need refinement before development.
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
 - [ ] **Redirect to org incorrect** - on user profile page clicking on organization name redirects to wrong location. Fix routing logic to redirect to correct org dashboard.
-- [ ] **Adjust "how it works" landing page** - Update copy and design of the landing page to better explain the product and guide users to sign up or explore features. Consider adding screenshots, diagrams, or a video demo.
-- [ ] **Landing page curl command** - Update the example curl command on the landing page to reflect the current API structure and authentication method. Ensure it works with the latest API version and provides a clear example for developers.
+
 - [ ] **Update curl command API key generation** -- during creation of the api key, the curl command example should be updated to reflect the new API key format and endpoint structure. This ensures that users can easily copy and use the command without confusion. there is a util method used in the channel.
 
 ---
