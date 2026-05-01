@@ -24,8 +24,10 @@
 	import { versionStore } from '$lib/stores/version.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette, Sparkles } from '@lucide/svelte';
+	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette, Sparkles, Bell } from '@lucide/svelte';
 	import { Badge } from '$lib/components/ui/badge';
+	import { notificationStore } from '$lib/stores/notification.svelte';
+	import NotificationPanel from '$lib/components/notification/NotificationPanel.svelte';
 	import { toast } from 'svelte-sonner';
 	import { handleError } from '$lib/utils/error-handler';
 	import type { UserOrganizationResponse } from '$lib/api/models';
@@ -36,6 +38,7 @@
 	let isDarkMode: boolean = $state(true);
 	const shouldShowDevPlaybook: boolean = showDevCredentials();
 	const hasNewVersion: boolean = $derived(versionStore.hasNewVersion);
+	const hasUnread: boolean = $derived(notificationStore.hasUnread);
 
 	onMount(() => {
 		isDarkMode = document.documentElement.classList.contains('dark');
@@ -115,13 +118,18 @@
 	<Sidebar.Menu>
 		<Sidebar.MenuItem>
 			<Sidebar.MenuButton
-				onclick={() => goto(CLIENT_ROUTES.CHANGELOG_PAGE.path)}
+				onclick={() => notificationStore.openPanel()}
 				class="hover:bg-sidebar-accent"
 			>
-				<Sparkles class="size-4" />
-				<span>What's New</span>
-				{#if hasNewVersion}
-					<span class="ml-auto h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+				<div class="relative">
+					<Bell class="size-4" />
+					{#if hasUnread}
+						<span class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+					{/if}
+				</div>
+				<span>Notifications</span>
+				{#if hasUnread}
+					<Badge class="ml-auto text-[10px] px-1.5 py-0">New</Badge>
 				{/if}
 			</Sidebar.MenuButton>
 		</Sidebar.MenuItem>
@@ -257,24 +265,34 @@
 					<!-- Account Actions -->
 					<div class="p-1">
 						<DropdownMenu.Item
-							class="cursor-pointer hover:bg-primary/10"
-							onclick={() => goto(CLIENT_ROUTES.PROFILE_PAGE.path)}
-						>
-							<User class="mr-2 h-4 w-4" />
-							<span>Profile</span>
-						</DropdownMenu.Item>
-						<DropdownMenu.Item
-							class="cursor-pointer hover:bg-primary/10"
-							onclick={toggleTheme}
-						>
-							{#if isDarkMode}
-								<Sun class="mr-2 h-4 w-4" />
-								<span>Light Mode</span>
-							{:else}
-								<Moon class="mr-2 h-4 w-4" />
-								<span>Dark Mode</span>
-							{/if}
-						</DropdownMenu.Item>
+						class="cursor-pointer hover:bg-primary/10"
+						onclick={() => goto(CLIENT_ROUTES.PROFILE_PAGE.path)}
+					>
+						<User class="mr-2 h-4 w-4" />
+						<span>Profile</span>
+					</DropdownMenu.Item>
+					<DropdownMenu.Item
+						class="cursor-pointer hover:bg-primary/10"
+						onclick={() => goto(CLIENT_ROUTES.CHANGELOG_PAGE.path)}
+					>
+						<Sparkles class="mr-2 h-4 w-4" />
+						<span>What's New</span>
+						{#if hasNewVersion}
+							<span class="ml-auto h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+						{/if}
+					</DropdownMenu.Item>
+					<DropdownMenu.Item
+						class="cursor-pointer hover:bg-primary/10"
+						onclick={toggleTheme}
+					>
+						{#if isDarkMode}
+							<Sun class="mr-2 h-4 w-4" />
+							<span>Light Mode</span>
+						{:else}
+							<Moon class="mr-2 h-4 w-4" />
+							<span>Dark Mode</span>
+						{/if}
+					</DropdownMenu.Item>
 					</div>
 
 					<DropdownMenu.Separator />
@@ -297,4 +315,9 @@
 	<div class="px-4 py-2 border-t border-border/50 group-data-[collapsible=icon]:hidden">
 		<p class="text-xs text-muted-foreground text-center">{APP_VERSION}</p>
 	</div>
+
+	<NotificationPanel
+		open={notificationStore.isPanelOpen}
+		onOpenChange={(open) => open ? notificationStore.openPanel() : notificationStore.closePanel()}
+	/>
 </Sidebar.Footer>
