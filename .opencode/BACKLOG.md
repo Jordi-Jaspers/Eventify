@@ -7,11 +7,19 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Organization Management
 **Context**: Admins need better tools to manage organizations, especially around trial limitations and status
 
+- [ ] **Update Organization Status** - Admin can update org status (TRIAL, ACTIVE, SUSPENDED). Suspended orgs hidden from members (403). Admin edit sheet with status dropdown. Endpoint: `PATCH /api/v1/admin/organizations/{orgId}/status`.
 - [ ] **TRIAL account limitations** - Limit users, event quota, and API keys for organizations in TRIAL status. Enforce limits in backend, show upgrade prompts in UI.
 - [ ] **Organization status change audit log** - Track when admin changes org status, with reason field. Part of broader admin audit log feature.
 - [ ] **Organization status change notifications** - Notify org owner when their organization is suspended or reactivated.
 - [ ] **Refactor user/org dashboards to something useful**
 - [ ] **Configurable Event Quotas** - Allow users to configure their monthly event limit (tied to subscription tier). organisations have no limitations.
+
+---
+
+## Epic: Channel Management
+**Context**: Channel owners and admins need efficient tools to manage channels at scale.
+
+- [ ] **Mass Channel Actions** - Select multiple channels and perform bulk actions (delete, pause, resume) with confirmation dialogs and partial failure handling. Bulk API endpoints + selection UI with toolbar.
 
 ---
 ## Epic: Bugs & Technical Debt
@@ -23,24 +31,17 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Update curl command API key generation** -- during creation of the api key, the curl command example should be updated to reflect the new API key format and endpoint structure. This ensures that users can easily copy and use the command without confusion. there is a util method used in the channel.
 
 ---
-## Epic: General Improvements
-**Context**: Small improvements that don't fit into other epics but would enhance user experience.
-
-- [ ] **More obvious indication for What's New events** - Currently, the "What's New" indicator is a small blue dot next page link in the sidebar. maybe we should add a popup or banner on the dashboard when there are new features/events to check out. This would increase visibility and encourage users to explore new capabilities.
-- [ ] **Native Compilation** - Explore using GraalVM native image compilation for faster startup times and lower memory usage, especially for serverless deployments.
-- [ ] **Improve server Test suite** - currently 1200+ tests which is taking around 5 minutes to run. Explore ways to optimize test execution time, such as parallel test execution, test selection based on code changes, or refactoring slow tests. extracting util methods to base classes. most culprits are unit tests having duplicate helper methods. our method is to always create a valid object and adjust the relevant field for the test instead of creating multiple variations of the same object with different fields set.
-
----
 
 ## Epic: OAUTH2 Authentication
-**Context**: Support third-party authentication via OAUTH2 providers (Google, GitHub, etc.) in addition to existing JWT and API Key methods.
+**Context**: Authentication, session management, and third-party provider support. Current system uses JWT (access+refresh) with Google/GitHub OAuth2.
 
-- [ ] **Review current authentication mechanisms** - Evaluate if current JWT-based auth meets all needs or if we should add OAuth2 for better SSO support.
-- [ ] **Company Login SSO / SAML** - entraID authentication, configuring entraID during org creation? user not searchable by regular users / org.
-- [ ] **Long-Lived Refresh Tokens / Remember me**
-- [ ] **Multi-Token Support / Management up to 5**
-- [ ] **Token Revocation - single/all**
-- [ ] **OAuth2 Enhancements - account linking**
+- [ ] **Company Login SSO / SAML** - EntraID authentication, configuring IdP during org creation. User not searchable by regular users / org. Requires SAML library, org-level IdP config, JIT provisioning, admin setup UI. (XL — consider as sub-epic)
+- [ ] **Evaluate Keycloak Migration** - Assess whether migrating to Keycloak would be more efficient than building session management, SSO/SAML, account linking, and MFA individually. Compare: ops overhead vs feature velocity.
+
+### Auth Audit Findings (from review)
+- [ ] **RSA seed hardening** - Default RSA seed is `default-seed`. Enforce unique seed in production (fail startup if default, or auto-generate). Low effort, high security impact.
+- [ ] **CSRF protection for cookie-based auth** - CSRF is disabled despite using HTTP-only cookies for JWT. Evaluate enabling CSRF for browser sessions (exclude API key auth).
+- [ ] **GitHub OAuth public email requirement** - GitHub OAuth fails silently if user has no public email. Add error handling or request `user:email` scope to access private emails.
 
 ---
 
@@ -64,7 +65,7 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Audit System
 **Context**: Cross-cutting audit trail for security, compliance, and debugging. Identified during Channel Management refinement.
 
-**NOTE** something like Axiom's frontend logging to capture user interactions for audits?
+**NOTE** something like Axiom's frontend logging / pocketbase monitoring to capture user interactions for audits? This should be somehting that can be monitored in the application as an admin.
 
 - [ ] **Audit infrastructure** - Create audit log table, service, and base patterns for tracking user actions across the platform.
 - [ ] **Bulk action audit trail** - Record bulk operations (channel deletes, etc.) with user, action, targets, timestamp.
@@ -87,6 +88,8 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Future Considerations
 **Context**: Ideas to keep in mind for architecture decisions but not for immediate development.
 
+- [ ] **Growthbook** - https://www.growthbook.io/ for feature flagging and A/B testing. Could be useful for gradual rollouts and testing new features.
+- [ ] **Admin User can create dashboards from every org channel** - Admins can create dashboards that pull in data from any channel across the organization, even if they are not the channel owner. This allows for cross-channel monitoring and insights.
 - [ ] **Webhooks/Notifications**: Alert users when specific events occur (ERROR severity, keyword match)
 - [ ] **Real-time Updates**: WebSocket or SSE for live timeline updates
 - [ ] **Event Enrichment**: Auto-detect JSON payloads, extract fields for filtering
