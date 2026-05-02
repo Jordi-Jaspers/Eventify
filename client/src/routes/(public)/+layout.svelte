@@ -4,12 +4,14 @@
 
     let {children} = $props();
     
-    // Check if we're on the landing page to allow full-width layout
-    const isLandingPage = $derived($page.url.pathname === '/');
+    // Check if we're on a full-width page (landing, pricing)
+    const isFullWidthPage = $derived(
+        $page.url.pathname === '/' || $page.url.pathname === '/pricing'
+    );
 </script>
 
 <AppBackground>
-    {#if isLandingPage}
+    {#if isFullWidthPage}
         <div class="w-full animate-fade-in">
             {@render children()}
         </div>

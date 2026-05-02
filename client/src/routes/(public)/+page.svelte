@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { isAuthenticated } from '$lib/stores/auth';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import AppLogo from '$lib/components/layout/AppLogo.svelte';
+	import PublicNavbar from '$lib/components/layout/PublicNavbar.svelte';
+	import PublicFooter from '$lib/components/layout/PublicFooter.svelte';
 	import {
 		Activity,
 		Building2,
@@ -13,43 +13,101 @@
 		Plug,
 		Radio,
 		BarChart3,
-		Menu,
-		X,
 		Copy,
 		Check,
-		ChevronDown
+		ChevronDown,
+		ChevronRight
 	} from '@lucide/svelte';
-	import { onMount } from 'svelte';
+	import { type Component } from 'svelte';
 	import { Card } from '$lib/components/ui/card';
 	import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
 
-	// Mobile menu state
-	let mobileMenuOpen: boolean = $state(false);
-	
-	// Scroll state for navbar styling
-	let scrolled: boolean = $state(false);
-	
 	// Copy button state
 	let copied: boolean = $state(false);
+
+	interface FeatureCard {
+		icon: Component;
+		title: string;
+		description: string;
+	}
+
+	interface HowItWorksStep {
+		icon: Component;
+		title: string;
+		description: string;
+	}
+
+	const features: FeatureCard[] = [
+		{
+			icon: Activity,
+			title: 'Real-Time Streaming',
+			description: 'WebSocket-powered live updates deliver events the moment they happen. No polling, no delays.'
+		},
+		{
+			icon: Building2,
+			title: 'Multi-Organization Support',
+			description: 'Manage multiple organizations with isolated data, separate API keys, and custom retention policies.'
+		},
+		{
+			icon: GitBranch,
+			title: 'Channel-Based Routing',
+			description: 'Route events to specific channels for organized monitoring. Filter and search with precision.'
+		},
+		{
+			icon: Code2,
+			title: 'Developer-First API',
+			description: 'RESTful API with comprehensive documentation. Integrate in minutes with any language or framework.'
+		},
+		{
+			icon: Users,
+			title: 'Team Collaboration',
+			description: 'Role-based access control, team dashboards, and shared insights. Keep everyone in sync.'
+		},
+		{
+			icon: Shield,
+			title: 'Enterprise Security',
+			description: 'API key rotation, audit logs, rate limiting, and encrypted storage. Built for compliance.'
+		}
+	];
+
+	const steps: HowItWorksStep[] = [
+		{
+			icon: Plug,
+			title: 'Create a Channel',
+			description: 'Organize events by service, environment, or team. Channels keep your event streams structured.'
+		},
+		{
+			icon: Radio,
+			title: 'Send Events',
+			description: 'One API call from any language. No SDK required — just a simple HTTP POST.'
+		},
+		{
+			icon: BarChart3,
+			title: 'Monitor & React',
+			description: 'Live dashboards, severity tracking, and trend analysis. Know what\'s happening in real time.'
+		}
+	];
 
 	// Smooth scroll to section
 	function scrollToSection(sectionId: string): void {
 		const element: HTMLElement | null = document.getElementById(sectionId);
 		if (element) {
 			element.scrollIntoView({ behavior: 'smooth' });
-			mobileMenuOpen = false;
 		}
 	}
 
 	// Copy code to clipboard
+
 	async function copyCode(): Promise<void> {
-		const code: string = `curl -X POST https://api.eventify.io/v1/events \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+		const code: string = `curl -X POST https://api.eventify.io/v1/external/event \\
+  -H "X-API-Key: ev_live_abc123" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "channel": "payments",
-    "type": "payment.completed",
-    "data": {"amount": 99.99, "currency": "USD"}
+    "slug": "deployment",
+    "severity": "info",
+    "title": "Deployment successful",
+    "message": "v2.1.0 deployed to production",
+    "metadata": {"service": "api-gateway", "region": "eu-west-1"}
   }'`;
 
 		try {
@@ -58,19 +116,11 @@
 			setTimeout(() => {
 				copied = false;
 			}, 2000);
-		} catch (err: unknown) {
-			console.error('Failed to copy:', err);
-		}
+	} catch (err: unknown) {
+		console.error('Failed to copy:', err);
 	}
+}
 
-	onMount(() => {
-		const handleScroll = (): void => {
-			scrolled = window.scrollY > 20;
-		};
-
-		window.addEventListener('scroll', handleScroll);
-		return () => window.removeEventListener('scroll', handleScroll);
-	});
 </script>
 
 <svelte:head>
@@ -79,157 +129,25 @@
 </svelte:head>
 
 <!-- Navigation Bar -->
-<nav
-	class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 {scrolled
-		? 'bg-card/90 backdrop-blur-xl border-b border-border/50 shadow-sm'
-		: 'bg-transparent'}"
->
-	<div class="container mx-auto px-4 sm:px-6 lg:px-8">
-		<div class="flex items-center justify-between h-16">
-			<!-- Logo -->
-			<AppLogo size="small" href={CLIENT_ROUTES.LANDING_PAGE.path} />
+<PublicNavbar activePage="landing" />
 
-			<!-- Desktop Navigation -->
-			<div class="hidden md:flex items-center gap-2">
-				<Button
-					variant="ghost"
-					onclick={() => scrollToSection('features')}
-					class="text-sm font-medium text-muted-foreground hover:text-primary"
-				>
-					Features
-				</Button>
-				<Button
-					variant="ghost"
-					onclick={() => scrollToSection('how-it-works')}
-					class="text-sm font-medium text-muted-foreground hover:text-primary"
-				>
-					How It Works
-				</Button>
-				<Button
-					variant="ghost"
-					onclick={() => scrollToSection('cta')}
-					class="text-sm font-medium text-muted-foreground hover:text-primary"
-				>
-					Get Started
-				</Button>
-			</div>
-
-			<!-- Desktop Auth Buttons -->
-			<div class="hidden md:flex items-center gap-3">
-				{#if $isAuthenticated}
-				<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path}>
-					Dashboard
-				</Button>
-				{:else}
-					<Button href={CLIENT_ROUTES.LOGIN_PAGE.path} variant="outline">
-						Login
-					</Button>
-				<Button href={CLIENT_ROUTES.REGISTER_PAGE.path}>
-					Sign Up Free
-				</Button>
-				{/if}
-			</div>
-
-			<!-- Mobile Menu Button -->
-			<Button
-				variant="ghost"
-				size="icon"
-				onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-				class="md:hidden text-muted-foreground hover:text-primary"
-				aria-label="Toggle menu"
-				aria-expanded={mobileMenuOpen}
-			>
-				{#if mobileMenuOpen}
-					<X class="w-6 h-6" />
-				{:else}
-					<Menu class="w-6 h-6" />
-				{/if}
-			</Button>
-		</div>
-
-	</div>
-</nav>
-
-<!-- Full-screen Mobile Menu -->
-{#if mobileMenuOpen}
-	<div class="fixed inset-0 z-40 md:hidden">
-		<!-- Backdrop -->
-		<button
-			onclick={() => (mobileMenuOpen = false)}
-			class="absolute inset-0 bg-background/80 backdrop-blur-sm"
-			aria-label="Close menu"
-		></button>
-		
-		<!-- Menu Panel -->
-		<div
-			class="absolute inset-x-0 top-16 bottom-0 bg-background/95 backdrop-blur-xl border-t border-border/50 animate-fade-in-up overflow-y-auto"
-			role="dialog"
-			aria-modal="true"
-		>
-			<div class="flex flex-col h-full px-6 py-8">
-				<!-- Navigation Links -->
-				<nav class="flex-1 space-y-2">
-					<Button
-						variant="ghost"
-						onclick={() => scrollToSection('features')}
-						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-muted/50 rounded-md"
-					>
-						Features
-					</Button>
-					<Button
-						variant="ghost"
-						onclick={() => scrollToSection('how-it-works')}
-						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-muted/50 rounded-md"
-					>
-						How It Works
-					</Button>
-					<Button
-						variant="ghost"
-						onclick={() => scrollToSection('cta')}
-						class="w-full justify-start px-4 py-6 text-lg font-medium hover:bg-muted/50 rounded-md"
-					>
-						Get Started
-					</Button>
-				</nav>
-				
-				<!-- Auth Buttons at Bottom -->
-				<div class="pt-6 border-t border-border/50 space-y-3">
-					{#if $isAuthenticated}
-						<Button href={CLIENT_ROUTES.DASHBOARD_PAGE.path} class="w-full h-12 text-base">
-							Dashboard
-						</Button>
-					{:else}
-						<Button href={CLIENT_ROUTES.LOGIN_PAGE.path} variant="outline" class="w-full h-12 text-base">
-							Login
-						</Button>
-						<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="w-full h-12 text-base">
-							Sign Up Free
-						</Button>
-					{/if}
-				</div>
-			</div>
-		</div>
-	</div>
-{/if}
-
-	<!-- Main Content -->
-	<main class="overflow-x-hidden">
-		<!-- Hero Section -->
-		<section id="hero" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-			<div class="container mx-auto max-w-7xl">
-				<div class="grid lg:grid-cols-2 gap-12 items-center">
-					<!-- Hero Text -->
-					<div class="animate-fade-in-up space-y-6">
-						<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-							<span class="text-primary">Real-Time Event Monitoring</span>
-							<br class="block" />
-							<span class="text-foreground relative z-10">for Modern Teams</span>
-						</h1>
-						<p class="text-lg sm:text-xl text-muted-foreground">
-							Track, analyze, and act on events across your distributed systems. Get instant insights
-							with WebSocket-powered live updates.
-						</p>
-						<div class="flex flex-col sm:flex-row gap-4 pt-4">
+<!-- Main Content -->
+<main class="overflow-x-hidden">
+	<!-- Hero Section -->
+	<section id="hero" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+		<div class="container mx-auto max-w-7xl">
+			<div class="grid lg:grid-cols-2 gap-12 items-center">
+				<!-- Hero Text -->
+				<div class="animate-fade-in-up space-y-6">
+					<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+						<span class="text-primary">Event Monitoring</span>
+						<br class="block" />
+						<span class="text-foreground relative z-10">for Developers</span>
+					</h1>
+					<p class="text-lg sm:text-xl text-muted-foreground">
+						Simple API. Real-time insights. Track events across your services with one API call.
+					</p>
+					<div class="flex flex-col sm:flex-row gap-4 pt-4">
 						<Button
 							href={CLIENT_ROUTES.REGISTER_PAGE.path}
 							size="lg"
@@ -237,102 +155,102 @@
 						>
 							Get Started Free
 						</Button>
-							<Button
-								onclick={() => scrollToSection('features')}
-								size="lg"
-								variant="outline"
-								class="text-base w-full sm:w-auto"
-							>
-								Learn More
-								<ChevronDown class="ml-2 h-4 w-4" />
-							</Button>
+						<Button
+							onclick={() => scrollToSection('features')}
+							size="lg"
+							variant="outline"
+							class="text-base w-full sm:w-auto"
+						>
+							Learn More
+							<ChevronDown class="ml-2 h-4 w-4" />
+						</Button>
+					</div>
+				</div>
+
+				<!-- Hero Visual - Animated Dashboard Mockup -->
+				<div class="relative animate-fade-in mt-8 lg:mt-0">
+					<!-- Main Dashboard -->
+					<div
+						class="rounded-lg border border-border/50 bg-card/60 backdrop-blur-xl p-6 shadow-xl"
+					>
+						<div class="space-y-4">
+							<!-- Header -->
+							<div class="flex items-center justify-between pb-4 border-b border-border/50">
+								<div class="flex items-center gap-2">
+									<Activity class="h-5 w-5 text-primary" />
+									<span class="font-semibold">Live Events</span>
+								</div>
+								<div class="flex items-center gap-2">
+									<PulseIndicator variant="green" size="md" />
+									<span class="text-xs text-muted-foreground">Connected</span>
+								</div>
+							</div>
+
+							<!-- Event Cards -->
+							<div class="space-y-3">
+								<div class="animate-fade-in-up rounded-md border border-green-500/20 bg-green-500/10 p-3">
+									<div class="flex items-center gap-2">
+										<span class="text-green-500">●</span>
+										<span class="text-sm font-mono">user.login</span>
+									</div>
+									<p class="text-xs text-muted-foreground mt-1">User authenticated successfully</p>
+								</div>
+
+								<div
+									class="animate-fade-in-up rounded-md border border-blue-500/20 bg-blue-500/10 p-3"
+									style="animation-delay: 0.2s;"
+								>
+									<div class="flex items-center gap-2">
+										<span class="text-blue-500">●</span>
+										<span class="text-sm font-mono">payment.success</span>
+									</div>
+									<p class="text-xs text-muted-foreground mt-1">Payment processed - $99.99 USD</p>
+								</div>
+
+								<div
+									class="animate-fade-in-up rounded-md border border-amber-500/20 bg-amber-500/10 p-3"
+									style="animation-delay: 0.4s;"
+								>
+									<div class="flex items-center gap-2">
+										<span class="text-amber-500">●</span>
+										<span class="text-sm font-mono">api.rate_limit</span>
+									</div>
+									<p class="text-xs text-muted-foreground mt-1">Rate limit warning - 80% capacity</p>
+								</div>
+							</div>
 						</div>
 					</div>
 
-					<!-- Hero Visual - Animated Dashboard Mockup -->
-					<div class="relative animate-fade-in mt-8 lg:mt-0">
-						<!-- Main Dashboard -->
-						<div
-							class="rounded-lg border border-border/50 bg-card/60 backdrop-blur-xl p-6 shadow-xl"
-						>
-							<div class="space-y-4">
-								<!-- Header -->
-								<div class="flex items-center justify-between pb-4 border-b border-border/50">
-									<div class="flex items-center gap-2">
-										<Activity class="h-5 w-5 text-primary" />
-										<span class="font-semibold">Live Events</span>
-									</div>
-									<div class="flex items-center gap-2">
-										<PulseIndicator variant="green" size="md" />
-										<span class="text-xs text-muted-foreground">Connected</span>
-									</div>
-								</div>
-
-								<!-- Event Cards -->
-								<div class="space-y-3">
-									<div class="animate-fade-in-up rounded-md border border-green-500/20 bg-green-500/10 p-3">
-										<div class="flex items-center gap-2">
-											<span class="text-green-500">●</span>
-											<span class="text-sm font-mono">user.login</span>
-										</div>
-										<p class="text-xs text-muted-foreground mt-1">User authenticated successfully</p>
-									</div>
-
-									<div
-										class="animate-fade-in-up rounded-md border border-blue-500/20 bg-blue-500/10 p-3"
-										style="animation-delay: 0.2s;"
-									>
-										<div class="flex items-center gap-2">
-											<span class="text-blue-500">●</span>
-											<span class="text-sm font-mono">payment.success</span>
-										</div>
-										<p class="text-xs text-muted-foreground mt-1">Payment processed - $99.99 USD</p>
-									</div>
-
-									<div
-										class="animate-fade-in-up rounded-md border border-amber-500/20 bg-amber-500/10 p-3"
-										style="animation-delay: 0.4s;"
-									>
-										<div class="flex items-center gap-2">
-											<span class="text-amber-500">●</span>
-											<span class="text-sm font-mono">api.rate_limit</span>
-										</div>
-										<p class="text-xs text-muted-foreground mt-1">Rate limit warning - 80% capacity</p>
-									</div>
-								</div>
-							</div>
+					<!-- Floating Notification Cards -->
+					<div
+						class="absolute -top-4 right-0 sm:-right-4 max-w-[200px] animate-fade-in-up rounded-md border border-border/50 bg-card/80 backdrop-blur-xl p-3 shadow-lg"
+						style="animation-delay: 0.6s;"
+					>
+						<div class="flex items-center gap-2">
+							<Shield class="h-4 w-4 text-primary" />
+							<span class="text-xs font-medium">Secure & Encrypted</span>
 						</div>
+					</div>
 
-						<!-- Floating Notification Cards -->
-						<div
-							class="absolute -top-4 right-0 sm:-right-4 max-w-[200px] animate-fade-in-up rounded-md border border-border/50 bg-card/80 backdrop-blur-xl p-3 shadow-lg"
-							style="animation-delay: 0.6s;"
-						>
-							<div class="flex items-center gap-2">
-								<Shield class="h-4 w-4 text-primary" />
-								<span class="text-xs font-medium">Secure & Encrypted</span>
-							</div>
-						</div>
-
-						<div
-							class="absolute -bottom-4 left-0 sm:-left-4 max-w-[180px] animate-fade-in-up rounded-md border border-border/50 bg-card/80 backdrop-blur-xl p-3 shadow-lg"
-							style="animation-delay: 0.8s;"
-						>
-							<div class="flex items-center gap-2">
-								<Activity class="h-4 w-4 text-primary" />
-								<span class="text-xs font-medium">Real-Time Updates</span>
-							</div>
+					<div
+						class="absolute -bottom-4 left-0 sm:-left-4 max-w-[180px] animate-fade-in-up rounded-md border border-border/50 bg-card/80 backdrop-blur-xl p-3 shadow-lg"
+						style="animation-delay: 0.8s;"
+					>
+						<div class="flex items-center gap-2">
+							<Activity class="h-4 w-4 text-primary" />
+							<span class="text-xs font-medium">Real-Time Updates</span>
 						</div>
 					</div>
 				</div>
 			</div>
-		</section>
+		</div>
+	</section>
 
 	<!-- Features Section -->
 	<section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
 		<div class="container mx-auto max-w-7xl">
 			<div class="text-center mb-16 animate-fade-in-up">
-					<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
+				<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
 					Powerful Features
 				</h2>
 				<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -341,104 +259,18 @@
 			</div>
 
 			<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-				<!-- Feature 1: Real-Time Streaming -->
+			{#each features as { icon: FeatureIcon, title, description }, i}
 				<div
 					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
+					style="animation-delay: {i * 0.1}s;"
 				>
-					<div
-						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
-					>
-						<Activity class="h-6 w-6 text-primary" />
+					<div class="mb-4 inline-flex rounded-md bg-primary/10 p-3">
+						<FeatureIcon class="h-6 w-6 text-primary" />
 					</div>
-					<h3 class="text-xl font-semibold mb-2">Real-Time Streaming</h3>
-					<p class="text-muted-foreground">
-						WebSocket-powered live updates deliver events the moment they happen. No polling, no
-						delays.
-					</p>
+					<h3 class="text-xl font-semibold mb-2">{title}</h3>
+					<p class="text-muted-foreground">{description}</p>
 				</div>
-
-				<!-- Feature 2: Multi-Organization Support -->
-				<div
-					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
-					style="animation-delay: 0.1s;"
-				>
-					<div
-						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
-					>
-						<Building2 class="h-6 w-6 text-primary" />
-					</div>
-					<h3 class="text-xl font-semibold mb-2">Multi-Organization Support</h3>
-					<p class="text-muted-foreground">
-						Manage multiple organizations with isolated data, separate API keys, and custom retention
-						policies.
-					</p>
-				</div>
-
-				<!-- Feature 3: Channel-Based Routing -->
-				<div
-					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
-					style="animation-delay: 0.2s;"
-				>
-					<div
-						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
-					>
-						<GitBranch class="h-6 w-6 text-primary" />
-					</div>
-					<h3 class="text-xl font-semibold mb-2">Channel-Based Routing</h3>
-					<p class="text-muted-foreground">
-						Route events to specific channels for organized monitoring. Filter and search with
-						precision.
-					</p>
-				</div>
-
-				<!-- Feature 4: Developer-First API -->
-				<div
-					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
-					style="animation-delay: 0.3s;"
-				>
-					<div
-						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
-					>
-						<Code2 class="h-6 w-6 text-primary" />
-					</div>
-					<h3 class="text-xl font-semibold mb-2">Developer-First API</h3>
-					<p class="text-muted-foreground">
-						RESTful API with comprehensive documentation. Integrate in minutes with any language or
-						framework.
-					</p>
-				</div>
-
-				<!-- Feature 5: Team Collaboration -->
-				<div
-					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
-					style="animation-delay: 0.4s;"
-				>
-					<div
-						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
-					>
-						<Users class="h-6 w-6 text-primary" />
-					</div>
-					<h3 class="text-xl font-semibold mb-2">Team Collaboration</h3>
-					<p class="text-muted-foreground">
-						Role-based access control, team dashboards, and shared insights. Keep everyone in sync.
-					</p>
-				</div>
-
-				<!-- Feature 6: Enterprise Security -->
-				<div
-					class="group rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 animate-fade-in-up"
-					style="animation-delay: 0.5s;"
-				>
-					<div
-						class="mb-4 inline-flex rounded-md bg-primary/10 p-3"
-					>
-						<Shield class="h-6 w-6 text-primary" />
-					</div>
-					<h3 class="text-xl font-semibold mb-2">Enterprise Security</h3>
-					<p class="text-muted-foreground">
-						API key rotation, audit logs, rate limiting, and encrypted storage. Built for compliance.
-					</p>
-				</div>
+			{/each}
 			</div>
 		</div>
 	</section>
@@ -455,74 +287,28 @@
 				</p>
 			</div>
 
-			<div class="grid md:grid-cols-3 gap-8 lg:gap-12">
-				<!-- Step 1 -->
-				<div class="relative animate-fade-in-up">
-					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-lg h-full">
-						<div
-							class="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 border border-primary/20 mb-6"
-						>
-							<Plug class="h-8 w-8 text-primary" />
+			<div class="flex flex-col md:flex-row items-stretch gap-0">
+			{#each steps as { icon: StepIcon, title, description }, i}
+				<div class="flex-1 animate-fade-in-up" style="animation-delay: {i * 0.2}s;">
+					<div class="relative flex flex-col h-full bg-card/50 backdrop-blur-xl border border-border/50 shadow-md rounded-lg p-8 overflow-hidden">
+						<span class="absolute top-4 right-6 text-8xl font-black text-primary/8 select-none leading-none">{i + 1}</span>
+						<div class="inline-flex items-center justify-center w-12 h-12 rounded-md bg-primary/10 border border-primary/20 mb-5">
+							<StepIcon class="h-6 w-6 text-primary" />
 						</div>
-						<div
-							class="inline-flex items-center justify-center bg-primary/20 text-primary rounded-full w-8 h-8 font-semibold mb-4 mx-auto"
-						>
-							1
-						</div>
-						<h3 class="text-xl font-semibold mb-3">Connect</h3>
-						<p class="text-muted-foreground">
-							Integrate with a simple API call. Works with any language or platform.
-						</p>
+						<h3 class="text-xl font-semibold mb-3">{title}</h3>
+						<p class="text-muted-foreground text-sm leading-relaxed">{description}</p>
 					</div>
-					<!-- Connector Line (hidden on mobile) -->
-					<div
-						class="hidden md:block absolute top-8 left-1/2 w-full h-[1px] bg-border"
-					></div>
 				</div>
 
-				<!-- Step 2 -->
-				<div class="relative animate-fade-in-up" style="animation-delay: 0.2s;">
-					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-lg h-full">
-						<div
-							class="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 border border-primary/20 mb-6"
-						>
-							<Radio class="h-8 w-8 text-primary" />
+					{#if i < steps.length - 1}
+						<div class="hidden md:flex items-center justify-center px-2 shrink-0">
+							<ChevronRight class="h-6 w-6 text-primary/40" />
 						</div>
-						<div
-							class="inline-flex items-center justify-center bg-primary/20 text-primary rounded-full w-8 h-8 font-semibold mb-4 mx-auto"
-						>
-							2
+						<div class="flex md:hidden items-center justify-center py-2">
+							<ChevronDown class="h-6 w-6 text-primary/40" />
 						</div>
-						<h3 class="text-xl font-semibold mb-3">Stream</h3>
-						<p class="text-muted-foreground">
-							Events flow in real-time. Filter, search, and monitor as they happen.
-						</p>
-					</div>
-					<!-- Connector Line (hidden on mobile) -->
-					<div
-						class="hidden md:block absolute top-8 left-1/2 w-full h-[1px] bg-border"
-					></div>
-				</div>
-
-				<!-- Step 3 -->
-				<div class="animate-fade-in-up" style="animation-delay: 0.4s;">
-					<div class="text-center bg-card/50 backdrop-blur-xl border border-border/50 shadow-md p-8 rounded-lg h-full">
-						<div
-							class="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 border border-primary/20 mb-6"
-						>
-							<BarChart3 class="h-8 w-8 text-primary" />
-						</div>
-						<div
-							class="inline-flex items-center justify-center bg-primary/20 text-primary rounded-full w-8 h-8 font-semibold mb-4 mx-auto"
-						>
-							3
-						</div>
-						<h3 class="text-xl font-semibold mb-3">Analyze</h3>
-						<p class="text-muted-foreground">
-							Gain insights with dashboards, alerts, and trend visualization.
-						</p>
-					</div>
-				</div>
+					{/if}
+				{/each}
 			</div>
 		</div>
 	</section>
@@ -541,17 +327,13 @@
 
 			<div class="animate-fade-in-up">
 				<Card class="bg-card/50 backdrop-blur-xl border border-border/50 shadow-md overflow-hidden">
-					<!-- Code Header -->
-					<div class="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-muted/30">
-						<div class="flex items-center gap-2">
-							<Code2 class="h-4 w-4 text-primary" />
-							<span class="text-sm font-medium">cURL</span>
-						</div>
+					<!-- Code Block -->
+					<div class="relative p-6 overflow-x-auto">
 						<Button
 							variant="ghost"
 							size="sm"
 							onclick={copyCode}
-							class="h-8 text-xs font-medium hover:bg-primary/20 hover:text-primary"
+							class="absolute top-3 right-3 h-8 text-xs font-medium hover:bg-primary/20 hover:text-primary z-10"
 							aria-label="Copy code"
 						>
 							{#if copied}
@@ -562,17 +344,15 @@
 								Copy
 							{/if}
 						</Button>
-					</div>
-
-					<!-- Code Block -->
-					<div class="p-6 overflow-x-auto">
-						<pre class="text-sm"><code class="language-bash text-muted-foreground"><span class="text-primary">curl</span> <span class="text-amber-500">-X POST</span> <span class="text-green-500">https://api.eventify.io/v1/events</span> <span class="text-amber-500">\</span>
-  <span class="text-amber-500">-H</span> <span class="text-green-500">"Authorization: Bearer YOUR_API_KEY"</span> <span class="text-amber-500">\</span>
+						<pre class="text-sm"><code class="language-bash text-muted-foreground"><span class="text-primary">curl</span> <span class="text-amber-500">-X POST</span> <span class="text-green-500">https://api.eventify.io/v1/external/event</span> <span class="text-amber-500">\</span>
+  <span class="text-amber-500">-H</span> <span class="text-green-500">"X-API-Key: ev_live_abc123"</span> <span class="text-amber-500">\</span>
   <span class="text-amber-500">-H</span> <span class="text-green-500">"Content-Type: application/json"</span> <span class="text-amber-500">\</span>
   <span class="text-amber-500">-d</span> <span class="text-green-500">'{`{
-    "channel": "payments",
-    "type": "payment.completed",
-    "data": {"amount": 99.99, "currency": "USD"}
+    "slug": "deployment",
+    "severity": "info",
+    "title": "Deployment successful",
+    "message": "v2.1.0 deployed to production",
+    "metadata": {"service": "api-gateway", "region": "eu-west-1"}
   }`}'</span></code></pre>
 					</div>
 				</Card>
@@ -601,90 +381,23 @@
 					Free to get started. No credit card required.
 				</p>
 				<div class="pt-4">
-				<Button
-					href={CLIENT_ROUTES.REGISTER_PAGE.path}
-					size="lg"
-					class="text-lg px-8 py-6"
-				>
-					Create Free Account
-				</Button>
+					<Button
+						href={CLIENT_ROUTES.REGISTER_PAGE.path}
+						size="lg"
+						class="text-lg px-8 py-6"
+					>
+						Create Free Account
+					</Button>
 				</div>
 			</div>
 		</div>
 	</section>
 </main>
 
-		<!-- Footer -->
-<footer class="border-t border-border/50 bg-muted/30 py-12 px-4 sm:px-6 lg:px-8">
-	<div class="container mx-auto max-w-7xl">
-		<div class="grid md:grid-cols-4 gap-8 mb-8">
-			<!-- Brand -->
-			<div class="md:col-span-2">
-				<div class="mb-4">
-					<AppLogo size="small" />
-				</div>
-				<p class="text-sm text-muted-foreground max-w-sm">
-					Real-time event monitoring for modern teams. Track, analyze, and act on events across
-					your distributed systems.
-				</p>
-			</div>
-
-			<!-- Product Links -->
-			<div>
-				<h4 class="font-semibold mb-4">Product</h4>
-				<ul class="space-y-2 text-sm">
-					<li>
-						<Button
-							variant="link"
-							onclick={() => scrollToSection('features')}
-							class="text-muted-foreground hover:text-primary p-0 h-auto font-normal"
-						>
-							Features
-						</Button>
-					</li>
-					<li>
-						<Button
-							variant="link"
-							onclick={() => scrollToSection('how-it-works')}
-							class="text-muted-foreground hover:text-primary p-0 h-auto font-normal"
-						>
-							How It Works
-						</Button>
-					</li>
-				</ul>
-			</div>
-
-			<!-- Account Links -->
-			<div>
-				<h4 class="font-semibold mb-4">Account</h4>
-				<ul class="space-y-2 text-sm">
-					<li>
-						<Button
-							href={CLIENT_ROUTES.LOGIN_PAGE.path}
-							variant="link"
-							class="text-muted-foreground hover:text-primary p-0 h-auto font-normal"
-						>
-							Login
-						</Button>
-					</li>
-					<li>
-						<Button
-							href={CLIENT_ROUTES.REGISTER_PAGE.path}
-							variant="link"
-							class="text-muted-foreground hover:text-primary p-0 h-auto font-normal"
-						>
-							Register
-						</Button>
-					</li>
-				</ul>
-			</div>
-		</div>
-
-		<!-- Copyright -->
-		<div class="pt-8 border-t border-border/50">
-			<p class="text-sm text-center text-muted-foreground">
-				© {new Date().getFullYear()} Eventify. All rights reserved.
-			</p>
-		</div>
-	</div>
-</footer>
+<!-- Footer -->
+<PublicFooter
+	productLinks={[
+		{ label: 'Features', onclick: () => scrollToSection('features') },
+		{ label: 'How It Works', onclick: () => scrollToSection('how-it-works') }
+	]}
+/>

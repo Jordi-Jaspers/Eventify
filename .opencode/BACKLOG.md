@@ -98,4 +98,5 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Export**: Download events as CSV/JSON for compliance/backup
 - [ ] **Stripe Integration**: manage subscriptions/payments
 - [ ] **Support / Help buttons** - guide users to docs or support chat from the avatar modal in sidebar.
+- [ ] **Pricing/Upgrade page for authenticated users** - Logged-in users should be able to view pricing and upgrade their plan from within the app (e.g., sidebar link or settings page).
 - [ ] **Add TTL-based Caching Infrastructure**: Add `@Cacheable` annotations or something similar for frequently accessed data like dashboard calls.

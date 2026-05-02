@@ -45,6 +45,10 @@ export const CLIENT_ROUTES = {
 		path: '/dev-playbook',
 		type: RouteType.PUBLIC
 	},
+	PRICING_PAGE: {
+		path: '/pricing',
+		type: RouteType.PUBLIC
+	},
 
 	// Private routes
 	DASHBOARD_PAGE: {
