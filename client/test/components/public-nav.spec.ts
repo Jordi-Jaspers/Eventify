@@ -1,77 +1,55 @@
 /**
  * Public Navigation Screenshot Tests
  *
- * Tests the updated nav (Logo left, Pricing + Get Started right) on landing and pricing pages.
+ * Validates shared public navbar across landing and pricing pages.
  */
-import { test } from '@playwright/test';
+import { test, setTheme, ANIMATION_SETTLE_MS, DATA_LOAD_MS } from '../fixtures/test-fixtures';
+import { createScreenshotHelper } from '../utils/screenshot';
+import { COLD_START_TIMEOUT_MS, THEMES } from '../utils/constants';
 
-const PAGE_NAME = 'public-nav';
-const screenshotDir = `test/resources/screenshots/${PAGE_NAME}`;
+const PAGE_NAME: string = 'public-nav';
+const getScreenshot = createScreenshotHelper(PAGE_NAME);
 
 test.describe('Public Navigation Screenshots', () => {
-    test.setTimeout(30000);
+	test.setTimeout(COLD_START_TIMEOUT_MS);
 
-    test('landing page nav - default (unauthenticated)', async ({ page }) => {
-        await page.goto('/');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
+	// Landing page - mobile navigation open
+	for (const theme of THEMES) {
+		test(`landing mobile ${theme} - navigation open`, async ({ page }, testInfo) => {
+			await page.setViewportSize({ width: 375, height: 667 });
+			await setTheme(page, theme);
+			await page.goto('/');
+			await page.waitForLoadState('domcontentloaded');
+			await page.waitForTimeout(DATA_LOAD_MS);
 
-        await page.screenshot({
-            path: `${screenshotDir}/01-landing-nav.png`,
-            clip: { x: 0, y: 0, width: 1280, height: 80 }
-        });
-    });
+			const menuButton = page.locator('button[aria-label="Toggle menu"]');
+			await menuButton.click();
+			await page.waitForTimeout(ANIMATION_SETTLE_MS);
 
-    test('landing page full - unauthenticated', async ({ page }) => {
-        await page.goto('/');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
+			await page.screenshot({
+				path: getScreenshot(`landing-mobile-nav-${theme}`, testInfo.project.name),
+				fullPage: false
+			});
+		});
+	}
 
-        await page.screenshot({
-            path: `${screenshotDir}/02-landing-full.png`,
-            fullPage: true
-        });
-    });
+	// Pricing page - mobile navigation open
+	for (const theme of THEMES) {
+		test(`pricing mobile ${theme} - navigation open`, async ({ page }, testInfo) => {
+			await page.setViewportSize({ width: 375, height: 667 });
+			await setTheme(page, theme);
+			await page.goto('/pricing');
+			await page.waitForLoadState('domcontentloaded');
+			await page.waitForTimeout(DATA_LOAD_MS);
 
-    test('pricing page nav - active state', async ({ page }) => {
-        await page.goto('/pricing');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
+			const menuButton = page.locator('button[aria-label="Toggle menu"]');
+			await menuButton.click();
+			await page.waitForTimeout(ANIMATION_SETTLE_MS);
 
-        await page.screenshot({
-            path: `${screenshotDir}/03-pricing-nav.png`,
-            clip: { x: 0, y: 0, width: 1280, height: 80 }
-        });
-    });
-
-    test('pricing page full - unauthenticated', async ({ page }) => {
-        await page.goto('/pricing');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
-
-        await page.screenshot({
-            path: `${screenshotDir}/04-pricing-full.png`,
-            fullPage: true
-        });
-    });
-
-    test('landing page mobile menu', async ({ page }) => {
-        await page.setViewportSize({ width: 375, height: 812 });
-        await page.goto('/');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
-
-        await page.screenshot({
-            path: `${screenshotDir}/05-landing-mobile-closed.png`,
-            fullPage: false
-        });
-
-        await page.getByRole('button', { name: 'Toggle menu' }).click();
-        await page.waitForTimeout(300);
-
-        await page.screenshot({
-            path: `${screenshotDir}/06-landing-mobile-open.png`,
-            fullPage: false
-        });
-    });
+			await page.screenshot({
+				path: getScreenshot(`pricing-mobile-nav-${theme}`, testInfo.project.name),
+				fullPage: false
+			});
+		});
+	}
 });

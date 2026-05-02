@@ -4,13 +4,7 @@
  * Simplified tests capturing full page layouts for design validation.
  * Full-page screenshots capture all sections; individual section tests removed.
  */
-import {
-	test,
-	expect,
-	setTheme,
-	ANIMATION_SETTLE_MS,
-	DATA_LOAD_MS
-} from '../fixtures/test-fixtures';
+import { test, setTheme, DATA_LOAD_MS } from '../fixtures/test-fixtures';
 import { createScreenshotHelper } from '../utils/screenshot';
 import { COLD_START_TIMEOUT_MS, THEMES } from '../utils/constants';
 
@@ -51,23 +45,4 @@ test.describe('Landing Page Screenshots', () => {
 		});
 	}
 
-	// Mobile navigation open (important for responsive validation)
-	for (const theme of THEMES) {
-		test(`mobile ${theme} - navigation open`, async ({ page }, testInfo) => {
-			await page.setViewportSize({ width: 375, height: 667 });
-			await setTheme(page, theme);
-			await page.goto('/');
-			await page.waitForLoadState('domcontentloaded');
-			await page.waitForTimeout(DATA_LOAD_MS);
-
-			const menuButton = page.locator('button[aria-label="Toggle menu"]');
-			await menuButton.click();
-			await page.waitForTimeout(ANIMATION_SETTLE_MS);
-
-			await page.screenshot({
-				path: getScreenshot(`mobile-nav-${theme}`, testInfo.project.name),
-				fullPage: false
-			});
-		});
-	}
 });

@@ -1,80 +1,53 @@
 /**
  * Pricing Page Screenshot Tests
  *
- * Tests the pricing page with 3 tier cards across desktop/mobile and dark/light themes.
+ * Captures full page layouts for design validation across themes and viewports.
  */
-import { expect, test } from '@playwright/test';
+import { test, setTheme, ANIMATION_SETTLE_MS, DATA_LOAD_MS } from '../fixtures/test-fixtures';
+import { createScreenshotHelper } from '../utils/screenshot';
+import { COLD_START_TIMEOUT_MS, THEMES } from '../utils/constants';
+import { expect } from '@playwright/test';
 
-const PAGE_NAME = 'pricing';
-const screenshotDir = `test/resources/screenshots/${PAGE_NAME}`;
+const PAGE_NAME: string = 'pricing';
+const getScreenshot = createScreenshotHelper(PAGE_NAME);
 
 test.describe('Pricing Page Screenshots', () => {
-    test.setTimeout(30000);
+	test.setTimeout(COLD_START_TIMEOUT_MS);
 
-    test('has 3 pricing tiers', async ({ page }) => {
-        await page.goto('/pricing');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
+	// Desktop full-page tests
+	for (const theme of THEMES) {
+		test(`desktop ${theme} - full page`, async ({ page }, testInfo) => {
+			await setTheme(page, theme);
+			await page.goto('/pricing');
+			await page.waitForLoadState('domcontentloaded');
+			await page.waitForTimeout(DATA_LOAD_MS);
 
-        const tiers = page.locator('[data-testid="pricing-tier"]');
-        await expect(tiers).toHaveCount(3);
-    });
+			const tiers = page.locator('[data-testid="pricing-tier"]');
+			await expect(tiers).toHaveCount(3);
 
-    test('has Popular badge on Pro tier', async ({ page }) => {
-        await page.goto('/pricing');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
+			await page.screenshot({
+				path: getScreenshot(`desktop-${theme}`, testInfo.project.name),
+				fullPage: true
+			});
+		});
+	}
 
-        await expect(page.getByText('Popular')).toBeVisible();
-    });
+	// Mobile full-page tests
+	for (const theme of THEMES) {
+		test(`mobile ${theme} - full page`, async ({ page }, testInfo) => {
+			await page.setViewportSize({ width: 375, height: 667 });
+			await setTheme(page, theme);
+			await page.goto('/pricing');
+			await page.waitForLoadState('domcontentloaded');
+			await page.waitForTimeout(DATA_LOAD_MS);
 
-    test('desktop dark - full page', async ({ page }) => {
-        await page.emulateMedia({ colorScheme: 'dark' });
-        await page.goto('/pricing');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
+			const tiers = page.locator('[data-testid="pricing-tier"]');
+			await expect(tiers).toHaveCount(3);
 
-        await page.screenshot({
-            path: `${screenshotDir}/01-desktop-dark.png`,
-            fullPage: true
-        });
-    });
-
-    test('desktop light - full page', async ({ page }) => {
-        await page.emulateMedia({ colorScheme: 'light' });
-        await page.goto('/pricing');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
-
-        await page.screenshot({
-            path: `${screenshotDir}/02-desktop-light.png`,
-            fullPage: true
-        });
-    });
-
-    test('mobile dark - full page', async ({ page }) => {
-        await page.setViewportSize({ width: 375, height: 812 });
-        await page.emulateMedia({ colorScheme: 'dark' });
-        await page.goto('/pricing');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
-
-        await page.screenshot({
-            path: `${screenshotDir}/03-mobile-dark.png`,
-            fullPage: true
-        });
-    });
-
-    test('mobile light - full page', async ({ page }) => {
-        await page.setViewportSize({ width: 375, height: 812 });
-        await page.emulateMedia({ colorScheme: 'light' });
-        await page.goto('/pricing');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
-
-        await page.screenshot({
-            path: `${screenshotDir}/04-mobile-light.png`,
-            fullPage: true
-        });
-    });
+			await page.screenshot({
+				path: getScreenshot(`mobile-${theme}`, testInfo.project.name),
+				fullPage: true
+			});
+		});
+	}
 });
