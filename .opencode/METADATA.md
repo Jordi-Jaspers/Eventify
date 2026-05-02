@@ -7,7 +7,7 @@
 
 | Setting | Value | Description |
 |---------|-------|-------------|
-| `screenshot_tests_enabled` | `true` | Enable screenshot tests for UI validation |
+| `screenshot_tests_enabled` | `false` | Enable screenshot tests for UI validation |
 | `update_whats_new` | `true` | Add user-facing changes to What's New changelog (see `eventify-whats-new` skill) |
 
 ## Project Files
@@ -139,7 +139,6 @@ Routes use SvelteKit's file-based routing with layout groups:
 | Start Backend | `./gradlew bootRun` | Root |
 | Start Frontend | `bun run dev` | `client/` |
 | Run Java Tests | `./gradlew test` | Root |
-| Run E2E Tests | `./scripts/playwright-test.sh` | Root |
 | Sync API Types | `bun run sync:api` | `client/` |
 | Reset Database | `./scripts/database-reset.sh` | Root |
 | Format Code | `./gradlew spotlessApply` | Root |

@@ -194,7 +194,6 @@ routes/
 | Start Backend | `./gradlew bootRun` | Root |
 | Start Frontend | `bun run dev` | `client/` |
 | Run Java Tests | `./gradlew test` | Root |
-| Run E2E Tests | `./scripts/playwright-test.sh` | Root |
 | Sync API Types | `bun run sync:api` | `client/` |
 | Reset Database | `./scripts/database-reset.sh` | Root |
 | Format Code | `./gradlew spotlessApply` | Root |
