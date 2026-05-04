@@ -218,6 +218,10 @@ public enum ApiErrorCode implements ApiError {
     WATCHLIST_NOT_FOUND(
         "ERR-0050",
         "The requested watchlist has been deleted or does not exist."
+    ),
+    SESSION_NOT_FOUND_ERROR(
+        "ERR-0052",
+        "The requested session does not exist or does not belong to you."
     );
 
     /* The error code for this reason. */

@@ -37,6 +37,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -113,7 +114,7 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected User aValidatedUserWithRole(final Role role) {
         final User user = aValidatedUser();
         updateUserRole(user, role);
-        return authenticationService.refresh(user.getRefreshToken().getValue());
+        return authenticationService.refresh(user.getRefreshToken().getValue(), new MockHttpServletRequest());
     }
 
     protected void updateUserRole(final User user, final Role role) {
@@ -128,7 +129,7 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected User aValidatedUser() {
         final User user = anUnvalidatedUser();
         final Token token = getValidationToken(user);
-        return authenticationService.verifyEmail(token.getValue());
+        return authenticationService.verifyEmail(token.getValue(), new MockHttpServletRequest());
     }
 
     protected User aLockedUser() {
@@ -423,6 +424,13 @@ public class IntegrationTest extends WebMvcConfigurator {
             .filter(entry -> entry.getType().equals(REFRESH_TOKEN))
             .findFirst()
             .orElseThrow(() -> new DataNotFoundException(TOKEN_NOT_FOUND_ERROR));
+    }
+
+    protected List<Token> getRefreshTokens(final User user) {
+        return tokenRepository.findByEmail(user.getEmail())
+            .stream()
+            .filter(entry -> entry.getType().equals(REFRESH_TOKEN))
+            .toList();
     }
 
     // ========================= OAUTH HELPER METHODS =========================

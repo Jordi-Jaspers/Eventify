@@ -85,7 +85,7 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
@@ -100,7 +100,7 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         assertThat(updatedUser.getLastLogin(), is(notNullValue()));
 
         // And: Tokens should be generated
-        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class));
+        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class));
 
         // And: Cookies should be set with correct token values
         verify(cookieService, times(1)).setAuthCookies(
@@ -135,7 +135,7 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
 
         // And: Capture the current time
         final OffsetDateTime beforeAuth = OffsetDateTime.now(UTC);
@@ -177,14 +177,14 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
 
         // Then: Tokens should be generated for the user
         final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(tokenService, times(1)).generateAuthorizationTokens(userCaptor.capture());
+        verify(tokenService, times(1)).generateAuthorizationTokens(userCaptor.capture(), any(HttpServletRequest.class));
         final User userForTokens = userCaptor.getValue();
         assertThat(userForTokens.getEmail(), is(equalTo(VALID_EMAIL)));
     }
@@ -203,7 +203,7 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
@@ -230,7 +230,7 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
@@ -244,5 +244,32 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         );
         final String redirectUrl = urlCaptor.getValue();
         assertThat(redirectUrl, is(equalTo(APPLICATION_URL + OAUTH2_FRONTEND_REDIRECT_PATH)));
+    }
+
+    @Test
+    @DisplayName("Should capture device info from request on OAuth2 login")
+    public void shouldCapturesDeviceInfoOnOAuth2Login() throws IOException {
+        // Given: A valid OAuth2 user with email
+        final OAuth2User oAuth2User = createMockOAuth2User(VALID_EMAIL);
+        when(authentication.getPrincipal()).thenReturn(oAuth2User);
+        when(response.isCommitted()).thenReturn(false);
+
+        // And: A valid user in the system
+        final User user = aValidUser();
+        when(userService.loadUserByUsername(VALID_EMAIL)).thenReturn(user);
+
+        // And: Tokens are generated for the user
+        final User userWithTokens = aValidUserWithTokens();
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(jakarta.servlet.http.HttpServletRequest.class)))
+            .thenReturn(userWithTokens);
+
+        // When: Handling authentication success
+        handler.onAuthenticationSuccess(request, response, authentication);
+
+        // Then: generateAuthorizationTokens should be called with the HttpServletRequest
+        verify(tokenService, times(1)).generateAuthorizationTokens(
+            any(User.class),
+            eq(request)
+        );
     }
 }

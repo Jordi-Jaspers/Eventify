@@ -13,6 +13,7 @@ export type UserDetailsResponse = components['schemas']['UserDetailsResponse'];
 export type UserOrganizationResponse = components['schemas']['UserOrganizationResponse'];
 export type UserQuotaResponse = components['schemas']['UserQuotaResponse'];
 export type RetentionSettingsResponse = components['schemas']['RetentionSettingsResponse'];
+export type SessionResponse = components['schemas']['SessionResponse'];
 
 // ================ Error Responses ===================
 export type ErrorResponseResource = components['schemas']['ErrorResponseResource'];

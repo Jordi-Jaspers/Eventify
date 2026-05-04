@@ -135,6 +135,10 @@ public final class Paths {
 
     public static final String USER_QUOTA_PATH = USERS_PATH + "/quota";
 
+    public static final String USER_SESSIONS_PATH = USERS_PATH + "/sessions";
+
+    public static final String USER_SESSION_PATH = USER_SESSIONS_PATH + ID_PART;
+
     public static final String USER_CHANNELS_PATH = USERS_PATH + "/channel";
 
     public static final String USER_CHANNELS_SEARCH_PATH = USER_CHANNELS_PATH + SEARCH_PART;

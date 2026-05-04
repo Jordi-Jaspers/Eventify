@@ -55,7 +55,7 @@ public class OAuth2AuthenticationControllerTest extends IntegrationTest {
 
         // Then: The user should be created in the database (testing REAL CustomOAuth2UserService logic)
         final String email = (String) googleUser.getAttributes().get(EMAIL);
-        final User createdUser = tokenService.generateAuthorizationTokens(getUserDetails(email));
+        final User createdUser = tokenService.generateAuthorizationTokens(getUserDetails(email), null);
         assertThat(createdUser, is(notNullValue()));
         assertThat(createdUser.getFirstName(), is(notNullValue()));
         assertThat(createdUser.getLastName(), is(notNullValue()));
@@ -88,7 +88,7 @@ public class OAuth2AuthenticationControllerTest extends IntegrationTest {
 
         // Then: The user should be created in the database (testing REAL CustomOAuth2UserService logic)
         final String email = (String) githubUser.getAttributes().get(EMAIL);
-        final User createdUser = tokenService.generateAuthorizationTokens(getUserDetails(email));
+        final User createdUser = tokenService.generateAuthorizationTokens(getUserDetails(email), null);
         assertThat(createdUser, is(notNullValue()));
         assertThat(createdUser.getFirstName(), is(notNullValue()));
         assertThat(createdUser.getLastName(), is(notNullValue()));

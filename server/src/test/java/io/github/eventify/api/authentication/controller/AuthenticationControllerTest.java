@@ -5,11 +5,13 @@ import io.github.eventify.api.authentication.model.request.RefreshTokenRequest;
 import io.github.eventify.api.authentication.model.request.RegisterUserRequest;
 import io.github.eventify.api.authentication.model.response.AuthenticationResponse;
 import io.github.eventify.api.authentication.model.response.RegisterResponse;
+import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.ApiErrorCode;
 import io.github.eventify.support.IntegrationTest;
-import io.github.jframe.exception.core.DataNotFoundException;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
+
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,6 @@ import static io.github.jframe.util.mapper.ObjectMappers.toJson;
 import static jakarta.servlet.http.HttpServletResponse.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -207,46 +208,67 @@ public class AuthenticationControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should logout successfully and invalidate the refresh token")
-    public void logoutSuccess() throws Exception {
+    @DisplayName("Should logout and invalidate only the current session, leaving other sessions intact")
+    public void logoutInvalidatesOnlyCurrentSession() throws Exception {
         // Given: A registered and validated user
         final User user = aValidatedUser();
 
         // And: A valid login request
-        final LoginRequest request = new LoginRequest()
+        final LoginRequest loginRequest = new LoginRequest()
             .setEmail(user.getEmail())
             .setPassword(TEST_PASSWORD);
 
-        // When: Logging in with valid credentials
-        final MockHttpServletRequestBuilder loginRequest = post(LOGIN_PATH)
-            .contentType(APPLICATION_JSON)
-            .content(toJson(request));
+        // When: Logging in from session A
+        final ResultActions sessionALoginResponse = mockMvc.perform(
+            post(LOGIN_PATH)
+                .contentType(APPLICATION_JSON)
+                .content(toJson(loginRequest))
+        );
+        sessionALoginResponse.andExpect(status().is(SC_OK));
 
-        final ResultActions loginResponse = mockMvc.perform(loginRequest);
+        final AuthenticationResponse sessionAAuth = fromJson(
+            sessionALoginResponse.andReturn().getResponse().getContentAsString(),
+            AuthenticationResponse.class
+        );
+        final String sessionARefreshToken = sessionAAuth.getRefreshToken();
+        final String sessionAAccessToken = sessionAAuth.getAccessToken();
 
-        // Then: The response should be OK with valid tokens
-        loginResponse.andExpect(status().is(SC_OK));
+        // And: Logging in again from session B (produces a second refresh token)
+        final ResultActions sessionBLoginResponse = mockMvc.perform(
+            post(LOGIN_PATH)
+                .contentType(APPLICATION_JSON)
+                .content(toJson(loginRequest))
+        );
+        sessionBLoginResponse.andExpect(status().is(SC_OK));
 
-        // And: The database should contain the refresh token for the user
-        assertThat(getRefreshToken(user), notNullValue());
+        final AuthenticationResponse sessionBAuth = fromJson(
+            sessionBLoginResponse.andReturn().getResponse().getContentAsString(),
+            AuthenticationResponse.class
+        );
+        final String sessionBRefreshToken = sessionBAuth.getRefreshToken();
 
-        // When: The token is extracted from the response
-        final String loginContent = loginResponse.andReturn().getResponse().getContentAsString();
-        final AuthenticationResponse authenticationResponse = fromJson(loginContent, AuthenticationResponse.class);
-        final String accessToken = authenticationResponse.getAccessToken();
+        // And: Both sessions exist in the database (plus the verifyEmail session = 3 total)
+        assertThat(getRefreshTokens(user), hasSize(3));
 
-        // And: Logging out
+        // When: Logging out from session A using session A's access token and refresh-token cookie
         final MockHttpServletRequestBuilder logoutRequest = get(LOGOUT_PATH)
-            .header(AUTHORIZATION, BEARER + accessToken);
+            .header(AUTHORIZATION, BEARER + sessionAAccessToken)
+            .cookie(
+                new jakarta.servlet.http.Cookie(
+                    io.github.eventify.common.constant.Constants.Security.REFRESH_TOKEN_COOKIE,
+                    sessionARefreshToken
+                )
+            );
 
-        // And: The request is made
         final ResultActions logoutResponse = mockMvc.perform(logoutRequest);
 
         // Then: The response should be NO_CONTENT
         logoutResponse.andExpect(status().is(SC_NO_CONTENT));
 
-        // And: The database should throw an exception when trying to retrieve the refresh token
-        assertThrows(DataNotFoundException.class, () -> getRefreshToken(user));
+        // And: Session B's refresh token should still exist and be valid (plus the verifyEmail session = 2 remaining)
+        final List<Token> remainingTokens = getRefreshTokens(user);
+        assertThat(remainingTokens, hasSize(2));
+        assertThat(remainingTokens.stream().anyMatch(t -> t.getValue().equals(sessionBRefreshToken)), is(true));
     }
 
     @Test

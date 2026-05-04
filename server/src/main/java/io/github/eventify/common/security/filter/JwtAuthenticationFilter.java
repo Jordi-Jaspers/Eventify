@@ -1,6 +1,7 @@
 package io.github.eventify.common.security.filter;
 
 import io.github.eventify.api.authentication.service.CookieService;
+import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.service.JwtService;
 import io.github.eventify.api.token.service.TokenService;
 import io.github.eventify.api.user.model.User;
@@ -108,7 +109,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (hasText(tokenToUse)) {
             final User authenticatedUser = tryAuthenticateWithAccessToken(tokenToUse);
             if (nonNull(authenticatedUser) && !isUserRestricted(authenticatedUser, response)) {
-                setSecurityContext(authenticatedUser, tokenToUse, request);
+                final Long refreshTokenId = resolveRefreshTokenId(request);
+                setSecurityContext(authenticatedUser, tokenToUse, refreshTokenId, request);
                 return authenticatedUser;
             }
         }
@@ -136,23 +138,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private User tryRefreshTokens(final String refreshToken, final HttpServletResponse response, final HttpServletRequest request) {
-        try {
-            if (!jwtService.isTokenExpired(refreshToken)) {
-                final User refreshedUser = tokenService.refresh(refreshToken);
-                if (nonNull(refreshedUser)) {
-                    cookieService.setAuthCookies(
-                        response,
-                        refreshedUser.getAccessToken(),
-                        refreshedUser.getRefreshToken()
-                    );
-                    setSecurityContext(refreshedUser, refreshedUser.getAccessToken().getValue(), request);
-                    return refreshedUser;
-                }
-            }
-        } catch (final ApiException apiException) {
-            log.debug("Token refresh failed: {}", apiException.getMessage());
+        if (jwtService.isTokenExpired(refreshToken)) {
+            return null;
         }
-        return null;
+        try {
+            final User refreshedUser = tokenService.refresh(refreshToken, request);
+            if (isNull(refreshedUser)) {
+                return null;
+            }
+            applyRefreshedAuth(refreshedUser, refreshToken, response, request);
+            return refreshedUser;
+        } catch (final ApiException ex) {
+            log.debug("Token refresh failed: {}", ex.getMessage());
+            return null;
+        }
+    }
+
+    private void applyRefreshedAuth(final User refreshedUser, final String originalRefreshToken,
+        final HttpServletResponse response, final HttpServletRequest request) {
+
+        if (nonNull(refreshedUser.getAccessToken()) && nonNull(refreshedUser.getRefreshToken())) {
+            cookieService.setAuthCookies(
+                response,
+                refreshedUser.getAccessToken(),
+                refreshedUser.getRefreshToken()
+            );
+        }
+        // Read the new refresh token id directly from the rotated user — the old token is gone after refresh().
+        final Long refreshTokenId = nonNull(refreshedUser.getRefreshToken())
+            ? refreshedUser.getRefreshToken().getId()
+            : null;
+        // Defensive fallback: a successful refresh should always set a new access token; preserve original
+        // refresh token value only if generation somehow failed, so the security context has a non-null jwt.
+        final String accessTokenValue = nonNull(refreshedUser.getAccessToken())
+            ? refreshedUser.getAccessToken().getValue()
+            : originalRefreshToken;
+        setSecurityContext(refreshedUser, accessTokenValue, refreshTokenId, request);
     }
 
     private String extractJwtFromHeader(final HttpServletRequest request) {
@@ -177,8 +198,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private void setSecurityContext(final User user, final String tokenValue, final HttpServletRequest request) {
-        final UserTokenPrincipal principal = new UserTokenPrincipal(user, tokenValue);
+    private void setSecurityContext(final User user, final String tokenValue, final Long refreshTokenId, final HttpServletRequest request) {
+        final UserTokenPrincipal principal = new UserTokenPrincipal(user, tokenValue, refreshTokenId);
 
         final JwtUserPrincipalAuthenticationToken authentication = new JwtUserPrincipalAuthenticationToken(
             principal,
@@ -188,6 +209,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.debug("Authentication successful for user '{}'. Setting security context.", user.getUsername());
+    }
+
+    private Long resolveRefreshTokenId(final HttpServletRequest request) {
+        final String refreshTokenValue = extractJwtFromCookies(request, REFRESH_TOKEN_COOKIE);
+        if (!hasText(refreshTokenValue)) {
+            return null;
+        }
+        try {
+            final Token token = tokenService.findAuthorizationTokenByValue(refreshTokenValue);
+            return nonNull(token) ? token.getId() : null;
+        } catch (final ApiException ex) {
+            log.debug("Could not resolve refresh token id: {}", ex.getMessage());
+            return null;
+        }
     }
 
     private boolean isUserRestricted(final User user, final HttpServletResponse response) {

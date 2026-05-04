@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.time.OffsetDateTime;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -18,7 +17,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import static io.github.eventify.common.constant.Constants.OAuthAttributes.EMAIL;
-import static java.time.ZoneOffset.UTC;
+import static io.github.eventify.common.util.TimeProvider.now;
 import static java.util.Objects.isNull;
 
 /**
@@ -84,11 +83,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private void authorize(final HttpServletRequest request, final HttpServletResponse response, final String email) throws IOException {
         User user = userService.loadUserByUsername(email);
-        user.setLastLogin(OffsetDateTime.now(UTC));
+        user.setLastLogin(now());
         userService.updateUserDetails(user);
 
         log.info("User '{}' successfully authenticated via OAuth", email);
-        user = tokenService.generateAuthorizationTokens(user);
+        user = tokenService.generateAuthorizationTokens(user, request);
         cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
 
         final String redirectUrl = redirectHelper.buildRedirectUrl();

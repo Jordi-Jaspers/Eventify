@@ -1,3 +1,6 @@
 spring:
   liquibase:
     contexts: tst
+
+security:
+  secure-cookies: false

@@ -82,7 +82,7 @@ public class OAuth2AuthenticationSuccessHandlerProcessAuthenticationTest extends
         // And: A valid user in the system
         final User user = aValidUser();
         when(userService.loadUserByUsername(VALID_EMAIL)).thenReturn(user);
-        when(tokenService.generateAuthorizationTokens(any(User.class))).thenReturn(user);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(user);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
@@ -94,7 +94,7 @@ public class OAuth2AuthenticationSuccessHandlerProcessAuthenticationTest extends
         verify(userService, times(1)).updateUserDetails(any(User.class));
 
         // And: Tokens should be generated
-        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class));
+        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class));
 
         // And: Cookies should be set
         verify(cookieService, times(1)).setAuthCookies(any(HttpServletResponse.class), any(), any());
@@ -121,7 +121,7 @@ public class OAuth2AuthenticationSuccessHandlerProcessAuthenticationTest extends
         verify(userService, never()).loadUserByUsername(any());
 
         // And: No tokens should be generated
-        verify(tokenService, never()).generateAuthorizationTokens(any(User.class));
+        verify(tokenService, never()).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class));
 
         // And: Redirect helper should be called with error
         verify(redirectHelper, times(1)).buildRedirectUrl(
@@ -149,7 +149,7 @@ public class OAuth2AuthenticationSuccessHandlerProcessAuthenticationTest extends
         );
 
         // And: No tokens should be generated
-        verify(tokenService, never()).generateAuthorizationTokens(any(User.class));
+        verify(tokenService, never()).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class));
     }
 
     @Test

@@ -30,4 +30,11 @@ public class SecurityProperties {
 
     private BootstrapProperties bootstrap;
 
+    /**
+     * Whether to set the {@code Secure} flag on authentication cookies.
+     * Should be {@code true} in production (HTTPS) and {@code false} in local development (HTTP).
+     * Defaults to {@code true}.
+     */
+    private boolean secureCookies = true;
+
 }

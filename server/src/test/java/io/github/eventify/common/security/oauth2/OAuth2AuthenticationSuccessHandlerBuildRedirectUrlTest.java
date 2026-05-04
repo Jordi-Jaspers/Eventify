@@ -87,7 +87,7 @@ public class OAuth2AuthenticationSuccessHandlerBuildRedirectUrlTest extends Unit
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
@@ -120,7 +120,7 @@ public class OAuth2AuthenticationSuccessHandlerBuildRedirectUrlTest extends Unit
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
@@ -153,7 +153,7 @@ public class OAuth2AuthenticationSuccessHandlerBuildRedirectUrlTest extends Unit
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);

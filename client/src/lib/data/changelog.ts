@@ -2,6 +2,34 @@ import type { ChangelogEntry } from '$lib/types/changelog';
 
 export const changelog: ChangelogEntry[] = [
 	{
+		version: '0.1.0',
+		date: '2026-05-04',
+		features: [
+			'Multi-device session management: log in from multiple devices simultaneously without invalidating other sessions',
+			'Sessions tab in Profile showing all active sessions with device, IP, and last-active info',
+			'Revoke individual sessions or revoke all other sessions from one click',
+			'Notification bell in sidebar showing unread "What\'s New" updates with a side panel',
+			'Public pricing page at /pricing with Free, Pro, and Enterprise tiers',
+			'Aggregated monitor timeline with click-to-zoom navigation and breadcrumbs',
+			'Custom date range picker and time-bucket labels on the monitor page',
+			'Duration details modal with collapsed long segments and ongoing indicators'
+		],
+		improvements: [
+			'Landing page rewritten with developer-focused copy, accurate API examples, and concrete How It Works steps',
+			'Pricing link added to public navigation; shared public navbar and footer across marketing pages',
+			'"What\'s New" moved to the user dropdown for quicker access',
+			'Monitor page payloads reduced ~99% via server-side aggregation (faster timeline loads)',
+			'Session list shows friendly device labels (e.g. "Chrome on Mac") and relative timestamps',
+			'Cookie security configurable per environment for smoother local development on Safari'
+		],
+		fixes: [
+			'Logging out on one device no longer logs you out of every other device',
+			'Logout now reliably revokes the current session even when the principal lacks a token id',
+			'IPv6 localhost addresses normalized to 127.0.0.1 in the session list for clarity',
+			'Safari login now persists cookies in development environments'
+		]
+	},
+	{
 		version: '0.0.9',
 		date: '2026-02-17',
 		features: [
