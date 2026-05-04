@@ -4,7 +4,7 @@ title: "Remember Me / Long-Lived Refresh Tokens"
 estimate: S
 status: ready
 created: 2026-04-04
-depends_on: ["AUTH-01-multi-device-session-management"]
+depends_on: []  # AUTH-01 shipped 2026-05-04
 labels: [ backend, frontend, security ]
 priority: P2
 claimed_by:
@@ -32,8 +32,8 @@ The current refresh token lifetime is fixed at 7 days. Users on personal devices
 
 * [ ] **Scenario 3: Remember me session visibility**
     * Given a user logged in with "Remember me"
-    * When they check their session in the Sessions tab (AUTH-01)
-    * Then the session shows the extended expiry date
+    * When they check their session in the Sessions tab (`/profile/sessions`, shipped in AUTH-01)
+    * Then the session shows the extended expiry date (requires `expiresAt` field added to `SessionResponse`)
 
 * [ ] **Scenario 4: OAuth2 login — default lifetime**
     * Given a user logs in via Google/GitHub OAuth2
@@ -67,20 +67,31 @@ The current refresh token lifetime is fixed at 7 days. Users on personal devices
 ## 6. Implementation Notes
 
 ### Backend
-- **LoginRequest** (or similar DTO): Add `rememberMe` boolean field (default `false`)
-- **AuthenticationService**: Pass `rememberMe` flag through to `TokenService`
-- **TokenService**: Use `JWT_REFRESH_LIFETIME_SECONDS` (7 days) when `rememberMe=false`, use new `JWT_REMEMBER_ME_LIFETIME_SECONDS` (30 days, configurable) when `rememberMe=true`
-- **CookieService**: Already calculates `maxAge` from token expiry — no changes needed
+- **LoginRequest**: Add `rememberMe` boolean field (default `false`) at `server/.../api/authentication/model/request/LoginRequest.java`
+- **AuthenticationService.authorize**: Currently `(String email, String password, HttpServletRequest request)` after AUTH-01. Add `boolean rememberMe` → `(email, password, rememberMe, request)`. Pass through to TokenService.
+- **TokenService.generateAuthorizationTokens**: Currently `(User, HttpServletRequest)` after AUTH-01. Add `boolean rememberMe` → `(User, HttpServletRequest, boolean)`. Use `JWT_REFRESH_LIFETIME_SECONDS` (7d) when false, new `JWT_REMEMBER_ME_LIFETIME_SECONDS` (30d, configurable) when true.
+- **JwtService.generateRefreshToken**: Add `boolean rememberMe` overload.
+- **CookieService**: Already calculates `maxAge` from token expiry — no changes needed.
+- **OAuth2 + email-verify paths**: Continue calling `generateAuthorizationTokens(user, request, false)` — no remember-me for these flows.
+- **SessionResponse**: Add `OffsetDateTime expiresAt` field so the Sessions tab can display extended expiry (Scenario 3). Update `SessionMapper` to map `Token.expiresAt → SessionResponse.expiresAt`.
 
 ### Frontend
 - **Login page** (`client/src/routes/(public)/login/`): Add checkbox to form, send `rememberMe` field in login request body
 - No changes to token refresh logic — the frontend already uses whatever expiry the backend sets
+- **Sessions table** (`client/src/lib/components/profile/SessionsTable.svelte` + `SessionRow.svelte`, both shipped in AUTH-01): Add an "Expires" column displaying formatted `expiresAt` for each session
+- After backend changes, run `bun run sync:api` from `client/` to regenerate types
 
 ### Files to modify (MANDATORY):
 | File | Change |
 |------|--------|
 | `server/.../api/authentication/model/request/LoginRequest.java` (or equivalent) | Add `rememberMe` boolean |
 | `server/.../api/authentication/service/AuthenticationService.java` | Pass flag to token generation |
-| `server/.../api/token/service/TokenService.java` | Conditional refresh token lifetime |
+| `server/.../api/token/service/TokenService.java` | Add `rememberMe` param; conditional refresh token lifetime |
+| `server/.../api/token/service/JwtService.java` | Add rememberMe-aware refresh token generation |
+| `server/.../api/session/model/response/SessionResponse.java` | Add `expiresAt` field |
+| `server/.../api/session/model/mapper/SessionMapper.java` | Map `expiresAt` |
+| `server/.../common/security/oauth2/OAuth2AuthenticationSuccessHandler.java` | Update call site (rememberMe=false) |
+| `server/.../api/authentication/controller/EmailVerificationController.java` | Update call site (rememberMe=false) |
 | `server/src/main/resources/application.yml` | Add `JWT_REMEMBER_ME_LIFETIME_SECONDS` config |
 | `client/src/routes/(public)/login/+page.svelte` | Add "Remember me" checkbox |
+| `client/src/lib/components/profile/SessionsTable.svelte` + `SessionRow.svelte` | Add Expires column |
