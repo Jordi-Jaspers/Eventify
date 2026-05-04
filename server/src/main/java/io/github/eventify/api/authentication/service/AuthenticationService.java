@@ -1,5 +1,6 @@
 package io.github.eventify.api.authentication.service;
 
+import io.github.eventify.api.authentication.model.request.LoginRequest;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.service.TokenService;
 import io.github.eventify.api.user.model.User;
@@ -53,21 +54,21 @@ public class AuthenticationService {
     }
 
     /**
-     * Authorizes the user with the given username and password.
+     * Authorizes the user with the given login request.
      *
-     * @param username the username of the user
-     * @param password the password of the user
-     * @param request  the HTTP request for device info capture
+     * @param request     the login request containing email, password, and rememberMe flag
+     * @param httpRequest the HTTP request for device info capture
      * @return the user with the updated tokens
      */
-    public User authorize(final String username, final String password, final HttpServletRequest request) {
-        authenticate(username, password);
+    public User authorize(final LoginRequest request, final HttpServletRequest httpRequest) {
+        final String username = request.getEmail();
+        authenticate(username, request.getPassword());
         final User user = userService.loadUserByUsername(username);
         user.setLastLogin(now());
         userService.updateUserDetails(user);
 
         log.info("User '{}' successfully authenticated", username);
-        return tokenService.generateAuthorizationTokens(user, request);
+        return tokenService.generateAuthorizationTokens(user, httpRequest, request.isRememberMe());
     }
 
     /**
@@ -88,7 +89,8 @@ public class AuthenticationService {
         log.info("User '{}' successfully validated", user.getEmail());
         // Invalidate any existing refresh tokens before creating a new one for the verified session
         tokenService.invalidateTokensForUser(user, REFRESH_TOKEN);
-        return tokenService.generateAuthorizationTokens(user, request);
+        // Email verification flow has no remember-me concept; always issue a standard refresh token.
+        return tokenService.generateAuthorizationTokens(user, request, false);
     }
 
     /**

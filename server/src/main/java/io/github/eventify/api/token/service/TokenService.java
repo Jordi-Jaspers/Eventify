@@ -37,16 +37,19 @@ public class TokenService {
      * Generate authorization tokens for a user, capturing device info from the request.
      * Each call creates a new session without invalidating existing sessions.
      *
-     * @param user    the user to generate tokens for
-     * @param request the HTTP request to extract device info from (may be null)
+     * @param user       the user to generate tokens for
+     * @param request    the HTTP request to extract device info from (may be {@code null})
+     * @param rememberMe if {@code true}, the refresh token uses the remember-me lifetime
+     *                   ({@code security.remember-me-token}, e.g. 30d) instead of the standard refresh-token
+     *                   lifetime ({@code security.refresh-token}, e.g. 7d)
      * @return the user with new tokens set
      */
-    public User generateAuthorizationTokens(final User user, final HttpServletRequest request) {
+    public User generateAuthorizationTokens(final User user, final HttpServletRequest request, final boolean rememberMe) {
         final List<Token> existingSessions = tokenRepository.findByEmail(user.getEmail());
         log.debug("User '{}' has {} existing session(s); creating new session", user.getEmail(), existingSessions.size());
 
         final Token accessToken = jwtService.generateAccessToken(user);
-        final Token newRefreshToken = jwtService.generateRefreshToken(user);
+        final Token newRefreshToken = jwtService.generateRefreshToken(user, rememberMe);
         newRefreshToken.captureDeviceMetadata(request);
 
         final Token savedRefreshToken = tokenRepository.save(newRefreshToken);
@@ -58,10 +61,27 @@ public class TokenService {
     }
 
     /**
+     * Generate authorization tokens for a user with the default (non remember-me) refresh-token lifetime.
+     * Convenience overload kept for callers (e.g. tests, OAuth flows wired via mocks) that don't expose a
+     * remember-me option.
+     *
+     * @param user    the user to generate tokens for
+     * @param request the HTTP request to extract device info from (may be {@code null})
+     * @return the user with new tokens set
+     */
+    public User generateAuthorizationTokens(final User user, final HttpServletRequest request) {
+        return generateAuthorizationTokens(user, request, false);
+    }
+
+    /**
      * Refreshes the access token using the refresh token, preserving device info on the rotated token.
+     * <p>
+     * <strong>MVP rotation-downgrade:</strong> the rotated refresh token is always issued with the standard
+     * (non remember-me) lifetime, regardless of how the original token was minted. This is an intentional
+     * MVP simplification — extending the remember-me lifetime indefinitely on every refresh is out of scope.
      *
      * @param refreshToken the refresh token value
-     * @param request      the HTTP request (used to update lastActiveAt)
+     * @param request      the HTTP request (used to update {@code lastActiveAt})
      * @return the user with refreshed tokens
      */
     public User refresh(final String refreshToken, final HttpServletRequest request) {
@@ -74,7 +94,8 @@ public class TokenService {
         log.info("Refreshing tokens for user '{}'", user.getUsername());
 
         final Token accessToken = jwtService.generateAccessToken(user);
-        final Token newRefreshToken = jwtService.generateRefreshToken(user);
+        // Intentional MVP downgrade: rotated refresh tokens never inherit remember-me lifetime.
+        final Token newRefreshToken = jwtService.generateRefreshToken(user, false);
         newRefreshToken.inheritDeviceMetadataFrom(existingToken);
         newRefreshToken.setLastActiveAt(now());
 

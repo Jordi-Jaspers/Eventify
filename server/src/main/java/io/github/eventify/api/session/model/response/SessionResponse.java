@@ -64,4 +64,11 @@ public class SessionResponse {
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     private boolean current;
+
+    @Schema(
+        description = "Session expiration timestamp",
+        format = "date-time",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private OffsetDateTime expiresAt;
 }

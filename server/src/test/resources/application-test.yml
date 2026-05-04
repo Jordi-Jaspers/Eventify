@@ -8,3 +8,8 @@ spring:
 springdoc:
   api-docs:
     enabled: true
+
+security:
+  remember-me-token:
+    lifetime: 30
+    time-unit: DAYS

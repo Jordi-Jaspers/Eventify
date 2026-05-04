@@ -3,6 +3,7 @@
     import { ConfirmDialog } from '$lib/components/ui/confirm-dialog';
     import SessionRow from './SessionRow.svelte';
     import SessionRowSkeleton from './SessionRowSkeleton.svelte';
+    import { SESSION_GRID_HEADER, SESSION_COL } from './session-grid';
     import type { SessionService } from '$lib/api/user/service/SessionService.svelte';
 
     interface Props {
@@ -61,12 +62,13 @@
     </div>
 {:else}
     <!-- Table header (desktop) -->
-    <div class="hidden md:grid md:grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b border-border/50 uppercase tracking-wide">
-        <div class="col-span-4">Device</div>
-        <div class="col-span-3">IP Address</div>
-        <div class="col-span-3">Last Active</div>
-        <div class="col-span-1">Status</div>
-        <div class="col-span-1 text-right">Action</div>
+    <div class="{SESSION_GRID_HEADER} px-4 py-2 text-xs font-medium text-muted-foreground border-b border-border/50 uppercase tracking-wide">
+        <div class={SESSION_COL.device}>Device</div>
+        <div class={SESSION_COL.ip}>IP Address</div>
+        <div class={SESSION_COL.lastActive}>Last Active</div>
+        <div class={SESSION_COL.expires}>Expires</div>
+        <div class={SESSION_COL.status}>Status</div>
+        <div class="{SESSION_COL.action} text-right">Action</div>
     </div>
 
     <!-- Session rows -->

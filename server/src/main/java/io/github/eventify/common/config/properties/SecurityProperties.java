@@ -28,6 +28,8 @@ public class SecurityProperties {
 
     private TokenProperties refreshToken;
 
+    private TokenProperties rememberMeToken;
+
     private BootstrapProperties bootstrap;
 
     /**

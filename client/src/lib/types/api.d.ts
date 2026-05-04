@@ -2637,6 +2637,12 @@ export interface components {
              * @example ********
              */
             password: string;
+            /**
+             * @description Whether to extend the session lifetime (30 days instead of 7). Defaults to false.
+             * @default false
+             * @example false
+             */
+            rememberMe: boolean;
         };
         PageResourceUserDetailsResponse: {
             /**
@@ -2893,6 +2899,11 @@ export interface components {
             createdAt?: string;
             /** @description Whether this session matches the current request's refresh-token cookie */
             current: boolean;
+            /**
+             * Format: date-time
+             * @description Session expiration timestamp
+             */
+            expiresAt?: string;
         };
         UserQuotaResponse: {
             /** Format: int32 */

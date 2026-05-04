@@ -31,7 +31,7 @@ const userStorage: Localstorage<UserDetailsResponse | null> = new Localstorage<U
 // Create the auth store
 function createAuthStore(): {
     subscribe: Writable<AuthState>['subscribe'];
-    login: (email: string, password: string) => Promise<UserDetailsResponse>;
+    login: (email: string, password: string, rememberMe?: boolean) => Promise<UserDetailsResponse>;
     register: (request: RegisterRequest) => Promise<RegisterResponse>;
     verifyEmail: (token: string) => Promise<UserDetailsResponse>;
     resendVerification: () => Promise<void>;
@@ -51,10 +51,10 @@ function createAuthStore(): {
 
     return {
         subscribe,
-        login: async (email: string, password: string): Promise<UserDetailsResponse> => {
+        login: async (email: string, password: string, rememberMe: boolean = false): Promise<UserDetailsResponse> => {
             update((state: AuthState): AuthState => ({...state, loading: true, error: null}));
             try {
-                const user: UserDetailsResponse = await apiLogin({email, password});
+                const user: UserDetailsResponse = await apiLogin({email, password, rememberMe});
 
                 if (user) {
                     userStorage.value = user;

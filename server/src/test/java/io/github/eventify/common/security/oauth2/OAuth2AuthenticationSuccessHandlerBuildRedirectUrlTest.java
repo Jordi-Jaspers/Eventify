@@ -23,6 +23,7 @@ import static io.github.eventify.api.Paths.OAUTH2_FRONTEND_REDIRECT_PATH;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -87,7 +88,9 @@ public class OAuth2AuthenticationSuccessHandlerBuildRedirectUrlTest extends Unit
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false))).thenReturn(
+            userWithTokens
+        );
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
@@ -120,7 +123,9 @@ public class OAuth2AuthenticationSuccessHandlerBuildRedirectUrlTest extends Unit
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false))).thenReturn(
+            userWithTokens
+        );
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
@@ -153,7 +158,9 @@ public class OAuth2AuthenticationSuccessHandlerBuildRedirectUrlTest extends Unit
 
         // And: Tokens are generated for the user
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(userWithTokens);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false))).thenReturn(
+            userWithTokens
+        );
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);

@@ -64,7 +64,7 @@ public class SessionControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should include id, deviceInfo, ipAddress, userAgent, lastActiveAt, createdAt, current in each session")
+    @DisplayName("Should include id, deviceInfo, ipAddress, userAgent, lastActiveAt, createdAt, current, expiresAt in each session")
     public void listSessionsContainsExpectedFields() throws Exception {
         // Given: A validated user who has logged in
         final User user = aValidatedUser();
@@ -87,6 +87,13 @@ public class SessionControllerTest extends IntegrationTest {
 
         assertThat(sessions, is(not(empty())));
         sessions.forEach(session -> assertThat(session.getId(), is(notNullValue())));
+
+        // And: The current session should expose a non-null expiresAt
+        final SessionResponse currentSession = sessions.stream()
+            .filter(SessionResponse::isCurrent)
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("No current session found"));
+        assertThat(currentSession.getExpiresAt(), is(notNullValue()));
     }
 
     @Test

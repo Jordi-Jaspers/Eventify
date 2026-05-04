@@ -12,6 +12,7 @@ import io.github.eventify.support.IntegrationTest;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
 
 import java.util.List;
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import static io.github.eventify.api.Paths.*;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
+import static io.github.eventify.common.constant.Constants.Security.REFRESH_TOKEN_COOKIE;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
 import static io.github.jframe.util.mapper.ObjectMappers.toJson;
 import static jakarta.servlet.http.HttpServletResponse.*;
@@ -351,5 +353,37 @@ public class AuthenticationControllerTest extends IntegrationTest {
         final String content = response.andReturn().getResponse().getContentAsString();
         final ApiErrorResponseResource error = fromJson(content, ApiErrorResponseResource.class);
         assertThat(error.getApiErrorReason(), is(ApiErrorCode.INVALID_TOKEN_ERROR.getReason()));
+    }
+
+    @Test
+    @DisplayName("Should set refresh-token cookie with extended maxAge (~30 days) when rememberMe=true")
+    public void loginWithRememberMeSetsExtendedRefreshCookieMaxAge() throws Exception {
+        // Given: A validated user
+        final User user = aValidatedUser();
+
+        // And: A login request with rememberMe=true
+        final LoginRequest request = new LoginRequest()
+            .setEmail(user.getEmail())
+            .setPassword(TEST_PASSWORD)
+            .setRememberMe(true);
+
+        // When: Logging in with rememberMe=true
+        final MockHttpServletRequestBuilder loginRequest = post(LOGIN_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(loginRequest);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The refresh-token cookie maxAge should be approximately 30 days (±60s tolerance)
+        final Cookie refreshTokenCookie = response.andReturn().getResponse().getCookie(REFRESH_TOKEN_COOKIE);
+        assertThat(refreshTokenCookie, is(notNullValue()));
+
+        final int minExpected = 29 * 86400;
+        final int maxExpected = 30 * 86400 + 60;
+        assertThat(refreshTokenCookie.getMaxAge(), is(greaterThanOrEqualTo(minExpected)));
+        assertThat(refreshTokenCookie.getMaxAge(), is(lessThanOrEqualTo(maxExpected)));
     }
 }

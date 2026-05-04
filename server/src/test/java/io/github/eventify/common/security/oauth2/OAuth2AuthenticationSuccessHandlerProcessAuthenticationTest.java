@@ -22,6 +22,7 @@ import org.springframework.security.web.RedirectStrategy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -82,7 +83,7 @@ public class OAuth2AuthenticationSuccessHandlerProcessAuthenticationTest extends
         // And: A valid user in the system
         final User user = aValidUser();
         when(userService.loadUserByUsername(VALID_EMAIL)).thenReturn(user);
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class))).thenReturn(user);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), anyBoolean())).thenReturn(user);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
@@ -93,8 +94,8 @@ public class OAuth2AuthenticationSuccessHandlerProcessAuthenticationTest extends
         // And: The user should be updated
         verify(userService, times(1)).updateUserDetails(any(User.class));
 
-        // And: Tokens should be generated
-        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class));
+        // And: Tokens should be generated with rememberMe=false (OAuth2 never extends lifetime)
+        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false));
 
         // And: Cookies should be set
         verify(cookieService, times(1)).setAuthCookies(any(HttpServletResponse.class), any(), any());
@@ -121,7 +122,7 @@ public class OAuth2AuthenticationSuccessHandlerProcessAuthenticationTest extends
         verify(userService, never()).loadUserByUsername(any());
 
         // And: No tokens should be generated
-        verify(tokenService, never()).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class));
+        verify(tokenService, never()).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), anyBoolean());
 
         // And: Redirect helper should be called with error
         verify(redirectHelper, times(1)).buildRedirectUrl(
@@ -149,7 +150,7 @@ public class OAuth2AuthenticationSuccessHandlerProcessAuthenticationTest extends
         );
 
         // And: No tokens should be generated
-        verify(tokenService, never()).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class));
+        verify(tokenService, never()).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), anyBoolean());
     }
 
     @Test

@@ -21,6 +21,7 @@ import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -72,14 +73,14 @@ public class TokenServiceTest extends UnitTest {
         final Token newRefreshToken = Token.builder()
             .value("new-refresh-token")
             .type(TokenType.REFRESH_TOKEN)
-            .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
+            .expiresAt(OffsetDateTime.now(UTC).plusDays(7))
             .user(user)
             .build();
         when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
-        when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
+        when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
         // When: Generating authorization tokens with a request context
-        tokenService.generateAuthorizationTokens(user, httpServletRequest);
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, false);
 
         // Then: The existing refresh token should NOT be deleted (no invalidation of prior tokens)
         verify(tokenRepository, never()).invalidateTokensWithTypeForUser(
@@ -113,14 +114,14 @@ public class TokenServiceTest extends UnitTest {
         final Token newRefreshToken = Token.builder()
             .value("refresh-token")
             .type(TokenType.REFRESH_TOKEN)
-            .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
+            .expiresAt(OffsetDateTime.now(UTC).plusDays(7))
             .user(user)
             .build();
         when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
-        when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
+        when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
         // When: Generating authorization tokens
-        tokenService.generateAuthorizationTokens(user, httpServletRequest);
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, false);
 
         // Then: The saved refresh token should have device info populated
         final ArgumentCaptor<Token> tokenCaptor = ArgumentCaptor.forClass(Token.class);
@@ -158,14 +159,14 @@ public class TokenServiceTest extends UnitTest {
         final Token newRefreshToken = Token.builder()
             .value("refresh-token")
             .type(TokenType.REFRESH_TOKEN)
-            .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
+            .expiresAt(OffsetDateTime.now(UTC).plusDays(7))
             .user(user)
             .build();
         when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
-        when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
+        when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
         // When: Generating authorization tokens
-        tokenService.generateAuthorizationTokens(user, httpServletRequest);
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, false);
 
         // Then: The saved refresh token should use the X-Forwarded-For IP (first one)
         final ArgumentCaptor<Token> tokenCaptor = ArgumentCaptor.forClass(Token.class);
@@ -200,14 +201,14 @@ public class TokenServiceTest extends UnitTest {
         final Token newRefreshToken = Token.builder()
             .value("refresh-token")
             .type(TokenType.REFRESH_TOKEN)
-            .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
+            .expiresAt(OffsetDateTime.now(UTC).plusDays(7))
             .user(user)
             .build();
         when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
-        when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
+        when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
-        // When: generateAuthorizationTokens is called with the request (as verifyEmail will do after refactor)
-        tokenService.generateAuthorizationTokens(user, httpServletRequest);
+        // When: generateAuthorizationTokens is called with rememberMe=false (verifyEmail never uses remember-me)
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, false);
 
         // Then: The saved refresh token should have device metadata populated
         final ArgumentCaptor<Token> tokenCaptor = ArgumentCaptor.forClass(Token.class);
@@ -222,6 +223,35 @@ public class TokenServiceTest extends UnitTest {
         assertThat(savedRefreshToken.getUserAgent(), containsString("iPhone"));
         assertThat(savedRefreshToken.getDeviceInfo(), is(notNullValue()));
         assertThat(savedRefreshToken.getLastActiveAt(), is(notNullValue()));
+    }
+
+    @Test
+    @DisplayName("Should invoke generateRefreshToken with rememberMe=true when rememberMe flag is set")
+    public void generateAuthorizationTokensWithRememberMeUsesExtendedLifetime() {
+        // Given: A user
+        final User user = aValidUser();
+
+        // And: JwtService generates tokens
+        final Token newAccessToken = Token.builder()
+            .value("access-token")
+            .type(TokenType.ACCESS_TOKEN)
+            .expiresAt(OffsetDateTime.now(UTC).plusMinutes(15))
+            .user(user)
+            .build();
+        final Token newRefreshToken = Token.builder()
+            .value("remember-me-refresh-token")
+            .type(TokenType.REFRESH_TOKEN)
+            .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
+            .user(user)
+            .build();
+        when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
+        when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
+
+        // When: Generating authorization tokens with rememberMe=true
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, true);
+
+        // Then: jwtService.generateRefreshToken should be called with rememberMe=true
+        verify(jwtService, times(1)).generateRefreshToken(eq(user), eq(true));
     }
 
     @Test
@@ -263,7 +293,7 @@ public class TokenServiceTest extends UnitTest {
             .user(user)
             .build();
         when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
-        when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
+        when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
         // When: Refreshing using session A's token
         tokenService.refresh("session-a-refresh-token", httpServletRequest);
@@ -313,7 +343,7 @@ public class TokenServiceTest extends UnitTest {
             .user(user)
             .build();
         when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
-        when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
+        when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
         // When: Refreshing the token
         tokenService.refresh("old-refresh-token", httpServletRequest);

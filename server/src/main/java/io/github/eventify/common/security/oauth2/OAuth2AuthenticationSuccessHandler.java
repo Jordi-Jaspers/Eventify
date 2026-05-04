@@ -87,7 +87,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         userService.updateUserDetails(user);
 
         log.info("User '{}' successfully authenticated via OAuth", email);
-        user = tokenService.generateAuthorizationTokens(user, request);
+        // OAuth2 logins do not expose a remember-me toggle; always use the standard refresh-token lifetime.
+        user = tokenService.generateAuthorizationTokens(user, request, false);
         cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
 
         final String redirectUrl = redirectHelper.buildRedirectUrl();

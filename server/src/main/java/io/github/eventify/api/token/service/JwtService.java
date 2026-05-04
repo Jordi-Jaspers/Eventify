@@ -81,10 +81,16 @@ public class JwtService {
 
     /**
      * Generate a Refresh JWT token for a user with the given claims.
+     *
+     * @param user       the user to generate the token for
+     * @param rememberMe if {@code true}, uses the remember-me token lifetime (e.g. 30d via
+     *                   {@code security.remember-me-token}); otherwise uses the standard refresh token lifetime
+     *                   (e.g. 7d via {@code security.refresh-token}).
      */
-    public <T extends UserDetails> Token generateRefreshToken(final T user) {
+    public <T extends UserDetails> Token generateRefreshToken(final T user, final boolean rememberMe) {
         final OffsetDateTime now = OffsetDateTime.now(UTC);
-        final TokenProperties properties = securityProperties.getRefreshToken();
+        final TokenProperties properties = resolveRefreshTokenProperties(rememberMe);
+
         final JwtClaimsSet claimsSet = JwtClaimsSet.builder()
             .id(UUID.randomUUID().toString())
             .subject(user.getUsername())
@@ -100,6 +106,16 @@ public class JwtService {
             REFRESH_TOKEN,
             (User) user
         );
+    }
+
+    /**
+     * Resolves which configured token properties (lifetime + time unit) should govern a refresh token.
+     * Encapsulates the {@code remember-me} vs. standard refresh-token branch in a single place.
+     */
+    private TokenProperties resolveRefreshTokenProperties(final boolean rememberMe) {
+        return rememberMe
+            ? securityProperties.getRememberMeToken()
+            : securityProperties.getRefreshToken();
     }
 
     // ================================ Token Extraction ================================

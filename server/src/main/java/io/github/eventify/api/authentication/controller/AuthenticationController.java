@@ -80,7 +80,7 @@ public class AuthenticationController {
         final HttpServletRequest httpRequest,
         final HttpServletResponse response) {
         validator.validateLoginRequest(request);
-        final User user = authenticationService.authorize(request.getEmail(), request.getPassword(), httpRequest);
+        final User user = authenticationService.authorize(request, httpRequest);
         cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
         return ResponseEntity.status(OK).body(userDetailsMapper.toUserResponse(user));
     }

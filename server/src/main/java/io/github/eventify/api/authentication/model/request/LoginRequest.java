@@ -29,4 +29,11 @@ public class LoginRequest {
     )
     private String password;
 
+    @Schema(
+        description = "Whether to extend the session lifetime (30 days instead of 7). Defaults to false.",
+        example = "false",
+        defaultValue = "false"
+    )
+    private boolean rememberMe;
+
 }

@@ -41,6 +41,9 @@ security:
   refresh-token:
     lifetime: ${JWT_REFRESH_LIFETIME_SECONDS:7}
     time-unit: ${JWT_REFRESH_LIFETIME_TIME_UNIT:DAYS}
+  remember-me-token:
+    lifetime: ${JWT_REMEMBER_ME_LIFETIME_SECONDS:30}
+    time-unit: ${JWT_REMEMBER_ME_LIFETIME_TIME_UNIT:DAYS}
   rsa:
     seed: ${RSA_SEED:default-seed}
   cors:

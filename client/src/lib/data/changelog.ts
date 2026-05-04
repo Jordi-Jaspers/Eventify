@@ -5,6 +5,8 @@ export const changelog: ChangelogEntry[] = [
 		version: '0.1.0',
 		date: '2026-05-04',
 		features: [
+			'"Remember me for 30 days" checkbox on login keeps you signed in longer on trusted devices',
+			'Sessions tab now shows when each session expires',
 			'Multi-device session management: log in from multiple devices simultaneously without invalidating other sessions',
 			'Sessions tab in Profile showing all active sessions with device, IP, and last-active info',
 			'Revoke individual sessions or revoke all other sessions from one click',

@@ -17,6 +17,7 @@
     import {getDevCredentials} from '$lib/api/dev/DevController';
     import type {DevCredentialsResponse} from '$lib/api/models';
     import {showDevCredentials} from '$lib/config/env';
+    import {Checkbox} from '$lib/components/ui/checkbox';
 
     $effect(() => {
         if ($isAuthenticated) {
@@ -28,6 +29,7 @@
     let password: string = $state('');
     let showPassword: boolean = $state(false);
     let isSubmitting: boolean = $state(false);
+    let rememberMe: boolean = $state(false);
 
     // Dev credentials fetched from API (dev mode only)
     let devCredentials: DevCredentialsResponse | null = $state(null);
@@ -63,7 +65,7 @@
         isSubmitting = true;
 
         try {
-            await authStore.login(email.trim(), password);
+            await authStore.login(email.trim(), password, rememberMe);
         } catch (error: unknown) {
             const {message} = handleError(error, 'Invalid email or password. Please try again.');
             toast.error(message);
@@ -190,6 +192,19 @@
                             {/if}
                         </button>
                     </div>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="flex items-center space-x-3">
+                    <Checkbox
+                        id="remember-me"
+                        checked={rememberMe}
+                        onCheckedChange={(v: boolean) => (rememberMe = v)}
+                        disabled={isSubmitting}
+                    />
+                    <Label for="remember-me" class="text-sm font-normal cursor-pointer">
+                        Remember me for 30 days
+                    </Label>
                 </div>
 
                 <!-- Submit Button -->
