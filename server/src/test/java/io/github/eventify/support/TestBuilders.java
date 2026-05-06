@@ -7,12 +7,15 @@ import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.user.model.AuthProvider;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.api.user.model.UserAuthProvider;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistConfiguration;
 import io.github.eventify.api.watchlist.model.WatchlistFilters;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 
 /**
@@ -137,5 +140,39 @@ public final class TestBuilders {
 
     public static Organization anOrganization(final Long id) {
         return anOrganization(id, "Test Organization", "test-organization");
+    }
+
+    // ========================= USER AUTH PROVIDER =========================
+
+    public static UserAuthProvider aUserAuthProvider(final User user, final AuthProvider provider) {
+        final UserAuthProvider authProvider = new UserAuthProvider();
+        authProvider.setUser(user);
+        authProvider.setProvider(provider);
+        authProvider.setProviderEmail(user.getEmail());
+        authProvider.setLinkedAt(Instant.now());
+        return authProvider;
+    }
+
+    public static UserAuthProvider aLocalUserAuthProvider(final User user) {
+        return aUserAuthProvider(user, AuthProvider.LOCAL);
+    }
+
+    public static UserAuthProvider aGoogleUserAuthProvider(final User user) {
+        return aUserAuthProvider(user, AuthProvider.GOOGLE);
+    }
+
+    public static UserAuthProvider aGitHubUserAuthProvider(final User user) {
+        return aUserAuthProvider(user, AuthProvider.GITHUB);
+    }
+
+    public static UserAuthProvider aUserAuthProvider(
+        final Long id,
+        final User user,
+        final AuthProvider provider,
+        final String providerEmail) {
+        final UserAuthProvider authProvider = aUserAuthProvider(user, provider);
+        authProvider.setId(id);
+        authProvider.setProviderEmail(providerEmail);
+        return authProvider;
     }
 }

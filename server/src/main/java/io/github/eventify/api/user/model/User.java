@@ -69,6 +69,12 @@ public class User implements UserDetails, PageableItem {
     @Column(name = "validated")
     private boolean validated;
 
+    @Column(
+        name = "has_password",
+        nullable = false
+    )
+    private boolean hasPassword;
+
     @UpdateTimestamp
     @Column(name = "last_login")
     private OffsetDateTime lastLogin;
@@ -91,6 +97,14 @@ public class User implements UserDetails, PageableItem {
         orphanRemoval = true
     )
     private List<Token> tokens = new ArrayList<>();
+
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        fetch = FetchType.LAZY,
+        orphanRemoval = true
+    )
+    private List<UserAuthProvider> authProviders = new ArrayList<>();
 
     @OneToMany(
         mappedBy = "user",
@@ -124,6 +138,7 @@ public class User implements UserDetails, PageableItem {
         this.enabled = true;
         this.validated = true;
         this.role = Role.USER;
+        this.hasPassword = false;
     }
 
     @Override

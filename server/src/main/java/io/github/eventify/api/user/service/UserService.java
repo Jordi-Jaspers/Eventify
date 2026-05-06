@@ -1,9 +1,12 @@
 package io.github.eventify.api.user.service;
 
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.user.model.AuthProvider;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.api.user.model.UserAuthProvider;
 import io.github.eventify.api.user.model.UserMetaData;
 import io.github.eventify.api.user.model.request.UpdateUserDetailsRequest;
+import io.github.eventify.api.user.repository.UserAuthProviderRepository;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.email.service.sender.EmailService;
 import io.github.eventify.common.exception.AuthorizationException;
@@ -51,6 +54,8 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
+
+    private final UserAuthProviderRepository userAuthProviderRepository;
 
     private final UserMetaData userMetaData;
 
@@ -236,6 +241,9 @@ public class UserService implements UserDetailsService {
         newUser.setRole(USER);
         newUser.setEnabled(true);
         newUser.setValidated(false);
-        return userRepository.save(newUser);
+        newUser.setHasPassword(true);
+        final User savedUser = userRepository.save(newUser);
+        userAuthProviderRepository.save(new UserAuthProvider(savedUser, AuthProvider.LOCAL, savedUser.getEmail()));
+        return savedUser;
     }
 }

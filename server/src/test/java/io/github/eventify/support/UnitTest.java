@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -218,6 +219,21 @@ public class UnitTest {
 
     protected Watchlist anOrgWatchlist(final Long id, final String name, final User user, final Organization org) {
         return TestBuilders.anOrgWatchlist(id, name, user, org);
+    }
+
+    /**
+     * Shadows Hamcrest's any(Class) to resolve static-import ambiguity with Mockito.
+     * Delegates to Mockito's ArgumentMatchers.any(Class).
+     */
+    protected static <T> T any(final Class<T> cls) {
+        return ArgumentMatchers.any(cls);
+    }
+
+    /**
+     * Delegates to Mockito's ArgumentMatchers.any() (no-arg).
+     */
+    protected static <T> T any() {
+        return ArgumentMatchers.any();
     }
 
 }

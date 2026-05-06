@@ -12,6 +12,7 @@ import io.github.eventify.api.quota.repository.UserEventQuotaRepository;
 import io.github.eventify.api.token.repository.TokenRepository;
 import io.github.eventify.api.token.service.TokenService;
 import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
+import io.github.eventify.api.user.repository.UserAuthProviderRepository;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
@@ -130,5 +131,8 @@ public class TestContextInitializer {
 
     @Autowired
     protected TestDataCleanupService testDataCleanupService;
+
+    @Autowired
+    protected UserAuthProviderRepository userAuthProviderRepository;
 
 }

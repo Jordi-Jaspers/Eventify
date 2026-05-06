@@ -222,6 +222,30 @@ public enum ApiErrorCode implements ApiError {
     SESSION_NOT_FOUND_ERROR(
         "ERR-0052",
         "The requested session does not exist or does not belong to you."
+    ),
+    PROVIDER_NOT_FOUND_ERROR(
+        "ERR-0053",
+        "The requested authentication provider does not exist or does not belong to you."
+    ),
+    LAST_AUTH_METHOD_ERROR(
+        "ERR-0054",
+        "Cannot unlink the last authentication method. Set a password or connect another provider first."
+    ),
+    EMAIL_IN_USE_ERROR(
+        "ERR-0055",
+        "The email address from this OAuth2 provider is already associated with another account."
+    ),
+    PROVIDER_LINKED_ELSEWHERE_ERROR(
+        "ERR-0056",
+        "This OAuth2 provider account is already linked to a different user."
+    ),
+    PROVIDER_ALREADY_LINKED_ERROR(
+        "ERR-0057",
+        "This OAuth2 provider is already linked to your account."
+    ),
+    LOCAL_PROVIDER_UNLINK_ERROR(
+        "ERR-0058",
+        "Cannot unlink the local (password) authentication method."
     );
 
     /* The error code for this reason. */

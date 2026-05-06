@@ -139,6 +139,10 @@ public final class Paths {
 
     public static final String USER_SESSION_PATH = USER_SESSIONS_PATH + ID_PART;
 
+    public static final String USER_PROVIDERS_PATH = USERS_PATH + "/providers";
+
+    public static final String USER_PROVIDER_PATH = USER_PROVIDERS_PATH + ID_PART;
+
     public static final String USER_CHANNELS_PATH = USERS_PATH + "/channel";
 
     public static final String USER_CHANNELS_SEARCH_PATH = USER_CHANNELS_PATH + SEARCH_PART;

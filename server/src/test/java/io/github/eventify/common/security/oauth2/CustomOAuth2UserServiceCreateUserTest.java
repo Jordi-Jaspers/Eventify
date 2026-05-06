@@ -3,6 +3,7 @@ package io.github.eventify.common.security.oauth2;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.repository.UserRepository;
+import io.github.eventify.api.user.service.UserAuthProviderService;
 import io.github.eventify.common.exception.OAuth2Exception;
 import io.github.eventify.support.UnitTest;
 
@@ -36,6 +37,9 @@ public class CustomOAuth2UserServiceCreateUserTest extends UnitTest {
     private UserRepository userRepository;
 
     @Mock
+    private UserAuthProviderService userAuthProviderService;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -48,7 +52,7 @@ public class CustomOAuth2UserServiceCreateUserTest extends UnitTest {
 
     @BeforeEach
     public void setUp() {
-        customOAuth2UserService = new CustomOAuth2UserService(userRepository, passwordEncoder);
+        customOAuth2UserService = new CustomOAuth2UserService(userRepository, userAuthProviderService, passwordEncoder);
     }
 
     @Test

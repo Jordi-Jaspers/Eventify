@@ -1,5 +1,6 @@
 package io.github.eventify.api.user.service;
 
+import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.model.TokenType;
 import io.github.eventify.api.token.service.TokenService;
 import io.github.eventify.api.user.model.User;
@@ -167,5 +168,35 @@ public class PasswordServiceTest extends UnitTest {
         verify(userRepository, never()).save(any(User.class));
         verify(tokenService, never()).invalidateTokensForUser(any(), any());
         verify(emailService, never()).sendPasswordResetEmail(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Should set hasPassword=true after password reset via token")
+    public void changePassword_setsHasPasswordTrue() {
+        // Given: A user with a valid password reset token
+        final User user = aValidUser();
+        user.setHasPassword(false);
+
+        final Token resetToken = Token.builder()
+            .id(1L)
+            .value("reset-token-value")
+            .type(io.github.eventify.api.token.model.TokenType.RESET_PASSWORD_TOKEN)
+            .user(user)
+            .build();
+
+        when(tokenService.findPasswordResetTokenByValue("reset-token-value")).thenReturn(resetToken);
+        when(passwordEncoder.encode(anyString())).thenReturn("new-encoded-password");
+
+        // When: Changing the password via reset token
+        passwordService.changePassword(VALID_NEW_PASSWORD, "reset-token-value");
+
+        // Then: The user should be saved with hasPassword=true
+        final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).save(userCaptor.capture());
+
+        final User savedUser = userCaptor.getValue();
+
+        // And: hasPassword should be true after password reset
+        assertThat(savedUser.isHasPassword(), is(true));
     }
 }

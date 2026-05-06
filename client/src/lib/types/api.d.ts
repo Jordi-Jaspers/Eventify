@@ -1088,6 +1088,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/user/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List connected providers
+         * @description Returns all authentication providers with their connection status for the authenticated user
+         */
+        get: operations["listProviders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/user/organization": {
         parameters: {
             query?: never;
@@ -1397,6 +1417,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/user/providers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Unlink provider
+         * @description Unlinks a specific authentication provider from the user account
+         */
+        delete: operations["unlinkProvider"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/user/api-keys/{keyId}": {
         parameters: {
             query?: never;
@@ -1458,19 +1498,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        ErrorResponseResource: {
-            method?: string;
-            uri?: string;
-            query?: string;
-            contentType?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            statusMessage?: string;
-            errorMessage?: string;
-            txId?: string;
-            traceId?: string;
-            spanId?: string;
-        };
         ApiErrorResponseResource: {
             method?: string;
             uri?: string;
@@ -1485,6 +1512,19 @@ export interface components {
             spanId?: string;
             apiErrorCode?: string;
             apiErrorReason?: string;
+        };
+        ErrorResponseResource: {
+            method?: string;
+            uri?: string;
+            query?: string;
+            contentType?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            statusMessage?: string;
+            errorMessage?: string;
+            txId?: string;
+            traceId?: string;
+            spanId?: string;
         };
         RateLimitErrorResponseResource: {
             method?: string;
@@ -2918,6 +2958,31 @@ export interface components {
             periodEnd?: string;
             /** Format: double */
             percentUsed?: number;
+        };
+        /** @description Authentication provider connection status */
+        ProviderResponse: {
+            /**
+             * Format: int64
+             * @description Unique identifier of the linked provider record (null when not connected)
+             * @example 42
+             */
+            id?: number;
+            /**
+             * @description The authentication provider type
+             * @example GOOGLE
+             * @enum {string}
+             */
+            provider: "LOCAL" | "GOOGLE" | "GITHUB";
+            /**
+             * @description Whether this provider is connected to the user account
+             * @example true
+             */
+            connected: boolean;
+            /**
+             * @description Email address associated with this provider (null when not connected)
+             * @example user@gmail.com
+             */
+            providerEmail?: string;
         };
         /** @description Dashboard statistics response */
         DashboardStatsResponse: {
@@ -9885,6 +9950,98 @@ export interface operations {
             };
         };
     };
+    listProviders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResponse"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
     getUserOrganizations: {
         parameters: {
             query?: never;
@@ -11247,6 +11404,98 @@ export interface operations {
         };
     };
     revokeSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    unlinkProvider: {
         parameters: {
             query?: never;
             header?: never;

@@ -71,6 +71,10 @@ export const CLIENT_ROUTES = {
 		path: '/profile/sessions',
 		type: RouteType.PRIVATE
 	},
+	PROFILE_CONNECTED_ACCOUNTS_PAGE: {
+		path: '/profile/connected-accounts',
+		type: RouteType.PRIVATE
+	},
 	CHANNELS_PAGE: {
 		path: '/channels',
 		type: RouteType.PRIVATE

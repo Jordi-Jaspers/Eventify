@@ -68,6 +68,7 @@ public class PasswordService {
         final User user = token.getUser();
         tokenService.invalidateTokensForUser(user, TokenType.RESET_PASSWORD_TOKEN);
         user.setPassword(passwordEncoder.encode(password));
+        user.setHasPassword(true);
         userRepository.save(user);
     }
 

@@ -14,6 +14,7 @@ export type UserOrganizationResponse = components['schemas']['UserOrganizationRe
 export type UserQuotaResponse = components['schemas']['UserQuotaResponse'];
 export type RetentionSettingsResponse = components['schemas']['RetentionSettingsResponse'];
 export type SessionResponse = components['schemas']['SessionResponse'];
+export type ProviderResponse = components['schemas']['ProviderResponse'];
 
 // ================ Error Responses ===================
 export type ErrorResponseResource = components['schemas']['ErrorResponseResource'];
@@ -97,6 +98,7 @@ export type PageResourceApiKeyResponse = components['schemas']['PageResourceApiK
 // ================ Enums ===================
 // These are inline enums from generated types - extracted for convenience
 export type OAuthProvider = 'google' | 'github';
+export type ProviderType = NonNullable<ProviderResponse['provider']>;
 export type OrganizationStatus = NonNullable<OrganizationResponse['status']>;
 export type OrganizationalRole = NonNullable<OrganizationMembershipResponse['role']>;
 export type UserRole = NonNullable<UserDetailsResponse['role']>;
