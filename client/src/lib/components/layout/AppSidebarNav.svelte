@@ -85,8 +85,8 @@
 				<Sidebar.Menu>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton
-							onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(currentOrganization.organizationId!).path)}
-							isActive={isActive(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(currentOrganization.organizationId!).path)}
+							onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(currentOrganization.organizationId).path)}
+							isActive={isActive(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(currentOrganization.organizationId).path)}
 						>
 							<LayoutDashboard class="size-4" />
 							<span>Dashboard</span>
@@ -94,8 +94,8 @@
 					</Sidebar.MenuItem>
 				<Sidebar.MenuItem>
 					<Sidebar.MenuButton
-						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(currentOrganization.organizationId!).path)}
-						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(currentOrganization.organizationId!).path)}
+						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(currentOrganization.organizationId).path)}
+						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(currentOrganization.organizationId).path)}
 					>
 						<Users class="size-4" />
 						<span>Members</span>
@@ -103,8 +103,8 @@
 				</Sidebar.MenuItem>
 				<Sidebar.MenuItem>
 					<Sidebar.MenuButton
-						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_CHANNELS_PAGE(currentOrganization.organizationId!).path)}
-						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_CHANNELS_PAGE(currentOrganization.organizationId!).path)}
+						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_CHANNELS_PAGE(currentOrganization.organizationId).path)}
+						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_CHANNELS_PAGE(currentOrganization.organizationId).path)}
 					>
 						<Radio class="size-4" />
 						<span>Channels</span>
@@ -112,8 +112,8 @@
 				</Sidebar.MenuItem>
 				<Sidebar.MenuItem>
 					<Sidebar.MenuButton
-						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_WATCHLISTS_PAGE(currentOrganization.organizationId!).path)}
-						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_WATCHLISTS_PAGE(currentOrganization.organizationId!).path)}
+						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_WATCHLISTS_PAGE(currentOrganization.organizationId).path)}
+						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_WATCHLISTS_PAGE(currentOrganization.organizationId).path)}
 					>
 						<ClipboardList class="size-4" />
 						<span>Watchlists</span>
@@ -121,8 +121,8 @@
 				</Sidebar.MenuItem>
 				<Sidebar.MenuItem>
 					<Sidebar.MenuButton
-						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(currentOrganization.organizationId!).path)}
-						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(currentOrganization.organizationId!).path)}
+						onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(currentOrganization.organizationId).path)}
+						isActive={isActive(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(currentOrganization.organizationId).path)}
 					>
 						<Activity class="size-4" />
 						<span>Monitor</span>
@@ -131,7 +131,7 @@
 					{#if canManageOrgSettings}
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton
-								onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_SETTINGS_PAGE(currentOrganization.organizationId!).path)}
+								onclick={() => goto(CLIENT_ROUTES.ORGANIZATION_SETTINGS_PAGE(currentOrganization.organizationId).path)}
 								isActive={currentPath.startsWith(`/organizations/${currentOrganization.organizationId}/settings`)}
 							>
 								<Settings class="size-4" />

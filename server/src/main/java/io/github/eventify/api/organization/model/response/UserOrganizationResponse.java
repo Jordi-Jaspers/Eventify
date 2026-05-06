@@ -21,35 +21,35 @@ public class UserOrganizationResponse {
     @Schema(
         description = "Unique organization identifier",
         example = "12345",
-        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+        requiredMode = Schema.RequiredMode.REQUIRED
     )
     private Long organizationId;
 
     @Schema(
         description = "Organization name",
         example = "Acme Corporation",
-        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+        requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String organizationName;
 
     @Schema(
         description = "URL-friendly organization slug",
         example = "acme-corporation",
-        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+        requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String organizationSlug;
 
     @Schema(
         description = "User's role within the organization",
         example = "MEMBER",
-        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+        requiredMode = Schema.RequiredMode.REQUIRED
     )
     private OrganizationalRole role;
 
     @Schema(
         description = "Timestamp when the user joined the organization",
         example = "2026-01-15T10:30:00Z",
-        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+        requiredMode = Schema.RequiredMode.REQUIRED
     )
     private OffsetDateTime joinedAt;
 }

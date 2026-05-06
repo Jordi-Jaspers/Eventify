@@ -229,7 +229,7 @@
 							{#each organizations as org (org.organizationId)}
 								<DropdownMenu.Item
 									class="cursor-pointer hover:bg-primary/10 flex items-center gap-3 px-2 py-2"
-									onclick={() => handleOrgSwitch(org.organizationId!)}
+									onclick={() => handleOrgSwitch(org.organizationId)}
 								>
 									<!-- Org Avatar -->
 									<div
