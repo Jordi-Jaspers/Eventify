@@ -1,5 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { page } from '$app/stores';
+    import { goto } from '$app/navigation';
+    import { toast } from 'svelte-sonner';
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import { Link2 } from '@lucide/svelte';
     import { SettingsNav } from '$lib/components/settings';
@@ -9,9 +12,24 @@
     import * as AlertDialog from '$lib/components/ui/alert-dialog';
     import { getProviderMeta } from '$lib/utils/provider-meta';
 
+    const LINK_ERROR_MESSAGES: Record<string, string> = {
+        email_in_use: 'The email address from this provider is already associated with another account.',
+        provider_linked_elsewhere: 'This provider account is already linked to a different user.',
+        already_linked: 'This provider is already connected to your account.'
+    };
+
     const service = createConnectedAccountsService();
 
-    onMount(() => service.load());
+    onMount(() => {
+        const error = $page.url.searchParams.get('error');
+        if (error) {
+            const message = LINK_ERROR_MESSAGES[error] ?? 'Failed to link provider. Please try again.';
+            toast.error(message);
+            // Clean up the URL
+            goto($page.url.pathname, { replaceState: true });
+        }
+        service.load();
+    });
 </script>
 
 <svelte:head>
