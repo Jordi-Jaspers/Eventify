@@ -21,7 +21,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
-import static io.github.eventify.common.exception.ApiErrorCode.EMAIL_IN_USE_ERROR;
 import static io.github.eventify.common.exception.ApiErrorCode.PROVIDER_ALREADY_LINKED_ERROR;
 import static io.github.eventify.common.exception.ApiErrorCode.PROVIDER_LINKED_ELSEWHERE_ERROR;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -345,36 +344,6 @@ public class UserAuthProviderServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("K3 (service): Should throw EMAIL_IN_USE_ERROR when provider email matches another user's primary email")
-    public void linkProviderForUser_throwsEMAIL_IN_USE_ERROR_whenProviderEmailMatchesAnotherUsersPrimaryEmail() {
-        // Given: User X does NOT have GOOGLE linked
-        final User userX = aValidUser();
-        userX.setId(1L);
-        userX.setEmail("x@example.com");
-
-        // And: User Z exists with primary email=z@example.com (no provider records)
-        final User userZ = aValidUser();
-        userZ.setId(2L);
-        userZ.setEmail("z@example.com");
-
-        when(userAuthProviderRepository.existsByUserAndProvider(userX, AuthProvider.GOOGLE)).thenReturn(false);
-        when(userAuthProviderRepository.findByProviderAndProviderEmail(AuthProvider.GOOGLE, "z@example.com"))
-            .thenReturn(Optional.empty());
-        when(userRepository.findByEmail("z@example.com")).thenReturn(Optional.of(userZ));
-
-        // When & Then: Linking GOOGLE with z@example.com should throw EMAIL_IN_USE_ERROR
-        final LinkOAuth2Exception exception = assertThrows(
-            LinkOAuth2Exception.class,
-            () -> userAuthProviderService.linkProviderForUser(userX, AuthProvider.GOOGLE, "z@example.com")
-        );
-
-        assertThat(exception.getErrorCode(), is(equalTo(EMAIL_IN_USE_ERROR)));
-
-        // And: No provider record is created
-        verify(userAuthProviderRepository, never()).save(any(UserAuthProvider.class));
-    }
-
-    @Test
     @DisplayName("K1+K2 (service): Should successfully link provider when all checks pass")
     public void linkProviderForUser_succeeds_whenAllChecksPass() {
         // Given: User X does NOT have GOOGLE linked
@@ -385,13 +354,95 @@ public class UserAuthProviderServiceTest extends UnitTest {
         when(userAuthProviderRepository.existsByUserAndProvider(userX, AuthProvider.GOOGLE)).thenReturn(false);
         when(userAuthProviderRepository.findByProviderAndProviderEmail(AuthProvider.GOOGLE, "y@example.com"))
             .thenReturn(Optional.empty());
-        when(userRepository.findByEmail("y@example.com")).thenReturn(Optional.empty());
         when(userAuthProviderRepository.save(any(UserAuthProvider.class))).thenAnswer(i -> i.getArgument(0));
 
         // When: Linking GOOGLE with y@example.com (unknown email, no conflicts)
         userAuthProviderService.linkProviderForUser(userX, AuthProvider.GOOGLE, "y@example.com");
 
         // Then: Provider record is saved for user X
+        verify(userAuthProviderRepository, times(1)).save(any(UserAuthProvider.class));
+    }
+
+    @Test
+    @DisplayName(
+        "Should succeed linking provider when provider email matches another user's primary email but provider is not linked elsewhere"
+    )
+    public void linkProviderForUser_succeeds_whenProviderEmailMatchesAnotherUsersPrimaryEmailButProviderNotLinkedElsewhere() {
+        // Given: User X (id=1, email=x@example.com) does NOT have GITHUB linked
+        final User userX = aValidUser();
+        userX.setId(1L);
+        userX.setEmail("x@example.com");
+
+        // And: User Y (id=2, email=y@example.com) exists as another user
+        final User userY = aValidUser();
+        userY.setId(2L);
+        userY.setEmail("y@example.com");
+
+        // And: No existing UserAuthProvider for GITHUB+y@example.com (provider not linked elsewhere)
+        when(userAuthProviderRepository.existsByUserAndProvider(userX, AuthProvider.GITHUB)).thenReturn(false);
+        when(userAuthProviderRepository.findByProviderAndProviderEmail(AuthProvider.GITHUB, "y@example.com"))
+            .thenReturn(Optional.empty());
+        when(userAuthProviderRepository.save(any(UserAuthProvider.class))).thenAnswer(i -> i.getArgument(0));
+
+        // When: Linking GITHUB with y@example.com (another user's primary email, but provider not linked)
+        userAuthProviderService.linkProviderForUser(userX, AuthProvider.GITHUB, "y@example.com");
+
+        // Then: Provider record is saved — no exception thrown
+        verify(userAuthProviderRepository, times(1)).save(any(UserAuthProvider.class));
+    }
+
+    @Test
+    @DisplayName("Should throw PROVIDER_LINKED_ELSEWHERE_ERROR when provider is still actively linked to another user")
+    public void linkProviderForUser_throwsPROVIDER_LINKED_ELSEWHERE_ERROR_whenProviderActivelyLinkedToAnotherUser() {
+        // Given: User X (id=1) does NOT have GITHUB linked
+        final User userX = aValidUser();
+        userX.setId(1L);
+
+        // And: User Y (id=2) has GITHUB linked with email y@example.com
+        final User userY = aValidUser();
+        userY.setId(2L);
+        final UserAuthProvider yGithubProvider = TestBuilders.aUserAuthProvider(10L, userY, AuthProvider.GITHUB, "y@example.com");
+
+        when(userAuthProviderRepository.existsByUserAndProvider(userX, AuthProvider.GITHUB)).thenReturn(false);
+        when(userAuthProviderRepository.findByProviderAndProviderEmail(AuthProvider.GITHUB, "y@example.com"))
+            .thenReturn(Optional.of(yGithubProvider));
+
+        // When: User X tries to link GITHUB with y@example.com
+        final LinkOAuth2Exception exception = assertThrows(
+            LinkOAuth2Exception.class,
+            () -> userAuthProviderService.linkProviderForUser(userX, AuthProvider.GITHUB, "y@example.com")
+        );
+
+        // Then: Should throw PROVIDER_LINKED_ELSEWHERE_ERROR
+        assertThat(exception.getErrorCode(), is(equalTo(PROVIDER_LINKED_ELSEWHERE_ERROR)));
+
+        // And: No provider record is created
+        verify(userAuthProviderRepository, never()).save(any(UserAuthProvider.class));
+    }
+
+    @Test
+    @DisplayName("Should succeed linking provider after it was unlinked from another user (re-link scenario)")
+    public void linkProviderForUser_succeeds_whenProviderWasPreviouslyUnlinkedFromAnotherUser() {
+        // Given: User X (id=1, email=x@example.com) does NOT have GITHUB linked
+        final User userX = aValidUser();
+        userX.setId(1L);
+        userX.setEmail("x@example.com");
+
+        // And: User Y (id=2, email=y@example.com) exists as another user
+        final User userY = aValidUser();
+        userY.setId(2L);
+        userY.setEmail("y@example.com");
+
+        // And: No existing UserAuthProvider for GITHUB+y@example.com (was unlinked — findByProviderAndProviderEmail returns empty)
+        when(userAuthProviderRepository.existsByUserAndProvider(userX, AuthProvider.GITHUB)).thenReturn(false);
+        when(userAuthProviderRepository.findByProviderAndProviderEmail(AuthProvider.GITHUB, "y@example.com"))
+            .thenReturn(Optional.empty());
+        when(userAuthProviderRepository.save(any(UserAuthProvider.class))).thenAnswer(i -> i.getArgument(0));
+
+        // When: Linking GITHUB with y@example.com (provider was previously unlinked from User Y)
+        userAuthProviderService.linkProviderForUser(userX, AuthProvider.GITHUB, "y@example.com");
+
+        // Then: Provider record is saved — no exception thrown (re-link is allowed)
         verify(userAuthProviderRepository, times(1)).save(any(UserAuthProvider.class));
     }
 
@@ -406,8 +457,6 @@ public class UserAuthProviderServiceTest extends UnitTest {
         when(userAuthProviderRepository.existsByUserAndProvider(userX, AuthProvider.GOOGLE)).thenReturn(false);
         when(userAuthProviderRepository.findByProviderAndProviderEmail(AuthProvider.GOOGLE, "x@example.com"))
             .thenReturn(Optional.empty());
-        // Email lookup returns userX themselves — should NOT be treated as conflict
-        when(userRepository.findByEmail("x@example.com")).thenReturn(Optional.of(userX));
         when(userAuthProviderRepository.save(any(UserAuthProvider.class))).thenAnswer(i -> i.getArgument(0));
 
         // When: Linking GOOGLE with x@example.com (same as own primary email)

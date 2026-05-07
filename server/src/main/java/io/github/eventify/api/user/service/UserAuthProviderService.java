@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static io.github.eventify.common.exception.ApiErrorCode.EMAIL_IN_USE_ERROR;
 import static io.github.eventify.common.exception.ApiErrorCode.PROVIDER_ALREADY_LINKED_ERROR;
 import static io.github.eventify.common.exception.ApiErrorCode.PROVIDER_LINKED_ELSEWHERE_ERROR;
 import static io.github.eventify.common.exception.ApiErrorCode.PROVIDER_NOT_FOUND_ERROR;
@@ -112,7 +111,6 @@ public class UserAuthProviderService {
      * <ol>
      * <li>K5: Same provider already linked to this user → PROVIDER_ALREADY_LINKED_ERROR</li>
      * <li>K4: (provider, providerEmail) already linked to another user → PROVIDER_LINKED_ELSEWHERE_ERROR</li>
-     * <li>K3: providerEmail matches another user's primary email → EMAIL_IN_USE_ERROR (self-email is allowed)</li>
      * </ol>
      *
      * @param user          the current authenticated user
@@ -128,11 +126,6 @@ public class UserAuthProviderService {
             userAuthProviderRepository.findByProviderAndProviderEmail(provider, providerEmail);
         if (existingProviderRecord.isPresent() && !existingProviderRecord.get().getUser().getId().equals(user.getId())) {
             throw new LinkOAuth2Exception(PROVIDER_LINKED_ELSEWHERE_ERROR);
-        }
-
-        final Optional<User> emailOwner = userRepository.findByEmail(providerEmail);
-        if (emailOwner.isPresent() && !emailOwner.get().getId().equals(user.getId())) {
-            throw new LinkOAuth2Exception(EMAIL_IN_USE_ERROR);
         }
 
         userAuthProviderRepository.save(new UserAuthProvider(user, provider, providerEmail));
