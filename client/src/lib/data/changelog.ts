@@ -2,8 +2,8 @@ import type { ChangelogEntry } from '$lib/types/changelog';
 
 export const changelog: ChangelogEntry[] = [
 	{
-		version: '0.1.0',
-		date: '2026-05-04',
+		version: '0.1.0-SNAPSHOT',
+		date: '2026-05-07',
 		features: [
 			'"Remember me for 30 days" checkbox on login keeps you signed in longer on trusted devices',
 			'Sessions tab now shows when each session expires',
@@ -25,6 +25,8 @@ export const changelog: ChangelogEntry[] = [
 			'Cookie security configurable per environment for smoother local development on Safari'
 		],
 		fixes: [
+			'OAuth2 account linking: unlinking a provider from one account and re-linking it to another now works correctly',
+			'Connected accounts page now shows error messages when OAuth2 linking fails',
 			'Logging out on one device no longer logs you out of every other device',
 			'Logout now reliably revokes the current session even when the principal lacks a token id',
 			'IPv6 localhost addresses normalized to 127.0.0.1 in the session list for clarity',
