@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { User, Code2, Database, Shield, Link2 } from '@lucide/svelte';
+	import { User, Code2, Database, Shield } from '@lucide/svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 
 	interface Props {
@@ -10,10 +10,9 @@
 
 	const tabs: Array<{ label: string; path: string; icon: typeof User }> = [
 		{ label: 'Profile', path: CLIENT_ROUTES.PROFILE_PAGE.path, icon: User },
-		{ label: 'Developer', path: CLIENT_ROUTES.DEVELOPER_PAGE.path, icon: Code2 },
+		{ label: 'Security', path: CLIENT_ROUTES.PROFILE_SECURITY_PAGE.path, icon: Shield },
 		{ label: 'Data & Storage', path: CLIENT_ROUTES.DATA_STORAGE_PAGE.path, icon: Database },
-		{ label: 'Sessions', path: CLIENT_ROUTES.PROFILE_SESSIONS_PAGE.path, icon: Shield },
-		{ label: 'Connected Accounts', path: CLIENT_ROUTES.PROFILE_CONNECTED_ACCOUNTS_PAGE.path, icon: Link2 }
+		{ label: 'Developer', path: CLIENT_ROUTES.DEVELOPER_PAGE.path, icon: Code2 }
 	];
 </script>
 

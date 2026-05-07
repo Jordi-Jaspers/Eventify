@@ -67,12 +67,8 @@ export const CLIENT_ROUTES = {
 		path: '/profile/data-storage',
 		type: RouteType.PRIVATE
 	},
-	PROFILE_SESSIONS_PAGE: {
-		path: '/profile/sessions',
-		type: RouteType.PRIVATE
-	},
-	PROFILE_CONNECTED_ACCOUNTS_PAGE: {
-		path: '/profile/connected-accounts',
+	PROFILE_SECURITY_PAGE: {
+		path: '/profile/security',
 		type: RouteType.PRIVATE
 	},
 	CHANNELS_PAGE: {
