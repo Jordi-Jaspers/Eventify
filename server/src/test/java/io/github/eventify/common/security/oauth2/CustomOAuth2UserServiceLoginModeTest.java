@@ -14,7 +14,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -154,12 +153,11 @@ public class CustomOAuth2UserServiceLoginModeTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("L2: Should preserve hasPassword when auto-linking provider to existing local user")
+    @DisplayName("L2: Should auto-link provider to existing local user")
     public void loginMode_L2_preservesHasPassword_whenAutoLinkingToExistingLocalUser() {
-        // Given: User X with hasPassword=true (local user), no GOOGLE provider
+        // Given: User X (local user), no GOOGLE provider
         final User userX = aValidUser();
         userX.setEmail(PRIMARY_EMAIL);
-        userX.setHasPassword(true);
 
         final OAuth2User oAuth2User = createMockOAuth2User(PRIMARY_EMAIL, true);
         when(oAuth2UserRequest.getClientRegistration()).thenReturn(clientRegistration);
@@ -168,13 +166,12 @@ public class CustomOAuth2UserServiceLoginModeTest extends UnitTest {
         when(userAuthProviderService.findByProviderAndProviderEmail(AuthProvider.GOOGLE, PRIMARY_EMAIL))
             .thenReturn(Optional.empty());
         when(userRepository.findByEmail(PRIMARY_EMAIL)).thenReturn(Optional.of(userX));
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
         // When: Processing OAuth2 login
         customOAuth2UserService.processOAuth2User(oAuth2UserRequest, oAuth2User);
 
-        // Then: hasPassword remains true — linking must not flip it
-        assertThat(userX.isHasPassword(), is(true));
+        // Then: upsertProvider is called for the existing user
+        verify(userAuthProviderService, times(1)).upsertProvider(eq(userX), eq(AuthProvider.GOOGLE), eq(PRIMARY_EMAIL));
     }
 
     // ========================= L3: New user creation =========================
@@ -211,7 +208,7 @@ public class CustomOAuth2UserServiceLoginModeTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("L3: Should set hasPassword=false when creating new OAuth2 user")
+    @DisplayName("L3: Should save new OAuth2 user when email is unknown")
     public void loginMode_L3_setsHasPasswordFalse_forNewOAuth2User() {
         // Given: A new Google OAuth2 user
         final OAuth2User oAuth2User = createMockOAuth2User(NEW_EMAIL, true);
@@ -227,10 +224,8 @@ public class CustomOAuth2UserServiceLoginModeTest extends UnitTest {
         // When: Processing the OAuth2 user
         customOAuth2UserService.processOAuth2User(oAuth2UserRequest, oAuth2User);
 
-        // Then: The created user should have hasPassword=false
-        final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository, times(1)).save(userCaptor.capture());
-        assertThat(userCaptor.getValue().isHasPassword(), is(false));
+        // Then: The new user should be saved
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test

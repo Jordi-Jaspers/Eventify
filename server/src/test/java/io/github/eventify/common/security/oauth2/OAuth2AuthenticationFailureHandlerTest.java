@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 public class OAuth2AuthenticationFailureHandlerTest extends UnitTest {
 
     private static final String ERROR_MESSAGE = "OAuth2 authentication failed";
-    private static final String CONNECTED_ACCOUNTS_PATH = "/profile/connected-accounts";
+    private static final String SECURITY_PATH = "/profile/security";
 
     @Mock
     private OAuth2RedirectHelper redirectHelper;
@@ -174,64 +174,64 @@ public class OAuth2AuthenticationFailureHandlerTest extends UnitTest {
     // ========================= LinkOAuth2Exception redirect tests =========================
 
     @Test
-    @DisplayName("Should redirect to /profile/connected-accounts?error=email_in_use when LinkOAuth2Exception with EMAIL_IN_USE_ERROR")
+    @DisplayName("Should redirect to /profile/security?error=email_in_use when LinkOAuth2Exception with EMAIL_IN_USE_ERROR")
     public void onAuthenticationFailure_LinkOAuth2Exception_redirectsToConnectedAccountsWithEmailInUseCode() throws IOException {
         // Given: A LinkOAuth2Exception with EMAIL_IN_USE_ERROR code
         final LinkOAuth2Exception linkException = new LinkOAuth2Exception(EMAIL_IN_USE_ERROR);
-        final String expectedRedirectUrl = APPLICATION_URL + CONNECTED_ACCOUNTS_PATH + "?error=email_in_use";
+        final String expectedRedirectUrl = APPLICATION_URL + SECURITY_PATH + "?error=email_in_use";
         when(redirectHelper.buildLinkErrorRedirectUrl(EMAIL_IN_USE_ERROR))
             .thenReturn(expectedRedirectUrl);
 
         // When: Handling the link failure
         handler.onAuthenticationFailure(request, response, linkException);
 
-        // Then: Redirect goes to connected-accounts with error code
+        // Then: Redirect goes to security with error code
         final ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
         verify(redirectStrategy, times(1)).sendRedirect(eq(request), eq(response), urlCaptor.capture());
-        assertThat(urlCaptor.getValue(), containsString("connected-accounts"));
+        assertThat(urlCaptor.getValue(), containsString("security"));
         assertThat(urlCaptor.getValue(), containsString("error=email_in_use"));
     }
 
     @Test
     @DisplayName(
-        "Should redirect to /profile/connected-accounts?error=provider_linked_elsewhere when LinkOAuth2Exception with PROVIDER_LINKED_ELSEWHERE_ERROR"
+        "Should redirect to /profile/security?error=provider_linked_elsewhere when LinkOAuth2Exception with PROVIDER_LINKED_ELSEWHERE_ERROR"
     )
     public void onAuthenticationFailure_LinkOAuth2Exception_redirectsToConnectedAccountsWithProviderLinkedElsewhereCode()
         throws IOException {
         // Given: A LinkOAuth2Exception with PROVIDER_LINKED_ELSEWHERE_ERROR code
         final LinkOAuth2Exception linkException = new LinkOAuth2Exception(PROVIDER_LINKED_ELSEWHERE_ERROR);
-        final String expectedRedirectUrl = APPLICATION_URL + CONNECTED_ACCOUNTS_PATH + "?error=provider_linked_elsewhere";
+        final String expectedRedirectUrl = APPLICATION_URL + SECURITY_PATH + "?error=provider_linked_elsewhere";
         when(redirectHelper.buildLinkErrorRedirectUrl(PROVIDER_LINKED_ELSEWHERE_ERROR))
             .thenReturn(expectedRedirectUrl);
 
         // When: Handling the link failure
         handler.onAuthenticationFailure(request, response, linkException);
 
-        // Then: Redirect goes to connected-accounts with error code
+        // Then: Redirect goes to security with error code
         final ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
         verify(redirectStrategy, times(1)).sendRedirect(eq(request), eq(response), urlCaptor.capture());
-        assertThat(urlCaptor.getValue(), containsString("connected-accounts"));
+        assertThat(urlCaptor.getValue(), containsString("security"));
         assertThat(urlCaptor.getValue(), containsString("error=provider_linked_elsewhere"));
     }
 
     @Test
     @DisplayName(
-        "Should redirect to /profile/connected-accounts?error=already_linked when LinkOAuth2Exception with PROVIDER_ALREADY_LINKED_ERROR"
+        "Should redirect to /profile/security?error=already_linked when LinkOAuth2Exception with PROVIDER_ALREADY_LINKED_ERROR"
     )
     public void onAuthenticationFailure_LinkOAuth2Exception_redirectsToConnectedAccountsWithAlreadyLinkedCode() throws IOException {
         // Given: A LinkOAuth2Exception with PROVIDER_ALREADY_LINKED_ERROR code
         final LinkOAuth2Exception linkException = new LinkOAuth2Exception(PROVIDER_ALREADY_LINKED_ERROR);
-        final String expectedRedirectUrl = APPLICATION_URL + CONNECTED_ACCOUNTS_PATH + "?error=already_linked";
+        final String expectedRedirectUrl = APPLICATION_URL + SECURITY_PATH + "?error=already_linked";
         when(redirectHelper.buildLinkErrorRedirectUrl(PROVIDER_ALREADY_LINKED_ERROR))
             .thenReturn(expectedRedirectUrl);
 
         // When: Handling the link failure
         handler.onAuthenticationFailure(request, response, linkException);
 
-        // Then: Redirect goes to connected-accounts with error code
+        // Then: Redirect goes to security with error code
         final ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
         verify(redirectStrategy, times(1)).sendRedirect(eq(request), eq(response), urlCaptor.capture());
-        assertThat(urlCaptor.getValue(), containsString("connected-accounts"));
+        assertThat(urlCaptor.getValue(), containsString("security"));
         assertThat(urlCaptor.getValue(), containsString("error=already_linked"));
     }
 
@@ -252,6 +252,6 @@ public class OAuth2AuthenticationFailureHandlerTest extends UnitTest {
         // And: Redirect strategy is called with the generic URL
         final ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
         verify(redirectStrategy, times(1)).sendRedirect(eq(request), eq(response), urlCaptor.capture());
-        assertThat(urlCaptor.getValue(), not(containsString("connected-accounts")));
+        assertThat(urlCaptor.getValue(), not(containsString("security")));
     }
 }

@@ -23,6 +23,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static io.github.eventify.common.exception.ApiErrorCode.OAUTH2_EMAIL_NOT_AVAILABLE;
+import static io.github.eventify.common.exception.ApiErrorCode.USER_ALREADY_EXISTS_ERROR;
 import static io.github.eventify.common.security.oauth2.OAuth2Attributes.LINK_USER_ID;
 import static io.github.eventify.common.security.oauth2.OAuth2Attributes.MODE;
 import static io.github.eventify.common.security.oauth2.OAuth2Attributes.MODE_LINK;
@@ -43,8 +45,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private static final String EMAIL_ERROR_FORMAT = "Email not publicly available from %s or not verified.";
-
     private final UserRepository userRepository;
 
     private final UserAuthProviderService userAuthProviderService;
@@ -52,11 +52,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * Loads the user from the OAuth2 provider, then routes to login or link processing based on the {@code mode} attribute.
+     * Loads the OAuth2 user from the provider and processes the authentication or linking flow.
      *
-     * @param userRequest the OAuth2 user request
-     * @return the OAuth2 user (login mode) or current authenticated user (link mode)
-     * @throws OAuth2AuthenticationException if authentication fails
+     * @param userRequest the OAuth2 user request containing client registration and access token
+     * @return the authenticated {@link OAuth2User}
+     * @throws OAuth2AuthenticationException if any error occurs during user loading or processing
      */
     @Override
     @Transactional
@@ -71,32 +71,28 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     /**
-     * Processes an OAuth2 user, dispatching to link mode (when {@code mode=link} and a valid linking user is present)
-     * or to login mode (L1/L2/L3 resolution). The resolved user's ID is written to {@link OAuth2AttributesHolder} under
-     * {@link OAuth2Attributes#RESOLVED_USER_ID}.
+     * Processes the OAuth2 user after loading from the provider. Determines whether to run in login mode or link mode
+     * based on the current {@link OAuth2AttributesHolder} state.
      *
      * @param userRequest the OAuth2 user request
-     * @param oAuth2User  the raw OAuth2 user from the provider
-     * @return the OAuth2 user (passed through; user resolution side-effect is via the attributes holder)
+     * @param oAuth2User  the raw OAuth2 user returned by the provider
+     * @return the processed {@link OAuth2User}
      */
     public OAuth2User processOAuth2User(final OAuth2UserRequest userRequest, final OAuth2User oAuth2User) {
         final String registrationId = userRequest.getClientRegistration().getRegistrationId();
         final OAuth2UserInfo oAuth2UserInfo = getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());
         requireVerifiedEmail(oAuth2UserInfo, registrationId);
 
-        // Read mode from OAuth2AttributesHolder (populated by OAuth2AttributesFilter from session)
         final String mode = OAuth2AttributesHolder.getAttribute(MODE);
         if (MODE_LINK.equals(mode)) {
             final User currentUser = getCurrentUserFromAttributes();
             if (currentUser != null) {
                 return processLinkMode(userRequest, oAuth2User, currentUser);
             }
-            // No linkUserId or user not found → fall through to login mode (security fallback)
         }
 
         final AuthProvider authProvider = AuthProvider.fromRegistrationId(registrationId);
         final String email = oAuth2UserInfo.getEmail();
-
         final User user = resolveUserForLogin(authProvider, email, registrationId, oAuth2UserInfo);
 
         userAuthProviderService.upsertProvider(user, authProvider, email);
@@ -108,15 +104,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     /**
-     * Processes the OAuth2 user in link mode (K1–K6).
-     * <p>
-     * Links the OAuth2 provider to the given authenticated user after performing cross-user safety checks
-     * (delegated to {@link UserAuthProviderService#linkProviderForUser}).
+     * Processes the OAuth2 link mode flow, linking the provider account to the currently authenticated user.
      *
      * @param userRequest the OAuth2 user request
-     * @param oAuth2User  the OAuth2 user
-     * @param currentUser the currently authenticated user
-     * @return the OAuth2 user (passed through)
+     * @param oAuth2User  the raw OAuth2 user returned by the provider
+     * @param currentUser the currently authenticated user to link the provider to
+     * @return the processed {@link OAuth2User}
      */
     public OAuth2User processLinkMode(final OAuth2UserRequest userRequest, final OAuth2User oAuth2User, final User currentUser) {
         final String registrationId = userRequest.getClientRegistration().getRegistrationId();
@@ -126,7 +119,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         final AuthProvider authProvider = AuthProvider.fromRegistrationId(registrationId);
         final String providerEmail = oAuth2UserInfo.getEmail();
 
-        // Pre-check: look up existing provider record and email owner for context
         userAuthProviderService.findByProviderAndProviderEmail(authProvider, providerEmail);
         userRepository.findByEmail(providerEmail);
 
@@ -137,14 +129,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return oAuth2User;
     }
 
-    /**
-     * Resolves the user for the login flow using the L1 → L2 → L3 strategy:
-     * <ul>
-     * <li>L1: lookup by (provider, providerEmail) — if a provider record exists, return its user</li>
-     * <li>L2: fall back to email lookup — if found, auto-link the provider and preserve {@code hasPassword}</li>
-     * <li>L3: otherwise, create a new user</li>
-     * </ul>
-     */
     private User resolveUserForLogin(
         final AuthProvider authProvider,
         final String email,
@@ -153,81 +137,60 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         final Optional<UserAuthProvider> providerRecord =
             userAuthProviderService.findByProviderAndProviderEmail(authProvider, email);
 
-        if (providerRecord != null && providerRecord.isPresent()) {
-            // L1: Provider record found — use that user directly
-            log.info("L1: Existing user found by provider record for OAuth2 email: {}", email);
+        if (providerRecord.isPresent()) {
+            log.debug("L1: Existing user found by provider record for OAuth2 email: {}", email);
             return providerRecord.get().getUser();
         }
 
-        // L2: Fall back to email lookup
-        final Optional<User> userByEmail = userRepository.findByEmail(email);
-        final User resolved;
-        if (userByEmail.isPresent()) {
-            // L2: User found by email — auto-link provider, preserve hasPassword
-            resolved = userByEmail.get();
-            log.info("L2: Auto-linking provider '{}' to existing user with email: {}", authProvider, email);
-            updateExistingUserIfNeeded(resolved, oAuth2UserInfo);
-        } else {
-            // L3: Create new user
-            log.info("L3: Creating new user from OAuth2 provider: {}", registrationId);
-            resolved = createNewUser(oAuth2UserInfo);
-        }
-        return resolved;
+        return resolveUserByEmailOrCreate(authProvider, email, registrationId, oAuth2UserInfo);
     }
 
-    /**
-     * Validates that the OAuth2 provider returned a verified, non-blank email; otherwise throws.
-     */
+    private User resolveUserByEmailOrCreate(
+        final AuthProvider authProvider,
+        final String email,
+        final String registrationId,
+        final OAuth2UserInfo oAuth2UserInfo) {
+        final Optional<User> userByEmail = userRepository.findByEmail(email);
+        if (userByEmail.isPresent()) {
+            log.debug("L2: Auto-linking provider '{}' to existing user with email: {}", authProvider, email);
+            final User resolved = userByEmail.get();
+            updateExistingUserIfNeeded(resolved, oAuth2UserInfo);
+            return resolved;
+        }
+
+        log.debug("L3: Creating new user from OAuth2 provider: {}", registrationId);
+        return createNewUser(oAuth2UserInfo);
+    }
+
     private void requireVerifiedEmail(final OAuth2UserInfo oAuth2UserInfo, final String registrationId) {
         if (isBlank(oAuth2UserInfo.getEmail()) || !oAuth2UserInfo.isEmailVerified()) {
-            throw new OAuth2Exception(String.format(EMAIL_ERROR_FORMAT, registrationId));
+            log.debug("OAuth2 email not available or not verified. Provider: {}", registrationId);
+            throw new OAuth2Exception(OAUTH2_EMAIL_NOT_AVAILABLE.getReason());
         }
     }
 
-    /**
-     * Create a new user from OAuth2 user info.
-     * <p>
-     * Note: OAuth2 users are assigned a random UUID password that is securely hashed. This means OAuth2 users cannot login via
-     * password-based authentication without first performing a password reset. This is intentional for security - OAuth2 users should
-     * authenticate via their OAuth2 provider or use the password reset flow to set a password for traditional login.
-     *
-     * @param oAuth2UserInfo The OAuth2 user info.
-     */
     private User createNewUser(final OAuth2UserInfo oAuth2UserInfo) {
         try {
             final User user = new User(oAuth2UserInfo);
-            user.setHasPassword(false);
-            final String password = UUID.randomUUID().toString();
-            user.setPassword(passwordEncoder.encode(password));
+            user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
             return userRepository.save(user);
         } catch (final DataIntegrityViolationException exception) {
-            throw new OAuth2Exception("A user with email " + oAuth2UserInfo.getEmail() + " already exists.", exception);
+            log.debug("User already exists with email: {}", oAuth2UserInfo.getEmail());
+            throw new OAuth2Exception(USER_ALREADY_EXISTS_ERROR.getReason(), exception);
         }
     }
 
-    /**
-     * Update the user details if they are not already set.
-     * <p>
-     * Note: This method only fills in blank fields and does not overwrite existing values. This means if a user changes their name on the
-     * OAuth2 provider (e.g., Google or GitHub), it will not be reflected in our system if they already have a name set. This is intentional
-     * to allow users to maintain different display names in our system than on their OAuth2 provider.
-     *
-     * @param existingUser   The existing user.
-     * @param oAuth2UserInfo The OAuth2 user info.
-     */
     private void updateExistingUserIfNeeded(final User existingUser, final OAuth2UserInfo oAuth2UserInfo) {
-        boolean changed = existingUser.isHasPassword();
-        if (isBlank(existingUser.getFirstName())) {
+        final boolean firstNameMissing = isBlank(existingUser.getFirstName());
+        final boolean lastNameMissing = isBlank(existingUser.getLastName());
+
+        if (firstNameMissing) {
             existingUser.setFirstName(oAuth2UserInfo.getFirstName());
-            changed = true;
         }
-
-        if (isBlank(existingUser.getLastName())) {
+        if (lastNameMissing) {
             existingUser.setLastName(oAuth2UserInfo.getLastName());
-            changed = true;
         }
-
-        if (changed) {
+        if (firstNameMissing || lastNameMissing) {
             userRepository.save(existingUser);
         }
     }

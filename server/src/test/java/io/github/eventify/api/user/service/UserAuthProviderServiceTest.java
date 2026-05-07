@@ -105,7 +105,6 @@ public class UserAuthProviderServiceTest extends UnitTest {
     public void unlinkProvider_success_removesProvider() {
         // Given: A user with LOCAL and GOOGLE linked
         final User user = aValidUser();
-        user.setHasPassword(true);
 
         final UserAuthProvider localProvider = TestBuilders.aUserAuthProvider(1L, user, AuthProvider.LOCAL, user.getEmail());
         final UserAuthProvider googleProvider = TestBuilders.aUserAuthProvider(2L, user, AuthProvider.GOOGLE, "google@gmail.com");
@@ -125,7 +124,6 @@ public class UserAuthProviderServiceTest extends UnitTest {
     public void unlinkProvider_throwsLastAuthMethodError_whenUnlinkingOnlyProviderAndNoPassword() {
         // Given: A user with only GOOGLE linked and no password
         final User user = aValidUser();
-        user.setHasPassword(false);
 
         final UserAuthProvider googleProvider = TestBuilders.aUserAuthProvider(1L, user, AuthProvider.GOOGLE, "google@gmail.com");
 
@@ -147,7 +145,6 @@ public class UserAuthProviderServiceTest extends UnitTest {
     public void unlinkProvider_throwsLastAuthMethodError_whenUnlinkingLocalAndNoOtherProviders() {
         // Given: A user with only LOCAL provider
         final User user = aValidUser();
-        user.setHasPassword(true);
 
         final UserAuthProvider localProvider = TestBuilders.aUserAuthProvider(1L, user, AuthProvider.LOCAL, user.getEmail());
 
@@ -167,9 +164,8 @@ public class UserAuthProviderServiceTest extends UnitTest {
     @Test
     @DisplayName("Should succeed when unlinking OAuth2 provider and user has a password")
     public void unlinkProvider_succeeds_whenUnlinkingOAuth2AndUserHasPassword() {
-        // Given: A user with LOCAL and GOOGLE, hasPassword=true
+        // Given: A user with LOCAL and GOOGLE, a password set
         final User user = aValidUser();
-        user.setHasPassword(true);
 
         final UserAuthProvider localProvider = TestBuilders.aUserAuthProvider(1L, user, AuthProvider.LOCAL, user.getEmail());
         final UserAuthProvider googleProvider = TestBuilders.aUserAuthProvider(2L, user, AuthProvider.GOOGLE, "google@gmail.com");
@@ -187,9 +183,8 @@ public class UserAuthProviderServiceTest extends UnitTest {
     @Test
     @DisplayName("Should succeed when unlinking OAuth2 and user has multiple OAuth2 providers")
     public void unlinkProvider_succeeds_whenUnlinkingOAuth2AndUserHasMultipleOAuth2Providers() {
-        // Given: A user with GOOGLE and GITHUB (no LOCAL), hasPassword=false
+        // Given: A user with GOOGLE and GITHUB (no LOCAL)
         final User user = aValidUser();
-        user.setHasPassword(false);
 
         final UserAuthProvider googleProvider = TestBuilders.aUserAuthProvider(1L, user, AuthProvider.GOOGLE, "google@gmail.com");
         final UserAuthProvider githubProvider = TestBuilders.aUserAuthProvider(2L, user, AuthProvider.GITHUB, "github@example.com");
@@ -254,7 +249,6 @@ public class UserAuthProviderServiceTest extends UnitTest {
     public void unlinkProvider_U4_throwsLocalProviderUnlinkException_whenProviderIsLocal() {
         // Given: User X has LOCAL provider record
         final User user = aValidUser();
-        user.setHasPassword(true);
 
         final UserAuthProvider localProvider = TestBuilders.aUserAuthProvider(1L, user, AuthProvider.LOCAL, user.getEmail());
 
@@ -275,7 +269,6 @@ public class UserAuthProviderServiceTest extends UnitTest {
     public void unlinkProvider_U4_throwsLocalProviderUnlinkException_evenWhenOtherProvidersExist() {
         // Given: User X has LOCAL + GOOGLE (so last-method check would pass, but LOCAL guard fires first)
         final User user = aValidUser();
-        user.setHasPassword(true);
 
         final UserAuthProvider localProvider = TestBuilders.aUserAuthProvider(1L, user, AuthProvider.LOCAL, user.getEmail());
         final UserAuthProvider googleProvider = TestBuilders.aUserAuthProvider(2L, user, AuthProvider.GOOGLE, "google@gmail.com");

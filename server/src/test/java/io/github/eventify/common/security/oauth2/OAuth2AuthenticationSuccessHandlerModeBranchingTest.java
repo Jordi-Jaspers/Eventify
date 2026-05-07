@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTest {
 
     private static final String USER_EMAIL = "user@example.com";
-    private static final String CONNECTED_ACCOUNTS_PATH = "/profile/connected-accounts";
+    private static final String SECURITY_PATH = "/profile/security";
 
     @Mock
     private TokenService tokenService;
@@ -115,10 +115,10 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
         verify(userService, times(1)).findById(42L);
         verify(userService, never()).loadUserByUsername(any());
 
-        // And: Redirect goes to dashboard (not connected-accounts)
+        // And: Redirect goes to dashboard (not security)
         final ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
         verify(redirectStrategy, times(1)).sendRedirect(any(), any(), urlCaptor.capture());
-        assertThat(urlCaptor.getValue(), not(containsString("connected-accounts")));
+        assertThat(urlCaptor.getValue(), not(containsString("security")));
     }
 
     @Test
@@ -158,7 +158,7 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
     }
 
     @Test
-    @DisplayName("Link mode: Should NOT issue JWT and redirect to /profile/connected-accounts?linked={provider}")
+    @DisplayName("Link mode: Should NOT issue JWT and redirect to /profile/security?linked={provider}")
     public void onAuthenticationSuccess_linkMode_doesNotIssueJwtAndRedirectsToConnectedAccountsWithLinkedParam() throws IOException {
         // Given: A response that is not committed
         when(response.isCommitted()).thenReturn(false);
@@ -170,7 +170,7 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
         final Authentication authentication = buildOAuth2AuthenticationWithMode("google", "link");
         when(authentication.getPrincipal()).thenReturn(oAuth2User);
 
-        final String connectedAccountsUrl = APPLICATION_URL + CONNECTED_ACCOUNTS_PATH + "?linked=google";
+        final String connectedAccountsUrl = APPLICATION_URL + SECURITY_PATH + "?linked=google";
         when(redirectHelper.buildLinkSuccessRedirectUrl("google")).thenReturn(connectedAccountsUrl);
 
         // When: Handling authentication success in link mode
@@ -180,10 +180,10 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
         verify(tokenService, never()).generateAuthorizationTokens(any(), any(), anyBoolean());
         verify(cookieService, never()).setAuthCookies(any(), any(), any());
 
-        // And: Redirect goes to /profile/connected-accounts?linked=google
+        // And: Redirect goes to /profile/security?linked=google
         final ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
         verify(redirectStrategy, times(1)).sendRedirect(any(), any(), urlCaptor.capture());
-        assertThat(urlCaptor.getValue(), containsString("connected-accounts"));
+        assertThat(urlCaptor.getValue(), containsString("security"));
         assertThat(urlCaptor.getValue(), containsString("linked=google"));
     }
 
@@ -200,7 +200,7 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
         final Authentication authentication = buildOAuth2AuthenticationWithMode("github", "link");
         when(authentication.getPrincipal()).thenReturn(oAuth2User);
 
-        final String connectedAccountsUrl = APPLICATION_URL + CONNECTED_ACCOUNTS_PATH + "?linked=github";
+        final String connectedAccountsUrl = APPLICATION_URL + SECURITY_PATH + "?linked=github";
         when(redirectHelper.buildLinkSuccessRedirectUrl("github")).thenReturn(connectedAccountsUrl);
 
         // When: Handling authentication success in link mode

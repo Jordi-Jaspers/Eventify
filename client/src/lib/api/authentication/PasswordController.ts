@@ -18,6 +18,26 @@ export async function requestPasswordReset(email: string): Promise<void> {
 	}
 }
 
+export interface UpdatePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
+/**
+ * Update password while authenticated (requires current password)
+ */
+export async function updatePassword(request: UpdatePasswordRequest): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (client as any).POST('/v1/password/update-password', {
+        body: request
+    });
+
+    if (error) {
+        throw error;
+    }
+}
+
 /**
  * Reset password with token
  */

@@ -40,6 +40,20 @@ export function aDisconnectedGithubProvider(): ProviderResponse {
     };
 }
 
+export function aLocalProvider(overrides: Partial<ProviderResponse> = {}): ProviderResponse {
+    return {
+        id: 10,
+        provider: 'LOCAL',
+        connected: true,
+        providerEmail: undefined,
+        ...overrides
+    };
+}
+
 export function aProviderList(): ProviderResponse[] {
     return [aConnectedGoogleProvider(), aDisconnectedGithubProvider()];
+}
+
+export function aProviderListWithLocal(): ProviderResponse[] {
+    return [aLocalProvider(), aConnectedGoogleProvider(), aDisconnectedGithubProvider()];
 }

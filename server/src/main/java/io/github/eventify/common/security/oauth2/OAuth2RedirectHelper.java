@@ -24,7 +24,7 @@ public class OAuth2RedirectHelper {
 
     private static final String ERROR_QUERY_PARAM = "error";
     private static final String LINKED_QUERY_PARAM = "linked";
-    private static final String CONNECTED_ACCOUNTS_PATH = "/profile/connected-accounts";
+    private static final String SECURITY_PATH = "/profile/security";
     private static final String ERROR_SUFFIX = "_error";
 
     private final ApplicationProperties applicationProperties;
@@ -55,14 +55,14 @@ public class OAuth2RedirectHelper {
 
     /**
      * Builds a redirect URL for a successful OAuth2 provider link.
-     * Redirects to /profile/connected-accounts?linked={provider}.
+     * Redirects to /profile/security?linked={provider}.
      *
      * @param provider the provider name (e.g. "google", "github")
      * @return the redirect URL
      */
     public String buildLinkSuccessRedirectUrl(final String provider) {
         return UriComponentsBuilder.fromUriString(applicationProperties.getUrl())
-            .path(CONNECTED_ACCOUNTS_PATH)
+            .path(SECURITY_PATH)
             .queryParam(LINKED_QUERY_PARAM, provider)
             .build()
             .toUriString();
@@ -70,7 +70,7 @@ public class OAuth2RedirectHelper {
 
     /**
      * Builds a redirect URL for a failed OAuth2 provider link.
-     * Redirects to /profile/connected-accounts?error={urlSafeCode}.
+     * Redirects to /profile/security?error={urlSafeCode}.
      * <p>
      * Mapping: enum name lowercased with "_error" suffix stripped.
      * Examples:
@@ -86,7 +86,7 @@ public class OAuth2RedirectHelper {
     public String buildLinkErrorRedirectUrl(final ApiErrorCode errorCode) {
         final String urlSafeCode = toUrlSafeCode(errorCode);
         return UriComponentsBuilder.fromUriString(applicationProperties.getUrl())
-            .path(CONNECTED_ACCOUNTS_PATH)
+            .path(SECURITY_PATH)
             .queryParam(ERROR_QUERY_PARAM, urlSafeCode)
             .build()
             .toUriString();

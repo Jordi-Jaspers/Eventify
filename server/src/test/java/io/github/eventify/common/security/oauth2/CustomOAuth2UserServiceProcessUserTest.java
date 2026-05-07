@@ -146,8 +146,7 @@ public class CustomOAuth2UserServiceProcessUserTest extends UnitTest {
         );
 
         // And: The exception message should indicate email is not available
-        assertThat(exception.getMessage(), containsString("Email not publicly available"));
-        assertThat(exception.getMessage(), containsString(GOOGLE_REGISTRATION_ID));
+        assertThat(exception.getMessage(), containsString("Email not publicly available from the OAuth2 provider or not verified."));
 
         // And: No user should be saved
         verify(userRepository, never()).save(any(User.class));
@@ -168,7 +167,7 @@ public class CustomOAuth2UserServiceProcessUserTest extends UnitTest {
         );
 
         // And: The exception message should indicate email is not available
-        assertThat(exception.getMessage(), containsString("Email not publicly available"));
+        assertThat(exception.getMessage(), containsString("Email not publicly available from the OAuth2 provider or not verified."));
 
         // And: No user should be saved
         verify(userRepository, never()).save(any(User.class));
@@ -189,8 +188,7 @@ public class CustomOAuth2UserServiceProcessUserTest extends UnitTest {
         );
 
         // And: The exception message should indicate email is not verified
-        assertThat(exception.getMessage(), containsString("not verified"));
-        assertThat(exception.getMessage(), containsString(GOOGLE_REGISTRATION_ID));
+        assertThat(exception.getMessage(), containsString("Email not publicly available from the OAuth2 provider or not verified."));
 
         // And: No user should be saved
         verify(userRepository, never()).save(any(User.class));

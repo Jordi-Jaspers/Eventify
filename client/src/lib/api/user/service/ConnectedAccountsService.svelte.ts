@@ -3,6 +3,7 @@ import type { OAuthProvider, ProviderResponse } from '$lib/api/models.ts';
 import { handleError } from '$lib/utils/error-handler';
 import { toast } from 'svelte-sonner';
 import { buildOAuth2Url } from '$lib/api/authentication/oauth2-url.ts';
+import { requestPasswordReset } from '$lib/api/authentication/PasswordController.ts';
 
 export function createConnectedAccountsService() {
     let providers: ProviderResponse[] = $state([]);
@@ -10,6 +11,7 @@ export function createConnectedAccountsService() {
     let unlinkingId: number | null = $state(null);
     let showUnlinkDialog: boolean = $state(false);
     let providerToUnlink: ProviderResponse | null = $state(null);
+    let showChangePasswordDialog: boolean = $state(false);
 
     async function load(): Promise<void> {
         loading = true;
@@ -59,17 +61,39 @@ export function createConnectedAccountsService() {
         }
     }
 
+    function openChangePasswordDialog(): void {
+        showChangePasswordDialog = true;
+    }
+
+    function setShowChangePasswordDialog(v: boolean): void {
+        showChangePasswordDialog = v;
+    }
+
+    async function requestPasswordResetForLocal(email: string): Promise<void> {
+        try {
+            await requestPasswordReset(email);
+            toast.success('Password reset email sent');
+        } catch (err: unknown) {
+            const { message }: { message: string } = handleError(err, 'Failed to send reset email');
+            toast.error(message);
+        }
+    }
+
     return {
         get providers(): ProviderResponse[] { return providers; },
         get loading(): boolean { return loading; },
         get unlinkingId(): number | null { return unlinkingId; },
         get showUnlinkDialog(): boolean { return showUnlinkDialog; },
         get providerToUnlink(): ProviderResponse | null { return providerToUnlink; },
+        get showChangePasswordDialog(): boolean { return showChangePasswordDialog; },
         load,
         linkProvider,
         openUnlinkDialog,
         setShowUnlinkDialog,
-        confirmUnlink
+        confirmUnlink,
+        openChangePasswordDialog,
+        setShowChangePasswordDialog,
+        requestPasswordResetForLocal
     };
 }
 

@@ -26,7 +26,7 @@ import static java.util.Objects.isNull;
 
 /**
  * Success handler for OAuth2 authentication. Issues JWT tokens after successful OAuth2 login and redirects to the frontend.
- * In link mode, skips JWT issuance and redirects to the connected-accounts page.
+ * In link mode, skips JWT issuance and redirects to the security page.
  * <p>
  * Security Note: JWT tokens are stored in HTTP-only, secure cookies with SameSite=Lax attribute for maximum security. This prevents token
  * exposure through browser history, Referer headers, or server logs that would occur with URL query parameters. The frontend can access
@@ -47,7 +47,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     /**
      * Handle successful OAuth2 authentication by generating JWT tokens and redirecting to frontend.
-     * In link mode, skips JWT issuance and redirects to the connected-accounts page.
+     * In link mode, skips JWT issuance and redirects to the security page.
      *
      * @param request        The HTTP request.
      * @param response       The HTTP response.

@@ -246,6 +246,10 @@ public enum ApiErrorCode implements ApiError {
     LOCAL_PROVIDER_UNLINK_ERROR(
         "ERR-0058",
         "Cannot unlink the local (password) authentication method."
+    ),
+    OAUTH2_EMAIL_NOT_AVAILABLE(
+        "ERR-0059",
+        "Email not publicly available from the OAuth2 provider or not verified."
     );
 
     /* The error code for this reason. */

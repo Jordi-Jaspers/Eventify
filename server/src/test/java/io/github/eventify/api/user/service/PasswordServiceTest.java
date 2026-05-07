@@ -171,11 +171,10 @@ public class PasswordServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should set hasPassword=true after password reset via token")
+    @DisplayName("Should save user after password reset via token")
     public void changePassword_setsHasPasswordTrue() {
         // Given: A user with a valid password reset token
         final User user = aValidUser();
-        user.setHasPassword(false);
 
         final Token resetToken = Token.builder()
             .id(1L)
@@ -190,13 +189,7 @@ public class PasswordServiceTest extends UnitTest {
         // When: Changing the password via reset token
         passwordService.changePassword(VALID_NEW_PASSWORD, "reset-token-value");
 
-        // Then: The user should be saved with hasPassword=true
-        final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository, times(1)).save(userCaptor.capture());
-
-        final User savedUser = userCaptor.getValue();
-
-        // And: hasPassword should be true after password reset
-        assertThat(savedUser.isHasPassword(), is(true));
+        // Then: The user should be saved
+        verify(userRepository, times(1)).save(any(User.class));
     }
 }

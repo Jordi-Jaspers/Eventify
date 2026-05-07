@@ -69,12 +69,6 @@ public class User implements UserDetails, PageableItem {
     @Column(name = "validated")
     private boolean validated;
 
-    @Column(
-        name = "has_password",
-        nullable = false
-    )
-    private boolean hasPassword;
-
     @UpdateTimestamp
     @Column(name = "last_login")
     private OffsetDateTime lastLogin;
@@ -138,7 +132,6 @@ public class User implements UserDetails, PageableItem {
         this.enabled = true;
         this.validated = true;
         this.role = Role.USER;
-        this.hasPassword = false;
     }
 
     @Override

@@ -141,7 +141,7 @@ public class CustomOAuth2UserServiceCreateUserTest extends UnitTest {
         );
 
         // And: The exception message should indicate duplicate email
-        assertThat(exception.getMessage(), containsString("A user with email " + VALID_EMAIL + " already exists"));
+        assertThat(exception.getMessage(), containsString("User cannot be created: The provided email address is already in use."));
     }
 
     @Test

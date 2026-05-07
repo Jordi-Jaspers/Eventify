@@ -7,7 +7,7 @@
     import { Button } from '$lib/components/ui/button';
     import { Shield, Link2, LoaderCircle } from '@lucide/svelte';
     import { SettingsNav } from '$lib/components/settings';
-    import { ConnectedAccountRow, SessionsTable } from '$lib/components/profile';
+    import { ConnectedAccountRow, SessionsTable, ChangePasswordDialog } from '$lib/components/profile';
     import { createConnectedAccountsService } from '$lib/api/user/service/ConnectedAccountsService.svelte';
     import { createSessionService } from '$lib/api/user/service/SessionService.svelte';
     import { CLIENT_ROUTES } from '$lib/config/routes';
@@ -25,9 +25,13 @@
 
     onMount(() => {
         const error: string | null = $page.url.searchParams.get('error');
+        const linked: string | null = $page.url.searchParams.get('linked');
         if (error) {
             const message: string = LINK_ERROR_MESSAGES[error] ?? 'Failed to link provider. Please try again.';
             toast.error(message);
+            goto($page.url.pathname, { replaceState: true });
+        } else if (linked) {
+            toast.success(`${linked.charAt(0).toUpperCase() + linked.slice(1)} has been linked to your account.`);
             goto($page.url.pathname, { replaceState: true });
         }
         accountsService.load();
@@ -126,6 +130,12 @@
 
     </div>
 </main>
+
+<!-- Change Password Dialog -->
+<ChangePasswordDialog
+    open={accountsService.showChangePasswordDialog}
+    onOpenChange={(v: boolean) => accountsService.setShowChangePasswordDialog(v)}
+/>
 
 <!-- Unlink Confirm Dialog -->
 <AlertDialog.Root

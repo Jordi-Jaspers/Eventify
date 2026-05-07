@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -20,8 +19,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import static io.github.eventify.common.security.oauth2.provider.OAuth2UserInfoFactory.GITHUB_REGISTRATION_ID;
 import static io.github.eventify.common.security.oauth2.provider.OAuth2UserInfoFactory.GOOGLE_REGISTRATION_ID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -135,7 +132,7 @@ public class CustomOAuth2UserServiceAuthProviderTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should set hasPassword=false when creating new OAuth2 user")
+    @DisplayName("Should save new OAuth2 user when no existing user found")
     public void processOAuth2User_setsHasPasswordFalse_forNewOAuth2User() {
         // Given: A new Google OAuth2 user
         final OAuth2User oAuth2User = createMockOAuth2User(VALID_EMAIL, true);
@@ -148,48 +145,33 @@ public class CustomOAuth2UserServiceAuthProviderTest extends UnitTest {
         // When: Processing the OAuth2 user
         customOAuth2UserService.processOAuth2User(oAuth2UserRequest, oAuth2User);
 
-        // Then: The created user should have hasPassword=false
-        final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository, times(1)).save(userCaptor.capture());
-
-        final User savedUser = userCaptor.getValue();
-
-        // And: hasPassword should be false (OAuth2 users don't have a real password)
-        assertThat(savedUser.isHasPassword(), is(false));
+        // Then: The new user should be saved
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
-    @DisplayName("Should link Google provider to existing local user without changing hasPassword")
+    @DisplayName("Should link Google provider to existing local user")
     public void processOAuth2User_linksGoogleProvider_whenExistingLocalUserAuthenticatesViaGoogle() {
-        // Given: An existing local user (hasPassword=true) with no Google provider linked
+        // Given: An existing local user with no Google provider linked
         final User existingUser = aValidUser();
-        existingUser.setHasPassword(true);
 
         final OAuth2User oAuth2User = createMockOAuth2User(VALID_EMAIL, true);
         when(oAuth2UserRequest.getClientRegistration()).thenReturn(clientRegistration);
         when(clientRegistration.getRegistrationId()).thenReturn(GOOGLE_REGISTRATION_ID);
         when(userRepository.findByEmail(VALID_EMAIL)).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
         // When: Processing the OAuth2 user
         customOAuth2UserService.processOAuth2User(oAuth2UserRequest, oAuth2User);
 
         // Then: upsertProvider should be called with GOOGLE for the existing user
         verify(userAuthProviderService, times(1)).upsertProvider(eq(existingUser), eq(AuthProvider.GOOGLE), eq(VALID_EMAIL));
-
-        // And: hasPassword must remain true — linking a provider must not flip it
-        final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository, atLeastOnce()).save(userCaptor.capture());
-        final User savedUser = userCaptor.getValue();
-        assertThat(savedUser.isHasPassword(), is(true));
     }
 
     @Test
-    @DisplayName("Should link GitHub provider to existing Google user without changing hasPassword")
+    @DisplayName("Should link GitHub provider to existing Google user")
     public void processOAuth2User_linksGitHubProvider_whenExistingGoogleUserAuthenticatesViaGitHub() {
-        // Given: An existing OAuth2 user (hasPassword=false, originally Google) linking GitHub
+        // Given: An existing OAuth2 user (originally Google) linking GitHub
         final User existingUser = aValidUser();
-        existingUser.setHasPassword(false);
 
         final OAuth2User oAuth2User = createMockOAuth2User(VALID_EMAIL, true);
         when(oAuth2UserRequest.getClientRegistration()).thenReturn(clientRegistration);
@@ -201,8 +183,5 @@ public class CustomOAuth2UserServiceAuthProviderTest extends UnitTest {
 
         // Then: upsertProvider should be called with GITHUB for the existing user
         verify(userAuthProviderService, times(1)).upsertProvider(eq(existingUser), eq(AuthProvider.GITHUB), eq(VALID_EMAIL));
-
-        // And: hasPassword must remain false — linking a provider must not flip it
-        assertThat(existingUser.isHasPassword(), is(false));
     }
 }
