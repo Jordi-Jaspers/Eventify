@@ -7,6 +7,7 @@ import io.github.eventify.api.user.model.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -44,10 +45,19 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
         """
             FROM Token t
                 LEFT JOIN FETCH t.user user
-                WHERE t.expiresAt > CURRENT_TIMESTAMP AND t.value = :token
+                WHERE t.expiresAt > CURRENT_TIMESTAMP AND t.valueHash = :hash
             """
     )
-    Optional<Token> findByValue(String token);
+    Optional<Token> findByValueHash(String hash);
+
+    @Query(
+        """
+            FROM Token t
+                LEFT JOIN FETCH t.user user
+                WHERE t.expiresAt > CURRENT_TIMESTAMP AND user.id = :userId AND t.familyId = :familyId
+            """
+    )
+    Optional<Token> findByUserIdAndFamilyId(@Param("userId") Long userId, @Param("familyId") UUID familyId);
 
     @Query(
         """
@@ -57,4 +67,12 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             """
     )
     List<Token> findByEmail(@NonNull String email);
+
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM Token t WHERE t.user.id IN :userIds")
+    void deleteAllByUserIdIn(@Param("userIds") List<Long> userIds);
 }

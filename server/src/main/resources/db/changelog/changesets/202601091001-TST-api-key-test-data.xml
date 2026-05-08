@@ -1,0 +1,191 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601091001-TST-api-key-test-data.xml">
+
+    <changeSet id="202601091001-TST-api-key-test-data-1" author="backend-agent" context="tst">
+        <comment>Insert USER-scoped API keys for admin (id=1) with varied expiration and usage. Keys are display-only - hashes are placeholders.</comment>
+        <sql>
+            -- User-scoped API keys for admin (id=1)
+            -- Key 1: Expired 5 days ago
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'a1b2',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_1_NOT_REAL_USE_FOR_DISPLAY_ONLY_a1b2',
+                'Production Server Key',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '6 days',
+                15234
+            );
+
+            -- Key 2: Expiring in 5 days (approaching expiration)
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'c3d4',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_2_NOT_REAL_USE_FOR_DISPLAY_ONLY_c3d4',
+                'Development API Key',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '5 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours',
+                8921
+            );
+
+            -- Key 3: No expiration, heavily used
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'e5f6',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_3_NOT_REAL_USE_FOR_DISPLAY_ONLY_e5f6',
+                'CI/CD Pipeline Key',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '90 days',
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes',
+                142567
+            );
+
+            -- Key 4: No expiration, never used
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            VALUES (
+                'g7h8',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_4_NOT_REAL_USE_FOR_DISPLAY_ONLY_g7h8',
+                'Backup Key (unused)',
+                'USER',
+                1,
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
+                NULL,
+                NULL,
+                0
+            );
+
+            -- Additional user keys for other test users
+            -- Alice: Active key
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT
+                'i9j0',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_5_NOT_REAL_USE_FOR_DISPLAY_ONLY_i9j0',
+                'Alice Personal Key',
+                'USER',
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '30 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day',
+                523;
+
+            -- Bob: Expired key
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT
+                'k1l2',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_6_NOT_REAL_USE_FOR_DISPLAY_ONLY_k1l2',
+                'Bob Old Key',
+                'USER',
+                (SELECT id FROM "user" WHERE email = 'bob.brown@example.com'),
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '16 days',
+                1089;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601091001-TST-api-key-test-data-2" author="backend-agent" context="tst">
+        <comment>Insert ORGANIZATION-scoped API keys for Acme, Beta, Gamma orgs with varied expiration.</comment>
+        <sql>
+            -- Acme Corp: Active key, no expiry
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT
+                'm3n4',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_7_NOT_REAL_USE_FOR_DISPLAY_ORG1_m3n4',
+                'Acme Production API',
+                'ORGANIZATION',
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '28 days',
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour',
+                89432;
+
+            -- Acme Corp: Second key, expiring soon (created by Alice)
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT
+                'o5p6',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_8_NOT_REAL_USE_FOR_DISPLAY_ORG1_o5p6',
+                'Acme Staging API',
+                'ORGANIZATION',
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '3 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 hours',
+                12045;
+
+            -- Beta Industries: Expired key
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT
+                'q7r8',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_9_NOT_REAL_USE_FOR_DISPLAY_ORG2_q7r8',
+                'Beta Legacy Integration',
+                'ORGANIZATION',
+                1,
+                (SELECT id FROM organization WHERE slug = 'beta-industries'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '40 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '11 days',
+                5678;
+
+            -- Beta Industries: Active key
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT
+                's9t0',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_10_NOT_REAL_USE_FOR_DISPLAY_ORG2_s9t0',
+                'Beta Main API',
+                'ORGANIZATION',
+                1,
+                (SELECT id FROM organization WHERE slug = 'beta-industries'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '60 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '3 hours',
+                23456;
+
+            -- Gamma Solutions: Key expiring in 6 days
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT
+                'u1v2',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_11_NOT_REAL_USE_FOR_DISPLAY_ORG3_u1v2',
+                'Gamma Webhook Handler',
+                'ORGANIZATION',
+                1,
+                (SELECT id FROM organization WHERE slug = 'gamma-solutions'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '24 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '6 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days',
+                7823;
+
+            -- Delta Technologies: Key created by Leo (owner)
+            INSERT INTO api_key (suffix, hashed_key, name, scope, user_id, organization_id, created_at, expires_at, last_used_at, total_requests)
+            SELECT
+                'w3x4',
+                '{bcrypt}$2a$10$TEST_HASH_PLACEHOLDER_KEY_12_NOT_REAL_USE_FOR_DISPLAY_ORG4_w3x4',
+                'Delta Test Key',
+                'ORGANIZATION',
+                (SELECT id FROM "user" WHERE email = 'leo.lopez@example.com'),
+                (SELECT id FROM organization WHERE slug = 'delta-tech'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days',
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 hours',
+                3421;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

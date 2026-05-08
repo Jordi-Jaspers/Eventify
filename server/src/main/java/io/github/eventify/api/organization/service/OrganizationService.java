@@ -9,14 +9,14 @@ import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.exception.NonExistingUserException;
-import io.github.jframe.datasource.search.model.JpaSearchSpecification;
+import io.github.jframe.datasource.search.JpaSearchSpecification;
 import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static io.github.eventify.api.organization.model.OrganizationalRole.OWNER;
+import static io.github.eventify.common.exception.ApiErrorCode.ORGANIZATION_NOT_FOUND_ERROR;
 import static io.github.jframe.util.constants.Constants.Characters.HYPHEN;
+import static java.util.stream.Stream.*;
 
 /**
  * Service for managing organizations.
@@ -67,6 +69,27 @@ public class OrganizationService {
     }
 
     /**
+     * Find organization by ID.
+     *
+     * @param orgId the organization ID
+     * @return the organization
+     */
+    public Organization findOrganizationById(final Long orgId) {
+        return organizationRepository.findById(orgId)
+            .orElseThrow(() -> new DataNotFoundException(ORGANIZATION_NOT_FOUND_ERROR));
+    }
+
+    /**
+     * Get organization by ID (alias for findOrganizationById).
+     *
+     * @param orgId the organization ID
+     * @return the organization
+     */
+    public Organization getOrganization(final Long orgId) {
+        return findOrganizationById(orgId);
+    }
+
+    /**
      * Create a new organization.
      *
      * @param request the organization provisioning request
@@ -91,6 +114,18 @@ public class OrganizationService {
     }
 
     /**
+     * Update retention days for an organization.
+     *
+     * @param organization  the organization to update
+     * @param retentionDays the new retention days value
+     * @return the updated organization
+     */
+    public Organization updateRetentionDays(final Organization organization, final Integer retentionDays) {
+        organization.setRetentionDays(retentionDays);
+        return organizationRepository.save(organization);
+    }
+
+    /**
      * Generate a unique slug from organization name. Handles collisions by appending -1, -2, etc.
      *
      * @param name the organization name
@@ -98,20 +133,11 @@ public class OrganizationService {
      */
     private String generateUniqueSlug(final String name) {
         final String baseSlug = generateSlugFromName(name);
-        final Optional<Organization> existingOrg = organizationRepository.findBySlug(baseSlug);
-
-        if (existingOrg.isEmpty()) {
-            return baseSlug;
-        }
-
-        int counter = 1;
-        String candidateSlug = baseSlug + HYPHEN + counter;
-        while (organizationRepository.findBySlug(candidateSlug).isPresent()) {
-            counter++;
-            candidateSlug = baseSlug + HYPHEN + counter;
-        }
-
-        return candidateSlug;
+        return concat(of(baseSlug), iterate(1, n -> n + 1).map(n -> baseSlug + HYPHEN + n))
+            .limit(1000)
+            .filter(slug -> organizationRepository.findBySlug(slug).isEmpty())
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Could not generate unique slug"));
     }
 
     /**

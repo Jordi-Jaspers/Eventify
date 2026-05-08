@@ -1,4 +1,3 @@
-import {SERVER_BASE_URL} from "$lib/config/constants.ts";
 import {client} from "$lib/api/client.ts";
 import type {
     AuthenticationResponse,
@@ -7,15 +6,16 @@ import type {
     RegisterRequest,
     RegisterResponse
 } from "$lib/api/models.ts";
+import {buildOAuth2Url} from "$lib/api/authentication/oauth2-url.ts";
 
 /**
- * Initiates OAuth2 login flow by redirecting to the backend OAuth endpoint
- * The backend will then redirect to the provider's authorization page
+ * Initiates OAuth2 login flow by redirecting to the backend OAuth endpoint.
+ * The backend will then redirect to the provider's authorization page.
  *
  * @param provider - OAuth provider (google or github)
  */
 export function initiateOAuth(provider: OAuthProvider): void {
-    globalThis.location.href = `${SERVER_BASE_URL}/v1/oauth2/authorization/${provider}`;
+    globalThis.location.href = buildOAuth2Url(provider);
 }
 
 /**

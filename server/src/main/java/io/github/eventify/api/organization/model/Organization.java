@@ -77,6 +77,12 @@ public class Organization implements PageableItem, Serializable {
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
+    @Column(
+        name = "retention_days",
+        nullable = false
+    )
+    private Integer retentionDays = 90;
+
     @Transient
     private User owner;
 

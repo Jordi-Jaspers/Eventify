@@ -1,5 +1,6 @@
 package io.github.eventify.common.security.oauth2;
 
+import io.github.eventify.common.exception.LinkOAuth2Exception;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Failure handler for OAuth2 authentication. Redirects to the frontend login page with an error message when OAuth2 login fails.
+ * For link-mode failures (LinkOAuth2Exception), redirects to /profile/security with an error code.
  */
 @Component
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
     /**
      * Handle OAuth2 authentication failure by redirecting to the frontend login page with error details.
+     * If the exception is a {@link LinkOAuth2Exception}, redirects to the security page with the error code.
      *
      * @param request   The HTTP request.
      * @param response  The HTTP response.
@@ -32,7 +35,18 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         final HttpServletRequest request,
         final HttpServletResponse response,
         final AuthenticationException exception) throws IOException {
-        final String redirectUrl = redirectHelper.buildRedirectUrl(exception.getLocalizedMessage());
+        final LinkOAuth2Exception linkException = extractLinkException(exception);
+        final String redirectUrl = linkException != null
+            ? redirectHelper.buildLinkErrorRedirectUrl(linkException.getErrorCode())
+            : redirectHelper.buildRedirectUrl(exception.getLocalizedMessage());
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+    }
+
+    private LinkOAuth2Exception extractLinkException(final AuthenticationException exception) {
+        final boolean isLink = exception instanceof LinkOAuth2Exception;
+        final boolean causeIsLink = !isLink && exception.getCause() instanceof LinkOAuth2Exception;
+        return isLink ? (LinkOAuth2Exception) exception
+            : causeIsLink ? (LinkOAuth2Exception) exception.getCause()
+                : null;
     }
 }

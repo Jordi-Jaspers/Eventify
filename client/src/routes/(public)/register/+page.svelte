@@ -118,12 +118,12 @@
 <!-- Content Container -->
 <div class="max-w-md mx-auto">
     <!-- Logo/Branding Section -->
-    <div class="mb-8">
+    <div class="mb-8 text-center">
         <AppLogo size="medium" subtitle="Create your account to get started"/>
     </div>
 
     <!-- Glassmorphism Card -->
-    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl">
+    <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg ring-1 ring-border/10">
         <!-- Card Content -->
         <CardHeader class="space-y-1">
             <CardTitle class="text-2xl flex items-center gap-2">
@@ -137,7 +137,7 @@
         <CardContent>
             <form onsubmit={handleSubmit} class="space-y-4">
                 <!-- First Name & Last Name -->
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <Label for="firstName">
                             First Name
@@ -151,7 +151,7 @@
                                 required
                                 aria-invalid={!!errors.firstName}
                                 aria-describedby={errors.firstName ? 'firstName-error' : undefined}
-                                class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                class="bg-background/50 border-border transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                         />
                         {#if errors.firstName}
                             <p id="firstName-error" class="text-sm text-destructive">
@@ -172,7 +172,7 @@
                                 required
                                 aria-invalid={!!errors.lastName}
                                 aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-                                class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                class="bg-background/50 border-border transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                         />
                         {#if errors.lastName}
                             <p id="lastName-error" class="text-sm text-destructive">
@@ -196,7 +196,7 @@
                             required
                             aria-invalid={!!errors.email}
                             aria-describedby={errors.email ? 'email-error' : undefined}
-                            class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            class="bg-background/50 border-border transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                     />
                     {#if errors.email}
                         <p id="email-error" class="text-sm text-destructive">
@@ -220,12 +220,12 @@
                                 required
                                 aria-invalid={!!errors.password}
                                 aria-describedby={errors.password ? 'password-error' : undefined}
-                                class="pr-10 bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                class="pr-10 bg-background/50 border-border transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                         />
                         <button
                                 type="button"
                                 onclick={() => (showPassword = !showPassword)}
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-0.5"
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                             {#if showPassword}
@@ -262,12 +262,12 @@
                                 aria-describedby={errors.passwordConfirmation
 								? 'passwordConfirmation-error'
 								: undefined}
-                                class="pr-10 bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                class="pr-10 bg-background/50 border-border transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                         />
                         <button
                                 type="button"
                                 onclick={() => (showPasswordConfirmation = !showPasswordConfirmation)}
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-0.5"
                                 aria-label={showPasswordConfirmation ? 'Hide password' : 'Show password'}
                         >
                             {#if showPasswordConfirmation}
@@ -282,8 +282,8 @@
                             {errors.passwordConfirmation}
                         </p>
                     {:else if passwordsMatch}
-                        <p class="text-sm text-green-400 flex items-center gap-1">
-                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                        <p class="text-sm text-green-500 flex items-center gap-1">
+                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
                             Passwords match
                         </p>
                     {:else if passwordsDontMatch}
@@ -294,7 +294,7 @@
                 <!-- Submit Button -->
                 <Button
                         type="submit"
-                        class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg hover:shadow-primary/50"
+                        class="w-full mt-6"
                         disabled={loading}
                 >
                     {#if loading}
@@ -314,7 +314,7 @@
                         Already have an account?{' '}
                         <a
                                 href={CLIENT_ROUTES.LOGIN_PAGE.path}
-                                class="text-primary hover:text-accent transition-colors font-medium"
+                                class="text-primary hover:underline transition-colors font-medium"
                         >
                             Sign in
                         </a>

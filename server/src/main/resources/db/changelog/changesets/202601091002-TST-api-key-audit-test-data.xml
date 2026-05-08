@@ -1,0 +1,128 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601091002-TST-api-key-audit-test-data.xml">
+
+    <changeSet id="202601091002-TST-api-key-audit-test-data-1" author="backend-agent" context="tst">
+        <comment>Insert API key audit records for revoked keys. At least 5 records across last 30 days, both USER and ORGANIZATION scoped.</comment>
+        <sql>
+            -- Revoked USER-scoped keys
+            -- Record 1: Admin's old production key, revoked 25 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                'z9y8',
+                'Old Production Key',
+                'USER',
+                1,
+                NULL,
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '120 days',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '25 days',
+                245678
+            );
+
+            -- Record 2: Alice's compromised key, revoked 18 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT
+                'x7w6',
+                'Compromised Dev Key',
+                'USER',
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                NULL,
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 days',
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '18 days',
+                8923;
+
+            -- Record 3: Admin's test key, revoked 10 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            VALUES (
+                'v5u4',
+                'Test Environment Key',
+                'USER',
+                1,
+                NULL,
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
+                1523
+            );
+
+            -- Revoked ORGANIZATION-scoped keys
+            -- Record 4: Acme Corp's old integration key, revoked 22 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT
+                't3s2',
+                'Acme Old Integration',
+                'ORGANIZATION',
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '90 days',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '22 days',
+                156234;
+
+            -- Record 5: Beta Industries' deprecated key, revoked 15 days ago by Grace (admin)
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT
+                'r1q0',
+                'Beta Deprecated API',
+                'ORGANIZATION',
+                1,
+                (SELECT id FROM organization WHERE slug = 'beta-industries'),
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',
+                (SELECT id FROM "user" WHERE email = 'grace.garcia@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
+                34567;
+
+            -- Record 6: Gamma Solutions' rotated key, revoked 5 days ago by Jack
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT
+                'p9o8',
+                'Gamma Rotated Key',
+                'ORGANIZATION',
+                1,
+                (SELECT id FROM organization WHERE slug = 'gamma-solutions'),
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '35 days',
+                (SELECT id FROM "user" WHERE email = 'jack.jackson@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days',
+                78234;
+
+            -- Record 7: David's expired key cleanup, revoked 2 days ago
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT
+                'n7m6',
+                'David Cleanup Key',
+                'USER',
+                (SELECT id FROM "user" WHERE email = 'david.davis@example.com'),
+                NULL,
+                (SELECT id FROM "user" WHERE email = 'david.davis@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '50 days',
+                (SELECT id FROM "user" WHERE email = 'david.davis@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 days',
+                421;
+
+            -- Record 8: Acme Corp's security rotation, revoked yesterday (created by Alice)
+            INSERT INTO api_key_audit (key_suffix, key_name, scope, owner_user_id, organization_id, created_by, created_at, revoked_by, revoked_at, total_requests)
+            SELECT
+                'l5k4',
+                'Acme Security Rotation',
+                'ORGANIZATION',
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
+                1,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day',
+                45678;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

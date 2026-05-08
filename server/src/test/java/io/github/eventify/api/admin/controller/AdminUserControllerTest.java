@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static io.github.eventify.api.Paths.ADMIN_USERS_SEARCH_PATH;
+import static io.github.eventify.api.Paths.ADMIN_USER_FORCE_RESET_PATH;
 import static io.github.eventify.api.user.model.UserMetaData.SEARCH_TERM;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
@@ -314,5 +315,164 @@ public class AdminUserControllerTest extends IntegrationTest {
             assertThat(pageResource.getContent(), hasSize(0));
         }
         assertThat(pageResource.getTotalElements(), is(0L));
+    }
+
+    @Test
+    @DisplayName("Should successfully trigger password reset for valid user")
+    public void forcePasswordResetSuccess() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: A target user exists
+        final User targetUser = aValidatedUser();
+
+        // When: Admin triggers force password reset
+        final MockHttpServletRequestBuilder request = post(
+            ADMIN_USER_FORCE_RESET_PATH.replace("{id}", targetUser.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when user ID does not exist")
+    public void forcePasswordResetUserNotFound() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: Non-existent user ID
+        final Long nonExistentUserId = 999999L;
+
+        // When: Admin triggers force password reset for non-existent user
+        final MockHttpServletRequestBuilder request = post(
+            ADMIN_USER_FORCE_RESET_PATH.replace("{id}", nonExistentUserId.toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be NOT FOUND
+        response.andExpect(status().is(SC_NOT_FOUND));
+    }
+
+    @Test
+    @DisplayName("Should return 403 when non-admin user attempts force reset")
+    public void forcePasswordResetForbiddenForNonAdmin() throws Exception {
+        // Given: A regular user without admin privileges
+        final User regularUser = aValidatedUser();
+
+        // And: A target user exists
+        final User targetUser = aValidatedUser();
+
+        // When: Regular user attempts to trigger force password reset
+        final MockHttpServletRequestBuilder request = post(
+            ADMIN_USER_FORCE_RESET_PATH.replace("{id}", targetUser.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + regularUser.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be FORBIDDEN
+        response.andExpect(status().is(SC_FORBIDDEN));
+    }
+
+    @Test
+    @DisplayName("Should successfully trigger reset for locked user")
+    public void forcePasswordResetForLockedUserSuccess() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: A locked user exists
+        final User lockedUser = aLockedUser();
+
+        // When: Admin triggers force password reset for locked user
+        final MockHttpServletRequestBuilder request = post(
+            ADMIN_USER_FORCE_RESET_PATH.replace("{id}", lockedUser.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+    }
+
+    @Test
+    @DisplayName("Should successfully trigger reset for user with unvalidated email")
+    public void forcePasswordResetForUnvalidatedUserSuccess() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: An unvalidated user exists
+        final User unvalidatedUser = anUnvalidatedUser();
+
+        // When: Admin triggers force password reset for unvalidated user
+        final MockHttpServletRequestBuilder request = post(
+            ADMIN_USER_FORCE_RESET_PATH.replace("{id}", unvalidatedUser.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+    }
+
+    @Test
+    @DisplayName("Should return 401 when no authentication provided")
+    public void forcePasswordResetWithoutAuthenticationFails() throws Exception {
+        // Given: A target user exists
+        final User targetUser = aValidatedUser();
+
+        // When: Request without authentication
+        final MockHttpServletRequestBuilder request = post(
+            ADMIN_USER_FORCE_RESET_PATH.replace("{id}", targetUser.getId().toString())
+        )
+            .contentType(APPLICATION_JSON);
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be UNAUTHORIZED
+        response.andExpect(status().is(SC_UNAUTHORIZED));
+    }
+
+    @Test
+    @DisplayName("Should invalidate refresh token after force password reset")
+    public void forcePasswordResetInvalidatesRefreshToken() throws Exception {
+        // Given: An admin user
+        final User admin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: A target user with valid refresh token
+        final User targetUser = aValidatedUser();
+        final String targetRefreshToken = targetUser.getRefreshToken().getValue();
+
+        // When: Admin triggers force password reset
+        final MockHttpServletRequestBuilder forceResetRequest = post(
+            ADMIN_USER_FORCE_RESET_PATH.replace("{id}", targetUser.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        mockMvc.perform(forceResetRequest).andExpect(status().is(SC_OK));
+
+        // Then: Target user's refresh token should be invalidated
+        // Attempting to refresh with the old refresh token should fail
+        final MockHttpServletRequestBuilder refreshRequest = post("/v1/auth/token")
+            .contentType(APPLICATION_JSON)
+            .content("{\"refreshToken\":\"" + targetRefreshToken + "\"}");
+
+        final ResultActions response = mockMvc.perform(refreshRequest);
+
+        // And: Should fail because refresh token is now invalid (400 Bad Request)
+        response.andExpect(status().is(SC_BAD_REQUEST));
     }
 }

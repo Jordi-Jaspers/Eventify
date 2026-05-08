@@ -1,12 +1,15 @@
 package io.github.eventify.common.config;
 
 import io.github.eventify.common.config.properties.SecurityProperties;
+import io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter;
 import io.github.eventify.common.security.filter.JwtAuthenticationFilter;
+import io.github.eventify.common.security.oauth2.CustomOAuth2AuthorizationRequestResolver;
 import io.github.eventify.common.security.oauth2.CustomOAuth2UserService;
+import io.github.eventify.common.security.oauth2.OAuth2AttributesFilter;
 import io.github.eventify.common.security.oauth2.OAuth2AuthenticationFailureHandler;
 import io.github.eventify.common.security.oauth2.OAuth2AuthenticationSuccessHandler;
+import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -15,10 +18,14 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -35,26 +42,35 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
     securedEnabled = true,
     jsr250Enabled = true
 )
+@RequiredArgsConstructor
 public class WebSecurityConfig implements WebMvcConfigurer {
+
+    private final SecurityProperties securityProperties;
+
+    private final OAuth2AttributesFilter oauth2AttributesFilter;
 
     /**
      * Configure CORS & requests handling behaviour.
      **/
     @Bean
     public SecurityFilterChain filterChain(
-        final SecurityProperties securityProperties,
         final JwtAuthenticationFilter jwtAuthenticationFilter,
+        final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
         final CustomOAuth2UserService customOAuth2UserService,
         final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
         final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler,
+        final ClientRegistrationRepository clientRegistrationRepository,
         final HttpSecurity http) throws Exception {
-        // Adding a once per request filter to check the JWT token.
-        http.addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);
+        http.addFilterAfter(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class);
+        http.addFilterBefore(oauth2AttributesFilter, OAuth2LoginAuthenticationFilter.class);
 
-        // Configure Session Management.
+        http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::disable);
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+        http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(sessionConfiguration -> sessionConfiguration.sessionCreationPolicy(STATELESS));
+        http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
-        // Return 401 (unauthorized) instead of 302 (redirect to login) when an authorization is missing or invalid.
         http.exceptionHandling(
             handler -> handler.authenticationEntryPoint(
                 (request, response, authException) -> handleAuthenticationFailure(
@@ -65,25 +81,20 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             )
         );
 
-        // Disable CSRF because of state-less session-management.
-        http.csrf(AbstractHttpConfigurer::disable);
-
-        // Enable CORS.
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource(securityProperties.getAllowedOrigins())));
-
-        // Configure OAuth2 Resource Server.
-        http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::disable);
-
-        // Configure OAuth2 Login
         http.oauth2Login(
             oauth2 -> oauth2
-                .authorizationEndpoint(endpointConfig -> endpointConfig.baseUri(OAUTH2_AUTHORIZATION_PATH))
+                .authorizationEndpoint(
+                    endpointConfig -> endpointConfig
+                        .baseUri(OAUTH2_AUTHORIZATION_PATH)
+                        .authorizationRequestResolver(
+                            new CustomOAuth2AuthorizationRequestResolver(clientRegistrationRepository, OAUTH2_AUTHORIZATION_PATH)
+                        )
+                )
                 .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                 .successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler)
         );
 
-        // Configure Endpoints
         http.authorizeHttpRequests(accessManagement -> {
             accessManagement.requestMatchers(PUBLIC_ACTUATOR_PATH + WILDCARD_PART).permitAll();
             accessManagement.requestMatchers(PUBLIC_PATH + WILDCARD_PART).permitAll();
@@ -100,13 +111,18 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return http.build();
     }
 
-    private UrlBasedCorsConfigurationSource corsConfigurationSource(final String... origins) {
+    /**
+     * Configures CORS settings for the application.
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(origins));
+        configuration.setAllowedOriginPatterns(List.of(securityProperties.getAllowedOrigins()));
         configuration.setAllowedMethods(List.of(WILDCARD));
         configuration.setAllowedHeaders(List.of(WILDCARD));
         configuration.setExposedHeaders(List.of(WILDCARD));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration(WILDCARD_PART, configuration);

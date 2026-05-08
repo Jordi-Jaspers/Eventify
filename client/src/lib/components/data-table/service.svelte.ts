@@ -13,16 +13,22 @@ import type { DataTableConfig, DataTableService, FilterValue, DateRange } from '
  * Uses Svelte 5 runes for reactive state management.
  */
 export function createDataTableService<T>(config: DataTableConfig<T>): DataTableService<T> {
-	const { fetchFn, pageSize = 10, defaultSortKey = null, defaultSortDirection = 'ASC' } = config;
+	const { fetchFn, pageSize = 10 } = config;
 
 	// Core state
 	let items: T[] = $state([]);
 	let loading: boolean = $state(false);
 	let error: string | null = $state(null);
 
-	// Sort state
-	let sortKey: string | null = $state(defaultSortKey);
-	let sortDirection: typeof defaultSortDirection = $state(defaultSortDirection);
+	// Sort state - supports multi-column sort
+	const initialSortOrder: SortableColumn[] = config.defaultSort ? [...config.defaultSort] : [];
+	let sortOrder: SortableColumn[] = $state(initialSortOrder);
+
+	// Derived sort key/direction for UI (shows first column's sort state)
+	const sortKey: string | null = $derived(sortOrder.length > 0 ? sortOrder[0].name : null);
+	const sortDirection: 'ASC' | 'DESC' = $derived(
+		sortOrder.length > 0 ? ((sortOrder[0].direction ?? 'ASC') as 'ASC' | 'DESC') : 'ASC'
+	);
 
 	// Filter state
 	let filters: Record<string, FilterValue> = $state({});
@@ -88,12 +94,8 @@ export function createDataTableService<T>(config: DataTableConfig<T>): DataTable
 			searchInputs: buildSearchInputs()
 		};
 
-		if (sortKey) {
-			const sortColumn: SortableColumn = {
-				name: sortKey,
-				direction: sortDirection
-			};
-			input.sortOrder = [sortColumn];
+		if (sortOrder.length > 0) {
+			input.sortOrder = sortOrder;
 		}
 
 		return input;
@@ -110,8 +112,8 @@ export function createDataTableService<T>(config: DataTableConfig<T>): DataTable
 			const response: PageResource<T> = await fetchFn(buildPageInput());
 
 			items = response.content ?? [];
-			totalPages = response.totalPages;
-			totalElements = response.totalElements;
+			totalPages = response.totalPages ?? 0;
+			totalElements = response.totalElements ?? 0;
 		} catch (err: unknown) {
 			const { message }: { message: string } = handleError(err, 'Failed to load data');
 			error = message;
@@ -152,16 +154,18 @@ export function createDataTableService<T>(config: DataTableConfig<T>): DataTable
 	}
 
 	/**
-	 * Sets sort key and direction, then reloads
+	 * Sets sort key and direction, then reloads.
+	 * When user clicks a column header, replaces any multi-column sort with single-column sort.
 	 */
 	function setSort(key: string): void {
-		if (sortKey === key) {
+		const currentFirst: SortableColumn | undefined = sortOrder[0];
+		if (currentFirst && currentFirst.name === key) {
 			// Toggle direction if same key
-			sortDirection = sortDirection === 'ASC' ? 'DESC' : 'ASC';
+			const newDirection: 'ASC' | 'DESC' = currentFirst.direction === 'ASC' ? 'DESC' : 'ASC';
+			sortOrder = [{ name: key, direction: newDirection }];
 		} else {
-			// New key, default to ASC
-			sortKey = key;
-			sortDirection = 'ASC';
+			// New key, default to ASC (replaces any multi-column sort)
+			sortOrder = [{ name: key, direction: 'ASC' }];
 		}
 		currentPage = 0;
 		load();
@@ -202,6 +206,16 @@ export function createDataTableService<T>(config: DataTableConfig<T>): DataTable
 	 */
 	function clearAllFilters(): void {
 		filters = {};
+		currentPage = 0;
+		load();
+	}
+
+	/**
+	 * Resets all filters and sort order to defaults
+	 */
+	function reset(): void {
+		filters = {};
+		sortOrder = [...initialSortOrder];
 		currentPage = 0;
 		load();
 	}
@@ -278,6 +292,7 @@ export function createDataTableService<T>(config: DataTableConfig<T>): DataTable
 		setFilter,
 		clearFilter,
 		clearAllFilters,
+		reset,
 		refresh
 	};
 }

@@ -10,17 +10,29 @@ import io.github.eventify.api.authentication.service.AuthenticationService;
 import io.github.eventify.api.authentication.service.CookieService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
+import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import static io.github.eventify.api.Paths.*;
-import static org.springframework.http.HttpStatus.*;
+import static io.github.eventify.api.Paths.LOGIN_PATH;
+import static io.github.eventify.api.Paths.LOGOUT_PATH;
+import static io.github.eventify.api.Paths.REGISTER_PATH;
+import static io.github.eventify.api.Paths.TOKEN_PATH;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -29,6 +41,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  */
 @RestController
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.ExcessiveImports")
 @Tag(
     name = "Authentication",
     description = "Traditional email/password authentication endpoints for user registration, login, token refresh, and logout"
@@ -63,9 +76,11 @@ public class AuthenticationController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<AuthenticationResponse> authorize(@RequestBody final LoginRequest request, final HttpServletResponse response) {
+    public ResponseEntity<AuthenticationResponse> authorize(@RequestBody final LoginRequest request,
+        final HttpServletRequest httpRequest,
+        final HttpServletResponse response) {
         validator.validateLoginRequest(request);
-        final User user = authenticationService.authorize(request.getEmail(), request.getPassword());
+        final User user = authenticationService.authorize(request, httpRequest);
         cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
         return ResponseEntity.status(OK).body(userDetailsMapper.toUserResponse(user));
     }
@@ -74,8 +89,9 @@ public class AuthenticationController {
     @Operation(summary = "Refresh the access token by exchanging the refresh token.")
     @PostMapping(path = TOKEN_PATH)
     public ResponseEntity<AuthenticationResponse> refreshTokens(@RequestBody final RefreshTokenRequest request,
+        final HttpServletRequest httpRequest,
         final HttpServletResponse response) {
-        final User user = authenticationService.refresh(request.getRefreshToken());
+        final User user = authenticationService.refresh(request.getRefreshToken(), httpRequest);
         cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
         return ResponseEntity.status(OK).body(userDetailsMapper.toUserResponse(user));
     }
@@ -83,8 +99,11 @@ public class AuthenticationController {
     @ResponseStatus(NO_CONTENT)
     @Operation(summary = "Revoke the refresh token and log out the user.")
     @GetMapping(path = LOGOUT_PATH)
-    public ResponseEntity<Void> logout(final HttpServletResponse response) {
-        authenticationService.logout();
+    public ResponseEntity<Void> logout(
+        @AuthenticationPrincipal final UserTokenPrincipal principal,
+        final HttpServletRequest request,
+        final HttpServletResponse response) {
+        authenticationService.logout(principal, request);
         cookieService.clearAuthCookies(response);
         return ResponseEntity.status(NO_CONTENT).build();
     }

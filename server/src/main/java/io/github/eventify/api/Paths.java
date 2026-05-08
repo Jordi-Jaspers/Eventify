@@ -11,6 +11,8 @@ public final class Paths {
 
     public static final String PUBLIC_PATH = BASE_PATH + "/public";
 
+    public static final String EXTERNAL_PATH = BASE_PATH + "/external";
+
     public static final String AUTH_PATH = BASE_PATH + "/auth";
 
     public static final String ADMIN_PATH = BASE_PATH + "/admin";
@@ -31,13 +33,33 @@ public final class Paths {
 
     public static final String UNLOCK_PART = "/unlock";
 
+    public static final String PAUSE_PART = "/pause";
+
+    public static final String RESUME_PART = "/resume";
+
     public static final String LOGIN_PART = "/login";
+
+    public static final String API_KEYS_PART = "/api-keys";
+
+    public static final String KEY_ID_PART = "/{keyId}";
 
     public static final String ERROR_PART = "/error";
 
     public static final String ORGANIZATIONS_PART = "/organization";
 
+    public static final String CHANNELS_PART = "/channels";
+
     public static final String USER_PART = "/user";
+
+    public static final String STATS_PART = "/stats";
+
+    public static final String DASHBOARD_PART = "/dashboard";
+
+    public static final String RETENTION_SETTINGS_PART = "/settings/retention";
+
+    public static final String WATCHLISTS_PART = "/watchlist";
+
+    public static final String EVENTS_PART = "/event";
 
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
 
@@ -107,6 +129,44 @@ public final class Paths {
 
     public static final String USER_INVITATION_PATH = USERS_PATH + "/invite";
 
+    public static final String USER_API_KEYS_PATH = USERS_PATH + API_KEYS_PART;
+
+    public static final String USER_API_KEY_PATH = USER_API_KEYS_PATH + KEY_ID_PART;
+
+    public static final String USER_QUOTA_PATH = USERS_PATH + "/quota";
+
+    public static final String USER_SESSIONS_PATH = USERS_PATH + "/sessions";
+
+    public static final String USER_SESSION_PATH = USER_SESSIONS_PATH + ID_PART;
+
+    public static final String USER_PROVIDERS_PATH = USERS_PATH + "/providers";
+
+    public static final String USER_PROVIDER_PATH = USER_PROVIDERS_PATH + ID_PART;
+
+    public static final String USER_CHANNELS_PATH = USERS_PATH + "/channel";
+
+    public static final String USER_CHANNELS_SEARCH_PATH = USER_CHANNELS_PATH + SEARCH_PART;
+
+    public static final String USER_CHANNEL_PATH = USER_CHANNELS_PATH + ID_PART;
+
+    public static final String USER_CHANNEL_PAUSE_PATH = USER_CHANNEL_PATH + PAUSE_PART;
+
+    public static final String USER_CHANNEL_RESUME_PATH = USER_CHANNEL_PATH + RESUME_PART;
+
+    public static final String USER_RETENTION_SETTINGS_PATH = USERS_PATH + RETENTION_SETTINGS_PART;
+
+    public static final String USER_WATCHLISTS_PATH = USERS_PATH + WATCHLISTS_PART;
+
+    public static final String USER_WATCHLISTS_SEARCH_PATH = USER_WATCHLISTS_PATH + SEARCH_PART;
+
+    public static final String USER_WATCHLIST_PATH = USER_WATCHLISTS_PATH + ID_PART;
+
+    public static final String USER_EVENTS_PATH = USERS_PATH + EVENTS_PART;
+
+    public static final String USER_EVENTS_SEARCH_PATH = USER_EVENTS_PATH + SEARCH_PART;
+
+    public static final String USER_DASHBOARD_STATS_PATH = USERS_PATH + DASHBOARD_PART + STATS_PART;
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;
@@ -115,9 +175,19 @@ public final class Paths {
 
     public static final String ADMIN_USERS_SEARCH_PATH = ADMIN_PATH + USER_PART + SEARCH_PART;
 
-    public static final String ADMIN_STATS_PATH = ADMIN_PATH + "/stats";
+    public static final String ADMIN_USER_FORCE_RESET_PATH = ADMIN_PATH + USER_PART + ID_PART + "/force-reset";
+
+    public static final String ADMIN_STATS_PATH = ADMIN_PATH + STATS_PART;
 
     public static final String ADMIN_ORGANIZATION_ASSIGN_OWNER_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/owner";
+
+    public static final String ADMIN_API_KEYS_STATS_PATH = ADMIN_PATH + API_KEYS_PART + STATS_PART;
+
+    public static final String ADMIN_API_KEYS_SEARCH_PATH = ADMIN_PATH + API_KEYS_PART + SEARCH_PART;
+
+    public static final String ADMIN_API_KEY_PATH = ADMIN_PATH + API_KEYS_PART + KEY_ID_PART;
+
+    public static final String ADMIN_API_KEYS_AUDIT_SEARCH_PATH = ADMIN_PATH + API_KEYS_PART + "/audit" + SEARCH_PART;
 
     /* ------------------------------- ORGANIZATION MEMBERSHIP ENDPOINTS ------------------------------- */
 
@@ -129,11 +199,43 @@ public final class Paths {
 
     public static final String ORGANIZATION_MEMBER_PATH = ORGANIZATION_MEMBERS_PATH + "/{userId}";
 
+    public static final String ORGANIZATION_NEW_MEMBERS_SEARCH_PATH = ORGANIZATION_MEMBERS_PATH + "/new" + SEARCH_PART;
+
     public static final String ORGANIZATION_MEMBERS_SEARCH_PATH = ORGANIZATION_MEMBERS_PATH + SEARCH_PART;
 
     public static final String ORGANIZATION_TRANSFER_OWNERSHIP_PATH = ORGANIZATION_PATH + "/transfer-ownership";
 
     public static final String USER_ORGANIZATIONS_PATH = USERS_PATH + ORGANIZATIONS_PART;
+
+    public static final String ORGANIZATION_API_KEYS_PATH = ORGANIZATION_PATH + API_KEYS_PART;
+
+    public static final String ORGANIZATION_API_KEYS_SEARCH_PATH = ORGANIZATION_API_KEYS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_API_KEY_PATH = ORGANIZATION_API_KEYS_PATH + KEY_ID_PART;
+
+    public static final String ORGANIZATION_CHANNELS_PATH = ORGANIZATION_PATH + CHANNELS_PART;
+
+    public static final String ORGANIZATION_CHANNELS_SEARCH_PATH = ORGANIZATION_CHANNELS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_CHANNEL_PATH = ORGANIZATION_CHANNELS_PATH + ID_PART;
+
+    public static final String ORGANIZATION_CHANNEL_PAUSE_PATH = ORGANIZATION_CHANNEL_PATH + PAUSE_PART;
+
+    public static final String ORGANIZATION_CHANNEL_RESUME_PATH = ORGANIZATION_CHANNEL_PATH + RESUME_PART;
+
+    public static final String ORGANIZATION_RETENTION_SETTINGS_PATH = ORGANIZATION_PATH + RETENTION_SETTINGS_PART;
+
+    public static final String ORGANIZATION_WATCHLISTS_PATH = ORGANIZATION_PATH + WATCHLISTS_PART;
+
+    public static final String ORGANIZATION_WATCHLISTS_SEARCH_PATH = ORGANIZATION_WATCHLISTS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_WATCHLIST_PATH = ORGANIZATION_WATCHLISTS_PATH + ID_PART;
+
+    public static final String ORGANIZATION_EVENTS_PATH = ORGANIZATION_PATH + EVENTS_PART;
+
+    public static final String ORGANIZATION_EVENTS_SEARCH_PATH = ORGANIZATION_EVENTS_PATH + SEARCH_PART;
+
+    public static final String ORGANIZATION_DASHBOARD_STATS_PATH = ORGANIZATION_PATH + DASHBOARD_PART + STATS_PART;
 
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 
@@ -142,6 +244,28 @@ public final class Paths {
     /* ------------------------------- DEV ENDPOINTS ------------------------------- */
 
     public static final String DEV_CREDENTIALS_PATH = PUBLIC_PATH + "/dev/credentials";
+
+    /* ------------------------------- EXTERNAL API ENDPOINTS ------------------------------- */
+
+    public static final String EXTERNAL_EVENTS_PATH = EXTERNAL_PATH + EVENTS_PART;
+
+    public static final String EXTERNAL_EVENTS_BATCH_PATH = EXTERNAL_EVENTS_PATH + "/batch";
+
+    public static final String EXTERNAL_CHANNELS_PATH = EXTERNAL_PATH + CHANNELS_PART;
+
+    /* ------------------------------- MONITOR ENDPOINTS ------------------------------- */
+
+    public static final String MONITOR_PART = "/monitor";
+
+    public static final String USER_MONITOR_PATH = USERS_PATH + MONITOR_PART;
+
+    public static final String ORGANIZATION_MONITOR_PATH = ORGANIZATION_PATH + MONITOR_PART;
+
+    public static final String DURATIONS_PART = "/durations";
+
+    public static final String USER_CHANNEL_DURATIONS_PATH = USER_CHANNELS_PATH + ID_PART + DURATIONS_PART;
+
+    public static final String ORGANIZATION_CHANNEL_DURATIONS_PATH = ORGANIZATION_CHANNELS_PATH + ID_PART + DURATIONS_PART;
 
     /* ------------------------------- END ------------------------------- */
 

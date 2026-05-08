@@ -98,7 +98,21 @@ public class User implements UserDetails, PageableItem {
         fetch = FetchType.LAZY,
         orphanRemoval = true
     )
+    private List<UserAuthProvider> authProviders = new ArrayList<>();
+
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        fetch = FetchType.LAZY,
+        orphanRemoval = true
+    )
     private List<OrganizationMembership> organizations = new ArrayList<>();
+
+    @Column(
+        name = "retention_days",
+        nullable = false
+    )
+    private Integer retentionDays = 90;
 
     @Transient
     private Token accessToken;

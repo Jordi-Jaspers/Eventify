@@ -1,16 +1,23 @@
 package io.github.eventify.support.util;
 
 import io.github.eventify.Main;
+import io.github.eventify.api.apikey.repository.ApiKeyAuditRepository;
+import io.github.eventify.api.apikey.repository.ApiKeyRepository;
 import io.github.eventify.api.authentication.service.AuthenticationService;
+import io.github.eventify.api.channel.repository.ChannelRepository;
+import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
+import io.github.eventify.api.quota.repository.UserEventQuotaRepository;
 import io.github.eventify.api.token.repository.TokenRepository;
 import io.github.eventify.api.token.service.TokenService;
 import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
+import io.github.eventify.api.user.repository.UserAuthProviderRepository;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserService;
+import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.support.config.BeanConfiguration;
-import io.github.eventify.support.container.RabbitContainer;
+import io.github.eventify.support.config.TimescaleLiquibaseConfiguration;
 import io.github.eventify.support.container.TimescaleContainer;
 import io.github.jframe.autoconfigure.properties.ApplicationProperties;
 import tools.jackson.databind.ObjectMapper;
@@ -19,10 +26,11 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -33,8 +41,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Import(
     {
         BeanConfiguration.class,
-        TimescaleContainer.class,
-        RabbitContainer.class
+        TimescaleLiquibaseConfiguration.class,
+        TimescaleContainer.class
     }
 )
 @Testcontainers
@@ -63,12 +71,13 @@ public class TestContextInitializer {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @NonNull
+    @Autowired
+    protected JdbcTemplate jdbcTemplate;
+
     // ========================= CONTAINERS =========================
     @Autowired
     protected PostgreSQLContainer<?> postgreSQLContainer;
-
-    @Autowired
-    protected RabbitMQContainer rabbitContainer;
 
     // ========================= APPLICATION =========================
 
@@ -98,5 +107,32 @@ public class TestContextInitializer {
 
     @Autowired
     protected TokenService tokenService;
+
+    @Autowired
+    protected ApiKeyRepository apiKeyRepository;
+
+    @Autowired
+    protected ApiKeyAuditRepository apiKeyAuditRepository;
+
+    @Autowired
+    protected ChannelRepository channelRepository;
+
+    @Autowired
+    protected EventRepository eventRepository;
+
+    @Autowired
+    protected UserEventQuotaRepository userEventQuotaRepository;
+
+    @Autowired
+    protected WatchlistRepository watchlistRepository;
+
+    @Autowired
+    protected PasswordEncoder passwordEncoder;
+
+    @Autowired
+    protected TestDataCleanupService testDataCleanupService;
+
+    @Autowired
+    protected UserAuthProviderRepository userAuthProviderRepository;
 
 }

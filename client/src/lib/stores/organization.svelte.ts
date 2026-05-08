@@ -76,6 +76,13 @@ class OrganizationStore {
 
 	hasNoOrgs: boolean = $derived(this.organizations.length === 0);
 
+	// Derived: get the current user's role in the selected organization
+	currentRole: 'OWNER' | 'ADMIN' | 'MEMBER' | null = $derived.by((): 'OWNER' | 'ADMIN' | 'MEMBER' | null => {
+		const org: UserOrganizationResponse | null = this.currentOrganization;
+		if (!org || !org.role) return null;
+		return org.role;
+	});
+
 	/**
 	 * Set the current org ID (updates both state and cookie)
 	 */

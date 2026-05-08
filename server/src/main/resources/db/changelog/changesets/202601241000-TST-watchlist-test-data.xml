@@ -1,0 +1,198 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601241000-TST-watchlist-test-data.xml">
+
+    <changeSet id="202601241000-TST-watchlist-test-data-1" author="jordi.jaspers" context="tst">
+        <comment>Insert personal watchlists for admin (id=1) with configured channels and filters.</comment>
+        <sql>
+            -- Watchlist 1: Production Monitoring - multiple channels, custom filters
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Production Monitoring',
+                'Critical production services including backend errors, deployments, and security alerts. Configured for high-priority event tracking.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Backend Errors' AND user_id = 1),
+                        (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1),
+                        (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', true,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours';
+
+            -- Watchlist 2: Frontend Analytics - single channel, default filters
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Frontend Performance',
+                'Web application performance and user behavior tracking.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Frontend Analytics' AND user_id = 1)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 day';
+
+            -- Watchlist 3: All Channels Overview - all personal channels
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'All Channels Overview',
+                'Complete view of all personal channels for quick status checks.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Backend Errors' AND user_id = 1),
+                        (SELECT id FROM channel WHERE name = 'Frontend Analytics' AND user_id = 1),
+                        (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1),
+                        (SELECT id FROM channel WHERE name = 'Marketing Campaigns' AND user_id = 1),
+                        (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1),
+                        (SELECT id FROM channel WHERE name = 'Test Channel' AND user_id = 1)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '7d',
+                    'onlyCritical', false,
+                    'sortBySeverity', false,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 minutes';
+
+            -- Watchlist 4: Security Focus - only security channel, critical only
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Security Alerts Only',
+                'Focused view for security monitoring. Shows only critical security events.',
+                1,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '30d',
+                    'onlyCritical', true,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes';
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601241000-TST-watchlist-test-data-2" author="jordi.jaspers" context="tst">
+        <comment>Insert personal watchlists for other test users.</comment>
+        <sql>
+            -- Watchlist for Alice
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Payment Dashboard',
+                'Monitoring payment processing and mobile app events.',
+                u.id,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Payment Processing' AND user_id = u.id),
+                        (SELECT id FROM channel WHERE name = 'Mobile App Events' AND user_id = u.id)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '12 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '4 hours'
+            FROM "user" u WHERE u.email = 'alice.anderson@example.com';
+
+            -- Watchlist for Bob
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'API Gateway Monitor',
+                'Tracking API gateway logs and request patterns.',
+                u.id,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'API Gateway Logs' AND user_id = u.id)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', true,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '8 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour'
+            FROM "user" u WHERE u.email = 'bob.brown@example.com';
+
+            -- Watchlist for Carol
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'IoT Sensor Dashboard',
+                'Real-time sensor data monitoring.',
+                u.id,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'IoT Sensor Data' AND user_id = u.id)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', false,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 minutes'
+            FROM "user" u WHERE u.email = 'carol.clark@example.com';
+
+            -- Watchlist for David
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'E-commerce Operations',
+                'Order tracking and customer support ticket monitoring.',
+                u.id,
+                NULL,
+                jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'E-commerce Orders' AND user_id = u.id),
+                        (SELECT id FROM channel WHERE name = 'Customer Support Tickets' AND user_id = u.id)
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange', '24h',
+                    'onlyCritical', false,
+                    'sortBySeverity', true,
+                    'groupedView', true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '14 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '2 hours'
+            FROM "user" u WHERE u.email = 'david.davis@example.com';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

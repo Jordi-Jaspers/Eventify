@@ -41,6 +41,14 @@ export const CLIENT_ROUTES = {
 		path: '/oauth2/redirect',
 		type: RouteType.PUBLIC
 	},
+	DEV_PLAYBOOK_PAGE: {
+		path: '/dev-playbook',
+		type: RouteType.PUBLIC
+	},
+	PRICING_PAGE: {
+		path: '/pricing',
+		type: RouteType.PUBLIC
+	},
 
 	// Private routes
 	DASHBOARD_PAGE: {
@@ -51,20 +59,84 @@ export const CLIENT_ROUTES = {
 		path: '/profile',
 		type: RouteType.PRIVATE
 	},
+	DEVELOPER_PAGE: {
+		path: '/developer',
+		type: RouteType.PRIVATE
+	},
+	DATA_STORAGE_PAGE: {
+		path: '/profile/data-storage',
+		type: RouteType.PRIVATE
+	},
+	PROFILE_SECURITY_PAGE: {
+		path: '/profile/security',
+		type: RouteType.PRIVATE
+	},
+	CHANNELS_PAGE: {
+		path: '/channels',
+		type: RouteType.PRIVATE
+	},
+	WATCHLISTS_PAGE: {
+		path: '/watchlists',
+		type: RouteType.PRIVATE
+	},
+	WATCHLISTS_MONITOR_PAGE: {
+		path: '/watchlists/monitor',
+		type: RouteType.PRIVATE
+	},
+	CHANGELOG_PAGE: {
+		path: '/changelog',
+		type: RouteType.PRIVATE
+	},
 	ADMIN_DASHBOARD_PAGE: {
 		path: '/admin/dashboard',
 		type: RouteType.PRIVATE
 	},
-	ADMIN_ORGANIZATIONS_NEW: {
-		path: '/admin/organizations/new',
+	ADMIN_USERS_PAGE: {
+		path: '/admin/users',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_ORGANIZATIONS_PAGE: {
 		path: '/admin/organizations',
 		type: RouteType.PRIVATE
 	},
+	ADMIN_API_KEYS_PAGE: {
+		path: '/admin/api-keys',
+		type: RouteType.PRIVATE
+	},
 	ORGANIZATION_MEMBERS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/members`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_DASHBOARD_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/dashboard`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_SETTINGS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/settings`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_SETTINGS_GENERAL_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/settings/general`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_SETTINGS_API_KEYS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/settings/api-keys`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_SETTINGS_DATA_STORAGE_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/settings/data-storage`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_CHANNELS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/channels`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_WATCHLISTS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/watchlists`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_MONITOR_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/watchlists/monitor`,
 		type: RouteType.PRIVATE
 	})
 } as const;

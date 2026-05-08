@@ -35,7 +35,7 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
     @Override
     public JwtUserPrincipalAuthenticationToken convert(final Jwt jwt) {
         final User user = userService.loadUserByUsername(jwt.getSubject());
-        final UserTokenPrincipal principal = new UserTokenPrincipal(user, jwt);
+        final UserTokenPrincipal principal = new UserTokenPrincipal(user, jwt, null);
         final Collection<GrantedAuthority> authorities = jwtGrantedAuthoritiesConverter.convert(jwt);
         return new JwtUserPrincipalAuthenticationToken(principal, authorities);
     }

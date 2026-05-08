@@ -84,7 +84,6 @@ dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-validation")
     implementation("org.springframework.boot", "spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot", "spring-boot-starter-mail")
-    implementation("org.springframework.boot", "spring-boot-starter-amqp")
     implementation("org.springframework.boot", "spring-boot-starter-liquibase")
     implementation("org.springframework.boot", "spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot", "spring-boot-starter-oauth2-client")
@@ -97,8 +96,8 @@ dependencies {
     implementation("org.springdoc", "springdoc-openapi-starter-webmvc-ui", retrieve("springdocVersion"))
 
     // JFrame Starters - common libraries for JFrame based applications
-    implementation("io.github.jframeoss", "starter-jpa", retrieve("jframeStarterVersion"))
-    implementation("io.github.jframeoss", "starter-otlp", retrieve("jframeStarterVersion"))
+    implementation("io.github.jframeoss", "jframe-spring-jpa", retrieve("jframeStarterVersion"))
+    implementation("io.github.jframeoss", "jframe-spring-otlp", retrieve("jframeStarterVersion"))
 
     // Used to validate entities and beans
     implementation("jakarta.servlet", "jakarta.servlet-api", retrieve("jakartaServletVersion"))
@@ -120,7 +119,6 @@ dependencies {
 
     // ======= TEST DEPENDENCIES =======
     testImplementation("org.springframework.boot", "spring-boot-test")
-    testImplementation("org.springframework.amqp", "spring-rabbit-test")
     testImplementation("org.springframework.boot", "spring-boot-testcontainers")
     testImplementation("org.springframework.boot", "spring-boot-starter-test") {
         exclude("com.vaadin.external.google", module = "android-json")
@@ -128,7 +126,6 @@ dependencies {
 
     testImplementation("org.springframework.security", "spring-security-test", retrieve("springSecurityTestVersion"))
     testImplementation("org.testcontainers", "postgresql", retrieve("testContainerVersion"))
-    testImplementation("org.testcontainers", "rabbitmq", retrieve("testContainerVersion"))
     testImplementation("org.testcontainers", "junit-jupiter", retrieve("testContainerVersion"))
 }
 
@@ -188,6 +185,20 @@ fun retrieve(property: String): String {
     return foundProperty.replace("\"", "")
 }
 
+/** Shared JVM arguments for running the application and tests. */
+val sharedJvmArgs = listOf(
+    "-XX:+UseG1GC",
+    "-Xms512m",
+    "-Xmx4096m",
+    "-XX:MetaspaceSize=512m",
+    "-XX:MaxMetaspaceSize=1024m",
+    "-XX:MaxMetaspaceFreeRatio=60",
+    "-XX:+EnableDynamicAgentLoading",
+    "-XX:+HeapDumpOnOutOfMemoryError",
+    "-Djava.awt.headless=true",
+    "-Dspring.output.ansi.enabled=ALWAYS"
+)
+
 // ============== TASK CONFIGURATION ================
 tasks.getByName<BootJar>("bootJar") {
     duplicatesStrategy = INCLUDE
@@ -210,7 +221,8 @@ tasks.withType<Test> {
     systemProperty("jframe.group", retrieve("group"))
     systemProperty("jframe.version", retrieve("version"))
     useJUnitPlatform()
-    jvmArgs("-XX:+EnableDynamicAgentLoading")
+    jvmArgs(sharedJvmArgs)
+    maxParallelForks = Runtime.getRuntime().availableProcessors()
     testLogging {
         showCauses = true
         showExceptions = true
@@ -237,7 +249,7 @@ tasks.withType<ProcessResources> {
 }
 
 tasks.named<CyclonedxDirectTask>("cyclonedxDirectBom") {
-    projectType = org.cyclonedx.model.Component.Type.LIBRARY
+    projectType = org.cyclonedx.model.Component.Type.APPLICATION
     schemaVersion = Version.VERSION_16
     componentName = project.name
     componentVersion = project.version.toString()
@@ -269,14 +281,5 @@ tasks.named<BootRun>("bootRun") {
     systemProperty("jframe.application.name", retrieve("artifactName"))
     systemProperty("jframe.application.group", retrieve("group"))
     systemProperty("jframe.application.version", retrieve("version"))
-    jvmArgs(
-        "-Xms512m",
-        "-Xmx4096m",
-        "-XX:MetaspaceSize=512m",
-        "-XX:MaxMetaspaceSize=1024m",
-        "-XX:MaxMetaspaceFreeRatio=60",
-        "-Djava.awt.headless=true",
-        "-XX:+UseG1GC",
-        "-Dspring.output.ansi.enabled=ALWAYS",
-    )
+    jvmArgs(sharedJvmArgs)
 }

@@ -1,0 +1,31 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601111001-PRD-retention-days-columns.xml">
+
+    <changeSet id="202601111001-PRD-retention-days-columns-1" author="orchestrator">
+        <comment>Adding retention_days column to user table for personal channel retention settings.</comment>
+        <sql>
+            ALTER TABLE "user" ADD COLUMN IF NOT EXISTS retention_days INTEGER NOT NULL DEFAULT 90;
+            ALTER TABLE "user" ADD CONSTRAINT chk_user_retention_days CHECK (retention_days >= 90 AND retention_days &lt;= 1825);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601111001-PRD-retention-days-columns-2" author="orchestrator">
+        <comment>Adding retention_days column to organization table for organization channel retention settings.</comment>
+        <sql>
+            ALTER TABLE organization ADD COLUMN IF NOT EXISTS retention_days INTEGER NOT NULL DEFAULT 90;
+            ALTER TABLE organization ADD CONSTRAINT chk_org_retention_days CHECK (retention_days >= 90 AND retention_days &lt;= 1825);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601111001-PRD-retention-days-columns-3" author="orchestrator">
+        <comment>Adding documentation for retention_days columns and constraints.</comment>
+        <sql>
+            COMMENT ON COLUMN "user".retention_days IS 'Retention period in days for personal channels (min 90, max 1825, default 90)';
+            COMMENT ON COLUMN organization.retention_days IS 'Retention period in days for organization channels (min 90, max 1825, default 90)';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

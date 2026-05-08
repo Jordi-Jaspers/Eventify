@@ -1,9 +1,15 @@
-# ====== SERVER CONFIG ======
 server.port: 9081
 
-# ======= LIQUIBASE CONFIGURATION =======
 spring:
   liquibase:
     enabled: true
     drop-first: true
-    contexts: test
+
+springdoc:
+  api-docs:
+    enabled: true
+
+security:
+  remember-me-token:
+    lifetime: 30
+    time-unit: DAYS

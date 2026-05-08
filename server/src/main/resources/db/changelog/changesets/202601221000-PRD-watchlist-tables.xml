@@ -1,0 +1,51 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601221000-PRD-watchlist-tables.xml">
+
+    <changeSet id="202601221000-PRD-watchlist-tables-1" author="backend-agent">
+        <comment>Creating watchlist table for event timeline monitoring with JSONB configuration and filters.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS watchlist (
+                id              SERIAL PRIMARY KEY,
+                name            VARCHAR(100) NOT NULL,
+                description     VARCHAR(500) NULL,
+                user_id         INTEGER NOT NULL,
+                organization_id INTEGER NULL,
+                configuration   JSONB NOT NULL DEFAULT '{"groups": [], "channelIds": []}',
+                filters         JSONB NOT NULL DEFAULT '{"timeRange": "24h", "onlyCritical": false, "sortBySeverity": true}',
+                created_at      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                updated_at      TIMESTAMPTZ NULL,
+                FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
+                FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601221000-PRD-watchlist-tables-2" author="backend-agent">
+        <comment>Creating indexes, unique constraints, and documentation for watchlist table.</comment>
+        <sql>
+            CREATE INDEX idx_watchlist_user ON watchlist(user_id) WHERE organization_id IS NULL;
+            CREATE INDEX idx_watchlist_org ON watchlist(organization_id) WHERE organization_id IS NOT NULL;
+            CREATE UNIQUE INDEX uq_watchlist_user_name ON watchlist(user_id, lower(name)) WHERE organization_id IS NULL;
+            CREATE UNIQUE INDEX uq_watchlist_org_name ON watchlist(organization_id, lower(name)) WHERE organization_id IS NOT NULL;
+
+            COMMENT ON TABLE watchlist IS 'Stores watchlists for monitoring event timelines across channels';
+            COMMENT ON COLUMN watchlist.id IS 'Unique identifier for the watchlist';
+            COMMENT ON COLUMN watchlist.name IS 'Watchlist name (unique per user for personal, per org for organization)';
+            COMMENT ON COLUMN watchlist.description IS 'Optional watchlist description';
+            COMMENT ON COLUMN watchlist.user_id IS 'User who owns (personal) or created (org) this watchlist';
+            COMMENT ON COLUMN watchlist.organization_id IS 'Organization this watchlist belongs to (null for personal watchlists)';
+            COMMENT ON COLUMN watchlist.configuration IS 'JSONB containing channel groups and loose channel IDs';
+            COMMENT ON COLUMN watchlist.filters IS 'JSONB containing default filter settings (timeRange, onlyCritical, sortBySeverity)';
+            COMMENT ON COLUMN watchlist.created_at IS 'Timestamp when the watchlist was created';
+            COMMENT ON COLUMN watchlist.updated_at IS 'Timestamp when the watchlist was last updated';
+            COMMENT ON INDEX idx_watchlist_user IS 'Partial index for personal watchlists';
+            COMMENT ON INDEX idx_watchlist_org IS 'Partial index for organization watchlists';
+            COMMENT ON INDEX uq_watchlist_user_name IS 'Partial unique constraint for personal watchlist names (case-insensitive)';
+            COMMENT ON INDEX uq_watchlist_org_name IS 'Partial unique constraint for organization watchlist names (case-insensitive)';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

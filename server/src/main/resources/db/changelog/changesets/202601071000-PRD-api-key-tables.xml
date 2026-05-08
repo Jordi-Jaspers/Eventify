@@ -1,0 +1,102 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601071000-PRD-api-key-tables.xml">
+
+    <changeSet id="202601071000-PRD-api-key-tables-1" author="backend-agent">
+        <comment>Creating api_key table for API key management.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS api_key
+            (
+                id              SERIAL PRIMARY KEY,
+                suffix          VARCHAR(4) NOT NULL,
+                hashed_key      TEXT NOT NULL,
+                name            VARCHAR(100) NOT NULL,
+                scope           VARCHAR(20) NOT NULL,
+                user_id         INTEGER NOT NULL,
+                organization_id INTEGER NULL,
+                created_at      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                expires_at      TIMESTAMPTZ NULL,
+                last_used_at    TIMESTAMPTZ NULL,
+                total_requests  BIGINT NOT NULL DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
+                FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX idx_api_key_user ON api_key(user_id) WHERE organization_id IS NULL;
+            CREATE INDEX idx_api_key_org ON api_key(organization_id) WHERE organization_id IS NOT NULL;
+            CREATE INDEX idx_api_key_suffix ON api_key(suffix);
+            CREATE UNIQUE INDEX idx_api_key_hashed ON api_key(hashed_key);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601071000-PRD-api-key-tables-2" author="backend-agent">
+        <comment>Creating api_key_audit table for tracking revoked API keys.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS api_key_audit
+            (
+                id              SERIAL PRIMARY KEY,
+                key_suffix      VARCHAR(4) NOT NULL,
+                key_name        VARCHAR(100) NOT NULL,
+                scope           VARCHAR(20) NOT NULL,
+                owner_user_id   INTEGER NULL,
+                organization_id INTEGER NULL,
+                created_by      INTEGER NOT NULL,
+                created_at      TIMESTAMPTZ NOT NULL,
+                revoked_by      INTEGER NULL,
+                revoked_at      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                total_requests  BIGINT NOT NULL,
+                FOREIGN KEY (revoked_by) REFERENCES "user"(id) ON DELETE SET NULL
+            );
+
+            CREATE INDEX idx_api_key_audit_org ON api_key_audit(organization_id);
+            CREATE INDEX idx_api_key_audit_user ON api_key_audit(owner_user_id);
+            CREATE INDEX idx_api_key_audit_revoked_at ON api_key_audit(revoked_at);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601071000-PRD-api-key-tables-3" author="backend-agent">
+        <comment>Adding documentation for api_key table, columns, and indexes.</comment>
+        <sql>
+            COMMENT ON TABLE api_key IS 'Stores active API keys for user and organization-scoped authentication';
+            COMMENT ON COLUMN api_key.id IS 'Unique identifier for the API key';
+            COMMENT ON COLUMN api_key.suffix IS 'Last 4 characters of the key for display and lookup purposes';
+            COMMENT ON COLUMN api_key.hashed_key IS 'BCrypt hashed full API key for secure validation';
+            COMMENT ON COLUMN api_key.name IS 'User-friendly name for the API key';
+            COMMENT ON COLUMN api_key.scope IS 'Scope of the key (USER or ORGANIZATION)';
+            COMMENT ON COLUMN api_key.user_id IS 'User who created/owns the API key';
+            COMMENT ON COLUMN api_key.organization_id IS 'Organization the key belongs to (null for USER scope)';
+            COMMENT ON COLUMN api_key.created_at IS 'Timestamp when the API key was created';
+            COMMENT ON COLUMN api_key.expires_at IS 'Optional expiration timestamp for the API key';
+            COMMENT ON COLUMN api_key.last_used_at IS 'Timestamp of last API key usage';
+            COMMENT ON COLUMN api_key.total_requests IS 'Total number of requests made using this key';
+            COMMENT ON INDEX idx_api_key_user IS 'Partial index for user-scoped API keys';
+            COMMENT ON INDEX idx_api_key_org IS 'Partial index for organization-scoped API keys';
+            COMMENT ON INDEX idx_api_key_suffix IS 'Index for fast suffix-based lookups';
+            COMMENT ON INDEX idx_api_key_hashed IS 'Unique index on hashed key for validation';
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601071000-PRD-api-key-tables-4" author="backend-agent">
+        <comment>Adding documentation for api_key_audit table, columns, and indexes.</comment>
+        <sql>
+            COMMENT ON TABLE api_key_audit IS 'Audit trail for revoked API keys';
+            COMMENT ON COLUMN api_key_audit.id IS 'Unique identifier for the audit record';
+            COMMENT ON COLUMN api_key_audit.key_suffix IS 'Suffix of the revoked API key';
+            COMMENT ON COLUMN api_key_audit.key_name IS 'Name of the revoked API key';
+            COMMENT ON COLUMN api_key_audit.scope IS 'Scope of the revoked key (USER or ORGANIZATION)';
+            COMMENT ON COLUMN api_key_audit.owner_user_id IS 'User who owned the API key';
+            COMMENT ON COLUMN api_key_audit.organization_id IS 'Organization the key belonged to';
+            COMMENT ON COLUMN api_key_audit.created_by IS 'User who originally created the key';
+            COMMENT ON COLUMN api_key_audit.created_at IS 'Original creation timestamp of the key';
+            COMMENT ON COLUMN api_key_audit.revoked_by IS 'User who revoked the key';
+            COMMENT ON COLUMN api_key_audit.revoked_at IS 'Timestamp when the key was revoked';
+            COMMENT ON COLUMN api_key_audit.total_requests IS 'Total requests made with the key before revocation';
+            COMMENT ON INDEX idx_api_key_audit_org IS 'Index for finding audit records by organization';
+            COMMENT ON INDEX idx_api_key_audit_user IS 'Index for finding audit records by user';
+            COMMENT ON INDEX idx_api_key_audit_revoked_at IS 'Index for time-based audit queries';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

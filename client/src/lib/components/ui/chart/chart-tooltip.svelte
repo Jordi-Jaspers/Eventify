@@ -2,7 +2,8 @@
 	import { getContext } from 'svelte';
 	import type { ChartConfig } from './types';
 
-	const config: ChartConfig = getContext('chart-config');
+	const getConfig = getContext<() => ChartConfig>('chart-config');
+	const config: ChartConfig = $derived(getConfig());
 
 	interface Props {
 		data?: Record<string, unknown>;

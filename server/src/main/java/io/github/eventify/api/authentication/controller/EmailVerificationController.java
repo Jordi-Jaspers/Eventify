@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,8 +40,8 @@ public class EmailVerificationController {
     @ResponseStatus(OK)
     @Operation(summary = "Verify the email address of a user.")
     @PostMapping(path = VERIFICATION_PATH)
-    public ResponseEntity<AuthenticationResponse> verifyEmail(@RequestParam("token") final String token) {
-        final User user = authenticationService.verifyEmail(token);
+    public ResponseEntity<AuthenticationResponse> verifyEmail(@RequestParam("token") final String token, final HttpServletRequest request) {
+        final User user = authenticationService.verifyEmail(token, request);
         return ResponseEntity.status(OK).body(userDetailsMapper.toUserResponse(user));
     }
 

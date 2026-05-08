@@ -16,6 +16,7 @@
 		service: DataTableService<T>;
 		row: Snippet<[T]>;
 		empty?: Snippet;
+		headerActions?: Snippet;
 		skeletonRows?: number;
 		title?: string;
 		description?: string;
@@ -27,6 +28,7 @@
 		service,
 		row,
 		empty,
+		headerActions,
 		skeletonRows = 5,
 		title,
 		description,
@@ -57,36 +59,43 @@
 
 <!-- Filters Card -->
 {#if hasFilterableColumns}
-	<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl mb-6">
-		<CardContent class="pt-6">
-			<DataTableFilters
-				{columns}
-				filters={service.filters}
-				onFilterChange={service.setFilter}
-				onClearAll={service.clearAllFilters}
-			/>
-		</CardContent>
-	</Card>
+	<div class="rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg mb-6 px-4 py-3">
+		<DataTableFilters
+			{columns}
+			filters={service.filters}
+			onFilterChange={service.setFilter}
+			onClearAll={service.reset}
+		/>
+	</div>
 {/if}
 
 <!-- Main Table Card -->
-<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl">
+<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
 	{#if title || description}
 		<CardHeader>
-			{#if title}
-				<div class="flex items-center gap-2">
-					{#if icon}
-						{@const IconComponent = icon}
-						<IconComponent class="w-5 h-5 text-primary" />
+			<div class="flex items-center justify-between">
+				<div class="flex-1">
+					{#if title}
+						<div class="flex items-center gap-2">
+							{#if icon}
+								{@const IconComponent = icon}
+								<IconComponent class="w-5 h-5 text-primary" />
+							{/if}
+							<CardTitle class="text-xl">{title}</CardTitle>
+						</div>
 					{/if}
-					<CardTitle class="text-xl">{title}</CardTitle>
+					{#if description}
+						<CardDescription>{description}</CardDescription>
+					{:else if !service.loading}
+						<CardDescription>{service.showingRange}</CardDescription>
+					{/if}
 				</div>
-			{/if}
-			{#if description}
-				<CardDescription>{description}</CardDescription>
-			{:else if !service.loading}
-				<CardDescription>{service.showingRange}</CardDescription>
-			{/if}
+				{#if headerActions}
+					<div class="flex items-center gap-2">
+						{@render headerActions()}
+					</div>
+				{/if}
+			</div>
 		</CardHeader>
 	{/if}
 
@@ -103,7 +112,7 @@
 			{/if}
 		{:else}
 			<!-- Data Table -->
-			<div class="space-y-2">
+			<div class="rounded-lg border border-border/50 overflow-hidden">
 				<!-- Table Header -->
 				<DataTableHeader
 					{columns}
@@ -113,9 +122,11 @@
 				/>
 
 				<!-- Table Rows -->
-				{#each service.items as item (item)}
-					{@render row(item)}
-				{/each}
+				<div class="divide-y divide-border/30">
+					{#each service.items as item (item)}
+						{@render row(item)}
+					{/each}
+				</div>
 			</div>
 
 			<!-- Pagination -->

@@ -1,0 +1,24 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202505031000-PRD-add-session-fields-to-token.xml">
+
+    <changeSet id="202505031000-PRD-add-session-fields-to-token-1" author="backend-agent">
+        <comment>Add session tracking columns to token table</comment>
+        <sql>
+            ALTER TABLE token ADD COLUMN IF NOT EXISTS device_info VARCHAR(255);
+            ALTER TABLE token ADD COLUMN IF NOT EXISTS user_agent VARCHAR(512);
+            ALTER TABLE token ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45);
+            ALTER TABLE token ADD COLUMN IF NOT EXISTS last_active_at TIMESTAMPTZ;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202505031000-PRD-add-session-fields-to-token-2" author="backend-agent">
+        <comment>Add index for session listing by user, type, and last active time</comment>
+        <sql>
+            CREATE INDEX IF NOT EXISTS idx_token_user_type_lastactive ON token (user_id, type, last_active_at);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

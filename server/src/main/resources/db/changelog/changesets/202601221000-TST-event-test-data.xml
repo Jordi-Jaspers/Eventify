@@ -1,0 +1,235 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601221000-TST-event-test-data.xml">
+
+    <!-- ==================== SMALL DATASET (tst context, excludes lds) ==================== -->
+    <!-- ~2000 events for admin user only: sufficient for UI testing, fast to insert -->
+    
+    <changeSet id="202601221000-TST-event-test-data-small-1" author="jordi.jaspers" context="tst and !lds">
+        <comment>Insert small test dataset: 7 days of events with variance for admin user's channels only (~2000 events)</comment>
+        <sql><![CDATA[
+            -- Get admin user ID (first user with ADMIN role)
+            WITH admin_user AS (
+                SELECT id FROM "user" WHERE role = 'ADMIN' ORDER BY id LIMIT 1
+            ),
+            -- Generate time series with varying intervals to simulate realistic traffic patterns
+            time_slots AS (
+                SELECT generate_series(
+                    (NOW() - INTERVAL '7 days')::timestamptz,
+                    NOW()::timestamptz,
+                    INTERVAL '5 minutes'
+                ) AS slot
+            ),
+            -- Random subset of time slots (roughly 50% to add variance)
+            random_slots AS (
+                SELECT slot FROM time_slots WHERE random() < 0.5
+            ),
+            -- Pre-generate severity to ensure message matches
+            event_data AS (
+                SELECT
+                    c.id AS channel_id,
+                    c.name AS channel_name,
+                    rs.slot,
+                    -- Weighted severity: 70% OK, 20% WARNING, 10% CRITICAL
+                    CASE 
+                        WHEN random() < 0.70 THEN 'OK'
+                        WHEN random() < 0.90 THEN 'WARNING'
+                        ELSE 'CRITICAL'
+                    END AS severity
+                FROM
+                    channel c
+                    CROSS JOIN random_slots rs
+                    CROSS JOIN admin_user au
+                WHERE
+                    c.status = 'ACTIVE'
+                    AND c.user_id = au.id
+                    AND c.organization_id IS NULL
+            )
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                ed.channel_id,
+                ed.severity,
+                -- Varied titles based on channel type
+                CASE ed.channel_name
+                    WHEN 'Backend Errors' THEN 
+                        (ARRAY['API Response', 'Database Query', 'Service Call', 'Cache Hit', 'Request Processed'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Frontend Analytics' THEN 
+                        (ARRAY['Page View', 'User Click', 'Form Submit', 'Navigation', 'Session Start'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Deployment Events' THEN 
+                        (ARRAY['Build Started', 'Tests Passed', 'Deploy Complete', 'Rollback', 'Health Check'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Security Alerts' THEN 
+                        (ARRAY['Login Attempt', 'Token Refresh', 'Access Denied', 'Rate Limited', 'Session Valid'])[FLOOR(random() * 5 + 1)::int]
+                    ELSE 
+                        (ARRAY['Event Received', 'Status Update', 'Metric Report', 'Heartbeat', 'Notification'])[FLOOR(random() * 5 + 1)::int]
+                END AS title,
+                -- Message matches severity
+                CASE ed.severity
+                    WHEN 'CRITICAL' THEN 'Critical issue detected - immediate attention required for ' || ed.channel_name
+                    WHEN 'WARNING' THEN 'Warning threshold exceeded in ' || ed.channel_name || ' - monitoring closely'
+                    ELSE 'Normal operation for ' || ed.channel_name || ' - all systems nominal'
+                END AS message,
+                -- Rich metadata with variance
+                jsonb_build_object(
+                    'source', (ARRAY['api-server', 'worker-1', 'worker-2', 'scheduler', 'gateway'])[FLOOR(random() * 5 + 1)::int],
+                    'channel_name', ed.channel_name,
+                    'environment', (ARRAY['production', 'staging', 'development'])[FLOOR(random() * 3 + 1)::int],
+                    'region', (ARRAY['us-east-1', 'eu-west-1', 'ap-southeast-1'])[FLOOR(random() * 3 + 1)::int],
+                    'cpu_usage', ROUND((random() * 80 + 10)::numeric, 1),
+                    'memory_mb', (random() * 4096)::int,
+                    'response_time_ms', (random() * 500)::int,
+                    'request_count', (random() * 1000)::int
+                ) AS metadata,
+                -- Add some jitter to timestamps (±2 minutes)
+                ed.slot + (random() * INTERVAL '4 minutes' - INTERVAL '2 minutes') AS timestamp
+            FROM event_data ed
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="202601221000-TST-event-test-data-small-2" author="jordi.jaspers" context="tst and !lds">
+        <comment>Insert burst events to simulate incidents for admin's channels</comment>
+        <sql><![CDATA[
+            -- Simulate 3 incident bursts in the last 7 days for realism
+            WITH admin_user AS (
+                SELECT id FROM "user" WHERE role = 'ADMIN' ORDER BY id LIMIT 1
+            ),
+            incident_times AS (
+                SELECT unnest(ARRAY[
+                    NOW() - INTERVAL '6 days' + INTERVAL '14 hours',
+                    NOW() - INTERVAL '3 days' + INTERVAL '9 hours',
+                    NOW() - INTERVAL '1 day' + INTERVAL '16 hours'
+                ]) AS incident_start
+            ),
+            burst_events AS (
+                SELECT 
+                    it.incident_start + (n * INTERVAL '30 seconds') AS event_time,
+                    n
+                FROM incident_times it
+                CROSS JOIN generate_series(0, 20) AS n
+            )
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                c.id AS channel_id,
+                CASE 
+                    WHEN be.n < 5 THEN 'CRITICAL'
+                    WHEN be.n < 15 THEN 'WARNING'
+                    ELSE 'OK'
+                END AS severity,
+                CASE 
+                    WHEN be.n < 5 THEN 'Incident Detected'
+                    WHEN be.n < 15 THEN 'Recovery In Progress'
+                    ELSE 'Service Restored'
+                END AS title,
+                CASE 
+                    WHEN be.n < 5 THEN 'Critical incident detected in ' || c.name || ' - escalating to on-call team'
+                    WHEN be.n < 15 THEN 'Recovery actions in progress for ' || c.name || ' - monitoring metrics'
+                    ELSE 'Service fully restored for ' || c.name || ' - incident resolved'
+                END AS message,
+                jsonb_build_object(
+                    'source', 'incident-detector',
+                    'channel_name', c.name,
+                    'incident_id', 'INC-' || LPAD((random() * 9999)::int::text, 4, '0'),
+                    'severity_level', CASE WHEN be.n < 5 THEN 'P1' WHEN be.n < 15 THEN 'P2' ELSE 'P3' END,
+                    'affected_users', (random() * 1000)::int
+                ) AS metadata,
+                be.event_time AS timestamp
+            FROM
+                channel c
+                CROSS JOIN burst_events be
+                CROSS JOIN admin_user au
+            WHERE
+                c.status = 'ACTIVE'
+                AND c.user_id = au.id
+                AND c.organization_id IS NULL  -- Only personal channels
+                AND c.name IN ('Backend Errors', 'Security Alerts')
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <!-- ==================== LARGE DATASET (lds context only) ==================== -->
+    <!-- Millions of events: for performance testing and realistic data scenarios -->
+
+    <changeSet id="202601221000-TST-event-test-data-1" author="jordi.jaspers" context="lds">
+        <comment>Insert test events for channels using generate_series. Creates 5 months of historical data at 5-second intervals with varied severities.</comment>
+        <sql><![CDATA[
+            -- Insert events for all active channels using generate_series
+            -- This creates events from 5 months ago to 1 month ago at 5-second intervals
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                c.id AS channel_id,
+                (ARRAY['OK', 'OK', 'OK', 'OK', 'OK', 'OK', 'OK', 'WARNING', 'WARNING', 'CRITICAL'])[FLOOR(random() * 10 + 1)::int] AS severity,
+                'Event at ' || TO_CHAR(stamp, 'YYYY-MM-DD HH24:MI:SS') AS title,
+                'Test event generated for channel ' || c.name || ' at ' || stamp AS message,
+                jsonb_build_object(
+                    'source', 'test-data-generator',
+                    'channel_name', c.name,
+                    'random_value', (random() * 1000)::int
+                ) AS metadata,
+                stamp AS timestamp
+            FROM
+                channel c
+                CROSS JOIN LATERAL generate_series(
+                    (NOW() - INTERVAL '5 months')::timestamptz,
+                    (NOW() - INTERVAL '1 month')::timestamptz,
+                    INTERVAL '5 seconds'
+                ) AS stamp
+            WHERE
+                c.status = 'ACTIVE'
+                AND c.id IN (
+                    -- Limit to first 3 channels to avoid excessive data
+                    SELECT id FROM channel WHERE status = 'ACTIVE' ORDER BY id LIMIT 3
+                )
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="202601221000-TST-event-test-data-2" author="jordi.jaspers" context="lds">
+        <comment>Insert additional recent events for testing with higher frequency.</comment>
+        <sql><![CDATA[
+            -- Insert more recent events (last month) at 1-minute intervals for all active channels
+            -- Pre-generate severity to ensure message matches
+            WITH event_data AS (
+                SELECT
+                    c.id AS channel_id,
+                    c.name AS channel_name,
+                    stamp,
+                    (ARRAY['OK', 'OK', 'OK', 'OK', 'OK', 'WARNING', 'WARNING', 'CRITICAL'])[FLOOR(random() * 8 + 1)::int] AS severity
+                FROM
+                    channel c
+                    CROSS JOIN LATERAL generate_series(
+                        (NOW() - INTERVAL '1 month')::timestamptz,
+                        NOW()::timestamptz,
+                        INTERVAL '1 minute'
+                    ) AS stamp
+                WHERE
+                    c.status = 'ACTIVE'
+            )
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                ed.channel_id,
+                ed.severity,
+                CASE ed.severity
+                    WHEN 'CRITICAL' THEN 'Critical alert triggered'
+                    WHEN 'WARNING' THEN 'Warning threshold exceeded'
+                    ELSE 'System health check passed'
+                END AS title,
+                CASE ed.severity
+                    WHEN 'CRITICAL' THEN 'Critical issue detected in channel ' || ed.channel_name || '. Immediate attention required.'
+                    WHEN 'WARNING' THEN 'Warning: Metrics approaching threshold in ' || ed.channel_name
+                    ELSE 'All systems nominal for ' || ed.channel_name
+                END AS message,
+                jsonb_build_object(
+                    'source', 'test-data-generator',
+                    'channel_name', ed.channel_name,
+                    'cpu_usage', (random() * 100)::int,
+                    'memory_usage', (random() * 100)::int,
+                    'response_time_ms', (random() * 500)::int
+                ) AS metadata,
+                ed.stamp AS timestamp
+            FROM event_data ed
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+</databaseChangeLog>

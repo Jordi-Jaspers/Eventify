@@ -1,0 +1,113 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601251000-TST-watchlist-groups-test-data.xml">
+
+    <changeSet id="202601251000-TST-watchlist-groups-test-data-1" author="jordi.jaspers" context="tst">
+        <comment>Update existing watchlists with channel groups for testing grouped view functionality.</comment>
+        <sql>
+            -- Update "Production Monitoring" watchlist (admin id=1):
+            -- Group Backend Errors + Security Alerts as "Critical Services"
+            -- Keep Deployment Events as standalone channel
+            UPDATE watchlist
+            SET configuration = jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1)
+                    ),
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+                            'name', 'Critical Services',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Backend Errors' AND user_id = 1),
+                                (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1)
+                            )
+                        )
+                    )
+                ),
+                updated_at = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+            WHERE name = 'Production Monitoring' AND user_id = 1;
+
+            -- Update "All Channels Overview" watchlist (admin id=1):
+            -- Group related channels together, keep some standalone
+            -- Group 1: "Application" (Backend Errors + Frontend Analytics)
+            -- Group 2: "Operations" (Deployment Events + Security Alerts)
+            -- Standalone: Marketing Campaigns, Test Channel
+            UPDATE watchlist
+            SET configuration = jsonb_build_object(
+                    'channelIds', jsonb_build_array(
+                        (SELECT id FROM channel WHERE name = 'Marketing Campaigns' AND user_id = 1),
+                        (SELECT id FROM channel WHERE name = 'Test Channel' AND user_id = 1)
+                    ),
+                    'groups', jsonb_build_array(
+                        jsonb_build_object(
+                            'id', 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
+                            'name', 'Application',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Backend Errors' AND user_id = 1),
+                                (SELECT id FROM channel WHERE name = 'Frontend Analytics' AND user_id = 1)
+                            )
+                        ),
+                        jsonb_build_object(
+                            'id', 'c3d4e5f6-a7b8-9012-cdef-345678901234',
+                            'name', 'Operations',
+                            'channelIds', jsonb_build_array(
+                                (SELECT id FROM channel WHERE name = 'Deployment Events' AND user_id = 1),
+                                (SELECT id FROM channel WHERE name = 'Security Alerts' AND user_id = 1)
+                            )
+                        )
+                    )
+                ),
+                updated_at = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+            WHERE name = 'All Channels Overview' AND user_id = 1;
+
+            -- Update "E-commerce Operations" watchlist (David):
+            -- Group both channels as "Customer Experience"
+            UPDATE watchlist
+            SET configuration = (
+                    SELECT jsonb_build_object(
+                        'channelIds', '[]'::jsonb,
+                        'groups', jsonb_build_array(
+                            jsonb_build_object(
+                                'id', 'd4e5f6a7-b8c9-0123-def0-456789012345',
+                                'name', 'Customer Experience',
+                                'channelIds', jsonb_build_array(
+                                    (SELECT id FROM channel WHERE name = 'E-commerce Orders' AND user_id = u.id),
+                                    (SELECT id FROM channel WHERE name = 'Customer Support Tickets' AND user_id = u.id)
+                                )
+                            )
+                        )
+                    )
+                    FROM "user" u WHERE u.email = 'david.davis@example.com'
+                ),
+                updated_at = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+            WHERE name = 'E-commerce Operations'
+              AND user_id = (SELECT id FROM "user" WHERE email = 'david.davis@example.com');
+
+            -- Update "Payment Dashboard" watchlist (Alice):
+            -- Group Payment Processing + Mobile App Events as "Financial"
+            UPDATE watchlist
+            SET configuration = (
+                    SELECT jsonb_build_object(
+                        'channelIds', '[]'::jsonb,
+                        'groups', jsonb_build_array(
+                            jsonb_build_object(
+                                'id', 'e5f6a7b8-c9d0-1234-ef01-567890123456',
+                                'name', 'Financial',
+                                'channelIds', jsonb_build_array(
+                                    (SELECT id FROM channel WHERE name = 'Payment Processing' AND user_id = u.id),
+                                    (SELECT id FROM channel WHERE name = 'Mobile App Events' AND user_id = u.id)
+                                )
+                            )
+                        )
+                    )
+                    FROM "user" u WHERE u.email = 'alice.anderson@example.com'
+                ),
+                updated_at = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+            WHERE name = 'Payment Dashboard'
+              AND user_id = (SELECT id FROM "user" WHERE email = 'alice.anderson@example.com');
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

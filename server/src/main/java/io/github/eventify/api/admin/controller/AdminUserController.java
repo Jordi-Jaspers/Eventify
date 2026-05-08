@@ -2,10 +2,9 @@ package io.github.eventify.api.admin.controller;
 
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
-import io.github.eventify.api.user.model.mapper.UserMapper;
 import io.github.eventify.api.user.model.request.UpdateRoleRequest;
 import io.github.eventify.api.user.model.response.UserDetailsResponse;
-import io.github.eventify.api.user.model.response.UserResponse;
+import io.github.eventify.api.user.service.PasswordService;
 import io.github.eventify.api.user.service.UserService;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
@@ -37,7 +36,7 @@ public class AdminUserController {
 
     private final UserDetailsMapper userDetailsMapper;
 
-    private final UserMapper userMapper;
+    private final PasswordService passwordService;
 
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
@@ -47,9 +46,9 @@ public class AdminUserController {
         produces = APPLICATION_JSON_VALUE,
         consumes = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<PageResource<UserResponse>> searchUsers(@RequestBody final SortablePageInput input) {
+    public ResponseEntity<PageResource<UserDetailsResponse>> searchUsers(@RequestBody final SortablePageInput input) {
         final Page<User> page = userService.searchUsers(input);
-        return ResponseEntity.status(OK).body(userMapper.toPageResource(page));
+        return ResponseEntity.status(OK).body(userDetailsMapper.toPageResource(page));
     }
 
     @ResponseStatus(OK)
@@ -90,5 +89,17 @@ public class AdminUserController {
         @RequestBody final UpdateRoleRequest request) {
         final User user = userService.updateAuthority(id, request.getRole());
         return ResponseEntity.status(OK).body(userDetailsMapper.toResourceObject(user));
+    }
+
+    @ResponseStatus(OK)
+    @Operation(summary = "Force password reset for a user (sends reset email)")
+    @PostMapping(
+        path = ADMIN_USER_FORCE_RESET_PATH,
+        produces = APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public ResponseEntity<Void> forcePasswordReset(@PathVariable final Long id) {
+        passwordService.forcePasswordReset(id);
+        return ResponseEntity.status(OK).build();
     }
 }

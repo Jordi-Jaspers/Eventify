@@ -1,0 +1,67 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601201000-PRD-event-table.xml">
+
+    <changeSet id="202601201000-PRD-event-table-1" author="backend-agent">
+        <comment>Creating event table for time-series event data.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS event
+            (
+                id              BIGSERIAL,
+                channel_id      INTEGER NOT NULL,
+                severity        TEXT NOT NULL,
+                title           TEXT NOT NULL,
+                message         TEXT NULL,
+                metadata        JSONB NULL,
+                timestamp       TIMESTAMPTZ NOT NULL,
+                PRIMARY KEY (id, timestamp)
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601201000-PRD-event-table-2" author="backend-agent">
+        <comment>Converting event table to TimescaleDB hypertable.</comment>
+        <sql>
+            SELECT create_hypertable('event', 'timestamp', chunk_time_interval => INTERVAL '7 days');
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601201000-PRD-event-table-3" author="backend-agent">
+        <comment>Creating indexes for event table.</comment>
+        <sql>
+            CREATE INDEX idx_event_channel_time ON event(channel_id, timestamp DESC);
+            CREATE INDEX idx_event_severity ON event(severity);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601201000-PRD-event-table-4" author="backend-agent">
+        <comment>Configuring TimescaleDB compression for event table.</comment>
+        <sql>
+            ALTER TABLE event SET (
+                timescaledb.compress,
+                timescaledb.compress_segmentby = 'channel_id',
+                timescaledb.compress_orderby = 'timestamp DESC'
+            );
+            SELECT add_compression_policy('event', INTERVAL '90 days');
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601201000-PRD-event-table-5" author="backend-agent">
+        <comment>Adding documentation for event table, columns, and indexes.</comment>
+        <sql>
+            COMMENT ON TABLE event IS 'Stores events for channels, optimized as TimescaleDB hypertable';
+            COMMENT ON COLUMN event.id IS 'Unique identifier for the event';
+            COMMENT ON COLUMN event.channel_id IS 'Channel this event belongs to';
+            COMMENT ON COLUMN event.severity IS 'Event severity level (OK, WARNING, CRITICAL)';
+            COMMENT ON COLUMN event.title IS 'Event title';
+            COMMENT ON COLUMN event.message IS 'Optional event message';
+            COMMENT ON COLUMN event.metadata IS 'Additional metadata as JSON';
+            COMMENT ON COLUMN event.timestamp IS 'Timestamp when the event occurred';
+            COMMENT ON INDEX idx_event_channel_time IS 'Composite index for querying events by channel and time';
+            COMMENT ON INDEX idx_event_severity IS 'Index for filtering events by severity';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -55,8 +56,11 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     /**
      * Delete all organizations created by the given list of user IDs.
      */
-    @Modifying
-    @Transactional
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Query(
         """
             DELETE FROM Organization o
@@ -64,6 +68,19 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
             """
     )
     void deleteAllByCreatedBy(@Param("ids") List<Long> ids);
+
+    /**
+     * Delete all organizations with names containing the given pattern.
+     *
+     * @param namePattern the name pattern
+     */
+    @Modifying(
+        clearAutomatically = true,
+        flushAutomatically = true
+    )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("DELETE FROM Organization o WHERE o.name LIKE %:namePattern%")
+    void deleteAllByNameContaining(@Param("namePattern") String namePattern);
 
     /**
      * Hard Delete all organizations.

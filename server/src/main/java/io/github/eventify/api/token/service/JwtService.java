@@ -71,20 +71,26 @@ public class JwtService {
             .claim(VALIDATED, userDetails.isValidated())
             .build();
 
-        return new Token(
-            encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue(),
-            OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC),
-            ACCESS_TOKEN,
-            (User) user
-        );
+        return Token.builder()
+            .rawValue(encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue())
+            .expiresAt(OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC))
+            .type(ACCESS_TOKEN)
+            .user((User) user)
+            .build();
     }
 
     /**
      * Generate a Refresh JWT token for a user with the given claims.
+     *
+     * @param user       the user to generate the token for
+     * @param rememberMe if {@code true}, uses the remember-me token lifetime (e.g. 30d via
+     *                   {@code security.remember-me-token}); otherwise uses the standard refresh token lifetime
+     *                   (e.g. 7d via {@code security.refresh-token}).
      */
-    public <T extends UserDetails> Token generateRefreshToken(final T user) {
+    public <T extends UserDetails> Token generateRefreshToken(final T user, final boolean rememberMe) {
         final OffsetDateTime now = OffsetDateTime.now(UTC);
-        final TokenProperties properties = securityProperties.getRefreshToken();
+        final TokenProperties properties = resolveRefreshTokenProperties(rememberMe);
+
         final JwtClaimsSet claimsSet = JwtClaimsSet.builder()
             .id(UUID.randomUUID().toString())
             .subject(user.getUsername())
@@ -94,12 +100,22 @@ public class JwtService {
             .expiresAt(now.plus(properties.getLifetime(), properties.getTimeUnit()).toInstant())
             .build();
 
-        return new Token(
-            encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue(),
-            OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC),
-            REFRESH_TOKEN,
-            (User) user
-        );
+        return Token.builder()
+            .rawValue(encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue())
+            .expiresAt(OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC))
+            .type(REFRESH_TOKEN)
+            .user((User) user)
+            .build();
+    }
+
+    /**
+     * Resolves which configured token properties (lifetime + time unit) should govern a refresh token.
+     * Encapsulates the {@code remember-me} vs. standard refresh-token branch in a single place.
+     */
+    private TokenProperties resolveRefreshTokenProperties(final boolean rememberMe) {
+        return rememberMe
+            ? securityProperties.getRememberMeToken()
+            : securityProperties.getRefreshToken();
     }
 
     // ================================ Token Extraction ================================

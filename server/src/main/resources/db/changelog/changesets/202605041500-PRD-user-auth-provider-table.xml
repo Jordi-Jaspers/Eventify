@@ -1,0 +1,62 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202605041500-PRD-user-auth-provider-table.xml">
+
+    <changeSet id="202605041500-PRD-user-auth-provider-table-1" author="eventify.dev">
+        <comment>Create user_auth_provider table to track linked authentication providers per user.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS user_auth_provider (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+                provider VARCHAR(20) NOT NULL,
+                provider_email VARCHAR(255) NOT NULL,
+                linked_at TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                CONSTRAINT uq_user_auth_provider UNIQUE (user_id, provider)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_user_auth_provider_user_id ON user_auth_provider (user_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605041500-PRD-user-auth-provider-table-2" author="eventify.dev">
+        <comment>Add has_password column to user table to track whether the user has a real password set.</comment>
+        <sql>
+            ALTER TABLE "user" ADD COLUMN IF NOT EXISTS has_password BOOLEAN NOT NULL DEFAULT false;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605041500-PRD-user-auth-provider-table-3" author="eventify.dev">
+        <comment>Backfill has_password=true for all existing users (assume they registered with password).</comment>
+        <sql>
+            UPDATE "user" SET has_password = true WHERE has_password = false;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605041500-PRD-user-auth-provider-table-4" author="eventify.dev">
+        <comment>Backfill LOCAL UserAuthProvider records for all existing users.</comment>
+        <sql>
+            INSERT INTO user_auth_provider (user_id, provider, provider_email, linked_at)
+            SELECT id, 'LOCAL', email, CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+            FROM "user"
+            ON CONFLICT (user_id, provider) DO NOTHING;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605041500-PRD-user-auth-provider-table-5" author="eventify.dev">
+        <comment>Add documentation comments for user_auth_provider table and columns.</comment>
+        <sql>
+            COMMENT ON TABLE user_auth_provider IS 'Tracks linked authentication providers for each user (LOCAL, GOOGLE, GITHUB)';
+            COMMENT ON COLUMN user_auth_provider.id IS 'Unique identifier for the auth provider record';
+            COMMENT ON COLUMN user_auth_provider.user_id IS 'Reference to the user who owns this provider link';
+            COMMENT ON COLUMN user_auth_provider.provider IS 'Authentication provider type (LOCAL, GOOGLE, GITHUB)';
+            COMMENT ON COLUMN user_auth_provider.provider_email IS 'Email address associated with this provider';
+            COMMENT ON COLUMN user_auth_provider.linked_at IS 'Timestamp when this provider was linked';
+            COMMENT ON INDEX idx_user_auth_provider_user_id IS 'Index for finding all providers for a given user';
+            COMMENT ON COLUMN "user".has_password IS 'Whether the user has a real password set (false for OAuth2-only users)';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

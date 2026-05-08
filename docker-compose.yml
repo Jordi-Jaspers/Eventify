@@ -13,10 +13,25 @@ services:
       - "5432:5432"
     environment:
       TZ: Europe/Amsterdam
-      POSTGRES_PASSWORD: root
       POSTGRES_USER: root
+      POSTGRES_PASSWORD: postgres
     volumes:
-      - timescaledb_data:/var/lib/postgresql/data  # Persistent data storage for TimescaleDB.
+      - timescaledb_data:/var/lib/postgresql/data
+
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/jaeger:latest
+    restart: unless-stopped
+    networks:
+      - internal
+    ports:
+      - "16686:16686"   # UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    volumes:
+      - jaeger_data:/data
 
   inbucket:
     container_name: inbucket
@@ -29,24 +44,9 @@ services:
       - "2500:2500"  # SMTP service port (correct port mapping).
       - "1100:1100"  # POP3 service port.
     volumes:
-      - inbucket_data:/data  # Persistent storage for Inbucket's data.
-
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:4-management
-    restart: unless-stopped
-    networks:
-      - internal
-    ports:
-      - "5672:5672"    # AMQP protocol port
-      - "15672:15672"  # Management UI port
-    environment:
-      RABBITMQ_DEFAULT_USER: root
-      RABBITMQ_DEFAULT_PASS: root
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq  # Persistent storage for RabbitMQ data
+      - inbucket_data:/data
 
 volumes:
-  timescaledb_data:  # Volume for TimescaleDB
-  inbucket_data:     # Volume for Inbucket
-  rabbitmq_data:     # Volume for RabbitMQ
+  timescaledb_data:
+  inbucket_data:
+  jaeger_data:

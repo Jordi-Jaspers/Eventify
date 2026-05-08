@@ -6,22 +6,22 @@ import io.github.eventify.api.token.repository.TokenRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.exception.InvalidJwtException;
 import io.github.eventify.common.exception.InvalidTokenException;
+import io.github.eventify.common.util.HashUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import jakarta.servlet.http.HttpServletRequest;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static io.github.eventify.api.token.model.TokenType.*;
+import static io.github.eventify.api.token.model.TokenType.RESET_PASSWORD_TOKEN;
+import static io.github.eventify.api.token.model.TokenType.USER_VALIDATION_TOKEN;
 import static io.github.eventify.common.exception.ApiErrorCode.TOKEN_NOT_FOUND_ERROR;
-import static java.time.ZoneOffset.UTC;
-import static java.util.Objects.nonNull;
-import static java.util.concurrent.TimeUnit.MINUTES;
+import static io.github.eventify.common.util.TimeProvider.now;
 
 /**
  * A service class which interacts with the token table in the database.
@@ -37,63 +37,125 @@ public class TokenService {
     private final JwtService jwtService;
 
     /**
-     * Remove all expired tokens from the database. This method runs every 5 minutes to clean up expired tokens
-     * in a single batch operation. The operation runs in a new transaction to avoid impacting other database operations.
+     * Generate authorization tokens for a user, capturing device info from the request. Uses the familyId to find and reuse an existing
+     * session row (same-session-replace), or creates a new one.
+     *
+     * @param user       the user to generate tokens for
+     * @param request    the HTTP request to extract device info from (may be {@code null})
+     * @param rememberMe if {@code true}, the refresh token uses the remember-me lifetime
+     * @param familyId   the device/session family identifier (from persistent device cookie)
+     * @return the user with new tokens set
      */
-    @Scheduled(
-        fixedDelay = 5,
-        timeUnit = MINUTES
-    )
-    public void deleteExpiredTokens() {
-        final int deletedTokens = tokenRepository.deleteExpiredTokens();
-        log.debug("Successfully deleted '{}' expired tokens.", deletedTokens);
-    }
+    public User generateAuthorizationTokens(final User user, final HttpServletRequest request, final boolean rememberMe,
+        final UUID familyId) {
 
-    /**
-     * Generate an access token for a user. The access token is valid for 15 minutes.
-     */
-    public User generateAuthorizationTokens(final User user) {
-        invalidateTokensForUser(user, ACCESS_TOKEN, REFRESH_TOKEN);
+        final List<Token> existingSessions = tokenRepository.findByEmail(user.getEmail());
+        log.debug(
+            "Creating/updating session for '{}' of familyId '{}'; {} existing session(s)",
+            user.getEmail(),
+            familyId,
+            existingSessions.size()
+        );
 
         final Token accessToken = jwtService.generateAccessToken(user);
-        final Token refreshToken = tokenRepository.save(jwtService.generateRefreshToken(user));
+        final Token newRefreshToken = jwtService.generateRefreshToken(user, rememberMe);
+
+        final String rawRefreshValue = newRefreshToken.getRawValue();
+        final String refreshHash = HashUtil.sha256(rawRefreshValue);
+
+        final Token savedRefreshToken = tokenRepository.save(
+            upsertRefreshToken(newRefreshToken, rawRefreshValue, refreshHash, familyId, user, request)
+        );
+        savedRefreshToken.setRawValue(rawRefreshValue);
         log.info("Generated Access & Refresh tokens for user '{}'", user.getEmail());
 
-        user.setRefreshToken(refreshToken);
+        user.setRefreshToken(savedRefreshToken);
         user.setAccessToken(accessToken);
         return user;
     }
 
     /**
-     * Refreshes the access token using the refresh token.
-     *
-     * @param refreshToken the refresh token
-     * @return the user with refreshed tokens
+     * Convenience overload — generates tokens with a random familyId (for callers that don't manage device cookies).
      */
-    public User refresh(final String refreshToken) {
-        final Token token = findAuthorizationTokenByValue(refreshToken);
-        if (nonNull(token)) {
-            final User user = token.getUser();
-            log.info("Refreshing tokens for user '{}'", user.getUsername());
-            return generateAuthorizationTokens(user);
-        } else {
-            throw new InvalidJwtException();
-        }
+    public User generateAuthorizationTokens(final User user, final HttpServletRequest request, final boolean rememberMe) {
+        return generateAuthorizationTokens(user, request, rememberMe, UUID.randomUUID());
     }
 
     /**
-     * Generate a token which can be used for 24 hours.
+     * Convenience overload — generates tokens with rememberMe=false and a random familyId.
+     */
+    public User generateAuthorizationTokens(final User user, final HttpServletRequest request) {
+        return generateAuthorizationTokens(user, request, false, UUID.randomUUID());
+    }
+
+    /**
+     * Refreshes the access token using the refresh token, preserving device info on the rotated token.
+     *
+     * @param refreshToken the raw refresh token value
+     * @param request      the HTTP request (used to update {@code lastActiveAt})
+     * @return the user with refreshed tokens
+     */
+    public User refresh(final String refreshToken, final HttpServletRequest request) {
+        final String hash = HashUtil.sha256(refreshToken);
+        final Token existingToken = tokenRepository.findByValueHash(hash)
+            .filter(t -> t.getType().isAccessToken() || t.getType().isRefreshToken())
+            .orElse(null);
+
+        if (existingToken == null) {
+            throw new InvalidJwtException();
+        }
+
+        final User user = existingToken.getUser();
+        log.info("Refreshing tokens for user '{}'", user.getUsername());
+
+        final Token accessToken = jwtService.generateAccessToken(user);
+        // Intentional MVP downgrade: rotated refresh tokens never inherit remember-me lifetime.
+        final Token newRefreshToken = jwtService.generateRefreshToken(user, false);
+        newRefreshToken.inheritDeviceMetadataFrom(existingToken);
+        newRefreshToken.setLastActiveAt(now());
+
+        final String newRawValue = newRefreshToken.getRawValue();
+        final String newHash = HashUtil.sha256(newRawValue);
+        newRefreshToken.setValueHash(newHash);
+        newRefreshToken.setFamilyId(existingToken.getFamilyId());
+
+        // Delete only the old token
+        tokenRepository.delete(existingToken);
+        final Token savedRefreshToken = tokenRepository.save(newRefreshToken);
+        savedRefreshToken.setRawValue(newRawValue);
+
+        user.setRefreshToken(savedRefreshToken);
+        user.setAccessToken(accessToken);
+        return user;
+    }
+
+    /**
+     * Generate a token which can be used for 24 hours. For non-refresh tokens, the raw value is stored directly in valueHash (not hashed).
      */
     public Token generateToken(final User user, final TokenType type) {
         tokenRepository.invalidateTokensWithTypeForUser(List.of(type), user);
+        final String rawValue = UUID.randomUUID().toString();
         final Token token = Token.builder()
-            .value(UUID.randomUUID().toString())
+            .valueHash(rawValue)
+            .rawValue(rawValue)
+            .familyId(UUID.randomUUID())
             .type(type)
-            .expiresAt(OffsetDateTime.now(UTC).plusDays(1))
+            .expiresAt(now().plusDays(1))
             .user(user)
             .build();
         log.info("Generated '{}' token for user '{}'", type, user.getEmail());
-        return tokenRepository.save(token);
+        final Token saved = tokenRepository.save(token);
+        saved.setRawValue(rawValue);
+        return saved;
+    }
+
+    /**
+     * Delete a token by its id, no-op if not found.
+     *
+     * @param id the token id
+     */
+    public void deleteById(final Long id) {
+        tokenRepository.findById(id).ifPresent(tokenRepository::delete);
     }
 
     /**
@@ -112,33 +174,68 @@ public class TokenService {
     }
 
     /**
-     * Returns token details for the given token value if it exists.
+     * Returns token details for the given raw token value if it exists (access or refresh tokens only).
      */
-    public Token findAuthorizationTokenByValue(final String token) {
-        log.info("Searching jwt token with value '{}'", token);
-        return tokenRepository.findByValue(token)
+    public Token findAuthorizationTokenByValue(final String rawToken) {
+        log.info("Looking up authorization token by value");
+        final String hash = HashUtil.sha256(rawToken);
+        return tokenRepository.findByValueHash(hash)
             .filter(entry -> entry.getType().isAccessToken() || entry.getType().isRefreshToken())
             .orElse(null);
     }
 
     /**
-     * Returns token details for the given token value if it exists.
+     * Returns token details for the given raw token value if it exists (validation tokens only). Validation tokens store the raw value
+     * directly in valueHash (not hashed).
      */
     public Token findValidationTokenByValue(final String token) {
-        log.info("Searching validation token with value '{}'", token);
-        return tokenRepository.findByValue(token)
+        log.info("Looking up validation token by value");
+        return tokenRepository.findByValueHash(token)
             .filter(entry -> entry.getType().equals(USER_VALIDATION_TOKEN))
             .orElseThrow(() -> new InvalidTokenException(TOKEN_NOT_FOUND_ERROR));
     }
 
-
     /**
-     * Find a password reset token by its value.
+     * Find a password reset token by its value. Password reset tokens store the raw value directly in valueHash (not hashed).
      */
     public Token findPasswordResetTokenByValue(final String token) {
-        log.info("Searching token with value '{}'", token);
-        return tokenRepository.findByValue(token)
+        log.info("Looking up password reset token by value");
+        return tokenRepository.findByValueHash(token)
             .filter(entry -> entry.getType().equals(RESET_PASSWORD_TOKEN))
             .orElseThrow(() -> new InvalidTokenException(TOKEN_NOT_FOUND_ERROR));
+    }
+
+    private Token upsertRefreshToken(
+        final Token newRefreshToken,
+        final String rawValue,
+        final String hash,
+        final UUID familyId,
+        final User user,
+        final HttpServletRequest request) {
+        final UUID resolvedFamilyId = familyId != null ? familyId : UUID.randomUUID();
+        final Optional<Token> existingSession = familyId != null
+            ? tokenRepository.findByUserIdAndFamilyId(user.getId(), familyId)
+            : Optional.empty();
+
+        if (existingSession.isPresent()) {
+            final Token existing = existingSession.get();
+            existing.setValueHash(hash);
+            existing.setRawValue(rawValue);
+            existing.setExpiresAt(newRefreshToken.getExpiresAt());
+            existing.captureDeviceMetadata(request);
+            return existing;
+        }
+        applyHashAndDevice(newRefreshToken, hash, resolvedFamilyId, request);
+        return newRefreshToken;
+    }
+
+    private void applyHashAndDevice(
+        final Token token,
+        final String hash,
+        final UUID familyId,
+        final HttpServletRequest request) {
+        token.setValueHash(hash);
+        token.setFamilyId(familyId);
+        token.captureDeviceMetadata(request);
     }
 }

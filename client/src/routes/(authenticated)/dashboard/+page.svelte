@@ -1,7 +1,46 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
     import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '$lib/components/ui/card';
-    import {Clock, Shield, User} from '@lucide/svelte';
+    import { Badge } from '$lib/components/ui/badge';
+    import {Clock, Shield, User, Building2, Activity, Radio, AlertTriangle} from '@lucide/svelte';
     import {authStore} from '$lib/stores/auth';
+    import { organizationStore } from '$lib/stores/organization.svelte';
+    import type { UserOrganizationResponse, DashboardStatsResponse } from '$lib/api/models';
+    import { CLIENT_ROUTES } from '$lib/config/routes';
+    import {getOrganizationalRoleBadgeClass, getUserRoleBadgeClass} from '$lib/utils/role';
+    import { formatDate, formatRelativeTime } from '$lib/utils/date';
+    import { getDashboardStats, getErrorRateVariant } from '$lib/services/dashboard.service';
+    import { handleError } from '$lib/utils/error-handler';
+    import { toast } from 'svelte-sonner';
+    import { StatCard } from '$lib/components/ui/stat-card';
+    import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
+
+    const organizations: UserOrganizationResponse[] = $derived(organizationStore.organizations);
+    const loading: boolean = $derived(organizationStore.loading);
+    const hasOrganizations: boolean = $derived(organizations.length > 0);
+
+    let stats: DashboardStatsResponse | null = $state(null);
+    let statsLoading: boolean = $state(true);
+
+    $effect(() => {
+        loadStats();
+    });
+
+    async function loadStats() {
+        try {
+            stats = await getDashboardStats();
+        } catch (err) {
+            const { message } = handleError(err, 'Failed to load dashboard stats');
+            toast.error(message);
+        } finally {
+            statsLoading = false;
+        }
+    }
+
+    async function handleOrgClick(orgId: number): Promise<void> {
+        organizationStore.switchOrganization(orgId);
+        await goto(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(orgId).path);
+    }
 </script>
 
 <svelte:head>
@@ -40,17 +79,16 @@
                             <Shield class="w-3 h-3 text-primary"/>
                             <p class="text-xs text-muted-foreground">Role</p>
                         </div>
-                        <p class="font-medium text-foreground capitalize">{$authStore.user?.role?.toLowerCase() || 'N/A'}</p>
+                        <Badge class="{getUserRoleBadgeClass($authStore.user?.role)} font-medium text-foreground" >
+                            {$authStore.user?.role || 'N/A'}
+                        </Badge>
                     </div>
                 </div>
 
                 <!-- Status -->
                 <div class="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
                     <div class="flex items-center gap-3">
-                        <div class="relative">
-                            <div class="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
-                            <div class="absolute inset-0 h-3 w-3 rounded-full bg-green-500 animate-ping"></div>
-                        </div>
+                        <PulseIndicator variant="green" size="lg" />
                         <div>
                             <p class="text-sm font-medium text-green-400">Account Active</p>
                             <p class="text-xs text-muted-foreground">All systems operational</p>
@@ -61,63 +99,112 @@
             </CardContent>
         </Card>
 
-        <!-- Next Steps Card -->
-        <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-            <!-- Gradient overlay -->
-            <div class="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-primary/10 opacity-50"></div>
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+                title="Events Today"
+                value={stats?.eventsToday?.toLocaleString() ?? '0'}
+                icon={Activity}
+                variant="blue"
+                loading={statsLoading}
+            />
+            <StatCard
+                title="Active Channels"
+                value={stats?.activeChannels?.toString() ?? '0'}
+                icon={Radio}
+                variant="purple"
+                loading={statsLoading}
+            />
+            <StatCard
+                title="Error Rate"
+                value={`${(stats?.errorRate ?? 0).toFixed(1)}%`}
+                icon={AlertTriangle}
+                variant={getErrorRateVariant(stats?.errorRate ?? 0)}
+                loading={statsLoading}
+            />
+            <StatCard
+                title="Last Event"
+                value={formatRelativeTime(stats?.lastEventAt)}
+                icon={Clock}
+                variant="primary"
+                loading={statsLoading}
+            />
+        </div>
 
-            <CardHeader class="relative z-10">
-                <CardTitle class="text-xl">Getting Started</CardTitle>
-                <CardDescription>
-                    Your platform setup status
-                </CardDescription>
-            </CardHeader>
-            <CardContent class="relative z-10">
-                <ul class="space-y-3">
-                    <li class="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                        <div class="flex-shrink-0 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                            <svg class="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                      d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </div>
-                        <span class="text-sm text-foreground font-medium">Authentication flow is working</span>
-                    </li>
-                    <li class="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                        <div class="flex-shrink-0 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                            <svg class="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                      d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </div>
-                        <span class="text-sm text-foreground font-medium">Route protection is active</span>
-                    </li>
-                    <li class="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                        <div class="flex-shrink-0 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                            <svg class="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                      d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </div>
-                        <span class="text-sm text-foreground font-medium">Organization Managment is active</span>
-                    </li>
-                    <li class="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30">
-                        <div class="flex-shrink-0 w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-                            <div class="w-2 h-2 rounded-full bg-muted-foreground"></div>
-                        </div>
-                        <span class="text-sm text-muted-foreground">Events monitoring coming soon</span>
-                    </li>
-                    <li class="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30">
-                        <div class="flex-shrink-0 w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-                            <div class="w-2 h-2 rounded-full bg-muted-foreground"></div>
-                        </div>
-                        <span class="text-sm text-muted-foreground">Real-time updates coming soon</span>
-                    </li>
-                </ul>
-            </CardContent>
-        </Card>
+        <!-- Organizations Section -->
+        {#if hasOrganizations && !loading}
+            <div class="space-y-4">
+                <!-- Section Header -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold flex items-center gap-2">
+                            <Building2 class="w-5 h-5 text-primary"/>
+                            Your Organizations
+                        </h2>
+                        <p class="text-sm text-muted-foreground mt-1">
+                            {organizations.length} {organizations.length === 1 ? 'organization' : 'organizations'}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Organization Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {#each organizations as org (org.organizationId)}
+                        <button
+                            onclick={() => handleOrgClick(org.organizationId!)}
+                            class="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
+                            aria-label="Open {org.organizationName} dashboard"
+                        >
+                            <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg hover:shadow-primary/50 hover:scale-[1.02] transition-all duration-200 cursor-pointer h-full">
+                                <CardHeader class="space-y-1">
+                                    <CardTitle class="text-lg flex items-center gap-2">
+                                        <Building2 class="w-4 h-4 text-primary"/>
+                                        {org.organizationName}
+                                    </CardTitle>
+                                    <CardDescription>
+                                        <Badge class={getOrganizationalRoleBadgeClass(org.role)}>
+                                            {org.role}
+                                        </Badge>
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <Clock class="w-3 h-3"/>
+                                        <span>Member since {formatDate(org.joinedAt ?? '')}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </button>
+                    {/each}
+                </div>
+            </div>
+        {:else if loading}
+            <!-- Loading Skeletons -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold flex items-center gap-2">
+                            <Building2 class="w-5 h-5 text-primary"/>
+                            Your Organizations
+                        </h2>
+                        <div class="h-4 w-32 bg-muted/50 rounded animate-pulse mt-1"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {#each Array(3) as _, i}
+                        <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
+                            <CardHeader class="space-y-2">
+                                <div class="h-5 bg-muted/50 rounded animate-pulse w-3/4"></div>
+                                <div class="h-4 bg-muted/50 rounded animate-pulse w-1/2"></div>
+                            </CardHeader>
+                            <CardContent>
+                                <div class="h-3 bg-muted/50 rounded animate-pulse w-full"></div>
+                            </CardContent>
+                        </Card>
+                    {/each}
+                </div>
+            </div>
+        {/if}
     </div>
 </main>

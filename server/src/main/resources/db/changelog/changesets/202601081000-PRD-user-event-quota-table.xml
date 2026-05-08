@@ -1,0 +1,39 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202601081000-PRD-user-event-quota-table.xml">
+
+    <changeSet id="202601081000-PRD-user-event-quota-table-1" author="backend-agent">
+        <comment>Creating user_event_quota table for tracking monthly event usage limits.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS user_event_quota
+            (
+                id              SERIAL PRIMARY KEY,
+                user_id         INTEGER NOT NULL UNIQUE,
+                event_count     BIGINT NOT NULL DEFAULT 0,
+                period_start    TIMESTAMPTZ NOT NULL,
+                updated_at      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX idx_user_event_quota_user ON user_event_quota(user_id);
+            CREATE INDEX idx_user_event_quota_period ON user_event_quota(period_start);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202601081000-PRD-user-event-quota-table-2" author="backend-agent">
+        <comment>Adding documentation for user_event_quota table, columns, and indexes.</comment>
+        <sql>
+            COMMENT ON TABLE user_event_quota IS 'Tracks monthly event usage per user with 1000 event limit';
+            COMMENT ON COLUMN user_event_quota.id IS 'Unique identifier for the quota record';
+            COMMENT ON COLUMN user_event_quota.user_id IS 'User this quota record belongs to (one per user)';
+            COMMENT ON COLUMN user_event_quota.event_count IS 'Number of events sent in current period';
+            COMMENT ON COLUMN user_event_quota.period_start IS 'Start of current billing period (first of month)';
+            COMMENT ON COLUMN user_event_quota.updated_at IS 'Last time quota was updated';
+            COMMENT ON INDEX idx_user_event_quota_user IS 'Index for fast user quota lookups';
+            COMMENT ON INDEX idx_user_event_quota_period IS 'Index for period-based queries';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

@@ -3,6 +3,7 @@ package io.github.eventify.api.organization.model.mapper;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.response.OrganizationMembershipResponse;
 import io.github.eventify.api.organization.model.response.UserOrganizationResponse;
+import io.github.jframe.datasource.search.model.mapper.PageMapper;
 import io.github.jframe.util.mapper.DateTimeMapper;
 import io.github.jframe.util.mapper.config.SharedMapperConfig;
 
@@ -16,7 +17,7 @@ import org.mapstruct.Mapping;
     config = SharedMapperConfig.class,
     uses = DateTimeMapper.class
 )
-public abstract class OrganizationMembershipMapper {
+public abstract class OrganizationMembershipMapper extends PageMapper<OrganizationMembershipResponse, OrganizationMembership> {
 
     /**
      * Map membership to response with full user details.
@@ -24,6 +25,7 @@ public abstract class OrganizationMembershipMapper {
      * @param membership the membership entity
      * @return the response DTO
      */
+    @Override
     @Mapping(
         source = "user.id",
         target = "userId"
@@ -44,11 +46,17 @@ public abstract class OrganizationMembershipMapper {
         source = "organization.id",
         target = "organizationId"
     )
-    @Mapping(
-        source = "createdAt",
-        target = "joinedAt"
-    )
-    public abstract OrganizationMembershipResponse toMembershipResponse(OrganizationMembership membership);
+    public abstract OrganizationMembershipResponse toResourceObject(OrganizationMembership membership);
+
+    /**
+     * Map membership to response with full user details (alias for controller usage).
+     *
+     * @param membership the membership entity
+     * @return the response DTO
+     */
+    public OrganizationMembershipResponse toMembershipResponse(final OrganizationMembership membership) {
+        return toResourceObject(membership);
+    }
 
     /**
      * Map membership to user organization response.
@@ -67,10 +75,6 @@ public abstract class OrganizationMembershipMapper {
     @Mapping(
         source = "organization.slug",
         target = "organizationSlug"
-    )
-    @Mapping(
-        source = "createdAt",
-        target = "joinedAt"
     )
     public abstract UserOrganizationResponse toUserOrganizationResponse(OrganizationMembership membership);
 }

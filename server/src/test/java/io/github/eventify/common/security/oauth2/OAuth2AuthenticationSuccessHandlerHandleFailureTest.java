@@ -131,7 +131,7 @@ public class OAuth2AuthenticationSuccessHandlerHandleFailureTest extends UnitTes
         handler.onAuthenticationSuccess(request, response, authentication);
 
         // Then: Token service should not be called
-        verify(tokenService, never()).generateAuthorizationTokens(any());
+        verify(tokenService, never()).generateAuthorizationTokens(any(), any());
 
         // And: Cookie service should not be called
         verify(cookieService, never()).setAuthCookies(any(), any(), any());

@@ -15,13 +15,28 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "security")
 public class SecurityProperties {
 
+    /**
+     * Allowed origin patterns for CORS (e.g., "http://localhost:*").
+     * Supports wildcards when used with allowCredentials=true.
+     */
     @Value("${security.cors.allowed-origins}")
-    private String[] allowedOrigins;
+    private String[] allowedOrigins = {
+        "http://localhost:*",
+    };
 
     private TokenProperties accessToken;
 
     private TokenProperties refreshToken;
 
+    private TokenProperties rememberMeToken;
+
     private BootstrapProperties bootstrap;
+
+    /**
+     * Whether to set the {@code Secure} flag on authentication cookies.
+     * Should be {@code true} in production (HTTPS) and {@code false} in local development (HTTP).
+     * Defaults to {@code true}.
+     */
+    private boolean secureCookies = true;
 
 }

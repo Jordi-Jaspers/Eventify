@@ -10,7 +10,12 @@ import io.github.eventify.api.organization.model.response.OrganizationMembership
 import io.github.eventify.api.organization.model.response.UserOrganizationResponse;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
+import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
+import io.github.jframe.datasource.search.model.resource.PageResource;
+import tools.jackson.core.type.TypeReference;
+
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +45,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldAddMemberWhenCallerIsOwner() throws Exception {
         // Given: An organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User newMember = aValidatedUser();
 
         // And: Add member request
@@ -73,7 +78,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldAddMemberWhenCallerIsAdmin() throws Exception {
         // Given: An organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
         final User newMember = aValidatedUser();
@@ -100,7 +105,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenMemberTriesToAdd() throws Exception {
         // Given: An organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
         final User newMember = aValidatedUser();
@@ -127,7 +132,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnBadRequestWhenUserAlreadyMember() throws Exception {
         // Given: An organization with existing member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -177,7 +182,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnNotFoundWhenUserEmailDoesNotExist() throws Exception {
         // Given: Organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         // And: Add member request with non-existent email
         final AddMemberRequest request = new AddMemberRequest()
@@ -201,7 +206,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnMemberListForOwner() throws Exception {
         // Given: Organization with owner and members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
@@ -229,7 +234,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnMemberListForAdmin() throws Exception {
         // Given: Organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -249,7 +254,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnMemberListForMember() throws Exception {
         // Given: Organization with regular member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -269,7 +274,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenForNonMembers() throws Exception {
         // Given: Organization and non-member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // When: Non-member requests member list
@@ -288,7 +293,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldUpdateRoleWhenOwnerUpdates() throws Exception {
         // Given: Organization with member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -323,7 +328,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldUpdateRoleWhenAdminUpdatesMemberToAdmin() throws Exception {
         // Given: Organization with admin and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
         final User member = aValidatedUser();
@@ -354,7 +359,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenAdminTriesToUpdateAnotherAdmin() throws Exception {
         // Given: Organization with two admins
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin1 = aValidatedUser();
         final User admin2 = aValidatedUser();
         addMemberToOrganization(org, admin1, OrganizationalRole.ADMIN);
@@ -385,7 +390,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenAdminTriesToUpdateOwner() throws Exception {
         // Given: Organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -414,7 +419,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenMemberTriesToUpdate() throws Exception {
         // Given: Organization with two members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
@@ -445,7 +450,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnBadRequestWhenTryingToSetOwnerRole() throws Exception {
         // Given: Organization with member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -474,7 +479,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldRemoveMemberWhenOwnerRemoves() throws Exception {
         // Given: Organization with member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -498,7 +503,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldRemoveMemberWhenAdminRemovesMember() throws Exception {
         // Given: Organization with admin and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
         final User member = aValidatedUser();
@@ -524,7 +529,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenAdminRemovesAnotherAdmin() throws Exception {
         // Given: Organization with two admins
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin1 = aValidatedUser();
         final User admin2 = aValidatedUser();
         addMemberToOrganization(org, admin1, OrganizationalRole.ADMIN);
@@ -550,7 +555,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenTryingToRemoveOwner() throws Exception {
         // Given: Organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -574,7 +579,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenMemberTriesToRemove() throws Exception {
         // Given: Organization with two members
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member1 = aValidatedUser();
         final User member2 = aValidatedUser();
         addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
@@ -600,7 +605,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldTransferOwnershipWhenOwnerTransfersToAdmin() throws Exception {
         // Given: Organization with owner and admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
@@ -628,7 +633,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldTransferOwnershipWhenOwnerTransfersToMember() throws Exception {
         // Given: Organization with owner and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -656,7 +661,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenNonOwnerTriesToTransfer() throws Exception {
         // Given: Organization with admin
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User admin = aValidatedUser();
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
         final User member = aValidatedUser();
@@ -686,7 +691,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnBadRequestWhenTargetIsNotMember() throws Exception {
         // Given: Organization with owner
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         // And: Transfer ownership request to non-member
@@ -713,12 +718,12 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnUserOrganizations() throws Exception {
         // Given: User with organization memberships
         final User owner = aValidatedUser();
-        final Organization org1 = createOrganization(owner);
+        final Organization org1 = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org1, member, OrganizationalRole.MEMBER);
 
         final User owner2 = aValidatedUser();
-        final Organization org2 = createOrganization(owner2);
+        final Organization org2 = anOrganisationWithOwner(owner2);
         addMemberToOrganization(org2, member, OrganizationalRole.ADMIN);
 
         // When: User requests their organizations
@@ -743,14 +748,16 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldSearchUsersWithValidQuery() throws Exception {
         // Given: Organization and search input
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
 
         final SortablePageInput input = new SortablePageInput();
         input.setPageNumber(0);
         input.setPageSize(10);
 
         // When: Searching users
-        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+        final MockHttpServletRequestBuilder httpRequest = post(
+            ORGANIZATION_NEW_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
             .contentType(APPLICATION_JSON)
             .content(toJson(input))
             .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
@@ -766,7 +773,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenNonMemberSearches() throws Exception {
         // Given: Organization and non-member user
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User nonMember = aValidatedUser();
 
         final SortablePageInput input = new SortablePageInput();
@@ -774,7 +781,9 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
         input.setPageSize(10);
 
         // When: Non-member searches
-        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+        final MockHttpServletRequestBuilder httpRequest = post(
+            ORGANIZATION_NEW_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString())
+        )
             .contentType(APPLICATION_JSON)
             .content(toJson(input))
             .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue());
@@ -790,7 +799,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldTransferOwnershipWhenGlobalAdminTransfers() throws Exception {
         // Given: Organization with owner and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -821,7 +830,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldTransferOwnershipWhenOwnerTransfersWithCorrectCurrentOwnerId() throws Exception {
         // Given: Organization with owner and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -849,7 +858,7 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
     public void shouldReturnForbiddenWhenOwnerSendsWrongCurrentOwnerId() throws Exception {
         // Given: Organization with owner and member
         final User owner = aValidatedUser();
-        final Organization org = createOrganization(owner);
+        final Organization org = anOrganisationWithOwner(owner);
         final User member = aValidatedUser();
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
@@ -870,5 +879,290 @@ public class OrganizationMembershipControllerTest extends IntegrationTest {
 
         // Then: Should return bad request (validation failure)
         response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should list members with pagination success")
+    public void listMembersWithPaginationSuccess() throws Exception {
+        // Given: Organization with multiple members
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+        final User member1 = aValidatedUser();
+        final User member2 = aValidatedUser();
+        final User member3 = aValidatedUser();
+        addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
+        addMemberToOrganization(org, member2, OrganizationalRole.ADMIN);
+        addMemberToOrganization(org, member3, OrganizationalRole.MEMBER);
+
+        // And: Pagination request for first page
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(2);
+
+        // When: Owner requests member list with pagination
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(input));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Response should contain paginated members
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<OrganizationMembershipResponse> pageResource = fromJson(content, new TypeReference<>() {});
+
+        assertThat(pageResource.getTotalElements(), is(greaterThanOrEqualTo(4L)));
+        assertThat(pageResource.getPageSize(), is(2));
+        assertThat(pageResource.getPageNumber(), is(0));
+    }
+
+    @Test
+    @DisplayName("Should list members with search filter success")
+    public void listMembersWithSearchFilterSuccess() throws Exception {
+        // Given: Organization with members with distinct emails
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+        final User member1 = aValidatedUser();
+        final User member2 = aValidatedUser();
+        addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
+        addMemberToOrganization(org, member2, OrganizationalRole.ADMIN);
+
+        // And: Search request filtering by email substring
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(10);
+        final SearchInput searchInput = new SearchInput();
+        searchInput.setFieldName("search");
+        searchInput.setTextValue(member1.getEmail().substring(0, 8));
+        input.getSearchInputs().add(searchInput);
+
+        // When: Owner searches for members by email
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(input));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Response should contain only matching member
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<OrganizationMembershipResponse> pageResource = fromJson(content, new TypeReference<>() {});
+
+        assertThat(pageResource.getTotalElements(), is(greaterThanOrEqualTo(1L)));
+    }
+
+    @Test
+    @DisplayName("Should list members with role filter success")
+    public void listMembersWithRoleFilterSuccess() throws Exception {
+        // Given: Organization with members of different roles
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+        final User member1 = aValidatedUser();
+        final User member2 = aValidatedUser();
+        final User member3 = aValidatedUser();
+        addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
+        addMemberToOrganization(org, member2, OrganizationalRole.ADMIN);
+        addMemberToOrganization(org, member3, OrganizationalRole.MEMBER);
+
+        // And: Filter request for MEMBER role only
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(10);
+        final SearchInput roleFilter = new SearchInput();
+        roleFilter.setFieldName("role");
+        roleFilter.setTextValueList(List.of("MEMBER"));
+        input.getSearchInputs().add(roleFilter);
+
+        // When: Owner filters members by role
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(input));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Response should contain only MEMBER role members
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<OrganizationMembershipResponse> pageResource = fromJson(content, new TypeReference<>() {});
+
+        // Filter should return exactly 2 MEMBER role members
+        assertThat(pageResource.getContent(), is(notNullValue()));
+        assertThat(pageResource.getContent().size(), is(2));
+        assertThat(pageResource.getTotalElements(), is(2L));
+        // Verify all returned members have MEMBER role
+        pageResource.getContent().forEach(
+            membership -> assertThat(membership.getRole(), is(OrganizationalRole.MEMBER))
+        );
+    }
+
+    @Test
+    @DisplayName("Should list members sort by email success")
+    public void listMembersSortByEmailSuccess() throws Exception {
+        // Given: Organization with members
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+        final User member1 = aValidatedUser();
+        final User member2 = aValidatedUser();
+        addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
+        addMemberToOrganization(org, member2, OrganizationalRole.ADMIN);
+
+        // And: Sort request by userEmail ascending
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(10);
+
+        // When: Owner requests sorted member list
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(input));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Response should contain members sorted by email
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<OrganizationMembershipResponse> pageResource = fromJson(content, new TypeReference<>() {});
+
+        assertThat(pageResource.getTotalElements(), is(greaterThanOrEqualTo(3L)));
+    }
+
+    @Test
+    @DisplayName("Should list members sort by role success")
+    public void listMembersSortByRoleSuccess() throws Exception {
+        // Given: Organization with members of different roles
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+        final User member1 = aValidatedUser();
+        final User member2 = aValidatedUser();
+        addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
+        addMemberToOrganization(org, member2, OrganizationalRole.ADMIN);
+
+        // And: Sort request by role
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(10);
+
+        // When: Owner requests member list sorted by role
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(input));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Response should contain members sorted by role
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<OrganizationMembershipResponse> pageResource = fromJson(content, new TypeReference<>() {});
+
+        assertThat(pageResource.getTotalElements(), is(greaterThanOrEqualTo(3L)));
+    }
+
+    @Test
+    @DisplayName("Should list members default sort by role hierarchy")
+    public void listMembersDefaultSortByRoleHierarchy() throws Exception {
+        // Given: Organization with members of all role types
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+        final User admin = aValidatedUser();
+        final User member = aValidatedUser();
+        addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
+        addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
+
+        // And: Request without explicit sort
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(10);
+
+        // When: Owner requests member list without sort
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(input));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Response should contain members in default role hierarchy order (OWNER -> ADMIN -> MEMBER)
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<OrganizationMembershipResponse> pageResource = fromJson(content, new TypeReference<>() {});
+
+        assertThat(pageResource.getTotalElements(), is(greaterThanOrEqualTo(3L)));
+    }
+
+    @Test
+    @DisplayName("Should list members as non-member fails")
+    public void listMembersAsNonMemberFails() throws Exception {
+        // Given: Organization with members
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+        final User nonMember = aValidatedUser();
+
+        // And: List request
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(10);
+
+        // When: Non-member tries to list members
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue())
+            .content(toJson(input));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Should be forbidden
+        response.andExpect(status().is(SC_FORBIDDEN));
+    }
+
+    @Test
+    @DisplayName("Should list members as global admin success")
+    public void listMembersAsGlobalAdminSuccess() throws Exception {
+        // Given: Organization with members
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+        final User member1 = aValidatedUser();
+        addMemberToOrganization(org, member1, OrganizationalRole.MEMBER);
+
+        // And: Global admin (not member of org)
+        final User globalAdmin = aValidatedUserWithRole(Role.ADMIN);
+
+        // And: List request
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(10);
+
+        // When: Global admin lists members
+        final MockHttpServletRequestBuilder httpRequest = post(ORGANIZATION_MEMBERS_SEARCH_PATH.replace("{orgId}", org.getId().toString()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + globalAdmin.getAccessToken().getValue())
+            .content(toJson(input));
+
+        final ResultActions response = mockMvc.perform(httpRequest);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: Response should contain all organization members
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<OrganizationMembershipResponse> pageResource = fromJson(content, new TypeReference<>() {});
+
+        assertThat(pageResource.getTotalElements(), is(greaterThanOrEqualTo(2L)));
     }
 }

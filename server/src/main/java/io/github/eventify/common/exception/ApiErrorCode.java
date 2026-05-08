@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 @Schema(description = "ApiErrorCode")
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public enum ApiErrorCode implements ApiError {
 
     INTERNAL_SERVER_ERROR(
@@ -153,6 +154,102 @@ public enum ApiErrorCode implements ApiError {
     NOT_MEMBER_OF_ORGANIZATION_ERROR(
         "ERR-0035",
         "User is not a member of the specified organization."
+    ),
+    CANNOT_UPDATE_ROLE_AS_ADMIN_ERROR(
+        "ERR-0036",
+        "As an administrator, you can only update roles to MEMBER."
+    ),
+    CANNOT_DEMOTE_LAST_ADMIN_ERROR(
+        "ERR-0037",
+        "Cannot demote the last system administrator. At least one admin must exist."
+    ),
+    CANNOT_LOCK_SELF_ERROR(
+        "ERR-0038",
+        "You cannot lock your own user account."
+    ),
+    API_KEY_LIMIT_EXCEEDED(
+        "ERR-0039",
+        "Maximum number of API keys reached. Please revoke an existing key first."
+    ),
+    API_KEY_NOT_FOUND(
+        "ERR-0040",
+        "API key not found."
+    ),
+    API_KEY_INVALID_EXPIRATION(
+        "ERR-0041",
+        "Expiration date must be in the future."
+    ),
+    INVALID_API_KEY(
+        "ERR-0042",
+        "Invalid or revoked API key."
+    ),
+    API_KEY_EXPIRED(
+        "ERR-0043",
+        "API key has expired."
+    ),
+    API_KEY_USER_DISABLED(
+        "ERR-0044",
+        "User account is disabled."
+    ),
+    QUOTA_EXCEEDED(
+        "ERR-0045",
+        "Monthly event quota exceeded. Quota resets on the first of each month."
+    ),
+    DUPLICATE_CHANNEL_NAME(
+        "ERR-0046",
+        "Duplicate channel name: A channel with this name already exists for this user."
+    ),
+    DUPLICATE_CHANNEL_SLUG(
+        "ERR-0051",
+        "Duplicate channel slug: A channel with this slug already exists for this owner."
+    ),
+    CHANNEL_NOT_FOUND(
+        "ERR-0047",
+        "The requested channel has been deleted or does not exist."
+    ),
+    CHANNEL_PAUSED(
+        "ERR-0048",
+        "Your channel is paused. Resume the channel to continue sending events."
+    ),
+    DUPLICATE_WATCHLIST_NAME(
+        "ERR-0049",
+        "Duplicate watchlist name: A watchlist with this name already exists for this user."
+    ),
+    WATCHLIST_NOT_FOUND(
+        "ERR-0050",
+        "The requested watchlist has been deleted or does not exist."
+    ),
+    SESSION_NOT_FOUND_ERROR(
+        "ERR-0052",
+        "The requested session does not exist or does not belong to you."
+    ),
+    PROVIDER_NOT_FOUND_ERROR(
+        "ERR-0053",
+        "The requested authentication provider does not exist or does not belong to you."
+    ),
+    LAST_AUTH_METHOD_ERROR(
+        "ERR-0054",
+        "Cannot unlink the last authentication method. Set a password or connect another provider first."
+    ),
+    EMAIL_IN_USE_ERROR(
+        "ERR-0055",
+        "The email address from this OAuth2 provider is already associated with another account."
+    ),
+    PROVIDER_LINKED_ELSEWHERE_ERROR(
+        "ERR-0056",
+        "This OAuth2 provider account is already linked to a different user."
+    ),
+    PROVIDER_ALREADY_LINKED_ERROR(
+        "ERR-0057",
+        "This OAuth2 provider is already linked to your account."
+    ),
+    LOCAL_PROVIDER_UNLINK_ERROR(
+        "ERR-0058",
+        "Cannot unlink the local (password) authentication method."
+    ),
+    OAUTH2_EMAIL_NOT_AVAILABLE(
+        "ERR-0059",
+        "Email not publicly available from the OAuth2 provider or not verified."
     );
 
     /* The error code for this reason. */

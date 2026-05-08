@@ -33,6 +33,7 @@ import org.mockito.MockedStatic;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
+import static io.github.eventify.common.exception.ApiErrorCode.USER_NOT_FOUND_ERROR;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,6 +57,9 @@ public class OrganizationMembershipServiceTest extends UnitTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private io.github.eventify.api.organization.model.OrganizationMembershipMetaData membershipMetaData;
 
     @InjectMocks
     private OrganizationMembershipService membershipService;
@@ -98,7 +102,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             .setEmail(member.getEmail())
             .setRole(OrganizationalRole.MEMBER);
 
-        when(userRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+        when(userService.findByEmail(member.getEmail())).thenReturn(member);
         when(organizationRepository.findById(organization.getId())).thenReturn(Optional.of(organization));
         when(membershipRepository.existsByOrganizationIdAndUserId(organization.getId(), member.getId()))
             .thenReturn(false);
@@ -125,7 +129,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             .setEmail(member.getEmail())
             .setRole(OrganizationalRole.ADMIN);
 
-        when(userRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+        when(userService.findByEmail(member.getEmail())).thenReturn(member);
         when(organizationRepository.findById(organization.getId())).thenReturn(Optional.of(organization));
         when(membershipRepository.existsByOrganizationIdAndUserId(organization.getId(), member.getId()))
             .thenReturn(false);
@@ -152,7 +156,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             .setEmail(member.getEmail())
             .setRole(OrganizationalRole.MEMBER);
 
-        when(userRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+        when(userService.findByEmail(member.getEmail())).thenReturn(member);
         when(organizationRepository.findById(organization.getId())).thenReturn(Optional.of(organization));
         when(membershipRepository.existsByOrganizationIdAndUserId(organization.getId(), member.getId()))
             .thenReturn(true);
@@ -177,7 +181,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             .setEmail(member.getEmail())
             .setRole(OrganizationalRole.MEMBER);
 
-        when(userRepository.findByEmail(member.getEmail())).thenReturn(Optional.empty());
+        when(userService.findByEmail(member.getEmail())).thenThrow(new DataNotFoundException(USER_NOT_FOUND_ERROR));
 
         // When & Then: Should throw DataNotFoundException
         assertThrows(
@@ -200,7 +204,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             .setRole(OrganizationalRole.MEMBER);
 
         member.setEnabled(false);
-        when(userRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+        when(userService.findByEmail(member.getEmail())).thenReturn(member);
         when(organizationRepository.findById(organization.getId())).thenReturn(Optional.of(organization));
 
         // When & Then: Should throw DisabledUserException
@@ -223,7 +227,7 @@ public class OrganizationMembershipServiceTest extends UnitTest {
             .setEmail(member.getEmail())
             .setRole(OrganizationalRole.MEMBER);
 
-        when(userRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+        when(userService.findByEmail(member.getEmail())).thenReturn(member);
         when(organizationRepository.findById(organization.getId())).thenReturn(Optional.empty());
 
         // When & Then: Should throw DataNotFoundException

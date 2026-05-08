@@ -14,7 +14,7 @@
                 organization_id INTEGER NOT NULL REFERENCES organization(id) ON DELETE CASCADE,
                 role TEXT NOT NULL,
                 invited_by INTEGER REFERENCES "user"(id),
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 UNIQUE(user_id, organization_id)
             );
 

@@ -2,17 +2,19 @@ package io.github.eventify.api.organization.service;
 
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
+import io.github.eventify.api.organization.model.OrganizationMembershipMetaData;
 import io.github.eventify.api.organization.model.OrganizationalRole;
 import io.github.eventify.api.organization.model.request.AddMemberRequest;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.common.exception.DisabledUserException;
 import io.github.eventify.common.exception.OwnerRoleException;
 import io.github.eventify.common.exception.OwnershipTransferException;
 import io.github.eventify.common.exception.UserAlreadyMemberException;
+import io.github.jframe.datasource.search.JpaSearchSpecification;
+import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.BadRequestException;
@@ -22,6 +24,10 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,21 +36,28 @@ import static io.github.eventify.api.authentication.model.Permission.MANAGE_ORGA
 import static io.github.eventify.api.user.model.UserMetaData.ORGANIZATION_TERM;
 import static io.github.eventify.common.exception.ApiErrorCode.*;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
+import static java.util.Objects.nonNull;
 
 /**
  * Service for managing organization memberships.
  */
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("ClassDataAbstractionCoupling")
+@SuppressWarnings(
+    {
+        "ClassDataAbstractionCoupling",
+        "PMD.ExcessiveImports"
+    }
+)
 public class OrganizationMembershipService {
 
     private static final int MAX_SEARCH_RESULTS = 10;
 
     private final UserService userService;
-    private final OrganizationMembershipRepository membershipRepository;
+
     private final OrganizationRepository organizationRepository;
-    private final UserRepository userRepository;
+    private final OrganizationMembershipRepository membershipRepository;
+    private final OrganizationMembershipMetaData membershipMetaData;
 
     /**
      * Add a member to an organization.
@@ -55,9 +68,7 @@ public class OrganizationMembershipService {
      */
     @Transactional
     public OrganizationMembership addMember(final Long orgId, final AddMemberRequest request) {
-        final User user = userRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
-
+        final User user = userService.findByEmail(request.getEmail());
         final Organization organization = organizationRepository.findById(orgId)
             .orElseThrow(() -> new DataNotFoundException(ORGANIZATION_NOT_FOUND_ERROR));
 
@@ -85,7 +96,6 @@ public class OrganizationMembershipService {
      */
     @Transactional
     public OrganizationMembership assignOwner(final Long orgId, final String email, final Long userId) {
-        // Check if organization already has an owner
         if (membershipRepository.existsByOrganizationIdAndRole(orgId, OrganizationalRole.OWNER)) {
             throw new OwnerRoleException(ORGANIZATION_ALREADY_HAS_OWNER_ERROR);
         }
@@ -93,33 +103,22 @@ public class OrganizationMembershipService {
         final Organization organization = organizationRepository.findById(orgId)
             .orElseThrow(() -> new DataNotFoundException(ORGANIZATION_NOT_FOUND_ERROR));
 
-        // Find user by email or userId
-        final User user;
-        if (email != null) {
-            user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
-        } else if (userId != null) {
-            user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundException(USER_NOT_FOUND_ERROR));
-        } else {
-            throw new BadRequestException("Either email or userId must be provided");
-        }
+        final User user = nonNull(email)
+            ? userService.findByEmail(email)
+            : userService.findById(userId);
 
         if (!user.isEnabled()) {
             throw new DisabledUserException();
         }
 
-        // Check if user is already a member
         final OrganizationMembership existingMembership = membershipRepository
             .findByOrganizationIdAndUserId(orgId, user.getId())
             .orElse(null);
 
-        if (existingMembership != null) {
-            // Update existing membership to OWNER
+        if (nonNull(existingMembership)) {
             existingMembership.setRole(OrganizationalRole.OWNER);
             return membershipRepository.save(existingMembership);
         } else {
-            // Create new membership with OWNER role
             final OrganizationMembership membership = new OrganizationMembership(organization, user, OrganizationalRole.OWNER);
             membership.setInvitedBy(getLoggedInUser());
             return membershipRepository.save(membership);
@@ -143,26 +142,7 @@ public class OrganizationMembershipService {
         final OrganizationMembership membership = membershipRepository.findByOrganizationIdAndUserId(orgId, userId)
             .orElseThrow(() -> new DataNotFoundException(MEMBERSHIP_NOT_FOUND_ERROR));
 
-        final User caller = getLoggedInUser();
-        final boolean isGlobalAdmin = caller.hasPermission(MANAGE_ORGANIZATIONS);
-
-        final OrganizationMembership callerMembership = membershipRepository
-            .findByOrganizationIdAndUserId(orgId, caller.getId())
-            .orElse(null);
-
-        if (!isGlobalAdmin && callerMembership == null) {
-            throw new AccessDeniedException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason());
-        }
-
-        if (!isGlobalAdmin && callerMembership != null
-            && callerMembership.getRole() == OrganizationalRole.ADMIN
-            && membership.getRole() != OrganizationalRole.MEMBER) {
-            throw new AccessDeniedException("Admins can only update MEMBER roles");
-        }
-
-        if (membership.getRole() == OrganizationalRole.OWNER) {
-            throw new OwnerRoleException(CANNOT_CHANGE_OWNER_ROLE_ERROR);
-        }
+        canUpdateMemberRole(orgId, membership, getLoggedInUser());
 
         membership.setRole(role);
         final OrganizationMembership saved = membershipRepository.save(membership);
@@ -184,26 +164,7 @@ public class OrganizationMembershipService {
         final OrganizationMembership membership = membershipRepository.findByOrganizationIdAndUserId(orgId, userId)
             .orElseThrow(() -> new DataNotFoundException(MEMBERSHIP_NOT_FOUND_ERROR));
 
-        final boolean isGlobalAdmin = callerUser.hasPermission(MANAGE_ORGANIZATIONS);
-
-        final OrganizationMembership callerMembership = membershipRepository
-            .findByOrganizationIdAndUserId(orgId, callerUser.getId())
-            .orElse(null);
-
-        if (!isGlobalAdmin && callerMembership == null) {
-            throw new AccessDeniedException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason());
-        }
-
-        if (!isGlobalAdmin && callerMembership != null
-            && callerMembership.getRole() == OrganizationalRole.ADMIN
-            && membership.getRole() != OrganizationalRole.MEMBER) {
-            throw new AccessDeniedException("Admins can only remove MEMBER roles");
-        }
-
-        if (membership.getRole() == OrganizationalRole.OWNER) {
-            throw new OwnerRoleException(CANNOT_REMOVE_OWNER_ERROR);
-        }
-
+        canUpdateMemberRole(orgId, membership, callerUser);
         membershipRepository.delete(membership);
     }
 
@@ -235,7 +196,7 @@ public class OrganizationMembershipService {
 
         final OrganizationMembership newOwnerMembership = membershipRepository
             .findByOrganizationIdAndUserId(orgId, newOwnerId)
-            .orElseThrow(() -> new BadRequestException("Target user is not a member of this organization"));
+            .orElseThrow(() -> new BadRequestException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason()));
 
         currentOwnerMembership.setRole(OrganizationalRole.ADMIN);
         newOwnerMembership.setRole(OrganizationalRole.OWNER);
@@ -284,5 +245,46 @@ public class OrganizationMembershipService {
         input.addSearchInput(searchInput);
 
         return userService.searchUsers(input);
+    }
+
+    /**
+     * Search organization members with pagination, filtering, and sorting.
+     *
+     * @param input the sortable page input containing search parameters
+     * @param orgId the organization ID
+     * @return page of organization memberships matching the search criteria
+     */
+    @Transactional(readOnly = true)
+    public Page<OrganizationMembership> searchOrganizationMembers(final SortablePageInput input, final Long orgId) {
+        final SearchInput searchInput = new SearchInput();
+        searchInput.setFieldName(ORGANIZATION_TERM);
+        searchInput.setTextValue(orgId.toString());
+        input.addSearchInput(searchInput);
+
+        final Sort sort = membershipMetaData.toSort(input.getSortOrder());
+        final Pageable pageable = PageRequest.of(input.getPageNumber(), input.getPageSize(), sort);
+
+        final List<SearchCriterium> criteria = membershipMetaData.toSearchCriteria(input.getSearchInputs());
+        final Specification<OrganizationMembership> spec = new JpaSearchSpecification<>(criteria);
+        return membershipRepository.findAll(spec, pageable);
+    }
+
+    private void canUpdateMemberRole(final Long orgId, final OrganizationMembership membership, final User caller) {
+        final boolean isGlobalAdmin = caller.hasPermission(MANAGE_ORGANIZATIONS);
+        final OrganizationMembership callerMembership = membershipRepository
+            .findByOrganizationIdAndUserId(orgId, caller.getId())
+            .orElse(null);
+
+        if (!isGlobalAdmin && callerMembership == null) {
+            throw new AccessDeniedException(NOT_MEMBER_OF_ORGANIZATION_ERROR.getReason());
+        }
+
+        if (!isGlobalAdmin && callerMembership.getRole() == OrganizationalRole.ADMIN && membership.getRole() != OrganizationalRole.MEMBER) {
+            throw new AccessDeniedException(CANNOT_UPDATE_ROLE_AS_ADMIN_ERROR.getReason());
+        }
+
+        if (membership.getRole() == OrganizationalRole.OWNER) {
+            throw new OwnerRoleException(CANNOT_CHANGE_OWNER_ROLE_ERROR);
+        }
     }
 }

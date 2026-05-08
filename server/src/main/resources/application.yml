@@ -12,7 +12,7 @@ jframe:
     response-length: ${LOGGING_RESPONSE_LENGTH:-1}
 
   otlp:
-    disabled: ${OTLP_DISABLED:true}
+    disabled: ${OTLP_DISABLED:false}
     url: ${OTLP_URL:http://localhost:4318}
     timeout: ${OTLP_TIMEOUT:10s}
     sampling-rate: ${OTLP_SAMPLING_RATE:1.0}
@@ -41,6 +41,9 @@ security:
   refresh-token:
     lifetime: ${JWT_REFRESH_LIFETIME_SECONDS:7}
     time-unit: ${JWT_REFRESH_LIFETIME_TIME_UNIT:DAYS}
+  remember-me-token:
+    lifetime: ${JWT_REMEMBER_ME_LIFETIME_SECONDS:30}
+    time-unit: ${JWT_REMEMBER_ME_LIFETIME_TIME_UNIT:DAYS}
   rsa:
     seed: ${RSA_SEED:default-seed}
   cors:
@@ -56,6 +59,7 @@ management:
 # ====== SERVER CONFIG ======
 server:
   servlet.context-path: /api
+  forward-headers-strategy: framework
 
 # ======= SPRINGDOC CONFIGURATION <https://springdoc.org/> =======
 springdoc:
@@ -65,10 +69,12 @@ springdoc:
   enable-data-rest: false
   enable-hateoas: false
   swagger-ui:
+    document-title: Eventify API
     disable-swagger-default-url: true
     default-models-expand-depth: -1
     path: /v1/public/docs/openapi.html
   api-docs:
+    enabled: true
     path: /v1/public/docs
 
 # ======= SPRING CONFIGURATION =======
@@ -83,24 +89,8 @@ spring:
     virtual.enabled: true
 
   liquibase:
-    enabled: false
-
-  rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:root}
-    password: ${RABBITMQ_PASSWORD:root}
-    listener:
-      simple:
-        prefetch: 250
-        concurrency: 4
-        max-concurrency: 8
-    connection-timeout: 5000
-    template:
-      reply-timeout: 5000
-    cache:
-      channel:
-        size: 25
+    enabled: true
+    contexts: prd
 
   datasource:
     hikari:
@@ -113,9 +103,9 @@ spring:
       idleTimeout: ${DATASOURCE_HIKARI_IDLE_TIMEOUT:900000}
       keepaliveTime: ${DATASOURCE_HIKARI_KEEPALIVE_TIME:0}
       registerMbeans: ${DATASOURCE_HIKARI_REGISTER_MBEANS:true}
-    url: ${DATASOURCE_TOP_URL:jdbc:postgresql://localhost:5432/tst_eventify}
-    username: ${DATASOURCE_TOP_USERNAME:tst_eventify}
-    password: ${DATASOURCE_TOP_PASSWORD:tst_eventify}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/tst_eventify}
+    username: ${DATASOURCE_USERNAME:tst_eventify}
+    password: ${DATASOURCE_PASSWORD:tst_eventify}
     driverClassName: org.postgresql.Driver
 
   jpa:

@@ -8,6 +8,8 @@ import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import java.security.Principal;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static io.github.eventify.common.exception.ApiErrorCode.NO_SECURITY_CONTEXT_ERROR;
@@ -36,6 +38,22 @@ public final class SecurityUtil {
             }
         }
         throw new AuthorizationException(NO_SECURITY_CONTEXT_ERROR);
+    }
+
+    /**
+     * Checks if the current user has a specific authority.
+     *
+     * @param authority the authority to check
+     * @return true if the user has the authority, false otherwise
+     */
+    public static boolean hasAuthority(final String authority) {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (isNull(authentication) || authentication instanceof AnonymousAuthenticationToken) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .anyMatch(auth -> auth.equals(authority));
     }
 
     private static Principal getPrincipal() {

@@ -19,13 +19,39 @@
 	import { authStore, currentUser } from '$lib/stores/auth';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
+	import { showDevCredentials } from '$lib/config/env';
+	import { APP_VERSION } from '$lib/config/version';
+	import { versionStore } from '$lib/stores/version.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw } from '@lucide/svelte';
+	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette, Sparkles, Bell } from '@lucide/svelte';
 	import { Badge } from '$lib/components/ui/badge';
+	import { notificationStore } from '$lib/stores/notification.svelte';
+	import NotificationPanel from '$lib/components/notification/NotificationPanel.svelte';
 	import { toast } from 'svelte-sonner';
 	import { handleError } from '$lib/utils/error-handler';
-	import type { UserOrganizationResponse, OrganizationalRole } from '$lib/api/models';
+	import type { UserOrganizationResponse } from '$lib/api/models';
+	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
+	import { onMount } from 'svelte';
+
+	// Theme state
+	let isDarkMode: boolean = $state(true);
+	const shouldShowDevPlaybook: boolean = showDevCredentials();
+	const hasNewVersion: boolean = $derived(versionStore.hasNewVersion);
+	const hasUnread: boolean = $derived(notificationStore.hasUnread);
+
+	onMount(() => {
+		isDarkMode = document.documentElement.classList.contains('dark');
+	});
+
+	function toggleTheme(): void {
+		isDarkMode = !isDarkMode;
+		if (isDarkMode) {
+			document.documentElement.classList.add('dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+		}
+	}
 
 	// Organization state
 	const loading: boolean = $derived(organizationStore.loading);
@@ -85,16 +111,42 @@
 	function getOrgInitial(name: string | undefined): string {
 		return name?.charAt(0)?.toUpperCase() || '?';
 	}
-
-	function getRoleBadgeClass(role: OrganizationalRole | undefined): string {
-		if (role === 'OWNER')
-			return 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0';
-		if (role === 'ADMIN') return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-		return 'bg-muted text-muted-foreground border-border';
-	}
 </script>
 
 <Sidebar.Footer class="border-t border-border/50">
+	<!-- Quick Actions above user menu -->
+	<Sidebar.Menu>
+		<Sidebar.MenuItem>
+			<Sidebar.MenuButton
+				onclick={() => notificationStore.openPanel()}
+				class="hover:bg-sidebar-accent"
+			>
+				<div class="relative">
+					<Bell class="size-4" />
+					{#if hasUnread}
+						<span class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+					{/if}
+				</div>
+				<span>Notifications</span>
+				{#if hasUnread}
+					<Badge class="ml-auto text-[10px] px-1.5 py-0">New</Badge>
+				{/if}
+			</Sidebar.MenuButton>
+		</Sidebar.MenuItem>
+		{#if shouldShowDevPlaybook}
+			<Sidebar.MenuItem>
+				<Sidebar.MenuButton
+					onclick={() => goto('/dev-playbook')}
+					class="hover:bg-sidebar-accent"
+				>
+					<Palette class="size-4" />
+					<span>Component Playbook</span>
+				</Sidebar.MenuButton>
+			</Sidebar.MenuItem>
+		{/if}
+	</Sidebar.Menu>
+
+	<!-- User Menu -->
 	<Sidebar.Menu>
 		<Sidebar.MenuItem>
 			<DropdownMenu.Root>
@@ -177,7 +229,7 @@
 							{#each organizations as org (org.organizationId)}
 								<DropdownMenu.Item
 									class="cursor-pointer hover:bg-primary/10 flex items-center gap-3 px-2 py-2"
-									onclick={() => handleOrgSwitch(org.organizationId!)}
+									onclick={() => handleOrgSwitch(org.organizationId)}
 								>
 									<!-- Org Avatar -->
 									<div
@@ -188,7 +240,7 @@
 									<div class="flex-1 min-w-0">
 										<div class="font-medium truncate text-sm">{org.organizationName}</div>
 										<Badge
-											class="{getRoleBadgeClass(org.role)} w-fit text-[10px] px-1.5 py-0 leading-tight mt-0.5"
+											class="{getOrganizationalRoleBadgeClass(org.role)} w-fit text-[10px] px-1.5 py-0 leading-tight mt-0.5"
 										>
 											{org.role}
 										</Badge>
@@ -213,12 +265,39 @@
 					<!-- Account Actions -->
 					<div class="p-1">
 						<DropdownMenu.Item
-							class="cursor-pointer hover:bg-primary/10"
-							onclick={() => goto(CLIENT_ROUTES.PROFILE_PAGE.path)}
-						>
-							<User class="mr-2 h-4 w-4" />
-							<span>Profile</span>
-						</DropdownMenu.Item>
+						class="cursor-pointer hover:bg-primary/10"
+						onclick={() => goto(CLIENT_ROUTES.PROFILE_PAGE.path)}
+					>
+						<User class="mr-2 h-4 w-4" />
+						<span>Profile</span>
+					</DropdownMenu.Item>
+					<DropdownMenu.Item
+						class="cursor-pointer hover:bg-primary/10"
+						onclick={() => goto(CLIENT_ROUTES.CHANGELOG_PAGE.path)}
+					>
+						<Sparkles class="mr-2 h-4 w-4" />
+						<span>What's New</span>
+						{#if hasNewVersion}
+							<span class="ml-auto h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+						{/if}
+					</DropdownMenu.Item>
+					<DropdownMenu.Item
+						class="cursor-pointer hover:bg-primary/10"
+						onclick={toggleTheme}
+					>
+						{#if isDarkMode}
+							<Sun class="mr-2 h-4 w-4" />
+							<span>Light Mode</span>
+						{:else}
+							<Moon class="mr-2 h-4 w-4" />
+							<span>Dark Mode</span>
+						{/if}
+					</DropdownMenu.Item>
+					</div>
+
+					<DropdownMenu.Separator />
+
+					<div class="p-1">
 						<DropdownMenu.Item
 							class="cursor-pointer hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
 							onclick={handleLogout}
@@ -231,4 +310,14 @@
 			</DropdownMenu.Root>
 		</Sidebar.MenuItem>
 	</Sidebar.Menu>
+	
+	<!-- Version Display - hidden when sidebar is collapsed -->
+	<div class="px-4 py-2 border-t border-border/50 group-data-[collapsible=icon]:hidden">
+		<p class="text-xs text-muted-foreground text-center">{APP_VERSION}</p>
+	</div>
+
+	<NotificationPanel
+		open={notificationStore.isPanelOpen}
+		onOpenChange={(open) => open ? notificationStore.openPanel() : notificationStore.closePanel()}
+	/>
 </Sidebar.Footer>

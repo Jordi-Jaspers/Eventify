@@ -1,10 +1,14 @@
 package io.github.eventify.support;
 
+import io.github.eventify.api.apikey.model.ApiKey;
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.channel.model.Channel;
+import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.model.TokenType;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.common.constant.Constants;
 
 import java.time.OffsetDateTime;
@@ -12,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -110,12 +115,12 @@ public class UnitTest {
     protected User aValidUserWithTokens() {
         final User user = aValidUser();
         final Token accessToken = Token.builder()
-            .value(ACCESS_TOKEN_VALUE)
+            .rawValue(ACCESS_TOKEN_VALUE)
             .type(TokenType.ACCESS_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusHours(1))
             .build();
         final Token refreshToken = Token.builder()
-            .value(REFRESH_TOKEN_VALUE)
+            .rawValue(REFRESH_TOKEN_VALUE)
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .build();
@@ -190,6 +195,45 @@ public class UnitTest {
         attributes.put(Constants.OAuthAttributes.EMAIL, VALID_EMAIL);
         attributes.put(Constants.OAuthAttributes.NAME, GITHUB_NAME);
         return attributes;
+    }
+
+    protected Channel aChannel(final Long id, final String name) {
+        return TestBuilders.aChannel(id, name, aValidUser());
+    }
+
+    protected Channel aChannel(final Long id, final String name, final User user) {
+        return TestBuilders.aChannel(id, name, user);
+    }
+
+    protected Channel aChannel(final Long id, final String name, final User user, final Organization org) {
+        return TestBuilders.aChannel(id, name, user, org);
+    }
+
+    protected ApiKey anApiKey(final Long id, final String suffix, final String name, final User user) {
+        return TestBuilders.anApiKey(id, suffix, name, user);
+    }
+
+    protected Watchlist aWatchlist(final Long id, final String name, final User user) {
+        return TestBuilders.aWatchlist(id, name, user);
+    }
+
+    protected Watchlist anOrgWatchlist(final Long id, final String name, final User user, final Organization org) {
+        return TestBuilders.anOrgWatchlist(id, name, user, org);
+    }
+
+    /**
+     * Shadows Hamcrest's any(Class) to resolve static-import ambiguity with Mockito.
+     * Delegates to Mockito's ArgumentMatchers.any(Class).
+     */
+    protected static <T> T any(final Class<T> cls) {
+        return ArgumentMatchers.any(cls);
+    }
+
+    /**
+     * Delegates to Mockito's ArgumentMatchers.any() (no-arg).
+     */
+    protected static <T> T any() {
+        return ArgumentMatchers.any();
     }
 
 }

@@ -36,7 +36,7 @@ public class EmailVerificationControllerTest extends IntegrationTest {
 
         // When: Verifying email with valid token
         final MockHttpServletRequestBuilder verifyRequest = post(VERIFICATION_PATH)
-            .param("token", verificationToken.getValue());
+            .param("token", verificationToken.getRawValue());
 
         final ResultActions response = mockMvc.perform(verifyRequest);
 

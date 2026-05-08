@@ -1,7 +1,9 @@
 package io.github.eventify.common.security.oauth2;
 
+import io.github.eventify.api.user.model.AuthProvider;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.repository.UserRepository;
+import io.github.eventify.api.user.service.UserAuthProviderService;
 import io.github.eventify.support.UnitTest;
 
 import java.util.Optional;
@@ -35,6 +37,9 @@ public class CustomOAuth2UserServiceUpdateUserTest extends UnitTest {
     private UserRepository userRepository;
 
     @Mock
+    private UserAuthProviderService userAuthProviderService;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -47,7 +52,9 @@ public class CustomOAuth2UserServiceUpdateUserTest extends UnitTest {
 
     @BeforeEach
     public void setUp() {
-        customOAuth2UserService = new CustomOAuth2UserService(userRepository, passwordEncoder);
+        customOAuth2UserService = new CustomOAuth2UserService(userRepository, userAuthProviderService, passwordEncoder);
+        lenient().when(userAuthProviderService.findByProviderAndProviderEmail(any(AuthProvider.class), any(String.class)))
+            .thenReturn(Optional.empty());
     }
 
     @Test
@@ -215,15 +222,12 @@ public class CustomOAuth2UserServiceUpdateUserTest extends UnitTest {
         // When: Processing the OAuth2 user
         customOAuth2UserService.processOAuth2User(oAuth2UserRequest, oAuth2User);
 
-        // Then: The user should still be saved (even though no changes were made)
-        final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository, times(1)).save(userCaptor.capture());
-
-        final User updatedUser = userCaptor.getValue();
+        // Then: No save should occur (no changes were made)
+        verify(userRepository, never()).save(any(User.class));
 
         // And: Both names should remain unchanged
-        assertThat(updatedUser.getFirstName(), is(equalTo(EXISTING_FIRST_NAME)));
-        assertThat(updatedUser.getLastName(), is(equalTo(EXISTING_LAST_NAME)));
+        assertThat(existingUser.getFirstName(), is(equalTo(EXISTING_FIRST_NAME)));
+        assertThat(existingUser.getLastName(), is(equalTo(EXISTING_LAST_NAME)));
     }
 
     @Test

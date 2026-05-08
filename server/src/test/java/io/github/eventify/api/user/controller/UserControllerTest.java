@@ -114,16 +114,16 @@ public class UserControllerTest extends IntegrationTest {
         final User user = aValidatedUser();
 
         // And: User is owner of one organization
-        final io.github.eventify.api.organization.model.Organization org1 = createOrganization(user);
+        final io.github.eventify.api.organization.model.Organization org1 = anOrganisationWithOwner(user);
 
         // And: User is admin in another organization
         final User otherOwner = aValidatedUser();
-        final io.github.eventify.api.organization.model.Organization org2 = createOrganization(otherOwner);
+        final io.github.eventify.api.organization.model.Organization org2 = anOrganisationWithOwner(otherOwner);
         addMemberToOrganization(org2, user, io.github.eventify.api.organization.model.OrganizationalRole.ADMIN);
 
         // And: User is member in a third organization
         final User anotherOwner = aValidatedUser();
-        final io.github.eventify.api.organization.model.Organization org3 = createOrganization(anotherOwner);
+        final io.github.eventify.api.organization.model.Organization org3 = anOrganisationWithOwner(anotherOwner);
         addMemberToOrganization(org3, user, io.github.eventify.api.organization.model.OrganizationalRole.MEMBER);
 
         // When: Requesting user details

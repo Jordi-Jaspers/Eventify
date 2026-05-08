@@ -197,3 +197,14 @@ server/**/bin/
 server/**/out/
 server/**config/*.local.properties
 /.idea/
+/client/test/resources/report
+/client/test/resources/test-results
+/client/node_modules/
+/client/.svelte-kit/
+/client/.env
+/server/.classpath
+/server/.factorypath
+/server/.project
+/server/.settings/org.eclipse.buildship.core.prefs
+/demo-application/
+.tmp
