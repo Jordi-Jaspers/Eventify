@@ -87,7 +87,7 @@ public class IntegrationTest extends WebMvcConfigurator {
 
         admin = aValidatedUserWithRole(Role.ADMIN);
         final JwtUserPrincipalAuthenticationToken authentication = new JwtUserPrincipalAuthenticationToken(
-            new UserTokenPrincipal(admin, admin.getAccessToken().getValue()),
+            new UserTokenPrincipal(admin, admin.getAccessToken().getRawValue()),
             admin.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -114,7 +114,7 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected User aValidatedUserWithRole(final Role role) {
         final User user = aValidatedUser();
         updateUserRole(user, role);
-        return authenticationService.refresh(user.getRefreshToken().getValue(), new MockHttpServletRequest());
+        return authenticationService.refresh(user.getRefreshToken().getRawValue(), new MockHttpServletRequest());
     }
 
     protected void updateUserRole(final User user, final Role role) {
@@ -129,7 +129,7 @@ public class IntegrationTest extends WebMvcConfigurator {
     protected User aValidatedUser() {
         final User user = anUnvalidatedUser();
         final Token token = getValidationToken(user);
-        return authenticationService.verifyEmail(token.getValue(), new MockHttpServletRequest());
+        return authenticationService.verifyEmail(token.getRawValue(), new MockHttpServletRequest());
     }
 
     protected User aLockedUser() {

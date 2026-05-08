@@ -216,7 +216,14 @@ public class SessionControllerTest extends IntegrationTest {
         // And: Only session B's refresh token should remain
         final List<io.github.eventify.api.token.model.Token> remaining = getRefreshTokens(user);
         assertThat(remaining, hasSize(1));
-        assertThat(remaining.get(0).getValue(), is(equalTo(sessionB.getRefreshToken())));
+        assertThat(
+            remaining.get(0).getValueHash(),
+            is(
+                equalTo(
+                    io.github.eventify.common.util.HashUtil.sha256(sessionB.getRefreshToken())
+                )
+            )
+        );
     }
 
     @Test

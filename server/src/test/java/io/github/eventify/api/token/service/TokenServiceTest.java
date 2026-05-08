@@ -4,11 +4,13 @@ import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.model.TokenType;
 import io.github.eventify.api.token.repository.TokenRepository;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.util.HashUtil;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -52,9 +54,11 @@ public class TokenServiceTest extends UnitTest {
     public void generateAuthorizationTokensDoesNotInvalidatePriorTokens() {
         // Given: A user with an existing refresh token in the DB
         final User user = aValidUser();
+        final UUID familyId = UUID.randomUUID();
         final Token existingRefreshToken = Token.builder()
             .id(99L)
-            .value("existing-refresh-token")
+            .valueHash("existing-refresh-token-hash")
+            .familyId(familyId)
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .user(user)
@@ -65,13 +69,15 @@ public class TokenServiceTest extends UnitTest {
 
         // And: JwtService generates new tokens
         final Token newAccessToken = Token.builder()
-            .value("new-access-token")
+            .rawValue("new-access-token")
+            .valueHash(HashUtil.sha256("new-access-token"))
             .type(TokenType.ACCESS_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusMinutes(15))
             .user(user)
             .build();
         final Token newRefreshToken = Token.builder()
-            .value("new-refresh-token")
+            .rawValue("new-refresh-token")
+            .valueHash(HashUtil.sha256("new-refresh-token"))
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(7))
             .user(user)
@@ -79,8 +85,8 @@ public class TokenServiceTest extends UnitTest {
         when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
         when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
-        // When: Generating authorization tokens with a request context
-        tokenService.generateAuthorizationTokens(user, httpServletRequest, false);
+        // When: Generating authorization tokens with a request context and a familyId
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, false, familyId);
 
         // Then: The existing refresh token should NOT be deleted (no invalidation of prior tokens)
         verify(tokenRepository, never()).invalidateTokensWithTypeForUser(
@@ -97,6 +103,7 @@ public class TokenServiceTest extends UnitTest {
     public void generateAuthorizationTokensCapturesDeviceInfo() {
         // Given: A user
         final User user = aValidUser();
+        final UUID familyId = UUID.randomUUID();
 
         // And: A request with User-Agent and remote address
         when(httpServletRequest.getHeader("User-Agent"))
@@ -106,13 +113,15 @@ public class TokenServiceTest extends UnitTest {
 
         // And: JwtService generates tokens
         final Token newAccessToken = Token.builder()
-            .value("access-token")
+            .rawValue("access-token")
+            .valueHash(HashUtil.sha256("access-token"))
             .type(TokenType.ACCESS_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusMinutes(15))
             .user(user)
             .build();
         final Token newRefreshToken = Token.builder()
-            .value("refresh-token")
+            .rawValue("refresh-token")
+            .valueHash(HashUtil.sha256("refresh-token"))
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(7))
             .user(user)
@@ -121,7 +130,7 @@ public class TokenServiceTest extends UnitTest {
         when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
         // When: Generating authorization tokens
-        tokenService.generateAuthorizationTokens(user, httpServletRequest, false);
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, false, familyId);
 
         // Then: The saved refresh token should have device info populated
         final ArgumentCaptor<Token> tokenCaptor = ArgumentCaptor.forClass(Token.class);
@@ -143,6 +152,7 @@ public class TokenServiceTest extends UnitTest {
     public void generateAuthorizationTokensUsesXForwardedForWhenPresent() {
         // Given: A user
         final User user = aValidUser();
+        final UUID familyId = UUID.randomUUID();
 
         // And: A request with X-Forwarded-For header
         when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn("9.9.9.9, 10.0.0.1");
@@ -151,13 +161,15 @@ public class TokenServiceTest extends UnitTest {
 
         // And: JwtService generates tokens
         final Token newAccessToken = Token.builder()
-            .value("access-token")
+            .rawValue("access-token")
+            .valueHash(HashUtil.sha256("access-token"))
             .type(TokenType.ACCESS_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusMinutes(15))
             .user(user)
             .build();
         final Token newRefreshToken = Token.builder()
-            .value("refresh-token")
+            .rawValue("refresh-token")
+            .valueHash(HashUtil.sha256("refresh-token"))
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(7))
             .user(user)
@@ -166,7 +178,7 @@ public class TokenServiceTest extends UnitTest {
         when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
         // When: Generating authorization tokens
-        tokenService.generateAuthorizationTokens(user, httpServletRequest, false);
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, false, familyId);
 
         // Then: The saved refresh token should use the X-Forwarded-For IP (first one)
         final ArgumentCaptor<Token> tokenCaptor = ArgumentCaptor.forClass(Token.class);
@@ -185,6 +197,7 @@ public class TokenServiceTest extends UnitTest {
     public void verifyEmailAlsoCapturesDeviceInfo() {
         // Given: A user (as returned by the verifyEmail flow after validation)
         final User user = aValidUser();
+        final UUID familyId = UUID.randomUUID();
 
         // And: A request with User-Agent and remote address (simulating the HTTP request passed through verifyEmail)
         when(httpServletRequest.getHeader("User-Agent")).thenReturn("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0)");
@@ -193,13 +206,15 @@ public class TokenServiceTest extends UnitTest {
 
         // And: JwtService generates tokens
         final Token newAccessToken = Token.builder()
-            .value("access-token")
+            .rawValue("access-token")
+            .valueHash(HashUtil.sha256("access-token"))
             .type(TokenType.ACCESS_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusMinutes(15))
             .user(user)
             .build();
         final Token newRefreshToken = Token.builder()
-            .value("refresh-token")
+            .rawValue("refresh-token")
+            .valueHash(HashUtil.sha256("refresh-token"))
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(7))
             .user(user)
@@ -208,7 +223,7 @@ public class TokenServiceTest extends UnitTest {
         when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
         // When: generateAuthorizationTokens is called with rememberMe=false (verifyEmail never uses remember-me)
-        tokenService.generateAuthorizationTokens(user, httpServletRequest, false);
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, false, familyId);
 
         // Then: The saved refresh token should have device metadata populated
         final ArgumentCaptor<Token> tokenCaptor = ArgumentCaptor.forClass(Token.class);
@@ -230,16 +245,19 @@ public class TokenServiceTest extends UnitTest {
     public void generateAuthorizationTokensWithRememberMeUsesExtendedLifetime() {
         // Given: A user
         final User user = aValidUser();
+        final UUID familyId = UUID.randomUUID();
 
         // And: JwtService generates tokens
         final Token newAccessToken = Token.builder()
-            .value("access-token")
+            .rawValue("access-token")
+            .valueHash(HashUtil.sha256("access-token"))
             .type(TokenType.ACCESS_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusMinutes(15))
             .user(user)
             .build();
         final Token newRefreshToken = Token.builder()
-            .value("remember-me-refresh-token")
+            .rawValue("remember-me-refresh-token")
+            .valueHash(HashUtil.sha256("remember-me-refresh-token"))
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .user(user)
@@ -248,7 +266,7 @@ public class TokenServiceTest extends UnitTest {
         when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
         // When: Generating authorization tokens with rememberMe=true
-        tokenService.generateAuthorizationTokens(user, httpServletRequest, true);
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, true, familyId);
 
         // Then: jwtService.generateRefreshToken should be called with rememberMe=true
         verify(jwtService, times(1)).generateRefreshToken(eq(user), eq(true));
@@ -259,10 +277,13 @@ public class TokenServiceTest extends UnitTest {
     public void refreshRotatesOnlyUsedRefreshToken() {
         // Given: A user with two active refresh tokens (sessions A and B)
         final User user = aValidUser();
+        final String sessionATokenRaw = "session-a-refresh-token";
+        final String sessionATokenHash = HashUtil.sha256(sessionATokenRaw);
 
         final Token sessionAToken = Token.builder()
             .id(1L)
-            .value("session-a-refresh-token")
+            .valueHash(sessionATokenHash)
+            .familyId(UUID.randomUUID())
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .user(user)
@@ -270,24 +291,27 @@ public class TokenServiceTest extends UnitTest {
 
         final Token sessionBToken = Token.builder()
             .id(2L)
-            .value("session-b-refresh-token")
+            .valueHash(HashUtil.sha256("session-b-refresh-token"))
+            .familyId(UUID.randomUUID())
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .user(user)
             .build();
 
-        // And: The repository finds session A's token by value
-        when(tokenRepository.findByValue("session-a-refresh-token")).thenReturn(Optional.of(sessionAToken));
+        // And: The repository finds session A's token by hash
+        when(tokenRepository.findByValueHash(sessionATokenHash)).thenReturn(Optional.of(sessionAToken));
 
         // And: JwtService generates new tokens for the rotation
         final Token newAccessToken = Token.builder()
-            .value("new-access-token")
+            .rawValue("new-access-token")
+            .valueHash(HashUtil.sha256("new-access-token"))
             .type(TokenType.ACCESS_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusMinutes(15))
             .user(user)
             .build();
         final Token newRefreshToken = Token.builder()
-            .value("new-session-a-refresh-token")
+            .rawValue("new-session-a-refresh-token")
+            .valueHash(HashUtil.sha256("new-session-a-refresh-token"))
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .user(user)
@@ -295,10 +319,10 @@ public class TokenServiceTest extends UnitTest {
         when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
         when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
-        // When: Refreshing using session A's token
-        tokenService.refresh("session-a-refresh-token", httpServletRequest);
+        // When: Refreshing using session A's raw token value
+        tokenService.refresh(sessionATokenRaw, httpServletRequest);
 
-        // Then: Only session A's token should be deleted (by value, not by user-wide invalidation)
+        // Then: Only session A's token should be deleted (by hash lookup, not by user-wide invalidation)
         verify(tokenRepository, times(1)).delete(sessionAToken);
 
         // And: Session B's token should NOT be deleted
@@ -309,14 +333,51 @@ public class TokenServiceTest extends UnitTest {
     }
 
     @Test
+    @DisplayName("Should create a new token row without NPE when familyId is null")
+    public void generateAuthorizationTokensWithNullFamilyIdInsertsNewRow() {
+        // Given: A user and a null familyId (e.g. device cookie not yet set)
+        final User user = aValidUser();
+
+        // And: JwtService generates tokens
+        final Token newAccessToken = Token.builder()
+            .rawValue("access-token")
+            .valueHash(HashUtil.sha256("access-token"))
+            .type(TokenType.ACCESS_TOKEN)
+            .expiresAt(OffsetDateTime.now(UTC).plusMinutes(15))
+            .user(user)
+            .build();
+        final Token newRefreshToken = Token.builder()
+            .rawValue("refresh-token")
+            .valueHash(HashUtil.sha256("refresh-token"))
+            .type(TokenType.REFRESH_TOKEN)
+            .expiresAt(OffsetDateTime.now(UTC).plusDays(7))
+            .user(user)
+            .build();
+        when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
+        when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
+
+        // When: Generating authorization tokens with a null familyId
+        tokenService.generateAuthorizationTokens(user, httpServletRequest, false, null);
+
+        // Then: findByUserIdAndFamilyId should NOT be called (null familyId skips lookup)
+        verify(tokenRepository, never()).findByUserIdAndFamilyId(any(), any());
+
+        // And: A new refresh token row should be saved
+        verify(tokenRepository, atLeastOnce()).save(any(Token.class));
+    }
+
+    @Test
     @DisplayName("Should preserve device info on the new token when rotating a refresh token")
     public void refreshPreservesDeviceInfoOnRotatedToken() {
         // Given: A user with a refresh token that has device info
         final User user = aValidUser();
+        final String oldTokenRaw = "old-refresh-token";
+        final String oldTokenHash = HashUtil.sha256(oldTokenRaw);
 
         final Token existingToken = Token.builder()
             .id(1L)
-            .value("old-refresh-token")
+            .valueHash(oldTokenHash)
+            .familyId(UUID.randomUUID())
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .user(user)
@@ -326,18 +387,20 @@ public class TokenServiceTest extends UnitTest {
         existingToken.setIpAddress("5.5.5.5");
         existingToken.setLastActiveAt(OffsetDateTime.now(UTC).minusHours(1));
 
-        // And: The repository finds the token by value
-        when(tokenRepository.findByValue("old-refresh-token")).thenReturn(Optional.of(existingToken));
+        // And: The repository finds the token by hash of the raw value
+        when(tokenRepository.findByValueHash(oldTokenHash)).thenReturn(Optional.of(existingToken));
 
         // And: JwtService generates new tokens
         final Token newAccessToken = Token.builder()
-            .value("new-access-token")
+            .rawValue("new-access-token")
+            .valueHash(HashUtil.sha256("new-access-token"))
             .type(TokenType.ACCESS_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusMinutes(15))
             .user(user)
             .build();
         final Token newRefreshToken = Token.builder()
-            .value("new-refresh-token")
+            .rawValue("new-refresh-token")
+            .valueHash(HashUtil.sha256("new-refresh-token"))
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .user(user)
@@ -345,8 +408,8 @@ public class TokenServiceTest extends UnitTest {
         when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
         when(jwtService.generateRefreshToken(any(User.class), anyBoolean())).thenReturn(newRefreshToken);
 
-        // When: Refreshing the token
-        tokenService.refresh("old-refresh-token", httpServletRequest);
+        // When: Refreshing the token using the raw value
+        tokenService.refresh(oldTokenRaw, httpServletRequest);
 
         // Then: The new refresh token should carry forward the device info
         final ArgumentCaptor<Token> tokenCaptor = ArgumentCaptor.forClass(Token.class);

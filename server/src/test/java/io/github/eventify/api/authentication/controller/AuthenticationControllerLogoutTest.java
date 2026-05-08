@@ -3,13 +3,11 @@ package io.github.eventify.api.authentication.controller;
 import io.github.eventify.api.authentication.model.validator.AuthenticationValidator;
 import io.github.eventify.api.authentication.service.AuthenticationService;
 import io.github.eventify.api.authentication.service.CookieService;
-import io.github.eventify.api.token.service.TokenService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.mapper.UserDetailsMapper;
 import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import io.github.eventify.support.UnitTest;
 
-import java.util.Optional;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -19,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("Unit Test - AuthenticationController Logout")
 public class AuthenticationControllerLogoutTest extends UnitTest {
@@ -35,9 +32,6 @@ public class AuthenticationControllerLogoutTest extends UnitTest {
 
     @Mock
     private UserDetailsMapper userDetailsMapper;
-
-    @Mock
-    private TokenService tokenService;
 
     @Mock
     private HttpServletRequest httpServletRequest;
@@ -59,21 +53,14 @@ public class AuthenticationControllerLogoutTest extends UnitTest {
         final User user = aValidUser();
         final UserTokenPrincipal principal = new UserTokenPrincipal(user, ACCESS_TOKEN_VALUE, null);
 
-        // And: A refresh token value is present in the cookie
-        final String refreshTokenValue = REFRESH_TOKEN_VALUE;
-        when(cookieService.readRefreshTokenValue(httpServletRequest)).thenReturn(Optional.of(refreshTokenValue));
-
         // When: Logging out
         controller.logout(principal, httpServletRequest, httpServletResponse);
 
-        // Then: The cookie fallback should be used to resolve the refresh token
-        verify(cookieService).readRefreshTokenValue(httpServletRequest);
+        // Then: The authentication service logout should be called
+        verify(authenticationService).logout(principal, httpServletRequest);
 
         // And: Auth cookies should be cleared
         verify(cookieService).clearAuthCookies(httpServletResponse);
-
-        // And: The authentication service logout should be called
-        verify(authenticationService).logout(principal, httpServletRequest);
     }
 
     @Test

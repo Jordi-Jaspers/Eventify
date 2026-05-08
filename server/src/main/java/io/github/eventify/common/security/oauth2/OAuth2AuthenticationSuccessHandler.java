@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -71,6 +72,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         final HttpServletResponse response,
         final Authentication authentication) throws IOException {
         try {
+            final UUID familyId = cookieService.readDeviceId(request).orElse(UUID.randomUUID());
             final OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
             final String email = oAuth2User.getAttribute(EMAIL);
             final String mode = OAuth2AttributesHolder.getAttribute(MODE);
@@ -84,7 +86,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 final String redirectUrl = redirectHelper.buildLinkSuccessRedirectUrl(provider);
                 getRedirectStrategy().sendRedirect(request, response, redirectUrl);
             } else {
-                authorize(request, response, email);
+                authorize(request, response, email, familyId);
             }
         } catch (final Exception exception) {
             log.error("Exception occurred while processing OAuth2 authentication", exception);
@@ -93,7 +95,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
     }
 
-    private void authorize(final HttpServletRequest request, final HttpServletResponse response, final String email) throws IOException {
+    private void authorize(final HttpServletRequest request, final HttpServletResponse response, final String email, final UUID familyId)
+        throws IOException {
         final Long resolvedUserId = OAuth2AttributesHolder.getAttribute(RESOLVED_USER_ID);
         User user;
         if (resolvedUserId != null) {
@@ -107,7 +110,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         log.info("User '{}' successfully authenticated via OAuth", email);
         // OAuth2 logins do not expose a remember-me toggle; always use the standard refresh-token lifetime.
-        user = tokenService.generateAuthorizationTokens(user, request, false);
+        user = tokenService.generateAuthorizationTokens(user, request, false, familyId);
         cookieService.setAuthCookies(response, user.getAccessToken(), user.getRefreshToken());
 
         final String redirectUrl = redirectHelper.buildRedirectUrl();

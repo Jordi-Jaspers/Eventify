@@ -13,6 +13,7 @@ import lombok.Setter;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,6 +24,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.servlet.http.HttpServletRequest;
 
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
@@ -46,14 +48,21 @@ public class Token implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(
-        name = "value",
-        unique = true
+        name = "value_hash",
+        unique = true,
+        nullable = false
     )
-    @EqualsAndHashCode.Include
-    private String value;
+    private String valueHash;
+
+    @Column(
+        name = "family_id",
+        nullable = false
+    )
+    private UUID familyId;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
@@ -87,18 +96,34 @@ public class Token implements Serializable {
     private OffsetDateTime lastActiveAt;
 
     /**
-     * The default non-id constructor.
-     *
-     * @param value     the value of the token
-     * @param expiresAt the expiration date of the token
-     * @param type      the type of the token
-     * @param user      the user the token belongs to
+     * The raw (unhashed) token value. Not persisted — used to pass the raw token to the cookie layer.
      */
-    public Token(final String value, final OffsetDateTime expiresAt, final TokenType type, final User user) {
-        this.value = value;
-        this.type = type;
-        this.expiresAt = expiresAt;
-        this.user = user;
+    @Transient
+    @Getter(lombok.AccessLevel.NONE)
+    private String rawValue;
+
+    /**
+     * Backward-compatible alias for rawValue. Not persisted.
+     * Kept so that existing builder usages (.value(...)) continue to compile.
+     */
+    @Transient
+    @Getter(lombok.AccessLevel.NONE)
+    private String value;
+
+    /**
+     * Returns the raw token value. Falls back to {@code value} then {@code valueHash} for backward compatibility.
+     * Note: for non-refresh tokens, valueHash stores the raw value directly.
+     */
+    public String getRawValue() {
+        final String resolved = rawValue != null ? rawValue : value;
+        return resolved != null ? resolved : valueHash;
+    }
+
+    /**
+     * Returns the raw token value. Delegates to {@link #getRawValue()} for backward compatibility.
+     */
+    public String getValue() {
+        return getRawValue();
     }
 
     /**

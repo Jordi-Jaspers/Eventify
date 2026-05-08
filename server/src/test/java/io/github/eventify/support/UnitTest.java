@@ -115,12 +115,12 @@ public class UnitTest {
     protected User aValidUserWithTokens() {
         final User user = aValidUser();
         final Token accessToken = Token.builder()
-            .value(ACCESS_TOKEN_VALUE)
+            .rawValue(ACCESS_TOKEN_VALUE)
             .type(TokenType.ACCESS_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusHours(1))
             .build();
         final Token refreshToken = Token.builder()
-            .value(REFRESH_TOKEN_VALUE)
+            .rawValue(REFRESH_TOKEN_VALUE)
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .build();

@@ -1,0 +1,39 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202605081000-PRD-hash-refresh-tokens-add-family-id.xml">
+
+    <changeSet id="202605081000-PRD-hash-refresh-tokens-add-family-id-1" author="developer.name">
+        <comment>Delete all existing refresh tokens before schema migration (raw values cannot be rehashed).</comment>
+        <sql>
+            DELETE FROM token WHERE type = 'REFRESH_TOKEN';
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605081000-PRD-hash-refresh-tokens-add-family-id-2" author="developer.name">
+        <comment>Drop the old plain-text value column from the token table.</comment>
+        <sql>
+            ALTER TABLE token DROP COLUMN IF EXISTS value;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605081000-PRD-hash-refresh-tokens-add-family-id-3" author="developer.name">
+        <comment>Add value_hash (SHA-256 hex, 64 chars) and family_id (UUID) columns to the token table.</comment>
+        <sql>
+            ALTER TABLE token ADD COLUMN value_hash VARCHAR(64) NOT NULL;
+            ALTER TABLE token ADD COLUMN family_id UUID NOT NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605081000-PRD-hash-refresh-tokens-add-family-id-4" author="developer.name">
+        <comment>Replace old value index with value_hash unique index and add composite user+family index.</comment>
+        <sql>
+            DROP INDEX IF EXISTS idx_token_value;
+            CREATE UNIQUE INDEX idx_token_value_hash ON token(value_hash);
+            CREATE INDEX idx_token_user_family ON token(user_id, family_id);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

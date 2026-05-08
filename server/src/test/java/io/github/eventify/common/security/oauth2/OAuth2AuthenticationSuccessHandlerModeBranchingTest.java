@@ -8,6 +8,8 @@ import io.github.eventify.support.UnitTest;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -26,6 +28,7 @@ import static io.github.eventify.common.constant.Constants.OAuthAttributes.EMAIL
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 /**
@@ -72,6 +75,7 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
             redirectHelper
         );
         handler.setRedirectStrategy(redirectStrategy);
+        when(cookieService.readDeviceId(any(HttpServletRequest.class))).thenReturn(Optional.of(UUID.randomUUID()));
     }
 
     @AfterEach
@@ -99,7 +103,7 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
         final User user = aValidUserWithTokens();
         when(userService.findById(42L)).thenReturn(user);
         when(userService.updateUserDetails(any(User.class))).thenReturn(user);
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(), anyBoolean())).thenReturn(user);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(), anyBoolean(), any(UUID.class))).thenReturn(user);
 
         final String dashboardUrl = APPLICATION_URL + "/dashboard";
         when(redirectHelper.buildRedirectUrl()).thenReturn(dashboardUrl);
@@ -108,7 +112,7 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
         handler.onAuthenticationSuccess(request, response, authentication);
 
         // Then: JWT tokens are issued
-        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(), anyBoolean());
+        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(), anyBoolean(), any(UUID.class));
         verify(cookieService, times(1)).setAuthCookies(any(), any(), any());
 
         // And: findById was used (not loadUserByUsername)
@@ -141,7 +145,7 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
         final User user = aValidUserWithTokens();
         when(userService.loadUserByUsername(USER_EMAIL)).thenReturn(user);
         when(userService.updateUserDetails(any(User.class))).thenReturn(user);
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(), anyBoolean())).thenReturn(user);
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(), anyBoolean(), any(UUID.class))).thenReturn(user);
 
         final String dashboardUrl = APPLICATION_URL + "/dashboard";
         when(redirectHelper.buildRedirectUrl()).thenReturn(dashboardUrl);
@@ -154,7 +158,7 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
         verify(userService, never()).findById(any());
 
         // And: JWT tokens are issued
-        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(), anyBoolean());
+        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(), anyBoolean(), any(UUID.class));
     }
 
     @Test
@@ -177,7 +181,7 @@ public class OAuth2AuthenticationSuccessHandlerModeBranchingTest extends UnitTes
         handler.onAuthenticationSuccess(request, response, authentication);
 
         // Then: JWT tokens are NOT issued (session preserved)
-        verify(tokenService, never()).generateAuthorizationTokens(any(), any(), anyBoolean());
+        verify(tokenService, never()).generateAuthorizationTokens(any(), any(), anyBoolean(), any());
         verify(cookieService, never()).setAuthCookies(any(), any(), any());
 
         // And: Redirect goes to /profile/security?linked=google

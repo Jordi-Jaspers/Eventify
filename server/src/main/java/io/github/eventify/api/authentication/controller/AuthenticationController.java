@@ -103,10 +103,6 @@ public class AuthenticationController {
         @AuthenticationPrincipal final UserTokenPrincipal principal,
         final HttpServletRequest request,
         final HttpServletResponse response) {
-        final boolean principalMissingTokenId = principal == null || principal.getRefreshTokenId() == null;
-        if (principalMissingTokenId) {
-            cookieService.readRefreshTokenValue(request);
-        }
         authenticationService.logout(principal, request);
         cookieService.clearAuthCookies(response);
         return ResponseEntity.status(NO_CONTENT).build();

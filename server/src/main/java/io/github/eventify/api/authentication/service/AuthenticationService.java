@@ -11,6 +11,8 @@ import io.github.jframe.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
+import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -68,7 +70,8 @@ public class AuthenticationService {
         userService.updateUserDetails(user);
 
         log.info("User '{}' successfully authenticated", username);
-        return tokenService.generateAuthorizationTokens(user, httpRequest, request.isRememberMe());
+        final UUID familyId = cookieService.readDeviceId(httpRequest).orElse(UUID.randomUUID());
+        return tokenService.generateAuthorizationTokens(user, httpRequest, request.isRememberMe(), familyId);
     }
 
     /**
@@ -84,13 +87,13 @@ public class AuthenticationService {
         tokenService.invalidateTokensForUser(user, USER_VALIDATION_TOKEN);
 
         user.setValidated(true);
-        user.setLastLogin(user.getLastLogin());
         user = userService.updateUserDetails(user);
         log.info("User '{}' successfully validated", user.getEmail());
         // Invalidate any existing refresh tokens before creating a new one for the verified session
         tokenService.invalidateTokensForUser(user, REFRESH_TOKEN);
         // Email verification flow has no remember-me concept; always issue a standard refresh token.
-        return tokenService.generateAuthorizationTokens(user, request, false);
+        final UUID familyId = cookieService.readDeviceId(request).orElse(UUID.randomUUID());
+        return tokenService.generateAuthorizationTokens(user, request, false, familyId);
     }
 
     /**
@@ -121,31 +124,29 @@ public class AuthenticationService {
      * @param httpRequest the current HTTP request (used for cookie fallback)
      */
     public void logout(final UserTokenPrincipal principal, final HttpServletRequest httpRequest) {
-        Long refreshTokenId = principal == null ? null : principal.getRefreshTokenId();
-        if (refreshTokenId == null) {
-            // Fallback: extract from cookie directly. Handles cases where the principal arrived
-            // without a populated id (e.g. immediately after a refresh, or browser-cookie edge cases).
-            refreshTokenId = cookieService.readRefreshTokenValue(httpRequest)
-                .map(this::resolveTokenIdFromValue)
-                .orElse(null);
-            if (refreshTokenId != null) {
-                log.warn("Logout fallback: resolved refresh token id from cookie because principal did not carry it");
-            }
-        }
-        if (refreshTokenId == null) {
-            log.warn("Logout called without a resolvable refresh token");
-            return;
-        }
-        tokenService.deleteById(refreshTokenId);
-        log.debug("Revoked refresh token id '{}'", refreshTokenId);
+        resolveRefreshTokenId(principal, httpRequest).ifPresentOrElse(
+            id -> {
+                tokenService.deleteById(id);
+                log.debug("Revoked refresh token id '{}'", id);
+            },
+            () -> log.warn("Logout called without a resolvable refresh token")
+        );
     }
 
-    private Long resolveTokenIdFromValue(final String value) {
+    private Optional<Long> resolveRefreshTokenId(final UserTokenPrincipal principal, final HttpServletRequest request) {
+        if (principal != null && principal.getRefreshTokenId() != null) {
+            return Optional.of(principal.getRefreshTokenId());
+        }
+        log.warn("Logout fallback: resolving refresh token id from cookie");
+        return cookieService.readRefreshTokenValue(request).flatMap(this::resolveTokenIdFromValue);
+    }
+
+    private Optional<Long> resolveTokenIdFromValue(final String value) {
         try {
-            final Token token = tokenService.findAuthorizationTokenByValue(value);
-            return token != null ? token.getId() : null;
+            return Optional.ofNullable(tokenService.findAuthorizationTokenByValue(value))
+                .map(Token::getId);
         } catch (final ApiException ex) {
-            return null;
+            return Optional.empty();
         }
     }
 

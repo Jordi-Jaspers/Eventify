@@ -9,9 +9,11 @@ import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.common.security.principal.JwtUserPrincipalAuthenticationToken;
 import io.github.eventify.common.security.principal.UserTokenPrincipal;
+import io.github.eventify.common.util.HashUtil;
 import io.github.eventify.support.UnitTest;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -70,10 +72,12 @@ public class JwtAuthenticationFilterTest extends UnitTest {
         final User user = aValidUser();
         final Long expectedRefreshTokenId = 42L;
         final String refreshTokenValue = "valid-refresh-token";
+        final UUID deviceId = UUID.randomUUID();
 
         final Token refreshToken = Token.builder()
             .id(expectedRefreshTokenId)
-            .value(refreshTokenValue)
+            .valueHash(HashUtil.sha256(refreshTokenValue))
+            .familyId(deviceId)
             .type(TokenType.REFRESH_TOKEN)
             .expiresAt(OffsetDateTime.now(UTC).plusDays(30))
             .user(user)
@@ -85,9 +89,13 @@ public class JwtAuthenticationFilterTest extends UnitTest {
         request.setRequestURI("/v1/user/details");
         request.setCookies(new jakarta.servlet.http.Cookie(REFRESH_TOKEN_COOKIE, refreshTokenValue));
 
+        // And: The filter ensures a device cookie (returns existing or new UUID)
+        when(cookieService.ensureDeviceId(any(), any())).thenReturn(deviceId);
+
         // And: The refresh token is not expired and resolves to a user with the rotated refresh token attached
         when(jwtService.isTokenExpired(refreshTokenValue)).thenReturn(false);
         user.setRefreshToken(refreshToken);
+        // The filter hashes the cookie value before calling tokenService.refresh
         when(tokenService.refresh(refreshTokenValue, request)).thenReturn(user);
 
         // When: The filter processes the request

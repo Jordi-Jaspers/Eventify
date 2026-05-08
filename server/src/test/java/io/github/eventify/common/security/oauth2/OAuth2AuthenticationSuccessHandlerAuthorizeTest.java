@@ -8,6 +8,8 @@ import io.github.eventify.support.UnitTest;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -60,6 +62,8 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
 
     private OAuth2AuthenticationSuccessHandler handler;
 
+    private UUID deviceId;
+
     @BeforeEach
     public void setUp() {
         handler = new OAuth2AuthenticationSuccessHandler(
@@ -70,6 +74,10 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         );
         handler.setRedirectStrategy(redirectStrategy);
         when(redirectHelper.buildRedirectUrl()).thenReturn(APPLICATION_URL + OAUTH2_FRONTEND_REDIRECT_PATH);
+
+        // Default: device cookie is present
+        deviceId = UUID.randomUUID();
+        when(cookieService.readDeviceId(any(HttpServletRequest.class))).thenReturn(Optional.of(deviceId));
     }
 
     @Test
@@ -84,9 +92,9 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         final User user = aValidUser();
         when(userService.loadUserByUsername(VALID_EMAIL)).thenReturn(user);
 
-        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false)
+        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false, passes familyId)
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false))).thenReturn(
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false), eq(deviceId))).thenReturn(
             userWithTokens
         );
 
@@ -102,8 +110,8 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         final User updatedUser = userCaptor.getValue();
         assertThat(updatedUser.getLastLogin(), is(notNullValue()));
 
-        // And: Tokens should be generated with rememberMe=false
-        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false));
+        // And: Tokens should be generated with rememberMe=false and the device familyId
+        verify(tokenService, times(1)).generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false), eq(deviceId));
 
         // And: Cookies should be set with correct token values
         verify(cookieService, times(1)).setAuthCookies(
@@ -136,9 +144,9 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         user.setLastLogin(null);
         when(userService.loadUserByUsername(VALID_EMAIL)).thenReturn(user);
 
-        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false)
+        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false, passes familyId)
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false))).thenReturn(
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false), eq(deviceId))).thenReturn(
             userWithTokens
         );
 
@@ -180,18 +188,23 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         final User user = aValidUser();
         when(userService.loadUserByUsername(VALID_EMAIL)).thenReturn(user);
 
-        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false)
+        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false, passes familyId)
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false))).thenReturn(
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false), eq(deviceId))).thenReturn(
             userWithTokens
         );
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
 
-        // Then: Tokens should be generated for the user with rememberMe=false
+        // Then: Tokens should be generated for the user with rememberMe=false and the device familyId
         final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(tokenService, times(1)).generateAuthorizationTokens(userCaptor.capture(), any(HttpServletRequest.class), eq(false));
+        verify(tokenService, times(1)).generateAuthorizationTokens(
+            userCaptor.capture(),
+            any(HttpServletRequest.class),
+            eq(false),
+            eq(deviceId)
+        );
         final User userForTokens = userCaptor.getValue();
         assertThat(userForTokens.getEmail(), is(equalTo(VALID_EMAIL)));
     }
@@ -208,9 +221,9 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         final User user = aValidUser();
         when(userService.loadUserByUsername(VALID_EMAIL)).thenReturn(user);
 
-        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false)
+        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false, passes familyId)
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false))).thenReturn(
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false), eq(deviceId))).thenReturn(
             userWithTokens
         );
 
@@ -237,9 +250,9 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         final User user = aValidUser();
         when(userService.loadUserByUsername(VALID_EMAIL)).thenReturn(user);
 
-        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false)
+        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false, passes familyId)
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false))).thenReturn(
+        when(tokenService.generateAuthorizationTokens(any(User.class), any(HttpServletRequest.class), eq(false), eq(deviceId))).thenReturn(
             userWithTokens
         );
 
@@ -269,19 +282,27 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
         final User user = aValidUser();
         when(userService.loadUserByUsername(VALID_EMAIL)).thenReturn(user);
 
-        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false)
+        // And: Tokens are generated for the user (OAuth2 always uses rememberMe=false, passes familyId)
         final User userWithTokens = aValidUserWithTokens();
-        when(tokenService.generateAuthorizationTokens(any(User.class), any(jakarta.servlet.http.HttpServletRequest.class), eq(false)))
+        when(
+            tokenService.generateAuthorizationTokens(
+                any(User.class),
+                any(jakarta.servlet.http.HttpServletRequest.class),
+                eq(false),
+                eq(deviceId)
+            )
+        )
             .thenReturn(userWithTokens);
 
         // When: Handling authentication success
         handler.onAuthenticationSuccess(request, response, authentication);
 
-        // Then: generateAuthorizationTokens should be called with the HttpServletRequest and rememberMe=false
+        // Then: generateAuthorizationTokens should be called with the HttpServletRequest, rememberMe=false, and the device familyId
         verify(tokenService, times(1)).generateAuthorizationTokens(
             any(User.class),
             eq(request),
-            eq(false)
+            eq(false),
+            eq(deviceId)
         );
     }
 }

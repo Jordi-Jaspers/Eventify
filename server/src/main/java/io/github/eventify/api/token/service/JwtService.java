@@ -71,12 +71,12 @@ public class JwtService {
             .claim(VALIDATED, userDetails.isValidated())
             .build();
 
-        return new Token(
-            encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue(),
-            OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC),
-            ACCESS_TOKEN,
-            (User) user
-        );
+        return Token.builder()
+            .rawValue(encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue())
+            .expiresAt(OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC))
+            .type(ACCESS_TOKEN)
+            .user((User) user)
+            .build();
     }
 
     /**
@@ -100,12 +100,12 @@ public class JwtService {
             .expiresAt(now.plus(properties.getLifetime(), properties.getTimeUnit()).toInstant())
             .build();
 
-        return new Token(
-            encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue(),
-            OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC),
-            REFRESH_TOKEN,
-            (User) user
-        );
+        return Token.builder()
+            .rawValue(encoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue())
+            .expiresAt(OffsetDateTime.ofInstant(claimsSet.getExpiresAt(), UTC))
+            .type(REFRESH_TOKEN)
+            .user((User) user)
+            .build();
     }
 
     /**

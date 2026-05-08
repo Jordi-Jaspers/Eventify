@@ -18,7 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.util.Arrays;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -81,6 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         @NonNull final FilterChain filterChain) throws ServletException, IOException {
 
         try {
+            cookieService.ensureDeviceId(request, response);
             final User authenticatedUser = authenticateRequest(request, response);
             if (nonNull(authenticatedUser)) {
                 if (!isUserRestricted(authenticatedUser, response)) {
@@ -100,22 +101,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private User authenticateRequest(final HttpServletRequest request, final HttpServletResponse response) {
-        // Try both auth methods
-        final String accessToken = extractJwtFromHeader(request);
-        final String accessTokenFromCookie = extractJwtFromCookies(request, ACCESS_TOKEN_COOKIE);
+        final String headerToken = extractJwtFromHeader(request);
+        final String cookieToken = extractJwtFromCookies(request, ACCESS_TOKEN_COOKIE);
+        final String accessToken = hasText(headerToken) ? headerToken : cookieToken;
 
-        // Prefer header token over cookie if both exist
-        final String tokenToUse = hasText(accessToken) ? accessToken : accessTokenFromCookie;
-        if (hasText(tokenToUse)) {
-            final User authenticatedUser = tryAuthenticateWithAccessToken(tokenToUse);
+        if (hasText(accessToken)) {
+            final User authenticatedUser = tryAuthenticateWithAccessToken(accessToken);
             if (nonNull(authenticatedUser) && !isUserRestricted(authenticatedUser, response)) {
                 final Long refreshTokenId = resolveRefreshTokenId(request);
-                setSecurityContext(authenticatedUser, tokenToUse, refreshTokenId, request);
+                setSecurityContext(authenticatedUser, accessToken, refreshTokenId, request);
                 return authenticatedUser;
             }
         }
 
-        // Try refresh token if access token failed
         final String refreshToken = extractJwtFromCookies(request, REFRESH_TOKEN_COOKIE);
         if (hasText(refreshToken)) {
             return tryRefreshTokens(refreshToken, response, request);
@@ -158,20 +156,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final HttpServletResponse response, final HttpServletRequest request) {
 
         if (nonNull(refreshedUser.getAccessToken()) && nonNull(refreshedUser.getRefreshToken())) {
-            cookieService.setAuthCookies(
-                response,
-                refreshedUser.getAccessToken(),
-                refreshedUser.getRefreshToken()
-            );
+            cookieService.setAuthCookies(response, refreshedUser.getAccessToken(), refreshedUser.getRefreshToken());
         }
-        // Read the new refresh token id directly from the rotated user — the old token is gone after refresh().
         final Long refreshTokenId = nonNull(refreshedUser.getRefreshToken())
             ? refreshedUser.getRefreshToken().getId()
             : null;
-        // Defensive fallback: a successful refresh should always set a new access token; preserve original
-        // refresh token value only if generation somehow failed, so the security context has a non-null jwt.
         final String accessTokenValue = nonNull(refreshedUser.getAccessToken())
-            ? refreshedUser.getAccessToken().getValue()
+            ? refreshedUser.getAccessToken().getRawValue()
             : originalRefreshToken;
         setSecurityContext(refreshedUser, accessTokenValue, refreshTokenId, request);
     }
@@ -188,14 +179,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (isNull(request.getCookies())) {
             return null;
         }
-
-        for (final Cookie cookie : request.getCookies()) {
-            if (Objects.equals(cookie.getName(), cookieName)) {
-                log.debug("JWT token found in cookie: {}", cookie.getName());
-                return cookie.getValue();
-            }
-        }
-        return null;
+        return Arrays.stream(request.getCookies())
+            .filter(cookie -> cookieName.equals(cookie.getName()))
+            .peek(cookie -> log.debug("JWT token found in cookie: {}", cookie.getName()))
+            .map(Cookie::getValue)
+            .findFirst()
+            .orElse(null);
     }
 
     private void setSecurityContext(final User user, final String tokenValue, final Long refreshTokenId, final HttpServletRequest request) {

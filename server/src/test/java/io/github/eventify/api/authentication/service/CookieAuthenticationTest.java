@@ -68,7 +68,7 @@ public class CookieAuthenticationTest extends IntegrationTest {
         final User user = aValidatedUser();
 
         // And: The user has a valid refresh token
-        final String refreshToken = user.getRefreshToken().getValue();
+        final String refreshToken = user.getRefreshToken().getRawValue();
         assertThat(refreshToken, notNullValue());
 
         // And: We pass the cookies to the request
@@ -130,15 +130,15 @@ public class CookieAuthenticationTest extends IntegrationTest {
 
         // And: The user has valid access and refresh tokens
         final Token accessToken = user.getAccessToken();
-        assertThat(accessToken.getValue(), notNullValue());
+        assertThat(accessToken.getRawValue(), notNullValue());
 
         final Token refreshToken = user.getRefreshToken();
-        assertThat(refreshToken.getValue(), notNullValue());
+        assertThat(refreshToken.getRawValue(), notNullValue());
 
         // When: Accessing a protected resource
         final MockHttpServletRequestBuilder request = get(USER_DETAILS)
-            .cookie(new Cookie(ACCESS_TOKEN_COOKIE, accessToken.getValue()))
-            .cookie(new Cookie(REFRESH_TOKEN_COOKIE, refreshToken.getValue()))
+            .cookie(new Cookie(ACCESS_TOKEN_COOKIE, accessToken.getRawValue()))
+            .cookie(new Cookie(REFRESH_TOKEN_COOKIE, refreshToken.getRawValue()))
             .contentType(APPLICATION_JSON);
 
         // When: Making the request

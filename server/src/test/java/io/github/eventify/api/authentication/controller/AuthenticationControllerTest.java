@@ -270,7 +270,14 @@ public class AuthenticationControllerTest extends IntegrationTest {
         // And: Session B's refresh token should still exist and be valid (plus the verifyEmail session = 2 remaining)
         final List<Token> remainingTokens = getRefreshTokens(user);
         assertThat(remainingTokens, hasSize(2));
-        assertThat(remainingTokens.stream().anyMatch(t -> t.getValue().equals(sessionBRefreshToken)), is(true));
+        assertThat(
+            remainingTokens.stream().anyMatch(
+                t -> t.getValueHash().equals(
+                    io.github.eventify.common.util.HashUtil.sha256(sessionBRefreshToken)
+                )
+            ),
+            is(true)
+        );
     }
 
     @Test
