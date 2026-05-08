@@ -1,7 +1,8 @@
 # Project: eventify
 
 **Initialized:** 2026-01-23
-**Last Updated:** 2026-02-11
+**Last Updated:** 2026-05-08
+**Current Version:** 1.1.0-SNAPSHOT (released 1.0.0 on 2026-05-08)
 
 ## Configuration
 
@@ -176,6 +177,7 @@ They override the global agents of the same name when working on this project.
 | eventify-spring-standards | Spring Boot patterns: JFrame search/pagination, entities, services, controllers, tests  |
 | eventify-svelte-standards | SvelteKit patterns: Controller→Service→Page, API client, DataTable, reusable components |
 | eventify-whats-new        | When and how to update the user-facing What's New changelog                             |
+| release                   | Git flow release process: branch, tag, merge, version bump                              |
 
 **Note:** Project-specific skills contain patterns tailored to this codebase. Agents should load these first.
 
