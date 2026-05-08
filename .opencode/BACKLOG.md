@@ -83,7 +83,7 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Audit log UI** - Admin interface to search and view audit trail.
 
 ---
-## Epic: Developer API Documentation
+## Epic: Developer API Documentation (NOT MVP)
 **Context**: Developers integrating with Eventify need comprehensive documentation to understand the API and get started quickly.
 
 - [ ] **Getting Started Guide** - Step-by-step guide: create API key, create channel, send first event. Interactive examples with copy-paste commands.
@@ -95,7 +95,7 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Changelog/Versioning** - API versioning strategy, deprecation policy, changelog for breaking changes.
 
 ---
-## Epic: Future Considerations
+## Epic: Future Considerations (NOT MVP)
 **Context**: Ideas to keep in mind for architecture decisions but not for immediate development.
 
 - [ ] **Growthbook** - https://www.growthbook.io/ for feature flagging and A/B testing. Could be useful for gradual rollouts and testing new features.

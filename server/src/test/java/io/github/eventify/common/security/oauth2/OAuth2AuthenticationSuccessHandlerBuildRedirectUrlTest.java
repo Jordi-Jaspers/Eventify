@@ -64,6 +64,8 @@ public class OAuth2AuthenticationSuccessHandlerBuildRedirectUrlTest extends Unit
 
     @BeforeEach
     public void setUp() {
+        OAuth2AttributesHolder.clear();
+
         handler = new OAuth2AuthenticationSuccessHandler(
             tokenService,
             userService,

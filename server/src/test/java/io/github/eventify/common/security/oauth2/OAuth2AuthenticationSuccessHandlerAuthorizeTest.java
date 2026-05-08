@@ -66,6 +66,8 @@ public class OAuth2AuthenticationSuccessHandlerAuthorizeTest extends UnitTest {
 
     @BeforeEach
     public void setUp() {
+        OAuth2AttributesHolder.clear();
+
         handler = new OAuth2AuthenticationSuccessHandler(
             tokenService,
             userService,
