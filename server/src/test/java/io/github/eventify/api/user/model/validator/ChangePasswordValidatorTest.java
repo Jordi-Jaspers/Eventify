@@ -11,7 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.passay.RuleResult;
+import org.passay.FailureValidationResult;
+import org.passay.SuccessValidationResult;
 
 import static io.github.eventify.api.user.model.validator.ChangePasswordValidator.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -48,7 +49,7 @@ public class ChangePasswordValidatorTest extends UnitTest {
             final ValidationResult result = new ValidationResult();
 
             // And: The password validator returns a valid result
-            final RuleResult passwordRuleResult = new RuleResult(true);
+            final org.passay.ValidationResult passwordRuleResult = new SuccessValidationResult();
             when(customPasswordValidator.validatePassword(VALID_NEW_PASSWORD))
                 .thenReturn(passwordRuleResult);
 
@@ -267,7 +268,7 @@ public class ChangePasswordValidatorTest extends UnitTest {
             final ValidationResult result = new ValidationResult();
 
             // And: The password validator returns an invalid result
-            final RuleResult passwordRuleResult = new RuleResult(false);
+            final org.passay.ValidationResult passwordRuleResult = new FailureValidationResult();
             when(customPasswordValidator.validatePassword(WEAK_PASSWORD))
                 .thenReturn(passwordRuleResult);
 
@@ -379,7 +380,7 @@ public class ChangePasswordValidatorTest extends UnitTest {
             final ValidationResult result = new ValidationResult();
 
             // And: The password validator returns a valid result
-            final RuleResult passwordRuleResult = new RuleResult(true);
+            final org.passay.ValidationResult passwordRuleResult = new SuccessValidationResult();
             when(customPasswordValidator.validatePassword(strongPassword))
                 .thenReturn(passwordRuleResult);
 
@@ -403,7 +404,7 @@ public class ChangePasswordValidatorTest extends UnitTest {
             final ValidationResult result = new ValidationResult();
 
             // And: The password validator returns a valid result
-            final RuleResult passwordRuleResult = new RuleResult(true);
+            final org.passay.ValidationResult passwordRuleResult = new SuccessValidationResult();
             when(customPasswordValidator.validatePassword(minLengthPassword))
                 .thenReturn(passwordRuleResult);
 
@@ -427,7 +428,7 @@ public class ChangePasswordValidatorTest extends UnitTest {
             final ValidationResult result = new ValidationResult();
 
             // And: The password validator returns a valid result
-            final RuleResult passwordRuleResult = new RuleResult(true);
+            final org.passay.ValidationResult passwordRuleResult = new SuccessValidationResult();
             when(customPasswordValidator.validatePassword(specialCharPassword))
                 .thenReturn(passwordRuleResult);
 
@@ -451,7 +452,7 @@ public class ChangePasswordValidatorTest extends UnitTest {
             final ValidationResult result = new ValidationResult();
 
             // And: The password validator returns an invalid result due to whitespace
-            final RuleResult passwordRuleResult = new RuleResult(false);
+            final org.passay.ValidationResult passwordRuleResult = new FailureValidationResult();
             when(customPasswordValidator.validatePassword(passwordWithSpace))
                 .thenReturn(passwordRuleResult);
 

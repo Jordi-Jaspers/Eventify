@@ -7,7 +7,6 @@ import io.github.jframe.validation.ValidationResult;
 import io.github.jframe.validation.Validator;
 import lombok.RequiredArgsConstructor;
 
-import org.passay.RuleResult;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.isNull;
@@ -56,7 +55,7 @@ public class ChangePasswordValidator implements Validator<PasswordRequest> {
             throw new ValidationException(result);
         }
 
-        final RuleResult passwordValidationResult = passwordValidator.validatePassword(request.getNewPassword());
+        final org.passay.ValidationResult passwordValidationResult = passwordValidator.validatePassword(request.getNewPassword());
         result.rejectField(PASSWORD, request.getNewPassword())
             .when(password -> !passwordValidationResult.isValid(), PASSWORD_IS_NOT_STRONG_ENOUGH);
 

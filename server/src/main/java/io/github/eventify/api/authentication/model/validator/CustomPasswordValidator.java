@@ -2,7 +2,13 @@ package io.github.eventify.api.authentication.model.validator;
 
 import java.util.List;
 
-import org.passay.*;
+import org.passay.DefaultPasswordValidator;
+import org.passay.PasswordData;
+import org.passay.ValidationResult;
+import org.passay.data.EnglishCharacterData;
+import org.passay.rule.CharacterRule;
+import org.passay.rule.LengthRule;
+import org.passay.rule.WhitespaceRule;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,13 +17,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomPasswordValidator {
 
-    private final PasswordValidator passwordValidator;
+    private final DefaultPasswordValidator passwordValidator;
 
     /**
      * Creates a new password validator with custom rules.
      */
     public CustomPasswordValidator() {
-        this.passwordValidator = new PasswordValidator(
+        this.passwordValidator = new DefaultPasswordValidator(
             List.of(
                 // length at least 8 characters
                 new LengthRule(8, 100),
@@ -42,7 +48,7 @@ public class CustomPasswordValidator {
      * @return True if the password is weak, false otherwise.
      */
     public boolean isWeakPassword(final String password) {
-        final RuleResult result = passwordValidator.validate(new PasswordData(password));
+        final ValidationResult result = passwordValidator.validate(new PasswordData(password));
         return !result.isValid();
     }
 
@@ -52,7 +58,7 @@ public class CustomPasswordValidator {
      * @param password The password to validate.
      * @return The result of the validation.
      */
-    public RuleResult validatePassword(final String password) {
+    public ValidationResult validatePassword(final String password) {
         return passwordValidator.validate(new PasswordData(password));
     }
 }
