@@ -39,10 +39,10 @@
         <div class="flex items-center gap-2">
             {#if isAdmin}
                 <Button
-                        onclick={() => goto(CLIENT_ROUTES.ADMIN_DASHBOARD_PAGE.path)}
+                        onclick={() => goto(CLIENT_ROUTES.ADMIN_STATISTICS_PAGE.path)}
                         variant="outline"
                         class="bg-background/50 border-border/50 hover:bg-accent/20 hover:border-accent hover:shadow-lg hover:shadow-accent/20 hover:scale-105 transition-all duration-200"
-                        title="Admin Dashboard"
+                        title="Admin Statistics"
                 >
                     <LayoutDashboard class="h-4 w-4"/>
                 </Button>

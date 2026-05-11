@@ -2,6 +2,15 @@ import type { ChangelogEntry } from '$lib/types/changelog';
 
 export const changelog: ChangelogEntry[] = [
 	{
+		version: '0.2.0-SNAPSHOT',
+		date: '2026-05-11',
+		features: [
+			'Admin area reorganized into Statistics, Resources (tabbed: Users / Organizations / API Keys), and Tools sections'
+		],
+		improvements: [],
+		fixes: []
+	},
+	{
 		version: '0.1.0-SNAPSHOT',
 		date: '2026-05-07',
 		features: [
