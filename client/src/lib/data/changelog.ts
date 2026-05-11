@@ -11,7 +11,7 @@ export const changelog: ChangelogEntry[] = [
 		fixes: []
 	},
 	{
-		version: '0.1.0-SNAPSHOT',
+		version: '0.1.0',
 		date: '2026-05-07',
 		features: [
 			'"Remember me for 30 days" checkbox on login keeps you signed in longer on trusted devices',
