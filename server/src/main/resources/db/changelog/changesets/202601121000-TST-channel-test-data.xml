@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202601121000-TST-channel-test-data.xml">
 
-    <changeSet id="202601121000-TST-channel-test-data-1" author="backend-agent" context="tst">
+    <changeSet id="202601121000-TST-channel-test-data-1" author="jordi.jaspers" context="tst">
         <comment>Insert personal channels for admin (id=1) with varied statuses.</comment>
         <sql>
             -- Personal channels for admin (id=1)
@@ -88,7 +88,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601121000-TST-channel-test-data-2" author="backend-agent" context="tst">
+    <changeSet id="202601121000-TST-channel-test-data-2" author="jordi.jaspers" context="tst">
         <comment>Insert personal channels for other test users.</comment>
         <sql>
             -- Personal channels for Alice
@@ -174,7 +174,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601121000-TST-channel-test-data-3" author="backend-agent" context="tst">
+    <changeSet id="202601121000-TST-channel-test-data-3" author="jordi.jaspers" context="tst">
         <comment>Insert organization channels for Acme, Beta, and Gamma.</comment>
         <sql>
             -- Organization channels for Acme Corp

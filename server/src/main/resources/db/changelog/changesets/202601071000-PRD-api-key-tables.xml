@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202601071000-PRD-api-key-tables.xml">
 
-    <changeSet id="202601071000-PRD-api-key-tables-1" author="backend-agent">
+    <changeSet id="202601071000-PRD-api-key-tables-1" author="jordi.jaspers">
         <comment>Creating api_key table for API key management.</comment>
         <sql>
             CREATE TABLE IF NOT EXISTS api_key
@@ -32,7 +32,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601071000-PRD-api-key-tables-2" author="backend-agent">
+    <changeSet id="202601071000-PRD-api-key-tables-2" author="jordi.jaspers">
         <comment>Creating api_key_audit table for tracking revoked API keys.</comment>
         <sql>
             CREATE TABLE IF NOT EXISTS api_key_audit
@@ -57,7 +57,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601071000-PRD-api-key-tables-3" author="backend-agent">
+    <changeSet id="202601071000-PRD-api-key-tables-3" author="jordi.jaspers">
         <comment>Adding documentation for api_key table, columns, and indexes.</comment>
         <sql>
             COMMENT ON TABLE api_key IS 'Stores active API keys for user and organization-scoped authentication';
@@ -79,7 +79,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601071000-PRD-api-key-tables-4" author="backend-agent">
+    <changeSet id="202601071000-PRD-api-key-tables-4" author="jordi.jaspers">
         <comment>Adding documentation for api_key_audit table, columns, and indexes.</comment>
         <sql>
             COMMENT ON TABLE api_key_audit IS 'Audit trail for revoked API keys';

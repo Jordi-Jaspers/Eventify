@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202601111000-PRD-channel-table.xml">
 
-    <changeSet id="202601111000-PRD-channel-table-1" author="backend-agent">
+    <changeSet id="202601111000-PRD-channel-table-1" author="jordi.jaspers">
         <comment>Creating channel table for event streaming channels.</comment>
         <sql>
             CREATE TABLE IF NOT EXISTS channel
@@ -24,7 +24,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601111000-PRD-channel-table-2" author="backend-agent">
+    <changeSet id="202601111000-PRD-channel-table-2" author="jordi.jaspers">
         <comment>Creating indexes and unique constraints for channel table.</comment>
         <sql>
             CREATE INDEX idx_channel_user ON channel(user_id) WHERE organization_id IS NULL;
@@ -35,7 +35,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601111000-PRD-channel-table-3" author="backend-agent">
+    <changeSet id="202601111000-PRD-channel-table-3" author="jordi.jaspers">
         <comment>Adding documentation for channel table, columns, and indexes.</comment>
         <sql>
             COMMENT ON TABLE channel IS 'Stores channels for event streaming';

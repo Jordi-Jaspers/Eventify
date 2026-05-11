@@ -277,6 +277,11 @@ tasks.withType<JavaCompile> {
     )
 }
 
+tasks.named<JavaCompile>("compileTestJava") {
+    options.compilerArgs.remove("-Werror")
+    options.compilerArgs.addAll(arrayOf("-Xlint:-unchecked"))
+}
+
 tasks.named<BootRun>("bootRun") {
     systemProperty("jframe.application.name", retrieve("artifactName"))
     systemProperty("jframe.application.group", retrieve("group"))

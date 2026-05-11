@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202601201000-PRD-event-table.xml">
 
-    <changeSet id="202601201000-PRD-event-table-1" author="backend-agent">
+    <changeSet id="202601201000-PRD-event-table-1" author="jordi.jaspers">
         <comment>Creating event table for time-series event data.</comment>
         <sql>
             CREATE TABLE IF NOT EXISTS event
@@ -22,14 +22,14 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601201000-PRD-event-table-2" author="backend-agent">
+    <changeSet id="202601201000-PRD-event-table-2" author="jordi.jaspers">
         <comment>Converting event table to TimescaleDB hypertable.</comment>
         <sql>
             SELECT create_hypertable('event', 'timestamp', chunk_time_interval => INTERVAL '7 days');
         </sql>
     </changeSet>
 
-    <changeSet id="202601201000-PRD-event-table-3" author="backend-agent">
+    <changeSet id="202601201000-PRD-event-table-3" author="jordi.jaspers">
         <comment>Creating indexes for event table.</comment>
         <sql>
             CREATE INDEX idx_event_channel_time ON event(channel_id, timestamp DESC);
@@ -37,7 +37,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601201000-PRD-event-table-4" author="backend-agent">
+    <changeSet id="202601201000-PRD-event-table-4" author="jordi.jaspers">
         <comment>Configuring TimescaleDB compression for event table.</comment>
         <sql>
             ALTER TABLE event SET (
@@ -49,7 +49,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601201000-PRD-event-table-5" author="backend-agent">
+    <changeSet id="202601201000-PRD-event-table-5" author="jordi.jaspers">
         <comment>Adding documentation for event table, columns, and indexes.</comment>
         <sql>
             COMMENT ON TABLE event IS 'Stores events for channels, optimized as TimescaleDB hypertable';

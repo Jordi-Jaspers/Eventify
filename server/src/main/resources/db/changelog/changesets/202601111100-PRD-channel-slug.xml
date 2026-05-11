@@ -4,14 +4,14 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202601111100-PRD-channel-slug.xml">
 
-    <changeSet id="202602161000-PRD-channel-slug-1" author="backend-agent">
+    <changeSet id="202602161000-PRD-channel-slug-1" author="jordi.jaspers">
         <comment>Add slug column to channel table for hierarchical identifiers.</comment>
         <sql>
             ALTER TABLE channel ADD COLUMN IF NOT EXISTS slug VARCHAR(100) NOT NULL DEFAULT '';
         </sql>
     </changeSet>
 
-    <changeSet id="202602161000-PRD-channel-slug-2" author="backend-agent">
+    <changeSet id="202602161000-PRD-channel-slug-2" author="jordi.jaspers">
         <comment>Create unique index for user channels slug (scoped to user).</comment>
         <sql>
             CREATE UNIQUE INDEX IF NOT EXISTS uq_channel_user_slug 
@@ -20,7 +20,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202602161000-PRD-channel-slug-3" author="backend-agent">
+    <changeSet id="202602161000-PRD-channel-slug-3" author="jordi.jaspers">
         <comment>Create unique index for organization channels slug (scoped to org).</comment>
         <sql>
             CREATE UNIQUE INDEX IF NOT EXISTS uq_channel_org_slug 
@@ -29,7 +29,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202602161000-PRD-channel-slug-4" author="backend-agent">
+    <changeSet id="202602161000-PRD-channel-slug-4" author="jordi.jaspers">
         <comment>Add documentation for slug column and indexes.</comment>
         <sql>
             COMMENT ON COLUMN channel.slug IS 'Hierarchical identifier for channel routing (e.g. errors, myapp.errors, myapp.prod.backend.errors)';

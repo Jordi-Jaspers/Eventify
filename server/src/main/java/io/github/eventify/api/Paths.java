@@ -267,6 +267,22 @@ public final class Paths {
 
     public static final String ORGANIZATION_CHANNEL_DURATIONS_PATH = ORGANIZATION_CHANNELS_PATH + ID_PART + DURATIONS_PART;
 
+    /* ------------------------------- NOTIFICATION ENDPOINTS ------------------------------- */
+
+    public static final String NOTIFICATIONS_PART = "/notifications";
+
+    public static final String NOTIFICATIONS_PATH = BASE_PATH + NOTIFICATIONS_PART;
+
+    public static final String NOTIFICATION_PATH = NOTIFICATIONS_PATH + ID_PART;
+
+    public static final String NOTIFICATIONS_UNREAD_COUNT_PATH = NOTIFICATIONS_PATH + "/unread-count";
+
+    public static final String NOTIFICATION_READ_PATH = NOTIFICATION_PATH + "/read";
+
+    public static final String NOTIFICATIONS_READ_ALL_PATH = NOTIFICATIONS_PATH + "/read-all";
+
+    public static final String NOTIFICATIONS_SEARCH_PATH = NOTIFICATIONS_PATH + SEARCH_PART;
+
     /* ------------------------------- END ------------------------------- */
 
     private Paths() {

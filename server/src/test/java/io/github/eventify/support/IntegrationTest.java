@@ -498,4 +498,20 @@ public class IntegrationTest extends WebMvcConfigurator {
         return new OAuth2UserRequest(clientRegistration, accessToken);
     }
 
+    // ========================= NOTIFICATION FACTORY METHODS =========================
+
+    protected void aNotificationForUser(final User user, final String title) {
+        final io.github.eventify.api.notification.model.Notification notification =
+            new io.github.eventify.api.notification.model.Notification(
+                user,
+                io.github.eventify.api.notification.model.NotificationCategory.ANNOUNCEMENT,
+                title,
+                "Test message for " + title,
+                null,
+                null,
+                false
+            );
+        notificationRepository.save(notification);
+    }
+
 }

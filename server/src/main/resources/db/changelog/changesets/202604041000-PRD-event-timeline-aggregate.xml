@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202604041000-PRD-event-timeline-aggregate.xml">
 
-    <changeSet id="202604041000-PRD-event-timeline-aggregate-1" author="eventify" runInTransaction="false">
+    <changeSet id="202604041000-PRD-event-timeline-aggregate-1" author="jordi.jaspers" runInTransaction="false">
         <comment>Create continuous aggregate for hourly event timeline data</comment>
         <sql>
             CREATE MATERIALIZED VIEW event_timeline_hourly
@@ -23,7 +23,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202604041000-PRD-event-timeline-aggregate-2" author="eventify" runInTransaction="false">
+    <changeSet id="202604041000-PRD-event-timeline-aggregate-2" author="jordi.jaspers" runInTransaction="false">
         <comment>Add hourly refresh policy for event_timeline_hourly</comment>
         <sql>
             SELECT add_continuous_aggregate_policy('event_timeline_hourly',
@@ -33,7 +33,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202604041000-PRD-event-timeline-aggregate-3" author="eventify" runInTransaction="false">
+    <changeSet id="202604041000-PRD-event-timeline-aggregate-3" author="jordi.jaspers" runInTransaction="false">
         <comment>Enable compression on event_timeline_hourly and add compression policy</comment>
         <sql>
             ALTER MATERIALIZED VIEW event_timeline_hourly SET (
@@ -44,7 +44,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202604041000-PRD-event-timeline-aggregate-4" author="eventify">
+    <changeSet id="202604041000-PRD-event-timeline-aggregate-4" author="jordi.jaspers">
         <comment>Add composite index for channel and time bucket queries</comment>
         <sql>
             CREATE INDEX idx_timeline_hourly_channel_bucket

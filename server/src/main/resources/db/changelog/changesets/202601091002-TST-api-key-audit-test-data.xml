@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202601091002-TST-api-key-audit-test-data.xml">
 
-    <changeSet id="202601091002-TST-api-key-audit-test-data-1" author="backend-agent" context="tst">
+    <changeSet id="202601091002-TST-api-key-audit-test-data-1" author="jordi.jaspers" context="tst">
         <comment>Insert API key audit records for revoked keys. At least 5 records across last 30 days, both USER and ORGANIZATION scoped.</comment>
         <sql>
             -- Revoked USER-scoped keys
