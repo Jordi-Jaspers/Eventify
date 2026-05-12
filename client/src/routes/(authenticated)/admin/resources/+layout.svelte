@@ -15,9 +15,9 @@
 		{ label: 'API Keys', path: CLIENT_ROUTES.ADMIN_API_KEYS_PAGE.path }
 	];
 
-	const tabPaths: string[] = tabs.map((t: { label: string; path: string }) => t.path);
-
-	const showTabs: boolean = $derived(tabPaths.some((p: string) => $page.url.pathname === p));
+	const showTabs: boolean = $derived(
+		tabs.some((t: { label: string; path: string }) => $page.url.pathname === t.path)
+	);
 </script>
 
 {#if showTabs}

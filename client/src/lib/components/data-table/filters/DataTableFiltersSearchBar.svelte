@@ -1,7 +1,7 @@
 <script lang="ts" generics="T">
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Input } from '$lib/components/ui/input';
-	import { Search, X, Calendar, Tag, Filter, ChevronDown } from '@lucide/svelte';
+	import { Search, X, ChevronDown } from '@lucide/svelte';
 	import type { DataTableColumn, FilterValue, DateRange } from '../types';
 	import {
 		TextFilter,
@@ -60,31 +60,19 @@
 		}, 300);
 	}
 
-	const hasActiveFilters: boolean = $derived(
-		Object.keys(filters).some((key: string) => {
-			const value: FilterValue = filters[key];
-			if (value === null || value === undefined || value === '') return false;
-			if (Array.isArray(value) && value.length === 0) return false;
-			return true;
-		})
-	);
-
-	// Active filter chips (only for filter buttons, not primary search)
-	const activeChips = $derived(
-		filterColumns.filter((col) => {
-			const value = filters[col.key];
-			if (value === null || value === undefined || value === '') return false;
-			if (Array.isArray(value) && value.length === 0) return false;
-			return true;
-		})
-	);
-
 	function isFilterActive(key: string): boolean {
-		const value = filters[key];
+		const value: FilterValue = filters[key];
 		if (value === null || value === undefined || value === '') return false;
 		if (Array.isArray(value) && value.length === 0) return false;
 		return true;
 	}
+
+	const hasActiveFilters: boolean = $derived(
+		Object.keys(filters).some((key: string) => isFilterActive(key))
+	);
+
+	// Active filter chips (only for filter buttons, not primary search)
+	const activeChips = $derived(filterColumns.filter((col) => isFilterActive(col.key)));
 
 	function getChipLabel(col: DataTableColumn<T>): string {
 		const value = filters[col.key];

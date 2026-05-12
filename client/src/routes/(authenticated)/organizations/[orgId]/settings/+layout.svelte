@@ -12,8 +12,7 @@
 	let { children }: Props = $props();
 
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
-	const currentPath: string = $derived(page.url.pathname);
-	
+
 	// Get organization from store
 	const organizationFromStore: UserOrganizationResponse | undefined = $derived(
 		organizationStore.organizations.find(
@@ -36,7 +35,7 @@
 </svelte:head>
 
 <!-- Settings Navigation -->
-<OrgSettingsNav {currentPath} {orgId} {canManage} />
+<OrgSettingsNav {orgId} {canManage} />
 
 <!-- Page Content -->
 {@render children()}

@@ -64,14 +64,13 @@
 		}
 	}
 
-	function formatAudienceType(type: AudienceType): string {
-		if (type === 'ALL_USERS') return 'All Users';
-		if (type === 'ALL_ORGANIZATION_OWNERS') return 'All Organization Owners';
-		if (type === 'ORGANIZATION') return 'Organization';
-		if (type === 'USER') return 'Single User';
-		if (type === 'GLOBAL_ROLE') return 'Global Role';
-		return type;
-	}
+	const AUDIENCE_TYPE_LABELS: Record<AudienceType, string> = {
+		ALL_USERS: 'All Users',
+		ALL_ORGANIZATION_OWNERS: 'All Organization Owners',
+		ORGANIZATION: 'Organization',
+		USER: 'Single User',
+		GLOBAL_ROLE: 'Global Role'
+	};
 
 	const categoryConfig: Record<
 		BroadcastCategory,
@@ -142,7 +141,7 @@
 									<span class="text-muted-foreground text-xs uppercase tracking-wide"
 										>Audience Type</span
 									>
-									<p class="mt-0.5">{formatAudienceType(broadcast.audienceType)}</p>
+									<p class="mt-0.5">{AUDIENCE_TYPE_LABELS[broadcast.audienceType] ?? broadcast.audienceType}</p>
 								</div>
 								<div>
 									<span class="text-muted-foreground text-xs uppercase tracking-wide"

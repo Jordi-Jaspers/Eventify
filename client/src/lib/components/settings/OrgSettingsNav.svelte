@@ -5,12 +5,10 @@
 	import type { Component } from 'svelte';
 
 	interface Props {
-		currentPath: string;
 		orgId: number;
 		canManage?: boolean;
 	}
 
-	// currentPath kept for API compatibility; active state is derived from $page inside TabNav
 	let { orgId, canManage = true }: Props = $props();
 
 	interface OrgTab {

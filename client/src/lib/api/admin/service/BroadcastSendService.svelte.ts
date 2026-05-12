@@ -94,9 +94,10 @@ export function createBroadcastSendService() {
 	}
 
 	$effect(() => {
-		const _type = audienceType;
-		const _user = selectedUser;
-		const _org = selectedOrg;
+		// Track audience state to trigger preview on change
+		audienceType;
+		selectedUser;
+		selectedOrg;
 		schedulePreview();
 	});
 

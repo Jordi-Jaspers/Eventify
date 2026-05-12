@@ -13,10 +13,8 @@
 		{ label: 'Notifications', path: CLIENT_ROUTES.ADMIN_TOOLS_NOTIFICATIONS_PAGE.path }
 	];
 
-	const tabPaths: string[] = tabs.map((t: { label: string; path: string }) => t.path);
-
 	const showTabs: boolean = $derived(
-		tabPaths.some((p: string) => $page.url.pathname.startsWith(p))
+		tabs.some((t: { label: string; path: string }) => $page.url.pathname.startsWith(t.path))
 	);
 </script>
 
