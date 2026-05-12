@@ -115,6 +115,30 @@ public interface OrganizationMembershipRepository extends JpaRepository<Organiza
     Page<OrganizationMembership> findAll(@NonNull Specification<OrganizationMembership> spec, @NonNull Pageable pageable);
 
     /**
+     * Find all distinct users who are OWNER in any organization.
+     *
+     * @return list of distinct owner users
+     */
+    @Query("SELECT DISTINCT m.user FROM OrganizationMembership m WHERE m.role = 'OWNER'")
+    List<io.github.eventify.api.user.model.User> findAllOwnersDistinct();
+
+    /**
+     * Count memberships for a given organization.
+     *
+     * @param organizationId the organization ID
+     * @return count of memberships
+     */
+    long countByOrganizationId(Long organizationId);
+
+    /**
+     * Count distinct users who are OWNER in any organization.
+     *
+     * @return count of distinct owners
+     */
+    @Query("SELECT COUNT(DISTINCT m.user) FROM OrganizationMembership m WHERE m.role = 'OWNER'")
+    long countDistinctOwners();
+
+    /**
      * Delete all memberships for users with the given IDs.
      *
      * @param userIds the user IDs

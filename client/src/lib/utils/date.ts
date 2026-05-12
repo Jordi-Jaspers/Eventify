@@ -11,17 +11,19 @@ export function formatDate(dateString: string): string {
 }
 
 /**
- * Format a date string with time (e.g., "Jan 15, 2024, 2:30 PM")
+ * Format a date string with time in ISO-like 24h format (e.g., "2024-01-15 14:30")
  */
 export function formatDateTime(dateString: string | undefined): string {
 	if (!dateString) return 'N/A';
 
 	try {
 		const date: Date = new Date(dateString);
-		return new Intl.DateTimeFormat('en-US', {
-			dateStyle: 'medium',
-			timeStyle: 'short'
-		}).format(date);
+		const year: number = date.getFullYear();
+		const month: string = String(date.getMonth() + 1).padStart(2, '0');
+		const day: string = String(date.getDate()).padStart(2, '0');
+		const hours: string = String(date.getHours()).padStart(2, '0');
+		const minutes: string = String(date.getMinutes()).padStart(2, '0');
+		return `${year}-${month}-${day} ${hours}:${minutes}`;
 	} catch {
 		return 'Invalid date';
 	}

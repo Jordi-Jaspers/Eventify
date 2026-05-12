@@ -111,6 +111,18 @@ export const CLIENT_ROUTES = {
 		path: '/admin/tools',
 		type: RouteType.PRIVATE
 	},
+	ADMIN_TOOLS_NOTIFICATIONS_PAGE: {
+		path: '/admin/tools/notifications',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_TOOLS_NOTIFICATIONS_SEND_PAGE: {
+		path: '/admin/tools/notifications/send',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_TOOLS_NOTIFICATIONS_HISTORY_PAGE: {
+		path: '/admin/tools/notifications/history',
+		type: RouteType.PRIVATE
+	},
 	ORGANIZATION_MEMBERS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/members`,
 		type: RouteType.PRIVATE

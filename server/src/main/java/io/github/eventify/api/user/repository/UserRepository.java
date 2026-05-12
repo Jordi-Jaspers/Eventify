@@ -130,6 +130,14 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     );
 
     /**
+     * Find all users with the given role.
+     *
+     * @param role the role to filter by.
+     * @return the users with the given role.
+     */
+    List<User> findAllByRole(@NonNull Role role);
+
+    /**
      * Find user by id with organizations eagerly loaded.
      *
      * @param id the user id

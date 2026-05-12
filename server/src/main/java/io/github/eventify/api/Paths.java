@@ -283,6 +283,18 @@ public final class Paths {
 
     public static final String NOTIFICATIONS_SEARCH_PATH = NOTIFICATIONS_PATH + SEARCH_PART;
 
+    /* ------------------------------- ADMIN NOTIFICATION ENDPOINTS ------------------------------- */
+
+    public static final String ADMIN_NOTIFICATIONS_PATH = ADMIN_PATH + NOTIFICATIONS_PART;
+
+    public static final String ADMIN_BROADCASTS_PART = "/broadcasts";
+
+    public static final String ADMIN_BROADCASTS_PATH = ADMIN_NOTIFICATIONS_PATH + ADMIN_BROADCASTS_PART;
+
+    public static final String ADMIN_BROADCASTS_SEARCH_PATH = ADMIN_BROADCASTS_PATH + SEARCH_PART;
+
+    public static final String ADMIN_BROADCASTS_PREVIEW_PATH = ADMIN_BROADCASTS_PATH + "/preview";
+
     /* ------------------------------- END ------------------------------- */
 
     private Paths() {

@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
 	import type { DateRange } from '../types';
 
 	interface Props {
@@ -40,23 +38,18 @@
 	}
 </script>
 
-<div class="grid grid-cols-2 gap-2">
-	<div class="space-y-1">
-		<Label class="text-xs text-muted-foreground">From</Label>
-		<Input
-			type="date"
-			value={fromDate}
-			oninput={handleFromChange}
-			class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-		/>
-	</div>
-	<div class="space-y-1">
-		<Label class="text-xs text-muted-foreground">To</Label>
-		<Input
-			type="date"
-			value={toDate}
-			oninput={handleToChange}
-			class="bg-background/50 border-border transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-		/>
-	</div>
+<div class="flex items-center gap-1.5">
+	<input
+		type="date"
+		value={fromDate}
+		oninput={handleFromChange}
+		class="h-8 w-[130px] rounded-md border border-border/50 bg-background/50 px-2 text-xs transition-colors focus:border-primary focus:outline-none"
+	/>
+	<span class="text-xs text-muted-foreground">–</span>
+	<input
+		type="date"
+		value={toDate}
+		oninput={handleToChange}
+		class="h-8 w-[130px] rounded-md border border-border/50 bg-background/50 px-2 text-xs transition-colors focus:border-primary focus:outline-none"
+	/>
 </div>

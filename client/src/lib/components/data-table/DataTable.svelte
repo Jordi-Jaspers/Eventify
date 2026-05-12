@@ -6,7 +6,7 @@
 	import type { Snippet, Component } from 'svelte';
 	import type { DataTableColumn, DataTableService } from './types';
 	import DataTableHeader from './DataTableHeader.svelte';
-	import DataTableFilters from './DataTableFilters.svelte';
+	import DataTableFiltersSearchBar from './filters/DataTableFiltersSearchBar.svelte';
 	import DataTablePagination from './DataTablePagination.svelte';
 	import DataTableSkeleton from './DataTableSkeleton.svelte';
 	import DataTableEmpty from './DataTableEmpty.svelte';
@@ -57,10 +57,10 @@
 	</Alert>
 {/if}
 
-<!-- Filters Card -->
+<!-- Filters -->
 {#if hasFilterableColumns}
-	<div class="rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg mb-6 px-4 py-3">
-		<DataTableFilters
+	<div class="relative z-10 rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg mb-6 px-4 py-3">
+		<DataTableFiltersSearchBar
 			{columns}
 			filters={service.filters}
 			onFilterChange={service.setFilter}
@@ -101,27 +101,21 @@
 
 	<CardContent>
 		{#if service.loading}
-			<!-- Loading Skeleton -->
 			<DataTableSkeleton rows={skeletonRows} columns={totalCols} />
 		{:else if service.items.length === 0}
-			<!-- Empty State -->
 			{#if empty}
 				{@render empty()}
 			{:else}
 				<DataTableEmpty />
 			{/if}
 		{:else}
-			<!-- Data Table -->
 			<div class="rounded-lg border border-border/50 overflow-hidden">
-				<!-- Table Header -->
 				<DataTableHeader
 					{columns}
 					currentSortKey={service.sortKey}
 					currentSortDirection={service.sortDirection}
 					onSort={service.setSort}
 				/>
-
-				<!-- Table Rows -->
 				<div class="divide-y divide-border/30">
 					{#each service.items as item (item)}
 						{@render row(item)}
@@ -129,7 +123,6 @@
 				</div>
 			</div>
 
-			<!-- Pagination -->
 			<DataTablePagination
 				currentPage={service.currentPage}
 				totalPages={service.totalPages}
