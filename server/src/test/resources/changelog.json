@@ -1,0 +1,23 @@
+[
+  {
+    "version": "1.2.0",
+    "date": "2026-05-01",
+    "features": ["Added changelog API", "Added public endpoints"],
+    "improvements": ["Improved performance"],
+    "fixes": []
+  },
+  {
+    "version": "1.1.0",
+    "date": "2026-04-01",
+    "features": ["Added organization support"],
+    "improvements": [],
+    "fixes": ["Fixed login bug", "Fixed token expiry"]
+  },
+  {
+    "version": "1.0.0",
+    "date": "2026-03-01",
+    "features": ["Initial release"],
+    "improvements": [],
+    "fixes": []
+  }
+]

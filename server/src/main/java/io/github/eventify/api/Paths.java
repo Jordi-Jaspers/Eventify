@@ -79,6 +79,10 @@ public final class Paths {
 
     public static final String PUBLIC_ERROR_PATH = PUBLIC_PATH + ERROR_PART;
 
+    public static final String PUBLIC_CHANGELOG_PATH = PUBLIC_PATH + "/changelog";
+
+    public static final String PUBLIC_CHANGELOG_VERSION_PATH = PUBLIC_CHANGELOG_PATH + "/{version}";
+
     /* ------------------------------- AUTH ENDPOINTS ------------------------------- */
 
     public static final String REGISTER_PATH = AUTH_PATH + "/register";

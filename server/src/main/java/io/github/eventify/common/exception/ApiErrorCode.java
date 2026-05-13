@@ -254,6 +254,14 @@ public enum ApiErrorCode implements ApiError {
     BROADCAST_NOT_FOUND(
         "ERR-0060",
         "The requested broadcast does not exist."
+    ),
+    CHANGELOG_NOT_FOUND(
+        "ERR-0061",
+        "The requested changelog version does not exist."
+    ),
+    COULD_NOT_LOAD_RESOURCE(
+        "ERR-0062",
+        "Could not load a required resource from the classpath."
     );
 
     /* The error code for this reason. */
