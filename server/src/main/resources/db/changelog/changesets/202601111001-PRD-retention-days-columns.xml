@@ -13,7 +13,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601111001-PRD-retention-days-columns-2" author="jordi.jaspers"">
+    <changeSet id="202601111001-PRD-retention-days-columns-2" author="jordi.jaspers">
         <comment>Adding retention_days column to organization table for organization channel retention settings.</comment>
         <sql>
             ALTER TABLE organization ADD COLUMN IF NOT EXISTS retention_days INTEGER NOT NULL DEFAULT 90;
@@ -21,7 +21,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601111001-PRD-retention-days-columns-3" author="jordi.jaspers"">
+    <changeSet id="202601111001-PRD-retention-days-columns-3" author="jordi.jaspers">
         <comment>Adding documentation for retention_days columns and constraints.</comment>
         <sql>
             COMMENT ON COLUMN "user".retention_days IS 'Retention period in days for personal channels (min 90, max 1825, default 90)';
