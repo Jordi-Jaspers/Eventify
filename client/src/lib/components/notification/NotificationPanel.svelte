@@ -1,8 +1,8 @@
 <!--
   NotificationPanel Component
 
-  Right-side Sheet panel displaying notifications.
-  Shows changelog notifications grouped by type.
+  Right-side Sheet panel displaying notifications from the API.
+  Shows notifications with category icons, relative time, and action buttons.
 
   Props:
   - open: boolean — controls sheet visibility
@@ -11,13 +11,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-	import { Bell, Sparkles, ExternalLink, Inbox } from '@lucide/svelte';
+	import { Bell, Sparkles, Settings, AlertTriangle, Inbox, CheckCheck } from '@lucide/svelte';
 	import { notificationStore } from '$lib/stores/notification.svelte';
-	import type { NotificationItem } from '$lib/types/notification';
-	import { CLIENT_ROUTES } from '$lib/config/routes';
-	import { formatDate } from '$lib/utils/date';
+	import type { NotificationResponse } from '$lib/api/models';
+	import { formatRelativeTime } from '$lib/utils/date';
 
 	interface Props {
 		open: boolean;
@@ -26,12 +24,23 @@
 
 	let { open, onOpenChange }: Props = $props();
 
-	const notifications: NotificationItem[] = $derived(notificationStore.notifications);
+	const notifications: NotificationResponse[] = $derived(notificationStore.notifications);
 	const hasNotifications: boolean = $derived(notifications.length > 0);
+	const hasUnread: boolean = $derived(notificationStore.hasUnread);
+	const hasMore: boolean = $derived(notificationStore.hasMore);
 
-	async function handleAction(path: string): Promise<void> {
-		onOpenChange(false);
-		await goto(path);
+	function isUnread(notification: NotificationResponse): boolean {
+		return !notification.readAt;
+	}
+
+	async function handleItemClick(notification: NotificationResponse): Promise<void> {
+		if (isUnread(notification)) {
+			await notificationStore.markAsRead(notification.id);
+		}
+		if (notification.actionUrl) {
+			onOpenChange(false);
+			await goto(notification.actionUrl);
+		}
 	}
 </script>
 
@@ -41,14 +50,27 @@
 		side="right"
 	>
 		<Sheet.Header class="pt-6 pb-4 border-b border-border/50">
-			<Sheet.Title class="flex items-center gap-2">
-				<div
-					class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 border border-primary/20"
-				>
-					<Bell class="h-4 w-4 text-primary" />
-				</div>
-				Notifications
-			</Sheet.Title>
+			<div class="flex items-center justify-between">
+				<Sheet.Title class="flex items-center gap-2">
+					<div
+						class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 border border-primary/20"
+					>
+						<Bell class="h-4 w-4 text-primary" />
+					</div>
+					Notifications
+				</Sheet.Title>
+				{#if hasUnread}
+					<Button
+						variant="ghost"
+						size="sm"
+						class="text-xs text-muted-foreground hover:text-foreground"
+						onclick={() => notificationStore.markAllAsRead()}
+					>
+						<CheckCheck class="h-3.5 w-3.5 mr-1.5" />
+						Mark all read
+					</Button>
+				{/if}
+			</div>
 			<Sheet.Description class="text-muted-foreground text-sm">
 				Stay up to date with the latest updates and announcements.
 			</Sheet.Description>
@@ -58,54 +80,68 @@
 			{#if hasNotifications}
 				<div class="space-y-3 px-4">
 					{#each notifications as notification (notification.id)}
-					<div
-						class="rounded-lg border p-4 space-y-3 transition-colors border-primary/20 bg-primary/5 hover:bg-primary/10"
-					>
-						<div class="flex items-start justify-between gap-2">
-							<div class="flex items-center gap-2">
-								{#if notification.type === 'changelog'}
-									<div
-										class="flex items-center justify-center w-7 h-7 rounded-md bg-primary/10"
-									>
-										<Sparkles class="h-3.5 w-3.5 text-primary" />
+						{@const unread = isUnread(notification)}
+						<button
+							type="button"
+							class="w-full text-left rounded-lg border p-4 space-y-2 transition-colors cursor-pointer
+								{notification.urgent ? 'border-l-4 border-l-destructive border-border/50' : 'border-border/50'}
+								{unread ? 'bg-primary/5 hover:bg-primary/10' : 'bg-transparent hover:bg-muted/30'}"
+							onclick={() => handleItemClick(notification)}
+						>
+							<div class="flex items-start justify-between gap-2">
+								<div class="flex items-center gap-2">
+									{#if notification.category === 'ANNOUNCEMENT'}
+										<div class="flex items-center justify-center w-7 h-7 rounded-md bg-blue-500/10">
+											<Sparkles class="h-3.5 w-3.5 text-blue-400" />
+										</div>
+									{:else if notification.category === 'SYSTEM'}
+										<div class="flex items-center justify-center w-7 h-7 rounded-md bg-muted/50">
+											<Settings class="h-3.5 w-3.5 text-muted-foreground" />
+										</div>
+									{:else if notification.category === 'ALERT'}
+										<div class="flex items-center justify-center w-7 h-7 rounded-md bg-destructive/10">
+											<AlertTriangle class="h-3.5 w-3.5 text-destructive" />
+										</div>
+									{/if}
+									<div>
+										<p class="font-medium text-sm leading-tight">{notification.title}</p>
+										<p class="text-xs text-muted-foreground mt-0.5">
+											{formatRelativeTime(notification.createdAt)}
+										</p>
 									</div>
-								{/if}
-								<div>
-									<p class="font-medium text-sm leading-tight">{notification.title}</p>
-									<p class="text-xs text-muted-foreground mt-0.5">
-										{formatDate(notification.date)}
-									</p>
 								</div>
+								{#if unread}
+									<span class="w-2 h-2 rounded-full bg-primary shrink-0 mt-1"></span>
+								{/if}
 							</div>
-							<div class="flex items-center gap-1.5 shrink-0">
-								<span class="w-2 h-2 rounded-full bg-primary shrink-0"></span>
-								<Badge
-									class="text-[10px] px-1.5 py-0 capitalize bg-primary/10 text-primary border-primary/20"
-								>
-									{notification.type}
-								</Badge>
-							</div>
-						</div>
 
-						{#if notification.description}
-							<p class="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-								{notification.description}
-							</p>
-						{/if}
+							{#if notification.message}
+								<p class="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+									{notification.message}
+								</p>
+							{/if}
 
-						{#if notification.actionLabel && notification.actionPath}
-							<Button
-								variant="outline"
-								size="sm"
-								class="w-full text-xs h-8 border-border/50 hover:bg-primary/10 hover:border-primary/30"
-								onclick={() => handleAction(notification.actionPath!)}
-							>
-								<ExternalLink class="h-3 w-3 mr-1.5" />
-								{notification.actionLabel}
-							</Button>
-						{/if}
-					</div>
-				{/each}
+							{#if notification.actionUrl && notification.actionLabel}
+								<div class="pt-1">
+									<span
+										class="inline-flex items-center text-xs text-primary hover:underline"
+									>
+										{notification.actionLabel} →
+									</span>
+								</div>
+							{/if}
+						</button>
+					{/each}
+
+					{#if hasMore}
+						<Button
+							variant="outline"
+							class="w-full border-border/50 hover:bg-primary/10 text-xs"
+							onclick={() => notificationStore.loadMore()}
+						>
+							Load more
+						</Button>
+					{/if}
 				</div>
 			{:else}
 				<div class="flex flex-col items-center justify-center h-full py-16 px-4 text-center">
@@ -119,16 +155,5 @@
 				</div>
 			{/if}
 		</div>
-
-		<Sheet.Footer class="border-t border-border/50 pb-6 pt-4 px-4">
-			<Button
-				variant="outline"
-				class="w-full border-border/50 hover:bg-primary/10"
-				onclick={() => handleAction(CLIENT_ROUTES.CHANGELOG_PAGE.path)}
-			>
-				<Sparkles class="h-4 w-4 mr-2 text-primary" />
-				View Full Changelog
-			</Button>
-		</Sheet.Footer>
 	</Sheet.Content>
 </Sheet.Root>

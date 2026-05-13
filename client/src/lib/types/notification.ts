@@ -1,12 +1,2 @@
-export type NotificationType = 'changelog' | 'system';
-
-export interface NotificationItem {
-	id: string;
-	type: NotificationType;
-	title: string;
-	description?: string;
-	date: string;
-	read: boolean;
-	actionLabel?: string;
-	actionPath?: string;
-}
+// Notification types are now sourced from the API.
+// Use NotificationResponse and PageResourceNotificationResponse from '$lib/api/models'.

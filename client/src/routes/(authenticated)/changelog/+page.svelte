@@ -1,16 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Sparkles, Calendar } from '@lucide/svelte';
 	import { changelog } from '$lib/data/changelog';
-	import { versionStore } from '$lib/stores/version.svelte';
 	import type { ChangelogEntry } from '$lib/types/changelog';
 	import { formatDate } from '$lib/utils/date';
-
-	onMount(() => {
-		versionStore.markAsSeen();
-	});
 
 	interface CategoryConfig {
 		title: string;

@@ -21,7 +21,6 @@
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { showDevCredentials } from '$lib/config/env';
 	import { APP_VERSION } from '$lib/config/version';
-	import { versionStore } from '$lib/stores/version.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette, Sparkles, Bell } from '@lucide/svelte';
@@ -37,8 +36,9 @@
 	// Theme state
 	let isDarkMode: boolean = $state(true);
 	const shouldShowDevPlaybook: boolean = showDevCredentials();
-	const hasNewVersion: boolean = $derived(versionStore.hasNewVersion);
 	const hasUnread: boolean = $derived(notificationStore.hasUnread);
+	const unreadCount: number = $derived(notificationStore.unreadCount);
+	const unreadBadgeLabel: string = $derived(unreadCount > 9 ? '9+' : String(unreadCount));
 
 	onMount(() => {
 		isDarkMode = document.documentElement.classList.contains('dark');
@@ -129,7 +129,7 @@
 				</div>
 				<span>Notifications</span>
 				{#if hasUnread}
-					<Badge class="ml-auto text-[10px] px-1.5 py-0">New</Badge>
+					<Badge class="ml-auto text-[10px] px-1.5 py-0">{unreadBadgeLabel}</Badge>
 				{/if}
 			</Sidebar.MenuButton>
 		</Sidebar.MenuItem>
@@ -277,9 +277,6 @@
 					>
 						<Sparkles class="mr-2 h-4 w-4" />
 						<span>What's New</span>
-						{#if hasNewVersion}
-							<span class="ml-auto h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-						{/if}
 					</DropdownMenu.Item>
 					<DropdownMenu.Item
 						class="cursor-pointer hover:bg-primary/10"

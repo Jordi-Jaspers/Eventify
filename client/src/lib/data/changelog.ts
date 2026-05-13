@@ -2,7 +2,7 @@ import type { ChangelogEntry } from '$lib/types/changelog';
 
 export const changelog: ChangelogEntry[] = [
 	{
-		version: '0.2.0-SNAPSHOT',
+		version: '1.1.0-SNAPSHOT',
 		date: '2026-05-11',
 		features: [
 			'Admin area reorganized into Statistics, Resources (tabbed: Users / Organizations / API Keys), and Tools sections'
@@ -11,7 +11,7 @@ export const changelog: ChangelogEntry[] = [
 		fixes: []
 	},
 	{
-		version: '0.1.0',
+		version: '1.0.0',
 		date: '2026-05-07',
 		features: [
 			'"Remember me for 30 days" checkbox on login keeps you signed in longer on trusted devices',

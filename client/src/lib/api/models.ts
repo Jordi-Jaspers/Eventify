@@ -95,6 +95,9 @@ export type PageResourceOrganizationMembershipResponse = components['schemas']['
 export type PageResourceUserDetailsResponse = components['schemas']['PageResourceUserDetailsResponse'];
 export type PageResourceApiKeyResponse = components['schemas']['PageResourceApiKeyResponse'];
 
+// ================ User Notifications ===================
+export type NotificationResponse = components['schemas']['NotificationResponse'];
+export type PageResourceNotificationResponse = components['schemas']['PageResourceNotificationResponse'];
 // ================ Notifications / Broadcasts ===================
 export type BroadcastResponseRaw = components['schemas']['BroadcastResponse'];
 export type RecipientResponse = components['schemas']['RecipientResponse'];
