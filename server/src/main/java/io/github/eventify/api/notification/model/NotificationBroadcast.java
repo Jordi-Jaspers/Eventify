@@ -44,12 +44,13 @@ public class NotificationBroadcast implements PageableItem {
     @JoinColumn(name = "sent_by")
     private User sentBy;
 
+    @Enumerated(EnumType.STRING)
     @Column(
         name = "audience_type",
         nullable = false,
         length = 40
     )
-    private String audienceType;
+    private NotificationAudienceType audienceType;
 
     @Column(name = "audience_target_id")
     private Long audienceTargetId;

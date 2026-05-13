@@ -1,5 +1,6 @@
 package io.github.eventify.api.notification.model.request;
 
+import io.github.eventify.api.notification.model.NotificationAudienceType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +15,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class AudienceRequest {
 
-    private String type;
+    private NotificationAudienceType type;
 
     private Long targetId;
 

@@ -41,7 +41,7 @@ public class BroadcastValidator implements Validator<CreateBroadcastRequest> {
             .orWhen(m -> m.length() > 500, MESSAGE_TOO_LONG);
 
         final AudienceRequest audience = request.getAudience();
-        if (isNull(audience) || isNullOrEmpty(audience.getType())) {
+        if (isNull(audience) || audience.getType() == null) {
             result.rejectField("audience.type", null).whenNull(AUDIENCE_TYPE_REQUIRED);
         }
 
@@ -64,7 +64,7 @@ public class BroadcastValidator implements Validator<CreateBroadcastRequest> {
     public void validateAudience(final AudienceRequest audienceRequest) {
         final ValidationResult result = new ValidationResult();
 
-        if (isNull(audienceRequest) || isNullOrEmpty(audienceRequest.getType())) {
+        if (isNull(audienceRequest) || audienceRequest.getType() == null) {
             result.rejectField("type", null).whenNull(AUDIENCE_TYPE_REQUIRED);
         }
 

@@ -53,7 +53,8 @@ public class NotificationDispatchService {
                 "Get started by creating your first channel and setting up your first watchlist.",
                 "/channels",
                 "Get started",
-                false
+                false,
+                null
             );
             dispatch(NotificationAudience.user(user.getId()), payload);
         } catch (final Exception exception) {

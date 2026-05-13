@@ -6,5 +6,6 @@ package io.github.eventify.api.notification.model;
 public enum NotificationCategory {
     ANNOUNCEMENT,
     SYSTEM,
-    ALERT
+    ALERT,
+    UPDATE
 }

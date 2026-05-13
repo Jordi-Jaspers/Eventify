@@ -1,6 +1,7 @@
 package io.github.eventify.api.notification.repository;
 
 import io.github.eventify.api.notification.model.NotificationBroadcast;
+import io.github.eventify.api.notification.model.NotificationCategory;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -12,4 +13,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NotificationBroadcastRepository extends JpaRepository<NotificationBroadcast, Long>,
                                                  JpaSpecificationExecutor<NotificationBroadcast> {
+
+    boolean existsByCategoryAndTitle(NotificationCategory category, String title);
 }

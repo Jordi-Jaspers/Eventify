@@ -8,7 +8,9 @@ import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.notification.model.NotificationAudienceType;
 import io.github.eventify.api.notification.model.NotificationBroadcast;
+import io.github.eventify.api.notification.model.NotificationCategory;
 import io.github.eventify.api.notification.model.request.AudienceRequest;
 import io.github.eventify.api.notification.model.request.CreateBroadcastRequest;
 import io.github.eventify.api.organization.model.Organization;
@@ -540,7 +542,7 @@ public class IntegrationTest extends WebMvcConfigurator {
     }
 
     protected NotificationBroadcast aBroadcastForAdmin(final io.github.eventify.api.user.model.User sentBy,
-        final String title, final String audienceType) {
+        final String title, final io.github.eventify.api.notification.model.NotificationAudienceType audienceType) {
         final NotificationBroadcast broadcast = new NotificationBroadcast();
         broadcast.setSentBy(sentBy);
         broadcast.setTitle(title);
@@ -551,18 +553,18 @@ public class IntegrationTest extends WebMvcConfigurator {
         return notificationBroadcastRepository.save(broadcast);
     }
 
-    protected static CreateBroadcastRequest aValidCreateBroadcastRequest(final String audienceType,
+    protected static CreateBroadcastRequest aValidCreateBroadcastRequest(final NotificationAudienceType audienceType,
         final Long targetId, final String role) {
         final AudienceRequest audience = anAudienceRequest(audienceType, targetId, role);
         final CreateBroadcastRequest request = new CreateBroadcastRequest();
         request.setTitle("Test Broadcast Title");
         request.setMessage("Test broadcast message content");
-        request.setCategory("ANNOUNCEMENT");
+        request.setCategory(NotificationCategory.ANNOUNCEMENT);
         request.setAudience(audience);
         return request;
     }
 
-    protected static AudienceRequest anAudienceRequest(final String audienceType,
+    protected static AudienceRequest anAudienceRequest(final NotificationAudienceType audienceType,
         final Long targetId, final String role) {
         final AudienceRequest audience = new AudienceRequest();
         audience.setType(audienceType);

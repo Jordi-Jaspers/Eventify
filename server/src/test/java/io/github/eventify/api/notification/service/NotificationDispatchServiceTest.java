@@ -98,7 +98,8 @@ public class NotificationDispatchServiceTest extends UnitTest {
             "Get started by creating your first channel",
             "/channels",
             "Get started",
-            false
+            false,
+            null
         );
     }
 }

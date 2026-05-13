@@ -1,5 +1,7 @@
 package io.github.eventify.api.notification.model.response;
 
+import io.github.eventify.api.notification.model.NotificationAudienceType;
+import io.github.eventify.api.notification.model.NotificationCategory;
 import io.github.jframe.datasource.search.model.resource.PageableItemResource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -31,7 +33,7 @@ public class BroadcastResponse implements PageableItemResource {
         example = "ANNOUNCEMENT",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private String category;
+    private NotificationCategory category;
 
     @Schema(
         description = "Broadcast title",
@@ -66,7 +68,7 @@ public class BroadcastResponse implements PageableItemResource {
         example = "ALL_USERS",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private String audienceType;
+    private NotificationAudienceType audienceType;
 
     @Schema(
         description = "Number of recipients",

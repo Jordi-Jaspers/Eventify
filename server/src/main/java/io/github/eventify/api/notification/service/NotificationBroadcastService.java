@@ -5,7 +5,6 @@ import io.github.eventify.api.notification.model.NotificationAudience;
 import io.github.eventify.api.notification.model.NotificationAudienceType;
 import io.github.eventify.api.notification.model.NotificationBroadcast;
 import io.github.eventify.api.notification.model.NotificationBroadcastMetaData;
-import io.github.eventify.api.notification.model.NotificationCategory;
 import io.github.eventify.api.notification.model.NotificationPayload;
 import io.github.eventify.api.notification.model.request.AudienceRequest;
 import io.github.eventify.api.notification.model.request.CreateBroadcastRequest;
@@ -95,7 +94,7 @@ public class NotificationBroadcastService {
         final int recipientCount) {
         final NotificationBroadcast broadcast = new NotificationBroadcast();
         broadcast.setSentBy(sender);
-        broadcast.setCategory(NotificationCategory.valueOf(request.getCategory()));
+        broadcast.setCategory(request.getCategory());
         broadcast.setTitle(request.getTitle());
         broadcast.setMessage(request.getMessage());
         broadcast.setActionUrl(request.getActionUrl());
@@ -110,7 +109,7 @@ public class NotificationBroadcastService {
     private NotificationPayload buildPayload(final CreateBroadcastRequest request,
         final NotificationBroadcast broadcast) {
         return new NotificationPayload(
-            NotificationCategory.valueOf(request.getCategory()),
+            request.getCategory(),
             request.getTitle(),
             request.getMessage(),
             request.getActionUrl(),
@@ -121,7 +120,7 @@ public class NotificationBroadcastService {
     }
 
     private NotificationAudience toAudience(final AudienceRequest audienceRequest) {
-        final NotificationAudienceType type = NotificationAudienceType.valueOf(audienceRequest.getType());
+        final NotificationAudienceType type = audienceRequest.getType();
         return switch (type) {
             case USER -> NotificationAudience.user(audienceRequest.getTargetId());
             case ALL_USERS -> NotificationAudience.allUsers();

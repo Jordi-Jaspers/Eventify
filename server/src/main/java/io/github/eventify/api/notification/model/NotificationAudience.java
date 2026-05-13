@@ -2,24 +2,19 @@ package io.github.eventify.api.notification.model;
 
 import io.github.eventify.api.authentication.model.Role;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Represents the target audience for a notification dispatch.
  */
 @Getter
+@RequiredArgsConstructor
 public final class NotificationAudience {
 
     private final NotificationAudienceType type;
     private final Long userId;
     private final Long organizationId;
     private final Role role;
-
-    private NotificationAudience(final NotificationAudienceType type, final Long userId, final Long organizationId, final Role role) {
-        this.type = type;
-        this.userId = userId;
-        this.organizationId = organizationId;
-        this.role = role;
-    }
 
     /**
      * Creates an audience targeting a single user by ID.

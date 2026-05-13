@@ -1,5 +1,6 @@
 package io.github.eventify.api.notification.controller;
 
+import io.github.eventify.api.notification.model.NotificationAudienceType;
 import io.github.eventify.api.notification.model.NotificationBroadcast;
 import io.github.eventify.api.notification.model.response.RecipientResponse;
 import io.github.eventify.api.user.model.User;
@@ -38,7 +39,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
         // Given: A broadcast with recipients
         final User recipient1 = aValidatedUser();
         final User recipient2 = aValidatedUser();
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Test Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Test Broadcast", NotificationAudienceType.ALL_USERS);
         aNotificationForUserWithBroadcast(recipient1, broadcast);
         aNotificationForUserWithBroadcast(recipient2, broadcast);
 
@@ -68,7 +69,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
     public void getRecipientsReturnsCorrectFields() throws Exception {
         // Given: A broadcast with one recipient
         final User recipient = aValidatedUser();
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Field Test Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Field Test Broadcast", NotificationAudienceType.ALL_USERS);
         aNotificationForUserWithBroadcast(recipient, broadcast);
 
         // When: Admin requests recipients
@@ -103,7 +104,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
         // Given: A broadcast with two recipients with distinct emails
         final User matchingRecipient = aValidatedUser();
         final User otherRecipient = aValidatedUser();
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Email Filter Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Email Filter Broadcast", NotificationAudienceType.ALL_USERS);
         aNotificationForUserWithBroadcast(matchingRecipient, broadcast);
         aNotificationForUserWithBroadcast(otherRecipient, broadcast);
 
@@ -135,7 +136,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
     public void getRecipientsFiltersByName() throws Exception {
         // Given: A broadcast with recipients
         final User recipient = aValidatedUser();
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Name Filter Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Name Filter Broadcast", NotificationAudienceType.ALL_USERS);
         aNotificationForUserWithBroadcast(recipient, broadcast);
 
         // When: Admin searches by first name (FIRST_NAME = "John")
@@ -166,7 +167,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
         // Given: A broadcast with two recipients
         final User recipient1 = aValidatedUser();
         final User recipient2 = aValidatedUser();
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Empty Search Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Empty Search Broadcast", NotificationAudienceType.ALL_USERS);
         aNotificationForUserWithBroadcast(recipient1, broadcast);
         aNotificationForUserWithBroadcast(recipient2, broadcast);
 
@@ -194,7 +195,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
     public void getRecipientsReturnsEmptyWhenSearchMatchesNone() throws Exception {
         // Given: A broadcast with a recipient
         final User recipient = aValidatedUser();
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "No Match Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "No Match Broadcast", NotificationAudienceType.ALL_USERS);
         aNotificationForUserWithBroadcast(recipient, broadcast);
 
         // When: Admin searches with a term that matches no recipient
@@ -225,7 +226,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
         final User recipient1 = aValidatedUser();
         final User recipient2 = aValidatedUser();
         final User recipient3 = aValidatedUser();
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Pagination Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Pagination Broadcast", NotificationAudienceType.ALL_USERS);
         aNotificationForUserWithBroadcast(recipient1, broadcast);
         aNotificationForUserWithBroadcast(recipient2, broadcast);
         aNotificationForUserWithBroadcast(recipient3, broadcast);
@@ -258,7 +259,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
         // Given: A broadcast with 2 recipients
         final User recipient1 = aValidatedUser();
         final User recipient2 = aValidatedUser();
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Offset Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Offset Broadcast", NotificationAudienceType.ALL_USERS);
         aNotificationForUserWithBroadcast(recipient1, broadcast);
         aNotificationForUserWithBroadcast(recipient2, broadcast);
 
@@ -289,7 +290,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
     @DisplayName("Should return empty list when broadcast has no recipients")
     public void getRecipientsReturnsEmptyForBroadcastWithNoRecipients() throws Exception {
         // Given: A broadcast with no associated notifications
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Empty Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Empty Broadcast", NotificationAudienceType.ALL_USERS);
 
         // When: Admin requests recipients
         final SortablePageInput input = aDefaultPageInput();
@@ -338,7 +339,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
     public void getRecipientsFailsWhenNotAdmin() throws Exception {
         // Given: A regular user and an existing broadcast
         final User regularUser = aValidatedUser();
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Security Test Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Security Test Broadcast", NotificationAudienceType.ALL_USERS);
 
         // When: Regular user attempts to get recipients
         final SortablePageInput input = aDefaultPageInput();
@@ -357,7 +358,7 @@ public class BroadcastRecipientsControllerTest extends IntegrationTest {
     @DisplayName("Should return 401 when unauthenticated user requests recipients")
     public void getRecipientsFailsWhenUnauthenticated() throws Exception {
         // Given: An existing broadcast and no authentication
-        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Auth Test Broadcast", "ALL_USERS");
+        final NotificationBroadcast broadcast = aBroadcastForAdmin(admin, "Auth Test Broadcast", NotificationAudienceType.ALL_USERS);
 
         // When: Unauthenticated request
         final SortablePageInput input = aDefaultPageInput();

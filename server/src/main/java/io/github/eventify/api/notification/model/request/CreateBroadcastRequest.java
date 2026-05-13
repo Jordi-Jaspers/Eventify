@@ -1,5 +1,6 @@
 package io.github.eventify.api.notification.model.request;
 
+import io.github.eventify.api.notification.model.NotificationCategory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +15,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class CreateBroadcastRequest {
 
-    private String category;
+    private NotificationCategory category;
 
     private String title;
 

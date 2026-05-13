@@ -1,6 +1,7 @@
 package io.github.eventify.api.notification.service;
 
 import io.github.eventify.api.notification.model.NotificationAudience;
+import io.github.eventify.api.notification.model.NotificationAudienceType;
 import io.github.eventify.api.notification.model.NotificationBroadcast;
 import io.github.eventify.api.notification.model.NotificationBroadcastMetaData;
 import io.github.eventify.api.notification.model.NotificationCategory;
@@ -69,13 +70,13 @@ public class NotificationBroadcastServiceTest extends UnitTest {
     public void shouldSendBroadcastToAllResolvedUsers() {
         // Given: A sender and a request targeting all users
         final User sender = aValidUser();
-        final CreateBroadcastRequest request = aValidBroadcastRequest("ALL_USERS", null, null);
+        final CreateBroadcastRequest request = aValidBroadcastRequest(NotificationAudienceType.ALL_USERS, null, null);
 
         final User recipient1 = aValidUser();
         final User recipient2 = aValidUser();
         recipient2.setId(2L);
 
-        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", "ALL_USERS", 2);
+        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", NotificationAudienceType.ALL_USERS, 2);
 
         when(audienceResolver.resolve(any(NotificationAudience.class)))
             .thenReturn(List.of(recipient1, recipient2));
@@ -102,14 +103,14 @@ public class NotificationBroadcastServiceTest extends UnitTest {
     public void shouldSaveBroadcastWithCorrectFields() {
         // Given: A sender and a detailed request
         final User sender = aValidUser();
-        final CreateBroadcastRequest request = aValidBroadcastRequest("ALL_USERS", null, null);
+        final CreateBroadcastRequest request = aValidBroadcastRequest(NotificationAudienceType.ALL_USERS, null, null);
         request.setTitle("Important Announcement");
         request.setMessage("This is an important message");
-        request.setCategory("ANNOUNCEMENT");
+        request.setCategory(NotificationCategory.ANNOUNCEMENT);
         request.setActionUrl("/dashboard");
         request.setActionLabel("Go to Dashboard");
 
-        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Important Announcement", "ALL_USERS", 1);
+        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Important Announcement", NotificationAudienceType.ALL_USERS, 1);
 
         when(audienceResolver.resolve(any(NotificationAudience.class))).thenReturn(List.of(aValidUser()));
         when(notificationBroadcastRepository.save(any(NotificationBroadcast.class))).thenReturn(savedBroadcast);
@@ -127,7 +128,7 @@ public class NotificationBroadcastServiceTest extends UnitTest {
         assertThat(captured.getCategory(), is(NotificationCategory.ANNOUNCEMENT));
         assertThat(captured.getActionUrl(), is("/dashboard"));
         assertThat(captured.getActionLabel(), is("Go to Dashboard"));
-        assertThat(captured.getAudienceType(), is("ALL_USERS"));
+        assertThat(captured.getAudienceType(), is(NotificationAudienceType.ALL_USERS));
         assertThat(captured.getSentBy(), is(sender));
     }
 
@@ -136,9 +137,9 @@ public class NotificationBroadcastServiceTest extends UnitTest {
     public void shouldCreateBroadcastWithZeroRecipientsWhenOrgEmpty() {
         // Given: A sender and a request targeting an empty organization
         final User sender = aValidUser();
-        final CreateBroadcastRequest request = aValidBroadcastRequest("ORGANIZATION", 10L, null);
+        final CreateBroadcastRequest request = aValidBroadcastRequest(NotificationAudienceType.ORGANIZATION, 10L, null);
 
-        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", "ORGANIZATION", 0);
+        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", NotificationAudienceType.ORGANIZATION, 0);
 
         when(audienceResolver.resolve(any(NotificationAudience.class))).thenReturn(List.of());
         when(notificationBroadcastRepository.save(any(NotificationBroadcast.class))).thenReturn(savedBroadcast);
@@ -162,9 +163,9 @@ public class NotificationBroadcastServiceTest extends UnitTest {
         // Given: A request targeting a specific organization
         final User sender = aValidUser();
         final Long orgId = 42L;
-        final CreateBroadcastRequest request = aValidBroadcastRequest("ORGANIZATION", orgId, null);
+        final CreateBroadcastRequest request = aValidBroadcastRequest(NotificationAudienceType.ORGANIZATION, orgId, null);
 
-        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", "ORGANIZATION", 0);
+        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", NotificationAudienceType.ORGANIZATION, 0);
 
         when(audienceResolver.resolve(any(NotificationAudience.class))).thenReturn(List.of());
         when(notificationBroadcastRepository.save(any(NotificationBroadcast.class))).thenReturn(savedBroadcast);
@@ -184,9 +185,9 @@ public class NotificationBroadcastServiceTest extends UnitTest {
     public void shouldSaveBroadcastWithAudienceRoleForGlobalRole() {
         // Given: A request targeting users with a specific role
         final User sender = aValidUser();
-        final CreateBroadcastRequest request = aValidBroadcastRequest("GLOBAL_ROLE", null, "USER");
+        final CreateBroadcastRequest request = aValidBroadcastRequest(NotificationAudienceType.GLOBAL_ROLE, null, "USER");
 
-        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", "GLOBAL_ROLE", 0);
+        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", NotificationAudienceType.GLOBAL_ROLE, 0);
 
         when(audienceResolver.resolve(any(NotificationAudience.class))).thenReturn(List.of());
         when(notificationBroadcastRepository.save(any(NotificationBroadcast.class))).thenReturn(savedBroadcast);
@@ -206,9 +207,9 @@ public class NotificationBroadcastServiceTest extends UnitTest {
     public void shouldReturnResponseWithSentByEmail() {
         // Given: A sender with known email
         final User sender = aValidUser();
-        final CreateBroadcastRequest request = aValidBroadcastRequest("ALL_USERS", null, null);
+        final CreateBroadcastRequest request = aValidBroadcastRequest(NotificationAudienceType.ALL_USERS, null, null);
 
-        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", "ALL_USERS", 1);
+        final NotificationBroadcast savedBroadcast = aSavedBroadcast(1L, "Test Title", NotificationAudienceType.ALL_USERS, 1);
         savedBroadcast.setSentBy(sender);
 
         when(audienceResolver.resolve(any(NotificationAudience.class))).thenReturn(List.of(aValidUser()));
@@ -227,7 +228,7 @@ public class NotificationBroadcastServiceTest extends UnitTest {
     @DisplayName("Should return recipient count without dispatching any notifications")
     public void shouldPreviewRecipientCountWithoutDispatching() {
         // Given: An audience request for all users
-        final AudienceRequest audienceRequest = anAudienceRequest("ALL_USERS", null, null);
+        final AudienceRequest audienceRequest = anAudienceRequest(NotificationAudienceType.ALL_USERS, null, null);
 
         when(audienceResolver.count(any(NotificationAudience.class))).thenReturn(50L);
 
@@ -248,7 +249,7 @@ public class NotificationBroadcastServiceTest extends UnitTest {
     @DisplayName("Should return zero count when audience has no recipients")
     public void shouldReturnZeroPreviewCountWhenNoRecipients() {
         // Given: An audience request for an empty organization
-        final AudienceRequest audienceRequest = anAudienceRequest("ORGANIZATION", 99L, null);
+        final AudienceRequest audienceRequest = anAudienceRequest(NotificationAudienceType.ORGANIZATION, 99L, null);
 
         when(audienceResolver.count(any(NotificationAudience.class))).thenReturn(0L);
 
@@ -269,8 +270,8 @@ public class NotificationBroadcastServiceTest extends UnitTest {
         input.setPageNumber(0);
         input.setPageSize(20);
 
-        final NotificationBroadcast broadcast1 = aSavedBroadcast(1L, "First Broadcast", "ALL_USERS", 10);
-        final NotificationBroadcast broadcast2 = aSavedBroadcast(2L, "Second Broadcast", "ORGANIZATION", 5);
+        final NotificationBroadcast broadcast1 = aSavedBroadcast(1L, "First Broadcast", NotificationAudienceType.ALL_USERS, 10);
+        final NotificationBroadcast broadcast2 = aSavedBroadcast(2L, "Second Broadcast", NotificationAudienceType.ORGANIZATION, 5);
         final Page<NotificationBroadcast> page = new PageImpl<>(List.of(broadcast1, broadcast2));
 
         when(notificationBroadcastRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
@@ -304,18 +305,18 @@ public class NotificationBroadcastServiceTest extends UnitTest {
 
     // ========================= FACTORY METHODS =========================
 
-    private static CreateBroadcastRequest aValidBroadcastRequest(final String audienceType,
+    private static CreateBroadcastRequest aValidBroadcastRequest(final NotificationAudienceType audienceType,
         final Long targetId, final String role) {
         final AudienceRequest audience = anAudienceRequest(audienceType, targetId, role);
         final CreateBroadcastRequest request = new CreateBroadcastRequest();
         request.setTitle("Test Title");
         request.setMessage("Test message content");
-        request.setCategory("ANNOUNCEMENT");
+        request.setCategory(NotificationCategory.ANNOUNCEMENT);
         request.setAudience(audience);
         return request;
     }
 
-    private static AudienceRequest anAudienceRequest(final String audienceType,
+    private static AudienceRequest anAudienceRequest(final NotificationAudienceType audienceType,
         final Long targetId, final String role) {
         final AudienceRequest audience = new AudienceRequest();
         audience.setType(audienceType);
@@ -325,7 +326,7 @@ public class NotificationBroadcastServiceTest extends UnitTest {
     }
 
     private static NotificationBroadcast aSavedBroadcast(final Long id, final String title,
-        final String audienceType, final int recipientCount) {
+        final NotificationAudienceType audienceType, final int recipientCount) {
         final NotificationBroadcast broadcast = new NotificationBroadcast();
         broadcast.setId(id);
         broadcast.setTitle(title);
