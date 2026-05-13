@@ -77,11 +77,16 @@ public class TestDataCleanupService {
         // 9. Tokens
         jdbcTemplate.execute("DELETE FROM token WHERE user_id IN " + userIdList);
 
-        // 10. Notification broadcasts (sent_by FK references user)
-        jdbcTemplate.execute("DELETE FROM notification_broadcast WHERE sent_by IN " + userIdList);
-
-        // 11. Notifications
+        // 10. Notifications (must be before notification_broadcast due to FK)
         jdbcTemplate.execute("DELETE FROM notification WHERE user_id IN " + userIdList);
+        // Also delete notifications referencing broadcasts sent by test users (e.g. ALL_USERS broadcasts)
+        jdbcTemplate.execute(
+            "DELETE FROM notification WHERE broadcast_id IN " +
+                "(SELECT id FROM notification_broadcast WHERE sent_by IN " + userIdList + ")"
+        );
+
+        // 11. Notification broadcasts (sent_by FK references user)
+        jdbcTemplate.execute("DELETE FROM notification_broadcast WHERE sent_by IN " + userIdList);
 
         // 12. Users (table name is "user" with quotes - reserved word in PostgreSQL)
         jdbcTemplate.execute("DELETE FROM \"user\" WHERE id IN " + userIdList);

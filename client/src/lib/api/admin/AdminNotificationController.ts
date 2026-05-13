@@ -1,48 +1,17 @@
 import { SERVER_BASE_URL } from '$lib/config/constants';
-import type { SortablePageInput, PageResource } from '$lib/api/models.ts';
+import type {
+	SortablePageInput,
+	PageResource,
+	BroadcastResponse,
+	RecipientResponse,
+	BroadcastCategory,
+	AudienceType,
+	AudienceRequest,
+	CreateBroadcastRequest,
+	PreviewResponse
+} from '$lib/api/models';
 
-export type BroadcastCategory = 'ANNOUNCEMENT' | 'SYSTEM' | 'ALERT';
-export type AudienceType =
-	| 'ALL_USERS'
-	| 'ORGANIZATION'
-	| 'ALL_ORGANIZATION_OWNERS'
-	| 'USER'
-	| 'GLOBAL_ROLE';
-
-export interface BroadcastAudience {
-	type: AudienceType;
-	targetId?: number;
-	role?: string;
-}
-
-export interface SendBroadcastRequest {
-	category: BroadcastCategory;
-	title: string;
-	message: string;
-	actionUrl?: string;
-	actionLabel?: string;
-	audience: BroadcastAudience;
-}
-
-export interface BroadcastResponse {
-	id: number;
-	category: BroadcastCategory;
-	title: string;
-	message: string;
-	actionUrl?: string;
-	actionLabel?: string;
-	audienceType: AudienceType;
-	audienceTargetId?: number;
-	audienceRole?: string;
-	audienceTargetName?: string;
-	recipientCount: number;
-	sentByEmail: string;
-	createdAt: string;
-}
-
-export interface PreviewRecipientCountResponse {
-	recipientCount: number;
-}
+export type { BroadcastResponse, RecipientResponse, BroadcastCategory, AudienceType, AudienceRequest, CreateBroadcastRequest, PreviewResponse };
 
 async function apiPost<T>(path: string, body: unknown): Promise<T> {
 	const response: Response = await fetch(`${SERVER_BASE_URL}${path}`, {
@@ -59,14 +28,14 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
 	return response.json() as Promise<T>;
 }
 
-export async function sendBroadcast(request: SendBroadcastRequest): Promise<BroadcastResponse> {
+export async function sendBroadcast(request: CreateBroadcastRequest): Promise<BroadcastResponse> {
 	return apiPost<BroadcastResponse>('/v1/admin/notifications/broadcasts', request);
 }
 
 export async function previewRecipientCount(
-	audience: BroadcastAudience
-): Promise<PreviewRecipientCountResponse> {
-	return apiPost<PreviewRecipientCountResponse>(
+	audience: AudienceRequest
+): Promise<PreviewResponse> {
+	return apiPost<PreviewResponse>(
 		'/v1/admin/notifications/broadcasts/preview',
 		audience
 	);
@@ -77,6 +46,16 @@ export async function searchBroadcasts(
 ): Promise<PageResource<BroadcastResponse>> {
 	return apiPost<PageResource<BroadcastResponse>>(
 		'/v1/admin/notifications/broadcasts/search',
+		input
+	);
+}
+
+export async function searchBroadcastRecipients(
+	id: number,
+	input: SortablePageInput
+): Promise<PageResource<RecipientResponse>> {
+	return apiPost<PageResource<RecipientResponse>>(
+		`/v1/admin/notifications/broadcasts/${id}/recipients/search`,
 		input
 	);
 }

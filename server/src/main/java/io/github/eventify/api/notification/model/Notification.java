@@ -98,6 +98,10 @@ public class Notification implements PageableItem {
     @Column(name = "read_at")
     private OffsetDateTime readAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "broadcast_id")
+    private NotificationBroadcast broadcast;
+
     /**
      * Business constructor for creating a notification.
      *

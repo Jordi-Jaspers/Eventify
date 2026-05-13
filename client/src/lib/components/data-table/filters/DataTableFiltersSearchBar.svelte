@@ -212,6 +212,5 @@
 
 <!-- Click outside to close popover -->
 {#if openFilter}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="fixed inset-0 z-40" onclick={() => { openFilter = null; }}></div>
+	<button type="button" class="fixed inset-0 z-40 cursor-default" aria-label="Close filter" onclick={() => { openFilter = null; }}></button>
 {/if}

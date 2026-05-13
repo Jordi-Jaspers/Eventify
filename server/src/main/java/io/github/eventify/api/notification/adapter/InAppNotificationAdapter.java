@@ -30,6 +30,9 @@ public class InAppNotificationAdapter implements NotificationAdapter {
             payload.getActionLabel(),
             payload.isUrgent()
         );
+        if (payload.getBroadcast() != null) {
+            notification.setBroadcast(payload.getBroadcast());
+        }
         notificationRepository.save(notification);
         log.debug("In-app notification saved for user {}: {}", user.getId(), payload.getTitle());
     }

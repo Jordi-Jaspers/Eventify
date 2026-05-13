@@ -56,7 +56,7 @@ public class NotificationBroadcastService {
         final NotificationBroadcast broadcast = buildBroadcast(sender, request, recipients.size());
         final NotificationBroadcast saved = notificationBroadcastRepository.save(broadcast);
 
-        final NotificationPayload payload = buildPayload(request);
+        final NotificationPayload payload = buildPayload(request, saved);
         for (final User recipient : recipients) {
             notificationDispatchService.dispatch(NotificationAudience.user(recipient.getId()), payload);
         }
@@ -107,14 +107,16 @@ public class NotificationBroadcastService {
         return broadcast;
     }
 
-    private NotificationPayload buildPayload(final CreateBroadcastRequest request) {
+    private NotificationPayload buildPayload(final CreateBroadcastRequest request,
+        final NotificationBroadcast broadcast) {
         return new NotificationPayload(
             NotificationCategory.valueOf(request.getCategory()),
             request.getTitle(),
             request.getMessage(),
             request.getActionUrl(),
             request.getActionLabel(),
-            false
+            false,
+            broadcast
         );
     }
 

@@ -250,6 +250,10 @@ public enum ApiErrorCode implements ApiError {
     OAUTH2_EMAIL_NOT_AVAILABLE(
         "ERR-0059",
         "Email not publicly available from the OAuth2 provider or not verified."
+    ),
+    BROADCAST_NOT_FOUND(
+        "ERR-0060",
+        "The requested broadcast does not exist."
     );
 
     /* The error code for this reason. */

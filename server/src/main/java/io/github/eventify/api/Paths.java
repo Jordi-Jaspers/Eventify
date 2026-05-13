@@ -295,6 +295,10 @@ public final class Paths {
 
     public static final String ADMIN_BROADCASTS_PREVIEW_PATH = ADMIN_BROADCASTS_PATH + "/preview";
 
+    public static final String ADMIN_BROADCAST_RECIPIENTS_PATH = ADMIN_BROADCASTS_PATH + "/{id}/recipients";
+
+    public static final String ADMIN_BROADCAST_RECIPIENTS_SEARCH_PATH = ADMIN_BROADCAST_RECIPIENTS_PATH + SEARCH_PART;
+
     /* ------------------------------- END ------------------------------- */
 
     private Paths() {

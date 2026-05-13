@@ -3,23 +3,44 @@
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import { Badge } from '$lib/components/ui/badge';
-	import {
-		History,
-		Megaphone,
-		Monitor,
-		TriangleAlert,
-		ChevronDown,
-		Users,
-		ExternalLink
-	} from '@lucide/svelte';
+	import { History, Megaphone, Monitor, TriangleAlert, ChevronDown, Users, ExternalLink } from '@lucide/svelte';
 	import { formatDateTime } from '$lib/utils/date';
 	import {
 		searchBroadcasts,
+		searchBroadcastRecipients,
 		type BroadcastResponse,
 		type BroadcastCategory,
-		type AudienceType
+		type AudienceType,
+		type RecipientResponse
 	} from '$lib/api/admin/AdminNotificationController';
-	import type { SortablePageInput } from '$lib/api/models';
+	import type { SortablePageInput, PageResource } from '$lib/api/models';
+	import { handleError } from '$lib/utils/error-handler';
+	import RecipientList from '$lib/components/notification/RecipientList.svelte';
+
+	interface RecipientState {
+		loading: boolean;
+		page: number;
+		search: string;
+		data: PageResource<RecipientResponse> | null;
+		debounceTimer: ReturnType<typeof setTimeout> | null;
+	}
+
+	const AUDIENCE_TYPE_LABELS: Record<AudienceType, string> = {
+		ALL_USERS: 'All Users',
+		ALL_ORGANIZATION_OWNERS: 'All Organization Owners',
+		ORGANIZATION: 'Organization',
+		USER: 'Single User',
+		GLOBAL_ROLE: 'Global Role'
+	};
+
+	const categoryConfig: Record<
+		BroadcastCategory,
+		{ label: string; variant: 'default' | 'destructive' | 'secondary'; icon: typeof Megaphone }
+	> = {
+		ANNOUNCEMENT: { label: 'Announce', variant: 'default', icon: Megaphone },
+		SYSTEM: { label: 'System', variant: 'secondary', icon: Monitor },
+		ALERT: { label: 'Alert', variant: 'destructive', icon: TriangleAlert }
+	};
 
 	const columns: DataTableColumn<BroadcastResponse>[] = [
 		{ key: 'createdAt', label: 'Sent At', sortable: true, filterable: true, filterType: 'DATE', colSpan: 2 },
@@ -36,8 +57,59 @@
 	});
 
 	let expandedId: number | null = $state(null);
+	let recipientStates: Map<number, RecipientState> = $state(new Map());
 
 	onMount(() => service.load());
+
+	function getRecipientState(id: number): RecipientState {
+		if (!recipientStates.has(id)) {
+			recipientStates = new Map(recipientStates).set(id, {
+				loading: false,
+				page: 0,
+				search: '',
+				data: null,
+				debounceTimer: null
+			});
+		}
+		return recipientStates.get(id)!;
+	}
+
+	function updateRecipientState(id: number, patch: Partial<RecipientState>): void {
+		const current: RecipientState = getRecipientState(id);
+		recipientStates = new Map(recipientStates).set(id, { ...current, ...patch });
+	}
+
+	async function loadRecipients(id: number, page: number, search: string): Promise<void> {
+		updateRecipientState(id, { loading: true });
+		try {
+			const input: SortablePageInput = {
+				pageNumber: page,
+				pageSize: 20,
+				searchInputs: search.trim() ? [{ fieldName: 'search', textValue: search.trim() }] : []
+			};
+			const data: PageResource<RecipientResponse> = await searchBroadcastRecipients(id, input);
+			updateRecipientState(id, { loading: false, data, page });
+		} catch (err: unknown) {
+			handleError(err, 'Failed to load recipients');
+			updateRecipientState(id, { loading: false });
+		}
+	}
+
+	function toggleExpand(id: number): void {
+		const wasExpanded: boolean = expandedId === id;
+		expandedId = wasExpanded ? null : id;
+		if (!wasExpanded) {
+			const state: RecipientState = getRecipientState(id);
+			if (!state.data) loadRecipients(id, 0, '');
+		}
+	}
+
+	function handleSearchInput(id: number, value: string): void {
+		const state: RecipientState = getRecipientState(id);
+		if (state.debounceTimer) clearTimeout(state.debounceTimer);
+		const timer: ReturnType<typeof setTimeout> = setTimeout(() => loadRecipients(id, 0, value), 300);
+		updateRecipientState(id, { search: value, debounceTimer: timer });
+	}
 
 	function formatAudienceLabel(type: AudienceType, broadcast: BroadcastResponse): string {
 		switch (type) {
@@ -63,31 +135,12 @@
 				return type;
 		}
 	}
-
-	const AUDIENCE_TYPE_LABELS: Record<AudienceType, string> = {
-		ALL_USERS: 'All Users',
-		ALL_ORGANIZATION_OWNERS: 'All Organization Owners',
-		ORGANIZATION: 'Organization',
-		USER: 'Single User',
-		GLOBAL_ROLE: 'Global Role'
-	};
-
-	const categoryConfig: Record<
-		BroadcastCategory,
-		{ label: string; variant: 'default' | 'destructive' | 'secondary'; icon: typeof Megaphone }
-	> = {
-		ANNOUNCEMENT: { label: 'Announce', variant: 'default', icon: Megaphone },
-		SYSTEM: { label: 'System', variant: 'secondary', icon: Monitor },
-		ALERT: { label: 'Alert', variant: 'destructive', icon: TriangleAlert }
-	};
-
-	function toggleExpand(id: number): void {
-		expandedId = expandedId === id ? null : id;
-	}
 </script>
 
 <DataTable {columns} {service} title="Broadcast History" icon={History}>
 	{#snippet row(broadcast: BroadcastResponse)}
+		{@const cat = categoryConfig[broadcast.category]}
+		{@const CategoryIcon = cat.icon}
 		<div class="border-b border-border/30 last:border-0">
 			<button
 				type="button"
@@ -107,15 +160,9 @@
 						{broadcast.title}
 					</div>
 					<div class="col-span-2">
-						<Badge variant={categoryConfig[broadcast.category].variant} class="gap-1">
-							{#if broadcast.category === 'ANNOUNCEMENT'}
-								<Megaphone class="h-3 w-3" />
-							{:else if broadcast.category === 'SYSTEM'}
-								<Monitor class="h-3 w-3" />
-							{:else}
-								<TriangleAlert class="h-3 w-3" />
-							{/if}
-							{categoryConfig[broadcast.category].label}
+						<Badge variant={cat.variant} class="gap-1">
+							<CategoryIcon class="h-3 w-3" />
+							{cat.label}
 						</Badge>
 					</div>
 					<div class="col-span-3 text-sm text-muted-foreground truncate">
@@ -129,6 +176,7 @@
 			</button>
 
 			{#if expandedId === broadcast.id}
+				{@const rs = getRecipientState(broadcast.id)}
 				<div class="mx-4 mb-4 rounded-lg border border-border/40 bg-muted/5">
 					<div class="p-4 space-y-4">
 						<div class="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
@@ -138,30 +186,22 @@
 						<div class="border-t border-border/30 pt-3">
 							<div class="grid grid-cols-2 lg:grid-cols-4 gap-y-3 gap-x-6 text-sm">
 								<div>
-									<span class="text-muted-foreground text-xs uppercase tracking-wide"
-										>Audience Type</span
-									>
+									<span class="text-muted-foreground text-xs uppercase tracking-wide">Audience Type</span>
 									<p class="mt-0.5">{AUDIENCE_TYPE_LABELS[broadcast.audienceType] ?? broadcast.audienceType}</p>
 								</div>
 								<div>
-									<span class="text-muted-foreground text-xs uppercase tracking-wide"
-										>Recipients</span
-									>
+									<span class="text-muted-foreground text-xs uppercase tracking-wide">Recipients</span>
 									<p class="mt-0.5 flex items-center gap-1.5">
 										<Users class="h-3.5 w-3.5 text-muted-foreground" />
 										{broadcast.recipientCount}
 									</p>
 								</div>
 								<div>
-									<span class="text-muted-foreground text-xs uppercase tracking-wide"
-										>Sent By</span
-									>
+									<span class="text-muted-foreground text-xs uppercase tracking-wide">Sent By</span>
 									<p class="mt-0.5 truncate">{broadcast.sentByEmail}</p>
 								</div>
 								<div>
-									<span class="text-muted-foreground text-xs uppercase tracking-wide"
-										>Sent At</span
-									>
+									<span class="text-muted-foreground text-xs uppercase tracking-wide">Sent At</span>
 									<p class="mt-0.5 tabular-nums">{formatDateTime(broadcast.createdAt)}</p>
 								</div>
 							</div>
@@ -180,6 +220,14 @@
 								</a>
 							</div>
 						{/if}
+
+						<RecipientList
+							loading={rs.loading}
+							search={rs.search}
+							data={rs.data}
+							onSearchInput={(value: string) => handleSearchInput(broadcast.id, value)}
+							onPageChange={(page: number) => loadRecipients(broadcast.id, page, rs.search)}
+						/>
 					</div>
 				</div>
 			{/if}

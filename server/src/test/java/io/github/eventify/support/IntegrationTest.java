@@ -27,6 +27,8 @@ import io.github.eventify.common.security.principal.JwtUserPrincipalAuthenticati
 import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import io.github.eventify.common.util.TimeProvider;
 import io.github.eventify.support.util.WebMvcConfigurator;
+import io.github.jframe.datasource.search.model.input.SearchInput;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -517,6 +519,26 @@ public class IntegrationTest extends WebMvcConfigurator {
         notificationRepository.save(notification);
     }
 
+    protected void aNotificationForUserWithBroadcast(final User user, final NotificationBroadcast broadcast) {
+        final io.github.eventify.api.notification.model.Notification notification =
+            new io.github.eventify.api.notification.model.Notification(
+                user,
+                io.github.eventify.api.notification.model.NotificationCategory.ANNOUNCEMENT,
+                broadcast.getTitle(),
+                broadcast.getMessage(),
+                null,
+                null,
+                false
+            );
+        final io.github.eventify.api.notification.model.Notification saved = notificationRepository.save(notification);
+        // Set broadcast FK via JDBC — the broadcast_id column is added by the backend-agent migration
+        jdbcTemplate.update(
+            "UPDATE notification SET broadcast_id = ? WHERE id = ?",
+            broadcast.getId(),
+            saved.getId()
+        );
+    }
+
     protected NotificationBroadcast aBroadcastForAdmin(final io.github.eventify.api.user.model.User sentBy,
         final String title, final String audienceType) {
         final NotificationBroadcast broadcast = new NotificationBroadcast();
@@ -547,6 +569,24 @@ public class IntegrationTest extends WebMvcConfigurator {
         audience.setTargetId(targetId);
         audience.setRole(role);
         return audience;
+    }
+
+    // ========================= PAGINATION FACTORY METHODS =========================
+
+    protected static SortablePageInput aDefaultPageInput() {
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(20);
+        return input;
+    }
+
+    protected static SortablePageInput aSearchPageInput(final String fieldName, final String value) {
+        final SortablePageInput input = aDefaultPageInput();
+        final SearchInput searchInput = new SearchInput();
+        searchInput.setFieldName(fieldName);
+        searchInput.setTextValue(value);
+        input.getSearchInputs().add(searchInput);
+        return input;
     }
 
 }

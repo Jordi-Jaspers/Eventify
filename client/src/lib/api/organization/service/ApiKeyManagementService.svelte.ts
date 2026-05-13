@@ -7,19 +7,6 @@ import { handleError } from '$lib/utils/error-handler';
 import { toast } from 'svelte-sonner';
 
 /**
- * Created API key details - shown in modal after creation
- */
-export interface CreatedApiKey {
-	id: number;
-	name: string;
-	key: string;
-	suffix: string;
-	createdAt: string;
-	expiresAt?: string;
-	createdBy?: any;
-}
-
-/**
  * Service for managing organization API key operations.
  * Encapsulates create, revoke logic and sheet/dialog state management.
  */
@@ -27,7 +14,7 @@ export function createApiKeyManagementService(orgId: number, onMutationSuccess: 
 	// Create sheet state
 	let showCreateSheet: boolean = $state(false);
 	let isCreating: boolean = $state(false);
-	let createdKey: CreatedApiKey | null = $state(null);
+	let createdKey: ApiKeyCreationResponse | null = $state(null);
 
 	// Revoke dialog state
 	let keyToRevoke: ApiKeyResponse | null = $state(null);
@@ -40,15 +27,7 @@ export function createApiKeyManagementService(orgId: number, onMutationSuccess: 
 		try {
 			const response: ApiKeyCreationResponse = await createOrganizationApiKey(orgId, { name, expiresAt });
 			toast.success(`API key "${name}" created successfully`);
-			createdKey = {
-				id: response.id ?? 0,
-				name: response.name ?? name,
-				key: response.key ?? '',
-				suffix: response.suffix ?? '',
-				createdAt: response.createdAt ?? new Date().toISOString(),
-				expiresAt: response.expiresAt,
-				createdBy: response.createdBy
-			};
+			createdKey = response;
 			showCreateSheet = false;
 			onMutationSuccess();
 		} catch (err: unknown) {
@@ -107,7 +86,7 @@ export function createApiKeyManagementService(orgId: number, onMutationSuccess: 
 		get isCreating(): boolean {
 			return isCreating;
 		},
-		get createdKey(): CreatedApiKey | null {
+		get createdKey(): ApiKeyCreationResponse | null {
 			return createdKey;
 		},
 		get keyToRevoke(): ApiKeyResponse | null {

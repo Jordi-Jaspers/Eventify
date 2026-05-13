@@ -95,6 +95,27 @@ export type PageResourceOrganizationMembershipResponse = components['schemas']['
 export type PageResourceUserDetailsResponse = components['schemas']['PageResourceUserDetailsResponse'];
 export type PageResourceApiKeyResponse = components['schemas']['PageResourceApiKeyResponse'];
 
+// ================ Notifications / Broadcasts ===================
+export type BroadcastResponseRaw = components['schemas']['BroadcastResponse'];
+export type RecipientResponse = components['schemas']['RecipientResponse'];
+export type CreateBroadcastRequest = components['schemas']['CreateBroadcastRequest'];
+export type AudienceRequest = components['schemas']['AudienceRequest'];
+export type PreviewResponse = components['schemas']['PreviewResponse'];
+export type PageResourceBroadcastResponse = components['schemas']['PageResourceBroadcastResponse'];
+export type PageResourceRecipientResponse = components['schemas']['PageResourceRecipientResponse'];
+
+export type BroadcastCategory = 'ANNOUNCEMENT' | 'SYSTEM' | 'ALERT';
+export type AudienceType = 'ALL_USERS' | 'ORGANIZATION' | 'ALL_ORGANIZATION_OWNERS' | 'USER' | 'GLOBAL_ROLE';
+
+// Narrowed type with proper enums (generated schema uses plain strings)
+export type BroadcastResponse = Omit<BroadcastResponseRaw, 'category' | 'audienceType'> & {
+	category: BroadcastCategory;
+	audienceType: AudienceType;
+	audienceTargetId?: number;
+	audienceRole?: string;
+	audienceTargetName?: string;
+};
+
 // ================ Enums ===================
 // These are inline enums from generated types - extracted for convenience
 export type OAuthProvider = 'google' | 'github';

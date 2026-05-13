@@ -5,7 +5,7 @@ import {
 	previewRecipientCount,
 	type BroadcastCategory,
 	type AudienceType,
-	type BroadcastAudience
+	type AudienceRequest
 } from '$lib/api/admin/AdminNotificationController';
 import { searchOrganizations } from '$lib/api/organization/OrganizationController';
 import type { UserResponse, OrganizationResponse } from '$lib/api/models';
@@ -60,8 +60,8 @@ export function createBroadcastSendService() {
 		!needsTypeConfirm || confirmInput === String(recipientCount)
 	);
 
-	function buildAudience(): BroadcastAudience {
-		const audience: BroadcastAudience = { type: audienceType };
+	function buildAudience(): AudienceRequest {
+		const audience: AudienceRequest = { type: audienceType };
 		if (audienceType === 'USER' && selectedUser) {
 			audience.targetId = selectedUser.id;
 		} else if (audienceType === 'ORGANIZATION' && selectedOrg) {
