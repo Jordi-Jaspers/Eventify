@@ -29,6 +29,30 @@ const user = await fetchUser();
 import type { UserDetailsResponse, OrganizationResponse } from '$lib/api/models';
 ```
 
+**Enums must be derived from generated types using `NonNullable<>`:**
+
+```typescript
+// ✅ CORRECT — derived from generated schema
+export type BroadcastCategory = NonNullable<BroadcastResponse['category']>;
+export type Severity = NonNullable<ChannelResponse['currentSeverity']>;
+
+// ❌ WRONG — hardcoded string literals
+export type BroadcastCategory = 'ANNOUNCEMENT' | 'SYSTEM' | 'ALERT';
+```
+
+All enum types live in the `// ================ Enums ===================` section of `models.ts`.
+
+**Always use `client` from `$lib/api/client` in controllers (never raw `fetch`):**
+
+```typescript
+// ✅ CORRECT
+import { client } from '../client';
+const { data, error } = await client.GET('/v1/user/details');
+
+// ❌ WRONG
+const response = await fetch(`${SERVER_BASE_URL}/v1/user/details`, { ... });
+```
+
 ---
 
 ## Project Structure

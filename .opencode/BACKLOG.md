@@ -97,6 +97,7 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Future Considerations (NOT MVP)
 **Context**: Ideas to keep in mind for architecture decisions but not for immediate development.
 
+- [ ] **Basic Tracing** - Consuming tracing data from a opentelemetry collector. Could be used for debugging and performance monitoring. (custom jeager, configurable per organization/user)
 - [ ] **Growthbook** - https://www.growthbook.io/ for feature flagging and A/B testing. Could be useful for gradual rollouts and testing new features.
 - [ ] **Admin User can create dashboards from every org channel** - Admins can create dashboards that pull in data from any channel across the organization, even if they are not the channel owner. This allows for cross-channel monitoring and insights.
 - [ ] **Event Enrichment**: Auto-detect JSON payloads, extract fields for filtering

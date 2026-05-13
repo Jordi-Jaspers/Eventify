@@ -1,7 +1,7 @@
 # Project: eventify
 
 **Initialized:** 2026-01-23
-**Last Updated:** 2026-05-08
+**Last Updated:** 2026-05-13
 **Current Version:** 1.1.0-SNAPSHOT (released 1.0.0 on 2026-05-08)
 
 ## Configuration
@@ -58,11 +58,15 @@ eventify/
 ├── client/                 # SvelteKit frontend (Svelte 5, Bun)
 │   ├── src/
 │   │   ├── lib/            # Shared logic
-│   │   │   ├── api/        # Generated API client (openapi-fetch)
+│   │   │   ├── api/        # API layer (openapi-fetch client, controllers, services, models)
+│   │   │   │   ├── client.ts       # openapi-fetch typed client
+│   │   │   │   ├── models.ts       # Type exports + enum derivations from OpenAPI spec
+│   │   │   │   └── [domain]/       # Feature modules
+│   │   │   │       ├── Controller.ts       # API calls using client
+│   │   │   │       └── service/            # Business logic + state (.svelte.ts)
 │   │   │   ├── components/ # UI Components (organized by feature + /ui)
-│   │   │   ├── services/   # Business logic / Complex API orchestrators
-│   │   │   ├── stores/     # State management (Stores & Runes)
-│   │   │   └── types/      # TypeScript definitions & API types
+│   │   │   ├── stores/     # Global state (Svelte 5 runes)
+│   │   │   └── config/     # Routes, constants
 │   │   └── routes/         # SvelteKit file-based routing
 │   │       ├── (authenticated)/  # Protected routes
 │   │       └── (public)/         # Landing, login, registration
@@ -112,10 +116,10 @@ Routes use SvelteKit's file-based routing with layout groups:
 | **Routes/Pages**       | `src/routes/`                   | File-based with `(authenticated)/`, `(public)/` groups |
 | **Generic UI**         | `src/lib/components/ui/`        | shadcn-svelte (Radix primitives)                       |
 | **Feature Components** | `src/lib/components/<feature>/` | Domain-specific components                             |
-| **Services**           | `src/lib/services/`             | Business logic, API orchestration                      |
+| **API Controllers**    | `src/lib/api/<domain>/`         | Typed API calls using openapi-fetch client             |
+| **Services**           | `src/lib/api/<domain>/service/` | Business logic, state (.svelte.ts)                     |
+| **Models & Enums**     | `src/lib/api/models.ts`         | OpenAPI-derived types and enum derivations             |
 | **Stores**             | `src/lib/stores/`               | Global state (Svelte 5 runes)                          |
-| **API Client**         | `src/lib/api/`                  | openapi-fetch client                                   |
-| **Types**              | `src/lib/types/`                | TypeScript definitions                                 |
 
 ### Database Layer
 
@@ -171,13 +175,14 @@ They override the global agents of the same name when working on this project.
 
 ### Project-Specific Skills (in `.opencode/skills/`)
 
-| Skill                     | Purpose                                                                                 |
-|---------------------------|-----------------------------------------------------------------------------------------|
-| eventify-architecture     | Project structure, layer architecture, where code belongs (REQUIRED)                    |
-| eventify-spring-standards | Spring Boot patterns: JFrame search/pagination, entities, services, controllers, tests  |
-| eventify-svelte-standards | SvelteKit patterns: Controller→Service→Page, API client, DataTable, reusable components |
-| eventify-whats-new        | When and how to update the user-facing What's New changelog                             |
-| release                   | Git flow release process: branch, tag, merge, version bump                              |
+| Skill                     | Purpose                                                                                              |
+|---------------------------|------------------------------------------------------------------------------------------------------|
+| eventify-architecture     | Project structure, layer architecture, where code belongs (REQUIRED)                                 |
+| eventify-spring-standards | Spring Boot patterns: JFrame search/pagination, entities, services, controllers, tests               |
+| eventify-svelte-standards | SvelteKit patterns: Controller→Service→Page, API client, DataTable, reusable components              |
+| eventify-whats-new        | When and how to update the user-facing What's New changelog                                          |
+| release                   | Git flow release process: branch, tag, merge, version bump                                           |
+| jframe-search-pagination  | Using the JFRAME pattern for search and pagination in Spring Boot (backend) and SvelteKit (frontend) |
 
 **Note:** Project-specific skills contain patterns tailored to this codebase. Agents should load these first.
 

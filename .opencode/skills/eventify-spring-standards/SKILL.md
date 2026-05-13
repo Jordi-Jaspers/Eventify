@@ -52,6 +52,7 @@ public void process(User user) {        // Missing final
 - ✅ Lombok: `@Getter`, `@Setter`, `@Builder`, `@RequiredArgsConstructor`
 - ✅ Lombok `@Accessors(chain = true)` for response objects
 - ✅ Layered: Controller → Service → Repository → Entity
+- ✅ Enums for categorical fields in entities (`@Enumerated(EnumType.STRING)`), request DTOs, and response DTOs — NEVER use `String` for values that have a fixed set (e.g. category, status, type, role)
 
 ## Entity Pattern
 
