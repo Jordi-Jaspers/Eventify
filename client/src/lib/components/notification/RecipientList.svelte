@@ -2,7 +2,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import { Users, Search, ChevronLeft, ChevronRight, LoaderCircle } from '@lucide/svelte';
-	import type { RecipientResponse } from '$lib/api/admin/AdminNotificationController';
+	import type { RecipientResponse } from '$lib/api/models';
 	import type { PageResource } from '$lib/api/models';
 
 	interface Props {

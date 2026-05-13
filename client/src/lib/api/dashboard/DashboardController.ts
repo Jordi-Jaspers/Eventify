@@ -1,4 +1,4 @@
-import { client } from '$lib/api/client';
+import { client } from '../client';
 import type { DashboardStatsResponse } from '$lib/api/models';
 
 export type ErrorRateVariant = 'green' | 'yellow' | 'red';
@@ -10,21 +10,21 @@ export type ErrorRateVariant = 'green' | 'yellow' | 'red';
  * - red: >= 5%
  */
 export function getErrorRateVariant(rate: number): ErrorRateVariant {
-    if (rate < 1) return 'green';
-    if (rate < 5) return 'yellow';
-    return 'red';
+	if (rate < 1) return 'green';
+	if (rate < 5) return 'yellow';
+	return 'red';
 }
 
 export async function getDashboardStats(): Promise<DashboardStatsResponse> {
-    const { data, error } = await client.GET('/v1/user/dashboard/stats');
-    if (error) throw error;
-    return data;
+	const { data, error } = await client.GET('/v1/user/dashboard/stats');
+	if (error) throw error;
+	return data;
 }
 
 export async function getOrgDashboardStats(orgId: number): Promise<DashboardStatsResponse> {
-    const { data, error } = await client.GET('/v1/organization/{orgId}/dashboard/stats', {
-        params: { path: { orgId } }
-    });
-    if (error) throw error;
-    return data;
+	const { data, error } = await client.GET('/v1/organization/{orgId}/dashboard/stats', {
+		params: { path: { orgId } }
+	});
+	if (error) throw error;
+	return data;
 }

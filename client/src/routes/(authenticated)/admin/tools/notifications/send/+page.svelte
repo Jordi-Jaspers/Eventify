@@ -9,7 +9,7 @@
 	import { LoaderCircle, Send, Users } from '@lucide/svelte';
 	import UserSearchCombobox from '$lib/components/user/UserSearchCombobox.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
-	import { type BroadcastCategory, type AudienceType } from '$lib/api/admin/AdminNotificationController';
+	import { type BroadcastCategory, type AudienceType } from '$lib/api/models';
 	import { createBroadcastSendService } from '$lib/api/admin/service/BroadcastSendService.svelte';
 
 	const svc = createBroadcastSendService();
@@ -17,7 +17,8 @@
 	const categoryOptions: { value: BroadcastCategory; label: string }[] = [
 		{ value: 'ANNOUNCEMENT', label: 'Announcement' },
 		{ value: 'SYSTEM', label: 'System' },
-		{ value: 'ALERT', label: 'Alert' }
+		{ value: 'ALERT', label: 'Alert' },
+		{ value: 'UPDATE', label: 'Update' }
 	];
 
 	const audienceOptions: { value: AudienceType; label: string }[] = [

@@ -3,17 +3,20 @@
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import { Badge } from '$lib/components/ui/badge';
-	import { History, Megaphone, Monitor, TriangleAlert, ChevronDown, Users, ExternalLink } from '@lucide/svelte';
+	import { History, Megaphone, Monitor, TriangleAlert, ChevronDown, Users, ExternalLink, Sparkles } from '@lucide/svelte';
 	import { formatDateTime } from '$lib/utils/date';
 	import {
 		searchBroadcasts,
-		searchBroadcastRecipients,
-		type BroadcastResponse,
-		type BroadcastCategory,
-		type AudienceType,
-		type RecipientResponse
+		searchBroadcastRecipients
 	} from '$lib/api/admin/AdminNotificationController';
-	import type { SortablePageInput, PageResource } from '$lib/api/models';
+	import type {
+		SortablePageInput,
+		PageResource,
+		BroadcastResponse,
+		BroadcastCategory,
+		AudienceType,
+		RecipientResponse
+	} from '$lib/api/models';
 	import { handleError } from '$lib/utils/error-handler';
 	import RecipientList from '$lib/components/notification/RecipientList.svelte';
 
@@ -39,13 +42,14 @@
 	> = {
 		ANNOUNCEMENT: { label: 'Announce', variant: 'default', icon: Megaphone },
 		SYSTEM: { label: 'System', variant: 'secondary', icon: Monitor },
-		ALERT: { label: 'Alert', variant: 'destructive', icon: TriangleAlert }
+		ALERT: { label: 'Alert', variant: 'destructive', icon: TriangleAlert },
+		UPDATE: { label: 'Update', variant: 'default', icon: Sparkles }
 	};
 
 	const columns: DataTableColumn<BroadcastResponse>[] = [
 		{ key: 'createdAt', label: 'Sent At', sortable: true, filterable: true, filterType: 'DATE', colSpan: 2 },
 		{ key: 'title', label: 'Title', sortable: false, filterable: true, filterType: 'FUZZY_TEXT', filterPlaceholder: 'Search title...', colSpan: 3 },
-		{ key: 'category', label: 'Category', sortable: true, filterable: true, filterType: 'ENUM', filterOptions: [{ value: 'ANNOUNCEMENT', label: 'Announcement' }, { value: 'SYSTEM', label: 'System' }, { value: 'ALERT', label: 'Alert' }], colSpan: 2 },
+		{ key: 'category', label: 'Category', sortable: true, filterable: true, filterType: 'ENUM', filterOptions: [{ value: 'ANNOUNCEMENT', label: 'Announcement' }, { value: 'SYSTEM', label: 'System' }, { value: 'ALERT', label: 'Alert' }, { value: 'UPDATE', label: 'Update' }], colSpan: 2 },
 		{ key: 'audienceType', label: 'Audience', sortable: false, colSpan: 3 },
 		{ key: 'sentByEmail', label: 'Sent By', sortable: false, filterable: true, filterType: 'FUZZY_TEXT', filterPlaceholder: 'Search email...', colSpan: 2 }
 	];

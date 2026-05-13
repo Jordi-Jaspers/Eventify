@@ -2,7 +2,7 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Sparkles, Calendar } from '@lucide/svelte';
-	import type { ChangelogEntry } from '$lib/types/changelog';
+	import type { ChangelogEntry } from '$lib/api/models';
 	import { formatDate } from '$lib/utils/date';
 	import type { PageData } from './$types';
 
@@ -67,7 +67,7 @@
 							</CardTitle>
 							<div class="flex items-center gap-2 text-sm text-muted-foreground">
 								<Calendar class="w-4 h-4" />
-								<span>{formatDate(entry.date)}</span>
+								<span>{formatDate(entry.date ?? '')}</span>
 							</div>
 						</div>
 					</CardHeader>

@@ -2,7 +2,7 @@
 	import { LoaderCircle, Inbox } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { formatDateTime } from '$lib/utils/date';
-	import { createEventService } from '$lib/services/event-service.svelte';
+	import { createEventService } from '$lib/api/event/service/EventService.svelte';
 	import { getSeverityColors } from './types';
 
 	interface Props {

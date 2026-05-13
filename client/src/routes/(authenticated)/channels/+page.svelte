@@ -11,7 +11,7 @@
 		ChannelRow,
 		SendEventsHelpModal
 	} from '$lib/components/channels';
-	import { UserChannelService } from '$lib/services/user-channel-service';
+	import { UserChannelService } from '$lib/api/channel/service/UserChannelService';
 	import { channelTableColumns } from '$lib/config/channel-table-columns';
 
 	// Services

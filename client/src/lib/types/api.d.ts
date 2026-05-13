@@ -1698,6 +1698,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ErrorResponseResource: {
+            method?: string;
+            uri?: string;
+            query?: string;
+            contentType?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            statusMessage?: string;
+            errorMessage?: string;
+            txId?: string;
+            traceId?: string;
+            spanId?: string;
+        };
         ApiErrorResponseResource: {
             method?: string;
             uri?: string;
@@ -1712,19 +1725,6 @@ export interface components {
             spanId?: string;
             apiErrorCode?: string;
             apiErrorReason?: string;
-        };
-        ErrorResponseResource: {
-            method?: string;
-            uri?: string;
-            query?: string;
-            contentType?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            statusMessage?: string;
-            errorMessage?: string;
-            txId?: string;
-            traceId?: string;
-            spanId?: string;
         };
         RateLimitErrorResponseResource: {
             method?: string;
@@ -2750,7 +2750,7 @@ export interface components {
              * @example ANNOUNCEMENT
              * @enum {string}
              */
-            category: "ANNOUNCEMENT" | "SYSTEM" | "ALERT";
+            category: "ANNOUNCEMENT" | "SYSTEM" | "ALERT" | "UPDATE";
             /**
              * @description Notification title
              * @example Welcome to Eventify
@@ -3097,13 +3097,15 @@ export interface components {
             content?: components["schemas"]["OrganizationResponse"][];
         };
         AudienceRequest: {
-            type?: string;
+            /** @enum {string} */
+            type?: "USER" | "ALL_USERS" | "ORGANIZATION" | "ALL_ORGANIZATION_OWNERS" | "GLOBAL_ROLE";
             /** Format: int64 */
             targetId?: number;
             role?: string;
         };
         CreateBroadcastRequest: {
-            category?: string;
+            /** @enum {string} */
+            category?: "ANNOUNCEMENT" | "SYSTEM" | "ALERT" | "UPDATE";
             title?: string;
             message?: string;
             actionUrl?: string;
@@ -3121,8 +3123,9 @@ export interface components {
             /**
              * @description Notification category
              * @example ANNOUNCEMENT
+             * @enum {string}
              */
-            category: string;
+            category: "ANNOUNCEMENT" | "SYSTEM" | "ALERT" | "UPDATE";
             /**
              * @description Broadcast title
              * @example System Update
@@ -3146,8 +3149,9 @@ export interface components {
             /**
              * @description Audience type
              * @example ALL_USERS
+             * @enum {string}
              */
-            audienceType: string;
+            audienceType: "USER" | "ALL_USERS" | "ORGANIZATION" | "ALL_ORGANIZATION_OWNERS" | "GLOBAL_ROLE";
             /**
              * Format: int32
              * @description Number of recipients

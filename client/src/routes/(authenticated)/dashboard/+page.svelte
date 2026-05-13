@@ -9,7 +9,7 @@
     import { CLIENT_ROUTES } from '$lib/config/routes';
     import {getOrganizationalRoleBadgeClass, getUserRoleBadgeClass} from '$lib/utils/role';
     import { formatDate, formatRelativeTime } from '$lib/utils/date';
-    import { getDashboardStats, getErrorRateVariant } from '$lib/services/dashboard.service';
+    import { getDashboardStats, getErrorRateVariant } from '$lib/api/dashboard/DashboardController';
     import { handleError } from '$lib/utils/error-handler';
     import { toast } from 'svelte-sonner';
     import { StatCard } from '$lib/components/ui/stat-card';

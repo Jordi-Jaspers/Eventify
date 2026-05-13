@@ -1,5 +1,5 @@
 import { SERVER_BASE_URL } from '$lib/config/constants';
-import type { ChangelogEntry } from '$lib/types/changelog';
+import type { ChangelogEntry } from '$lib/api/models';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }): Promise<{ changelog: ChangelogEntry[] }> => {

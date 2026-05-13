@@ -81,9 +81,6 @@ export type Timeline = components['schemas']['Timeline'];
 export type TimelineDuration = components['schemas']['TimelineDuration'];
 export type EventSearchResponse = components['schemas']['EventSearchResponse'];
 export type PageResourceEventSearchResponse = components['schemas']['PageResourceEventSearchResponse'];
-export type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
-export type Severity = 'CRITICAL' | 'WARNING' | 'OK' | 'NO_DATA';
-export type BucketSize = NonNullable<MonitorResponse['bucketSize']>;
 
 // ================ Pagination ===================
 export type SearchInput = components['schemas']['SearchInput'];
@@ -98,30 +95,29 @@ export type PageResourceApiKeyResponse = components['schemas']['PageResourceApiK
 // ================ User Notifications ===================
 export type NotificationResponse = components['schemas']['NotificationResponse'];
 export type PageResourceNotificationResponse = components['schemas']['PageResourceNotificationResponse'];
+
+// ================ Changelog ===================
+export type ChangelogEntry = components['schemas']['ChangelogEntry'];
+
 // ================ Notifications / Broadcasts ===================
-export type BroadcastResponseRaw = components['schemas']['BroadcastResponse'];
-export type RecipientResponse = components['schemas']['RecipientResponse'];
-export type CreateBroadcastRequest = components['schemas']['CreateBroadcastRequest'];
-export type AudienceRequest = components['schemas']['AudienceRequest'];
-export type PreviewResponse = components['schemas']['PreviewResponse'];
-export type PageResourceBroadcastResponse = components['schemas']['PageResourceBroadcastResponse'];
-export type PageResourceRecipientResponse = components['schemas']['PageResourceRecipientResponse'];
-
-export type BroadcastCategory = 'ANNOUNCEMENT' | 'SYSTEM' | 'ALERT';
-export type AudienceType = 'ALL_USERS' | 'ORGANIZATION' | 'ALL_ORGANIZATION_OWNERS' | 'USER' | 'GLOBAL_ROLE';
-
-// Narrowed type with proper enums (generated schema uses plain strings)
-export type BroadcastResponse = Omit<BroadcastResponseRaw, 'category' | 'audienceType'> & {
-	category: BroadcastCategory;
-	audienceType: AudienceType;
+export type BroadcastResponse = components['schemas']['BroadcastResponse'] & {
 	audienceTargetId?: number;
 	audienceRole?: string;
 	audienceTargetName?: string;
 };
+export type RecipientResponse = components['schemas']['RecipientResponse'];
+export type CreateBroadcastRequest = components['schemas']['CreateBroadcastRequest'];
+export type AudienceRequest = components['schemas']['AudienceRequest'];
+export type PreviewResponse = components['schemas']['PreviewResponse'];
 
 // ================ Enums ===================
-// These are inline enums from generated types - extracted for convenience
+// Derived from generated OpenAPI types where possible
 export type OAuthProvider = 'google' | 'github';
+export type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
+export type BroadcastCategory = NonNullable<BroadcastResponse['category']>;
+export type AudienceType = NonNullable<AudienceRequest['type']>;
+export type Severity = NonNullable<TimelineDuration['severity']>;
+export type BucketSize = NonNullable<MonitorResponse['bucketSize']>;
 export type ProviderType = NonNullable<ProviderResponse['provider']>;
 export type OrganizationStatus = NonNullable<OrganizationResponse['status']>;
 export type OrganizationalRole = NonNullable<OrganizationMembershipResponse['role']>;

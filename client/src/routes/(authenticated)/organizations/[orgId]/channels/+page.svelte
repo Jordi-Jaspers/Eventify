@@ -22,7 +22,7 @@
 	} from '$lib/components/channels';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
-	import { ChannelService } from '$lib/services/channel-service';
+	import { ChannelService } from '$lib/api/channel/service/ChannelService';
 	import { channelTableColumns } from '$lib/config/channel-table-columns';
 
 	// Reactive orgId from route params
