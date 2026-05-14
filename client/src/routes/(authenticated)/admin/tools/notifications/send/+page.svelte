@@ -6,7 +6,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { LoaderCircle, Send, Users } from '@lucide/svelte';
+	import { LoaderCircle, Send, Users, ExternalLink, ArrowRight } from '@lucide/svelte';
 	import UserSearchCombobox from '$lib/components/user/UserSearchCombobox.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { type BroadcastCategory, type AudienceType } from '$lib/api/models';
@@ -207,9 +207,23 @@
 					/>
 				</div>
 			</div>
-			{#if !svc.isActionValid()}
-				<p class="text-sm text-destructive">Action URL and Action Label must both be set or both empty.</p>
-			{/if}
+		{#if !svc.isActionValid()}
+			<p class="text-sm text-destructive">Action URL and Action Label must both be set or both empty.</p>
+		{/if}
+		{#if svc.hasActionUrl() && !svc.isUrlFormatValid()}
+			<p class="text-sm text-destructive">URL must start with "/" (internal) or "http://" / "https://" (external).</p>
+		{/if}
+		{#if svc.hasActionUrl() && svc.isUrlFormatValid()}
+			<div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+				{#if svc.isInternalUrl()}
+					<ArrowRight class="h-3 w-3" />
+					<span>Internal route — opens in same tab</span>
+				{:else}
+					<ExternalLink class="h-3 w-3" />
+					<span>External link — opens in new tab</span>
+				{/if}
+			</div>
+		{/if}
 		</Card.Content>
 		<Card.Footer>
 			<Button onclick={svc.openConfirm} disabled={!svc.canSubmit} class="gap-2">

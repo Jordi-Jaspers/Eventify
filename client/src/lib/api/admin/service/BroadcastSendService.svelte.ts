@@ -50,11 +50,26 @@ export function createBroadcastSendService() {
 		return hasUrl === hasLabel;
 	}
 
+	function isUrlFormatValid(): boolean {
+		const trimmed = actionUrl.trim();
+		if (trimmed.length === 0) return true;
+		return trimmed.startsWith('/') || trimmed.startsWith('http://') || trimmed.startsWith('https://');
+	}
+
+	function isInternalUrl(): boolean {
+		return actionUrl.trim().startsWith('/');
+	}
+
+	function hasActionUrl(): boolean {
+		return actionUrl.trim().length > 0;
+	}
+
 	const canSubmit: boolean = $derived(
 		title.trim().length > 0 &&
 			message.trim().length > 0 &&
 			isAudienceValid() &&
 			isActionValid() &&
+			isUrlFormatValid() &&
 			!sending
 	);
 
@@ -220,6 +235,9 @@ export function createBroadcastSendService() {
 		get confirmReady(): boolean { return confirmReady; },
 		// Methods
 		isActionValid,
+		isUrlFormatValid,
+		isInternalUrl,
+		hasActionUrl,
 		selectOrg,
 		clearOrg,
 		openConfirm,

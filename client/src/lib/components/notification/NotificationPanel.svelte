@@ -12,7 +12,7 @@
 	import { goto } from '$app/navigation';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { Button } from '$lib/components/ui/button';
-	import { Bell, Sparkles, Settings, AlertTriangle, Inbox, CheckCheck } from '@lucide/svelte';
+	import { Bell, Sparkles, Settings, AlertTriangle, Inbox, CheckCheck, ExternalLink } from '@lucide/svelte';
 	import { notificationStore } from '$lib/stores/notification.svelte';
 	import type { NotificationResponse } from '$lib/api/models';
 	import { formatRelativeTime } from '$lib/utils/date';
@@ -33,13 +33,21 @@
 		return !notification.readAt;
 	}
 
+	function isInternalUrl(url: string): boolean {
+		return url.startsWith('/');
+	}
+
 	async function handleItemClick(notification: NotificationResponse): Promise<void> {
 		if (isUnread(notification)) {
 			await notificationStore.markAsRead(notification.id);
 		}
 		if (notification.actionUrl) {
 			onOpenChange(false);
-			await goto(notification.actionUrl);
+			if (isInternalUrl(notification.actionUrl)) {
+				await goto(notification.actionUrl);
+			} else {
+				window.open(notification.actionUrl, '_blank');
+			}
 		}
 	}
 </script>
@@ -121,15 +129,20 @@
 								</p>
 							{/if}
 
-							{#if notification.actionUrl && notification.actionLabel}
-								<div class="pt-1">
-									<span
-										class="inline-flex items-center text-xs text-primary hover:underline"
-									>
-										{notification.actionLabel} →
-									</span>
-								</div>
-							{/if}
+						{#if notification.actionUrl && notification.actionLabel}
+							<div class="pt-1">
+								<span
+									class="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+								>
+									{notification.actionLabel}
+									{#if isInternalUrl(notification.actionUrl)}
+										→
+									{:else}
+										<ExternalLink class="h-3 w-3" />
+									{/if}
+								</span>
+							</div>
+						{/if}
 						</button>
 					{/each}
 
