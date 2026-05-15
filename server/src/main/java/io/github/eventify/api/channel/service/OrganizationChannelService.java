@@ -15,6 +15,7 @@ import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -134,44 +135,55 @@ public class OrganizationChannelService {
     }
 
     /**
-     * Pauses an organization channel (idempotent).
+     * Batch pauses organization channels (idempotent).
+     * All channels must exist and belong to the organization; otherwise throws DataNotFoundException.
      *
      * @param organizationId the organization ID
-     * @param channelId      the channel ID
-     * @return the paused channel
-     * @throws DataNotFoundException if channel not found or not in organization
+     * @param channelIds     the channel IDs to pause
+     * @throws DataNotFoundException if any channel is not found or not in organization
      */
     @Transactional
-    public Channel pauseOrganizationChannel(final Long organizationId, final Long channelId) {
-        final Channel channel = getOrganizationChannel(organizationId, channelId);
-        return channelCreationService.updateStatus(channel, ChannelStatus.PAUSED);
+    public void batchPauseOrganizationChannels(final Long organizationId, final List<Long> channelIds) {
+        batchUpdateStatus(organizationId, channelIds, ChannelStatus.PAUSED);
     }
 
     /**
-     * Resumes an organization channel (idempotent).
+     * Batch resumes organization channels (idempotent).
+     * All channels must exist and belong to the organization; otherwise throws DataNotFoundException.
      *
      * @param organizationId the organization ID
-     * @param channelId      the channel ID
-     * @return the resumed channel
-     * @throws DataNotFoundException if channel not found or not in organization
+     * @param channelIds     the channel IDs to resume
+     * @throws DataNotFoundException if any channel is not found or not in organization
      */
     @Transactional
-    public Channel resumeOrganizationChannel(final Long organizationId, final Long channelId) {
-        final Channel channel = getOrganizationChannel(organizationId, channelId);
-        return channelCreationService.updateStatus(channel, ChannelStatus.ACTIVE);
+    public void batchResumeOrganizationChannels(final Long organizationId, final List<Long> channelIds) {
+        batchUpdateStatus(organizationId, channelIds, ChannelStatus.ACTIVE);
     }
 
     /**
-     * Deletes an organization channel (soft delete - sets status to PENDING_DELETION).
+     * Batch deletes organization channels (soft delete).
+     * All channels must exist and belong to the organization; otherwise throws DataNotFoundException.
+     * Re-deleting already-deleted channels also throws DataNotFoundException.
      *
      * @param organizationId the organization ID
-     * @param channelId      the channel ID
-     * @return the deleted channel
-     * @throws DataNotFoundException if channel not found or not in organization
+     * @param channelIds     the channel IDs to delete
+     * @throws DataNotFoundException if any channel is not found, not in organization, or already deleted
      */
     @Transactional
-    public Channel deleteOrganizationChannel(final Long organizationId, final Long channelId) {
-        final Channel channel = getOrganizationChannel(organizationId, channelId);
-        return channelCreationService.updateStatus(channel, ChannelStatus.PENDING_DELETION);
+    public void batchDeleteOrganizationChannels(final Long organizationId, final List<Long> channelIds) {
+        batchUpdateStatus(organizationId, channelIds, ChannelStatus.PENDING_DELETION);
+    }
+
+    private void batchUpdateStatus(final Long organizationId, final List<Long> channelIds, final ChannelStatus status) {
+        final List<Channel> channels = loadOrgChannelsOrNotFound(organizationId, channelIds);
+        channels.forEach(channel -> channelCreationService.updateStatus(channel, status));
+    }
+
+    private List<Channel> loadOrgChannelsOrNotFound(final Long organizationId, final List<Long> channelIds) {
+        final List<Channel> channels = channelRepository.findActiveByIdInAndOrganizationId(channelIds, organizationId);
+        if (channels.size() != channelIds.size()) {
+            throw new DataNotFoundException(CHANNEL_NOT_FOUND);
+        }
+        return channels;
     }
 }

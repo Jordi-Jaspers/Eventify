@@ -1,10 +1,13 @@
 package io.github.eventify.api.channel.model.validator;
 
+import io.github.eventify.api.channel.model.request.ChannelBatchRequest;
 import io.github.eventify.api.channel.model.request.CreateChannelRequest;
 import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.jframe.exception.core.ValidationException;
 import io.github.jframe.validation.ValidationResult;
 import io.github.jframe.validation.Validator;
+
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -25,11 +28,13 @@ public class ChannelValidator implements Validator<Object> {
     public static final String SLUG_INVALID_FORMAT =
         "Slug must contain only lowercase letters, numbers, and dots. Cannot start or end with dots, or have consecutive dots";
     public static final String DESCRIPTION_TOO_LONG = "Description must not exceed 500 characters";
+    public static final String CHANNEL_IDS_REQUIRED = "channelIds must not be empty";
 
     // Fields
     public static final String NAME = "name";
     public static final String SLUG = "slug";
     public static final String DESCRIPTION = "description";
+    public static final String CHANNEL_IDS = "channelIds";
 
     // Slug pattern: lowercase letters, numbers, dots (not at start/end, no consecutive dots)
     private static final String SLUG_PATTERN = "^[a-z0-9]+(\\.[a-z0-9]+)*$";
@@ -94,6 +99,27 @@ public class ChannelValidator implements Validator<Object> {
     }
 
     /**
+     * Validates a ChannelBatchRequest.
+     *
+     * @param request the batch request
+     * @param result  the validation result
+     */
+    public void validate(final ChannelBatchRequest request, final ValidationResult result) {
+        if (isNull(request)) {
+            result.reject(BODY_IS_MISSING);
+            throw new ValidationException(result);
+        }
+
+        result.rejectField(CHANNEL_IDS, request.getChannelIds())
+            .whenNull(CHANNEL_IDS_REQUIRED)
+            .orWhen(List::isEmpty, CHANNEL_IDS_REQUIRED);
+
+        if (result.hasErrors()) {
+            throw new ValidationException(result);
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -102,6 +128,8 @@ public class ChannelValidator implements Validator<Object> {
             validate((CreateChannelRequest) request, result);
         } else if (request instanceof UpdateChannelRequest) {
             validate((UpdateChannelRequest) request, result);
+        } else if (request instanceof ChannelBatchRequest) {
+            validate((ChannelBatchRequest) request, result);
         } else {
             result.reject("Unsupported request type");
             throw new ValidationException(result);

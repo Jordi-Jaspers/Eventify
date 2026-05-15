@@ -1,12 +1,15 @@
 package io.github.eventify.api.channel.controller;
 
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.channel.model.request.ChannelBatchRequest;
 import io.github.eventify.api.channel.model.request.CreateChannelRequest;
 import io.github.eventify.api.channel.model.response.ChannelDetailsResponse;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationalRole;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
+
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -334,12 +337,12 @@ public class GetOrgChannelControllerTest extends IntegrationTest {
         // And: Channel is deleted
         mockMvc.perform(
             delete(
-                ORGANIZATION_CHANNEL_PATH
+                ORGANIZATION_CHANNELS_PATH
                     .replace("{orgId}", org.getId().toString())
-                    .replace("{id}", createdChannel.getId().toString())
             )
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(createdChannel.getId()))))
         );
 
         // When: Getting deleted channel

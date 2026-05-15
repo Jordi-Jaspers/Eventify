@@ -163,6 +163,23 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
     List<Channel> findAllByIdInAndOrganizationId(@Param("ids") List<Long> ids, @Param("organizationId") Long organizationId);
 
     /**
+     * Finds all organization channels by IDs and organization ID, excluding deleted ones (batch query).
+     *
+     * @param ids            the channel IDs
+     * @param organizationId the organization ID
+     * @return list of active channels
+     */
+    @Query(
+        """
+            SELECT c FROM Channel c
+            WHERE c.id IN :ids
+            AND c.organization.id = :organizationId
+            AND c.status != 'PENDING_DELETION'
+            """
+    )
+    List<Channel> findActiveByIdInAndOrganizationId(@Param("ids") List<Long> ids, @Param("organizationId") Long organizationId);
+
+    /**
      * Finds personal channels by user ID and status.
      *
      * @param userId the user ID

@@ -1,9 +1,9 @@
 import {
 	createChannel,
 	updateChannel,
-	pauseChannel,
-	resumeChannel,
-	deleteChannel
+	pauseChannels,
+	resumeChannels,
+	deleteChannels
 } from '$lib/api/channel/UserChannelController';
 import type { ChannelDetailsResponse } from '$lib/api/models';
 import { toast } from 'svelte-sonner';
@@ -56,11 +56,11 @@ export class UserChannelService {
 	}
 
 	/**
-	 * Pause a channel
+	 * Pause a single channel (uses batch endpoint)
 	 */
 	async pauseChannel(channelId: number): Promise<void> {
 		try {
-			await pauseChannel(channelId);
+			await pauseChannels([channelId]);
 			toast.success('Channel paused');
 		} catch (error) {
 			toast.error('Failed to pause channel');
@@ -69,11 +69,11 @@ export class UserChannelService {
 	}
 
 	/**
-	 * Resume a paused channel
+	 * Resume a single paused channel (uses batch endpoint)
 	 */
 	async resumeChannel(channelId: number): Promise<void> {
 		try {
-			await resumeChannel(channelId);
+			await resumeChannels([channelId]);
 			toast.success('Channel resumed');
 		} catch (error) {
 			toast.error('Failed to resume channel');
@@ -82,22 +82,53 @@ export class UserChannelService {
 	}
 
 	/**
-	 * Delete a channel with confirmation
+	 * Delete a single channel (uses batch endpoint)
 	 */
 	async deleteChannel(channel: ChannelDetailsResponse): Promise<void> {
-		const confirmed: boolean = confirm(
-			`Are you sure you want to delete "${channel.name}"? This action cannot be undone.`
-		);
-
-		if (!confirmed) {
-			return;
-		}
-
 		try {
-			await deleteChannel(channel.id ?? 0);
+			await deleteChannels([channel.id ?? 0]);
 			toast.success('Channel deleted');
 		} catch (error) {
 			toast.error('Failed to delete channel');
+			throw error;
+		}
+	}
+
+	/**
+	 * Batch pause channels
+	 */
+	async pauseChannels(ids: number[]): Promise<void> {
+		try {
+			await pauseChannels(ids);
+			toast.success(`${ids.length} channel${ids.length > 1 ? 's' : ''} paused`);
+		} catch (error) {
+			toast.error('Failed to pause channels');
+			throw error;
+		}
+	}
+
+	/**
+	 * Batch resume channels
+	 */
+	async resumeChannels(ids: number[]): Promise<void> {
+		try {
+			await resumeChannels(ids);
+			toast.success(`${ids.length} channel${ids.length > 1 ? 's' : ''} resumed`);
+		} catch (error) {
+			toast.error('Failed to resume channels');
+			throw error;
+		}
+	}
+
+	/**
+	 * Batch delete channels
+	 */
+	async deleteChannels(ids: number[]): Promise<void> {
+		try {
+			await deleteChannels(ids);
+			toast.success(`${ids.length} channel${ids.length > 1 ? 's' : ''} deleted`);
+		} catch (error) {
+			toast.error('Failed to delete channels');
 			throw error;
 		}
 	}

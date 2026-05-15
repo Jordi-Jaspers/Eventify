@@ -18,6 +18,71 @@
     import { CodeBlockWithCopy } from '$lib/components/ui/code-block-with-copy';
     import { getEnvironment, showDevCredentials } from '$lib/config/env';
     import type { Environment } from '$lib/config/env';
+    import { DataTable, createDataTableService } from '$lib/components/data-table';
+    import type { DataTableColumn } from '$lib/components/data-table/types';
+    import type { PageResource, SortablePageInput } from '$lib/api/models';
+
+    // DataTable demo
+    interface DemoItem {
+        id: number;
+        name: string;
+        status: string;
+    }
+
+    const demoItems: DemoItem[] = [
+        { id: 1, name: 'Production API', status: 'ACTIVE' },
+        { id: 2, name: 'Staging', status: 'PAUSED' },
+        { id: 3, name: 'Dev Sandbox', status: 'ACTIVE' }
+    ];
+
+    const demoColumns: DataTableColumn<DemoItem>[] = [
+        { key: 'name', label: 'Name', sortable: true, colSpan: 4 },
+        { key: 'status', label: 'Status', sortable: true, colSpan: 3 }
+    ];
+
+    async function demoFetchFn(_input: SortablePageInput): Promise<PageResource<DemoItem>> {
+        return {
+            content: demoItems,
+            totalElements: demoItems.length,
+            totalPages: 1,
+            pageNumber: 0,
+            pageSize: 10
+        };
+    }
+
+    const demoService = createDataTableService<DemoItem>({
+        fetchFn: demoFetchFn,
+        pageSize: 10
+    });
+
+    let demoAllSelected: boolean = $state(false);
+    let demoIndeterminate: boolean = $state(false);
+    const demoSelectedIds: Set<number> = $state(new Set<number>());
+
+    function demoToggleSelectAll(): void {
+        if (demoAllSelected || demoIndeterminate) {
+            demoSelectedIds.clear();
+            demoAllSelected = false;
+            demoIndeterminate = false;
+        } else {
+            demoItems.forEach((item: DemoItem) => demoSelectedIds.add(item.id));
+            demoAllSelected = true;
+            demoIndeterminate = false;
+        }
+    }
+
+    function demoToggleRow(id: number): void {
+        if (demoSelectedIds.has(id)) {
+            demoSelectedIds.delete(id);
+        } else {
+            demoSelectedIds.add(id);
+        }
+        const count: number = demoSelectedIds.size;
+        demoAllSelected = count === demoItems.length;
+        demoIndeterminate = count > 0 && count < demoItems.length;
+    }
+
+    onMount(() => demoService.load());
     
     // DateTimePicker state
     let dateTimeValue1: string = $state('');
@@ -1688,48 +1753,39 @@
                         <CardDescription>Use this styling for all DataTable row snippets</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div class="rounded-lg border border-border/50 overflow-hidden">
-                            <!-- Header -->
-                            <div class="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/30 text-sm font-medium text-muted-foreground border-b border-border/50">
-                                <div class="col-span-3">Channel</div>
-                                <div class="col-span-4">Description</div>
-                                <div class="col-span-2">Status</div>
-                                <div class="col-span-2">Created</div>
-                                <div class="col-span-1"></div>
-                            </div>
-                            
-                            <!-- Rows -->
-                            <div class="divide-y divide-border/30">
-                                <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all">
-                                    <div class="col-span-3 flex items-center gap-3">
-                                        <Radio class="h-5 w-5 text-primary shrink-0" />
-                                        <span class="font-medium truncate">Production API</span>
+                        <DataTable
+                            columns={demoColumns}
+                            service={demoService}
+                            title="Demo Items"
+                            icon={Radio}
+                            selectable={true}
+                            allSelected={demoAllSelected}
+                            indeterminate={demoIndeterminate}
+                            onToggleSelectAll={demoToggleSelectAll}
+                        >
+                            {#snippet row(item: DemoItem)}
+                                <div class="grid grid-cols-7 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all">
+                                    <div class="col-span-1 flex items-center gap-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={demoSelectedIds.has(item.id)}
+                                            onchange={() => demoToggleRow(item.id)}
+                                            class="h-4 w-4 rounded border-border accent-primary cursor-pointer"
+                                            aria-label="Select {item.name}"
+                                        />
                                     </div>
-                                    <div class="col-span-4 text-sm text-muted-foreground truncate">Main production channel</div>
-                                    <div class="col-span-2"><Badge variant="default">Active</Badge></div>
-                                    <div class="col-span-2 text-sm text-muted-foreground">Jan 15, 2026</div>
-                                    <div class="col-span-1 flex justify-end">
-                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
-                                            <Edit class="h-4 w-4" />
-                                        </Button>
+                                    <div class="col-span-3 flex items-center gap-3">
+                                        <Radio class="h-4 w-4 text-primary shrink-0" />
+                                        <span class="font-medium truncate">{item.name}</span>
+                                    </div>
+                                    <div class="col-span-3">
+                                        <Badge variant={item.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                                            {item.status}
+                                        </Badge>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all">
-                                    <div class="col-span-3 flex items-center gap-3">
-                                        <Radio class="h-5 w-5 text-primary shrink-0" />
-                                        <span class="font-medium truncate">Staging</span>
-                                    </div>
-                                    <div class="col-span-4 text-sm text-muted-foreground truncate">Pre-production testing</div>
-                                    <div class="col-span-2"><Badge variant="secondary">Paused</Badge></div>
-                                    <div class="col-span-2 text-sm text-muted-foreground">Jan 10, 2026</div>
-                                    <div class="col-span-1 flex justify-end">
-                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
-                                            <Edit class="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            {/snippet}
+                        </DataTable>
                     </CardContent>
                 </Card>
             </section>

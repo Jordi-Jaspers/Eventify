@@ -54,6 +54,7 @@ export type ApiKeyResponse = components['schemas']['ApiKeyResponse'];
 export type ChannelDetailsResponse = components['schemas']['ChannelDetailsResponse'];
 export type CreateChannelRequest = components['schemas']['CreateChannelRequest'];
 export type UpdateChannelRequest = components['schemas']['UpdateChannelRequest'];
+export type ChannelBatchRequest = components['schemas']['ChannelBatchRequest'];
 export type PageResourceChannelDetailsResponse =
 	components['schemas']['PageResourceChannelDetailsResponse'];
 

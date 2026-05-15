@@ -1,6 +1,7 @@
 package io.github.eventify.api.channel.controller;
 
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.channel.model.request.ChannelBatchRequest;
 import io.github.eventify.api.channel.model.request.CreateChannelRequest;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationalRole;
@@ -9,6 +10,8 @@ import io.github.eventify.support.IntegrationTest;
 import io.github.jframe.datasource.search.model.input.SearchInput;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
+
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -327,12 +330,12 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
         // And: Second channel is deleted
         mockMvc.perform(
             delete(
-                ORGANIZATION_CHANNEL_PATH
+                ORGANIZATION_CHANNELS_PATH
                     .replace("{orgId}", org.getId().toString())
-                    .replace("{id}", createdChannel.getId().toString())
             )
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(createdChannel.getId()))))
         );
 
         // When: Searching channels
@@ -487,13 +490,10 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
 
         // And: Pause the third channel
         mockMvc.perform(
-            post(
-                ORGANIZATION_CHANNEL_PAUSE_PATH
-                    .replace("{orgId}", org.getId().toString())
-                    .replace("{id}", pausedChannel.getId().toString())
-            )
+            post(ORGANIZATION_CHANNELS_PAUSE_PATH.replace("{orgId}", org.getId().toString()))
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(pausedChannel.getId()))))
         );
 
         // When: Searching channels with status filter ACTIVE
@@ -562,13 +562,10 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
             fromJson(pausedContent1, io.github.eventify.api.channel.model.response.ChannelDetailsResponse.class);
 
         mockMvc.perform(
-            post(
-                ORGANIZATION_CHANNEL_PAUSE_PATH
-                    .replace("{orgId}", org.getId().toString())
-                    .replace("{id}", pausedChannel1.getId().toString())
-            )
+            post(ORGANIZATION_CHANNELS_PAUSE_PATH.replace("{orgId}", org.getId().toString()))
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(pausedChannel1.getId()))))
         );
 
         final CreateChannelRequest pausedRequest2 = new CreateChannelRequest()
@@ -587,13 +584,10 @@ public class SearchOrgChannelControllerTest extends IntegrationTest {
             fromJson(pausedContent2, io.github.eventify.api.channel.model.response.ChannelDetailsResponse.class);
 
         mockMvc.perform(
-            post(
-                ORGANIZATION_CHANNEL_PAUSE_PATH
-                    .replace("{orgId}", org.getId().toString())
-                    .replace("{id}", pausedChannel2.getId().toString())
-            )
+            post(ORGANIZATION_CHANNELS_PAUSE_PATH.replace("{orgId}", org.getId().toString()))
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(pausedChannel2.getId()))))
         );
 
         // When: Searching channels with status filter PAUSED

@@ -9,9 +9,11 @@
 		CreateChannelSheet,
 		ChannelDetailsSheet,
 		ChannelRow,
+		ChannelBulkActionBar,
 		SendEventsHelpModal
 	} from '$lib/components/channels';
 	import { UserChannelService } from '$lib/api/channel/service/UserChannelService';
+	import { createChannelSelectionService } from '$lib/api/channel/service/ChannelSelectionService.svelte';
 	import { channelTableColumns } from '$lib/config/channel-table-columns';
 
 	// Services
@@ -21,6 +23,7 @@
 		defaultSort: [{ name: 'createdAt', direction: 'DESC' }]
 	});
 	const channelService: UserChannelService = new UserChannelService();
+	const selection = createChannelSelectionService(() => dataTableService.items);
 
 	// Sheet state
 	let showCreateSheet: boolean = $state(false);
@@ -60,7 +63,6 @@
 		description: string | undefined
 	): Promise<void> {
 		await channelService.updateChannel(channelId, name, description);
-		// Refresh the selected channel to show updated data
 		if (selectedChannel?.id === channelId) {
 			selectedChannel = await getChannel(channelId);
 		}
@@ -69,7 +71,6 @@
 
 	async function handlePauseChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.pauseChannel(channel.id ?? 0);
-		// Refresh the selected channel to show updated status
 		if (selectedChannel?.id === channel.id) {
 			selectedChannel = await getChannel(channel.id!);
 		}
@@ -78,7 +79,6 @@
 
 	async function handleResumeChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.resumeChannel(channel.id ?? 0);
-		// Refresh the selected channel to show updated status
 		if (selectedChannel?.id === channel.id) {
 			selectedChannel = await getChannel(channel.id!);
 		}
@@ -88,6 +88,21 @@
 	async function handleDeleteChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.deleteChannel(channel);
 		closeDetailsSheet();
+		dataTableService.load();
+	}
+
+	async function handleBulkPause(ids: number[]): Promise<void> {
+		await channelService.pauseChannels(ids);
+		dataTableService.load();
+	}
+
+	async function handleBulkResume(ids: number[]): Promise<void> {
+		await channelService.resumeChannels(ids);
+		dataTableService.load();
+	}
+
+	async function handleBulkDelete(ids: number[]): Promise<void> {
+		await channelService.deleteChannels(ids);
 		dataTableService.load();
 	}
 
@@ -120,18 +135,39 @@
 	</div>
 
 		<!-- DataTable -->
-		<DataTable columns={channelTableColumns} service={dataTableService} title="All Channels" icon={Radio}>
+		<DataTable
+			columns={channelTableColumns}
+			service={dataTableService}
+			title="All Channels"
+			icon={Radio}
+			selectable={true}
+			allSelected={selection.isAllSelected}
+			indeterminate={selection.isIndeterminate}
+			onToggleSelectAll={selection.toggleSelectAll}
+		>
 			{#snippet headerActions()}
-				<SendEventsHelpModal apiKeySettingsUrl="/developer" />
+				{#if selection.selectedChannels.length > 0}
+					<ChannelBulkActionBar
+						selectedChannels={selection.selectedChannels}
+						onPause={handleBulkPause}
+						onResume={handleBulkResume}
+						onDelete={handleBulkDelete}
+						onClearSelection={selection.clearSelection}
+					/>
+				{:else}
+					<SendEventsHelpModal apiKeySettingsUrl="/developer" />
+				{/if}
 			{/snippet}
 			{#snippet row(channel: ChannelDetailsResponse)}
 				<ChannelRow
 					{channel}
 					canManage={true}
+					selected={selection.selectedIds.has(channel.id ?? 0)}
 					onEdit={openDetailsSheet}
 					onPause={handlePauseChannel}
 					onResume={handleResumeChannel}
 					onDelete={handleDeleteChannel}
+					onToggleSelect={selection.toggleSelectChannel}
 				/>
 			{/snippet}
 		</DataTable>

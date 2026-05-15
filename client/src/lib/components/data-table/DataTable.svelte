@@ -21,6 +21,10 @@
 		title?: string;
 		description?: string;
 		icon?: Component;
+		selectable?: boolean;
+		allSelected?: boolean;
+		indeterminate?: boolean;
+		onToggleSelectAll?: () => void;
 	}
 
 	let {
@@ -32,7 +36,11 @@
 		skeletonRows = 5,
 		title,
 		description,
-		icon
+		icon,
+		selectable = false,
+		allSelected = false,
+		indeterminate = false,
+		onToggleSelectAll
 	}: Props = $props();
 
 	const totalCols: number = $derived(
@@ -115,6 +123,10 @@
 					currentSortKey={service.sortKey}
 					currentSortDirection={service.sortDirection}
 					onSort={service.setSort}
+					{selectable}
+					{allSelected}
+					{indeterminate}
+					{onToggleSelectAll}
 				/>
 				<div class="divide-y divide-border/30">
 					{#each service.items as item (item)}

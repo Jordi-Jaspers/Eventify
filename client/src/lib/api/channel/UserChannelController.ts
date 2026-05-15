@@ -74,46 +74,37 @@ export async function updateChannel(
 }
 
 /**
- * Pause channel
+ * Batch pause channels
  */
-export async function pauseChannel(id: number): Promise<ChannelDetailsResponse> {
-	const { data, error } = await client.POST('/v1/user/channel/{id}/pause', {
-		params: {
-			path: { id }
-		}
+export async function pauseChannels(ids: number[]): Promise<void> {
+	const { error } = await client.POST('/v1/user/channel/pause', {
+		body: { channelIds: ids }
 	});
 	if (error) {
 		throw error;
 	}
-	return data;
 }
 
 /**
- * Resume channel
+ * Batch resume channels
  */
-export async function resumeChannel(id: number): Promise<ChannelDetailsResponse> {
-	const { data, error } = await client.POST('/v1/user/channel/{id}/resume', {
-		params: {
-			path: { id }
-		}
+export async function resumeChannels(ids: number[]): Promise<void> {
+	const { error } = await client.POST('/v1/user/channel/resume', {
+		body: { channelIds: ids }
 	});
 	if (error) {
 		throw error;
 	}
-	return data;
 }
 
 /**
- * Delete channel (soft delete)
+ * Batch delete channels (soft delete)
  */
-export async function deleteChannel(id: number): Promise<ChannelDetailsResponse> {
-	const { data, error } = await client.DELETE('/v1/user/channel/{id}', {
-		params: {
-			path: { id }
-		}
+export async function deleteChannels(ids: number[]): Promise<void> {
+	const { error } = await client.DELETE('/v1/user/channel', {
+		body: { channelIds: ids }
 	});
 	if (error) {
 		throw error;
 	}
-	return data;
 }

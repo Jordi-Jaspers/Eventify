@@ -3,19 +3,28 @@
 	import type { SortDirection } from '$lib/api/models';
 	import type { DataTableColumn } from './types';
 	import type { Component } from 'svelte';
+	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
 
 	interface Props<T> {
 		columns: DataTableColumn<T>[];
 		currentSortKey: string | null;
 		currentSortDirection: SortDirection;
 		onSort: (key: string) => void;
+		selectable?: boolean;
+		allSelected?: boolean;
+		indeterminate?: boolean;
+		onToggleSelectAll?: () => void;
 	}
 
 	let {
 		columns,
 		currentSortKey,
 		currentSortDirection,
-		onSort
+		onSort,
+		selectable = false,
+		allSelected = false,
+		indeterminate = false,
+		onToggleSelectAll
 	}: Props<T> = $props();
 
 	const totalCols: number = $derived(
@@ -46,19 +55,31 @@
 		{@const colSpan = column.colSpan ?? 1}
 		{#if colSpan > 0}
 			<div style="grid-column: span {colSpan} / span {colSpan};">
-				{#if column.sortable}
-					{@const IconComponent = getSortIcon(column.key, column.sortable)}
-					<button
-						type="button"
-						onclick={() => handleSort(column.key, column.sortable)}
-						class="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
-					>
-						{column.label}
-						<IconComponent class="h-3 w-3" />
-					</button>
-				{:else if column.label}
-					<span>{column.label}</span>
+		{#if column.key === 'checkbox'}
+				{#if selectable}
+					<div class="flex items-center justify-center h-full">
+					<Checkbox
+						checked={allSelected}
+						{indeterminate}
+						onCheckedChange={() => onToggleSelectAll?.()}
+						aria-label="Select all"
+						class="cursor-pointer"
+					/>
+					</div>
 				{/if}
+			{:else if column.sortable}
+				{@const IconComponent = getSortIcon(column.key, column.sortable)}
+				<button
+					type="button"
+					onclick={() => handleSort(column.key, column.sortable)}
+					class="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+				>
+					{column.label}
+					<IconComponent class="h-3 w-3" />
+				</button>
+			{:else if column.label}
+				<span>{column.label}</span>
+			{/if}
 			</div>
 		{/if}
 	{/each}

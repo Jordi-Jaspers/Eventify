@@ -2,6 +2,7 @@ package io.github.eventify.api.channel.controller;
 
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.mapper.ChannelMapper;
+import io.github.eventify.api.channel.model.request.ChannelBatchRequest;
 import io.github.eventify.api.channel.model.request.CreateChannelRequest;
 import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.model.response.ChannelDetailsResponse;
@@ -23,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import static io.github.eventify.api.Paths.*;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -32,6 +32,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  */
 @RestController
 @RequiredArgsConstructor
+@SuppressWarnings("ClassFanOutComplexity")
 @Tag(
     name = "User Channels",
     description = "Manage personal channels for event streaming"
@@ -114,48 +115,51 @@ public class UserChannelController {
     }
 
     @PostMapping(
-        path = USER_CHANNEL_PAUSE_PATH,
-        produces = APPLICATION_JSON_VALUE
+        path = USER_CHANNELS_PAUSE_PATH,
+        consumes = APPLICATION_JSON_VALUE
     )
-    @ResponseStatus(OK)
-    @PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal) or hasAuthority('MANAGE_USERS')")
+    @ResponseStatus(NO_CONTENT)
+    @PreAuthorize("@channelSecurity.canAccessChannelsAsUser(#request.channelIds, principal) or hasAuthority('MANAGE_USERS')")
     @Operation(
-        summary = "Pause channel",
-        description = "Pauses a personal channel (idempotent)"
+        summary = "Batch pause channels",
+        description = "Pauses multiple personal channels in a single request (idempotent)"
     )
-    public ResponseEntity<ChannelDetailsResponse> pauseChannel(@PathVariable final Long id) {
-        final Channel channel = channelService.pauseUserChannel(id);
-        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
+    public ResponseEntity<Void> batchPauseChannels(@RequestBody final ChannelBatchRequest request) {
+        channelValidator.validateAndThrow(request);
+        channelService.batchPauseUserChannels(request.getChannelIds());
+        return ResponseEntity.status(NO_CONTENT).build();
     }
 
     @PostMapping(
-        path = USER_CHANNEL_RESUME_PATH,
-        produces = APPLICATION_JSON_VALUE
+        path = USER_CHANNELS_RESUME_PATH,
+        consumes = APPLICATION_JSON_VALUE
     )
-    @ResponseStatus(OK)
-    @PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal) or hasAuthority('MANAGE_USERS')")
+    @ResponseStatus(NO_CONTENT)
+    @PreAuthorize("@channelSecurity.canAccessChannelsAsUser(#request.channelIds, principal) or hasAuthority('MANAGE_USERS')")
     @Operation(
-        summary = "Resume channel",
-        description = "Resumes a paused channel (idempotent)"
+        summary = "Batch resume channels",
+        description = "Resumes multiple personal channels in a single request (idempotent)"
     )
-    public ResponseEntity<ChannelDetailsResponse> resumeChannel(@PathVariable final Long id) {
-        final Channel channel = channelService.resumeUserChannel(id);
-        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
+    public ResponseEntity<Void> batchResumeChannels(@RequestBody final ChannelBatchRequest request) {
+        channelValidator.validateAndThrow(request);
+        channelService.batchResumeUserChannels(request.getChannelIds());
+        return ResponseEntity.status(NO_CONTENT).build();
     }
 
     @DeleteMapping(
-        path = USER_CHANNEL_PATH,
-        produces = APPLICATION_JSON_VALUE
+        path = USER_CHANNELS_PATH,
+        consumes = APPLICATION_JSON_VALUE
     )
-    @ResponseStatus(OK)
-    @PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal) or hasAuthority('MANAGE_USERS')")
+    @ResponseStatus(NO_CONTENT)
+    @PreAuthorize("@channelSecurity.canAccessChannelsAsUser(#request.channelIds, principal) or hasAuthority('MANAGE_USERS')")
     @Operation(
-        summary = "Delete channel",
-        description = "Soft deletes a personal channel (sets status to PENDING_DELETION)"
+        summary = "Batch delete channels",
+        description = "Soft deletes multiple personal channels in a single request (sets status to PENDING_DELETION)"
     )
-    public ResponseEntity<ChannelDetailsResponse> deleteChannel(@PathVariable final Long id) {
-        final Channel channel = channelService.deleteUserChannel(id);
-        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
+    public ResponseEntity<Void> batchDeleteChannels(@RequestBody final ChannelBatchRequest request) {
+        channelValidator.validateAndThrow(request);
+        channelService.batchDeleteUserChannels(request.getChannelIds());
+        return ResponseEntity.status(NO_CONTENT).build();
     }
 
     @PostMapping(
