@@ -17,12 +17,6 @@ Raw ideas and future work. Items here need refinement before development.
 
 ---
 
-## Epic: Channel Management
-**Context**: Channel owners and admins need efficient tools to manage channels at scale.
-
-
----
-
 ## Epic: Watchlist Composition
 **Context**: Templates and additional views to make watchlists more reusable and informative. Templates are a new first-class concept distinct from inline groups: live-linked, editable, propagating across all consumers.
 
