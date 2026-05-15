@@ -48,7 +48,10 @@ public class TestDataCleanupService {
             "DELETE FROM event WHERE channel_id IN (SELECT id FROM channel WHERE user_id IN " + userIdList + ")"
         );
 
-        // 2. User event quotas
+        // 2. Audit logs
+        jdbcTemplate.execute("DELETE FROM audit_log WHERE actor_id IN " + userIdList);
+
+        // 3. User event quotas
         jdbcTemplate.execute("DELETE FROM user_event_quota WHERE user_id IN " + userIdList);
 
         // 3. API key audit records (revoked_by and owner_user_id are the user FK columns)

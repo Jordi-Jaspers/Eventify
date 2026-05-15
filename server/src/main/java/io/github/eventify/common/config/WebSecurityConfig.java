@@ -1,5 +1,6 @@
 package io.github.eventify.common.config;
 
+import io.github.eventify.common.audit.filter.AdminRequestCachingFilter;
 import io.github.eventify.common.config.properties.SecurityProperties;
 import io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter;
 import io.github.eventify.common.security.filter.JwtAuthenticationFilter;
@@ -36,6 +37,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 /**
  * Configures spring web security.
  */
+@SuppressWarnings("PMD.ExcessiveImports")
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(
@@ -53,7 +55,9 @@ public class WebSecurityConfig implements WebMvcConfigurer {
      * Configure CORS & requests handling behaviour.
      **/
     @Bean
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public SecurityFilterChain filterChain(
+        final AdminRequestCachingFilter adminRequestCachingFilter,
         final JwtAuthenticationFilter jwtAuthenticationFilter,
         final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
         final CustomOAuth2UserService customOAuth2UserService,
@@ -62,6 +66,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         final ClientRegistrationRepository clientRegistrationRepository,
         final HttpSecurity http) throws Exception {
         http.addFilterBefore(jwtAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);
+        http.addFilterBefore(adminRequestCachingFilter, JwtAuthenticationFilter.class);
         http.addFilterAfter(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class);
         http.addFilterBefore(oauth2AttributesFilter, OAuth2LoginAuthenticationFilter.class);
 

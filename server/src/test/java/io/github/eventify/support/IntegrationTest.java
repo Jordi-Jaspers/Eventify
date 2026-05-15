@@ -591,4 +591,27 @@ public class IntegrationTest extends WebMvcConfigurator {
         return input;
     }
 
+    // ========================= AUDIT HELPERS =========================
+
+    /**
+     * Waits briefly for async audit persistence to complete.
+     */
+    protected void waitForAsyncAudit() {
+        try {
+            Thread.sleep(200);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    protected io.github.eventify.common.audit.model.AuditLog findAuditLogByMethod(
+        final java.util.List<io.github.eventify.common.audit.model.AuditLog> logs,
+        final String method
+    ) {
+        return logs.stream()
+            .filter(log -> method.equals(log.getMethod()))
+            .findFirst()
+            .orElse(null);
+    }
+
 }
