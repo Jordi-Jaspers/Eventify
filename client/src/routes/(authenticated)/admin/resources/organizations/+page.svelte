@@ -38,7 +38,6 @@
 			filterable: true,
 			filterType: 'MULTI_ENUM',
 			filterOptions: [
-				{ value: 'TRIAL', label: 'Trial' },
 				{ value: 'ACTIVE', label: 'Active' },
 				{ value: 'SUSPENDED', label: 'Suspended' }
 			],

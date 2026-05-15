@@ -12,7 +12,6 @@ import lombok.Getter;
 @Schema(description = "OrganizationStatus")
 public enum OrganizationStatus {
 
-    TRIAL("Organization is in trial period"),
     ACTIVE("Organization has an active subscription"),
     SUSPENDED("Organization has been suspended");
 

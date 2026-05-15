@@ -88,7 +88,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(1L);
         savedOrganization.setName(VALID_ORG_NAME);
         savedOrganization.setSlug(VALID_ORG_SLUG);
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(VALID_ORG_SLUG)).thenReturn(Optional.empty());
@@ -100,7 +100,7 @@ public class OrganizationServiceTest extends UnitTest {
         assertThat(result.getId(), is(1L));
         assertThat(result.getName(), is(VALID_ORG_NAME));
         assertThat(result.getSlug(), is(VALID_ORG_SLUG));
-        assertThat(result.getStatus(), is(OrganizationStatus.TRIAL));
+        assertThat(result.getStatus(), is(OrganizationStatus.ACTIVE));
         assertThat(result.getCreatedBy(), is(authenticatedUser.getId()));
         verify(organizationRepository).save(any());
     }
@@ -116,7 +116,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(1L);
         savedOrganization.setName(orgName);
         savedOrganization.setSlug(expectedSlug);
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(expectedSlug)).thenReturn(Optional.empty());
@@ -136,7 +136,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(1L);
         savedOrganization.setName(VALID_ORG_NAME_WITH_SPACES);
         savedOrganization.setSlug(EXPECTED_SLUG_SPACES);
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(EXPECTED_SLUG_SPACES)).thenReturn(Optional.empty());
@@ -156,7 +156,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(1L);
         savedOrganization.setName(VALID_ORG_NAME_UPPERCASE);
         savedOrganization.setSlug(EXPECTED_SLUG_UPPERCASE);
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(EXPECTED_SLUG_UPPERCASE)).thenReturn(Optional.empty());
@@ -176,7 +176,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(1L);
         savedOrganization.setName(VALID_ORG_NAME_WITH_SPECIAL);
         savedOrganization.setSlug(EXPECTED_SLUG_SPECIAL);
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(EXPECTED_SLUG_SPECIAL)).thenReturn(Optional.empty());
@@ -198,7 +198,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(2L);
         savedOrganization.setName("Acme Corp");
         savedOrganization.setSlug(collidingSlug);
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(baseSlug)).thenReturn(Optional.of(new Organization()));
@@ -222,7 +222,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(3L);
         savedOrganization.setName("Acme Corp");
         savedOrganization.setSlug(slug2);
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(baseSlug)).thenReturn(Optional.of(new Organization()));
@@ -236,15 +236,15 @@ public class OrganizationServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should default organization status to TRIAL if not provided")
-    void shouldDefaultOrganizationStatusToTrialIfNotProvided() {
+    @DisplayName("Should default organization status to ACTIVE if not provided")
+    void shouldDefaultOrganizationStatusToActiveIfNotProvided() {
         final ProvisionOrganizationRequest request = aValidOrganizationRequest(VALID_ORG_NAME);
 
         final Organization savedOrganization = new Organization();
         savedOrganization.setId(1L);
         savedOrganization.setName(VALID_ORG_NAME);
         savedOrganization.setSlug(VALID_ORG_SLUG);
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(VALID_ORG_SLUG)).thenReturn(Optional.empty());
@@ -252,7 +252,7 @@ public class OrganizationServiceTest extends UnitTest {
 
         final Organization result = organizationService.create(request);
 
-        assertThat(result.getStatus(), is(OrganizationStatus.TRIAL));
+        assertThat(result.getStatus(), is(OrganizationStatus.ACTIVE));
     }
 
     @Test
@@ -264,7 +264,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(1L);
         savedOrganization.setName(VALID_ORG_NAME);
         savedOrganization.setSlug(VALID_ORG_SLUG);
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(VALID_ORG_SLUG)).thenReturn(Optional.empty());
@@ -285,7 +285,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(1L);
         savedOrganization.setName(orgName);
         savedOrganization.setSlug("abc");
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug("abc")).thenReturn(Optional.empty());
@@ -307,7 +307,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(1L);
         savedOrganization.setName(orgName);
         savedOrganization.setSlug(orgName.toLowerCase());
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(anyString())).thenReturn(Optional.empty());
@@ -328,7 +328,7 @@ public class OrganizationServiceTest extends UnitTest {
         savedOrganization.setId(1L);
         savedOrganization.setName(UNICODE_NAME);
         savedOrganization.setSlug("cafe-cmpany");
-        savedOrganization.setStatus(OrganizationStatus.TRIAL);
+        savedOrganization.setStatus(OrganizationStatus.ACTIVE);
         savedOrganization.setCreatedBy(authenticatedUser.getId());
 
         when(organizationRepository.findBySlug(anyString())).thenReturn(Optional.empty());

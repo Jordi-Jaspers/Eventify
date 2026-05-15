@@ -4,7 +4,6 @@ import type { OrganizationStatus } from '$lib/api/models';
  * Get the badge variant for an organization status
  * - ACTIVE: success (green)
  * - SUSPENDED: destructive (red)
- * - TRIAL: default (neutral)
  */
 export function getOrganizationStatusBadgeVariant(
 	status: OrganizationStatus | undefined
@@ -14,7 +13,6 @@ export function getOrganizationStatusBadgeVariant(
 			return 'success';
 		case 'SUSPENDED':
 			return 'destructive';
-		case 'TRIAL':
 		default:
 			return 'default';
 	}

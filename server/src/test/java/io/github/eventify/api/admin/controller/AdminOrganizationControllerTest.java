@@ -68,7 +68,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         assertThat(organizationResponse.getId(), notNullValue());
         assertThat(organizationResponse.getName(), is(request.getName()));
         assertThat(organizationResponse.getSlug(), is(notNullValue()));
-        assertThat(organizationResponse.getStatus(), is(OrganizationStatus.TRIAL));
+        assertThat(organizationResponse.getStatus(), is(OrganizationStatus.ACTIVE));
         assertThat(organizationResponse.getCreatedBy(), notNullValue());
         assertThat(organizationResponse.getCreatedAt(), notNullValue());
     }
@@ -497,7 +497,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Multiple test organizations
-        createOrganizationWithStatus("Alpha Corp", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Alpha Corp", OrganizationStatus.ACTIVE);
         createOrganizationWithStatus("Beta Inc", OrganizationStatus.ACTIVE);
         createOrganizationWithStatus("Gamma LLC", OrganizationStatus.SUSPENDED);
 
@@ -536,7 +536,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // And: Five test organizations
         for (int i = 0; i < 5; i++) {
-            createOrganizationWithStatus("Org " + i, OrganizationStatus.TRIAL);
+            createOrganizationWithStatus("Org " + i, OrganizationStatus.ACTIVE);
         }
 
         // And: A search request with custom pagination
@@ -575,9 +575,9 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organizations with similar names
-        createOrganizationWithStatus("TechCorp Solutions", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("TechCorp Solutions", OrganizationStatus.ACTIVE);
         createOrganizationWithStatus("Medical Tech Inc", OrganizationStatus.ACTIVE);
-        createOrganizationWithStatus("Financial Services", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Financial Services", OrganizationStatus.SUSPENDED);
 
         // And: A search request for "tech"
         final SortablePageInput searchInput = new SortablePageInput();
@@ -620,22 +620,22 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Organizations with different statuses
-        createOrganizationWithStatus("Trial Org 1", OrganizationStatus.TRIAL);
-        createOrganizationWithStatus("Trial Org 2", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Suspended Org 1", OrganizationStatus.SUSPENDED);
+        createOrganizationWithStatus("Suspended Org 2", OrganizationStatus.SUSPENDED);
         createOrganizationWithStatus("Active Org", OrganizationStatus.ACTIVE);
-        createOrganizationWithStatus("Suspended Org", OrganizationStatus.SUSPENDED);
+        createOrganizationWithStatus("Another Active Org", OrganizationStatus.ACTIVE);
 
-        // And: A search request filtering by TRIAL status
+        // And: A search request filtering by SUSPENDED status
         final SortablePageInput searchInput = new SortablePageInput();
         searchInput.setPageNumber(0);
         searchInput.setPageSize(10);
 
         final SearchInput statusFilter = new SearchInput();
         statusFilter.setFieldName("status");
-        statusFilter.setTextValueList(List.of("TRIAL"));
+        statusFilter.setTextValueList(List.of("SUSPENDED"));
         searchInput.getSearchInputs().add(statusFilter);
 
-        // When: Filtering by TRIAL status
+        // When: Filtering by SUSPENDED status
         final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
             .contentType(APPLICATION_JSON)
             .content(toJson(searchInput))
@@ -646,7 +646,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         // Then: The response should be OK
         response.andExpect(status().is(SC_OK));
 
-        // And: The response should only contain TRIAL organizations
+        // And: The response should only contain SUSPENDED organizations
         final String content = response.andReturn().getResponse().getContentAsString();
         final PageResource<OrganizationResponse> pageResponse = fromJson(
             content,
@@ -655,7 +655,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(2)));
         pageResponse.getContent().forEach(
-            org -> assertThat(org.getStatus(), is(OrganizationStatus.TRIAL))
+            org -> assertThat(org.getStatus(), is(OrganizationStatus.SUSPENDED))
         );
     }
 
@@ -666,10 +666,10 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         final User admin = aValidatedUserWithRole(Role.ADMIN);
 
         // And: Various organizations
-        createOrganizationWithStatus("Tech Alpha", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Tech Alpha", OrganizationStatus.SUSPENDED);
         createOrganizationWithStatus("Tech Beta", OrganizationStatus.ACTIVE);
-        createOrganizationWithStatus("Tech Gamma", OrganizationStatus.TRIAL);
-        createOrganizationWithStatus("Medical Alpha", OrganizationStatus.TRIAL);
+        createOrganizationWithStatus("Tech Gamma", OrganizationStatus.SUSPENDED);
+        createOrganizationWithStatus("Medical Alpha", OrganizationStatus.SUSPENDED);
 
         // And: A search request with both name and status filters
         final SortablePageInput searchInput = new SortablePageInput();
@@ -683,10 +683,10 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         final SearchInput statusFilter = new SearchInput();
         statusFilter.setFieldName("status");
-        statusFilter.setTextValueList(List.of("TRIAL"));
+        statusFilter.setTextValueList(List.of("SUSPENDED"));
         searchInput.getSearchInputs().add(statusFilter);
 
-        // When: Searching for "tech" AND filtering by TRIAL
+        // When: Searching for "tech" AND filtering by SUSPENDED
         final MockHttpServletRequestBuilder request = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
             .contentType(APPLICATION_JSON)
             .content(toJson(searchInput))
@@ -707,7 +707,7 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
         assertThat(pageResponse.getContent(), hasSize(greaterThanOrEqualTo(2)));
         pageResponse.getContent().forEach(org -> {
             assertThat(org.getName().toLowerCase(), containsString("tech"));
-            assertThat(org.getStatus(), is(OrganizationStatus.TRIAL));
+            assertThat(org.getStatus(), is(OrganizationStatus.SUSPENDED));
         });
     }
 

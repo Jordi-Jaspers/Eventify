@@ -3033,7 +3033,7 @@ export interface components {
              * @example ACTIVE
              * @enum {string}
              */
-            status?: "TRIAL" | "ACTIVE" | "SUSPENDED";
+            status?: "ACTIVE" | "SUSPENDED";
             /**
              * Format: int64
              * @description User ID of the organization creator
