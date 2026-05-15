@@ -1,14 +1,15 @@
 # Project: eventify
 
 **Initialized:** 2026-01-23
-**Last Updated:** 2026-05-13
+**Last Updated:** 2026-05-15
 **Current Version:** 1.1.0-SNAPSHOT (released 1.0.0 on 2026-05-08)
 
 ## Configuration
 
-| Setting            | Value  | Description                                                                      |
-|--------------------|--------|----------------------------------------------------------------------------------|
-| `update_whats_new` | `true` | Add user-facing changes to What's New changelog (see `eventify-whats-new` skill) |
+| Setting               | Value  | Description                                                                      |
+|-----------------------|--------|----------------------------------------------------------------------------------|
+| `update_whats_new`    | `true` | Add user-facing changes to What's New changelog (see `eventify-whats-new` skill) |
+| `skip_frontend_tests` | `true` | Skip frontend tests during the TDD-workflow                                      |
 
 ## Project Files
 
@@ -216,7 +217,6 @@ They override the global agents of the same name when working on this project.
 
 ## Notes
 
-- UI polish uses `~/.config/opencode/scripts/ui-polish-loop.sh`
 - Styling guide: `.opencode/STYLING-GUIDE.md`
 - After backend API changes, run `bun run sync:api` from `client/` to regenerate TypeScript types
 - Frontend uses glassmorphism design with dark-mode-first aesthetic
