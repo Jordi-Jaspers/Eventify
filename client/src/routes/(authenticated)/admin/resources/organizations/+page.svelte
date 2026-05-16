@@ -3,11 +3,12 @@
 	import { goto } from '$app/navigation';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn } from '$lib/components/data-table/types';
-	import { searchOrganizations } from '$lib/api/organization/OrganizationController';
+	import { searchOrganizations } from '$lib/api/admin/AdminOrganizationController';
 	import type { OrganizationResponse } from '$lib/api/models';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { Building2, Users, Key } from '@lucide/svelte';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { Building2, Users, Key, MoreVertical, Pencil } from '@lucide/svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { formatDate } from '$lib/utils/date';
 	import {
@@ -15,6 +16,7 @@
 		getOwnerDisplayName
 	} from '$lib/utils/organization';
 	import CreateOrganizationSheet from '$lib/components/admin/CreateOrganizationSheet.svelte';
+	import { EditOrganizationSheet } from '$lib/components/admin';
 
 	const columns: DataTableColumn<OrganizationResponse>[] = [
 		{
@@ -66,32 +68,31 @@
 		}
 	];
 
-	// Service
 	const service = createDataTableService<OrganizationResponse>({
 		fetchFn: searchOrganizations,
 		pageSize: 10,
-		defaultSort: [{name: 'name', direction: 'ASC'}]
+		defaultSort: [{ name: 'name', direction: 'ASC' }]
 	});
 
-	// Create organization sheet state
 	let isCreateSheetOpen: boolean = $state(false);
+	let isEditSheetOpen: boolean = $state(false);
+	let selectedOrganization: OrganizationResponse | null = $state(null);
 
-	// Navigation helpers
 	function navigateToMembers(orgId: number | undefined): void {
-		if (orgId) {
-			goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(orgId).path);
-		}
+		if (orgId) goto(CLIENT_ROUTES.ORGANIZATION_MEMBERS_PAGE(orgId).path);
 	}
 
 	function navigateToApiKeys(orgId: number | undefined): void {
-		if (orgId) {
-			goto(CLIENT_ROUTES.ORGANIZATION_SETTINGS_API_KEYS_PAGE(orgId).path);
-		}
+		if (orgId) goto(CLIENT_ROUTES.ORGANIZATION_SETTINGS_API_KEYS_PAGE(orgId).path);
 	}
 
-	// Handle successful organization creation
-	function handleOrganizationCreated(): void {
+	function handleOrganizationSaved(): void {
 		service.load();
+	}
+
+	function openEditSheet(org: OrganizationResponse): void {
+		selectedOrganization = org;
+		isEditSheetOpen = true;
 	}
 
 	onMount(() => service.load());
@@ -166,34 +167,35 @@
 					<div class="col-span-1 md:col-span-1 flex items-center">
 						<span class="text-sm text-muted-foreground">
 							<span class="md:hidden">Created: </span>
-							{org.createdAt ? formatDate(org.createdAt ?? '') : 'N/A'}
+							{org.createdAt ? formatDate(org.createdAt) : 'N/A'}
 						</span>
 					</div>
 
 					<!-- Actions -->
-					<div class="col-span-1 md:col-span-1 flex items-center justify-center gap-1">
-						<Button
-							variant="ghost"
-							size="sm"
-							onclick={() => navigateToApiKeys(org.id)}
-							class="gap-1 text-primary hover:text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
-							title="Manage API Keys"
-							aria-label="Manage API Keys for {org.name}"
-						>
-							<Key class="h-4 w-4" />
-							<span class="md:hidden">API Keys</span>
-						</Button>
-						<Button
-							variant="ghost"
-							size="sm"
-							onclick={() => navigateToMembers(org.id)}
-							class="gap-1 text-primary hover:text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
-							title="Manage Members"
-							aria-label="Manage Members for {org.name}"
-						>
-							<Users class="h-4 w-4" />
-							<span class="md:hidden">Members</span>
-						</Button>
+					<div class="col-span-1 md:col-span-1 flex items-center justify-center" role="none" onclick={(e) => e.stopPropagation()}>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger>
+								<Button variant="ghost" size="icon" class="h-8 w-8">
+									<MoreVertical class="h-4 w-4" />
+									<span class="sr-only">Actions</span>
+								</Button>
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content align="end" class="w-48 bg-card/95 backdrop-blur-xl border-border/50">
+								<DropdownMenu.Item onclick={() => openEditSheet(org)} class="cursor-pointer">
+									<Pencil class="mr-2 h-4 w-4" />
+									Edit
+								</DropdownMenu.Item>
+								<DropdownMenu.Separator />
+								<DropdownMenu.Item onclick={() => navigateToApiKeys(org.id)} class="cursor-pointer">
+									<Key class="mr-2 h-4 w-4" />
+									API Keys
+								</DropdownMenu.Item>
+								<DropdownMenu.Item onclick={() => navigateToMembers(org.id)} class="cursor-pointer">
+									<Users class="mr-2 h-4 w-4" />
+									Members
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
 					</div>
 				</div>
 			{/snippet}
@@ -203,7 +205,15 @@
 		<CreateOrganizationSheet
 			open={isCreateSheetOpen}
 			onOpenChange={(open: boolean) => (isCreateSheetOpen = open)}
-			onSuccess={handleOrganizationCreated}
+			onSuccess={handleOrganizationSaved}
+		/>
+
+		<!-- Edit Organization Sheet -->
+		<EditOrganizationSheet
+			open={isEditSheetOpen}
+			onOpenChange={(open: boolean) => (isEditSheetOpen = open)}
+			onSuccess={handleOrganizationSaved}
+			organization={selectedOrganization}
 		/>
 	</div>
 </main>

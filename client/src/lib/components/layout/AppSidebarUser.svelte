@@ -78,6 +78,8 @@
 	}
 
 	async function handleOrgSwitch(orgId: number): Promise<void> {
+		// TODO: When UserOrganizationResponse includes a `status` field, check if the org is SUSPENDED
+		// and show toast.error('This organization has been suspended') instead of switching.
 		organizationStore.switchOrganization(orgId);
 
 		// Check if we're on an org-specific page and navigate to the new org

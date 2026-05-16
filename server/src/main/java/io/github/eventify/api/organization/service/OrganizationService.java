@@ -3,6 +3,7 @@ package io.github.eventify.api.organization.service;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.OrganizationMetaData;
+import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
@@ -14,7 +15,6 @@ import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -34,7 +34,6 @@ import static java.util.stream.Stream.*;
 /**
  * Service for managing organizations.
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrganizationService {
@@ -48,10 +47,7 @@ public class OrganizationService {
     private final OrganizationMembershipRepository organizationMembershipRepository;
 
     /**
-     * Search and filter organizations with pagination using SortablePageInput.
-     *
-     * @param input pagination and search parameters
-     * @return paginated list of organizations
+     * Search and filter organizations with pagination.
      */
     @Transactional(readOnly = true)
     public Page<Organization> searchOrganizations(final SortablePageInput input) {
@@ -70,9 +66,6 @@ public class OrganizationService {
 
     /**
      * Find organization by ID.
-     *
-     * @param orgId the organization ID
-     * @return the organization
      */
     public Organization findOrganizationById(final Long orgId) {
         return organizationRepository.findById(orgId)
@@ -80,10 +73,7 @@ public class OrganizationService {
     }
 
     /**
-     * Get organization by ID (alias for findOrganizationById).
-     *
-     * @param orgId the organization ID
-     * @return the organization
+     * Get organization by ID.
      */
     public Organization getOrganization(final Long orgId) {
         return findOrganizationById(orgId);
@@ -91,9 +81,6 @@ public class OrganizationService {
 
     /**
      * Create a new organization.
-     *
-     * @param request the organization provisioning request
-     * @return the created organization
      */
     @Transactional
     public Organization create(final ProvisionOrganizationRequest request) {
@@ -114,23 +101,23 @@ public class OrganizationService {
     }
 
     /**
+     * Update the status of an organization.
+     */
+    @Transactional
+    public Organization updateStatus(final Long orgId, final OrganizationStatus status) {
+        final Organization organization = findOrganizationById(orgId);
+        organization.setStatus(status);
+        return organizationRepository.save(organization);
+    }
+
+    /**
      * Update retention days for an organization.
-     *
-     * @param organization  the organization to update
-     * @param retentionDays the new retention days value
-     * @return the updated organization
      */
     public Organization updateRetentionDays(final Organization organization, final Integer retentionDays) {
         organization.setRetentionDays(retentionDays);
         return organizationRepository.save(organization);
     }
 
-    /**
-     * Generate a unique slug from organization name. Handles collisions by appending -1, -2, etc.
-     *
-     * @param name the organization name
-     * @return unique slug
-     */
     private String generateUniqueSlug(final String name) {
         final String baseSlug = generateSlugFromName(name);
         return concat(of(baseSlug), iterate(1, n -> n + 1).map(n -> baseSlug + HYPHEN + n))
@@ -140,12 +127,6 @@ public class OrganizationService {
             .orElseThrow(() -> new IllegalStateException("Could not generate unique slug"));
     }
 
-    /**
-     * Generate slug from organization name. Converts to lowercase, replaces spaces with hyphens, removes special characters, and collapses
-     * multiple hyphens.
-     *
-     * @return generated slug
-     */
     private String generateSlugFromName(final String name) {
         return name.toLowerCase()
             .trim()

@@ -185,6 +185,8 @@ public final class Paths {
 
     public static final String ADMIN_ORGANIZATION_ASSIGN_OWNER_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/owner";
 
+    public static final String ADMIN_ORGANIZATION_STATUS_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/status";
+
     public static final String ADMIN_API_KEYS_STATS_PATH = ADMIN_PATH + API_KEYS_PART + STATS_PART;
 
     public static final String ADMIN_API_KEYS_SEARCH_PATH = ADMIN_PATH + API_KEYS_PART + SEARCH_PART;

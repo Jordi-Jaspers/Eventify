@@ -5,7 +5,7 @@
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import UserSearchCombobox from '$lib/components/user/UserSearchCombobox.svelte';
 	import { Building2, CircleAlert, LoaderCircle, Tag, UserCircle } from '@lucide/svelte';
-	import { createOrganization } from '$lib/api/organization/OrganizationController';
+	import { createOrganization } from '$lib/api/admin/AdminOrganizationController';
 	import type { OrganizationResponse, UserResponse } from '$lib/api/models';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';

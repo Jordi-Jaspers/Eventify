@@ -4,7 +4,7 @@ import {
 	sendBroadcast,
 	previewRecipientCount
 } from '$lib/api/admin/AdminNotificationController';
-import { searchOrganizations } from '$lib/api/organization/OrganizationController';
+import { searchOrganizations } from '$lib/api/admin/AdminOrganizationController';
 import type {
 	UserResponse,
 	OrganizationResponse,

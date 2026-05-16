@@ -70,6 +70,8 @@ class OrganizationStore {
 				(org: UserOrganizationResponse) => org.organizationId === orgId
 			) || null
 		);
+		// TODO: When UserOrganizationResponse includes a `status` field, auto-switch to null (personal context)
+		// and show toast.error if the current organization's status becomes SUSPENDED.
 	});
 
 	hasMultipleOrgs: boolean = $derived(this.organizations.length > 1);

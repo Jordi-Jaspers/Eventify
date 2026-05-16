@@ -4,7 +4,7 @@
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableService } from '$lib/components/data-table/types';
 	import { searchOrganizationChannels, getOrganizationChannel } from '$lib/api/organization/OrganizationChannelController';
-	import { getOrganizationById } from '$lib/api/organization/OrganizationController';
+	import { getOrganizationById } from '$lib/api/admin/AdminOrganizationController';
 	import type {
 		ChannelDetailsResponse,
 		SortablePageInput,

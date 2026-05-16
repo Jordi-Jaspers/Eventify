@@ -6,7 +6,7 @@
 	import { toast } from 'svelte-sonner';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
-	import { getOrganizationById } from '$lib/api/organization/OrganizationController';
+	import { getOrganizationById } from '$lib/api/admin/AdminOrganizationController';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { createRetentionService } from '$lib/api/settings/service/RetentionService.svelte';
 	import type { UserOrganizationResponse, OrganizationResponse } from '$lib/api/models';

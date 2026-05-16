@@ -4,6 +4,7 @@ import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
+import io.github.eventify.api.organization.model.request.UpdateOrganizationStatusRequest;
 import io.github.eventify.api.organization.model.response.OrganizationResponse;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import static io.github.eventify.api.Paths.ADMIN_ORGANIZATIONS_PATH;
 import static io.github.eventify.api.Paths.ADMIN_ORGANIZATIONS_SEARCH_PATH;
+import static io.github.eventify.api.Paths.ADMIN_ORGANIZATION_STATUS_PATH;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
 import static io.github.jframe.util.mapper.ObjectMappers.toJson;
@@ -30,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -834,6 +837,271 @@ public class AdminOrganizationControllerTest extends IntegrationTest {
 
         // Then: The response should be FORBIDDEN
         response.andExpect(status().is(SC_FORBIDDEN));
+    }
+
+    // ============================= UPDATE ORGANIZATION STATUS TESTS =============================
+
+    @Test
+    @DisplayName("Should update organization status from ACTIVE to SUSPENDED")
+    public void updateOrganizationStatusToSuspendedSuccess() throws Exception {
+        // Given: An admin user and an active organization
+        final Organization org = createOrganizationWithStatus("Status Test Org", OrganizationStatus.ACTIVE);
+
+        // And: A request to suspend the organization
+        final UpdateOrganizationStatusRequest request = new UpdateOrganizationStatusRequest()
+            .setStatus(OrganizationStatus.SUSPENDED);
+
+        // When: Updating organization status to SUSPENDED
+        final MockHttpServletRequestBuilder patchRequest = patch(
+            ADMIN_ORGANIZATION_STATUS_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(patchRequest);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The response should contain the updated status
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final OrganizationResponse organizationResponse = fromJson(content, OrganizationResponse.class);
+
+        assertThat(organizationResponse.getId(), is(org.getId()));
+        assertThat(organizationResponse.getStatus(), is(OrganizationStatus.SUSPENDED));
+    }
+
+    @Test
+    @DisplayName("Should update organization status from SUSPENDED back to ACTIVE")
+    public void updateOrganizationStatusToActiveSuccess() throws Exception {
+        // Given: An admin user and a suspended organization
+        final Organization org = createOrganizationWithStatus("Reactivate Test Org", OrganizationStatus.SUSPENDED);
+
+        // And: A request to reactivate the organization
+        final UpdateOrganizationStatusRequest request = new UpdateOrganizationStatusRequest()
+            .setStatus(OrganizationStatus.ACTIVE);
+
+        // When: Updating organization status to ACTIVE
+        final MockHttpServletRequestBuilder patchRequest = patch(
+            ADMIN_ORGANIZATION_STATUS_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(patchRequest);
+
+        // Then: The response should be OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: The response should contain the updated status
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final OrganizationResponse organizationResponse = fromJson(content, OrganizationResponse.class);
+
+        assertThat(organizationResponse.getId(), is(org.getId()));
+        assertThat(organizationResponse.getStatus(), is(OrganizationStatus.ACTIVE));
+    }
+
+    @Test
+    @DisplayName("Should persist status change after update (GET after PATCH)")
+    public void updateOrganizationStatusPersists() throws Exception {
+        // Given: An admin user and an active organization
+        final Organization org = createOrganizationWithStatus("Persist Test Org", OrganizationStatus.ACTIVE);
+
+        // And: A request to suspend the organization
+        final UpdateOrganizationStatusRequest request = new UpdateOrganizationStatusRequest()
+            .setStatus(OrganizationStatus.SUSPENDED);
+
+        // When: Updating organization status
+        final MockHttpServletRequestBuilder patchRequest = patch(
+            ADMIN_ORGANIZATION_STATUS_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        mockMvc.perform(patchRequest).andExpect(status().is(SC_OK));
+
+        // And: Fetching the organization via search to verify persistence
+        final io.github.jframe.datasource.search.model.input.SortablePageInput searchInput =
+            new io.github.jframe.datasource.search.model.input.SortablePageInput();
+        searchInput.setPageNumber(0);
+        searchInput.setPageSize(10);
+        final io.github.jframe.datasource.search.model.input.SearchInput nameFilter =
+            new io.github.jframe.datasource.search.model.input.SearchInput();
+        nameFilter.setFieldName("name");
+        nameFilter.setTextValue(org.getName());
+        searchInput.getSearchInputs().add(nameFilter);
+
+        final MockHttpServletRequestBuilder getRequest = post(ADMIN_ORGANIZATIONS_SEARCH_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(searchInput))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions getResponse = mockMvc.perform(getRequest);
+
+        // Then: The persisted status should be SUSPENDED
+        getResponse.andExpect(status().is(SC_OK));
+        final String content = getResponse.andReturn().getResponse().getContentAsString();
+        final io.github.jframe.datasource.search.model.resource.PageResource<OrganizationResponse> pageResponse = fromJson(
+            content,
+            new TypeReference<io.github.jframe.datasource.search.model.resource.PageResource<OrganizationResponse>>() {}
+        );
+
+        assertThat(pageResponse.getContent(), hasSize(1));
+        assertThat(pageResponse.getContent().get(0).getStatus(), is(OrganizationStatus.SUSPENDED));
+    }
+
+    @Test
+    @DisplayName("Should accept idempotent status update (ACTIVE to ACTIVE)")
+    public void updateOrganizationStatusIdempotentSuccess() throws Exception {
+        // Given: An admin user and an already active organization
+        final Organization org = createOrganizationWithStatus("Idempotent Test Org", OrganizationStatus.ACTIVE);
+
+        // And: A request to set status to ACTIVE (same as current)
+        final UpdateOrganizationStatusRequest request = new UpdateOrganizationStatusRequest()
+            .setStatus(OrganizationStatus.ACTIVE);
+
+        // When: Updating organization status to the same value
+        final MockHttpServletRequestBuilder patchRequest = patch(
+            ADMIN_ORGANIZATION_STATUS_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(patchRequest);
+
+        // Then: The response should be OK (idempotent)
+        response.andExpect(status().is(SC_OK));
+
+        // And: The status should remain ACTIVE
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final OrganizationResponse organizationResponse = fromJson(content, OrganizationResponse.class);
+
+        assertThat(organizationResponse.getStatus(), is(OrganizationStatus.ACTIVE));
+    }
+
+    @Test
+    @DisplayName("Should not update organization status without authentication")
+    public void updateOrganizationStatusWithoutAuthenticationFails() throws Exception {
+        // Given: An organization and no authentication
+        final Organization org = createOrganizationWithStatus("Auth Test Org", OrganizationStatus.ACTIVE);
+
+        // And: A valid status update request
+        final UpdateOrganizationStatusRequest request = new UpdateOrganizationStatusRequest()
+            .setStatus(OrganizationStatus.SUSPENDED);
+
+        // When: Updating status without authorization header
+        final MockHttpServletRequestBuilder patchRequest = patch(
+            ADMIN_ORGANIZATION_STATUS_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request));
+
+        final ResultActions response = mockMvc.perform(patchRequest);
+
+        // Then: The response should be UNAUTHORIZED
+        response.andExpect(status().is(SC_UNAUTHORIZED));
+    }
+
+    @Test
+    @DisplayName("Should not update organization status without MANAGE_ORGANIZATIONS permission")
+    public void updateOrganizationStatusWithoutPermissionFails() throws Exception {
+        // Given: A regular user without MANAGE_ORGANIZATIONS permission
+        final User regularUser = aValidatedUser();
+
+        // And: An organization
+        final Organization org = createOrganizationWithStatus("Permission Test Org", OrganizationStatus.ACTIVE);
+
+        // And: A valid status update request
+        final UpdateOrganizationStatusRequest request = new UpdateOrganizationStatusRequest()
+            .setStatus(OrganizationStatus.SUSPENDED);
+
+        // When: Regular user attempts to update organization status
+        final MockHttpServletRequestBuilder patchRequest = patch(
+            ADMIN_ORGANIZATION_STATUS_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + regularUser.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(patchRequest);
+
+        // Then: The response should be FORBIDDEN
+        response.andExpect(status().is(SC_FORBIDDEN));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when status is null")
+    public void updateOrganizationStatusWithNullStatusFails() throws Exception {
+        // Given: An admin user and an organization
+        final Organization org = createOrganizationWithStatus("Null Status Org", OrganizationStatus.ACTIVE);
+
+        // And: A request with null status
+        final UpdateOrganizationStatusRequest request = new UpdateOrganizationStatusRequest()
+            .setStatus(null);
+
+        // When: Updating organization status with null value
+        final MockHttpServletRequestBuilder patchRequest = patch(
+            ADMIN_ORGANIZATION_STATUS_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(patchRequest);
+
+        // Then: The response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when status value is invalid")
+    public void updateOrganizationStatusWithInvalidStatusFails() throws Exception {
+        // Given: An admin user and an organization
+        final Organization org = createOrganizationWithStatus("Invalid Status Org", OrganizationStatus.ACTIVE);
+
+        // And: A raw JSON request with an invalid status value
+        final String invalidBody = "{\"status\": \"INVALID_STATUS\"}";
+
+        // When: Updating organization status with invalid value
+        final MockHttpServletRequestBuilder patchRequest = patch(
+            ADMIN_ORGANIZATION_STATUS_PATH.replace("{orgId}", org.getId().toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(invalidBody)
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(patchRequest);
+
+        // Then: The response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when organization does not exist")
+    public void updateOrganizationStatusForNonExistentOrgFails() throws Exception {
+        // Given: An admin user and a non-existent organization ID
+        final Long nonExistentOrgId = 999999L;
+
+        // And: A valid status update request
+        final UpdateOrganizationStatusRequest request = new UpdateOrganizationStatusRequest()
+            .setStatus(OrganizationStatus.SUSPENDED);
+
+        // When: Updating status for non-existent organization
+        final MockHttpServletRequestBuilder patchRequest = patch(
+            ADMIN_ORGANIZATION_STATUS_PATH.replace("{orgId}", nonExistentOrgId.toString())
+        )
+            .contentType(APPLICATION_JSON)
+            .content(toJson(request))
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(patchRequest);
+
+        // Then: The response should be NOT_FOUND
+        response.andExpect(status().is(SC_NOT_FOUND));
     }
 
     // ============================= HELPER METHODS =============================

@@ -6,6 +6,7 @@ import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.mapper.OrganizationMapper;
 import io.github.eventify.api.organization.model.mapper.OrganizationMembershipMapper;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
+import io.github.eventify.api.organization.model.request.UpdateOrganizationStatusRequest;
 import io.github.eventify.api.organization.model.response.OrganizationMembershipResponse;
 import io.github.eventify.api.organization.model.response.OrganizationResponse;
 import io.github.eventify.api.organization.model.validator.OrganizationMembershipValidator;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static io.github.eventify.api.Paths.ADMIN_ORGANIZATIONS_PATH;
 import static io.github.eventify.api.Paths.ADMIN_ORGANIZATIONS_SEARCH_PATH;
 import static io.github.eventify.api.Paths.ADMIN_ORGANIZATION_ASSIGN_OWNER_PATH;
+import static io.github.eventify.api.Paths.ADMIN_ORGANIZATION_STATUS_PATH;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -43,7 +46,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     name = "Admin Organization Management",
     description = "Endpoints for global administrators to provision and manage organizations"
 )
-@SuppressWarnings("PMD.ExcessiveImports")
+@SuppressWarnings(
+    {
+        "PMD.ExcessiveImports",
+        "checkstyle:ClassFanOutComplexity"
+    }
+)
 public class AdminOrganizationController {
 
     private final OrganizationService organizationService;
@@ -75,7 +83,7 @@ public class AdminOrganizationController {
 
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('MANAGE_ORGANIZATIONS')")
-    @Operation(summary = "Search organizations with pagination and filtering")
+    @Operation(summary = "Search organizations with pagination and filtering (Admin only)")
     @PostMapping(
         path = ADMIN_ORGANIZATIONS_SEARCH_PATH,
         consumes = APPLICATION_JSON_VALUE,
@@ -100,6 +108,23 @@ public class AdminOrganizationController {
         membershipValidator.validateAssignOwner(request);
         final OrganizationMembership membership = membershipService.assignOwner(orgId, request.getEmail(), request.getUserId());
         final OrganizationMembershipResponse response = membershipMapper.toMembershipResponse(membership);
+        return ResponseEntity.status(OK).body(response);
+    }
+
+    @ResponseStatus(OK)
+    @PreAuthorize("hasAuthority('MANAGE_ORGANIZATIONS')")
+    @Operation(summary = "Update organization status (Admin only)")
+    @PatchMapping(
+        path = ADMIN_ORGANIZATION_STATUS_PATH,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<OrganizationResponse> updateOrganizationStatus(
+        @PathVariable final Long orgId,
+        @RequestBody final UpdateOrganizationStatusRequest request) {
+        validator.validateUpdateStatus(request);
+        final Organization organization = organizationService.updateStatus(orgId, request.getStatus());
+        final OrganizationResponse response = organizationMapper.toResourceObject(organization);
         return ResponseEntity.status(OK).body(response);
     }
 }

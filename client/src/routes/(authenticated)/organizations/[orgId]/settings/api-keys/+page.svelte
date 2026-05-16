@@ -9,7 +9,7 @@
 	import type { DataTableColumn, DataTableService } from '$lib/components/data-table/types';
 	import { CreateApiKeySheet, ApiKeyCreatedModal, ApiKeyTableRow } from '$lib/components/api-keys';
 	import { searchOrganizationApiKeys } from '$lib/api/organization/OrganizationApiKeyController';
-	import { getOrganizationById } from '$lib/api/organization/OrganizationController';
+	import { getOrganizationById } from '$lib/api/admin/AdminOrganizationController';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
