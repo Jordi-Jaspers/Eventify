@@ -85,7 +85,13 @@
 		}
 		if (col.filterType === 'DATE') {
 			const dr = value as DateRange;
-			return `${dr.from ?? '…'} – ${dr.to ?? '…'}`;
+			const fmt = (v: string | undefined): string => {
+				if (!v) return '…';
+				const d = new Date(v);
+				if (isNaN(d.getTime())) return v.split('T')[0];
+				return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+			};
+			return `${fmt(dr.from)} – ${fmt(dr.to)}`;
 		}
 		if (typeof value === 'string' && value.length > 20) {
 			return `${col.label}: ${value.slice(0, 20)}…`;

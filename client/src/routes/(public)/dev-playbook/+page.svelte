@@ -6,6 +6,7 @@
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
     import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2, Menu, LayoutList, AlertCircle, Mail, User, Settings, ShieldCheck } from '@lucide/svelte';
     import { Badge } from '$lib/components/ui/badge';
+    import * as Tooltip from '$lib/components/ui/tooltip';
     import { DateTimePicker } from '$lib/components/ui/date-time-picker';
     import { StatCard } from '$lib/components/ui/stat-card';
     import { Key, Users, Building2, Activity, AlertTriangle, Clock, TrendingUp, Shield } from '@lucide/svelte';
@@ -20,67 +21,90 @@
     import type { Environment } from '$lib/config/env';
     import { DataTable, createDataTableService } from '$lib/components/data-table';
     import type { DataTableColumn } from '$lib/components/data-table/types';
-    import type { PageResource, SortablePageInput } from '$lib/api/models';
+    import type { PageResource, SortablePageInput, ChannelDetailsResponse } from '$lib/api/models';
+    import { Checkbox } from '$lib/components/ui/checkbox';
+    import { ChannelRow, ChannelBulkActionBar } from '$lib/components/channels';
+    import { createChannelSelectionService } from '$lib/api/channel/service/ChannelSelectionService.svelte';
+    import { channelTableColumns } from '$lib/config/channel-table-columns';
 
-    // DataTable demo
-    interface DemoItem {
-        id: number;
-        name: string;
-        status: string;
-    }
-
-    const demoItems: DemoItem[] = [
-        { id: 1, name: 'Production API', status: 'ACTIVE' },
-        { id: 2, name: 'Staging', status: 'PAUSED' },
-        { id: 3, name: 'Dev Sandbox', status: 'ACTIVE' }
+    // DataTable demo — mock ChannelDetailsResponse data
+    const demoChannels: ChannelDetailsResponse[] = [
+        {
+            id: 1,
+            name: 'Production API',
+            slug: 'prod.api.events',
+            description: 'Production backend event stream for monitoring API health and performance metrics',
+            status: 'ACTIVE',
+            createdAt: '2026-01-08T10:30:00Z',
+            updatedAt: '2026-05-15T14:20:00Z',
+            lastEventAt: '2026-05-16T09:45:00Z',
+            isStale: false
+        },
+        {
+            id: 2,
+            name: 'Staging Environment',
+            slug: 'staging.backend.logs',
+            description: 'Staging environment logs for pre-release testing and QA validation',
+            status: 'PAUSED',
+            createdAt: '2026-02-14T08:00:00Z',
+            updatedAt: '2026-04-20T11:30:00Z',
+            lastEventAt: '2026-04-20T11:30:00Z',
+            isStale: true
+        },
+        {
+            id: 3,
+            name: 'Dev Sandbox',
+            slug: 'dev.sandbox.errors',
+            description: 'Development sandbox for testing new integrations and error handling flows',
+            status: 'ACTIVE',
+            createdAt: '2026-03-01T16:45:00Z',
+            updatedAt: '2026-05-14T18:00:00Z',
+            lastEventAt: '2026-05-14T18:00:00Z',
+            isStale: false
+        },
+        {
+            id: 4,
+            name: 'Mobile App Crashes',
+            slug: 'mobile.app.crashes',
+            description: 'Crash reports from iOS and Android mobile applications',
+            status: 'ACTIVE',
+            createdAt: '2026-01-20T12:00:00Z',
+            updatedAt: '2026-05-16T08:15:00Z',
+            lastEventAt: '2026-05-16T08:15:00Z',
+            isStale: false
+        },
+        {
+            id: 5,
+            name: 'Legacy Webhook',
+            slug: 'legacy.webhook.inbound',
+            description: 'Inbound webhook events from legacy third-party integrations scheduled for migration',
+            status: 'PAUSED',
+            createdAt: '2025-11-05T09:00:00Z',
+            updatedAt: '2026-03-10T10:00:00Z',
+            isStale: true
+        }
     ];
 
-    const demoColumns: DataTableColumn<DemoItem>[] = [
-        { key: 'name', label: 'Name', sortable: true, colSpan: 4 },
-        { key: 'status', label: 'Status', sortable: true, colSpan: 3 }
-    ];
-
-    async function demoFetchFn(_input: SortablePageInput): Promise<PageResource<DemoItem>> {
+    async function demoFetchFn(_input: SortablePageInput): Promise<PageResource<ChannelDetailsResponse>> {
         return {
-            content: demoItems,
-            totalElements: demoItems.length,
+            content: demoChannels,
+            totalElements: demoChannels.length,
             totalPages: 1,
             pageNumber: 0,
             pageSize: 10
         };
     }
 
-    const demoService = createDataTableService<DemoItem>({
+    const demoService = createDataTableService<ChannelDetailsResponse>({
         fetchFn: demoFetchFn,
         pageSize: 10
     });
 
-    let demoAllSelected: boolean = $state(false);
-    let demoIndeterminate: boolean = $state(false);
-    const demoSelectedIds: Set<number> = $state(new Set<number>());
+    const demoSelection = createChannelSelectionService(() => demoService.items);
 
-    function demoToggleSelectAll(): void {
-        if (demoAllSelected || demoIndeterminate) {
-            demoSelectedIds.clear();
-            demoAllSelected = false;
-            demoIndeterminate = false;
-        } else {
-            demoItems.forEach((item: DemoItem) => demoSelectedIds.add(item.id));
-            demoAllSelected = true;
-            demoIndeterminate = false;
-        }
-    }
-
-    function demoToggleRow(id: number): void {
-        if (demoSelectedIds.has(id)) {
-            demoSelectedIds.delete(id);
-        } else {
-            demoSelectedIds.add(id);
-        }
-        const count: number = demoSelectedIds.size;
-        demoAllSelected = count === demoItems.length;
-        demoIndeterminate = count > 0 && count < demoItems.length;
-    }
+    // No-op handlers for demo
+    function demoNoOp(_channel: ChannelDetailsResponse): void {}
+    async function demoBulkNoOp(_ids: number[]): Promise<void> {}
 
     onMount(() => demoService.load());
     
@@ -1753,39 +1777,42 @@
                         <CardDescription>Use this styling for all DataTable row snippets</CardDescription>
                     </CardHeader>
                     <CardContent>
+                        <Tooltip.Provider>
                         <DataTable
-                            columns={demoColumns}
+                            columns={channelTableColumns}
                             service={demoService}
-                            title="Demo Items"
+                            title="Demo Channels"
                             icon={Radio}
                             selectable={true}
-                            allSelected={demoAllSelected}
-                            indeterminate={demoIndeterminate}
-                            onToggleSelectAll={demoToggleSelectAll}
+                            allSelected={demoSelection.isAllSelected}
+                            indeterminate={demoSelection.isIndeterminate}
+                            onToggleSelectAll={demoSelection.toggleSelectAll}
                         >
-                            {#snippet row(item: DemoItem)}
-                                <div class="grid grid-cols-7 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all">
-                                    <div class="col-span-1 flex items-center gap-3">
-                                        <input
-                                            type="checkbox"
-                                            checked={demoSelectedIds.has(item.id)}
-                                            onchange={() => demoToggleRow(item.id)}
-                                            class="h-4 w-4 rounded border-border accent-primary cursor-pointer"
-                                            aria-label="Select {item.name}"
-                                        />
-                                    </div>
-                                    <div class="col-span-3 flex items-center gap-3">
-                                        <Radio class="h-4 w-4 text-primary shrink-0" />
-                                        <span class="font-medium truncate">{item.name}</span>
-                                    </div>
-                                    <div class="col-span-3">
-                                        <Badge variant={item.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                                            {item.status}
-                                        </Badge>
-                                    </div>
-                                </div>
+                            {#snippet headerActions()}
+                                {#if demoSelection.selectedChannels.length > 0}
+                                    <ChannelBulkActionBar
+                                        selectedChannels={demoSelection.selectedChannels}
+                                        onPause={demoBulkNoOp}
+                                        onResume={demoBulkNoOp}
+                                        onDelete={demoBulkNoOp}
+                                        onClearSelection={demoSelection.clearSelection}
+                                    />
+                                {/if}
+                            {/snippet}
+                            {#snippet row(channel: ChannelDetailsResponse)}
+                                <ChannelRow
+                                    {channel}
+                                    canManage={true}
+                                    selected={demoSelection.selectedIds.has(channel.id ?? 0)}
+                                    onEdit={demoNoOp}
+                                    onPause={demoNoOp}
+                                    onResume={demoNoOp}
+                                    onDelete={demoNoOp}
+                                    onToggleSelect={demoSelection.toggleSelectChannel}
+                                />
                             {/snippet}
                         </DataTable>
+                        </Tooltip.Provider>
                     </CardContent>
                 </Card>
             </section>

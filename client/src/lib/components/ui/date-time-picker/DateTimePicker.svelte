@@ -30,18 +30,23 @@
 		minValue?: DateValue;
 		/** Maximum selectable date */
 		maxValue?: DateValue;
+		/** Date-only mode: hides time input, outputs YYYY-MM-DD */
+		dateOnly?: boolean;
 	}
 
 	let {
 		value,
 		onValueChange,
 		label,
-		placeholder = 'Select date and time',
+		placeholder,
 		id = 'datetime-picker',
 		disabled = false,
 		minValue,
-		maxValue
+		maxValue,
+		dateOnly = false
 	}: Props = $props();
+
+	const effectivePlaceholder: string = $derived(placeholder ?? (dateOnly ? 'Select date' : 'Select date and time'));
 
 	let open: boolean = $state(false);
 
@@ -77,6 +82,13 @@
 		try {
 			const date: Date = new Date(value);
 			if (isNaN(date.getTime())) return '';
+			if (dateOnly) {
+				return date.toLocaleDateString('en-GB', {
+					day: '2-digit',
+					month: 'short',
+					year: 'numeric'
+				});
+			}
 			return date.toLocaleString('en-GB', {
 				day: '2-digit',
 				month: 'short',
@@ -92,6 +104,13 @@
 
 	function handleDateSelect(newDate: DateValue | undefined): void {
 		if (!newDate) return;
+
+		if (dateOnly) {
+			const iso: string = `${String(newDate.year)}-${String(newDate.month).padStart(2, '0')}-${String(newDate.day).padStart(2, '0')}`;
+			onValueChange(iso);
+			open = false;
+			return;
+		}
 
 		// Preserve existing time or use current time
 		let hours: number = 0;
@@ -151,7 +170,13 @@
 	}
 
 	function handleNow(): void {
-		onValueChange(new Date().toISOString());
+		if (dateOnly) {
+			const now: Date = new Date();
+			const iso: string = `${String(now.getFullYear())}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+			onValueChange(iso);
+		} else {
+			onValueChange(new Date().toISOString());
+		}
 	}
 </script>
 
@@ -173,7 +198,7 @@
 				>
 					<CalendarIcon class="mr-2 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
 					<span class="truncate text-xs">
-						{displayValue || placeholder}
+						{displayValue || effectivePlaceholder}
 					</span>
 				</Button>
 			{/snippet}
@@ -196,33 +221,35 @@
 				/>
 			</div>
 
-			<!-- Time Input -->
-			<div class="p-3 border-b border-border/30">
-				<div class="flex items-center gap-2">
-					<Clock class="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-					<Label for="{id}-time" class="text-xs font-medium text-muted-foreground shrink-0"
-						>Time</Label
-					>
-					<Input
-						id="{id}-time"
-						type="time"
-						value={timeValue}
-						onchange={handleTimeChange}
-						lang="en-GB"
-						class="flex-1 h-8 text-xs bg-background/50 border-border/30 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 [&::-webkit-calendar-picker-indicator]:hidden"
-					/>
-				</div>
+		<!-- Time Input -->
+		{#if !dateOnly}
+		<div class="p-3 border-b border-border/30">
+			<div class="flex items-center gap-2">
+				<Clock class="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+				<Label for="{id}-time" class="text-xs font-medium text-muted-foreground shrink-0"
+					>Time</Label
+				>
+				<Input
+					id="{id}-time"
+					type="time"
+					value={timeValue}
+					onchange={handleTimeChange}
+					lang="en-GB"
+					class="flex-1 h-8 text-xs bg-background/50 border-border/30 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 [&::-webkit-calendar-picker-indicator]:hidden"
+				/>
 			</div>
+		</div>
+		{/if}
 
 			<!-- Quick Actions -->
 			<div class="p-2 flex items-center justify-between gap-2 bg-muted/5">
 				<Button
 					variant="ghost"
 					size="sm"
-					onclick={handleNow}
-					class="h-7 text-xs text-muted-foreground hover:text-foreground"
-				>
-					Now
+				onclick={handleNow}
+				class="h-7 text-xs text-muted-foreground hover:text-foreground"
+			>
+				{dateOnly ? 'Today' : 'Now'}
 				</Button>
 				<div class="flex items-center gap-1">
 					{#if value}

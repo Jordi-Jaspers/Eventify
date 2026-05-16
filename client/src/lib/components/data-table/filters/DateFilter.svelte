@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { DateRange } from '../types';
+	import { DateTimePicker } from '$lib/components/ui/date-time-picker';
 
 	interface Props {
 		value: DateRange | null;
@@ -12,16 +13,18 @@
 	let fromDate: string = $state(value?.from ?? '');
 	let toDate: string = $state(value?.to ?? '');
 
-	function handleFromChange(event: Event): void {
-		const target = event.target as HTMLInputElement;
-		fromDate = target.value;
+	function handleFromChange(newValue: string): void {
+		fromDate = newValue;
 		emitChange();
 	}
 
-	function handleToChange(event: Event): void {
-		const target = event.target as HTMLInputElement;
-		toDate = target.value;
+	function handleToChange(newValue: string): void {
+		toDate = newValue;
 		emitChange();
+	}
+
+	function toDateOnly(val: string): string {
+		return val.split('T')[0];
 	}
 
 	function emitChange(): void {
@@ -31,25 +34,27 @@
 		}
 
 		const dateRange: DateRange = {
-			from: fromDate || undefined,
-			to: toDate || undefined
+			from: fromDate ? `${toDateOnly(fromDate)}T00:00:00` : undefined,
+			to: toDate ? `${toDateOnly(toDate)}T23:59:59` : undefined
 		};
 		onChange(dateRange);
 	}
 </script>
 
 <div class="flex items-center gap-1.5">
-	<input
-		type="date"
+	<DateTimePicker
 		value={fromDate}
-		oninput={handleFromChange}
-		class="h-8 w-[130px] rounded-md border border-border/50 bg-background/50 px-2 text-xs transition-colors focus:border-primary focus:outline-none"
+		onValueChange={handleFromChange}
+		placeholder="From date"
+		id="date-filter-from"
+		dateOnly={true}
 	/>
-	<span class="text-xs text-muted-foreground">–</span>
-	<input
-		type="date"
+	<span class="text-xs text-muted-foreground shrink-0">–</span>
+	<DateTimePicker
 		value={toDate}
-		oninput={handleToChange}
-		class="h-8 w-[130px] rounded-md border border-border/50 bg-background/50 px-2 text-xs transition-colors focus:border-primary focus:outline-none"
+		onValueChange={handleToChange}
+		placeholder="To date"
+		id="date-filter-to"
+		dateOnly={true}
 	/>
 </div>
