@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -60,6 +61,12 @@ public class OrganizationService {
             .map(org -> {
                 final int memberCount = organizationRepository.countMembersByOrganizationId(org.getId());
                 org.setMemberCount(memberCount);
+                organizationMembershipRepository.findByOrganizationIdAndRole(org.getId(), OWNER)
+                    .map(OrganizationMembership::getUser)
+                    .ifPresent(owner -> {
+                        Hibernate.initialize(owner);
+                        org.setOwner(owner);
+                    });
                 return org;
             });
     }

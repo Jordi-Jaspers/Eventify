@@ -13,6 +13,7 @@
 	import { formatDate } from '$lib/utils/date';
 	import {
 		getOrganizationStatusBadgeVariant,
+		getOrganizationStatusLabel,
 		getOwnerDisplayName
 	} from '$lib/utils/organization';
 	import CreateOrganizationSheet from '$lib/components/admin/CreateOrganizationSheet.svelte';
@@ -142,8 +143,8 @@
 
 				<!-- Status -->
 				<div class="col-span-1 md:col-span-2 flex items-center">
-					<Badge variant={getOrganizationStatusBadgeVariant(org.status)} class="min-w-[90px] justify-center">
-						{org.status}
+					<Badge variant={getOrganizationStatusBadgeVariant(org.status)}>
+						{getOrganizationStatusLabel(org.status)}
 					</Badge>
 				</div>
 
