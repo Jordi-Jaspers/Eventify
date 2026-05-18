@@ -53,7 +53,7 @@ public class AuditIntegrationTest extends IntegrationTest {
         assertThat(logs, is(not(empty())));
 
         final AuditLog log = logs.get(0);
-        assertThat(log.getActorId(), is(equalTo(adminUser.getId())));
+        assertThat(log.getActor().getId(), is(equalTo(adminUser.getId())));
         assertThat(log.getMethod(), is(equalTo("GET")));
         assertThat(log.getRequestBody(), is(nullValue()));
         assertThat(log.getIpAddress(), is(notNullValue()));
@@ -121,7 +121,7 @@ public class AuditIntegrationTest extends IntegrationTest {
 
         // And: An AuditEvent published programmatically (non-interceptor path)
         final AuditEvent event = new AuditEvent(
-            actor.getId(),
+            actor,
             "DELETE",
             "/v1/admin/api-keys/42",
             204,

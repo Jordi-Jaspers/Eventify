@@ -17,8 +17,9 @@ import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -57,18 +58,11 @@ public class OrganizationService {
 
         final List<SearchCriterium> criteria = organizationMetaData.toSearchCriteria(input.getSearchInputs());
         final Specification<Organization> spec = new JpaSearchSpecification<>(criteria);
-        return organizationRepository.findAll(spec, pageable)
-            .map(org -> {
-                final int memberCount = organizationRepository.countMembersByOrganizationId(org.getId());
-                org.setMemberCount(memberCount);
-                organizationMembershipRepository.findByOrganizationIdAndRole(org.getId(), OWNER)
-                    .map(OrganizationMembership::getUser)
-                    .ifPresent(owner -> {
-                        Hibernate.initialize(owner);
-                        org.setOwner(owner);
-                    });
-                return org;
-            });
+        final Page<Organization> page = organizationRepository.findAll(spec, pageable);
+
+        enrichWithOwners(page.getContent());
+
+        return page;
     }
 
     /**
@@ -123,6 +117,20 @@ public class OrganizationService {
     public Organization updateRetentionDays(final Organization organization, final Integer retentionDays) {
         organization.setRetentionDays(retentionDays);
         return organizationRepository.save(organization);
+    }
+
+    private void enrichWithOwners(final List<Organization> organizations) {
+        if (organizations.isEmpty()) {
+            return;
+        }
+
+        final List<Long> orgIds = organizations.stream().map(Organization::getId).toList();
+        final Map<Long, User> ownerByOrgId = organizationMembershipRepository
+            .findAllByOrganizationIdInAndRole(orgIds, OWNER)
+            .stream()
+            .collect(Collectors.toMap(m -> m.getOrganization().getId(), OrganizationMembership::getUser, (a, b) -> a));
+
+        organizations.forEach(org -> org.setOwner(ownerByOrgId.get(org.getId())));
     }
 
     private String generateUniqueSlug(final String name) {

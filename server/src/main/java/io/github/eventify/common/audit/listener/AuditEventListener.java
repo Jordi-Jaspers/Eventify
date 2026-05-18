@@ -34,7 +34,7 @@ public class AuditEventListener {
         try {
             auditLogRepository.save(
                 new AuditLog(
-                    event.getActorId(),
+                    event.getActor(),
                     event.getMethod(),
                     event.getPath(),
                     (short) event.getStatusCode(),

@@ -5,8 +5,7 @@
 	import {Alert, AlertDescription} from '$lib/components/ui/alert';
 	import {Badge} from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Chart from '$lib/components/ui/chart';
-	import {AreaChart, Tooltip} from 'layerchart';
+	import { AreaChartCard } from '$lib/components/ui/chart';
 	import {scaleTime} from 'd3-scale';
 	import {getAdminStats} from '$lib/api/admin/AdminController';
 	import {CLIENT_ROUTES} from '$lib/config/routes';
@@ -16,7 +15,6 @@
 		Users,
 		Building2,
 		Activity,
-		TrendingUp,
 		CircleAlert,
 		Plus,
 		UserCog,
@@ -203,133 +201,50 @@
 		</div>
 
 		<!-- Growth Chart -->
-		<Card
-				class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden"
+		<AreaChartCard
+			title="Growth Trends"
+			data={formatChartData(stats?.growthData ?? [])}
+			xScale={scaleTime()}
+			series={[
+				{ key: 'totalOrganizations', label: 'Organizations', color: chartConfig.totalOrganizations.color },
+				{ key: 'totalUsers', label: 'Users', color: chartConfig.totalUsers.color }
+			]}
+			config={chartConfig}
+			heightClass="h-80"
+			showYAxis={true}
+			xAxisFormat={(v) => formatXAxisDate(v as Date)}
+			{loading}
 		>
-			<div
-					class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-50"
-			></div>
-			<CardHeader class="relative z-10">
-				<div class="flex items-center gap-2">
-					<TrendingUp class="w-5 h-5 text-primary"/>
-					<CardTitle class="text-xl">Growth Trends</CardTitle>
+			{#snippet tooltip({ data })}
+				<div class="rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-xl p-3">
+					<div class="font-semibold text-sm mb-2">
+						{formatTooltipDate(data.date as Date)}
+					</div>
+					<div class="space-y-1.5">
+						<div class="flex items-center gap-2">
+							<div class="h-2.5 w-2.5 rounded-full" style="background-color: {chartConfig.totalOrganizations.color}"></div>
+							<span class="text-xs text-muted-foreground">Organizations:</span>
+							<span class="text-sm font-medium ml-auto">{(data.totalOrganizations as number).toLocaleString()}</span>
+							{#if data.newOrganizationsGrowthPercentage !== null && data.newOrganizationsGrowthPercentage !== undefined}
+								<Badge variant={getBadgeVariant(data.newOrganizationsGrowthPercentage as number)} class="text-xs px-1.5 py-0">
+									{formatPercentage(data.newOrganizationsGrowthPercentage as number)}
+								</Badge>
+							{/if}
+						</div>
+						<div class="flex items-center gap-2">
+							<div class="h-2.5 w-2.5 rounded-full" style="background-color: {chartConfig.totalUsers.color}"></div>
+							<span class="text-xs text-muted-foreground">Users:</span>
+							<span class="text-sm font-medium ml-auto">{(data.totalUsers as number).toLocaleString()}</span>
+							{#if data.newUsersGrowthPercentage !== null && data.newUsersGrowthPercentage !== undefined}
+								<Badge variant={getBadgeVariant(data.newUsersGrowthPercentage as number)} class="text-xs px-1.5 py-0">
+									{formatPercentage(data.newUsersGrowthPercentage as number)}
+								</Badge>
+							{/if}
+						</div>
+					</div>
 				</div>
-				<CardDescription>Cumulative growth of organizations and users over the last 30 days</CardDescription>
-			</CardHeader>
-			<CardContent class="relative z-10">
-				{#if loading}
-					<div class="h-80 bg-muted/50 rounded animate-pulse"></div>
-				{:else if stats?.growthData && stats.growthData.length > 0}
-					<!-- Chart -->
-					<Chart.Container config={chartConfig} class="h-80">
-						<AreaChart
-								data={formatChartData(stats.growthData)}
-								x="date"
-								xScale={scaleTime()}
-								series={[
-									{
-										key: 'totalOrganizations',
-										label: 'Organizations',
-										value: 'totalOrganizations',
-										color: chartConfig.totalOrganizations.color
-									},
-									{
-										key: 'totalUsers',
-										label: 'Users',
-										value: 'totalUsers',
-										color: chartConfig.totalUsers.color
-									}
-								]}
-								seriesLayout="overlap"
-								padding={{ top: 20, bottom: 60, left: 60, right: 20 }}
-								props={{
-									area: {
-										fillOpacity: 0.2
-									},
-									xAxis: {
-										format: formatXAxisDate,
-										rule: true
-									},
-									yAxis: {
-										rule: true
-									}
-								}}
-						>
-							{#snippet tooltip()}
-								<Tooltip.Root variant="none">
-									{#snippet children({ data }: { data: ChartDataPoint })}
-										<div
-												class="rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-xl p-3"
-										>
-											<div class="font-semibold text-sm mb-2">
-												{formatTooltipDate(data.date)}
-											</div>
-											<div class="space-y-1.5">
-												<div class="flex items-center gap-2">
-													<div
-															class="h-2.5 w-2.5 rounded-full"
-															style="background-color: {chartConfig.totalOrganizations.color}"
-													></div>
-													<span class="text-xs text-muted-foreground">Organizations:</span>
-													<span class="text-sm font-medium ml-auto"
-													>{data.totalOrganizations.toLocaleString()}</span
-													>
-													{#if data.newOrganizationsGrowthPercentage !== null && data.newOrganizationsGrowthPercentage !== undefined}
-														<Badge variant={getBadgeVariant(data.newOrganizationsGrowthPercentage)} class="text-xs px-1.5 py-0">
-															{formatPercentage(data.newOrganizationsGrowthPercentage)}
-														</Badge>
-													{/if}
-												</div>
-												<div class="flex items-center gap-2">
-													<div
-															class="h-2.5 w-2.5 rounded-full"
-															style="background-color: {chartConfig.totalUsers.color}"
-													></div>
-													<span class="text-xs text-muted-foreground">Users:</span>
-													<span class="text-sm font-medium ml-auto"
-													>{data.totalUsers.toLocaleString()}</span
-													>
-													{#if data.newUsersGrowthPercentage !== null && data.newUsersGrowthPercentage !== undefined}
-														<Badge variant={getBadgeVariant(data.newUsersGrowthPercentage)} class="text-xs px-1.5 py-0">
-															{formatPercentage(data.newUsersGrowthPercentage)}
-														</Badge>
-													{/if}
-												</div>
-											</div>
-										</div>
-									{/snippet}
-								</Tooltip.Root>
-							{/snippet}
-						</AreaChart>
-					</Chart.Container>
-
-					<!-- Chart Legend -->
-					<div class="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-border/50">
-						<div class="flex items-center gap-2">
-							<div
-									class="h-3 w-3 rounded-full"
-									style="background-color: {chartConfig.totalOrganizations.color}"
-							></div>
-							<span class="text-sm text-muted-foreground">Organizations</span>
-						</div>
-						<div class="flex items-center gap-2">
-							<div
-									class="h-3 w-3 rounded-full"
-									style="background-color: {chartConfig.totalUsers.color}"
-							></div>
-							<span class="text-sm text-muted-foreground">Users</span>
-						</div>
-					</div>
-				{:else}
-					<div class="h-80 flex items-center justify-center text-muted-foreground">
-						<div class="text-center">
-							<TrendingUp class="h-12 w-12 mx-auto mb-4 opacity-50"/>
-							<p>No growth data available</p>
-						</div>
-					</div>
-				{/if}
-			</CardContent>
-		</Card>
+			{/snippet}
+		</AreaChartCard>
 
 		<!-- Quick Actions -->
 		<Card

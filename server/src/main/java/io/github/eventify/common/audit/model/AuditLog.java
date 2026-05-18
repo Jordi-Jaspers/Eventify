@@ -1,5 +1,6 @@
 package io.github.eventify.common.audit.model;
 
+import io.github.eventify.api.user.model.User;
 import io.github.jframe.datasource.search.model.PageableItem;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,9 +11,12 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -20,9 +24,7 @@ import org.hibernate.type.SqlTypes;
 
 import static io.github.eventify.Main.SERIAL_VERSION_UID;
 
-/**
- * JPA entity representing an audit log entry for admin actions.
- */
+/** JPA entity representing an HTTP request audit log entry. */
 @Getter
 @Setter
 @Entity
@@ -37,11 +39,9 @@ public class AuditLog implements PageableItem, Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(
-        name = "actor_id",
-        nullable = false
-    )
-    private Long actorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actor_id")
+    private User actor;
 
     @Column(
         name = "method",
@@ -83,18 +83,16 @@ public class AuditLog implements PageableItem, Serializable {
     )
     private OffsetDateTime createdAt;
 
-    /**
-     * Business constructor for creating audit log entries.
-     */
+    /** Creates an AuditLog with all fields. */
     public AuditLog(
-                    final Long actorId,
+                    final User actor,
                     final String method,
                     final String path,
                     final Short statusCode,
                     final String requestBody,
                     final String ipAddress,
                     final OffsetDateTime createdAt) {
-        this.actorId = actorId;
+        this.actor = actor;
         this.method = method;
         this.path = path;
         this.statusCode = statusCode;

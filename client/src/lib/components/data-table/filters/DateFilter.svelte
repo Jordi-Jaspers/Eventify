@@ -23,10 +23,6 @@
 		emitChange();
 	}
 
-	function toDateOnly(val: string): string {
-		return val.split('T')[0];
-	}
-
 	function emitChange(): void {
 		if (!fromDate && !toDate) {
 			onChange(null);
@@ -34,8 +30,8 @@
 		}
 
 		const dateRange: DateRange = {
-			from: fromDate ? `${toDateOnly(fromDate)}T00:00:00` : undefined,
-			to: toDate ? `${toDateOnly(toDate)}T23:59:59` : undefined
+			from: fromDate ? (fromDate.includes('T') ? fromDate : `${fromDate}T00:00:00`) : undefined,
+			to: toDate ? (toDate.includes('T') ? toDate : `${toDate}T23:59:59`) : undefined
 		};
 		onChange(dateRange);
 	}
@@ -47,7 +43,7 @@
 		onValueChange={handleFromChange}
 		placeholder="From date"
 		id="date-filter-from"
-		dateOnly={true}
+		dateOnly={false}
 	/>
 	<span class="text-xs text-muted-foreground shrink-0">–</span>
 	<DateTimePicker
@@ -55,6 +51,6 @@
 		onValueChange={handleToChange}
 		placeholder="To date"
 		id="date-filter-to"
-		dateOnly={true}
+		dateOnly={false}
 	/>
 </div>

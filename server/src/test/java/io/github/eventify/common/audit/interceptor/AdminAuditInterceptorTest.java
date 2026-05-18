@@ -58,7 +58,7 @@ public class AdminAuditInterceptorTest extends UnitTest {
         verify(eventPublisher).publishEvent(captor.capture());
 
         final AuditEvent published = captor.getValue();
-        assertThat(published.getActorId(), is(equalTo(actor.getId())));
+        assertThat(published.getActor().getId(), is(equalTo(actor.getId())));
         assertThat(published.getMethod(), is(equalTo("GET")));
         assertThat(published.getPath(), is(equalTo("/v1/admin/users/search")));
         assertThat(published.getStatusCode(), is(equalTo(200)));

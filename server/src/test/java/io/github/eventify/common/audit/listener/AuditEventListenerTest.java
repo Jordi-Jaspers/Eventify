@@ -1,5 +1,6 @@
 package io.github.eventify.common.audit.listener;
 
+import io.github.eventify.api.user.model.User;
 import io.github.eventify.common.audit.event.AuditEvent;
 import io.github.eventify.common.audit.model.AuditLog;
 import io.github.eventify.common.audit.repository.AuditLogRepository;
@@ -100,6 +101,8 @@ public class AuditEventListenerTest extends UnitTest {
         final int statusCode,
         final String requestBody,
         final String ipAddress) {
-        return new AuditEvent(actorId, method, path, statusCode, requestBody, ipAddress);
+        final User actor = new User();
+        actor.setId(actorId);
+        return new AuditEvent(actor, method, path, statusCode, requestBody, ipAddress);
     }
 }

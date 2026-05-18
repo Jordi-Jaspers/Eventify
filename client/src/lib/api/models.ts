@@ -6,6 +6,7 @@ export type RegisterRequest = components['schemas']['RegisterUserRequest'];
 export type AuthenticationResponse = components['schemas']['AuthenticationResponse'];
 export type RegisterResponse = components['schemas']['RegisterResponse'];
 export type ForgotPasswordRequest = components['schemas']['ForgotPasswordRequest'];
+export type UpdatePasswordRequest = components['schemas']['UpdatePasswordRequest'];
 
 // ================ User ===================
 export type UserResponse = components['schemas']['UserResponse'];
@@ -124,6 +125,10 @@ export type OrganizationStatus = NonNullable<OrganizationResponse['status']>;
 export type OrganizationalRole = NonNullable<OrganizationMembershipResponse['role']>;
 export type UserRole = NonNullable<UserDetailsResponse['role']>;
 export type SortDirection = NonNullable<SortableColumn['direction']>;
+
+// ================ Audit Log ===================
+export type AuditLogResponse = components['schemas']['AuditLogResponse'];
+export type AuditLogStatsResponse = components['schemas']['AuditLogStatsResponse'];
 
 // ================ Generic PageResource ===================
 // Generic type for paginated responses (mirrors backend PageResource<T>)

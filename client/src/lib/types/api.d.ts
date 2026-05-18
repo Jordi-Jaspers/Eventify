@@ -1135,6 +1135,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/audit-log/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Search audit log entries with filtering and pagination */
+        post: operations["searchAuditLog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/admin/api-keys/search": {
         parameters: {
             query?: never;
@@ -1162,7 +1179,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Search API key audit log */
-        post: operations["searchAuditLog"];
+        post: operations["searchAuditLog_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1542,6 +1559,23 @@ export interface paths {
         };
         /** Get platform statistics for admin dashboard */
         get: operations["getStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/audit-log/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get audit log statistics for a time range */
+        get: operations["getAuditLogStats"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2061,6 +2095,12 @@ export interface components {
              * @example acme-corporation
              */
             organizationSlug: string;
+            /**
+             * @description Organization status
+             * @example ACTIVE
+             * @enum {string}
+             */
+            organizationStatus: "ACTIVE" | "SUSPENDED";
             /**
              * @description User's role within the organization
              * @example MEMBER
@@ -3286,6 +3326,79 @@ export interface components {
              */
             recipientCount: number;
         };
+        /** @description Audit log entry details */
+        AuditLogResponse: {
+            /**
+             * Format: int64
+             * @description Unique audit log entry identifier
+             * @example 123
+             */
+            id: number;
+            /**
+             * @description Email of the actor who performed the action
+             * @example admin@example.com
+             */
+            actorEmail?: string;
+            /**
+             * @description HTTP method
+             * @example GET
+             */
+            method: string;
+            /**
+             * @description Request path
+             * @example /v1/channels
+             */
+            path: string;
+            /**
+             * Format: int32
+             * @description HTTP status code
+             * @example 200
+             */
+            statusCode: number;
+            /** @description Client IP address */
+            ipAddress: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of the request
+             * @example 2026-01-08T10:30:00Z
+             */
+            createdAt: string;
+            /**
+             * @description Request body (JSON)
+             * @example {
+             *       "name": "test"
+             *     }
+             */
+            requestBody?: string;
+        };
+        PageResourceAuditLogResponse: {
+            /**
+             * Format: int64
+             * @description Total number of elements available
+             * @example 125
+             */
+            totalElements: number;
+            /**
+             * Format: int32
+             * @description Total number of pages available
+             * @example 5
+             */
+            totalPages: number;
+            /**
+             * Format: int32
+             * @description Number of items per page
+             * @example 25
+             */
+            pageSize: number;
+            /**
+             * Format: int32
+             * @description Current page number (0-based)
+             * @example 0
+             */
+            pageNumber: number;
+            /** @description List of items on the current page */
+            content?: components["schemas"]["AuditLogResponse"][];
+        };
         ApiKeyAuditResponse: {
             /**
              * Format: int64
@@ -3603,6 +3716,56 @@ export interface components {
              * @example 10
              */
             newOrganizationsGrowthPercentage?: number;
+        };
+        /** @description Audit log statistics for a given time range */
+        AuditLogStatsResponse: {
+            /**
+             * Format: int64
+             * @description Total number of requests in the time range
+             * @example 12847
+             */
+            totalRequests: number;
+            /**
+             * Format: int64
+             * @description Number of requests with status code >= 400
+             * @example 296
+             */
+            errorCount: number;
+            /**
+             * Format: int64
+             * @description Number of mutating requests (POST, PUT, PATCH, DELETE)
+             * @example 1523
+             */
+            mutationCount: number;
+            /**
+             * Format: int64
+             * @description Number of distinct actors in the time range
+             * @example 14
+             */
+            uniqueActors: number;
+            /** @description Hourly breakdown of requests and errors */
+            hourlyBuckets: components["schemas"]["HourlyBucket"][];
+        };
+        /** @description Hourly bucket of audit log activity */
+        HourlyBucket: {
+            /**
+             * Format: date-time
+             * @description Start of the hour bucket (UTC)
+             * @example 2024-01-15T00:00:00Z
+             */
+            hour: string;
+            /**
+             * Format: int64
+             * @description Total requests in this hour
+             * @example 120
+             */
+            total: number;
+            /**
+             * Format: int64
+             * @description Error requests (status >= 400) in this hour
+             * @example 3
+             */
+            errors: number;
         };
         ApiKeyStatsResponse: {
             /**
@@ -10461,6 +10624,102 @@ export interface operations {
             };
         };
     };
+    searchAuditLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SortablePageInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResourceAuditLogResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
     searchApiKeys: {
         parameters: {
             query?: never;
@@ -10557,7 +10816,7 @@ export interface operations {
             };
         };
     };
-    searchAuditLog: {
+    searchAuditLog_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -12657,6 +12916,101 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminStatsResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    getAuditLogStats: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogStatsResponse"];
                 };
             };
             /** @description Unauthorized */

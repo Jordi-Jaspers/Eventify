@@ -305,6 +305,14 @@ public final class Paths {
 
     public static final String ADMIN_BROADCAST_RECIPIENTS_SEARCH_PATH = ADMIN_BROADCAST_RECIPIENTS_PATH + SEARCH_PART;
 
+    /* ------------------------------- ADMIN AUDIT LOG ENDPOINTS ------------------------------- */
+
+    public static final String ADMIN_AUDIT_LOG_PART = "/audit-log";
+
+    public static final String ADMIN_AUDIT_LOG_SEARCH_PATH = ADMIN_PATH + ADMIN_AUDIT_LOG_PART + SEARCH_PART;
+
+    public static final String ADMIN_AUDIT_LOG_STATS_PATH = ADMIN_PATH + ADMIN_AUDIT_LOG_PART + STATS_PART;
+
     /* ------------------------------- END ------------------------------- */
 
     private Paths() {

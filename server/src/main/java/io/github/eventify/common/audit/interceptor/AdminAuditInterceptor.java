@@ -43,7 +43,7 @@ public class AdminAuditInterceptor implements HandlerInterceptor {
             final String method = request.getMethod();
             eventPublisher.publishEvent(
                 new AuditEvent(
-                    actor.getId(),
+                    actor,
                     method,
                     truncatePath(request.getRequestURI()),
                     response.getStatus(),

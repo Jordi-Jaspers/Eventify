@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Component, Snippet } from 'svelte';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { Card } from '$lib/components/ui/card';
 
 	interface Props {
 		title: string;
@@ -13,7 +13,7 @@
 		trailing?: Snippet;
 	}
 
-	const {
+	let {
 		title,
 		value,
 		icon: Icon,
@@ -70,21 +70,19 @@
 </script>
 
 <Card
-	class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden {classes.border} transition-all duration-300"
+	class="border-border/50 bg-card/50 backdrop-blur-sm shadow-sm relative overflow-hidden {classes.border} transition-all duration-300"
 >
-	<div class="absolute inset-0 bg-gradient-to-br {classes.gradient} opacity-50"></div>
-	<CardHeader class="relative z-10">
-		<div class="flex items-center justify-between">
-			<CardTitle class="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-			<Icon class="h-5 w-5 {classes.text.split(' ')[0]}" />
+	<div class="absolute inset-0 bg-gradient-to-br {classes.gradient} opacity-30"></div>
+	<div class="relative z-10 px-4 py-3">
+		<div class="flex items-center justify-between mb-1">
+			<span class="text-xs font-medium text-muted-foreground">{title}</span>
+			<Icon class="h-3.5 w-3.5 {classes.text.split(' ')[0]}" />
 		</div>
-	</CardHeader>
-	<CardContent class="relative z-10">
 		{#if loading}
-			<div class="h-10 bg-muted/50 rounded animate-pulse"></div>
+			<div class="h-6 w-16 bg-muted/50 rounded animate-pulse"></div>
 		{:else}
-			<div class="flex items-end gap-3">
-				<div class="text-3xl font-bold {classes.text}">
+			<div class="flex items-end gap-2">
+				<div class="text-xl font-bold {classes.text}">
 					{value}
 				</div>
 				{#if trailing}
@@ -92,10 +90,10 @@
 				{/if}
 			</div>
 			{#if subtitle}
-				<div class="text-xs text-muted-foreground truncate mt-1">
+				<div class="text-[11px] text-muted-foreground truncate mt-0.5">
 					{subtitle}
 				</div>
 			{/if}
 		{/if}
-	</CardContent>
+	</div>
 </Card>

@@ -123,6 +123,10 @@ export const CLIENT_ROUTES = {
 		path: '/admin/tools/notifications/history',
 		type: RouteType.PRIVATE
 	},
+	ADMIN_AUDIT_LOG_PAGE: {
+		path: '/admin/tools/audit-log',
+		type: RouteType.PRIVATE
+	},
 	ORGANIZATION_MEMBERS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/members`,
 		type: RouteType.PRIVATE
