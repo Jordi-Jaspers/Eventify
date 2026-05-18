@@ -10,6 +10,7 @@
 import { getUserOrganizations } from '$lib/api/user/UserController';
 import type { UserOrganizationResponse } from '$lib/api/models';
 import { browser } from '$app/environment';
+import { toast } from 'svelte-sonner';
 
 const COOKIE_NAME: string = 'currentOrganizationId';
 const COOKIE_MAX_AGE: number = 2592000; // 30 days in seconds
@@ -65,13 +66,16 @@ class OrganizationStore {
 	currentOrganization: UserOrganizationResponse | null = $derived.by((): UserOrganizationResponse | null => {
 		const orgId: number | null = this.currentOrgId;
 		if (!orgId) return null;
-		return (
-			this.organizations.find(
-				(org: UserOrganizationResponse) => org.organizationId === orgId
-			) || null
+		const org: UserOrganizationResponse | undefined = this.organizations.find(
+			(o: UserOrganizationResponse) => o.organizationId === orgId
 		);
-		// TODO: When UserOrganizationResponse includes a `status` field, auto-switch to null (personal context)
-		// and show toast.error if the current organization's status becomes SUSPENDED.
+		if (!org) return null;
+		if (org.organizationStatus === 'SUSPENDED') {
+			this.clearCurrentOrg();
+			toast.error('This organization has been suspended');
+			return null;
+		}
+		return org;
 	});
 
 	hasMultipleOrgs: boolean = $derived(this.organizations.length > 1);
@@ -91,6 +95,10 @@ class OrganizationStore {
 	private setCurrentOrgId(orgId: string): void {
 		this._currentOrgId = orgId;
 		writeCookie(COOKIE_NAME, orgId, COOKIE_MAX_AGE);
+	}
+
+	private clearCurrentOrg(): void {
+		this.setCurrentOrgId('');
 	}
 
 	/**
@@ -130,8 +138,8 @@ class OrganizationStore {
 	/**
 	 * Switch to a different organization
 	 */
-	switchOrganization(orgId: number): void {
-		if (!browser) return;
+	switchOrganization(orgId: number): boolean {
+		if (!browser) return false;
 
 		const org: UserOrganizationResponse | undefined = this.organizations.find(
 			(o: UserOrganizationResponse) => o.organizationId === orgId
@@ -139,10 +147,16 @@ class OrganizationStore {
 
 		if (!org) {
 			console.error(`Organization with ID ${orgId} not found`);
-			return;
+			return false;
+		}
+
+		if (org.organizationStatus === 'SUSPENDED') {
+			toast.error('This organization has been suspended');
+			return false;
 		}
 
 		this.setCurrentOrgId(String(orgId));
+		return true;
 	}
 
 	/**

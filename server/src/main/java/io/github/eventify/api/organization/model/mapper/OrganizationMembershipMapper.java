@@ -76,5 +76,9 @@ public abstract class OrganizationMembershipMapper extends PageMapper<Organizati
         source = "organization.slug",
         target = "organizationSlug"
     )
+    @Mapping(
+        source = "organization.status",
+        target = "organizationStatus"
+    )
     public abstract UserOrganizationResponse toUserOrganizationResponse(OrganizationMembership membership);
 }
