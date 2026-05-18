@@ -451,6 +451,7 @@ Test: test/components/[page].spec.ts
 14. **Icons over text** - Use icons for actions
 15. **Accessibility first** - Keyboard nav, ARIA, contrast
 16. **`bun run check` must pass** - 0 errors
+17. **NEVER suppress linting or type errors** - No `eslint-disable`, `@ts-ignore`, `@ts-nocheck`, `// @ts-expect-error`, or `(x as any)`. Fix the root cause instead.
 17. **SCREENSHOT TESTS ARE MANDATORY** - Create tests that navigate to REAL pages, NOT mock HTML
 18. **TEST COMMAND AUTO-STARTS BACKEND** - `bun run test` handles backend lifecycle
 19. **OpenAPI types in models.ts** - Import from `$lib/api/models`
