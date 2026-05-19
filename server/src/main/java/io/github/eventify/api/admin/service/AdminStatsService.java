@@ -1,9 +1,10 @@
 package io.github.eventify.api.admin.service;
 
+import io.github.eventify.api.admin.model.StorageStats;
+import io.github.eventify.api.admin.model.mapper.AdminStatsMapper;
 import io.github.eventify.api.admin.model.projection.DailyGrowthData;
 import io.github.eventify.api.admin.model.response.AdminStatsResponse;
 import io.github.eventify.api.admin.model.response.GrowthDataPoint;
-import io.github.eventify.api.admin.model.response.TableSizeEntry;
 import io.github.eventify.api.admin.repository.AdminStorageRepository;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
@@ -26,9 +27,7 @@ import java.util.stream.IntStream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Service for admin dashboard statistics.
- */
+/** Aggregates platform-wide admin statistics (users, orgs, channels, growth). */
 @Service
 @RequiredArgsConstructor
 public class AdminStatsService {
@@ -42,6 +41,8 @@ public class AdminStatsService {
     private final EventRepository eventRepository;
 
     private final AdminStorageRepository adminStorageRepository;
+
+    private final AdminStatsMapper adminStatsMapper;
 
     /** Aggregates platform statistics for the given time window. */
     @Transactional(readOnly = true)
@@ -79,8 +80,8 @@ public class AdminStatsService {
     }
 
     @Transactional(readOnly = true)
-    public List<TableSizeEntry> getStorageStats() {
-        return adminStorageRepository.getStorageStats();
+    public List<StorageStats> getStorageStats() {
+        return adminStatsMapper.toStorageStatsList(adminStorageRepository.findStorageSizes());
     }
 
     private GrowthDataPoint findBestDay(final List<GrowthDataPoint> growthData, final ToIntFunction<GrowthDataPoint> metric) {
@@ -133,32 +134,24 @@ public class AdminStatsService {
     private void applyGrowthPercentages(final List<GrowthDataPoint> dataPoints) {
         IntStream.range(0, dataPoints.size())
             .forEach(i -> {
-                final GrowthDataPoint currentDay = dataPoints.get(i);
-                final GrowthDataPoint previousDay = i > 0 ? dataPoints.get(i - 1) : null;
+                final GrowthDataPoint current = dataPoints.get(i);
+                final GrowthDataPoint previous = i > 0 ? dataPoints.get(i - 1) : null;
 
-                currentDay.setNewUsersGrowthPercentage(
-                    growthPercentage(previousDay, previousDay != null ? previousDay.getTotalUsers() : 0, currentDay.getTotalUsers())
+                current.setNewUsersGrowthPercentage(growthPercentage(previous, current.getTotalUsers(), GrowthDataPoint::getTotalUsers));
+                current.setNewOrganizationsGrowthPercentage(
+                    growthPercentage(previous, current.getTotalOrganizations(), GrowthDataPoint::getTotalOrganizations)
                 );
-                currentDay.setNewOrganizationsGrowthPercentage(
-                    growthPercentage(
-                        previousDay,
-                        previousDay != null ? previousDay.getTotalOrganizations() : 0,
-                        currentDay.getTotalOrganizations()
-                    )
-                );
-                currentDay.setNewEventsGrowthPercentage(
-                    growthPercentage(previousDay, previousDay != null ? previousDay.getNewEvents() : 0, currentDay.getNewEvents())
-                );
+                current.setNewEventsGrowthPercentage(growthPercentage(previous, current.getNewEvents(), GrowthDataPoint::getNewEvents));
             });
     }
 
-    private Double growthPercentage(final GrowthDataPoint previousDay, final int previousValue, final int currentValue) {
-        return previousDay != null ? calculateGrowthPercentage(previousValue, currentValue) : null;
-    }
-
-    private double calculateGrowthPercentage(final int previousValue, final int currentValue) {
+    private Double growthPercentage(final GrowthDataPoint previous, final int currentValue, final ToIntFunction<GrowthDataPoint> metric) {
+        if (previous == null) {
+            return null;
+        }
+        final int previousValue = metric.applyAsInt(previous);
         return previousValue != 0
             ? ((currentValue - previousValue) / (double) previousValue) * 100.0
-            : 0;
+            : 0.0;
     }
 }

@@ -1,8 +1,13 @@
 package io.github.eventify.api.admin.controller;
 
+import io.github.eventify.api.admin.model.EventStats;
+import io.github.eventify.api.admin.model.StorageStats;
+import io.github.eventify.api.admin.model.mapper.AdminStatsMapper;
+import io.github.eventify.api.admin.model.response.AdminEventStatsResponse;
 import io.github.eventify.api.admin.model.response.AdminStatsResponse;
 import io.github.eventify.api.admin.model.response.TableSizeEntry;
 import io.github.eventify.api.admin.model.validator.AdminStatsValidator;
+import io.github.eventify.api.admin.service.AdminEventStatsService;
 import io.github.eventify.api.admin.service.AdminStatsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static io.github.eventify.api.Paths.ADMIN_STATS_EVENTS_PATH;
 import static io.github.eventify.api.Paths.ADMIN_STATS_PATH;
 import static io.github.eventify.api.Paths.ADMIN_STATS_STORAGE_PATH;
 import static org.springframework.http.HttpStatus.OK;
@@ -32,7 +38,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class AdminDashboardController {
 
     private final AdminStatsService adminStatsService;
+    private final AdminEventStatsService adminEventStatsService;
     private final AdminStatsValidator adminStatsValidator;
+    private final AdminStatsMapper adminStatsMapper;
 
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('VIEW_PLATFORM_STATS')")
@@ -50,13 +58,27 @@ public class AdminDashboardController {
 
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('VIEW_PLATFORM_STATS')")
+    @Operation(summary = "Get event statistics for admin dashboard")
+    @GetMapping(
+        path = ADMIN_STATS_EVENTS_PATH,
+        produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<AdminEventStatsResponse> getEventStats(
+        @RequestParam(defaultValue = "30") final int days) {
+        adminStatsValidator.validateAndThrow(days);
+        final EventStats data = adminEventStatsService.getEventStats(days);
+        return ResponseEntity.status(OK).body(adminStatsMapper.toEventStatsResponse(data));
+    }
+
+    @ResponseStatus(OK)
+    @PreAuthorize("hasAuthority('VIEW_PLATFORM_STATS')")
     @Operation(summary = "Get storage statistics for all tracked database tables")
     @GetMapping(
         path = ADMIN_STATS_STORAGE_PATH,
         produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<List<TableSizeEntry>> getStorageStats() {
-        final List<TableSizeEntry> response = adminStatsService.getStorageStats();
-        return ResponseEntity.status(OK).body(response);
+        final List<StorageStats> data = adminStatsService.getStorageStats();
+        return ResponseEntity.status(OK).body(adminStatsMapper.toTableSizeEntryList(data));
     }
 }

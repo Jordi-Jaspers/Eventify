@@ -1,5 +1,8 @@
 import { client } from '$lib/api/client.ts';
 import type {AdminStatsResponse, AssignOwnerRequest, OrganizationMembershipResponse, TableSizeEntry} from "$lib/api/models.ts";
+import type { components } from '$lib/types/api';
+
+export type AdminEventStatsResponse = components['schemas']['AdminEventStatsResponse'];
 
 /**
  * Get admin dashboard statistics
@@ -17,6 +20,15 @@ export async function getStorageStats(): Promise<TableSizeEntry[]> {
 	const { data, error } = await client.GET('/v1/admin/stats/storage');
 	if (error) throw error;
 	return data ?? [];
+}
+
+/**
+ * Get event statistics for admin dashboard
+ */
+export async function getEventStats(days?: number): Promise<AdminEventStatsResponse> {
+	const { data, error } = await client.GET('/v1/admin/stats/events', { params: { query: { days } } });
+	if (error) throw error;
+	return data;
 }
 
 /**

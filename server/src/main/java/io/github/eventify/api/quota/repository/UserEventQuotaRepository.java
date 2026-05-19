@@ -51,6 +51,34 @@ public interface UserEventQuotaRepository extends JpaRepository<UserEventQuota, 
     int resetAllQuotas(@Param("periodStart") OffsetDateTime periodStart);
 
     /**
+     * Count users with event_count >= nearLimitThreshold AND < atLimitThreshold.
+     *
+     * @param nearLimitThreshold lower bound (inclusive)
+     * @param atLimitThreshold   upper bound (exclusive)
+     * @return count of users near limit
+     */
+    @Query("SELECT COUNT(q) FROM UserEventQuota q WHERE q.eventCount >= :nearLimitThreshold AND q.eventCount < :atLimitThreshold")
+    Long countUsersNearLimit(@Param("nearLimitThreshold") int nearLimitThreshold, @Param("atLimitThreshold") int atLimitThreshold);
+
+    /**
+     * Count users with event_count >= monthlyLimit (at or over limit).
+     *
+     * @param monthlyLimit the monthly event limit
+     * @return count of users at or over limit
+     */
+    @Query("SELECT COUNT(q) FROM UserEventQuota q WHERE q.eventCount >= :monthlyLimit")
+    Long countUsersAtLimit(@Param("monthlyLimit") int monthlyLimit);
+
+    /**
+     * Calculate average quota utilization as a percentage (avg(event_count) / monthlyLimit * 100).
+     *
+     * @param monthlyLimit the monthly event limit
+     * @return average utilization percentage, or 0.0 if no records
+     */
+    @Query("SELECT COALESCE(AVG(q.eventCount) * 100.0 / :monthlyLimit, 0.0) FROM UserEventQuota q")
+    Double calculateAverageUtilization(@Param("monthlyLimit") int monthlyLimit);
+
+    /**
      * Delete all quotas for users with the given IDs.
      *
      * @param userIds the user IDs

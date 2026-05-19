@@ -1584,6 +1584,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/stats/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get event statistics for admin dashboard */
+        get: operations["getEventStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/admin/audit-log/stats": {
         parameters: {
             query?: never;
@@ -1766,6 +1783,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ErrorResponseResource: {
+            method?: string;
+            uri?: string;
+            query?: string;
+            contentType?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            statusMessage?: string;
+            errorMessage?: string;
+            txId?: string;
+            traceId?: string;
+            spanId?: string;
+        };
         ApiErrorResponseResource: {
             method?: string;
             uri?: string;
@@ -1780,19 +1810,6 @@ export interface components {
             spanId?: string;
             apiErrorCode?: string;
             apiErrorReason?: string;
-        };
-        ErrorResponseResource: {
-            method?: string;
-            uri?: string;
-            query?: string;
-            contentType?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            statusMessage?: string;
-            errorMessage?: string;
-            txId?: string;
-            traceId?: string;
-            spanId?: string;
         };
         RateLimitErrorResponseResource: {
             method?: string;
@@ -3808,6 +3825,105 @@ export interface components {
              * @example 1 MB
              */
             sizeFormatted: string;
+        };
+        /** @description Admin event statistics response */
+        AdminEventStatsResponse: {
+            /** @description Daily event ingestion totals for the requested period */
+            dailyIngestion: components["schemas"]["DailyIngestionResponse"][];
+            /** @description Top 10 channels by event volume in the period */
+            topChannels: components["schemas"]["TopChannelResponse"][];
+            /** @description Event severity breakdown for the period */
+            severityBreakdown: components["schemas"]["SeverityBreakdownResponse"];
+            /** @description User event quota statistics */
+            quotaStats: components["schemas"]["QuotaStatsResponse"];
+        };
+        /** @description Daily event ingestion data point */
+        DailyIngestionResponse: {
+            /**
+             * Format: date
+             * @description Date of the data point
+             * @example 2026-04-20
+             */
+            date: string;
+            /**
+             * Format: int64
+             * @description Total events ingested on this day
+             * @example 1500
+             */
+            eventCount: number;
+        };
+        /** @description User event quota statistics */
+        QuotaStatsResponse: {
+            /**
+             * Format: int64
+             * @description Number of users with event_count >= 800 and < 1000 (near limit)
+             * @example 5
+             */
+            usersNearLimit: number;
+            /**
+             * Format: int64
+             * @description Number of users with event_count >= 1000 (at or over limit)
+             * @example 3
+             */
+            usersAtLimit: number;
+            /**
+             * Format: double
+             * @description Average quota utilization as percentage (avg(event_count)/1000*100)
+             * @example 42.5
+             */
+            averageUtilization: number;
+        };
+        /** @description Event severity breakdown */
+        SeverityBreakdownResponse: {
+            /**
+             * Format: int64
+             * @description Number of critical events
+             * @example 50
+             */
+            critical: number;
+            /**
+             * Format: int64
+             * @description Number of warning events
+             * @example 120
+             */
+            warning: number;
+            /**
+             * Format: int64
+             * @description Number of ok events
+             * @example 830
+             */
+            ok: number;
+        };
+        /** @description Top channel by event volume */
+        TopChannelResponse: {
+            /**
+             * Format: int64
+             * @description Channel ID
+             * @example 42
+             */
+            channelId: number;
+            /**
+             * @description Channel name
+             * @example production-alerts
+             */
+            channelName?: string;
+            /**
+             * @description Owner display name
+             * @example John Doe
+             */
+            ownerName?: string;
+            /**
+             * Format: int64
+             * @description Total event count in the period
+             * @example 5000
+             */
+            eventCount: number;
+            /**
+             * Format: double
+             * @description Percentage of total events in the period
+             * @example 25
+             */
+            percentage: number;
         };
         /** @description Audit log statistics for a given time range */
         AuditLogStatsResponse: {
@@ -13102,6 +13218,100 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TableSizeEntry"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    getEventStats: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminEventStatsResponse"];
                 };
             };
             /** @description Unauthorized */

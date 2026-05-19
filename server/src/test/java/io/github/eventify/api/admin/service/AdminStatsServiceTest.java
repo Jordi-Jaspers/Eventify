@@ -1,9 +1,11 @@
 package io.github.eventify.api.admin.service;
 
+import io.github.eventify.api.admin.model.StorageStats;
+import io.github.eventify.api.admin.model.mapper.AdminStatsMapper;
 import io.github.eventify.api.admin.model.projection.DailyGrowthData;
+import io.github.eventify.api.admin.model.projection.StorageSizeProjection;
 import io.github.eventify.api.admin.model.response.AdminStatsResponse;
 import io.github.eventify.api.admin.model.response.GrowthDataPoint;
-import io.github.eventify.api.admin.model.response.TableSizeEntry;
 import io.github.eventify.api.admin.repository.AdminStorageRepository;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
@@ -48,6 +50,9 @@ public class AdminStatsServiceTest extends UnitTest {
     @Mock
     private AdminStorageRepository adminStorageRepository;
 
+    @Mock
+    private AdminStatsMapper adminStatsMapper;
+
     @BeforeEach
     public void setUp() throws Exception {
         adminStatsService = new AdminStatsService(
@@ -55,17 +60,26 @@ public class AdminStatsServiceTest extends UnitTest {
             organizationRepository,
             channelRepository,
             eventRepository,
-            adminStorageRepository
+            adminStorageRepository,
+            adminStatsMapper
         );
 
         // Default stub for storage stats
-        lenient().when(adminStorageRepository.getStorageStats()).thenReturn(
+        final List<StorageSizeProjection> projections = List.of(
+            aStorageSizeProjection("event", 1024L, "1024 bytes"),
+            aStorageSizeProjection("notification", 2048L, "2 kB"),
+            aStorageSizeProjection("channel", 512L, "512 bytes"),
+            aStorageSizeProjection("organization", 256L, "256 bytes"),
+            aStorageSizeProjection("app_user", 4096L, "4 kB")
+        );
+        lenient().when(adminStorageRepository.findStorageSizes()).thenReturn(projections);
+        lenient().when(adminStatsMapper.toStorageStatsList(projections)).thenReturn(
             List.of(
-                TableSizeEntry.builder().tableName("event").sizeBytes(1024L).sizeFormatted("1024 bytes").build(),
-                TableSizeEntry.builder().tableName("notification").sizeBytes(2048L).sizeFormatted("2 kB").build(),
-                TableSizeEntry.builder().tableName("channel").sizeBytes(512L).sizeFormatted("512 bytes").build(),
-                TableSizeEntry.builder().tableName("organization").sizeBytes(256L).sizeFormatted("256 bytes").build(),
-                TableSizeEntry.builder().tableName("app_user").sizeBytes(4096L).sizeFormatted("4 kB").build()
+                aStorageStats("event", 1024L, "1024 bytes"),
+                aStorageStats("notification", 2048L, "2 kB"),
+                aStorageStats("channel", 512L, "512 bytes"),
+                aStorageStats("organization", 256L, "256 bytes"),
+                aStorageStats("app_user", 4096L, "4 kB")
             )
         );
 
@@ -77,6 +91,34 @@ public class AdminStatsServiceTest extends UnitTest {
         lenient().when(channelRepository.countByStatus(ChannelStatus.PENDING_DELETION)).thenReturn(0L);
         lenient().when(eventRepository.countByTimestampAfter(any())).thenReturn(0L);
         lenient().when(eventRepository.findDailyEventCounts(any())).thenReturn(Collections.emptyList());
+    }
+
+    private static StorageStats aStorageStats(final String tableName, final Long sizeBytes, final String sizeFormatted) {
+        return StorageStats.builder()
+            .tableName(tableName)
+            .sizeBytes(sizeBytes)
+            .sizeFormatted(sizeFormatted)
+            .build();
+    }
+
+    private static StorageSizeProjection aStorageSizeProjection(final String tableName, final Long sizeBytes, final String sizeFormatted) {
+        return new StorageSizeProjection() {
+
+            @Override
+            public String getTableName() {
+                return tableName;
+            }
+
+            @Override
+            public Long getSizeBytes() {
+                return sizeBytes;
+            }
+
+            @Override
+            public String getSizeFormatted() {
+                return sizeFormatted;
+            }
+        };
     }
 
     private DailyGrowthData createMockGrowthData(final LocalDate date, final long total, final long newCount) {
@@ -1180,7 +1222,7 @@ public class AdminStatsServiceTest extends UnitTest {
         // Given: No special setup needed (storage uses native queries)
 
         // When: Getting storage stats
-        final List<TableSizeEntry> storageStats = adminStatsService.getStorageStats();
+        final List<StorageStats> storageStats = adminStatsService.getStorageStats();
 
         // Then: Should return entries for all 5 tables
         assertThat(storageStats, is(notNullValue()));
@@ -1193,10 +1235,10 @@ public class AdminStatsServiceTest extends UnitTest {
         // Given: No special setup needed
 
         // When: Getting storage stats
-        final List<TableSizeEntry> storageStats = adminStatsService.getStorageStats();
+        final List<StorageStats> storageStats = adminStatsService.getStorageStats();
 
         // Then: Each entry should have tableName, sizeBytes, and sizeFormatted
-        for (final TableSizeEntry entry : storageStats) {
+        for (final StorageStats entry : storageStats) {
             assertThat(entry.getTableName(), is(notNullValue()));
             assertThat(entry.getTableName(), not(emptyString()));
             assertThat(entry.getSizeBytes(), is(notNullValue()));
@@ -1210,11 +1252,11 @@ public class AdminStatsServiceTest extends UnitTest {
         // Given: No special setup needed
 
         // When: Getting storage stats
-        final List<TableSizeEntry> storageStats = adminStatsService.getStorageStats();
+        final List<StorageStats> storageStats = adminStatsService.getStorageStats();
 
         // Then: Table names should include the 5 expected tables
         final List<String> tableNames = storageStats.stream()
-            .map(TableSizeEntry::getTableName)
+            .map(StorageStats::getTableName)
             .toList();
 
         assertThat(tableNames, hasItems("event", "notification", "channel", "organization", "app_user"));
