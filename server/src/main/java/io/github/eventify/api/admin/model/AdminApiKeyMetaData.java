@@ -81,7 +81,7 @@ public class AdminApiKeyMetaData extends AbstractSortSearchMetaData {
      */
     public Specification<ApiKey> toSearchSpecification(final SortablePageInput input) {
         final List<SearchInput> searchInputs = new ArrayList<>(input.getSearchInputs());
-        final SearchInput statusFilter = extractStatusFilter(searchInputs);
+        final SearchInput statusFilter = SearchInputHelper.extractFilter(searchInputs, STATUS);
 
         final List<SearchCriterium> criteria = toSearchCriteria(searchInputs);
         Specification<ApiKey> spec = new JpaSearchSpecification<>(criteria);
@@ -91,25 +91,6 @@ public class AdminApiKeyMetaData extends AbstractSortSearchMetaData {
         }
 
         return spec;
-    }
-
-    /**
-     * Extracts and removes the status filter from the search inputs list.
-     *
-     * @param searchInputs the mutable list of search inputs
-     * @return the status filter or null if not present
-     */
-    private SearchInput extractStatusFilter(final List<SearchInput> searchInputs) {
-        final SearchInput statusFilter = searchInputs.stream()
-            .filter(si -> STATUS.equalsIgnoreCase(si.getFieldName()))
-            .findFirst()
-            .orElse(null);
-
-        if (statusFilter != null) {
-            searchInputs.remove(statusFilter);
-        }
-
-        return statusFilter;
     }
 
     /**

@@ -12,9 +12,9 @@
 		Gauge,
 		BarChart3
 	} from '@lucide/svelte';
-	import type { AdminEventStatsResponse } from '$lib/api/admin/AdminController';
+	import type { AdminEventStatsResponse, AdminEventVolumeResponse } from '$lib/api/models';
 	import {
-		formatIngestionData,
+		formatEventVolumeData,
 		formatXAxisDate,
 		formatTooltipDate,
 		ingestionChartConfig
@@ -22,12 +22,14 @@
 
 	interface Props {
 		eventStats: AdminEventStatsResponse | null;
+		eventVolume: AdminEventVolumeResponse | null;
 		selectedDays: number;
 		eventsLoading: boolean;
+		volumeLoading: boolean;
 		loadingSkeleton: import('svelte').Snippet<[number, string?]>;
 	}
 
-	let { eventStats, selectedDays, eventsLoading, loadingSkeleton }: Props = $props();
+	let { eventStats, eventVolume, selectedDays, eventsLoading, volumeLoading, loadingSkeleton }: Props = $props();
 </script>
 
 <!-- Daily Ingestion Chart -->
@@ -38,14 +40,14 @@
 	</h2>
 	<AreaChartCard
 		title=""
-		data={formatIngestionData(eventStats?.dailyIngestion ?? [], selectedDays)}
+		data={formatEventVolumeData(eventVolume, selectedDays)}
 		xScale={scaleTime()}
 		series={[{ key: 'count', label: 'Events Ingested', color: ingestionChartConfig.count.color }]}
 		config={ingestionChartConfig}
 		heightClass="h-80"
 		showYAxis={true}
 		xAxisFormat={(v) => formatXAxisDate(v as Date)}
-		loading={eventsLoading}
+		loading={volumeLoading}
 	>
 		{#snippet tooltip({ data })}
 			<div class="rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-xl p-3 min-w-40">

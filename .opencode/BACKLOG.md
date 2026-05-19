@@ -7,7 +7,6 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
-- [x] **Hovering configure button in watchlist has bad contrast** - Fixed. [Details](./completed/20260519-USER_CHANGE_REQUEST-configure-button-hover-contrast.md)
 - [ ] **Sub packages for admin features** - in the backend, the admin packages is getting to big, with to many controllers, services and models. We should split it into sub packages, like `admin.resources`, `admin.stats`, `admin.tools`, etc. or even more detailed. This will make it easier to navigate and maintain the codebase.
 - [ ] **Some controllers in backend are building response objects in the services** - The controllers should be responsible for building the response objects, not the services. The services should return domain objects or DTOs, and the controllers should map via mapstruct to the response objects. This will make the code more modular and easier to test. do research and not every endpoint we should change.
 - [ ] **Refactor pages to use more components** - some pages are getting to big and hard to maintain, we should refactor them to use more components, like the admin dashboard, the watchlist editor, etc. This will make the code more modular and easier to maintain.

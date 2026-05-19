@@ -107,6 +107,7 @@ Page: [page-name]
 Verify before outputting final report:
 
 - [ ] Checked codebase for existing components/services/utils
+- [ ] No custom models or types — only OpenAPI types from `$lib/api/models`
 - [ ] Reused existing code where possible
 - [ ] Extracted reusable patterns (if logic repeats 2+ times)
 - [ ] Route files are minimal (business logic in services)

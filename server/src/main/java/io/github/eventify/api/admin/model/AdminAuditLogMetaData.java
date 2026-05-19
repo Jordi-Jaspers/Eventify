@@ -87,16 +87,7 @@ public class AdminAuditLogMetaData extends AbstractSortSearchMetaData {
     }
 
     private SearchInput extractFilter(final List<SearchInput> searchInputs, final String fieldName) {
-        final SearchInput filter = searchInputs.stream()
-            .filter(si -> fieldName.equalsIgnoreCase(si.getFieldName()))
-            .findFirst()
-            .orElse(null);
-
-        if (filter != null) {
-            searchInputs.remove(filter);
-        }
-
-        return filter;
+        return SearchInputHelper.extractFilter(searchInputs, fieldName);
     }
 
     private Specification<AuditLog> buildStatusRangeSpecification(final List<String> statusRanges) {

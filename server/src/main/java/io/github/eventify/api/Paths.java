@@ -187,6 +187,12 @@ public final class Paths {
 
     public static final String ADMIN_STATS_EVENTS_PATH = ADMIN_STATS_PATH + "/events";
 
+    public static final String ADMIN_STATS_COUNTS_PATH = ADMIN_STATS_PATH + "/counts";
+
+    public static final String ADMIN_STATS_GROWTH_PATH = ADMIN_STATS_PATH + "/growth";
+
+    public static final String ADMIN_STATS_EVENT_VOLUME_PATH = ADMIN_STATS_PATH + "/event-volume";
+
     public static final String ADMIN_ORGANIZATION_ASSIGN_OWNER_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/owner";
 
     public static final String ADMIN_ORGANIZATION_STATUS_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/status";

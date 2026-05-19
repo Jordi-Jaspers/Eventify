@@ -5,32 +5,35 @@
 	import { StatCard } from '$lib/components/ui/stat-card';
 	import { scaleTime } from 'd3-scale';
 	import { Users, Building2, Radio, Calendar, Trophy } from '@lucide/svelte';
-	import type { AdminStatsResponse } from '$lib/api/models.ts';
+	import type { AdminCountsResponse, AdminGrowthResponse, AdminEventVolumeResponse } from '$lib/api/models';
 	import {
-		formatChartData,
+		formatGrowthChartData,
 		formatXAxisDate,
 		formatTooltipDate,
 		formatPercentage,
 		getBadgeVariant,
-		formatBestDayCount,
+		formatBestGrowthDayCount,
 		usersOrgsChartConfig,
 		eventsChartConfig
 	} from './statistics-helpers.js';
 
 	interface Props {
-		stats: AdminStatsResponse | null;
-		loading: boolean;
+		counts: AdminCountsResponse | null;
+		growth: AdminGrowthResponse | null;
+		eventVolume: AdminEventVolumeResponse | null;
+		countsLoading: boolean;
+		growthLoading: boolean;
 		loadingSkeleton: import('svelte').Snippet<[number, string?]>;
 	}
 
-	let { stats, loading, loadingSkeleton }: Props = $props();
+	let { counts, growth, eventVolume, countsLoading, growthLoading, loadingSkeleton }: Props = $props();
 
 	type ChartView = 'users-orgs' | 'events';
 	let chartView: ChartView = $state('users-orgs');
 
 	function getActiveUserPercentage(): number {
-		if (!stats?.totalUsers || stats.totalUsers === 0) return 0;
-		return Math.round(((stats.activeUsers ?? 0) / stats.totalUsers) * 100);
+		if (!counts?.totalUsers || counts.totalUsers === 0) return 0;
+		return Math.round(((counts.activeUsers ?? 0) / counts.totalUsers) * 100);
 	}
 </script>
 
@@ -38,10 +41,10 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
 	<StatCard
 		title="Users"
-		value={stats?.totalUsers?.toLocaleString() ?? '0'}
+		value={counts?.totalUsers?.toLocaleString() ?? '0'}
 		icon={Users}
 		variant="blue"
-		{loading}
+		loading={countsLoading}
 	>
 		{#snippet trailing()}
 			<Badge variant="secondary" class="mb-1.5 text-xs">
@@ -52,28 +55,28 @@
 
 	<StatCard
 		title="Organizations"
-		value={stats?.totalOrganizations?.toLocaleString() ?? '0'}
+		value={counts?.totalOrganizations?.toLocaleString() ?? '0'}
 		icon={Building2}
 		variant="purple"
-		{loading}
+		loading={countsLoading}
 	/>
 
 	<StatCard
 		title="Channels"
-		value={stats?.totalChannels?.toLocaleString() ?? '0'}
+		value={counts?.totalChannels?.toLocaleString() ?? '0'}
 		icon={Radio}
 		variant="green"
-		subtitle="{stats?.activeChannels ?? 0} active · {stats?.pausedChannels ?? 0} paused · {stats?.staleChannels ?? 0} stale"
-		{loading}
+		subtitle="{counts?.activeChannels ?? 0} active · {counts?.pausedChannels ?? 0} paused · {counts?.staleChannels ?? 0} stale"
+		loading={countsLoading}
 	/>
 
 	<StatCard
 		title="Events"
-		value={stats?.totalEventsInPeriod?.toLocaleString() ?? '0'}
+		value={eventVolume?.totalEvents?.toLocaleString() ?? '0'}
 		icon={Calendar}
 		variant="orange"
 		subtitle="in selected period"
-		{loading}
+		loading={growthLoading}
 	/>
 </div>
 
@@ -98,7 +101,7 @@
 	{#if chartView === 'users-orgs'}
 		<AreaChartCard
 			title=""
-			data={formatChartData(stats?.growthData ?? [])}
+			data={formatGrowthChartData(growth?.growthData ?? [])}
 			xScale={scaleTime()}
 			series={[
 				{ key: 'totalUsers', label: 'Users', color: usersOrgsChartConfig.totalUsers.color },
@@ -108,7 +111,7 @@
 			heightClass="h-80"
 			showYAxis={true}
 			xAxisFormat={(v) => formatXAxisDate(v as Date)}
-			{loading}
+			loading={growthLoading}
 		>
 			{#snippet tooltip({ data })}
 				<div class="rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-xl p-3 min-w-48">
@@ -141,7 +144,7 @@
 	{:else}
 		<AreaChartCard
 			title=""
-			data={formatChartData(stats?.growthData ?? [])}
+			data={formatGrowthChartData(growth?.growthData ?? [])}
 			xScale={scaleTime()}
 			series={[
 				{ key: 'newEvents', label: 'Events Ingested', color: eventsChartConfig.newEvents.color }
@@ -150,7 +153,7 @@
 			heightClass="h-80"
 			showYAxis={true}
 			xAxisFormat={(v) => formatXAxisDate(v as Date)}
-			{loading}
+			loading={growthLoading}
 		>
 			{#snippet tooltip({ data })}
 				<div class="rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-xl p-3 min-w-40">
@@ -173,7 +176,7 @@
 		<CardTitle class="text-base">Records</CardTitle>
 	</CardHeader>
 	<CardContent>
-		{#if loading}
+		{#if growthLoading}
 			{@render loadingSkeleton(3)}
 		{:else}
 			<div class="divide-y divide-border/50">
@@ -182,21 +185,21 @@
 						<Users class="h-4 w-4 text-blue-400" />
 						<span class="text-sm text-muted-foreground">Most users in a day</span>
 					</div>
-					<span class="text-sm font-semibold tabular-nums">{formatBestDayCount(stats?.bestGrowthDayUsers, 'newUsers')}</span>
+					<span class="text-sm font-semibold tabular-nums">{formatBestGrowthDayCount(growth?.bestGrowthDayUsers, 'newUsers')}</span>
 				</div>
 				<div class="flex items-center justify-between py-2.5">
 					<div class="flex items-center gap-2">
 						<Building2 class="h-4 w-4 text-purple-400" />
 						<span class="text-sm text-muted-foreground">Most orgs in a day</span>
 					</div>
-					<span class="text-sm font-semibold tabular-nums">{formatBestDayCount(stats?.bestGrowthDayOrganizations, 'newOrganizations')}</span>
+					<span class="text-sm font-semibold tabular-nums">{formatBestGrowthDayCount(growth?.bestGrowthDayOrganizations, 'newOrganizations')}</span>
 				</div>
 				<div class="flex items-center justify-between py-2.5">
 					<div class="flex items-center gap-2">
 						<Calendar class="h-4 w-4 text-green-400" />
 						<span class="text-sm text-muted-foreground">Most events in a day</span>
 					</div>
-					<span class="text-sm font-semibold tabular-nums">{formatBestDayCount(stats?.bestGrowthDayEvents, 'newEvents')}</span>
+					<span class="text-sm font-semibold tabular-nums">{formatBestGrowthDayCount(growth?.bestGrowthDayEvents, 'newEvents')}</span>
 				</div>
 			</div>
 		{/if}

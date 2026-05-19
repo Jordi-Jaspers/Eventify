@@ -9,11 +9,11 @@ import io.github.eventify.api.admin.model.projection.DailyEventIngestion;
 import io.github.eventify.api.admin.model.projection.TopChannelData;
 import io.github.eventify.api.admin.repository.EventTimelineRepository;
 import io.github.eventify.api.quota.repository.UserEventQuotaRepository;
+import io.github.eventify.common.util.TimeProvider;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -78,7 +78,7 @@ public class AdminEventStatsService {
     }
 
     private static OffsetDateTime startOfDayUtc(final LocalDate date) {
-        return date.atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
+        return TimeProvider.startOfDayUtc(date);
     }
 
     private static DailyIngestion toDailyIngestion(final DailyEventIngestion d) {

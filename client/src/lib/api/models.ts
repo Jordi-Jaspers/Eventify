@@ -35,8 +35,12 @@ export type TransferOwnershipRequest = components['schemas']['TransferOwnershipR
 export type AssignOwnerRequest = components['schemas']['AssignOwnerRequest'];
 
 // ================ Admin ===================
-export type AdminStatsResponse = components['schemas']['AdminStatsResponse'];
 export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
+export type AdminCountsResponse = components['schemas']['AdminCountsResponse'];
+export type AdminGrowthResponse = components['schemas']['AdminGrowthResponse'];
+export type AdminEventVolumeResponse = components['schemas']['AdminEventVolumeResponse'];
+export type DailyVolumePoint = components['schemas']['DailyVolumePoint'];
+export type AdminEventStatsResponse = components['schemas']['AdminEventStatsResponse'];
 export type AdminApiKeyStatsResponse = components['schemas']['ApiKeyStatsResponse'];
 export type TableSizeEntry = components['schemas']['TableSizeEntry'];
 export type AdminApiKeyAuditResponse = components['schemas']['ApiKeyAuditResponse'];

@@ -91,6 +91,8 @@ dependencies {
         exclude("org.apache.tomcat", module = "tomcat-jdbc")
     }
 
+    implementation("org.springframework.boot", "spring-boot-starter-cache")
+
     // ======= IMPLEMENTATION DEPENDENCIES =======
     // Open API documentation generation.
     implementation("org.springdoc", "springdoc-openapi-starter-webmvc-ui", retrieve("springdocVersion"))

@@ -1,0 +1,35 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202605191000-PRD-admin-event-stats-daily-aggregate.xml">
+
+    <changeSet id="202605191000-PRD-admin-event-stats-daily-aggregate-1" author="jordi.jaspers" runInTransaction="false">
+        <comment>Create daily continuous aggregate for admin event stats from hourly timeline</comment>
+        <sql>
+            CREATE MATERIALIZED VIEW IF NOT EXISTS admin_event_stats_daily
+            WITH (timescaledb.continuous) AS
+            SELECT
+                time_bucket('1 day', bucket) AS day,
+                SUM(event_count) AS total_events,
+                COUNT(*) FILTER (WHERE last_severity = 'CRITICAL') AS critical_count,
+                COUNT(*) FILTER (WHERE last_severity = 'WARNING') AS warning_count,
+                COUNT(*) FILTER (WHERE last_severity = 'OK') AS ok_count
+            FROM event_timeline_hourly
+            GROUP BY day;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605191000-PRD-admin-event-stats-daily-aggregate-2" author="jordi.jaspers" runInTransaction="false">
+        <comment>Add refresh policy for admin_event_stats_daily aggregate (every 5 minutes)</comment>
+        <sql>
+            SELECT add_continuous_aggregate_policy('admin_event_stats_daily',
+                start_offset => INTERVAL '7 days',
+                end_offset => INTERVAL '5 minutes',
+                schedule_interval => INTERVAL '5 minutes',
+                if_not_exists => TRUE);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

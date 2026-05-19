@@ -5,6 +5,7 @@ import java.util.TimeZone;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import static io.github.jframe.util.constants.Constants.DateTime.DEFAULT_TIMEZONE;
@@ -12,6 +13,7 @@ import static io.github.jframe.util.constants.Constants.DateTime.DEFAULT_TIMEZON
 /**
  * The main class to start the Spring Boot application.
  */
+@EnableCaching
 @EnableScheduling
 @SpringBootApplication(scanBasePackageClasses = Main.class)
 public class Main extends SpringBootServletInitializer {

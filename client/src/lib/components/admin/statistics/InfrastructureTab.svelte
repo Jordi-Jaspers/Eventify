@@ -2,18 +2,18 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { StatCard } from '$lib/components/ui/stat-card';
 	import { Key, TrendingUp, Activity, Calendar, Database, Radio } from '@lucide/svelte';
-	import type { AdminStatsResponse, AdminApiKeyStatsResponse, TableSizeEntry } from '$lib/api/models.ts';
+	import type { AdminApiKeyStatsResponse, TableSizeEntry, AdminCountsResponse } from '$lib/api/models';
 
 	interface Props {
-		stats: AdminStatsResponse | null;
+		counts: AdminCountsResponse | null;
 		apiKeyStats: AdminApiKeyStatsResponse | null;
 		storageStats: TableSizeEntry[];
-		loading: boolean;
+		countsLoading: boolean;
 		infraLoading: boolean;
 		loadingSkeleton: import('svelte').Snippet<[number, string?]>;
 	}
 
-	let { stats, apiKeyStats, storageStats, loading, infraLoading, loadingSkeleton }: Props = $props();
+	let { counts, apiKeyStats, storageStats, countsLoading, infraLoading, loadingSkeleton }: Props = $props();
 </script>
 
 <!-- API Key Stats -->
@@ -106,34 +106,34 @@
 		Channel Health
 	</h2>
 	<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-		<StatCard
-			title="Active"
-			value={stats?.activeChannels?.toLocaleString() ?? '0'}
-			icon={Activity}
-			variant="green"
-			{loading}
-		/>
-		<StatCard
-			title="Paused"
-			value={stats?.pausedChannels?.toLocaleString() ?? '0'}
-			icon={Radio}
-			variant="yellow"
-			{loading}
-		/>
-		<StatCard
-			title="Stale"
-			value={stats?.staleChannels?.toLocaleString() ?? '0'}
-			icon={Radio}
-			variant="orange"
-			{loading}
-		/>
-		<StatCard
-			title="Pending Deletion"
-			value={stats?.pendingDeletionChannels?.toLocaleString() ?? '0'}
-			icon={Radio}
-			variant="red"
-			{loading}
-		/>
+	<StatCard
+		title="Active"
+		value={counts?.activeChannels?.toLocaleString() ?? '0'}
+		icon={Activity}
+		variant="green"
+		loading={countsLoading}
+	/>
+	<StatCard
+		title="Paused"
+		value={counts?.pausedChannels?.toLocaleString() ?? '0'}
+		icon={Radio}
+		variant="yellow"
+		loading={countsLoading}
+	/>
+	<StatCard
+		title="Stale"
+		value={counts?.staleChannels?.toLocaleString() ?? '0'}
+		icon={Radio}
+		variant="orange"
+		loading={countsLoading}
+	/>
+	<StatCard
+		title="Pending Deletion"
+		value={counts?.pendingDeletionChannels?.toLocaleString() ?? '0'}
+		icon={Radio}
+		variant="red"
+		loading={countsLoading}
+	/>
 	</div>
 </div>
 

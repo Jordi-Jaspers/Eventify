@@ -1,4 +1,4 @@
-import type { GrowthDataPoint } from '$lib/api/models.ts';
+import type { GrowthDataPoint, AdminGrowthResponse, AdminEventVolumeResponse } from '$lib/api/models.ts';
 import type { ChartConfig } from '$lib/components/ui/chart/types';
 
 // ── Chart configs ──────────────────────────────────────────────────────────────
@@ -86,10 +86,10 @@ export function formatBestDayCount(
 }
 
 export function formatIngestionData(
-	data: { date: string; eventCount: number }[],
+	data: { date?: string; eventCount?: number }[],
 	days: number
 ): IngestionChartPoint[] {
-	const dataMap: Map<string, number> = new Map(data.map((p) => [p.date, p.eventCount]));
+	const dataMap: Map<string, number> = new Map(data.map((p) => [p.date ?? '', p.eventCount ?? 0]));
 	const today: Date = new Date();
 	today.setHours(0, 0, 0, 0);
 	const points: IngestionChartPoint[] = [];
@@ -100,4 +100,40 @@ export function formatIngestionData(
 		points.push({ date: d, count: dataMap.get(key) ?? 0 });
 	}
 	return points;
+}
+
+// ── New split API formatters ───────────────────────────────────────────────────
+
+export function formatGrowthChartData(growthData: GrowthDataPoint[]): ChartDataPoint[] {
+	return growthData.map((point: GrowthDataPoint): ChartDataPoint => {
+		const dateStr: string = point.date ?? '';
+		const date: Date = new Date(dateStr);
+		return {
+			date,
+			totalOrganizations: point.totalOrganizations ?? 0,
+			totalUsers: point.totalUsers ?? 0,
+			newEvents: point.newEvents ?? 0,
+			dateStr: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+			newUsersGrowthPercentage: point.newUsersGrowthPercentage,
+			newOrganizationsGrowthPercentage: point.newOrganizationsGrowthPercentage
+		};
+	});
+}
+
+export function formatEventVolumeData(
+	response: AdminEventVolumeResponse | null,
+	days: number
+): IngestionChartPoint[] {
+	return formatIngestionData(response?.dailyVolume ?? [], days);
+}
+
+export function formatBestGrowthDayCount(
+	point: GrowthDataPoint | null | undefined,
+	field: 'newUsers' | 'newOrganizations' | 'newEvents'
+): string {
+	if (!point?.date) return '—';
+	const count: number = (point[field] as number | undefined) ?? 0;
+	const date: Date = new Date(point.date);
+	const dateLabel: string = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+	return `${count.toLocaleString()} on ${dateLabel}`;
 }
