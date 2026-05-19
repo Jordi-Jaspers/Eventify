@@ -1,6 +1,6 @@
 package io.github.eventify.api.user.repository;
 
-import io.github.eventify.api.admin.model.projection.DailyGrowthData;
+import io.github.eventify.api.admin.stats.model.projection.DailyGrowthData;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
 

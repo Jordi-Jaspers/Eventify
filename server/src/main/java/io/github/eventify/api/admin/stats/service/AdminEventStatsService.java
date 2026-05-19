@@ -1,0 +1,100 @@
+package io.github.eventify.api.admin.stats.service;
+
+import io.github.eventify.api.admin.stats.model.DailyIngestion;
+import io.github.eventify.api.admin.stats.model.EventStats;
+import io.github.eventify.api.admin.stats.model.QuotaStats;
+import io.github.eventify.api.admin.stats.model.SeverityBreakdown;
+import io.github.eventify.api.admin.stats.model.TopChannelInfo;
+import io.github.eventify.api.admin.stats.model.projection.DailyEventIngestion;
+import io.github.eventify.api.admin.stats.model.projection.TopChannelData;
+import io.github.eventify.api.admin.stats.repository.EventTimelineRepository;
+import io.github.eventify.api.quota.repository.UserEventQuotaRepository;
+import io.github.eventify.common.util.TimeProvider;
+import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/** Aggregates event analytics from TimescaleDB continuous aggregate and quota data. */
+@Service
+@RequiredArgsConstructor
+public class AdminEventStatsService {
+
+    private static final int MONTHLY_LIMIT = 1000;
+    private static final int NEAR_LIMIT_THRESHOLD = 800;
+    private static final int TOP_CHANNELS_LIMIT = 10;
+
+    private static final String SEVERITY_CRITICAL = "CRITICAL";
+    private static final String SEVERITY_WARNING = "WARNING";
+    private static final String SEVERITY_OK = "OK";
+
+    private final EventTimelineRepository eventTimelineRepository;
+    private final UserEventQuotaRepository userEventQuotaRepository;
+
+    /** Builds event statistics for the given number of days. */
+    @Transactional(readOnly = true)
+    public EventStats getEventStats(final int days) {
+        final OffsetDateTime from = startOfDayUtc(LocalDate.now().minusDays(days));
+        final OffsetDateTime to = startOfDayUtc(LocalDate.now().plusDays(1));
+
+        return EventStats.builder()
+            .dailyIngestion(buildDailyIngestion(from, to))
+            .topChannels(buildTopChannels(from, to))
+            .severityBreakdown(buildSeverityBreakdown(from, to))
+            .quotaStats(buildQuotaStats())
+            .build();
+    }
+
+    private List<DailyIngestion> buildDailyIngestion(final OffsetDateTime from, final OffsetDateTime to) {
+        return eventTimelineRepository.findDailyIngestion(from, to).stream()
+            .map(AdminEventStatsService::toDailyIngestion)
+            .toList();
+    }
+
+    private List<TopChannelInfo> buildTopChannels(final OffsetDateTime from, final OffsetDateTime to) {
+        return eventTimelineRepository.findTopChannels(from, to, TOP_CHANNELS_LIMIT).stream()
+            .map(AdminEventStatsService::toTopChannelInfo)
+            .toList();
+    }
+
+    private SeverityBreakdown buildSeverityBreakdown(final OffsetDateTime from, final OffsetDateTime to) {
+        return SeverityBreakdown.builder()
+            .critical(eventTimelineRepository.countBySeverity(from, to, SEVERITY_CRITICAL))
+            .warning(eventTimelineRepository.countBySeverity(from, to, SEVERITY_WARNING))
+            .ok(eventTimelineRepository.countBySeverity(from, to, SEVERITY_OK))
+            .build();
+    }
+
+    private QuotaStats buildQuotaStats() {
+        return QuotaStats.builder()
+            .usersNearLimit(userEventQuotaRepository.countUsersNearLimit(NEAR_LIMIT_THRESHOLD, MONTHLY_LIMIT))
+            .usersAtLimit(userEventQuotaRepository.countUsersAtLimit(MONTHLY_LIMIT))
+            .averageUtilization(userEventQuotaRepository.calculateAverageUtilization(MONTHLY_LIMIT))
+            .build();
+    }
+
+    private static OffsetDateTime startOfDayUtc(final LocalDate date) {
+        return TimeProvider.startOfDayUtc(date);
+    }
+
+    private static DailyIngestion toDailyIngestion(final DailyEventIngestion d) {
+        return DailyIngestion.builder()
+            .date(d.getDate())
+            .eventCount(d.getEventCount())
+            .build();
+    }
+
+    private static TopChannelInfo toTopChannelInfo(final TopChannelData c) {
+        return TopChannelInfo.builder()
+            .channelId(c.getChannelId())
+            .channelName(c.getChannelName())
+            .ownerName(c.getOwnerName())
+            .eventCount(c.getEventCount())
+            .percentage(c.getPercentage())
+            .build();
+    }
+}

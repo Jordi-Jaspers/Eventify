@@ -1,6 +1,6 @@
 package io.github.eventify.api.organization.repository;
 
-import io.github.eventify.api.admin.model.projection.DailyGrowthData;
+import io.github.eventify.api.admin.stats.model.projection.DailyGrowthData;
 import io.github.eventify.api.organization.model.Organization;
 
 import java.time.OffsetDateTime;
