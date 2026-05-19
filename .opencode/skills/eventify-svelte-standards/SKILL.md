@@ -477,35 +477,4 @@ formatRelativeDate('2024-01-15'); // "2 days ago"
 import { handleError, getValidationErrorMap } from '$lib/utils/error-handler';
 ```
 
----
 
-## Commands
-
-```bash
-bun run dev          # Dev server
-bun run check        # Type check (must pass)
-bun run build        # Production build
-bun run sync:api     # Regenerate API types from backend
-bun run test         # Playwright tests
-```
-
----
-
-## Checklist
-
-Before completing any frontend work:
-
-**Code Quality:**
-- [ ] Explicit types on all variables and functions
-- [ ] `CLIENT_ROUTES` used (no hardcoded paths)
-- [ ] OpenAPI types from `$lib/api/models`
-- [ ] No custom types in `$lib/api/models` only OpenAPI types
-- [ ] Error handling with `handleError()` + `toast`
-- [ ] Loading states on async operations
-- [ ] `bun run check` passes
-
-**Reusability:**
-- [ ] Checked `$lib/components/` for existing reusable components
-- [ ] Checked `/dev-playbook` for documented patterns
-- [ ] Code is concise - no duplication, extracted shared logic
-- [ ] New generic components added to dev-playbook (if applicable)
