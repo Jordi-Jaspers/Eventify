@@ -4,6 +4,7 @@ import io.github.eventify.api.notification.adapter.NotificationAdapter;
 import io.github.eventify.api.notification.model.NotificationAudience;
 import io.github.eventify.api.notification.model.NotificationCategory;
 import io.github.eventify.api.notification.model.NotificationPayload;
+import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.UnitTest;
 
@@ -11,9 +12,13 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("Unit Test - Notification Dispatch Service")
@@ -101,5 +106,67 @@ public class NotificationDispatchServiceTest extends UnitTest {
             false,
             null
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // dispatchOrganizationStatusChange
+    // -------------------------------------------------------------------------
+
+    @Nested
+    @DisplayName("Organization Status Change Notifications")
+    class OrganizationStatusChangeTests {
+
+        @Test
+        @DisplayName("Should dispatch urgent notification when status changes to SUSPENDED")
+        void shouldDispatchUrgentNotificationOnSuspension() {
+            final User user = aValidUser();
+            when(audienceResolver.resolve(any())).thenReturn(List.of(user));
+
+            dispatchService.dispatchOrganizationStatusChange(1L, "Acme Corp", OrganizationStatus.ACTIVE, OrganizationStatus.SUSPENDED);
+
+            final ArgumentCaptor<NotificationPayload> captor = ArgumentCaptor.forClass(NotificationPayload.class);
+            verify(inAppAdapter).send(eq(user), captor.capture());
+            final NotificationPayload payload = captor.getValue();
+            assertThat(payload.getTitle(), is("Organization suspended"));
+            assertThat(payload.getMessage(), is("Acme Corp has been suspended"));
+            assertThat(payload.getCategory(), is(NotificationCategory.SYSTEM));
+            assertThat(payload.getActionUrl(), is("/organizations"));
+            assertThat(payload.isUrgent(), is(true));
+        }
+
+        @Test
+        @DisplayName("Should dispatch non-urgent notification when status changes from SUSPENDED to ACTIVE")
+        void shouldDispatchNonUrgentNotificationOnReactivation() {
+            final User user = aValidUser();
+            when(audienceResolver.resolve(any())).thenReturn(List.of(user));
+
+            dispatchService.dispatchOrganizationStatusChange(1L, "Acme Corp", OrganizationStatus.SUSPENDED, OrganizationStatus.ACTIVE);
+
+            final ArgumentCaptor<NotificationPayload> captor = ArgumentCaptor.forClass(NotificationPayload.class);
+            verify(inAppAdapter).send(eq(user), captor.capture());
+            final NotificationPayload payload = captor.getValue();
+            assertThat(payload.getTitle(), is("Organization reactivated"));
+            assertThat(payload.getMessage(), is("Acme Corp has been reactivated"));
+            assertThat(payload.getCategory(), is(NotificationCategory.SYSTEM));
+            assertThat(payload.isUrgent(), is(false));
+        }
+
+        @Test
+        @DisplayName("Should not dispatch when status is idempotent ACTIVE to ACTIVE")
+        void shouldNotDispatchOnIdempotentActive() {
+            dispatchService.dispatchOrganizationStatusChange(1L, "Acme Corp", OrganizationStatus.ACTIVE, OrganizationStatus.ACTIVE);
+
+            verifyNoInteractions(audienceResolver);
+            verifyNoInteractions(inAppAdapter);
+        }
+
+        @Test
+        @DisplayName("Should not dispatch when status is idempotent SUSPENDED to SUSPENDED")
+        void shouldNotDispatchOnIdempotentSuspended() {
+            dispatchService.dispatchOrganizationStatusChange(1L, "Acme Corp", OrganizationStatus.SUSPENDED, OrganizationStatus.SUSPENDED);
+
+            verifyNoInteractions(audienceResolver);
+            verifyNoInteractions(inAppAdapter);
+        }
     }
 }

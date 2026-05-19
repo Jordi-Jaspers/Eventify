@@ -1,5 +1,6 @@
 package io.github.eventify.api.organization.service;
 
+import io.github.eventify.api.notification.service.NotificationDispatchService;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.model.request.ProvisionOrganizationRequest;
@@ -47,6 +48,9 @@ public class OrganizationServiceTest extends UnitTest {
     @Mock
     private OrganizationMembershipRepository organizationMembershipRepository;
 
+    @Mock
+    private NotificationDispatchService notificationDispatchService;
+
     @InjectMocks
     private OrganizationService organizationService;
 
@@ -68,7 +72,7 @@ public class OrganizationServiceTest extends UnitTest {
         securityUtilMock.when(SecurityUtil::getLoggedInUser).thenReturn(authenticatedUser);
 
         // Default mock for owner lookup
-        when(userRepository.findByEmail(VALID_EMAIL)).thenReturn(Optional.of(ownerUser));
+        lenient().when(userRepository.findByEmail(VALID_EMAIL)).thenReturn(Optional.of(ownerUser));
         lenient().when(organizationMembershipRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
@@ -317,6 +321,138 @@ public class OrganizationServiceTest extends UnitTest {
 
         assertThat(result, notNullValue());
         assertThat(result.getName(), is(orgName));
+    }
+
+    // -------------------------------------------------------------------------
+    // updateStatus — notification dispatch
+    // -------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("Should dispatch urgent SYSTEM notification when status changes to SUSPENDED")
+    void shouldDispatchUrgentNotificationWhenStatusChangesToSuspended() {
+        // Given: An active organization
+        final Organization organization = anActiveOrganization(10L, "Acme Corp");
+        when(organizationRepository.findById(10L)).thenReturn(Optional.of(organization));
+        when(organizationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        // When: Status is updated to SUSPENDED
+        organizationService.updateStatus(10L, OrganizationStatus.SUSPENDED);
+
+        // Then: An urgent SYSTEM notification is dispatched to the organization audience
+        verify(notificationDispatchService).dispatchOrganizationStatusChange(
+            eq(10L),
+            eq("Acme Corp"),
+            eq(OrganizationStatus.ACTIVE),
+            eq(OrganizationStatus.SUSPENDED)
+        );
+    }
+
+    @Test
+    @DisplayName("Should dispatch non-urgent SYSTEM notification when status changes from SUSPENDED to ACTIVE")
+    void shouldDispatchNonUrgentNotificationWhenStatusChangesFromSuspendedToActive() {
+        // Given: A suspended organization
+        final Organization organization = aSuspendedOrganization(20L, "Beta Inc");
+        when(organizationRepository.findById(20L)).thenReturn(Optional.of(organization));
+        when(organizationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        // When: Status is updated to ACTIVE
+        organizationService.updateStatus(20L, OrganizationStatus.ACTIVE);
+
+        // Then: A non-urgent SYSTEM notification is dispatched to the organization audience
+        verify(notificationDispatchService).dispatchOrganizationStatusChange(
+            eq(20L),
+            eq("Beta Inc"),
+            eq(OrganizationStatus.SUSPENDED),
+            eq(OrganizationStatus.ACTIVE)
+        );
+    }
+
+    @Test
+    @DisplayName("Should NOT dispatch notification when status is idempotent ACTIVE to ACTIVE")
+    void shouldNotDispatchNotificationWhenStatusIsIdempotentActiveToActive() {
+        // Given: An already active organization
+        final Organization organization = anActiveOrganization(30L, "Gamma Ltd");
+        when(organizationRepository.findById(30L)).thenReturn(Optional.of(organization));
+        when(organizationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        // When: Status is set to ACTIVE again (no change)
+        organizationService.updateStatus(30L, OrganizationStatus.ACTIVE);
+
+        // Then: Dispatch is called with same old/new status (dispatch service handles no-op)
+        verify(notificationDispatchService).dispatchOrganizationStatusChange(
+            eq(30L),
+            eq("Gamma Ltd"),
+            eq(OrganizationStatus.ACTIVE),
+            eq(OrganizationStatus.ACTIVE)
+        );
+    }
+
+    @Test
+    @DisplayName("Should NOT dispatch notification when status is idempotent SUSPENDED to SUSPENDED")
+    void shouldNotDispatchNotificationWhenStatusIsIdempotentSuspendedToSuspended() {
+        // Given: An already suspended organization
+        final Organization organization = aSuspendedOrganization(40L, "Delta Co");
+        when(organizationRepository.findById(40L)).thenReturn(Optional.of(organization));
+        when(organizationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        // When: Status is set to SUSPENDED again (no change)
+        organizationService.updateStatus(40L, OrganizationStatus.SUSPENDED);
+
+        // Then: Dispatch is called with same old/new status (dispatch service handles no-op)
+        verify(notificationDispatchService).dispatchOrganizationStatusChange(
+            eq(40L),
+            eq("Delta Co"),
+            eq(OrganizationStatus.SUSPENDED),
+            eq(OrganizationStatus.SUSPENDED)
+        );
+    }
+
+    @Test
+    @DisplayName("Should still save organization when status changes to SUSPENDED")
+    void shouldSaveOrganizationWhenStatusChangesToSuspended() {
+        // Given: An active organization
+        final Organization organization = anActiveOrganization(50L, "Echo Corp");
+        when(organizationRepository.findById(50L)).thenReturn(Optional.of(organization));
+        when(organizationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        // When: Status is updated to SUSPENDED
+        final Organization result = organizationService.updateStatus(50L, OrganizationStatus.SUSPENDED);
+
+        // Then: Organization is saved with new status
+        verify(organizationRepository).save(organization);
+        assertThat(result.getStatus(), is(equalTo(OrganizationStatus.SUSPENDED)));
+    }
+
+    @Test
+    @DisplayName("Should still save organization when status changes from SUSPENDED to ACTIVE")
+    void shouldSaveOrganizationWhenStatusChangesFromSuspendedToActive() {
+        // Given: A suspended organization
+        final Organization organization = aSuspendedOrganization(60L, "Foxtrot Ltd");
+        when(organizationRepository.findById(60L)).thenReturn(Optional.of(organization));
+        when(organizationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        // When: Status is updated to ACTIVE
+        final Organization result = organizationService.updateStatus(60L, OrganizationStatus.ACTIVE);
+
+        // Then: Organization is saved with new status
+        verify(organizationRepository).save(organization);
+        assertThat(result.getStatus(), is(equalTo(OrganizationStatus.ACTIVE)));
+    }
+
+    private static Organization anActiveOrganization(final Long id, final String name) {
+        final Organization org = new Organization();
+        org.setId(id);
+        org.setName(name);
+        org.setStatus(OrganizationStatus.ACTIVE);
+        return org;
+    }
+
+    private static Organization aSuspendedOrganization(final Long id, final String name) {
+        final Organization org = new Organization();
+        org.setId(id);
+        org.setName(name);
+        org.setStatus(OrganizationStatus.SUSPENDED);
+        return org;
     }
 
     @Test

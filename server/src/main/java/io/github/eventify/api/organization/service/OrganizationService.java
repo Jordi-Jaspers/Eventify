@@ -1,5 +1,6 @@
 package io.github.eventify.api.organization.service;
 
+import io.github.eventify.api.notification.service.NotificationDispatchService;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.OrganizationMetaData;
@@ -36,6 +37,7 @@ import static java.util.stream.Stream.*;
 /**
  * Service for managing organizations.
  */
+@SuppressWarnings("PMD.ExcessiveImports")
 @Service
 @RequiredArgsConstructor
 public class OrganizationService {
@@ -47,6 +49,8 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
 
     private final OrganizationMembershipRepository organizationMembershipRepository;
+
+    private final NotificationDispatchService notificationDispatchService;
 
     /**
      * Search and filter organizations with pagination.
@@ -107,8 +111,11 @@ public class OrganizationService {
     @Transactional
     public Organization updateStatus(final Long orgId, final OrganizationStatus status) {
         final Organization organization = findOrganizationById(orgId);
+        final OrganizationStatus oldStatus = organization.getStatus();
         organization.setStatus(status);
-        return organizationRepository.save(organization);
+        final Organization saved = organizationRepository.save(organization);
+        notificationDispatchService.dispatchOrganizationStatusChange(orgId, organization.getName(), oldStatus, status);
+        return saved;
     }
 
     /**

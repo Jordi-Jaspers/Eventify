@@ -9,7 +9,7 @@ Raw ideas and future work. Items here need refinement before development.
 
 - [ ] **Hovering configure button in watchlist has bad contrast** - Fix CSS to ensure the button is visible on hover in all themes.
 - [ ] **The stat cards may be redesigned**
-- [ ] ...
+- [ ] **Slow admin dashboard load times** - Investigate and optimize backend queries, consider adding caching for frequently accessed data, split calls maybe.
 
 ---
 
