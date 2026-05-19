@@ -10,15 +10,14 @@ import lombok.experimental.Accessors;
 
 import java.util.List;
 
-/**
- * Response object containing admin dashboard statistics.
- */
+/** Admin dashboard statistics response. */
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
+@Schema(description = "Admin dashboard statistics")
 public class AdminStatsResponse {
 
     @Schema(
@@ -47,4 +46,64 @@ public class AdminStatsResponse {
         requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private List<GrowthDataPoint> growthData;
+
+    @Schema(
+        description = "Total number of channels in the system",
+        example = "150",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Long totalChannels;
+
+    @Schema(
+        description = "Number of active channels",
+        example = "100",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Long activeChannels;
+
+    @Schema(
+        description = "Number of paused channels",
+        example = "20",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Long pausedChannels;
+
+    @Schema(
+        description = "Number of stale channels",
+        example = "15",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Long staleChannels;
+
+    @Schema(
+        description = "Number of channels pending deletion",
+        example = "5",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Long pendingDeletionChannels;
+
+    @Schema(
+        description = "Total number of events ingested in the selected period",
+        example = "50000",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Long totalEventsInPeriod;
+
+    @Schema(
+        description = "Growth data point with the highest new user count in the period",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private GrowthDataPoint bestGrowthDayUsers;
+
+    @Schema(
+        description = "Growth data point with the highest new organization count in the period",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private GrowthDataPoint bestGrowthDayOrganizations;
+
+    @Schema(
+        description = "Growth data point with the highest new event count in the period",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private GrowthDataPoint bestGrowthDayEvents;
 }

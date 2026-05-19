@@ -7,6 +7,10 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
+- [ ] **Hovering configure button in watchlist has bad contrast** - Fix CSS to ensure the button is visible on hover in all themes.
+- [ ] **The stat cards may be redesigned**
+- [ ] ...
+
 ---
 
 ## Epic: Organization Management

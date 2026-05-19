@@ -3,6 +3,11 @@ package io.github.eventify.api.admin.service;
 import io.github.eventify.api.admin.model.projection.DailyGrowthData;
 import io.github.eventify.api.admin.model.response.AdminStatsResponse;
 import io.github.eventify.api.admin.model.response.GrowthDataPoint;
+import io.github.eventify.api.admin.model.response.TableSizeEntry;
+import io.github.eventify.api.admin.repository.AdminStorageRepository;
+import io.github.eventify.api.channel.model.ChannelStatus;
+import io.github.eventify.api.channel.repository.ChannelRepository;
+import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.support.UnitTest;
@@ -20,6 +25,7 @@ import org.mockito.Mock;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @DisplayName("Unit Test - Admin Stats Service")
@@ -33,9 +39,44 @@ public class AdminStatsServiceTest extends UnitTest {
     @Mock
     private OrganizationRepository organizationRepository;
 
+    @Mock
+    private ChannelRepository channelRepository;
+
+    @Mock
+    private EventRepository eventRepository;
+
+    @Mock
+    private AdminStorageRepository adminStorageRepository;
+
     @BeforeEach
-    public void setUp() {
-        adminStatsService = new AdminStatsService(userRepository, organizationRepository);
+    public void setUp() throws Exception {
+        adminStatsService = new AdminStatsService(
+            userRepository,
+            organizationRepository,
+            channelRepository,
+            eventRepository,
+            adminStorageRepository
+        );
+
+        // Default stub for storage stats
+        lenient().when(adminStorageRepository.getStorageStats()).thenReturn(
+            List.of(
+                TableSizeEntry.builder().tableName("event").sizeBytes(1024L).sizeFormatted("1024 bytes").build(),
+                TableSizeEntry.builder().tableName("notification").sizeBytes(2048L).sizeFormatted("2 kB").build(),
+                TableSizeEntry.builder().tableName("channel").sizeBytes(512L).sizeFormatted("512 bytes").build(),
+                TableSizeEntry.builder().tableName("organization").sizeBytes(256L).sizeFormatted("256 bytes").build(),
+                TableSizeEntry.builder().tableName("app_user").sizeBytes(4096L).sizeFormatted("4 kB").build()
+            )
+        );
+
+        // Default lenient stubs so existing tests don't need to set up new repos
+        lenient().when(channelRepository.count()).thenReturn(0L);
+        lenient().when(channelRepository.countByStatus(ChannelStatus.ACTIVE)).thenReturn(0L);
+        lenient().when(channelRepository.countByStatus(ChannelStatus.PAUSED)).thenReturn(0L);
+        lenient().when(channelRepository.countByIsStaleTrue()).thenReturn(0L);
+        lenient().when(channelRepository.countByStatus(ChannelStatus.PENDING_DELETION)).thenReturn(0L);
+        lenient().when(eventRepository.countByTimestampAfter(any())).thenReturn(0L);
+        lenient().when(eventRepository.findDailyEventCounts(any())).thenReturn(Collections.emptyList());
     }
 
     private DailyGrowthData createMockGrowthData(final LocalDate date, final long total, final long newCount) {
@@ -70,7 +111,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Total organizations should be 5
         assertThat(stats.getTotalOrganizations(), is(equalTo(5L)));
@@ -88,7 +129,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Total users should be 10
         assertThat(stats.getTotalUsers(), is(equalTo(10L)));
@@ -105,7 +146,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Active users should be 7
         assertThat(stats.getActiveUsers(), is(equalTo(7L)));
@@ -122,7 +163,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Active users should be 0
         assertThat(stats.getActiveUsers(), is(equalTo(0L)));
@@ -139,7 +180,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: All counts should be 0
         assertThat(stats.getTotalOrganizations(), is(equalTo(0L)));
@@ -172,7 +213,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Growth data should contain points with cumulative and relative fields
         assertThat(stats.getGrowthData(), is(notNullValue()));
@@ -214,7 +255,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Should return response with 30 days of data (including zeros)
         assertThat(stats, is(notNullValue()));
@@ -233,7 +274,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Response should contain all required fields
         assertThat(stats.getTotalOrganizations(), is(notNullValue()));
@@ -257,7 +298,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Large counts should be stored correctly
         assertThat(stats.getTotalUsers(), is(equalTo(largeUserCount)));
@@ -276,7 +317,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Stats should be calculated for proper date range
         assertThat(stats, is(notNullValue()));
@@ -293,7 +334,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Growth data list should contain 31 entries (30 days + today)
         assertThat(stats.getGrowthData(), is(notNullValue()));
@@ -314,7 +355,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Active users should be <= total users
         assertThat(stats.getActiveUsers(), is(lessThanOrEqualTo(stats.getTotalUsers())));
@@ -347,7 +388,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Today's growth percentage should be 50% based on cumulative totals (150-100)/100
         final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
@@ -386,7 +427,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Today's growth percentage should be -25% based on cumulative totals (75-100)/100
         final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
@@ -425,7 +466,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Today's growth percentage should be 0% based on cumulative totals
         final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
@@ -464,7 +505,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Today's growth percentage should be 0.0 (graceful handling of division by zero)
         final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
@@ -506,7 +547,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Both metrics should be calculated independently based on cumulative totals
         final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
@@ -549,7 +590,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Organizations growth percentage should be -25% based on cumulative totals
         final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
@@ -586,7 +627,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: First day should have null or 0.0 growth percentage
         final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
@@ -629,7 +670,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Percentages should be precise based on cumulative totals
         final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
@@ -672,7 +713,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Organizations growth should handle zero gracefully (returns 0.0)
         final Optional<GrowthDataPoint> todayData = stats.getGrowthData().stream()
@@ -719,7 +760,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: All percentages should be calculated correctly based on cumulative totals
         final Optional<GrowthDataPoint> yesterdayPoint = stats.getGrowthData().stream()
@@ -772,7 +813,7 @@ public class AdminStatsServiceTest extends UnitTest {
         when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
 
         // When: Getting admin stats
-        final AdminStatsResponse stats = adminStatsService.getAdminStats();
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
 
         // Then: Every data point should have percentage fields (not null, even if 0 or null)
         for (final GrowthDataPoint point : stats.getGrowthData()) {
@@ -785,5 +826,397 @@ public class AdminStatsServiceTest extends UnitTest {
                 assertThat(point.getNewOrganizationsGrowthPercentage(), is(instanceOf(Double.class)));
             }
         }
+    }
+
+    // ==================== Days Param Tests ====================
+
+    @Test
+    @DisplayName("Should return 7-day growth data when days=7")
+    public void shouldReturn7DayGrowthDataWhenDaysIs7() {
+        // Given: All repos return empty data
+        when(userRepository.count()).thenReturn(10L);
+        when(organizationRepository.count()).thenReturn(5L);
+        when(userRepository.countByValidatedTrue()).thenReturn(8L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats for 7 days
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(7);
+
+        // Then: Growth data should contain 8 entries (7 days + today)
+        assertThat(stats.getGrowthData(), is(notNullValue()));
+        assertThat(stats.getGrowthData(), hasSize(8));
+    }
+
+    @Test
+    @DisplayName("Should return 90-day growth data when days=90")
+    public void shouldReturn90DayGrowthDataWhenDaysIs90() {
+        // Given: All repos return empty data
+        when(userRepository.count()).thenReturn(10L);
+        when(organizationRepository.count()).thenReturn(5L);
+        when(userRepository.countByValidatedTrue()).thenReturn(8L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats for 90 days
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(90);
+
+        // Then: Growth data should contain 91 entries (90 days + today)
+        assertThat(stats.getGrowthData(), is(notNullValue()));
+        assertThat(stats.getGrowthData(), hasSize(91));
+    }
+
+    // ==================== Channel Stats Tests ====================
+
+    @Test
+    @DisplayName("Should return total channels count")
+    public void shouldReturnTotalChannelsCount() {
+        // Given: 20 channels exist
+        when(userRepository.count()).thenReturn(0L);
+        when(organizationRepository.count()).thenReturn(0L);
+        when(userRepository.countByValidatedTrue()).thenReturn(0L);
+        when(channelRepository.count()).thenReturn(20L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Total channels should be 20
+        assertThat(stats.getTotalChannels(), is(equalTo(20L)));
+    }
+
+    @Test
+    @DisplayName("Should return channel counts by status")
+    public void shouldReturnChannelCountsByStatus() {
+        // Given: Channels with different statuses
+        when(userRepository.count()).thenReturn(0L);
+        when(organizationRepository.count()).thenReturn(0L);
+        when(userRepository.countByValidatedTrue()).thenReturn(0L);
+        when(channelRepository.count()).thenReturn(30L);
+        when(channelRepository.countByStatus(ChannelStatus.ACTIVE)).thenReturn(15L);
+        when(channelRepository.countByStatus(ChannelStatus.PAUSED)).thenReturn(5L);
+        when(channelRepository.countByIsStaleTrue()).thenReturn(7L);
+        when(channelRepository.countByStatus(ChannelStatus.PENDING_DELETION)).thenReturn(3L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Each status count should be correct
+        assertThat(stats.getActiveChannels(), is(equalTo(15L)));
+        assertThat(stats.getPausedChannels(), is(equalTo(5L)));
+        assertThat(stats.getStaleChannels(), is(equalTo(7L)));
+        assertThat(stats.getPendingDeletionChannels(), is(equalTo(3L)));
+    }
+
+    @Test
+    @DisplayName("Should return zero channel counts when no channels exist")
+    public void shouldReturnZeroChannelCountsWhenNoChannelsExist() {
+        // Given: No channels in database
+        when(userRepository.count()).thenReturn(0L);
+        when(organizationRepository.count()).thenReturn(0L);
+        when(userRepository.countByValidatedTrue()).thenReturn(0L);
+        when(channelRepository.count()).thenReturn(0L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: All channel counts should be 0
+        assertThat(stats.getTotalChannels(), is(equalTo(0L)));
+        assertThat(stats.getActiveChannels(), is(equalTo(0L)));
+        assertThat(stats.getPausedChannels(), is(equalTo(0L)));
+        assertThat(stats.getStaleChannels(), is(equalTo(0L)));
+        assertThat(stats.getPendingDeletionChannels(), is(equalTo(0L)));
+    }
+
+    // ==================== Event Stats Tests ====================
+
+    @Test
+    @DisplayName("Should return total events in period")
+    public void shouldReturnTotalEventsInPeriod() {
+        // Given: 500 events in the period
+        when(userRepository.count()).thenReturn(0L);
+        when(organizationRepository.count()).thenReturn(0L);
+        when(userRepository.countByValidatedTrue()).thenReturn(0L);
+        when(eventRepository.countByTimestampAfter(any())).thenReturn(500L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Total events in period should be 500
+        assertThat(stats.getTotalEventsInPeriod(), is(equalTo(500L)));
+    }
+
+    @Test
+    @DisplayName("Should return zero events in period when no events exist")
+    public void shouldReturnZeroEventsInPeriodWhenNoEventsExist() {
+        // Given: No events in the period
+        when(userRepository.count()).thenReturn(0L);
+        when(organizationRepository.count()).thenReturn(0L);
+        when(userRepository.countByValidatedTrue()).thenReturn(0L);
+        when(eventRepository.countByTimestampAfter(any())).thenReturn(0L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Total events in period should be 0
+        assertThat(stats.getTotalEventsInPeriod(), is(equalTo(0L)));
+    }
+
+    // ==================== Best Growth Day Tests ====================
+
+    @Test
+    @DisplayName("Should return best growth day for users when growth data exists")
+    public void shouldReturnBestGrowthDayForUsersWhenGrowthDataExists() {
+        // Given: Multiple days of user growth data
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+        final LocalDate twoDaysAgo = today.minusDays(2);
+
+        // Day with most new users is yesterday (50 new)
+        final List<DailyGrowthData> userGrowthData = List.of(
+            createMockGrowthData(twoDaysAgo, 50L, 5L),
+            createMockGrowthData(yesterday, 100L, 50L),
+            createMockGrowthData(today, 100L, 0L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(userGrowthData);
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Best growth day for users should be yesterday
+        assertThat(stats.getBestGrowthDayUsers(), is(notNullValue()));
+        assertThat(stats.getBestGrowthDayUsers().getDate(), is(equalTo(yesterday)));
+    }
+
+    @Test
+    @DisplayName("Should return null best growth day for users when no growth data exists")
+    public void shouldReturnNullBestGrowthDayForUsersWhenNoGrowthDataExists() {
+        // Given: No growth data
+        when(userRepository.count()).thenReturn(0L);
+        when(organizationRepository.count()).thenReturn(0L);
+        when(userRepository.countByValidatedTrue()).thenReturn(0L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Best growth day for users should be null
+        assertThat(stats.getBestGrowthDayUsers(), is(nullValue()));
+    }
+
+    @Test
+    @DisplayName("Should return best growth day for organizations when growth data exists")
+    public void shouldReturnBestGrowthDayForOrganizationsWhenGrowthDataExists() {
+        // Given: Multiple days of org growth data
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+        final LocalDate twoDaysAgo = today.minusDays(2);
+
+        // Day with most new orgs is two days ago (10 new)
+        final List<DailyGrowthData> orgGrowthData = List.of(
+            createMockGrowthData(twoDaysAgo, 30L, 10L),
+            createMockGrowthData(yesterday, 33L, 3L),
+            createMockGrowthData(today, 35L, 2L)
+        );
+
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(orgGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Best growth day for organizations should be two days ago
+        assertThat(stats.getBestGrowthDayOrganizations(), is(notNullValue()));
+        assertThat(stats.getBestGrowthDayOrganizations().getDate(), is(equalTo(twoDaysAgo)));
+    }
+
+    @Test
+    @DisplayName("Should return null best growth day for organizations when no growth data exists")
+    public void shouldReturnNullBestGrowthDayForOrganizationsWhenNoGrowthDataExists() {
+        // Given: No growth data
+        when(userRepository.count()).thenReturn(0L);
+        when(organizationRepository.count()).thenReturn(0L);
+        when(userRepository.countByValidatedTrue()).thenReturn(0L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Best growth day for organizations should be null
+        assertThat(stats.getBestGrowthDayOrganizations(), is(nullValue()));
+    }
+
+    @Test
+    @DisplayName("Should return best growth day for events when event data exists")
+    public void shouldReturnBestGrowthDayForEventsWhenEventDataExists() {
+        // Given: Multiple days of event growth data
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+        final LocalDate twoDaysAgo = today.minusDays(2);
+
+        // Day with most events is yesterday (1000 events)
+        final List<DailyGrowthData> eventGrowthData = List.of(
+            createMockGrowthData(twoDaysAgo, 200L, 200L),
+            createMockGrowthData(yesterday, 1200L, 1000L),
+            createMockGrowthData(today, 1250L, 50L)
+        );
+
+        when(eventRepository.findDailyEventCounts(any())).thenReturn(eventGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Best growth day for events should be yesterday
+        assertThat(stats.getBestGrowthDayEvents(), is(notNullValue()));
+        assertThat(stats.getBestGrowthDayEvents().getDate(), is(equalTo(yesterday)));
+    }
+
+    @Test
+    @DisplayName("Should return null best growth day for events when no event data exists")
+    public void shouldReturnNullBestGrowthDayForEventsWhenNoEventDataExists() {
+        // Given: No event data
+        when(userRepository.count()).thenReturn(0L);
+        when(organizationRepository.count()).thenReturn(0L);
+        when(userRepository.countByValidatedTrue()).thenReturn(0L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(eventRepository.findDailyEventCounts(any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Best growth day for events should be null
+        assertThat(stats.getBestGrowthDayEvents(), is(nullValue()));
+    }
+
+    // ==================== Growth Data Events Series Tests ====================
+
+    @Test
+    @DisplayName("Should include event counts in growth data points")
+    public void shouldIncludeEventCountsInGrowthDataPoints() {
+        // Given: Event growth data for specific days
+        when(userRepository.count()).thenReturn(100L);
+        when(organizationRepository.count()).thenReturn(50L);
+        when(userRepository.countByValidatedTrue()).thenReturn(80L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+
+        final List<DailyGrowthData> eventGrowthData = List.of(
+            createMockGrowthData(yesterday, 500L, 500L),
+            createMockGrowthData(today, 750L, 250L)
+        );
+
+        when(eventRepository.findDailyEventCounts(any())).thenReturn(eventGrowthData);
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: Growth data points should include event counts
+        final Optional<GrowthDataPoint> yesterdayPoint = stats.getGrowthData().stream()
+            .filter(d -> d.getDate().equals(yesterday))
+            .findFirst();
+
+        assertThat(yesterdayPoint.isPresent(), is(true));
+        if (yesterdayPoint.isPresent()) {
+            assertThat(yesterdayPoint.get().getNewEvents(), is(equalTo(500)));
+        }
+    }
+
+    @Test
+    @DisplayName("Should return zero event counts for days without events")
+    public void shouldReturnZeroEventCountsForDaysWithoutEvents() {
+        // Given: No event data
+        when(userRepository.count()).thenReturn(10L);
+        when(organizationRepository.count()).thenReturn(5L);
+        when(userRepository.countByValidatedTrue()).thenReturn(8L);
+        when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
+        when(eventRepository.findDailyEventCounts(any())).thenReturn(Collections.emptyList());
+
+        // When: Getting admin stats
+        final AdminStatsResponse stats = adminStatsService.getAdminStats(30);
+
+        // Then: All growth data points should have zero event counts
+        for (final GrowthDataPoint point : stats.getGrowthData()) {
+            assertThat(point.getNewEvents(), is(equalTo(0)));
+        }
+    }
+
+    // ==================== Storage Stats Tests ====================
+
+    @Test
+    @DisplayName("Should return storage stats for all 5 tables")
+    public void shouldReturnStorageStatsForAll5Tables() {
+        // Given: No special setup needed (storage uses native queries)
+
+        // When: Getting storage stats
+        final List<TableSizeEntry> storageStats = adminStatsService.getStorageStats();
+
+        // Then: Should return entries for all 5 tables
+        assertThat(storageStats, is(notNullValue()));
+        assertThat(storageStats, hasSize(5));
+    }
+
+    @Test
+    @DisplayName("Should return storage entries with required fields")
+    public void shouldReturnStorageEntriesWithRequiredFields() {
+        // Given: No special setup needed
+
+        // When: Getting storage stats
+        final List<TableSizeEntry> storageStats = adminStatsService.getStorageStats();
+
+        // Then: Each entry should have tableName, sizeBytes, and sizeFormatted
+        for (final TableSizeEntry entry : storageStats) {
+            assertThat(entry.getTableName(), is(notNullValue()));
+            assertThat(entry.getTableName(), not(emptyString()));
+            assertThat(entry.getSizeBytes(), is(notNullValue()));
+            assertThat(entry.getSizeFormatted(), is(notNullValue()));
+        }
+    }
+
+    @Test
+    @DisplayName("Should return storage entries for expected table names")
+    public void shouldReturnStorageEntriesForExpectedTableNames() {
+        // Given: No special setup needed
+
+        // When: Getting storage stats
+        final List<TableSizeEntry> storageStats = adminStatsService.getStorageStats();
+
+        // Then: Table names should include the 5 expected tables
+        final List<String> tableNames = storageStats.stream()
+            .map(TableSizeEntry::getTableName)
+            .toList();
+
+        assertThat(tableNames, hasItems("event", "notification", "channel", "organization", "app_user"));
     }
 }

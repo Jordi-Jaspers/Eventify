@@ -10,15 +10,14 @@ import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 
-/**
- * Response object representing a single growth data point.
- */
+/** Growth data point for a single day. */
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
+@Schema(description = "Growth data point for a single day")
 public class GrowthDataPoint {
 
     @Schema(
@@ -69,4 +68,18 @@ public class GrowthDataPoint {
         requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )
     private Double newOrganizationsGrowthPercentage;
+
+    @Schema(
+        description = "Number of new events ingested on this date",
+        example = "1500",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private int newEvents;
+
+    @Schema(
+        description = "Percentage growth in new events compared to previous period",
+        example = "12.5",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Double newEventsGrowthPercentage;
 }

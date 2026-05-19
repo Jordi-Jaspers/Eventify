@@ -183,6 +183,8 @@ public final class Paths {
 
     public static final String ADMIN_STATS_PATH = ADMIN_PATH + STATS_PART;
 
+    public static final String ADMIN_STATS_STORAGE_PATH = ADMIN_STATS_PATH + "/storage";
+
     public static final String ADMIN_ORGANIZATION_ASSIGN_OWNER_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/owner";
 
     public static final String ADMIN_ORGANIZATION_STATUS_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/status";

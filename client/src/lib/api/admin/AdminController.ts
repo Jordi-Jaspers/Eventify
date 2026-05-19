@@ -1,17 +1,22 @@
 import { client } from '$lib/api/client.ts';
-import type {AdminStatsResponse, AssignOwnerRequest, OrganizationMembershipResponse} from "$lib/api/models.ts";
+import type {AdminStatsResponse, AssignOwnerRequest, OrganizationMembershipResponse, TableSizeEntry} from "$lib/api/models.ts";
 
 /**
  * Get admin dashboard statistics
  */
-export async function getAdminStats(): Promise<AdminStatsResponse> {
-	const { data, error } = await client.GET('/v1/admin/stats');
-
-	if (error) {
-		throw error;
-	}
-
+export async function getAdminStats(days?: number): Promise<AdminStatsResponse> {
+	const { data, error } = await client.GET('/v1/admin/stats', { params: { query: { days } } });
+	if (error) throw error;
 	return data;
+}
+
+/**
+ * Get storage statistics for all tracked database tables
+ */
+export async function getStorageStats(): Promise<TableSizeEntry[]> {
+	const { data, error } = await client.GET('/v1/admin/stats/storage');
+	if (error) throw error;
+	return data ?? [];
 }
 
 /**
@@ -23,14 +28,7 @@ export async function assignOrganizationOwner(orgId: number, request: AssignOwne
 		params: { path: { orgId } },
 		body: request
 	});
-
-	if (error) {
-		throw error;
-	}
-
-	if (!data) {
-		throw new Error('No data returned from assign owner');
-	}
-
+	if (error) throw error;
+	if (!data) throw new Error('No data returned from assign owner');
 	return data as OrganizationMembershipResponse;
 }

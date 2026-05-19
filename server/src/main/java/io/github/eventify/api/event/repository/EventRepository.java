@@ -1,5 +1,6 @@
 package io.github.eventify.api.event.repository;
 
+import io.github.eventify.api.admin.model.projection.DailyGrowthData;
 import io.github.eventify.api.event.model.Event;
 
 import java.time.OffsetDateTime;
@@ -129,6 +130,37 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
      * @return count of events
      */
     long countByChannelIdInAndTimestampAfter(List<Long> channelIds, OffsetDateTime timestamp);
+
+    /**
+     * Counts events with timestamp after the given time.
+     *
+     * @param timestamp the threshold timestamp
+     * @return count of events after the timestamp
+     */
+    Long countByTimestampAfter(OffsetDateTime timestamp);
+
+    /**
+     * Finds daily event counts from the given start date.
+     *
+     * @param since the start date
+     * @return list of daily growth data
+     */
+    @Query(
+        value = """
+            SELECT
+                gs.date::date AS date,
+                (SELECT COUNT(*) FROM event WHERE timestamp < gs.date + INTERVAL '1 day') AS total,
+                (SELECT COUNT(*) FROM event WHERE timestamp >= gs.date AND timestamp < gs.date + INTERVAL '1 day') AS new
+            FROM generate_series(
+                CAST(:since AS timestamp),
+                CAST(NOW() AS timestamp),
+                CAST('1 day' AS interval)
+            ) AS gs(date)
+            ORDER BY gs.date ASC
+            """,
+        nativeQuery = true
+    )
+    List<DailyGrowthData> findDailyEventCounts(@Param("since") OffsetDateTime since);
 
     /**
      * Finds the most recent event for a channel.

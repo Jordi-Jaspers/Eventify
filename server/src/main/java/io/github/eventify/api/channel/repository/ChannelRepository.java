@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Repository for Channel entity.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 @Repository
 public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpecificationExecutor<Channel> {
 
@@ -136,6 +137,21 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * @return optional channel
      */
     Optional<Channel> findByIdAndOrganizationIdAndStatusNot(Long id, Long organizationId, ChannelStatus status);
+
+    /**
+     * Counts channels by status.
+     *
+     * @param status the channel status
+     * @return count of channels with the given status
+     */
+    Long countByStatus(ChannelStatus status);
+
+    /**
+     * Counts channels where isStale is true.
+     *
+     * @return count of stale channels
+     */
+    Long countByIsStaleTrue();
 
     /**
      * Finds all channels by status.

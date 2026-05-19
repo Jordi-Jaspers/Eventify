@@ -38,6 +38,7 @@ export type AssignOwnerRequest = components['schemas']['AssignOwnerRequest'];
 export type AdminStatsResponse = components['schemas']['AdminStatsResponse'];
 export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
 export type AdminApiKeyStatsResponse = components['schemas']['ApiKeyStatsResponse'];
+export type TableSizeEntry = components['schemas']['TableSizeEntry'];
 export type AdminApiKeyAuditResponse = components['schemas']['ApiKeyAuditResponse'];
 export type PageResourceAdminApiKeyAuditResponse =
 	components['schemas']['PageResourceApiKeyAuditResponse'];
