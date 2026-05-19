@@ -1,5 +1,7 @@
 package io.github.eventify.api.user.controller;
 
+import io.github.eventify.api.user.model.ProviderInfo;
+import io.github.eventify.api.user.model.mapper.ProviderMapper;
 import io.github.eventify.api.user.model.response.ProviderResponse;
 import io.github.eventify.api.user.service.UserAuthProviderService;
 import io.github.eventify.common.security.principal.UserTokenPrincipal;
@@ -35,6 +37,8 @@ public class UserProviderController {
 
     private final UserAuthProviderService userAuthProviderService;
 
+    private final ProviderMapper providerMapper;
+
     @GetMapping(
         path = USER_PROVIDERS_PATH,
         produces = APPLICATION_JSON_VALUE
@@ -45,7 +49,8 @@ public class UserProviderController {
     )
     public ResponseEntity<List<ProviderResponse>> listProviders(
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
-        return ResponseEntity.status(OK).body(userAuthProviderService.listProvidersForUser(principal.getUser()));
+        final List<ProviderInfo> providerInfos = userAuthProviderService.listProvidersForUser(principal.getUser());
+        return ResponseEntity.status(OK).body(providerMapper.toResponses(providerInfos));
     }
 
     @DeleteMapping(path = USER_PROVIDER_PATH)

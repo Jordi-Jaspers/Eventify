@@ -1,5 +1,7 @@
 package io.github.eventify.api.quota.controller;
 
+import io.github.eventify.api.quota.model.QuotaStatus;
+import io.github.eventify.api.quota.model.mapper.QuotaMapper;
 import io.github.eventify.api.quota.model.response.UserQuotaResponse;
 import io.github.eventify.api.quota.service.UserQuotaService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +31,8 @@ public class UserQuotaController {
 
     private final UserQuotaService userQuotaService;
 
+    private final QuotaMapper quotaMapper;
+
     @GetMapping(
         path = USER_QUOTA_PATH,
         produces = APPLICATION_JSON_VALUE
@@ -36,7 +40,7 @@ public class UserQuotaController {
     @ResponseStatus(OK)
     @Operation(summary = "Get current event quota status for the authenticated user")
     public ResponseEntity<UserQuotaResponse> getQuota() {
-        final UserQuotaResponse response = userQuotaService.getQuotaStatus(getLoggedInUser().getId());
-        return ResponseEntity.status(OK).body(response);
+        final QuotaStatus quotaStatus = userQuotaService.getQuotaStatus(getLoggedInUser().getId());
+        return ResponseEntity.status(OK).body(quotaMapper.toResponse(quotaStatus));
     }
 }

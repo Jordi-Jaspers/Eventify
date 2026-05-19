@@ -1817,19 +1817,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        ErrorResponseResource: {
-            method?: string;
-            uri?: string;
-            query?: string;
-            contentType?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            statusMessage?: string;
-            errorMessage?: string;
-            txId?: string;
-            traceId?: string;
-            spanId?: string;
-        };
         ApiErrorResponseResource: {
             method?: string;
             uri?: string;
@@ -1844,6 +1831,19 @@ export interface components {
             spanId?: string;
             apiErrorCode?: string;
             apiErrorReason?: string;
+        };
+        ErrorResponseResource: {
+            method?: string;
+            uri?: string;
+            query?: string;
+            contentType?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            statusMessage?: string;
+            errorMessage?: string;
+            txId?: string;
+            traceId?: string;
+            spanId?: string;
         };
         RateLimitErrorResponseResource: {
             method?: string;

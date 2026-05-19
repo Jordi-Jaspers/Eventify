@@ -1,7 +1,7 @@
 package io.github.eventify.api.quota.service;
 
+import io.github.eventify.api.quota.model.QuotaStatus;
 import io.github.eventify.api.quota.model.UserEventQuota;
-import io.github.eventify.api.quota.model.response.UserQuotaResponse;
 import io.github.eventify.api.quota.repository.UserEventQuotaRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.service.UserService;
@@ -190,7 +190,7 @@ public class UserQuotaServiceTest extends UnitTest {
             given(quotaRepository.save(any(UserEventQuota.class))).willAnswer(invocation -> invocation.getArgument(0));
 
             // When: Getting quota status
-            final UserQuotaResponse response = userQuotaService.getQuotaStatus(USER_ID);
+            final QuotaStatus response = userQuotaService.getQuotaStatus(USER_ID);
 
             // Then: New quota record should be created with 0 usage
             assertThat(response.getUsed(), is(0));
@@ -208,7 +208,7 @@ public class UserQuotaServiceTest extends UnitTest {
             given(quotaRepository.findByUserIdWithLock(USER_ID)).willReturn(Optional.of(quota));
 
             // When: Getting quota status
-            final UserQuotaResponse response = userQuotaService.getQuotaStatus(USER_ID);
+            final QuotaStatus response = userQuotaService.getQuotaStatus(USER_ID);
 
             // Then: Response should contain correct values
             assertThat(response.getUsed(), is(eventCount));
@@ -227,7 +227,7 @@ public class UserQuotaServiceTest extends UnitTest {
             given(quotaRepository.findByUserIdWithLock(USER_ID)).willReturn(Optional.of(quota));
 
             // When: Getting quota status
-            final UserQuotaResponse response = userQuotaService.getQuotaStatus(USER_ID);
+            final QuotaStatus response = userQuotaService.getQuotaStatus(USER_ID);
 
             // Then: Percent used should be 34.2
             assertThat(response.getPercentUsed(), is(closeTo(34.2, 0.01)));
@@ -241,7 +241,7 @@ public class UserQuotaServiceTest extends UnitTest {
             given(quotaRepository.findByUserIdWithLock(USER_ID)).willReturn(Optional.of(quota));
 
             // When: Getting quota status
-            final UserQuotaResponse response = userQuotaService.getQuotaStatus(USER_ID);
+            final QuotaStatus response = userQuotaService.getQuotaStatus(USER_ID);
 
             // Then: Percent used should be capped at 100.0
             assertThat(response.getPercentUsed(), is(lessThanOrEqualTo(100.0)));

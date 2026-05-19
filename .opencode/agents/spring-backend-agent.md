@@ -137,8 +137,11 @@ The global skills cover:
 - ✅ All variables `final`
 - ✅ Explicit types (NEVER `var`)
 - ✅ Constructor injection (NO `@Autowired` fields)
-- ✅ NO Java records (standard classes only)
+- ✅ NO Java records (standard classes only, use Lombok @Getter @Builder @AllArgsConstructor @NoArgsConstructor)
 - ✅ Layered architecture: Controller → Service → Repository → Entity
+- ✅ Services return domain objects/entities ONLY — NEVER response DTOs (`*Response` classes)
+- ✅ Controllers are responsible for mapping domain objects → response DTOs (via MapStruct mappers)
+- ✅ Response DTOs live in `model/response/`, domain objects in `model/`
 
 ## Database Migrations
 

@@ -1,5 +1,7 @@
 package io.github.eventify.api.session.controller;
 
+import io.github.eventify.api.session.model.SessionInfo;
+import io.github.eventify.api.session.model.mapper.SessionMapper;
 import io.github.eventify.api.session.model.response.SessionResponse;
 import io.github.eventify.api.session.service.SessionService;
 import io.github.eventify.common.security.principal.UserTokenPrincipal;
@@ -35,6 +37,8 @@ public class SessionController {
 
     private final SessionService sessionService;
 
+    private final SessionMapper sessionMapper;
+
     @GetMapping(
         path = USER_SESSIONS_PATH,
         produces = APPLICATION_JSON_VALUE
@@ -45,7 +49,8 @@ public class SessionController {
     )
     public ResponseEntity<List<SessionResponse>> listSessions(
         @AuthenticationPrincipal final UserTokenPrincipal principal) {
-        return ResponseEntity.status(OK).body(sessionService.listSessionsForUser(principal.getUser(), principal.getRefreshTokenId()));
+        final List<SessionInfo> sessionInfos = sessionService.listSessionsForUser(principal.getUser(), principal.getRefreshTokenId());
+        return ResponseEntity.status(OK).body(sessionMapper.sessionInfosToResponses(sessionInfos));
     }
 
     @DeleteMapping(path = USER_SESSION_PATH)

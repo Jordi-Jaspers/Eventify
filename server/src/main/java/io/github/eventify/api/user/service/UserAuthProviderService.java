@@ -1,9 +1,9 @@
 package io.github.eventify.api.user.service;
 
 import io.github.eventify.api.user.model.AuthProvider;
+import io.github.eventify.api.user.model.ProviderInfo;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.UserAuthProvider;
-import io.github.eventify.api.user.model.response.ProviderResponse;
 import io.github.eventify.api.user.repository.UserAuthProviderRepository;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.exception.LastAuthMethodException;
@@ -47,13 +47,13 @@ public class UserAuthProviderService {
      * @return list of provider responses
      */
     @Transactional(readOnly = true)
-    public List<ProviderResponse> listProvidersForUser(final User user) {
+    public List<ProviderInfo> listProvidersForUser(final User user) {
         final List<UserAuthProvider> linked = userAuthProviderRepository.findAllByUser(user);
         final Map<AuthProvider, UserAuthProvider> linkedMap = linked.stream()
             .collect(Collectors.toMap(UserAuthProvider::getProvider, Function.identity()));
 
         return Arrays.stream(AuthProvider.values())
-            .map(provider -> toProviderResponse(provider, linkedMap.get(provider)))
+            .map(provider -> toProviderInfo(provider, linkedMap.get(provider)))
             .toList();
     }
 
@@ -152,16 +152,17 @@ public class UserAuthProviderService {
         return remainingCount > 0;
     }
 
-    private ProviderResponse toProviderResponse(final AuthProvider provider, final UserAuthProvider linked) {
-        final ProviderResponse response = new ProviderResponse();
-        response.setProvider(provider);
+    private ProviderInfo toProviderInfo(final AuthProvider provider, final UserAuthProvider linked) {
         if (linked != null) {
-            response.setId(linked.getId());
-            response.setConnected(true);
-            response.setProviderEmail(linked.getProviderEmail());
-        } else {
-            response.setConnected(false);
+            return ProviderInfo.builder()
+                .provider(provider.name())
+                .connected(true)
+                .providerEmail(linked.getProviderEmail())
+                .build();
         }
-        return response;
+        return ProviderInfo.builder()
+            .provider(provider.name())
+            .connected(false)
+            .build();
     }
 }
