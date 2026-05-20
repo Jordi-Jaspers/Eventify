@@ -64,7 +64,13 @@ public class TestDataCleanupService {
         // 5. Channels
         jdbcTemplate.execute("DELETE FROM channel WHERE user_id IN " + userIdList);
 
-        // 6. Watchlists
+        // 6. Subscriptions (depends on watchlist and user)
+        jdbcTemplate.execute("DELETE FROM subscription WHERE user_id IN " + userIdList);
+        jdbcTemplate.execute(
+            "DELETE FROM subscription WHERE watchlist_id IN (SELECT id FROM watchlist WHERE user_id IN " + userIdList + ")"
+        );
+
+        // 6b. Watchlists
         jdbcTemplate.execute("DELETE FROM watchlist WHERE user_id IN " + userIdList);
 
         // 7. Organization memberships

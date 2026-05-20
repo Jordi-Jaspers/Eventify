@@ -284,4 +284,11 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
             """
     )
     int clearStaleForActiveChannels(@Param("threshold") OffsetDateTime threshold);
+
+    /**
+     * Finds channels where currentSeverity IS DISTINCT FROM lastNotifiedSeverity.
+     * Used by SeverityTransitionJob to detect severity changes requiring notification.
+     */
+    @Query("SELECT c FROM Channel c WHERE c.currentSeverity IS NOT NULL AND c.currentSeverity <> c.lastNotifiedSeverity")
+    List<Channel> findChannelsWithSeverityChange();
 }

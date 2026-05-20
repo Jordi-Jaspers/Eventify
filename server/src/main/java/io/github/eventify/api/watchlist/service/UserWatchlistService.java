@@ -5,6 +5,7 @@ import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistMetaData;
+import io.github.eventify.api.watchlist.repository.WatchlistChannelRepository;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.common.exception.DuplicateWatchlistNameException;
 import io.github.jframe.datasource.search.model.input.SearchInput;
@@ -23,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static io.github.eventify.api.watchlist.model.WatchlistMetaData.USER_TERM;
-import static io.github.eventify.common.exception.ApiErrorCode.CHANNEL_NOT_FOUND;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 
 /**
@@ -37,16 +37,18 @@ public class UserWatchlistService extends WatchlistService {
     /**
      * Constructor.
      *
-     * @param watchlistRepository the watchlist repository
-     * @param channelRepository   the channel repository
-     * @param watchlistMetaData   the watchlist metadata
+     * @param watchlistRepository        the watchlist repository
+     * @param channelRepository          the channel repository
+     * @param watchlistMetaData          the watchlist metadata
+     * @param watchlistChannelRepository the watchlist channel junction repository
      */
     public UserWatchlistService(
                                 final WatchlistRepository watchlistRepository,
                                 final ChannelRepository channelRepository,
-                                final WatchlistMetaData watchlistMetaData
+                                final WatchlistMetaData watchlistMetaData,
+                                final WatchlistChannelRepository watchlistChannelRepository
     ) {
-        super(watchlistRepository, watchlistMetaData);
+        super(watchlistRepository, watchlistMetaData, watchlistChannelRepository);
         this.channelRepository = channelRepository;
     }
 
@@ -71,7 +73,9 @@ public class UserWatchlistService extends WatchlistService {
         }
         initializeDefaults(watchlist);
 
-        return watchlistRepository.save(watchlist);
+        final Watchlist saved = watchlistRepository.save(watchlist);
+        syncWatchlistChannels(saved);
+        return saved;
     }
 
     /**
@@ -131,7 +135,9 @@ public class UserWatchlistService extends WatchlistService {
         }
         applyUpdates(watchlist, updated);
 
-        return watchlistRepository.save(watchlist);
+        final Watchlist saved = watchlistRepository.save(watchlist);
+        syncWatchlistChannels(saved);
+        return saved;
     }
 
     /**
@@ -162,11 +168,6 @@ public class UserWatchlistService extends WatchlistService {
             .map(Channel::getId)
             .collect(Collectors.toSet());
 
-        channelIds.stream()
-            .filter(id -> !foundIds.contains(id))
-            .findFirst()
-            .ifPresent(id -> {
-                throw new DataNotFoundException(CHANNEL_NOT_FOUND);
-            });
+        validateFoundChannelIds(channelIds, foundIds);
     }
 }

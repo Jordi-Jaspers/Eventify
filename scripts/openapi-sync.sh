@@ -8,12 +8,18 @@ readonly DOCS_URL="http://localhost:8080/api/v1/public/docs"
 
 setup_backend_trap
 
+section "Resetting Database"
+step "Wiping and recreating database"
+"$SCRIPT_DIR/database-reset.sh" && ok
+
 section "Stopping Gradle daemons"
 stop_gradle_daemons
 
 section "Cleanup"
 if [ -f "$OPENAPI_FILE" ]; then
     step "Removing old openapi.json"; rm "$OPENAPI_FILE"; ok
+else
+    info "No existing openapi.json to remove"
 fi
 
 section "Backend Server"

@@ -75,6 +75,8 @@ export type WatchlistConfigurationRequest = components['schemas']['WatchlistConf
 export type WatchlistFiltersRequest = components['schemas']['WatchlistFiltersRequest'];
 export type PageResourceWatchlistDetailsResponse =
 	components['schemas']['PageResourceWatchlistDetailsResponse'];
+export type SubscribeRequest = components['schemas']['SubscribeRequest'];
+export type SubscriptionResponse = components['schemas']['SubscriptionResponse'];
 
 // ================ Monitor ===================
 export type MonitorRequest = components['schemas']['MonitorRequest'];

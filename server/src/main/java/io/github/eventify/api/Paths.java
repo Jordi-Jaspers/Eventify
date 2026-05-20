@@ -59,6 +59,8 @@ public final class Paths {
 
     public static final String WATCHLISTS_PART = "/watchlist";
 
+    public static final String SUBSCRIPTION_PART = "/subscription";
+
     public static final String EVENTS_PART = "/event";
 
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
@@ -164,6 +166,8 @@ public final class Paths {
     public static final String USER_WATCHLISTS_SEARCH_PATH = USER_WATCHLISTS_PATH + SEARCH_PART;
 
     public static final String USER_WATCHLIST_PATH = USER_WATCHLISTS_PATH + ID_PART;
+
+    public static final String USER_WATCHLIST_SUBSCRIPTION_PATH = USER_WATCHLISTS_PATH + "/{watchlistId}" + SUBSCRIPTION_PART;
 
     public static final String USER_EVENTS_PATH = USERS_PATH + EVENTS_PART;
 

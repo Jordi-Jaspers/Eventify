@@ -10,6 +10,7 @@
 		MonitorGroup,
 		MonitorEmptyState,
 		ConfigurePopover,
+		SubscribeWatchlistDialog,
 		TimeAxisHeader,
 		DurationDetailsModal,
 		ZoomBreadcrumb,
@@ -75,6 +76,7 @@
 			<Button variant="outline" size="icon" onclick={service.handleShare} title="Share">
 				<Share2 class="h-4 w-4" />
 			</Button>
+			<SubscribeWatchlistDialog watchlistId={service.watchlist.id!} />
 			<Button variant="outline" onclick={() => goto(service.handleEdit())}>
 				<Edit class="mr-2 h-4 w-4" />
 				Edit Watchlist
