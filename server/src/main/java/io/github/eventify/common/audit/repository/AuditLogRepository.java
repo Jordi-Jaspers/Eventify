@@ -54,6 +54,21 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long>, JpaSp
     )
     List<HourlyBucketProjection> findHourlyBucketsBetween(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
 
+    @Query(
+        value = """
+            SELECT
+                time_bucket('1 day', created_at) AS hour,
+                COUNT(*) AS total,
+                COUNT(*) FILTER (WHERE status_code >= 400) AS errors
+            FROM audit_log
+            WHERE created_at >= :from AND created_at <= :to
+            GROUP BY time_bucket('1 day', created_at)
+            ORDER BY hour ASC
+            """,
+        nativeQuery = true
+    )
+    List<HourlyBucketProjection> findDailyBucketsBetween(@Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
+
     @NonNull
     @Override
     @EntityGraph(attributePaths = "actor")

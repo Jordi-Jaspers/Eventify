@@ -171,13 +171,6 @@
 		}
 	});
 
-	onMount(() => {
-		const today: Date = new Date();
-		const todayStart: string = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-		const todayEnd: string = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
-		dataTableService.setFilter('createdAt', { from: todayStart, to: todayEnd });
-	});
-
 	const errorRate: string = $derived.by((): string => {
 		if (!stats || stats.totalRequests === 0) return '0.0';
 		return ((stats.errorCount / stats.totalRequests) * 100).toFixed(1);
@@ -210,7 +203,7 @@
 		/>
 
 		<!-- Sparkline Timeline -->
-		<AuditLogSparkline {stats} {statsLoading} onHourClick={handleHourClick} />
+		<AuditLogSparkline {stats} {statsLoading} dateFrom={currentDateFilter?.from} dateTo={currentDateFilter?.to} onHourClick={handleHourClick} />
 
 		<!-- DataTable -->
 		<DataTable {columns} service={dataTableService} title="Audit Log" icon={ScrollText}>

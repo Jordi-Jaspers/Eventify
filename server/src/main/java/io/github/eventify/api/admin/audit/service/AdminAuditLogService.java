@@ -9,6 +9,7 @@ import io.github.eventify.common.audit.repository.AuditLogRepository;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -44,7 +45,10 @@ public class AdminAuditLogService {
     @Transactional(readOnly = true)
     public AuditLogStatsData getAuditLogStats(final OffsetDateTime from, final OffsetDateTime to) {
         final AuditLogStatsProjection stats = auditLogRepository.findStatsBetween(from, to);
-        final List<HourlyBucketProjection> buckets = auditLogRepository.findHourlyBucketsBetween(from, to);
+        final Duration range = Duration.between(from, to);
+        final List<HourlyBucketProjection> buckets = range.toHours() <= 24
+            ? auditLogRepository.findHourlyBucketsBetween(from, to)
+            : auditLogRepository.findDailyBucketsBetween(from, to);
         return new AuditLogStatsData(stats, buckets);
     }
 }

@@ -18,6 +18,7 @@
 		data: any[];
 		x?: string;
 		xScale: any;
+		xDomain?: [Date, Date];
 		series: SeriesConfig[];
 		config: ChartConfig;
 		seriesLayout?: 'overlap' | 'stack';
@@ -33,6 +34,7 @@
 		data,
 		x = 'date',
 		xScale,
+		xDomain,
 		series,
 		config,
 		seriesLayout = 'overlap',
@@ -42,6 +44,8 @@
 		loading = false,
 		tooltip
 	}: Props = $props();
+
+	const resolvedXScale = $derived(xDomain ? xScale.domain(xDomain) : xScale);
 </script>
 
 <Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -66,7 +70,7 @@
 				<AreaChart
 					{data}
 					{x}
-					{xScale}
+					xScale={resolvedXScale}
 					series={series.map((s) => ({ key: s.key, label: s.label, value: s.value ?? s.key, color: s.color }))}
 					{seriesLayout}
 					padding={{ top: 10, bottom: 30, left: showYAxis ? 40 : 10, right: 10 }}

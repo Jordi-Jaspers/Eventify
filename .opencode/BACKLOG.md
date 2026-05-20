@@ -7,7 +7,8 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
-- [ ] **Refactor pages to use more components** - some pages are getting to big and hard to maintain, we should refactor them to use more components, like the admin dashboard, the watchlist editor, etc. This will make the code more modular and easier to maintain.
+- [ ] **The configure button in watchlist needs restyling** - it should use an existing component and be different edit watchlist button. also the hover make the text the same color as the background which is not good for accessibility.
+- [ ] **get started should route to login page** - currently it routes to register
 
 ---
 
