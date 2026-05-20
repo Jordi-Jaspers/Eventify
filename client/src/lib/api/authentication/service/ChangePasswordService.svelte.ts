@@ -26,7 +26,7 @@ export function createChangePasswordService() {
         error = null;
 
         try {
-            await updatePassword({ currentPassword, newPassword, confirmPassword });
+            await updatePassword({ oldPassword: currentPassword, newPassword, confirmPassword });
             toast.success('Password updated successfully');
             currentPassword = '';
             newPassword = '';

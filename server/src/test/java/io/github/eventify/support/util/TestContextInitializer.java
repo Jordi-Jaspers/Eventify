@@ -6,6 +6,8 @@ import io.github.eventify.api.apikey.repository.ApiKeyRepository;
 import io.github.eventify.api.authentication.service.AuthenticationService;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.repository.EventRepository;
+import io.github.eventify.api.notification.repository.NotificationBroadcastRepository;
+import io.github.eventify.api.notification.repository.NotificationRepository;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.quota.repository.UserEventQuotaRepository;
@@ -16,6 +18,7 @@ import io.github.eventify.api.user.repository.UserAuthProviderRepository;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
+import io.github.eventify.common.audit.repository.AuditLogRepository;
 import io.github.eventify.support.config.BeanConfiguration;
 import io.github.eventify.support.config.TimescaleLiquibaseConfiguration;
 import io.github.eventify.support.container.TimescaleContainer;
@@ -115,6 +118,9 @@ public class TestContextInitializer {
     protected ApiKeyAuditRepository apiKeyAuditRepository;
 
     @Autowired
+    protected AuditLogRepository auditLogRepository;
+
+    @Autowired
     protected ChannelRepository channelRepository;
 
     @Autowired
@@ -134,5 +140,11 @@ public class TestContextInitializer {
 
     @Autowired
     protected UserAuthProviderRepository userAuthProviderRepository;
+
+    @Autowired
+    protected NotificationRepository notificationRepository;
+
+    @Autowired
+    protected NotificationBroadcastRepository notificationBroadcastRepository;
 
 }

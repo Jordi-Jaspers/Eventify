@@ -4,7 +4,7 @@
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableService } from '$lib/components/data-table/types';
 	import { searchOrganizationChannels, getOrganizationChannel } from '$lib/api/organization/OrganizationChannelController';
-	import { getOrganizationById } from '$lib/api/organization/OrganizationController';
+	import { getOrganizationById } from '$lib/api/admin/AdminOrganizationController';
 	import type {
 		ChannelDetailsResponse,
 		SortablePageInput,
@@ -14,15 +14,18 @@
 	} from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Radio, Plus } from '@lucide/svelte';
+	import { PageHeader } from '$lib/components/ui/page-header';
 	import {
 		CreateChannelSheet,
 		ChannelDetailsSheet,
 		ChannelRow,
+		ChannelBulkActionBar,
 		SendEventsHelpModal
 	} from '$lib/components/channels';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
-	import { ChannelService } from '$lib/services/channel-service';
+	import { ChannelService } from '$lib/api/channel/service/ChannelService';
+	import { createChannelSelectionService } from '$lib/api/channel/service/ChannelSelectionService.svelte';
 	import { channelTableColumns } from '$lib/config/channel-table-columns';
 
 	// Reactive orgId from route params
@@ -38,9 +41,7 @@
 	// Check permissions - canManage if OWNER, ADMIN, or global ADMIN
 	const isGlobalAdmin: boolean = $derived($currentUser?.role === 'ADMIN');
 	const canManage: boolean = $derived.by((): boolean => {
-		// Global admin can always manage
 		if (isGlobalAdmin) return true;
-		// Check if user is OWNER or ADMIN of this specific org
 		if (!organizationFromStore) return false;
 		const role: string | undefined = organizationFromStore.role;
 		return role === 'OWNER' || role === 'ADMIN';
@@ -50,7 +51,6 @@
 	let adminFetchedOrg: OrganizationResponse | null = $state(null);
 	let lastFetchedOrgId: number = $state(0);
 
-	// Fetch org for global admin if not in store
 	$effect(() => {
 		if (!browser) return;
 		const currentOrgId: number = orgId;
@@ -102,7 +102,10 @@
 		}
 	});
 
-
+	// Selection service
+	const selection = createChannelSelectionService(
+		() => dataTableService?.items ?? []
+	);
 
 	// Sheet state
 	let showCreateSheet: boolean = $state(false);
@@ -142,7 +145,6 @@
 		description: string | undefined
 	): Promise<void> {
 		await channelService.updateChannel(channelId, name, description);
-		// Refresh the selected channel to show updated data
 		if (selectedChannel?.id === channelId) {
 			selectedChannel = await getOrganizationChannel(orgId, channelId);
 		}
@@ -151,7 +153,6 @@
 
 	async function handlePauseChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.pauseChannel(channel.id ?? 0);
-		// Refresh the selected channel to show updated status
 		if (selectedChannel?.id === channel.id) {
 			selectedChannel = await getOrganizationChannel(orgId, channel.id!);
 		}
@@ -160,7 +161,6 @@
 
 	async function handleResumeChannel(channel: ChannelDetailsResponse): Promise<void> {
 		await channelService.resumeChannel(channel.id ?? 0);
-		// Refresh the selected channel to show updated status
 		if (selectedChannel?.id === channel.id) {
 			selectedChannel = await getOrganizationChannel(orgId, channel.id!);
 		}
@@ -172,7 +172,22 @@
 		closeDetailsSheet();
 		dataTableService?.load();
 	}
-</script>
+
+	// Bulk action handlers
+	async function handleBulkPause(ids: number[]): Promise<void> {
+		await channelService.pauseChannels(ids);
+		dataTableService?.load();
+	}
+
+	async function handleBulkResume(ids: number[]): Promise<void> {
+		await channelService.resumeChannels(ids);
+		dataTableService?.load();
+	}
+
+	async function handleBulkDelete(ids: number[]): Promise<void> {
+		await channelService.deleteChannels(ids);
+		dataTableService?.load();
+	}</script>
 
 <svelte:head>
 	<title>Channels - {orgName} - Eventify</title>
@@ -182,39 +197,56 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 	<!-- Header -->
-	<div class="flex items-center justify-between mb-8">
-		<div>
-			<h1 class="text-3xl font-bold text-primary">Organization Channels</h1>
-			<p class="text-muted-foreground mt-2">
-				Manage channels for {orgName}
-			</p>
-		</div>
-		{#if canManage}
-			<div class="flex items-center gap-3">
-				<Button onclick={() => (showCreateSheet = true)}>
-					<Plus class="mr-2 h-4 w-4" />
-					New Channel
-				</Button>
-			</div>
-		{/if}
-	</div>
+	<PageHeader title="Organization Channels" description="Manage channels for {orgName}">
+		{#snippet actions()}
+			{#if canManage}
+				<div class="flex items-center gap-3">
+					<Button onclick={() => (showCreateSheet = true)}>
+						<Plus class="mr-2 h-4 w-4" />
+						New Channel
+					</Button>
+				</div>
+			{/if}
+		{/snippet}
+	</PageHeader>
 
 		<!-- DataTable -->
 		{#if dataTableService}
-			<DataTable columns={channelTableColumns} service={dataTableService} title="All Channels" icon={Radio}>
+		<DataTable
+				columns={channelTableColumns}
+				service={dataTableService}
+				title="All Channels"
+				icon={Radio}
+				selectable={canManage}
+				allSelected={selection.isAllSelected}
+				indeterminate={selection.isIndeterminate}
+				onToggleSelectAll={selection.toggleSelectAll}
+			>
 				{#snippet headerActions()}
-					<SendEventsHelpModal
-						apiKeySettingsUrl="/organizations/{orgId}/settings/api-keys"
-					/>
+					{#if canManage && selection.selectedChannels.length > 0}
+						<ChannelBulkActionBar
+							selectedChannels={selection.selectedChannels}
+							onPause={handleBulkPause}
+							onResume={handleBulkResume}
+							onDelete={handleBulkDelete}
+							onClearSelection={selection.clearSelection}
+						/>
+					{:else}
+						<SendEventsHelpModal
+							apiKeySettingsUrl="/organizations/{orgId}/settings/api-keys"
+						/>
+					{/if}
 				{/snippet}
 				{#snippet row(channel: ChannelDetailsResponse)}
 					<ChannelRow
 						{channel}
 						{canManage}
+						selected={selection.selectedIds.has(channel.id ?? 0)}
 						onEdit={openDetailsSheet}
 						onPause={handlePauseChannel}
 						onResume={handleResumeChannel}
 						onDelete={handleDeleteChannel}
+						onToggleSelect={canManage ? selection.toggleSelectChannel : undefined}
 					/>
 				{/snippet}
 			</DataTable>

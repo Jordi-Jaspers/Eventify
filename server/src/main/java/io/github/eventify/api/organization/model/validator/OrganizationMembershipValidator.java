@@ -1,6 +1,6 @@
 package io.github.eventify.api.organization.model.validator;
 
-import io.github.eventify.api.admin.model.request.AssignOwnerRequest;
+import io.github.eventify.api.admin.users.model.request.AssignOwnerRequest;
 import io.github.eventify.api.organization.model.OrganizationalRole;
 import io.github.eventify.api.organization.model.request.AddMemberRequest;
 import io.github.eventify.api.organization.model.request.TransferOwnershipRequest;

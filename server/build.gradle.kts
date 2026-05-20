@@ -91,6 +91,8 @@ dependencies {
         exclude("org.apache.tomcat", module = "tomcat-jdbc")
     }
 
+    implementation("org.springframework.boot", "spring-boot-starter-cache")
+
     // ======= IMPLEMENTATION DEPENDENCIES =======
     // Open API documentation generation.
     implementation("org.springdoc", "springdoc-openapi-starter-webmvc-ui", retrieve("springdocVersion"))
@@ -275,6 +277,11 @@ tasks.withType<JavaCompile> {
             "-Werror"
         )
     )
+}
+
+tasks.named<JavaCompile>("compileTestJava") {
+    options.compilerArgs.remove("-Werror")
+    options.compilerArgs.addAll(arrayOf("-Xlint:-unchecked"))
 }
 
 tasks.named<BootRun>("bootRun") {

@@ -1,5 +1,6 @@
 package io.github.eventify.api.session.service;
 
+import io.github.eventify.api.session.model.SessionInfo;
 import io.github.eventify.api.session.model.mapper.SessionMapper;
 import io.github.eventify.api.session.model.response.SessionResponse;
 import io.github.eventify.api.token.model.Token;
@@ -59,9 +60,9 @@ public class SessionService {
      * @return list of session responses with current flag populated
      */
     @Transactional(readOnly = true)
-    public List<SessionResponse> listSessionsForUser(final User user, final Long currentRefreshTokenId) {
+    public List<SessionInfo> listSessionsForUser(final User user, final Long currentRefreshTokenId) {
         return listSessions(user).stream()
-            .map(token -> toResponseWithCurrentFlag(token, currentRefreshTokenId))
+            .map(token -> toSessionInfo(token, currentRefreshTokenId))
             .toList();
     }
 
@@ -103,9 +104,18 @@ public class SessionService {
         return session;
     }
 
-    private SessionResponse toResponseWithCurrentFlag(final Token token, final Long currentRefreshTokenId) {
+    private SessionInfo toSessionInfo(final Token token, final Long currentRefreshTokenId) {
         final SessionResponse response = sessionMapper.toResponse(token);
-        response.setCurrent(token.getId().equals(currentRefreshTokenId));
-        return response;
+        final boolean current = token.getId().equals(currentRefreshTokenId);
+        return SessionInfo.builder()
+            .id(response.getId())
+            .deviceInfo(response.getDeviceInfo())
+            .ipAddress(response.getIpAddress())
+            .userAgent(response.getUserAgent())
+            .lastActiveAt(response.getLastActiveAt())
+            .createdAt(response.getCreatedAt())
+            .current(current)
+            .expiresAt(response.getExpiresAt())
+            .build();
     }
 }

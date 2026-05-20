@@ -59,6 +59,8 @@ public final class Paths {
 
     public static final String WATCHLISTS_PART = "/watchlist";
 
+    public static final String SUBSCRIPTION_PART = "/subscription";
+
     public static final String EVENTS_PART = "/event";
 
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
@@ -78,6 +80,10 @@ public final class Paths {
     public static final String PUBLIC_VALIDATE_EMAIL_PATH = PUBLIC_PATH + "/email/validate";
 
     public static final String PUBLIC_ERROR_PATH = PUBLIC_PATH + ERROR_PART;
+
+    public static final String PUBLIC_CHANGELOG_PATH = PUBLIC_PATH + "/changelog";
+
+    public static final String PUBLIC_CHANGELOG_VERSION_PATH = PUBLIC_CHANGELOG_PATH + "/{version}";
 
     /* ------------------------------- AUTH ENDPOINTS ------------------------------- */
 
@@ -149,9 +155,9 @@ public final class Paths {
 
     public static final String USER_CHANNEL_PATH = USER_CHANNELS_PATH + ID_PART;
 
-    public static final String USER_CHANNEL_PAUSE_PATH = USER_CHANNEL_PATH + PAUSE_PART;
+    public static final String USER_CHANNELS_PAUSE_PATH = USER_CHANNELS_PATH + PAUSE_PART;
 
-    public static final String USER_CHANNEL_RESUME_PATH = USER_CHANNEL_PATH + RESUME_PART;
+    public static final String USER_CHANNELS_RESUME_PATH = USER_CHANNELS_PATH + RESUME_PART;
 
     public static final String USER_RETENTION_SETTINGS_PATH = USERS_PATH + RETENTION_SETTINGS_PART;
 
@@ -160,6 +166,8 @@ public final class Paths {
     public static final String USER_WATCHLISTS_SEARCH_PATH = USER_WATCHLISTS_PATH + SEARCH_PART;
 
     public static final String USER_WATCHLIST_PATH = USER_WATCHLISTS_PATH + ID_PART;
+
+    public static final String USER_WATCHLIST_SUBSCRIPTION_PATH = USER_WATCHLISTS_PATH + "/{watchlistId}" + SUBSCRIPTION_PART;
 
     public static final String USER_EVENTS_PATH = USERS_PATH + EVENTS_PART;
 
@@ -179,7 +187,19 @@ public final class Paths {
 
     public static final String ADMIN_STATS_PATH = ADMIN_PATH + STATS_PART;
 
+    public static final String ADMIN_STATS_STORAGE_PATH = ADMIN_STATS_PATH + "/storage";
+
+    public static final String ADMIN_STATS_EVENTS_PATH = ADMIN_STATS_PATH + "/events";
+
+    public static final String ADMIN_STATS_COUNTS_PATH = ADMIN_STATS_PATH + "/counts";
+
+    public static final String ADMIN_STATS_GROWTH_PATH = ADMIN_STATS_PATH + "/growth";
+
+    public static final String ADMIN_STATS_EVENT_VOLUME_PATH = ADMIN_STATS_PATH + "/event-volume";
+
     public static final String ADMIN_ORGANIZATION_ASSIGN_OWNER_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/owner";
+
+    public static final String ADMIN_ORGANIZATION_STATUS_PATH = ADMIN_PATH + ORGANIZATIONS_PART + "/{orgId}/status";
 
     public static final String ADMIN_API_KEYS_STATS_PATH = ADMIN_PATH + API_KEYS_PART + STATS_PART;
 
@@ -219,9 +239,9 @@ public final class Paths {
 
     public static final String ORGANIZATION_CHANNEL_PATH = ORGANIZATION_CHANNELS_PATH + ID_PART;
 
-    public static final String ORGANIZATION_CHANNEL_PAUSE_PATH = ORGANIZATION_CHANNEL_PATH + PAUSE_PART;
+    public static final String ORGANIZATION_CHANNELS_PAUSE_PATH = ORGANIZATION_CHANNELS_PATH + PAUSE_PART;
 
-    public static final String ORGANIZATION_CHANNEL_RESUME_PATH = ORGANIZATION_CHANNEL_PATH + RESUME_PART;
+    public static final String ORGANIZATION_CHANNELS_RESUME_PATH = ORGANIZATION_CHANNELS_PATH + RESUME_PART;
 
     public static final String ORGANIZATION_RETENTION_SETTINGS_PATH = ORGANIZATION_PATH + RETENTION_SETTINGS_PART;
 
@@ -266,6 +286,46 @@ public final class Paths {
     public static final String USER_CHANNEL_DURATIONS_PATH = USER_CHANNELS_PATH + ID_PART + DURATIONS_PART;
 
     public static final String ORGANIZATION_CHANNEL_DURATIONS_PATH = ORGANIZATION_CHANNELS_PATH + ID_PART + DURATIONS_PART;
+
+    /* ------------------------------- NOTIFICATION ENDPOINTS ------------------------------- */
+
+    public static final String NOTIFICATIONS_PART = "/notifications";
+
+    public static final String NOTIFICATIONS_PATH = BASE_PATH + NOTIFICATIONS_PART;
+
+    public static final String NOTIFICATION_PATH = NOTIFICATIONS_PATH + ID_PART;
+
+    public static final String NOTIFICATIONS_UNREAD_COUNT_PATH = NOTIFICATIONS_PATH + "/unread-count";
+
+    public static final String NOTIFICATION_READ_PATH = NOTIFICATION_PATH + "/read";
+
+    public static final String NOTIFICATIONS_READ_ALL_PATH = NOTIFICATIONS_PATH + "/read-all";
+
+    public static final String NOTIFICATIONS_SEARCH_PATH = NOTIFICATIONS_PATH + SEARCH_PART;
+
+    /* ------------------------------- ADMIN NOTIFICATION ENDPOINTS ------------------------------- */
+
+    public static final String ADMIN_NOTIFICATIONS_PATH = ADMIN_PATH + NOTIFICATIONS_PART;
+
+    public static final String ADMIN_BROADCASTS_PART = "/broadcasts";
+
+    public static final String ADMIN_BROADCASTS_PATH = ADMIN_NOTIFICATIONS_PATH + ADMIN_BROADCASTS_PART;
+
+    public static final String ADMIN_BROADCASTS_SEARCH_PATH = ADMIN_BROADCASTS_PATH + SEARCH_PART;
+
+    public static final String ADMIN_BROADCASTS_PREVIEW_PATH = ADMIN_BROADCASTS_PATH + "/preview";
+
+    public static final String ADMIN_BROADCAST_RECIPIENTS_PATH = ADMIN_BROADCASTS_PATH + "/{id}/recipients";
+
+    public static final String ADMIN_BROADCAST_RECIPIENTS_SEARCH_PATH = ADMIN_BROADCAST_RECIPIENTS_PATH + SEARCH_PART;
+
+    /* ------------------------------- ADMIN AUDIT LOG ENDPOINTS ------------------------------- */
+
+    public static final String ADMIN_AUDIT_LOG_PART = "/audit-log";
+
+    public static final String ADMIN_AUDIT_LOG_SEARCH_PATH = ADMIN_PATH + ADMIN_AUDIT_LOG_PART + SEARCH_PART;
+
+    public static final String ADMIN_AUDIT_LOG_STATS_PATH = ADMIN_PATH + ADMIN_AUDIT_LOG_PART + STATS_PART;
 
     /* ------------------------------- END ------------------------------- */
 

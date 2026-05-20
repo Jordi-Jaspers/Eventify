@@ -1,6 +1,6 @@
 package io.github.eventify.api.user.repository;
 
-import io.github.eventify.api.admin.model.projection.DailyGrowthData;
+import io.github.eventify.api.admin.stats.model.projection.DailyGrowthData;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
 
@@ -128,6 +128,14 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
         @Param("start") OffsetDateTime start,
         @Param("end") OffsetDateTime end
     );
+
+    /**
+     * Find all users with the given role.
+     *
+     * @param role the role to filter by.
+     * @return the users with the given role.
+     */
+    List<User> findAllByRole(@NonNull Role role);
 
     /**
      * Find user by id with organizations eagerly loaded.

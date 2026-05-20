@@ -5,7 +5,7 @@
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { LayoutDashboard, Shield, Building2, Users, UserCog, Settings, Key, Radio, ClipboardList, Activity } from '@lucide/svelte';
+	import { LayoutDashboard, Shield, Building2, Users, UserCog, Settings, Key, Radio, ClipboardList, Activity, BarChart3, Database, Wrench } from '@lucide/svelte';
 
 	interface Props {
 		currentPath: string;
@@ -152,44 +152,31 @@
 				<Sidebar.Menu>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton
-								onclick={() => goto(CLIENT_ROUTES.ADMIN_DASHBOARD_PAGE.path)}
-								isActive={isActive(CLIENT_ROUTES.ADMIN_DASHBOARD_PAGE.path)}
+								onclick={() => goto(CLIENT_ROUTES.ADMIN_STATISTICS_PAGE.path)}
+								isActive={currentPath.startsWith('/admin/statistics')}
 						>
-							<Shield class="size-4" />
-							<span>Admin Dashboard</span>
+							<BarChart3 class="size-4" />
+							<span>Statistics</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
 
-					<!-- Organizations -->
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton
-								onclick={() => goto(CLIENT_ROUTES.ADMIN_ORGANIZATIONS_PAGE.path)}
-								isActive={currentPath.startsWith('/admin/organizations')}
+								onclick={() => goto(CLIENT_ROUTES.ADMIN_RESOURCES_PAGE.path)}
+								isActive={currentPath.startsWith('/admin/resources')}
 						>
-							<Building2 class="size-4" />
-							<span>Organizations</span>
+							<Database class="size-4" />
+							<span>Resources</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
 
-					<!-- Users -->
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton
-								onclick={() => goto(CLIENT_ROUTES.ADMIN_USERS_PAGE.path)}
-								isActive={currentPath.startsWith('/admin/users')}
+								onclick={() => goto(CLIENT_ROUTES.ADMIN_TOOLS_PAGE.path)}
+								isActive={currentPath.startsWith('/admin/tools')}
 						>
-							<UserCog class="size-4" />
-							<span>Users</span>
-						</Sidebar.MenuButton>
-					</Sidebar.MenuItem>
-
-					<!-- API Keys -->
-					<Sidebar.MenuItem>
-						<Sidebar.MenuButton
-								onclick={() => goto(CLIENT_ROUTES.ADMIN_API_KEYS_PAGE.path)}
-								isActive={currentPath.startsWith('/admin/api-keys')}
-						>
-							<Key class="size-4" />
-							<span>API Keys</span>
+							<Wrench class="size-4" />
+							<span>Tools</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
 				</Sidebar.Menu>

@@ -66,7 +66,7 @@
 					>
 						Pricing
 					</Button>
-					<Button href={CLIENT_ROUTES.REGISTER_PAGE.path}>Get Started</Button>
+					<Button href={CLIENT_ROUTES.LOGIN_PAGE.path}>Get Started</Button>
 				{/if}
 			</div>
 
@@ -127,9 +127,9 @@
 							Dashboard
 						</Button>
 					{:else}
-						<Button href={CLIENT_ROUTES.REGISTER_PAGE.path} class="w-full h-12 text-base">
-							Get Started
-						</Button>
+					<Button href={CLIENT_ROUTES.LOGIN_PAGE.path} class="w-full h-12 text-base">
+						Get Started
+					</Button>
 					{/if}
 				</div>
 			</div>

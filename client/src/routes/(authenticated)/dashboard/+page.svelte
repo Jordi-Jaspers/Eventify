@@ -2,18 +2,19 @@
     import { goto } from '$app/navigation';
     import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '$lib/components/ui/card';
     import { Badge } from '$lib/components/ui/badge';
-    import {Clock, Shield, User, Building2, Activity, Radio, AlertTriangle} from '@lucide/svelte';
+    import {Clock, Shield, User, Building2, Activity, Radio, AlertTriangle, Mail} from '@lucide/svelte';
     import {authStore} from '$lib/stores/auth';
     import { organizationStore } from '$lib/stores/organization.svelte';
     import type { UserOrganizationResponse, DashboardStatsResponse } from '$lib/api/models';
     import { CLIENT_ROUTES } from '$lib/config/routes';
     import {getOrganizationalRoleBadgeClass, getUserRoleBadgeClass} from '$lib/utils/role';
     import { formatDate, formatRelativeTime } from '$lib/utils/date';
-    import { getDashboardStats, getErrorRateVariant } from '$lib/services/dashboard.service';
+    import { getDashboardStats, getErrorRateVariant } from '$lib/api/dashboard/DashboardController';
     import { handleError } from '$lib/utils/error-handler';
     import { toast } from 'svelte-sonner';
     import { StatCard } from '$lib/components/ui/stat-card';
     import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
+    import { InfoField } from '$lib/components/ui/info-field';
 
     const organizations: UserOrganizationResponse[] = $derived(organizationStore.organizations);
     const loading: boolean = $derived(organizationStore.loading);
@@ -68,10 +69,7 @@
                 <!-- User Info Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Email -->
-                    <div class="p-4 rounded-lg bg-background/50 border border-border/50">
-                        <p class="text-xs text-muted-foreground mb-1">Email Address</p>
-                        <p class="font-medium text-foreground">{$authStore.user?.email || 'N/A'}</p>
-                    </div>
+                    <InfoField label="Email Address" value={$authStore.user?.email || 'N/A'} icon={Mail} />
 
                     <!-- Role -->
                     <div class="p-4 rounded-lg bg-background/50 border border-border/50">

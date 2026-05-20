@@ -1,5 +1,6 @@
 package io.github.eventify.api.session.service;
 
+import io.github.eventify.api.session.model.SessionInfo;
 import io.github.eventify.api.session.model.mapper.SessionMapper;
 import io.github.eventify.api.session.model.response.SessionResponse;
 import io.github.eventify.api.token.model.Token;
@@ -208,18 +209,18 @@ public class SessionServiceTest extends UnitTest {
         when(sessionMapper.toResponse(token2)).thenReturn(aSessionResponse(2L));
 
         // When: Listing sessions with token2 as current
-        final List<SessionResponse> responses = sessionService.listSessionsForUser(user, 2L);
+        final List<SessionInfo> responses = sessionService.listSessionsForUser(user, 2L);
 
         // Then: token2's response should be marked as current
         assertThat(responses, hasSize(2));
-        final SessionResponse currentSession = responses.stream()
-            .filter(SessionResponse::isCurrent)
+        final SessionInfo currentSession = responses.stream()
+            .filter(SessionInfo::isCurrent)
             .findFirst()
             .orElseThrow(() -> new AssertionError("No current session found"));
         assertThat(currentSession.getId(), is(equalTo(2L)));
 
         // And: token1's response should NOT be current
-        final SessionResponse otherSession = responses.stream()
+        final SessionInfo otherSession = responses.stream()
             .filter(r -> !r.isCurrent())
             .findFirst()
             .orElseThrow(() -> new AssertionError("No non-current session found"));
@@ -238,7 +239,7 @@ public class SessionServiceTest extends UnitTest {
         when(sessionMapper.toResponse(token1)).thenReturn(aSessionResponse(1L));
 
         // When: Listing sessions with null current id
-        final List<SessionResponse> responses = sessionService.listSessionsForUser(user, null);
+        final List<SessionInfo> responses = sessionService.listSessionsForUser(user, null);
 
         // Then: No session should be marked as current
         assertThat(responses, hasSize(1));

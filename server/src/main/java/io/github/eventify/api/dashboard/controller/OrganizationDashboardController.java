@@ -1,5 +1,7 @@
 package io.github.eventify.api.dashboard.controller;
 
+import io.github.eventify.api.dashboard.model.DashboardStats;
+import io.github.eventify.api.dashboard.model.mapper.DashboardStatsMapper;
 import io.github.eventify.api.dashboard.model.response.DashboardStatsResponse;
 import io.github.eventify.api.dashboard.service.DashboardStatsService;
 import io.github.eventify.common.security.principal.UserTokenPrincipal;
@@ -32,6 +34,8 @@ public class OrganizationDashboardController {
 
     private final DashboardStatsService dashboardStatsService;
 
+    private final DashboardStatsMapper dashboardStatsMapper;
+
     @ResponseStatus(OK)
     @PreAuthorize("@orgSecurity.isMember(#orgId, #principal.user.id)")
     @Operation(summary = "Get organization dashboard statistics")
@@ -43,7 +47,7 @@ public class OrganizationDashboardController {
         @PathVariable final Long orgId,
         @AuthenticationPrincipal final UserTokenPrincipal principal
     ) {
-        final DashboardStatsResponse stats = dashboardStatsService.getOrganizationStats(orgId);
-        return ResponseEntity.status(OK).body(stats);
+        final DashboardStats stats = dashboardStatsService.getOrganizationStats(orgId);
+        return ResponseEntity.status(OK).body(dashboardStatsMapper.toResponse(stats));
     }
 }

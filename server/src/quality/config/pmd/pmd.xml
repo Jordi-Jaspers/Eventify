@@ -23,6 +23,7 @@
 <!--        <exclude name="JUnit4TestShouldUseAfterAnnotation"/>-->
 <!--        <exclude name="JUnit4TestShouldUseTestAnnotation"/>-->
 <!--        <exclude name="UnusedImports"/> &lt;!&ndash; deprecated in favour of UnnecessaryImport &ndash;&gt;-->
+        <exclude name="UnnecessaryWarningSuppression"/>
     </rule>
 
 
@@ -99,6 +100,11 @@
     <rule ref="category/java/design.xml/TooManyMethods" message="Avoid classes longer than 20 methods">
         <properties>
             <property name="maxmethods" value="20"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/ExcessiveImports">
+        <properties>
+            <property name="minimum" value="35"/>
         </properties>
     </rule>
 

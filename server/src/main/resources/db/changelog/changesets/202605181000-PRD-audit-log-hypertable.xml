@@ -1,0 +1,41 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202605181000-PRD-audit-log-hypertable.xml">
+
+    <changeSet id="202605181000-PRD-audit-log-hypertable-1" author="jordi.jaspers">
+        <comment>Convert audit_log to TimescaleDB hypertable for time-series optimization.</comment>
+        <sql>
+            -- Drop the existing primary key (hypertables need partition column in PK)
+            ALTER TABLE audit_log DROP CONSTRAINT audit_log_pkey;
+
+            -- Add composite primary key including created_at (required for hypertable)
+            ALTER TABLE audit_log ADD PRIMARY KEY (id, created_at);
+
+            -- Convert to hypertable with 1-day chunks
+            SELECT create_hypertable('audit_log', 'created_at', migrate_data => true, chunk_time_interval => INTERVAL '1 day');
+
+            -- Enable compression for chunks older than 7 days
+            ALTER TABLE audit_log SET (
+                timescaledb.compress,
+                timescaledb.compress_segmentby = 'actor_id',
+                timescaledb.compress_orderby = 'created_at DESC'
+            );
+
+            -- Add compression policy: compress chunks older than 7 days
+            SELECT add_compression_policy('audit_log', INTERVAL '7 days');
+
+            -- Add retention policy: drop chunks older than 90 days
+            SELECT add_retention_policy('audit_log', INTERVAL '90 days');
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605181000-PRD-audit-log-hypertable-2" author="jordi.jaspers">
+        <comment>Add documentation for hypertable configuration.</comment>
+        <sql>
+            COMMENT ON TABLE audit_log IS 'TimescaleDB hypertable storing audit log entries. Chunks: 1 day. Compression: after 7 days. Retention: 90 days.';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

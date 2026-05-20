@@ -1,11 +1,13 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
+    import { mode, setMode } from 'mode-watcher';
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import Button from '$lib/components/ui/button/button.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
     import { Sun, Moon, Check, X, Loader2, ArrowLeft, GripVertical, Radio, Folder, ChevronDown, Edit, Trash2, Menu, LayoutList, AlertCircle, Mail, User, Settings, ShieldCheck } from '@lucide/svelte';
     import { Badge } from '$lib/components/ui/badge';
+    import * as Tooltip from '$lib/components/ui/tooltip';
     import { DateTimePicker } from '$lib/components/ui/date-time-picker';
     import { StatCard } from '$lib/components/ui/stat-card';
     import { Key, Users, Building2, Activity, AlertTriangle, Clock, TrendingUp, Shield } from '@lucide/svelte';
@@ -18,7 +20,107 @@
     import { CodeBlockWithCopy } from '$lib/components/ui/code-block-with-copy';
     import { getEnvironment, showDevCredentials } from '$lib/config/env';
     import type { Environment } from '$lib/config/env';
+    import { DataTable, createDataTableService } from '$lib/components/data-table';
+    import type { DataTableColumn } from '$lib/components/data-table/types';
+    import type { PageResource, SortablePageInput, ChannelDetailsResponse } from '$lib/api/models';
+    import { Checkbox } from '$lib/components/ui/checkbox';
+    import { ChannelRow, ChannelBulkActionBar } from '$lib/components/channels';
+    import { createChannelSelectionService } from '$lib/api/channel/service/ChannelSelectionService.svelte';
+    import { channelTableColumns } from '$lib/config/channel-table-columns';
+    import { PageHeader } from '$lib/components/ui/page-header';
+    import { PasswordInput } from '$lib/components/ui/password-input';
+    import { RevokeApiKeyAlertDialog } from '$lib/components/api-keys';
+    import { WatchlistTableRow } from '$lib/components/watchlist';
+    import ConfirmDialog from '$lib/components/ui/confirm-dialog/confirm-dialog.svelte';
+    import { ClipboardList, Eye, Plus } from '@lucide/svelte';
+
+    // DataTable demo — mock ChannelDetailsResponse data
+    const demoChannels: ChannelDetailsResponse[] = [
+        {
+            id: 1,
+            name: 'Production API',
+            slug: 'prod.api.events',
+            description: 'Production backend event stream for monitoring API health and performance metrics',
+            status: 'ACTIVE',
+            createdAt: '2026-01-08T10:30:00Z',
+            updatedAt: '2026-05-15T14:20:00Z',
+            lastEventAt: '2026-05-16T09:45:00Z',
+            isStale: false
+        },
+        {
+            id: 2,
+            name: 'Staging Environment',
+            slug: 'staging.backend.logs',
+            description: 'Staging environment logs for pre-release testing and QA validation',
+            status: 'PAUSED',
+            createdAt: '2026-02-14T08:00:00Z',
+            updatedAt: '2026-04-20T11:30:00Z',
+            lastEventAt: '2026-04-20T11:30:00Z',
+            isStale: true
+        },
+        {
+            id: 3,
+            name: 'Dev Sandbox',
+            slug: 'dev.sandbox.errors',
+            description: 'Development sandbox for testing new integrations and error handling flows',
+            status: 'ACTIVE',
+            createdAt: '2026-03-01T16:45:00Z',
+            updatedAt: '2026-05-14T18:00:00Z',
+            lastEventAt: '2026-05-14T18:00:00Z',
+            isStale: false
+        },
+        {
+            id: 4,
+            name: 'Mobile App Crashes',
+            slug: 'mobile.app.crashes',
+            description: 'Crash reports from iOS and Android mobile applications',
+            status: 'ACTIVE',
+            createdAt: '2026-01-20T12:00:00Z',
+            updatedAt: '2026-05-16T08:15:00Z',
+            lastEventAt: '2026-05-16T08:15:00Z',
+            isStale: false
+        },
+        {
+            id: 5,
+            name: 'Legacy Webhook',
+            slug: 'legacy.webhook.inbound',
+            description: 'Inbound webhook events from legacy third-party integrations scheduled for migration',
+            status: 'PAUSED',
+            createdAt: '2025-11-05T09:00:00Z',
+            updatedAt: '2026-03-10T10:00:00Z',
+            isStale: true
+        }
+    ];
+
+    async function demoFetchFn(_input: SortablePageInput): Promise<PageResource<ChannelDetailsResponse>> {
+        return {
+            content: demoChannels,
+            totalElements: demoChannels.length,
+            totalPages: 1,
+            pageNumber: 0,
+            pageSize: 10
+        };
+    }
+
+    const demoService = createDataTableService<ChannelDetailsResponse>({
+        fetchFn: demoFetchFn,
+        pageSize: 10
+    });
+
+    const demoSelection = createChannelSelectionService(() => demoService.items);
+
+    // No-op handlers for demo
+    function demoNoOp(_channel: ChannelDetailsResponse): void {}
+    async function demoBulkNoOp(_ids: number[]): Promise<void> {}
+
+    onMount(() => demoService.load());
     
+    // Phase 1-2 component demos
+    let demoPassword: string = $state('');
+    let demoPassword2: string = $state('');
+    let showRevokeDialog: boolean = $state(false);
+    let showConfirmDialog: boolean = $state(false);
+
     // DateTimePicker state
     let dateTimeValue1: string = $state('');
     let dateTimeValue2: string = $state(new Date().toISOString());
@@ -34,21 +136,12 @@
     });
     
     // Theme toggle
-    let isDarkMode = $state(true);
+    const isDarkMode: boolean = $derived(mode.current === 'dark');
     let mobileNavOpen = $state(false);
     
     function toggleTheme() {
-        isDarkMode = !isDarkMode;
-        if (isDarkMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        setMode(isDarkMode ? 'light' : 'dark');
     }
-    
-    onMount(() => {
-        isDarkMode = document.documentElement.classList.contains('dark');
-    });
 
     // Get current environment
     const currentEnvironment: Environment = $derived(getEnvironment());
@@ -82,7 +175,12 @@
                 { id: 'status-indicator', label: 'Status Indicator' },
                 { id: 'info-field', label: 'Info Field' },
                 { id: 'section-header', label: 'Section Header' },
-                { id: 'code-block-with-copy', label: 'Code Block with Copy' }
+                { id: 'code-block-with-copy', label: 'Code Block with Copy' },
+                { id: 'page-header', label: 'PageHeader' },
+                { id: 'password-input', label: 'PasswordInput' },
+                { id: 'revoke-api-key-dialog', label: 'RevokeApiKeyAlertDialog' },
+                { id: 'confirm-dialog', label: 'ConfirmDialog' },
+                { id: 'watchlist-table-row', label: 'WatchlistTableRow' }
             ]
         },
         {
@@ -1688,48 +1786,42 @@
                         <CardDescription>Use this styling for all DataTable row snippets</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div class="rounded-lg border border-border/50 overflow-hidden">
-                            <!-- Header -->
-                            <div class="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/30 text-sm font-medium text-muted-foreground border-b border-border/50">
-                                <div class="col-span-3">Channel</div>
-                                <div class="col-span-4">Description</div>
-                                <div class="col-span-2">Status</div>
-                                <div class="col-span-2">Created</div>
-                                <div class="col-span-1"></div>
-                            </div>
-                            
-                            <!-- Rows -->
-                            <div class="divide-y divide-border/30">
-                                <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all">
-                                    <div class="col-span-3 flex items-center gap-3">
-                                        <Radio class="h-5 w-5 text-primary shrink-0" />
-                                        <span class="font-medium truncate">Production API</span>
-                                    </div>
-                                    <div class="col-span-4 text-sm text-muted-foreground truncate">Main production channel</div>
-                                    <div class="col-span-2"><Badge variant="default">Active</Badge></div>
-                                    <div class="col-span-2 text-sm text-muted-foreground">Jan 15, 2026</div>
-                                    <div class="col-span-1 flex justify-end">
-                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
-                                            <Edit class="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-12 items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-all">
-                                    <div class="col-span-3 flex items-center gap-3">
-                                        <Radio class="h-5 w-5 text-primary shrink-0" />
-                                        <span class="font-medium truncate">Staging</span>
-                                    </div>
-                                    <div class="col-span-4 text-sm text-muted-foreground truncate">Pre-production testing</div>
-                                    <div class="col-span-2"><Badge variant="secondary">Paused</Badge></div>
-                                    <div class="col-span-2 text-sm text-muted-foreground">Jan 10, 2026</div>
-                                    <div class="col-span-1 flex justify-end">
-                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-primary">
-                                            <Edit class="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <Tooltip.Provider>
+                        <DataTable
+                            columns={channelTableColumns}
+                            service={demoService}
+                            title="Demo Channels"
+                            icon={Radio}
+                            selectable={true}
+                            allSelected={demoSelection.isAllSelected}
+                            indeterminate={demoSelection.isIndeterminate}
+                            onToggleSelectAll={demoSelection.toggleSelectAll}
+                        >
+                            {#snippet headerActions()}
+                                {#if demoSelection.selectedChannels.length > 0}
+                                    <ChannelBulkActionBar
+                                        selectedChannels={demoSelection.selectedChannels}
+                                        onPause={demoBulkNoOp}
+                                        onResume={demoBulkNoOp}
+                                        onDelete={demoBulkNoOp}
+                                        onClearSelection={demoSelection.clearSelection}
+                                    />
+                                {/if}
+                            {/snippet}
+                            {#snippet row(channel: ChannelDetailsResponse)}
+                                <ChannelRow
+                                    {channel}
+                                    canManage={true}
+                                    selected={demoSelection.selectedIds.has(channel.id ?? 0)}
+                                    onEdit={demoNoOp}
+                                    onPause={demoNoOp}
+                                    onResume={demoNoOp}
+                                    onDelete={demoNoOp}
+                                    onToggleSelect={demoSelection.toggleSelectChannel}
+                                />
+                            {/snippet}
+                        </DataTable>
+                        </Tooltip.Provider>
                     </CardContent>
                 </Card>
             </section>
@@ -1821,6 +1913,130 @@
                         <p class="text-center text-sm text-muted-foreground">
                             Don't have an account? <a href="/register" class="text-primary hover:underline">Sign up</a>
                         </p>
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- PageHeader -->
+            <section id="page-header" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">PageHeader</h2>
+                <p class="text-muted-foreground mb-6">Standardized page header with title, description, and optional action buttons.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Variants</CardTitle>
+                        <CardDescription>With and without action slot</CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-6">
+                        <PageHeader title="My Channels" description="Manage your personal channels for organizing events">
+                            {#snippet actions()}
+                                <Button><Plus class="mr-2 h-4 w-4" />New Channel</Button>
+                            {/snippet}
+                        </PageHeader>
+                        <div class="border-t border-border/30 pt-4">
+                            <PageHeader title="Users" description="Manage and monitor all users on the platform" />
+                        </div>
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- PasswordInput -->
+            <section id="password-input" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">PasswordInput</h2>
+                <p class="text-muted-foreground mb-6">Password field with show/hide toggle, accessibility, and disabled state.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">States</CardTitle>
+                        <CardDescription>Enabled and disabled</CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-4 max-w-sm">
+                        <div>
+                            <label for="demo-pw" class="text-sm font-medium mb-1 block">Password</label>
+                            <PasswordInput id="demo-pw" placeholder="Enter your password" bind:value={demoPassword} />
+                        </div>
+                        <div>
+                            <label for="demo-pw2" class="text-sm font-medium mb-1 block">Disabled</label>
+                            <PasswordInput id="demo-pw2" placeholder="Disabled field" bind:value={demoPassword2} disabled={true} />
+                        </div>
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- RevokeApiKeyAlertDialog -->
+            <section id="revoke-api-key-dialog" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">RevokeApiKeyAlertDialog</h2>
+                <p class="text-muted-foreground mb-6">Confirmation dialog for revoking API keys.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Demo</CardTitle>
+                        <CardDescription>Click to trigger the revoke confirmation</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button variant="destructive" onclick={() => (showRevokeDialog = true)}>Revoke API Key</Button>
+                        <RevokeApiKeyAlertDialog
+                            open={showRevokeDialog}
+                            onOpenChange={(o) => (showRevokeDialog = o)}
+                            keyName="my-production-key"
+                            isRevoking={false}
+                            onConfirm={() => (showRevokeDialog = false)}
+                        />
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- ConfirmDialog -->
+            <section id="confirm-dialog" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">ConfirmDialog</h2>
+                <p class="text-muted-foreground mb-6">Generic confirmation dialog with destructive variant.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Demo</CardTitle>
+                        <CardDescription>Click to trigger the delete confirmation</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button variant="outline" onclick={() => (showConfirmDialog = true)}>Delete Item</Button>
+                        <ConfirmDialog
+                            open={showConfirmDialog}
+                            title="Delete Watchlist"
+                            confirmLabel="Delete"
+                            destructive={true}
+                            onOpenChange={(o) => (showConfirmDialog = o)}
+                            onConfirm={() => (showConfirmDialog = false)}
+                        >
+                            {#snippet description()}
+                                Are you sure you want to delete "Production Monitor"? This action cannot be undone.
+                            {/snippet}
+                        </ConfirmDialog>
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- WatchlistTableRow -->
+            <section id="watchlist-table-row" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">WatchlistTableRow</h2>
+                <p class="text-muted-foreground mb-6">Reusable table row for watchlist items with actions.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Demo</CardTitle>
+                        <CardDescription>Two sample rows with monitor, edit, and delete actions</CardDescription>
+                    </CardHeader>
+                    <CardContent class="p-0">
+                        <WatchlistTableRow
+                            watchlist={{ id: 1, name: 'Production Monitor', description: 'Monitors all production channels for downtime', createdAt: '2026-01-15T10:00:00Z' }}
+                            onMonitor={() => {}}
+                            onEdit={() => {}}
+                            onDelete={() => {}}
+                        />
+                        <WatchlistTableRow
+                            watchlist={{ id: 2, name: 'Staging Health', description: 'Tracks staging environment health metrics', createdAt: '2026-03-20T14:30:00Z' }}
+                            onMonitor={() => {}}
+                            onEdit={() => {}}
+                            onDelete={() => {}}
+                        />
                     </CardContent>
                 </Card>
             </section>

@@ -98,8 +98,13 @@ public class Channel implements PageableItem, Serializable, TimelineSource {
     @Transient
     private Timeline timeline;
 
-    @Transient
+    @Column(name = "current_severity")
+    @Enumerated(EnumType.STRING)
     private Severity currentSeverity;
+
+    @Column(name = "last_notified_severity")
+    @Enumerated(EnumType.STRING)
+    private Severity lastNotifiedSeverity;
 
     /**
      * Creates a new channel with the specified name, slug, user, and organization.

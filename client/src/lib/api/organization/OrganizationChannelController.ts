@@ -72,11 +72,12 @@ export async function updateOrganizationChannel(
 }
 
 /**
- * Pause organization channel
+ * Batch pause organization channels
  */
-export async function pauseOrganizationChannel(orgId: number, id: number): Promise<void> {
-	const { error } = await client.POST('/v1/organization/{orgId}/channels/{id}/pause', {
-		params: { path: { orgId, id } }
+export async function pauseOrganizationChannels(orgId: number, ids: number[]): Promise<void> {
+	const { error } = await client.POST('/v1/organization/{orgId}/channels/pause', {
+		params: { path: { orgId } },
+		body: { channelIds: ids }
 	});
 
 	if (error) {
@@ -85,11 +86,12 @@ export async function pauseOrganizationChannel(orgId: number, id: number): Promi
 }
 
 /**
- * Resume organization channel
+ * Batch resume organization channels
  */
-export async function resumeOrganizationChannel(orgId: number, id: number): Promise<void> {
-	const { error } = await client.POST('/v1/organization/{orgId}/channels/{id}/resume', {
-		params: { path: { orgId, id } }
+export async function resumeOrganizationChannels(orgId: number, ids: number[]): Promise<void> {
+	const { error } = await client.POST('/v1/organization/{orgId}/channels/resume', {
+		params: { path: { orgId } },
+		body: { channelIds: ids }
 	});
 
 	if (error) {
@@ -98,11 +100,12 @@ export async function resumeOrganizationChannel(orgId: number, id: number): Prom
 }
 
 /**
- * Delete organization channel
+ * Batch delete organization channels
  */
-export async function deleteOrganizationChannel(orgId: number, id: number): Promise<void> {
-	const { error } = await client.DELETE('/v1/organization/{orgId}/channels/{id}', {
-		params: { path: { orgId, id } }
+export async function deleteOrganizationChannels(orgId: number, ids: number[]): Promise<void> {
+	const { error } = await client.DELETE('/v1/organization/{orgId}/channels', {
+		params: { path: { orgId } },
+		body: { channelIds: ids }
 	});
 
 	if (error) {

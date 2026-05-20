@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Repository for Channel entity.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 @Repository
 public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpecificationExecutor<Channel> {
 
@@ -138,6 +139,21 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
     Optional<Channel> findByIdAndOrganizationIdAndStatusNot(Long id, Long organizationId, ChannelStatus status);
 
     /**
+     * Counts channels by status.
+     *
+     * @param status the channel status
+     * @return count of channels with the given status
+     */
+    Long countByStatus(ChannelStatus status);
+
+    /**
+     * Counts channels where isStale is true.
+     *
+     * @return count of stale channels
+     */
+    Long countByIsStaleTrue();
+
+    /**
      * Finds all channels by status.
      *
      * @param status the channel status
@@ -161,6 +177,23 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
             """
     )
     List<Channel> findAllByIdInAndOrganizationId(@Param("ids") List<Long> ids, @Param("organizationId") Long organizationId);
+
+    /**
+     * Finds all organization channels by IDs and organization ID, excluding deleted ones (batch query).
+     *
+     * @param ids            the channel IDs
+     * @param organizationId the organization ID
+     * @return list of active channels
+     */
+    @Query(
+        """
+            SELECT c FROM Channel c
+            WHERE c.id IN :ids
+            AND c.organization.id = :organizationId
+            AND c.status != 'PENDING_DELETION'
+            """
+    )
+    List<Channel> findActiveByIdInAndOrganizationId(@Param("ids") List<Long> ids, @Param("organizationId") Long organizationId);
 
     /**
      * Finds personal channels by user ID and status.
@@ -251,4 +284,11 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
             """
     )
     int clearStaleForActiveChannels(@Param("threshold") OffsetDateTime threshold);
+
+    /**
+     * Finds channels where currentSeverity IS DISTINCT FROM lastNotifiedSeverity.
+     * Used by SeverityTransitionJob to detect severity changes requiring notification.
+     */
+    @Query("SELECT c FROM Channel c WHERE c.currentSeverity IS NOT NULL AND c.currentSeverity <> c.lastNotifiedSeverity")
+    List<Channel> findChannelsWithSeverityChange();
 }

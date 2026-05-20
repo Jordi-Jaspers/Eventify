@@ -1,5 +1,6 @@
 package io.github.eventify.common.security.oauth2;
 
+import io.github.eventify.api.notification.service.NotificationDispatchService;
 import io.github.eventify.api.user.model.AuthProvider;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.UserAuthProvider;
@@ -50,6 +51,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserAuthProviderService userAuthProviderService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final NotificationDispatchService notificationDispatchService;
 
     /**
      * Loads the OAuth2 user from the provider and processes the authentication or linking flow.
@@ -173,7 +176,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         try {
             final User user = new User(oAuth2UserInfo);
             user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-            return userRepository.save(user);
+            final User savedUser = userRepository.save(user);
+            notificationDispatchService.dispatchWelcomeNotification(savedUser);
+            return savedUser;
         } catch (final DataIntegrityViolationException exception) {
             log.debug("User already exists with email: {}", oAuth2UserInfo.getEmail());
             throw new OAuth2Exception(USER_ALREADY_EXISTS_ERROR.getReason(), exception);

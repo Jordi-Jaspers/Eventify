@@ -6,6 +6,8 @@ import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.support.UnitTest;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -58,6 +60,8 @@ public class OAuth2AuthenticationSuccessHandlerHandleFailureTest extends UnitTes
 
     @BeforeEach
     public void setUp() {
+        OAuth2AttributesHolder.clear();
+
         handler = new OAuth2AuthenticationSuccessHandler(
             tokenService,
             userService,
@@ -65,6 +69,9 @@ public class OAuth2AuthenticationSuccessHandlerHandleFailureTest extends UnitTes
             redirectHelper
         );
         handler.setRedirectStrategy(redirectStrategy);
+
+        // Prevent NPE in processAuthentication when wrapping null deviceId in Optional
+        when(cookieService.readDeviceId(any(HttpServletRequest.class))).thenReturn(Optional.of(UUID.randomUUID()));
     }
 
     @Test

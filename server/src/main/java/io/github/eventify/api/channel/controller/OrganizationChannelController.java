@@ -2,6 +2,7 @@ package io.github.eventify.api.channel.controller;
 
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.mapper.ChannelMapper;
+import io.github.eventify.api.channel.model.request.ChannelBatchRequest;
 import io.github.eventify.api.channel.model.request.CreateChannelRequest;
 import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.model.response.ChannelDetailsResponse;
@@ -31,6 +32,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  */
 @RestController
 @RequiredArgsConstructor
+@SuppressWarnings("ClassFanOutComplexity")
 @Tag(
     name = "Organization Channels",
     description = "Manage channels at organization level for event streaming"
@@ -125,57 +127,60 @@ public class OrganizationChannelController {
     }
 
     @PostMapping(
-        path = ORGANIZATION_CHANNEL_PAUSE_PATH,
-        produces = APPLICATION_JSON_VALUE
+        path = ORGANIZATION_CHANNELS_PAUSE_PATH,
+        consumes = APPLICATION_JSON_VALUE
     )
-    @ResponseStatus(OK)
+    @ResponseStatus(NO_CONTENT)
     @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) or hasAuthority('MANAGE_ORGANIZATIONS')")
     @Operation(
-        summary = "Pause organization channel",
-        description = "Pauses an organization channel (idempotent). Requires OWNER or ADMIN role."
+        summary = "Batch pause organization channels",
+        description = "Pauses multiple organization channels in a single request (idempotent). Requires OWNER or ADMIN role."
     )
-    public ResponseEntity<ChannelDetailsResponse> pauseOrganizationChannel(
+    public ResponseEntity<Void> batchPauseOrganizationChannels(
         @PathVariable final Long orgId,
-        @PathVariable final Long id
+        @RequestBody final ChannelBatchRequest request
     ) {
-        final Channel channel = organizationChannelService.pauseOrganizationChannel(orgId, id);
-        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
+        channelValidator.validateAndThrow(request);
+        organizationChannelService.batchPauseOrganizationChannels(orgId, request.getChannelIds());
+        return ResponseEntity.status(NO_CONTENT).build();
     }
 
     @PostMapping(
-        path = ORGANIZATION_CHANNEL_RESUME_PATH,
-        produces = APPLICATION_JSON_VALUE
+        path = ORGANIZATION_CHANNELS_RESUME_PATH,
+        consumes = APPLICATION_JSON_VALUE
     )
-    @ResponseStatus(OK)
+    @ResponseStatus(NO_CONTENT)
     @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) or hasAuthority('MANAGE_ORGANIZATIONS')")
     @Operation(
-        summary = "Resume organization channel",
-        description = "Resumes a paused organization channel (idempotent). Requires OWNER or ADMIN role."
+        summary = "Batch resume organization channels",
+        description = "Resumes multiple organization channels in a single request (idempotent). Requires OWNER or ADMIN role."
     )
-    public ResponseEntity<ChannelDetailsResponse> resumeOrganizationChannel(
+    public ResponseEntity<Void> batchResumeOrganizationChannels(
         @PathVariable final Long orgId,
-        @PathVariable final Long id
+        @RequestBody final ChannelBatchRequest request
     ) {
-        final Channel channel = organizationChannelService.resumeOrganizationChannel(orgId, id);
-        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
+        channelValidator.validateAndThrow(request);
+        organizationChannelService.batchResumeOrganizationChannels(orgId, request.getChannelIds());
+        return ResponseEntity.status(NO_CONTENT).build();
     }
 
     @DeleteMapping(
-        path = ORGANIZATION_CHANNEL_PATH,
-        produces = APPLICATION_JSON_VALUE
+        path = ORGANIZATION_CHANNELS_PATH,
+        consumes = APPLICATION_JSON_VALUE
     )
-    @ResponseStatus(OK)
+    @ResponseStatus(NO_CONTENT)
     @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) or hasAuthority('MANAGE_ORGANIZATIONS')")
     @Operation(
-        summary = "Delete organization channel",
-        description = "Soft deletes an organization channel (sets status to PENDING_DELETION). Requires OWNER or ADMIN role."
+        summary = "Batch delete organization channels",
+        description = "Soft deletes multiple organization channels in a single request. Requires OWNER or ADMIN role."
     )
-    public ResponseEntity<ChannelDetailsResponse> deleteOrganizationChannel(
+    public ResponseEntity<Void> batchDeleteOrganizationChannels(
         @PathVariable final Long orgId,
-        @PathVariable final Long id
+        @RequestBody final ChannelBatchRequest request
     ) {
-        final Channel channel = organizationChannelService.deleteOrganizationChannel(orgId, id);
-        return ResponseEntity.status(OK).body(channelMapper.toResourceObject(channel));
+        channelValidator.validateAndThrow(request);
+        organizationChannelService.batchDeleteOrganizationChannels(orgId, request.getChannelIds());
+        return ResponseEntity.status(NO_CONTENT).build();
     }
 
     @PostMapping(
@@ -191,11 +196,9 @@ public class OrganizationChannelController {
         summary = "Get organization channel duration details",
         description = "Fetches duration details around a specific timestamp for an organization channel"
     )
-    public ResponseEntity<DurationDetailsResponse> getOrganizationChannelDurations(
-        @PathVariable final Long orgId,
+    public ResponseEntity<DurationDetailsResponse> getOrganizationChannelDurations(@PathVariable final Long orgId,
         @PathVariable final Long id,
-        @RequestBody final DurationDetailsRequest request
-    ) {
+        @RequestBody final DurationDetailsRequest request) {
         final DurationDetailsResponse response = durationService.getDurations(
             id,
             request.getTimestamp(),

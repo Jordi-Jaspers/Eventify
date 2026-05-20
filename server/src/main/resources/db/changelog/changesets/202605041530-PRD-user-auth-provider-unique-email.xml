@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202605041530-PRD-user-auth-provider-unique-email.xml">
 
-    <changeSet id="202605041530-PRD-user-auth-provider-unique-email-1" author="jordi.hernandez">
+    <changeSet id="202605041530-PRD-user-auth-provider-unique-email-1" author="jordi.jaspers">
         <comment>Add unique partial index on user_auth_provider(provider, provider_email) to enforce K4 at DB level.
             Uses a partial index (WHERE provider_email IS NOT NULL) to allow null provider_email on LOCAL rows.
         </comment>
@@ -16,7 +16,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202605041530-PRD-user-auth-provider-unique-email-2" author="jordi.hernandez">
+    <changeSet id="202605041530-PRD-user-auth-provider-unique-email-2" author="jordi.jaspers">
         <comment>Add documentation for the unique index on user_auth_provider.</comment>
         <sql>
             COMMENT ON INDEX idx_user_auth_provider_provider_email_unique

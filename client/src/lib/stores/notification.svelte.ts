@@ -1,63 +1,167 @@
-import { versionStore } from '$lib/stores/version.svelte';
-import { getLatestVersion, changelog } from '$lib/data/changelog';
-import type { NotificationItem } from '$lib/types/notification';
-import type { ChangelogEntry } from '$lib/types/changelog';
+import { client } from '$lib/api/client';
+import { isAuthenticated } from '$lib/stores/auth';
+import { get } from 'svelte/store';
+import type { NotificationResponse, PageResourceNotificationResponse } from '$lib/api/models';
 
-const MAX_NOTIFICATIONS: number = 5;
-
-function compareVersions(a: string, b: string): number {
-	const partsA: number[] = a.split('.').map(Number);
-	const partsB: number[] = b.split('.').map(Number);
-	for (let i: number = 0; i < Math.max(partsA.length, partsB.length); i++) {
-		const diff: number = (partsA[i] ?? 0) - (partsB[i] ?? 0);
-		if (diff !== 0) return diff;
-	}
-	return 0;
-}
+const PAGE_SIZE: number = 20;
+const POLL_INTERVAL_MS: number = 30_000;
 
 class NotificationStore {
 	#isPanelOpen: boolean = $state(false);
+	#notifications: NotificationResponse[] = $state([]);
+	#unreadCount: number = $state(0);
+	#currentPage: number = $state(0);
+	#totalPages: number = $state(0);
+	#pollTimer: ReturnType<typeof setInterval> | null = null;
+	#unsubscribeAuth: (() => void) | null = null;
+	#onVisibilityChange: (() => void) | null = null;
 
 	get isPanelOpen(): boolean {
 		return this.#isPanelOpen;
 	}
 
-	get notifications(): NotificationItem[] {
-		const lastSeen: string = versionStore.lastSeenVersion;
-
-		return changelog
-			.filter((entry: ChangelogEntry): boolean => !lastSeen || compareVersions(entry.version, lastSeen) > 0)
-			.slice(0, MAX_NOTIFICATIONS)
-			.map((entry: ChangelogEntry): NotificationItem => ({
-				id: `changelog-${entry.version}`,
-				type: 'changelog',
-				title: `Version ${entry.version} released`,
-				description: entry.features?.[0] ?? entry.improvements?.[0] ?? undefined,
-				date: entry.date,
-				read: false,
-				actionLabel: 'View full changelog',
-				actionPath: '/changelog'
-			}));
+	get notifications(): NotificationResponse[] {
+		return this.#notifications;
 	}
 
 	get unreadCount(): number {
-		return this.notifications.length;
+		return this.#unreadCount;
 	}
 
 	get hasUnread(): boolean {
-		return this.unreadCount > 0;
+		return this.#unreadCount > 0;
 	}
 
-	markAllAsRead(): void {
-		versionStore.markAsSeen();
+	get hasMore(): boolean {
+		return this.#currentPage + 1 < this.#totalPages;
 	}
 
-	openPanel(): void {
+	async #fetchNotifications(page: number = 0): Promise<void> {
+		const { data } = await client.POST('/v1/notifications/search', {
+			body: {
+				pageNumber: page,
+				pageSize: PAGE_SIZE,
+				sortOrder: [{ name: 'createdAt', direction: 'DESC' }]
+			}
+		});
+		const result: PageResourceNotificationResponse | undefined = data;
+		if (!result) return;
+
+		if (page === 0) {
+			this.#notifications = result.content ?? [];
+		} else {
+			this.#notifications = [...this.#notifications, ...(result.content ?? [])];
+		}
+		this.#currentPage = result.pageNumber ?? 0;
+		this.#totalPages = result.totalPages ?? 0;
+	}
+
+	async #fetchUnreadCount(): Promise<void> {
+		if (!get(isAuthenticated)) return;
+		const { data } = await client.GET('/v1/notifications/unread-count');
+		if (data) {
+			this.#unreadCount = data.count;
+		}
+	}
+
+	#startPolling(): void {
+		this.#stopPolling();
+		this.#pollTimer = setInterval(async (): Promise<void> => {
+			if (document.visibilityState === 'visible' && get(isAuthenticated)) {
+				await this.#fetchUnreadCount();
+			}
+		}, POLL_INTERVAL_MS);
+	}
+
+	#stopPolling(): void {
+		if (this.#pollTimer !== null) {
+			clearInterval(this.#pollTimer);
+			this.#pollTimer = null;
+		}
+	}
+
+	init(): void {
+		if (typeof document === 'undefined') return;
+		// Guard against multiple init() calls
+		if (this.#unsubscribeAuth !== null) return;
+
+		this.#unsubscribeAuth = isAuthenticated.subscribe((authenticated: boolean): void => {
+			if (authenticated) {
+				this.#fetchUnreadCount();
+				this.#startPolling();
+			} else {
+				this.#stopPolling();
+				this.#notifications = [];
+				this.#unreadCount = 0;
+			}
+		});
+
+		this.#onVisibilityChange = (): void => {
+			if (document.visibilityState === 'visible' && get(isAuthenticated)) {
+				this.#fetchUnreadCount();
+			}
+		};
+		document.addEventListener('visibilitychange', this.#onVisibilityChange);
+	}
+
+	destroy(): void {
+		this.#stopPolling();
+		this.#unsubscribeAuth?.();
+		this.#unsubscribeAuth = null;
+		if (this.#onVisibilityChange && typeof document !== 'undefined') {
+			document.removeEventListener('visibilitychange', this.#onVisibilityChange);
+			this.#onVisibilityChange = null;
+		}
+	}
+
+	async openPanel(): Promise<void> {
 		this.#isPanelOpen = true;
+		await this.#fetchNotifications(0);
 	}
 
 	closePanel(): void {
 		this.#isPanelOpen = false;
+	}
+
+	async markAsRead(id: number): Promise<void> {
+		// Optimistic update
+		const previous: NotificationResponse[] = this.#notifications;
+		const previousCount: number = this.#unreadCount;
+		this.#notifications = this.#notifications.map(
+			(n: NotificationResponse): NotificationResponse =>
+				n.id === id ? { ...n, readAt: new Date().toISOString() } : n
+		);
+		this.#unreadCount = Math.max(0, this.#unreadCount - 1);
+
+		const { error } = await client.POST('/v1/notifications/{id}/read', {
+			params: { path: { id } }
+		});
+		if (error) {
+			this.#notifications = previous;
+			this.#unreadCount = previousCount;
+		}
+	}
+
+	async markAllAsRead(): Promise<void> {
+		// Optimistic update
+		const previous: NotificationResponse[] = this.#notifications;
+		const previousCount: number = this.#unreadCount;
+		const now: string = new Date().toISOString();
+		this.#notifications = this.#notifications.map(
+			(n: NotificationResponse): NotificationResponse => ({ ...n, readAt: now })
+		);
+		this.#unreadCount = 0;
+
+		const { error } = await client.POST('/v1/notifications/read-all');
+		if (error) {
+			this.#notifications = previous;
+			this.#unreadCount = previousCount;
+		}
+	}
+
+	async loadMore(): Promise<void> {
+		if (!this.hasMore) return;
+		await this.#fetchNotifications(this.#currentPage + 1);
 	}
 }
 

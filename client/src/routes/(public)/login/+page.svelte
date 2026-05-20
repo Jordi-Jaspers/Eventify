@@ -12,7 +12,8 @@
     import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
     import {toast} from 'svelte-sonner';
-    import {CircleAlert, Eye, EyeOff, Info, LoaderCircle, Shield, Terminal} from '@lucide/svelte';
+    import {CircleAlert, Info, LoaderCircle, Shield, Terminal} from '@lucide/svelte';
+    import { PasswordInput } from '$lib/components/ui/password-input';
     import {handleError} from '$lib/utils/error-handler';
     import {getDevCredentials} from '$lib/api/dev/DevController';
     import type {DevCredentialsResponse} from '$lib/api/models';
@@ -27,7 +28,6 @@
 
     let email: string = $state('');
     let password: string = $state('');
-    let showPassword: boolean = $state(false);
     let isSubmitting: boolean = $state(false);
     let rememberMe: boolean = $state(false);
 
@@ -72,10 +72,6 @@
         } finally {
             isSubmitting = false;
         }
-    }
-
-    function togglePasswordVisibility(): void {
-        showPassword = !showPassword;
     }
 
     function fillDevCredentials(): void {
@@ -168,29 +164,13 @@
                             Forgot password?
                         </a>
                     </div>
-                    <div class="relative">
-                        <Input
+                    <div class="space-y-2">
+                        <PasswordInput
                                 id="password"
-                                type={showPassword ? 'text' : 'password'}
                                 placeholder="Enter your password"
                                 bind:value={password}
                                 disabled={isSubmitting}
-                                class="pr-10 bg-background/50"
                         />
-                        <button
-                                type="button"
-                                onclick={togglePasswordVisibility}
-                                disabled={isSubmitting}
-                                class="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground hover:text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
-                                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                                tabindex="0"
-                        >
-                            {#if showPassword}
-                                <EyeOff class="h-4 w-4"/>
-                            {:else}
-                                <Eye class="h-4 w-4"/>
-                            {/if}
-                        </button>
                     </div>
                 </div>
 

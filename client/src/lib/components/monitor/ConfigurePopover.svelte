@@ -84,8 +84,9 @@
 		{#snippet child({ props }: { props: Record<string, any> })}
 			<Button
 				{...props}
-				variant="outline"
-				class="relative gap-2 border-border/50 bg-background/30 backdrop-blur-sm hover:bg-background/50 hover:border-primary/50 transition-all duration-200"
+				variant="default"
+				size="sm"
+				class="relative gap-2"
 			>
 				<Settings class="h-4 w-4" />
 				<span class="hidden sm:inline">Configure</span>

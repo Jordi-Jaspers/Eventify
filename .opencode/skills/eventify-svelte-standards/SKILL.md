@@ -29,6 +29,30 @@ const user = await fetchUser();
 import type { UserDetailsResponse, OrganizationResponse } from '$lib/api/models';
 ```
 
+**Enums must be derived from generated types using `NonNullable<>`:**
+
+```typescript
+// ✅ CORRECT — derived from generated schema
+export type BroadcastCategory = NonNullable<BroadcastResponse['category']>;
+export type Severity = NonNullable<ChannelResponse['currentSeverity']>;
+
+// ❌ WRONG — hardcoded string literals
+export type BroadcastCategory = 'ANNOUNCEMENT' | 'SYSTEM' | 'ALERT';
+```
+
+All enum types live in the `// ================ Enums ===================` section of `models.ts`.
+
+**Always use `client` from `$lib/api/client` in controllers (never raw `fetch`):**
+
+```typescript
+// ✅ CORRECT
+import { client } from '../client';
+const { data, error } = await client.GET('/v1/user/details');
+
+// ❌ WRONG
+const response = await fetch(`${SERVER_BASE_URL}/v1/user/details`, { ... });
+```
+
 ---
 
 ## Project Structure
@@ -435,6 +459,30 @@ Add to dev-playbook if the component is:
 
 Examples: StatusIndicator, InfoField, SectionHeader, EditableField, RoleBadge
 
+### Dev Playbook Section Template
+
+Every section in `(public)/dev-playbook/+page.svelte` MUST follow this exact structure:
+
+```svelte
+<!-- ComponentName -->
+<section id="component-id" class="mb-20 scroll-mt-20">
+    <h2 class="text-2xl font-semibold mb-2">Component Name</h2>
+    <p class="text-muted-foreground mb-6">Short description of the component.</p>
+
+    <Card class="border-border/50">
+        <CardHeader>
+            <CardTitle class="text-base">Variant/Demo Title</CardTitle>
+            <CardDescription>Brief explanation</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <!-- Component demo here -->
+        </CardContent>
+    </Card>
+</section>
+```
+
+Also add the component to the `navSections` array in the script block under the appropriate category.
+
 ---
 
 ## Utility Functions
@@ -453,35 +501,4 @@ formatRelativeDate('2024-01-15'); // "2 days ago"
 import { handleError, getValidationErrorMap } from '$lib/utils/error-handler';
 ```
 
----
 
-## Commands
-
-```bash
-bun run dev          # Dev server
-bun run check        # Type check (must pass)
-bun run build        # Production build
-bun run sync:api     # Regenerate API types from backend
-bun run test         # Playwright tests
-```
-
----
-
-## Checklist
-
-Before completing any frontend work:
-
-**Code Quality:**
-- [ ] Explicit types on all variables and functions
-- [ ] `CLIENT_ROUTES` used (no hardcoded paths)
-- [ ] OpenAPI types from `$lib/api/models`
-- [ ] No custom types in `$lib/api/models` only OpenAPI types
-- [ ] Error handling with `handleError()` + `toast`
-- [ ] Loading states on async operations
-- [ ] `bun run check` passes
-
-**Reusability:**
-- [ ] Checked `$lib/components/` for existing reusable components
-- [ ] Checked `/dev-playbook` for documented patterns
-- [ ] Code is concise - no duplication, extracted shared logic
-- [ ] New generic components added to dev-playbook (if applicable)

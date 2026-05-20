@@ -1,0 +1,44 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202605151000-PRD-audit-log-table.xml">
+
+    <changeSet id="202605151000-PRD-audit-log-table-1" author="jordi.jaspers">
+        <comment>Create audit_log table for tracking admin actions.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS audit_log (
+                id          BIGSERIAL PRIMARY KEY,
+                actor_id    BIGINT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+                method      VARCHAR(7) NOT NULL,
+                path        VARCHAR(512) NOT NULL,
+                status_code SMALLINT NOT NULL,
+                request_body JSONB,
+                ip_address  VARCHAR(45) NOT NULL,
+                created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+
+            CREATE INDEX idx_audit_log_created_at ON audit_log (created_at);
+            CREATE INDEX idx_audit_log_actor_id ON audit_log (actor_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605151000-PRD-audit-log-table-2" author="jordi.jaspers">
+        <comment>Add documentation for audit_log table and columns.</comment>
+        <sql>
+            COMMENT ON TABLE audit_log IS 'Stores audit log entries for admin actions';
+            COMMENT ON COLUMN audit_log.id IS 'Unique identifier for the audit log entry';
+            COMMENT ON COLUMN audit_log.actor_id IS 'Reference to the user who performed the action';
+            COMMENT ON COLUMN audit_log.method IS 'HTTP method of the request (GET, POST, PUT, PATCH, DELETE, etc.)';
+            COMMENT ON COLUMN audit_log.path IS 'Request path, truncated to 512 characters';
+            COMMENT ON COLUMN audit_log.status_code IS 'HTTP response status code';
+            COMMENT ON COLUMN audit_log.request_body IS 'Request body as JSONB, null for GET/HEAD/OPTIONS';
+            COMMENT ON COLUMN audit_log.ip_address IS 'Client IP address (IPv4 or IPv6)';
+            COMMENT ON COLUMN audit_log.created_at IS 'Timestamp when the audit log entry was created';
+            COMMENT ON INDEX idx_audit_log_created_at IS 'Index for querying audit logs by creation time';
+            COMMENT ON INDEX idx_audit_log_actor_id IS 'Index for querying audit logs by actor';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

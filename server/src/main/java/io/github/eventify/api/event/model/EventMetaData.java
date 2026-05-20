@@ -19,6 +19,8 @@ public class EventMetaData extends AbstractSortSearchMetaData {
 
     public static final String CHANNEL_ID_TERM = "channelId";
 
+    public static final String CHANNEL_IDS_TERM = "channelIds";
+
     public static final String CHANNEL_ID_FIELD = "channel.id";
 
     public static final String TIMESTAMP = "timestamp";
@@ -39,6 +41,7 @@ public class EventMetaData extends AbstractSortSearchMetaData {
     public EventMetaData() {
         super();
         addField(CHANNEL_ID_TERM, CHANNEL_ID_FIELD, SearchType.NUMERIC, true);
+        addField(CHANNEL_IDS_TERM, CHANNEL_ID_FIELD, SearchType.MULTI_NUMERIC, true);
         addField(TIMESTAMP, TIMESTAMP, SearchType.DATE, true);
         addField(SEVERITY, SEVERITY, SearchType.ENUM, Severity.class, true);
     }

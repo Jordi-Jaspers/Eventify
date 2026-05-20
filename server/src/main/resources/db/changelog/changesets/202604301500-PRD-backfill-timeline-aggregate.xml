@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202604301500-PRD-backfill-timeline-aggregate.xml">
 
-    <changeSet id="202604301500-PRD-backfill-timeline-aggregate-1" author="eventify" runInTransaction="false" runAlways="true">
+    <changeSet id="202604301500-PRD-backfill-timeline-aggregate-1" author="jordi.jaspers" runInTransaction="false" runAlways="true">
         <comment>Backfill continuous aggregate for all historical event data</comment>
         <sql>
             CALL refresh_continuous_aggregate('event_timeline_hourly', NULL, now());

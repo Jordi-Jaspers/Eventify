@@ -1,13 +1,11 @@
 package io.github.eventify.common.config;
 
+import io.github.eventify.common.audit.filter.AdminRequestCachingFilter;
 import io.github.eventify.common.config.properties.SecurityProperties;
 import io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter;
 import io.github.eventify.common.security.filter.JwtAuthenticationFilter;
-import io.github.eventify.common.security.oauth2.CustomOAuth2AuthorizationRequestResolver;
-import io.github.eventify.common.security.oauth2.CustomOAuth2UserService;
-import io.github.eventify.common.security.oauth2.OAuth2AttributesFilter;
-import io.github.eventify.common.security.oauth2.OAuth2AuthenticationFailureHandler;
-import io.github.eventify.common.security.oauth2.OAuth2AuthenticationSuccessHandler;
+import io.github.eventify.common.security.filter.SuspendedOrganizationFilter;
+import io.github.eventify.common.security.oauth2.*;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -30,7 +28,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static io.github.eventify.api.Paths.*;
-import static io.github.eventify.common.security.filter.UnauthorizedHandler.handleAuthenticationFailure;
+import static io.github.eventify.common.security.filter.SecurityResponseHandler.handleUnauthorizedAccess;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 /**
@@ -53,16 +51,21 @@ public class WebSecurityConfig implements WebMvcConfigurer {
      * Configure CORS & requests handling behaviour.
      **/
     @Bean
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public SecurityFilterChain filterChain(
+        final AdminRequestCachingFilter adminRequestCachingFilter,
         final JwtAuthenticationFilter jwtAuthenticationFilter,
         final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
+        final SuspendedOrganizationFilter suspendedOrganizationFilter,
         final CustomOAuth2UserService customOAuth2UserService,
         final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
         final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler,
         final ClientRegistrationRepository clientRegistrationRepository,
-        final HttpSecurity http) throws Exception {
+        final HttpSecurity http) {
         http.addFilterBefore(jwtAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);
+        http.addFilterBefore(adminRequestCachingFilter, JwtAuthenticationFilter.class);
         http.addFilterAfter(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class);
+        http.addFilterAfter(suspendedOrganizationFilter, ApiKeyAuthenticationFilter.class);
         http.addFilterBefore(oauth2AttributesFilter, OAuth2LoginAuthenticationFilter.class);
 
         http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::disable);
@@ -73,11 +76,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
         http.exceptionHandling(
             handler -> handler.authenticationEntryPoint(
-                (request, response, authException) -> handleAuthenticationFailure(
-                    request,
-                    response,
-                    authException.getMessage()
-                )
+                (request, response, authException) -> handleUnauthorizedAccess(request, response, authException.getMessage())
             )
         );
 

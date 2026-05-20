@@ -9,6 +9,11 @@ import type { ChannelDetailsResponse } from '$lib/api/models';
  */
 export const channelTableColumns: DataTableColumn<ChannelDetailsResponse>[] = [
 	{
+		key: 'checkbox',
+		label: '',
+		colSpan: 1
+	},
+	{
 		key: 'name',
 		label: 'Channel',
 		sortable: true,
@@ -20,7 +25,7 @@ export const channelTableColumns: DataTableColumn<ChannelDetailsResponse>[] = [
 	{
 		key: 'description',
 		label: 'Description',
-		colSpan: 7
+		colSpan: 8
 	},
 	{
 		key: 'status',

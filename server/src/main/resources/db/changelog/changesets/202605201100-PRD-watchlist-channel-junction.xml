@@ -1,0 +1,48 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202605201100-PRD-watchlist-channel-junction.xml">
+
+    <changeSet id="202605201100-PRD-watchlist-channel-junction-1" author="jordi.jaspers">
+        <comment>Create watchlist_channel junction table for efficient channel-to-watchlist lookups.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS watchlist_channel (
+                watchlist_id INTEGER NOT NULL,
+                channel_id   INTEGER NOT NULL,
+                PRIMARY KEY (watchlist_id, channel_id),
+                FOREIGN KEY (watchlist_id) REFERENCES watchlist(id) ON DELETE CASCADE,
+                FOREIGN KEY (channel_id) REFERENCES channel(id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_watchlist_channel_channel_id ON watchlist_channel (channel_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605201100-PRD-watchlist-channel-junction-2" author="jordi.jaspers">
+        <comment>Add documentation comments for watchlist_channel table.</comment>
+        <sql>
+            COMMENT ON TABLE watchlist_channel IS 'Junction table linking watchlists to channels for efficient reverse lookups';
+            COMMENT ON COLUMN watchlist_channel.watchlist_id IS 'Reference to the watchlist';
+            COMMENT ON COLUMN watchlist_channel.channel_id IS 'Reference to the channel';
+            COMMENT ON INDEX idx_watchlist_channel_channel_id IS 'Index for reverse lookups: find all watchlists containing a channel';
+        </sql>
+    </changeSet>
+
+    <changeSet id="202605201100-PRD-watchlist-channel-junction-3" author="jordi.jaspers">
+        <comment>Backfill watchlist_channel from existing watchlist JSONB configuration (standalone channelIds and group channelIds).</comment>
+        <sql>
+            INSERT INTO watchlist_channel (watchlist_id, channel_id)
+            SELECT w.id, ch.value::int
+            FROM watchlist w, jsonb_array_elements(w.configuration->'channelIds') ch(value)
+            WHERE w.configuration->'channelIds' IS NOT NULL
+            UNION
+            SELECT w.id, ch.value::int
+            FROM watchlist w, jsonb_array_elements(w.configuration->'groups') g(grp), jsonb_array_elements(g.grp->'channelIds') ch(value)
+            WHERE w.configuration->'groups' IS NOT NULL
+            ON CONFLICT DO NOTHING;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

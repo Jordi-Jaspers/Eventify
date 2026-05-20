@@ -1,0 +1,17 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202605121000-PRD-backfill-organization-status-active.xml">
+
+    <changeSet id="202605121000-PRD-backfill-organization-status-active-1" author="jordi.jaspers">
+        <comment>Backfill organization status to ACTIVE for all existing organizations that are currently in TRIAL
+            status, as we are removing the TRIAL status in the next changeSet.
+        </comment>
+        <sql>
+            UPDATE organization
+            SET status = 'ACTIVE'
+            WHERE status = 'TRIAL';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

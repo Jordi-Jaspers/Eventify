@@ -1,16 +1,17 @@
 package io.github.eventify.api.channel.controller;
 
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.channel.model.request.ChannelBatchRequest;
 import io.github.eventify.api.channel.model.request.CreateChannelRequest;
 import io.github.eventify.api.channel.model.request.UpdateChannelRequest;
 import io.github.eventify.api.channel.model.response.ChannelDetailsResponse;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
-import io.github.jframe.datasource.search.model.input.SearchInput;
-import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.github.jframe.exception.resource.ApiErrorResponseResource;
 import io.github.jframe.exception.resource.ValidationErrorResponseResource;
+
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -502,250 +503,156 @@ public class UserChannelControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should pause channel successfully")
-    public void pauseChannelSuccess() throws Exception {
-        // Given: An authenticated user
+    @DisplayName("Should pause channels in batch successfully")
+    public void batchPauseChannelsSuccess() throws Exception {
+        // Given: An authenticated user with two active channels
         final User user = aValidatedUser();
 
-        // And: User has an active channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Active Channel")
-            .setSlug("test.channel.15");
+        final ChannelDetailsResponse channel1 = createUserChannel(user, "Batch Pause Channel 1", "batch.pause.1");
+        final ChannelDetailsResponse channel2 = createUserChannel(user, "Batch Pause Channel 2", "batch.pause.2");
 
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
+        // When: Pausing both channels in a batch
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(channel1.getId(), channel2.getId()));
 
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
-
-        // When: Pausing the channel
-        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNEL_PAUSE_PATH.replace("{id}", createdChannel.getId().toString()))
+        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNELS_PAUSE_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(batchRequest));
 
         final ResultActions response = mockMvc.perform(pauseRequest);
 
-        // Then: Response should be OK
-        response.andExpect(status().is(SC_OK));
+        // Then: Response should be NO_CONTENT
+        response.andExpect(status().is(SC_NO_CONTENT));
 
-        // And: Channel status should be PAUSED
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse pausedChannel = fromJson(content, ChannelDetailsResponse.class);
-
-        assertThat(pausedChannel.getStatus(), is("PAUSED"));
+        // And: Both channels should be PAUSED
+        assertUserChannelStatus(user, channel1.getId(), "PAUSED");
+        assertUserChannelStatus(user, channel2.getId(), "PAUSED");
     }
 
     @Test
-    @DisplayName("Should be idempotent when pausing already paused channel")
-    public void pauseChannelIdempotentWhenAlreadyPaused() throws Exception {
-        // Given: An authenticated user
+    @DisplayName("Should be idempotent when batch pausing already paused channels")
+    public void batchPauseChannelsIdempotentWhenAlreadyPaused() throws Exception {
+        // Given: An authenticated user with a paused channel
         final User user = aValidatedUser();
 
-        // And: User has a paused channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Paused Channel")
-            .setSlug("test.channel.16");
-
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
+        final ChannelDetailsResponse channel = createUserChannel(user, "Already Paused Channel", "batch.pause.idempotent");
 
         // And: Channel is already paused
         mockMvc.perform(
-            post(USER_CHANNEL_PAUSE_PATH.replace("{id}", createdChannel.getId().toString()))
+            post(USER_CHANNELS_PAUSE_PATH)
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))))
         );
 
         // When: Pausing again
-        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNEL_PAUSE_PATH.replace("{id}", createdChannel.getId().toString()))
+        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNELS_PAUSE_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))));
 
         final ResultActions response = mockMvc.perform(pauseRequest);
 
-        // Then: Response should be OK
-        response.andExpect(status().is(SC_OK));
-
-        // And: Channel should still be PAUSED
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse channel = fromJson(content, ChannelDetailsResponse.class);
-
-        assertThat(channel.getStatus(), is("PAUSED"));
+        // Then: Response should be NO_CONTENT (idempotent)
+        response.andExpect(status().is(SC_NO_CONTENT));
     }
 
     @Test
-    @DisplayName("Should resume channel successfully")
-    public void resumeChannelSuccess() throws Exception {
-        // Given: An authenticated user
+    @DisplayName("Should resume channels in batch successfully")
+    public void batchResumeChannelsSuccess() throws Exception {
+        // Given: An authenticated user with two paused channels
         final User user = aValidatedUser();
 
-        // And: User has a paused channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Paused Channel")
-            .setSlug("test.channel.17");
+        final ChannelDetailsResponse channel1 = createUserChannel(user, "Batch Resume Channel 1", "batch.resume.1");
+        final ChannelDetailsResponse channel2 = createUserChannel(user, "Batch Resume Channel 2", "batch.resume.2");
 
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
-
-        // And: Channel is paused
+        // And: Both channels are paused
         mockMvc.perform(
-            post(USER_CHANNEL_PAUSE_PATH.replace("{id}", createdChannel.getId().toString()))
+            post(USER_CHANNELS_PAUSE_PATH)
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel1.getId(), channel2.getId()))))
         );
 
-        // When: Resuming the channel
-        final MockHttpServletRequestBuilder resumeRequest = post(
-            USER_CHANNEL_RESUME_PATH.replace("{id}", createdChannel.getId().toString())
-        )
+        // When: Resuming both channels in a batch
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(channel1.getId(), channel2.getId()));
+
+        final MockHttpServletRequestBuilder resumeRequest = post(USER_CHANNELS_RESUME_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(batchRequest));
 
         final ResultActions response = mockMvc.perform(resumeRequest);
 
-        // Then: Response should be OK
-        response.andExpect(status().is(SC_OK));
+        // Then: Response should be NO_CONTENT
+        response.andExpect(status().is(SC_NO_CONTENT));
 
-        // And: Channel status should be ACTIVE
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse resumedChannel = fromJson(content, ChannelDetailsResponse.class);
-
-        assertThat(resumedChannel.getStatus(), is("ACTIVE"));
+        // And: Both channels should be ACTIVE
+        assertUserChannelStatus(user, channel1.getId(), "ACTIVE");
+        assertUserChannelStatus(user, channel2.getId(), "ACTIVE");
     }
 
     @Test
-    @DisplayName("Should be idempotent when resuming already active channel")
-    public void resumeChannelIdempotentWhenAlreadyActive() throws Exception {
-        // Given: An authenticated user
+    @DisplayName("Should be idempotent when batch resuming already active channels")
+    public void batchResumeChannelsIdempotentWhenAlreadyActive() throws Exception {
+        // Given: An authenticated user with an active channel
         final User user = aValidatedUser();
 
-        // And: User has an active channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Active Channel")
-            .setSlug("test.channel.18");
+        final ChannelDetailsResponse channel = createUserChannel(user, "Already Active Channel", "batch.resume.idempotent");
 
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
-
-        // When: Resuming active channel
-        final MockHttpServletRequestBuilder resumeRequest = post(
-            USER_CHANNEL_RESUME_PATH.replace("{id}", createdChannel.getId().toString())
-        )
+        // When: Resuming an already active channel
+        final MockHttpServletRequestBuilder resumeRequest = post(USER_CHANNELS_RESUME_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))));
 
         final ResultActions response = mockMvc.perform(resumeRequest);
 
-        // Then: Response should be OK
-        response.andExpect(status().is(SC_OK));
-
-        // And: Channel should still be ACTIVE
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse channel = fromJson(content, ChannelDetailsResponse.class);
-
-        assertThat(channel.getStatus(), is("ACTIVE"));
+        // Then: Response should be NO_CONTENT (idempotent)
+        response.andExpect(status().is(SC_NO_CONTENT));
     }
 
     @Test
-    @DisplayName("Should delete channel successfully")
-    public void deleteChannelSuccess() throws Exception {
-        // Given: An authenticated user
+    @DisplayName("Should delete channels in batch successfully")
+    public void batchDeleteChannelsSuccess() throws Exception {
+        // Given: An authenticated user with two channels
         final User user = aValidatedUser();
 
-        // And: User has a channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Channel to Delete")
-            .setSlug("test.channel.19");
+        final ChannelDetailsResponse channel1 = createUserChannel(user, "Batch Delete Channel 1", "batch.delete.1");
+        final ChannelDetailsResponse channel2 = createUserChannel(user, "Batch Delete Channel 2", "batch.delete.2");
 
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
+        // When: Deleting both channels in a batch
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(channel1.getId(), channel2.getId()));
 
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
-
-        // When: Deleting the channel
-        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNEL_PATH.replace("{id}", createdChannel.getId().toString()))
+        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNELS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(batchRequest));
 
         final ResultActions response = mockMvc.perform(deleteRequest);
 
-        // Then: Response should be OK
-        response.andExpect(status().is(SC_OK));
-
-        // And: Channel status should be PENDING_DELETION
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse deletedChannel = fromJson(content, ChannelDetailsResponse.class);
-
-        assertThat(deletedChannel.getStatus(), is("PENDING_DELETION"));
+        // Then: Response should be NO_CONTENT
+        response.andExpect(status().is(SC_NO_CONTENT));
     }
 
     @Test
-    @DisplayName("Should not show deleted channel in search")
-    public void searchDoesNotShowDeletedChannels() throws Exception {
-        // Given: An authenticated user
+    @DisplayName("Should not show batch-deleted channels in search")
+    public void searchDoesNotShowBatchDeletedChannels() throws Exception {
+        // Given: An authenticated user with two channels
         final User user = aValidatedUser();
 
-        // And: User has 2 channels, one deleted
-        final CreateChannelRequest createRequest1 = new CreateChannelRequest()
-            .setName("Active Channel")
-            .setSlug("test.channel.20");
+        final ChannelDetailsResponse activeChannel = createUserChannel(user, "Active Channel", "batch.delete.search.active");
+        final ChannelDetailsResponse deletedChannel = createUserChannel(user, "Deleted Channel", "batch.delete.search.deleted");
 
+        // And: One channel is batch-deleted
         mockMvc.perform(
-            post(USER_CHANNELS_PATH)
+            delete(USER_CHANNELS_PATH)
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(createRequest1))
-        );
-
-        final CreateChannelRequest createRequest2 = new CreateChannelRequest()
-            .setName("Deleted Channel")
-            .setSlug("test.channel.21");
-
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(createRequest2))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
-
-        // And: Second channel is deleted
-        mockMvc.perform(
-            delete(USER_CHANNEL_PATH.replace("{id}", createdChannel.getId().toString()))
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(deletedChannel.getId()))))
         );
 
         // When: Searching channels
@@ -765,89 +672,66 @@ public class UserChannelControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should fail when deleting already deleted channel")
-    public void deleteChannelFailsWhenAlreadyDeleted() throws Exception {
-        // Given: An authenticated user
+    @DisplayName("Should fail when batch deleting already deleted channels")
+    public void batchDeleteChannelsFailsWhenAlreadyDeleted() throws Exception {
+        // Given: An authenticated user with a deleted channel
         final User user = aValidatedUser();
 
-        // And: User has a deleted channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Deleted Channel")
-            .setSlug("test.channel.22");
-
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
+        final ChannelDetailsResponse channel = createUserChannel(user, "Already Deleted Channel", "batch.delete.already.deleted");
 
         // And: Channel is already deleted
         mockMvc.perform(
-            delete(USER_CHANNEL_PATH.replace("{id}", createdChannel.getId().toString()))
+            delete(USER_CHANNELS_PATH)
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))))
         );
 
         // When: Attempting to delete again
-        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNEL_PATH.replace("{id}", createdChannel.getId().toString()))
+        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNELS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))));
 
         final ResultActions response = mockMvc.perform(deleteRequest);
 
         // Then: Response should be FORBIDDEN (deleted channels are not accessible via security check)
-        // This is intentional - we don't reveal whether a resource exists or is deleted
         response.andExpect(status().is(SC_FORBIDDEN));
     }
 
     @Test
-    @DisplayName("Should fail when deleting non-existent channel")
-    public void deleteChannelFailsWhenNotFound() throws Exception {
+    @DisplayName("Should fail when batch deleting non-existent channels")
+    public void batchDeleteChannelsFailsWhenNotFound() throws Exception {
         // Given: An authenticated user
         final User user = aValidatedUser();
 
-        // When: Deleting non-existent channel
-        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNEL_PATH.replace("{id}", "99999"))
+        // When: Deleting non-existent channels
+        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNELS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(99999L))));
 
         final ResultActions response = mockMvc.perform(deleteRequest);
 
         // Then: Response should be FORBIDDEN (security check fails before reaching service layer)
-        // This is intentional - we don't reveal whether a resource exists or not
         response.andExpect(status().is(SC_FORBIDDEN));
     }
 
     @Test
-    @DisplayName("Should fail when deleting another user channel")
-    public void deleteChannelFailsWhenNotOwner() throws Exception {
+    @DisplayName("Should fail when batch deleting another user's channels")
+    public void batchDeleteChannelsFailsWhenNotOwner() throws Exception {
         // Given: Two authenticated users
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
 
         // And: User1 has a channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("User1 Channel")
-            .setSlug("test.channel.23");
+        final ChannelDetailsResponse channel = createUserChannel(user1, "User1 Channel", "batch.delete.not.owner");
 
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user1.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
-
-        // When: User2 attempts to delete User1's channel
-        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNEL_PATH.replace("{id}", createdChannel.getId().toString()))
+        // When: User2 attempts to batch-delete User1's channel
+        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNELS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user2.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user2.getAccessToken().getValue())
+            .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))));
 
         final ResultActions response = mockMvc.perform(deleteRequest);
 
@@ -856,147 +740,20 @@ public class UserChannelControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return only active channels when filtering by status ACTIVE")
-    public void searchByStatus_shouldReturnOnlyActiveChannels() throws Exception {
-        // Given: An authenticated user
-        final User user = aValidatedUser();
-
-        // And: User has 2 active channels
-        final CreateChannelRequest activeRequest1 = new CreateChannelRequest()
-            .setName("Active Channel 1")
-            .setSlug("test.channel.24");
-        final ResultActions createActiveResponse1 = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(activeRequest1))
-        );
-        createActiveResponse1.andExpect(status().is(SC_CREATED));
-
-        final CreateChannelRequest activeRequest2 = new CreateChannelRequest()
-            .setName("Active Channel 2")
-            .setSlug("test.channel.25");
-        final ResultActions createActiveResponse2 = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(activeRequest2))
-        );
-        createActiveResponse2.andExpect(status().is(SC_CREATED));
-
-        // And: User has 1 paused channel
-        final CreateChannelRequest pausedRequest = new CreateChannelRequest()
-            .setName("Paused Channel")
-            .setSlug("test.channel.26");
-        final ResultActions createPausedResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(toJson(pausedRequest))
-        );
-        createPausedResponse.andExpect(status().is(SC_CREATED));
-
-        final String pausedContent = createPausedResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse pausedChannel = fromJson(pausedContent, ChannelDetailsResponse.class);
-
-        // And: Pause the third channel
-        mockMvc.perform(
-            post(USER_CHANNEL_PAUSE_PATH.replace("{id}", pausedChannel.getId().toString()))
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-        );
-
-        // When: Searching channels with status filter ACTIVE
-        final SortablePageInput searchInput = new SortablePageInput();
-        searchInput.setPageNumber(0);
-        searchInput.setPageSize(10);
-
-        final SearchInput statusFilter = new SearchInput();
-        statusFilter.setFieldName("status");
-        statusFilter.setTextValue("ACTIVE");
-        searchInput.getSearchInputs().add(statusFilter);
-
-        final MockHttpServletRequestBuilder searchRequest = post(USER_CHANNELS_SEARCH_PATH)
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-            .content(toJson(searchInput));
-
-        final ResultActions response = mockMvc.perform(searchRequest);
-
-        // Then: Response should be OK
-        response.andExpect(status().is(SC_OK));
-
-        // And: Only active channels should be returned
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final PageResource<?> searchResponse = fromJson(content, PageResource.class);
-
-        assertThat(searchResponse.getContent(), hasSize(2));
-        assertThat(searchResponse.getTotalElements(), is(2L));
-    }
-
-    @Test
-    @DisplayName("Should fail when updating another user's channel")
-    public void updateChannelFailsWhenNotOwner() throws Exception {
-        // Given: Two authenticated users
-        final User user1 = aValidatedUser();
-        final User user2 = aValidatedUser();
-
-        // And: User1 has a channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("User1 Channel")
-            .setSlug("test.channel.27");
-
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user1.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
-
-        // When: User2 attempts to update User1's channel
-        final UpdateChannelRequest updateRequest = new UpdateChannelRequest()
-            .setName("Updated by User2");
-
-        final MockHttpServletRequestBuilder updateRequestBuilder = put(USER_CHANNEL_PATH.replace("{id}", createdChannel.getId().toString()))
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user2.getAccessToken().getValue())
-            .content(toJson(updateRequest));
-
-        final ResultActions response = mockMvc.perform(updateRequestBuilder);
-
-        // Then: Response should be FORBIDDEN (access denied by security)
-        response.andExpect(status().is(SC_FORBIDDEN));
-    }
-
-    @Test
-    @DisplayName("Should fail when pausing another user's channel")
-    public void pauseChannelFailsWhenNotOwner() throws Exception {
+    @DisplayName("Should fail when batch pausing another user's channels")
+    public void batchPauseChannelsFailsWhenNotOwner() throws Exception {
         // Given: Two authenticated users
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
 
         // And: User1 has an active channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("User1 Active Channel")
-            .setSlug("test.channel.28");
+        final ChannelDetailsResponse channel = createUserChannel(user1, "User1 Active Channel", "batch.pause.not.owner");
 
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user1.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
-
-        // When: User2 attempts to pause User1's channel
-        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNEL_PAUSE_PATH.replace("{id}", createdChannel.getId().toString()))
+        // When: User2 attempts to batch-pause User1's channel
+        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNELS_PAUSE_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user2.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user2.getAccessToken().getValue())
+            .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))));
 
         final ResultActions response = mockMvc.perform(pauseRequest);
 
@@ -1005,40 +762,28 @@ public class UserChannelControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should fail when resuming another user's channel")
-    public void resumeChannelFailsWhenNotOwner() throws Exception {
+    @DisplayName("Should fail when batch resuming another user's channels")
+    public void batchResumeChannelsFailsWhenNotOwner() throws Exception {
         // Given: Two authenticated users
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
 
-        // And: User1 has a paused channel
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("User1 Paused Channel")
-            .setSlug("test.channel.29");
-
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user1.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
+        // And: User1 has a channel
+        final ChannelDetailsResponse channel = createUserChannel(user1, "User1 Paused Channel", "batch.resume.not.owner");
 
         // And: Channel is paused
         mockMvc.perform(
-            post(USER_CHANNEL_PAUSE_PATH.replace("{id}", createdChannel.getId().toString()))
+            post(USER_CHANNELS_PAUSE_PATH)
                 .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + user1.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))))
         );
 
-        // When: User2 attempts to resume User1's channel
-        final MockHttpServletRequestBuilder resumeRequest = post(
-            USER_CHANNEL_RESUME_PATH.replace("{id}", createdChannel.getId().toString())
-        )
+        // When: User2 attempts to batch-resume User1's channel
+        final MockHttpServletRequestBuilder resumeRequest = post(USER_CHANNELS_RESUME_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + user2.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + user2.getAccessToken().getValue())
+            .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))));
 
         final ResultActions response = mockMvc.perform(resumeRequest);
 
@@ -1047,81 +792,297 @@ public class UserChannelControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should allow admin to access any user's channel")
-    public void adminCanAccessAnyUserChannel() throws Exception {
+    @DisplayName("Should allow admin to batch delete any user's channels")
+    public void adminCanBatchDeleteAnyUserChannel() throws Exception {
         // Given: Regular user owns a channel
         final User regularUser = aValidatedUser();
 
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Regular User Channel")
-            .setSlug("test.channel.30");
-
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + regularUser.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
+        final ChannelDetailsResponse channel = createUserChannel(regularUser, "Regular User Channel", "batch.delete.admin");
 
         // And: Admin user exists
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
 
-        // When: Admin calls GET /channels/{id}
-        final MockHttpServletRequestBuilder getRequest = get(USER_CHANNEL_PATH.replace("{id}", createdChannel.getId().toString()))
+        // When: Admin batch-deletes the channel
+        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNELS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
-
-        final ResultActions response = mockMvc.perform(getRequest);
-
-        // Then: Response should be OK with channel details
-        response.andExpect(status().is(SC_OK));
-
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse channelResponse = fromJson(content, ChannelDetailsResponse.class);
-
-        assertThat(channelResponse.getId(), is(createdChannel.getId()));
-        assertThat(channelResponse.getName(), is("Regular User Channel"));
-    }
-
-    @Test
-    @DisplayName("Should allow admin to delete any user's channel")
-    public void adminCanDeleteAnyUserChannel() throws Exception {
-        // Given: Regular user owns a channel
-        final User regularUser = aValidatedUser();
-
-        final CreateChannelRequest createRequest = new CreateChannelRequest()
-            .setName("Regular User Channel")
-            .setSlug("test.channel.31");
-
-        final ResultActions createResponse = mockMvc.perform(
-            post(USER_CHANNELS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + regularUser.getAccessToken().getValue())
-                .content(toJson(createRequest))
-        );
-
-        final String createContent = createResponse.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse createdChannel = fromJson(createContent, ChannelDetailsResponse.class);
-
-        // And: Admin user exists
-        final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-
-        // When: Admin calls DELETE /channels/{id}
-        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNEL_PATH.replace("{id}", createdChannel.getId().toString()))
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))));
 
         final ResultActions response = mockMvc.perform(deleteRequest);
 
-        // Then: Response should be OK, channel status is PENDING_DELETION
-        response.andExpect(status().is(SC_OK));
+        // Then: Response should be NO_CONTENT
+        response.andExpect(status().is(SC_NO_CONTENT));
+    }
 
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final ChannelDetailsResponse deletedChannel = fromJson(content, ChannelDetailsResponse.class);
+    @Test
+    @DisplayName("Should fail when batch request has empty channelIds")
+    public void batchPauseChannelsFailsWhenEmptyIds() throws Exception {
+        // Given: An authenticated user
+        final User user = aValidatedUser();
 
-        assertThat(deletedChannel.getStatus(), is("PENDING_DELETION"));
+        // When: Sending batch request with empty channelIds
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of());
+
+        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNELS_PAUSE_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(batchRequest));
+
+        final ResultActions response = mockMvc.perform(pauseRequest);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should fail when batch request body is null")
+    public void batchDeleteChannelsFailsWhenNullBody() throws Exception {
+        // Given: An authenticated user
+        final User user = aValidatedUser();
+
+        // When: Sending batch delete with no body
+        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNELS_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+
+        final ResultActions response = mockMvc.perform(deleteRequest);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should fail entire batch when mix of valid and invalid channel IDs")
+    public void batchPauseChannelsFailsWhenMixedValidInvalidIds() throws Exception {
+        // Given: An authenticated user with one valid channel
+        final User user = aValidatedUser();
+
+        final ChannelDetailsResponse channel = createUserChannel(user, "Valid Channel", "batch.pause.mixed");
+
+        // When: Pausing with a mix of valid and non-existent IDs
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(channel.getId(), 99999L));
+
+        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNELS_PAUSE_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(batchRequest));
+
+        final ResultActions response = mockMvc.perform(pauseRequest);
+
+        // Then: Entire batch should fail (all-or-nothing)
+        response.andExpect(status().is(SC_FORBIDDEN));
+
+        // And: Valid channel should NOT be paused
+        assertUserChannelStatus(user, channel.getId(), "ACTIVE");
+    }
+
+    @Test
+    @DisplayName("Should work with single channel ID in batch (backward compat)")
+    public void batchPauseSingleChannelSuccess() throws Exception {
+        // Given: An authenticated user with one channel
+        final User user = aValidatedUser();
+
+        final ChannelDetailsResponse channel = createUserChannel(user, "Single Batch Channel", "batch.pause.single");
+
+        // When: Pausing with a single-element batch
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(channel.getId()));
+
+        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNELS_PAUSE_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(batchRequest));
+
+        final ResultActions response = mockMvc.perform(pauseRequest);
+
+        // Then: Response should be NO_CONTENT
+        response.andExpect(status().is(SC_NO_CONTENT));
+
+        // And: Channel should be PAUSED
+        assertUserChannelStatus(user, channel.getId(), "PAUSED");
+    }
+
+    @Test
+    @DisplayName("Should fail entire batch delete when mix of valid and non-existent channel IDs")
+    public void batchDeleteChannelsFailsWhenMixedValidInvalidIds() throws Exception {
+        // Given: An authenticated user with two channels
+        final User user = aValidatedUser();
+
+        final ChannelDetailsResponse channel1 = createUserChannel(user, "Valid Delete Channel 1", "batch.delete.mixed.valid.1");
+        createUserChannel(user, "Valid Delete Channel 2", "batch.delete.mixed.valid.2");
+
+        // When: Deleting with a mix of valid and non-existent IDs
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(channel1.getId(), 99999L));
+
+        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNELS_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(batchRequest));
+
+        final ResultActions response = mockMvc.perform(deleteRequest);
+
+        // Then: Entire batch should fail (all-or-nothing)
+        response.andExpect(status().is(SC_FORBIDDEN));
+
+        // And: Valid channel should NOT be deleted (still ACTIVE)
+        assertUserChannelStatus(user, channel1.getId(), "ACTIVE");
+    }
+
+    @Test
+    @DisplayName("Should fail entire batch pause when mix of own and another user's channel IDs")
+    public void batchPauseChannelsFailsWhenMixedValidAndOtherUsersChannel() throws Exception {
+        // Given: Two authenticated users, each with a channel
+        final User user1 = aValidatedUser();
+        final User user2 = aValidatedUser();
+
+        final ChannelDetailsResponse ownChannel = createUserChannel(user1, "User1 Own Channel Pause", "batch.pause.mixed.own");
+        final ChannelDetailsResponse otherChannel = createUserChannel(user2, "User2 Channel Pause", "batch.pause.mixed.other");
+
+        // When: User1 batch pauses own channel and user2's channel
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(ownChannel.getId(), otherChannel.getId()));
+
+        final MockHttpServletRequestBuilder pauseRequest = post(USER_CHANNELS_PAUSE_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user1.getAccessToken().getValue())
+            .content(toJson(batchRequest));
+
+        final ResultActions response = mockMvc.perform(pauseRequest);
+
+        // Then: Entire batch should fail (all-or-nothing)
+        response.andExpect(status().is(SC_FORBIDDEN));
+
+        // And: User1's own channel should NOT be paused (still ACTIVE)
+        assertUserChannelStatus(user1, ownChannel.getId(), "ACTIVE");
+    }
+
+    @Test
+    @DisplayName("Should fail entire batch delete when mix of own and another user's channel IDs")
+    public void batchDeleteChannelsFailsWhenMixedValidAndOtherUsersChannel() throws Exception {
+        // Given: Two authenticated users, each with a channel
+        final User user1 = aValidatedUser();
+        final User user2 = aValidatedUser();
+
+        final ChannelDetailsResponse ownChannel = createUserChannel(user1, "User1 Own Channel Delete", "batch.delete.mixed.own");
+        final ChannelDetailsResponse otherChannel = createUserChannel(user2, "User2 Channel Delete", "batch.delete.mixed.other");
+
+        // When: User1 batch deletes own channel and user2's channel
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(ownChannel.getId(), otherChannel.getId()));
+
+        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNELS_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user1.getAccessToken().getValue())
+            .content(toJson(batchRequest));
+
+        final ResultActions response = mockMvc.perform(deleteRequest);
+
+        // Then: Entire batch should fail (all-or-nothing)
+        response.andExpect(status().is(SC_FORBIDDEN));
+
+        // And: User1's own channel should NOT be deleted (still ACTIVE)
+        assertUserChannelStatus(user1, ownChannel.getId(), "ACTIVE");
+    }
+
+    @Test
+    @DisplayName("Should fail entire batch delete when mix of active and already-deleted channel IDs")
+    public void batchDeleteChannelsFailsWhenMixedValidAndAlreadyDeleted() throws Exception {
+        // Given: An authenticated user with two channels
+        final User user = aValidatedUser();
+
+        final ChannelDetailsResponse remainingChannel = createUserChannel(user, "Remaining Channel", "batch.delete.mixed.remaining");
+        final ChannelDetailsResponse deletedChannel = createUserChannel(user, "Pre-Deleted Channel", "batch.delete.mixed.predeleted");
+
+        // And: One channel is already deleted
+        mockMvc.perform(
+            delete(USER_CHANNELS_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(deletedChannel.getId()))))
+        );
+
+        // When: Batch deleting remaining channel together with already-deleted channel
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(remainingChannel.getId(), deletedChannel.getId()));
+
+        final MockHttpServletRequestBuilder deleteRequest = delete(USER_CHANNELS_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(batchRequest));
+
+        final ResultActions response = mockMvc.perform(deleteRequest);
+
+        // Then: Entire batch should fail (all-or-nothing)
+        response.andExpect(status().is(SC_FORBIDDEN));
+
+        // And: Remaining channel should NOT be deleted (still ACTIVE)
+        assertUserChannelStatus(user, remainingChannel.getId(), "ACTIVE");
+    }
+
+    @Test
+    @DisplayName("Should fail entire batch resume when mix of valid and non-existent channel IDs")
+    public void batchResumeChannelsFailsWhenMixedValidInvalidIds() throws Exception {
+        // Given: An authenticated user with a paused channel
+        final User user = aValidatedUser();
+
+        final ChannelDetailsResponse channel = createUserChannel(user, "Paused Channel Resume Mixed", "batch.resume.mixed");
+
+        // And: Channel is paused
+        mockMvc.perform(
+            post(USER_CHANNELS_PAUSE_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(new ChannelBatchRequest().setChannelIds(List.of(channel.getId()))))
+        );
+
+        // When: Resuming with a mix of valid and non-existent IDs
+        final ChannelBatchRequest batchRequest = new ChannelBatchRequest()
+            .setChannelIds(List.of(channel.getId(), 99999L));
+
+        final MockHttpServletRequestBuilder resumeRequest = post(USER_CHANNELS_RESUME_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            .content(toJson(batchRequest));
+
+        final ResultActions response = mockMvc.perform(resumeRequest);
+
+        // Then: Entire batch should fail (all-or-nothing)
+        response.andExpect(status().is(SC_FORBIDDEN));
+
+        // And: Valid channel should NOT be resumed (still PAUSED)
+        assertUserChannelStatus(user, channel.getId(), "PAUSED");
+    }
+
+    // ========================= PRIVATE HELPERS =========================
+
+    private ChannelDetailsResponse createUserChannel(final User user, final String name, final String slug) throws Exception {
+        final CreateChannelRequest request = new CreateChannelRequest()
+            .setName(name)
+            .setSlug(slug);
+
+        final ResultActions createResponse = mockMvc.perform(
+            post(USER_CHANNELS_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(request))
+        );
+
+        final String content = createResponse.andReturn().getResponse().getContentAsString();
+        return fromJson(content, ChannelDetailsResponse.class);
+    }
+
+    private void assertUserChannelStatus(final User user, final Long channelId, final String expectedStatus) throws Exception {
+        final MockHttpServletRequestBuilder getRequest = get(USER_CHANNEL_PATH.replace("{id}", channelId.toString()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue());
+
+        final ResultActions getResponse = mockMvc.perform(getRequest);
+        final String content = getResponse.andReturn().getResponse().getContentAsString();
+        final ChannelDetailsResponse channel = fromJson(content, ChannelDetailsResponse.class);
+
+        assertThat(channel.getStatus(), is(expectedStatus));
     }
 }

@@ -8,6 +8,11 @@ import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.notification.model.NotificationAudienceType;
+import io.github.eventify.api.notification.model.NotificationBroadcast;
+import io.github.eventify.api.notification.model.NotificationCategory;
+import io.github.eventify.api.notification.model.request.AudienceRequest;
+import io.github.eventify.api.notification.model.request.CreateBroadcastRequest;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.OrganizationalRole;
@@ -24,6 +29,8 @@ import io.github.eventify.common.security.principal.JwtUserPrincipalAuthenticati
 import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import io.github.eventify.common.util.TimeProvider;
 import io.github.eventify.support.util.WebMvcConfigurator;
+import io.github.jframe.datasource.search.model.input.SearchInput;
+import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -496,6 +503,115 @@ public class IntegrationTest extends WebMvcConfigurator {
         );
 
         return new OAuth2UserRequest(clientRegistration, accessToken);
+    }
+
+    // ========================= NOTIFICATION FACTORY METHODS =========================
+
+    protected void aNotificationForUser(final User user, final String title) {
+        final io.github.eventify.api.notification.model.Notification notification =
+            new io.github.eventify.api.notification.model.Notification(
+                user,
+                io.github.eventify.api.notification.model.NotificationCategory.ANNOUNCEMENT,
+                title,
+                "Test message for " + title,
+                null,
+                null,
+                false
+            );
+        notificationRepository.save(notification);
+    }
+
+    protected void aNotificationForUserWithBroadcast(final User user, final NotificationBroadcast broadcast) {
+        final io.github.eventify.api.notification.model.Notification notification =
+            new io.github.eventify.api.notification.model.Notification(
+                user,
+                io.github.eventify.api.notification.model.NotificationCategory.ANNOUNCEMENT,
+                broadcast.getTitle(),
+                broadcast.getMessage(),
+                null,
+                null,
+                false
+            );
+        final io.github.eventify.api.notification.model.Notification saved = notificationRepository.save(notification);
+        // Set broadcast FK via JDBC — the broadcast_id column is added by the backend-agent migration
+        jdbcTemplate.update(
+            "UPDATE notification SET broadcast_id = ? WHERE id = ?",
+            broadcast.getId(),
+            saved.getId()
+        );
+    }
+
+    protected NotificationBroadcast aBroadcastForAdmin(final io.github.eventify.api.user.model.User sentBy,
+        final String title, final io.github.eventify.api.notification.model.NotificationAudienceType audienceType) {
+        final NotificationBroadcast broadcast = new NotificationBroadcast();
+        broadcast.setSentBy(sentBy);
+        broadcast.setTitle(title);
+        broadcast.setMessage("Broadcast message for " + title);
+        broadcast.setCategory(io.github.eventify.api.notification.model.NotificationCategory.ANNOUNCEMENT);
+        broadcast.setAudienceType(audienceType);
+        broadcast.setRecipientCount(0);
+        return notificationBroadcastRepository.save(broadcast);
+    }
+
+    protected static CreateBroadcastRequest aValidCreateBroadcastRequest(final NotificationAudienceType audienceType,
+        final Long targetId, final String role) {
+        final AudienceRequest audience = anAudienceRequest(audienceType, targetId, role);
+        final CreateBroadcastRequest request = new CreateBroadcastRequest();
+        request.setTitle("Test Broadcast Title");
+        request.setMessage("Test broadcast message content");
+        request.setCategory(NotificationCategory.ANNOUNCEMENT);
+        request.setAudience(audience);
+        return request;
+    }
+
+    protected static AudienceRequest anAudienceRequest(final NotificationAudienceType audienceType,
+        final Long targetId, final String role) {
+        final AudienceRequest audience = new AudienceRequest();
+        audience.setType(audienceType);
+        audience.setTargetId(targetId);
+        audience.setRole(role);
+        return audience;
+    }
+
+    // ========================= PAGINATION FACTORY METHODS =========================
+
+    protected static SortablePageInput aDefaultPageInput() {
+        final SortablePageInput input = new SortablePageInput();
+        input.setPageNumber(0);
+        input.setPageSize(20);
+        return input;
+    }
+
+    protected static SortablePageInput aSearchPageInput(final String fieldName, final String value) {
+        final SortablePageInput input = aDefaultPageInput();
+        final SearchInput searchInput = new SearchInput();
+        searchInput.setFieldName(fieldName);
+        searchInput.setTextValue(value);
+        input.getSearchInputs().add(searchInput);
+        return input;
+    }
+
+    // ========================= AUDIT HELPERS =========================
+
+    /**
+     * Waits briefly for async audit persistence to complete.
+     */
+    protected void waitForAsyncAudit() {
+        try {
+            Thread.sleep(200);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    protected io.github.eventify.common.audit.model.AuditLog findAuditLogByMethod(
+        final java.util.List<io.github.eventify.common.audit.model.AuditLog> logs,
+        final String method
+    ) {
+        return logs.stream()
+            .filter(log -> method.equals(log.getMethod()))
+            .findFirst()
+            .orElse(null);
     }
 
 }

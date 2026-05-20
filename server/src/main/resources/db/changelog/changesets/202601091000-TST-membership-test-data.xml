@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202601091000-TST-membership-test-data.xml">
 
-    <changeSet id="202601091000-TST-membership-test-data-1" author="backend-agent" context="tst">
+    <changeSet id="202601091000-TST-membership-test-data-1" author="jordi.jaspers" context="tst">
         <comment>Insert organization memberships with varied roles. Admin (id=1) owns orgs Acme, Beta, Gamma. Acme has 5+ members. Chi Studios has only 1 member.</comment>
         <sql>
             -- Admin (id=1) as OWNER of organizations Acme, Beta, Gamma

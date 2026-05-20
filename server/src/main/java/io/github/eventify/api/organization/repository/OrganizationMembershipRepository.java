@@ -3,6 +3,7 @@ package io.github.eventify.api.organization.repository;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.OrganizationalRole;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -113,6 +114,47 @@ public interface OrganizationMembershipRepository extends JpaRepository<Organiza
     @NonNull
     @Override
     Page<OrganizationMembership> findAll(@NonNull Specification<OrganizationMembership> spec, @NonNull Pageable pageable);
+
+    /**
+     * Find all distinct users who are OWNER in any organization.
+     *
+     * @return list of distinct owner users
+     */
+    @Query("SELECT DISTINCT m.user FROM OrganizationMembership m WHERE m.role = 'OWNER'")
+    List<io.github.eventify.api.user.model.User> findAllOwnersDistinct();
+
+    /**
+     * Find all memberships for a collection of organization IDs with a specific role.
+     *
+     * @param orgIds the organization IDs
+     * @param role   the organizational role
+     * @return list of memberships matching the criteria
+     */
+    @Query(
+        "SELECT m FROM OrganizationMembership m "
+            + "JOIN FETCH m.user JOIN FETCH m.organization "
+            + "WHERE m.organization.id IN :orgIds AND m.role = :role"
+    )
+    List<OrganizationMembership> findAllByOrganizationIdInAndRole(
+        @Param("orgIds") Collection<Long> orgIds,
+        @Param("role") OrganizationalRole role
+    );
+
+    /**
+     * Count memberships for a given organization.
+     *
+     * @param organizationId the organization ID
+     * @return count of memberships
+     */
+    long countByOrganizationId(Long organizationId);
+
+    /**
+     * Count distinct users who are OWNER in any organization.
+     *
+     * @return count of distinct owners
+     */
+    @Query("SELECT COUNT(DISTINCT m.user) FROM OrganizationMembership m WHERE m.role = 'OWNER'")
+    long countDistinctOwners();
 
     /**
      * Delete all memberships for users with the given IDs.

@@ -2,6 +2,7 @@ package io.github.eventify.api.watchlist.repository;
 
 import io.github.eventify.api.watchlist.model.Watchlist;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -90,4 +91,14 @@ public interface WatchlistRepository extends JpaRepository<Watchlist, Long>, Jpa
             """
     )
     Optional<Watchlist> findByOrganizationIdAndName(@Param("organizationId") Long organizationId, @Param("name") String name);
+
+    /**
+     * Finds all watchlists that contain the given channel via the junction table.
+     * Used by SeverityTransitionJob to find affected watchlists when a channel's severity changes.
+     *
+     * @param channelId the channel ID to search for
+     * @return list of watchlists containing the channel
+     */
+    @Query("SELECT w FROM Watchlist w WHERE w.id IN (SELECT wc.watchlistId FROM WatchlistChannel wc WHERE wc.channelId = :channelId)")
+    List<Watchlist> findWatchlistsContainingChannel(@Param("channelId") Long channelId);
 }

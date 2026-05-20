@@ -14,6 +14,7 @@ import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -157,41 +158,40 @@ public class ChannelService {
     }
 
     /**
-     * Pauses a personal channel (idempotent).
+     * Batch pauses personal channels for the logged-in user (idempotent).
+     * Ownership is pre-validated by @PreAuthorize — this method loads and updates atomically.
      *
-     * @param channelId the channel ID
-     * @return the paused channel
-     * @throws DataNotFoundException if channel not found or not owned by user
+     * @param channelIds the channel IDs to pause
      */
     @Transactional
-    public Channel pauseUserChannel(final Long channelId) {
-        final Channel channel = getChannelWithAdminFallback(channelId);
-        return channelCreationService.updateStatus(channel, ChannelStatus.PAUSED);
+    public void batchPauseUserChannels(final List<Long> channelIds) {
+        batchUpdateStatus(channelIds, ChannelStatus.PAUSED);
     }
 
     /**
-     * Resumes a personal channel (idempotent).
+     * Batch resumes personal channels for the logged-in user (idempotent).
+     * Ownership is pre-validated by @PreAuthorize — this method loads and updates atomically.
      *
-     * @param channelId the channel ID
-     * @return the resumed channel
-     * @throws DataNotFoundException if channel not found or not owned by user
+     * @param channelIds the channel IDs to resume
      */
     @Transactional
-    public Channel resumeUserChannel(final Long channelId) {
-        final Channel channel = getChannelWithAdminFallback(channelId);
-        return channelCreationService.updateStatus(channel, ChannelStatus.ACTIVE);
+    public void batchResumeUserChannels(final List<Long> channelIds) {
+        batchUpdateStatus(channelIds, ChannelStatus.ACTIVE);
     }
 
     /**
-     * Deletes a personal channel (soft delete - sets status to PENDING_DELETION).
+     * Batch deletes personal channels for the logged-in user (soft delete).
+     * Ownership is pre-validated by @PreAuthorize — this method loads and updates atomically.
      *
-     * @param channelId the channel ID
-     * @return the deleted channel
-     * @throws DataNotFoundException if channel not found or not owned by user
+     * @param channelIds the channel IDs to delete
      */
     @Transactional
-    public Channel deleteUserChannel(final Long channelId) {
-        final Channel channel = getChannelWithAdminFallback(channelId);
-        return channelCreationService.updateStatus(channel, ChannelStatus.PENDING_DELETION);
+    public void batchDeleteUserChannels(final List<Long> channelIds) {
+        batchUpdateStatus(channelIds, ChannelStatus.PENDING_DELETION);
+    }
+
+    private void batchUpdateStatus(final List<Long> channelIds, final ChannelStatus status) {
+        final List<Channel> channels = channelRepository.findActiveChannelsByIds(channelIds);
+        channels.forEach(channel -> channelCreationService.updateStatus(channel, status));
     }
 }

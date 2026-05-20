@@ -1,7 +1,7 @@
 package io.github.eventify.api.quota.service;
 
+import io.github.eventify.api.quota.model.QuotaStatus;
 import io.github.eventify.api.quota.model.UserEventQuota;
-import io.github.eventify.api.quota.model.response.UserQuotaResponse;
 import io.github.eventify.api.quota.repository.UserEventQuotaRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.service.UserService;
@@ -58,7 +58,7 @@ public class UserQuotaService {
      * @return quota response DTO
      */
     @Transactional
-    public UserQuotaResponse getQuotaStatus(final Long userId) {
+    public QuotaStatus getQuotaStatus(final Long userId) {
         final UserEventQuota quota = getOrCreateQuotaWithLock(userId);
         final Integer used = quota.getEventCount();
         final Integer remaining = Math.max(0, MONTHLY_EVENT_LIMIT - used);
@@ -67,13 +67,14 @@ public class UserQuotaService {
         final OffsetDateTime periodStart = quota.getPeriodStart();
         final OffsetDateTime periodEnd = periodStart.plusMonths(1).with(LocalTime.MIN);
 
-        return new UserQuotaResponse()
-            .setUsed(used)
-            .setLimit(MONTHLY_EVENT_LIMIT)
-            .setRemaining(remaining)
-            .setPeriodStart(periodStart.toLocalDate())
-            .setPeriodEnd(periodEnd.toLocalDate())
-            .setPercentUsed(percentUsed);
+        return QuotaStatus.builder()
+            .used(used)
+            .limit(MONTHLY_EVENT_LIMIT)
+            .remaining(remaining)
+            .percentUsed(percentUsed)
+            .periodStart(periodStart.toLocalDate())
+            .periodEnd(periodEnd.toLocalDate())
+            .build();
     }
 
     /**

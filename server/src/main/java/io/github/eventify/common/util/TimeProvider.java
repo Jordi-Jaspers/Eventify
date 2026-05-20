@@ -2,7 +2,9 @@ package io.github.eventify.common.util;
 
 import lombok.experimental.UtilityClass;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -40,5 +42,15 @@ public class TimeProvider {
      */
     public static OffsetDateTime truncateToMicros(final OffsetDateTime timestamp) {
         return timestamp == null ? null : timestamp.truncatedTo(ChronoUnit.MICROS);
+    }
+
+    /**
+     * Returns the start of the given date at UTC midnight as an OffsetDateTime.
+     *
+     * @param date the local date
+     * @return the start of day in UTC
+     */
+    public static OffsetDateTime startOfDayUtc(final LocalDate date) {
+        return date.atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
     }
 }

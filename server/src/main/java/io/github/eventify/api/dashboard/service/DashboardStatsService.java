@@ -3,7 +3,7 @@ package io.github.eventify.api.dashboard.service;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
-import io.github.eventify.api.dashboard.model.response.DashboardStatsResponse;
+import io.github.eventify.api.dashboard.model.DashboardStats;
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.repository.EventRepository;
@@ -34,7 +34,7 @@ public class DashboardStatsService {
      * @return dashboard statistics
      */
     @Transactional(readOnly = true)
-    public DashboardStatsResponse getPersonalStats(final Long userId) {
+    public DashboardStats getPersonalStats(final Long userId) {
         final List<Channel> activeChannels = channelRepository.findByUserIdAndOrganizationIsNullAndStatus(
             userId,
             ChannelStatus.ACTIVE
@@ -50,7 +50,7 @@ public class DashboardStatsService {
      * @return dashboard statistics
      */
     @Transactional(readOnly = true)
-    public DashboardStatsResponse getOrganizationStats(final Long orgId) {
+    public DashboardStats getOrganizationStats(final Long orgId) {
         final List<Channel> activeChannels = channelRepository.findByOrganizationIdAndStatus(
             orgId,
             ChannelStatus.ACTIVE
@@ -65,7 +65,7 @@ public class DashboardStatsService {
      * @param activeChannels list of active channels
      * @return dashboard statistics
      */
-    private DashboardStatsResponse calculateStats(final List<Channel> activeChannels) {
+    private DashboardStats calculateStats(final List<Channel> activeChannels) {
         final int activeChannelCount = activeChannels.size();
 
         // Extract channel IDs
@@ -82,7 +82,11 @@ public class DashboardStatsService {
 
         // Early return for empty channels list
         if (activeChannels.isEmpty()) {
-            return new DashboardStatsResponse(eventsToday, 0, 0.0, null);
+            return DashboardStats.builder()
+                .eventsToday(eventsToday)
+                .activeChannels(0)
+                .errorRate(0.0)
+                .build();
         }
 
         // Calculate error rate based on most recent event severity per channel
@@ -113,11 +117,11 @@ public class DashboardStatsService {
         // Calculate error rate as percentage
         final double errorRate = ((double) criticalCount / activeChannelCount) * 100.0;
 
-        return new DashboardStatsResponse(
-            eventsToday,
-            activeChannelCount,
-            errorRate,
-            mostRecentEventTimestamp
-        );
+        return DashboardStats.builder()
+            .eventsToday(eventsToday)
+            .activeChannels(activeChannelCount)
+            .errorRate(errorRate)
+            .lastEventAt(mostRecentEventTimestamp)
+            .build();
     }
 }

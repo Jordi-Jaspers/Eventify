@@ -3,7 +3,7 @@ package io.github.eventify.api.dashboard.service;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
-import io.github.eventify.api.dashboard.model.response.DashboardStatsResponse;
+import io.github.eventify.api.dashboard.model.DashboardStats;
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.repository.EventRepository;
@@ -64,10 +64,10 @@ public class DashboardStatsServiceTest extends UnitTest {
         }
 
         // When: Getting personal dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getPersonalStats(user.getId());
+        final DashboardStats stats = dashboardStatsService.getPersonalStats(user.getId());
 
         // Then: Error rate should be 20.0%
-        assertThat(stats.errorRate(), is(equalTo(20.0)));
+        assertThat(stats.getErrorRate(), is(equalTo(20.0)));
     }
 
     @Test
@@ -81,13 +81,13 @@ public class DashboardStatsServiceTest extends UnitTest {
             .willReturn(0L);
 
         // When: Getting personal dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getPersonalStats(user.getId());
+        final DashboardStats stats = dashboardStatsService.getPersonalStats(user.getId());
 
         // Then: All stats should be zero
-        assertThat(stats.eventsToday(), is(equalTo(0L)));
-        assertThat(stats.activeChannels(), is(equalTo(0)));
-        assertThat(stats.errorRate(), is(equalTo(0.0)));
-        assertThat(stats.lastEventAt(), is(nullValue()));
+        assertThat(stats.getEventsToday(), is(equalTo(0L)));
+        assertThat(stats.getActiveChannels(), is(equalTo(0)));
+        assertThat(stats.getErrorRate(), is(equalTo(0.0)));
+        assertThat(stats.getLastEventAt(), is(nullValue()));
     }
 
     @Test
@@ -112,10 +112,10 @@ public class DashboardStatsServiceTest extends UnitTest {
         }
 
         // When: Getting personal dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getPersonalStats(user.getId());
+        final DashboardStats stats = dashboardStatsService.getPersonalStats(user.getId());
 
         // Then: Events today should match expected count
-        assertThat(stats.eventsToday(), is(equalTo(expectedEventCount)));
+        assertThat(stats.getEventsToday(), is(equalTo(expectedEventCount)));
     }
 
     @Test
@@ -135,10 +135,10 @@ public class DashboardStatsServiceTest extends UnitTest {
         }
 
         // When: Getting personal dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getPersonalStats(user.getId());
+        final DashboardStats stats = dashboardStatsService.getPersonalStats(user.getId());
 
         // Then: Active channels should be 5
-        assertThat(stats.activeChannels(), is(equalTo(5)));
+        assertThat(stats.getActiveChannels(), is(equalTo(5)));
     }
 
     @Test
@@ -165,10 +165,10 @@ public class DashboardStatsServiceTest extends UnitTest {
         given(eventRepository.countByChannelIdInAndTimestampAfter(any(), any())).willReturn(0L);
 
         // When: Getting personal dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getPersonalStats(user.getId());
+        final DashboardStats stats = dashboardStatsService.getPersonalStats(user.getId());
 
         // Then: Last event timestamp should be the most recent
-        assertThat(stats.lastEventAt(), is(equalTo(now)));
+        assertThat(stats.getLastEventAt(), is(equalTo(now)));
     }
 
     @Test
@@ -188,10 +188,10 @@ public class DashboardStatsServiceTest extends UnitTest {
         }
 
         // When: Getting personal dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getPersonalStats(user.getId());
+        final DashboardStats stats = dashboardStatsService.getPersonalStats(user.getId());
 
         // Then: Should only count personal channels
-        assertThat(stats.activeChannels(), is(equalTo(3)));
+        assertThat(stats.getActiveChannels(), is(equalTo(3)));
     }
 
     @Test
@@ -211,10 +211,10 @@ public class DashboardStatsServiceTest extends UnitTest {
         }
 
         // When: Getting org dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getOrganizationStats(orgId);
+        final DashboardStats stats = dashboardStatsService.getOrganizationStats(orgId);
 
         // Then: Should only count org channels
-        assertThat(stats.activeChannels(), is(equalTo(5)));
+        assertThat(stats.getActiveChannels(), is(equalTo(5)));
     }
 
     @Test
@@ -235,10 +235,10 @@ public class DashboardStatsServiceTest extends UnitTest {
         given(eventRepository.countByChannelIdInAndTimestampAfter(any(), any())).willReturn(0L);
 
         // When: Getting personal dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getPersonalStats(user.getId());
+        final DashboardStats stats = dashboardStatsService.getPersonalStats(user.getId());
 
         // Then: Error rate should be 0.0
-        assertThat(stats.errorRate(), is(equalTo(0.0)));
+        assertThat(stats.getErrorRate(), is(equalTo(0.0)));
     }
 
     @Test
@@ -260,10 +260,10 @@ public class DashboardStatsServiceTest extends UnitTest {
         given(eventRepository.countByChannelIdInAndTimestampAfter(any(), any())).willReturn(0L);
 
         // When: Getting personal dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getPersonalStats(user.getId());
+        final DashboardStats stats = dashboardStatsService.getPersonalStats(user.getId());
 
         // Then: Error rate should be 100.0
-        assertThat(stats.errorRate(), is(equalTo(100.0)));
+        assertThat(stats.getErrorRate(), is(equalTo(100.0)));
     }
 
     @Test
@@ -288,10 +288,10 @@ public class DashboardStatsServiceTest extends UnitTest {
         given(eventRepository.countByChannelIdInAndTimestampAfter(any(), any())).willReturn(0L);
 
         // When: Getting personal dashboard stats
-        final DashboardStatsResponse stats = dashboardStatsService.getPersonalStats(user.getId());
+        final DashboardStats stats = dashboardStatsService.getPersonalStats(user.getId());
 
         // Then: Error rate should be 25% (1/4)
-        assertThat(stats.errorRate(), is(equalTo(25.0)));
+        assertThat(stats.getErrorRate(), is(equalTo(25.0)));
     }
 
     // ========================= HELPER METHODS =========================

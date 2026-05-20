@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202601091001-TST-api-key-test-data.xml">
 
-    <changeSet id="202601091001-TST-api-key-test-data-1" author="backend-agent" context="tst">
+    <changeSet id="202601091001-TST-api-key-test-data-1" author="jordi.jaspers" context="tst">
         <comment>Insert USER-scoped API keys for admin (id=1) with varied expiration and usage. Keys are display-only - hashes are placeholders.</comment>
         <sql>
             -- User-scoped API keys for admin (id=1)
@@ -100,7 +100,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202601091001-TST-api-key-test-data-2" author="backend-agent" context="tst">
+    <changeSet id="202601091001-TST-api-key-test-data-2" author="jordi.jaspers" context="tst">
         <comment>Insert ORGANIZATION-scoped API keys for Acme, Beta, Gamma orgs with varied expiration.</comment>
         <sql>
             -- Acme Corp: Active key, no expiry

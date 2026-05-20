@@ -1,5 +1,6 @@
 package io.github.eventify.api.session.model.mapper;
 
+import io.github.eventify.api.session.model.SessionInfo;
 import io.github.eventify.api.session.model.response.SessionResponse;
 import io.github.eventify.api.token.model.Token;
 import io.github.jframe.util.mapper.DateTimeMapper;
@@ -34,4 +35,10 @@ public abstract class SessionMapper {
 
     @IterableMapping(qualifiedByName = "toResponse")
     public abstract List<SessionResponse> toResponses(List<Token> tokens);
+
+    @Named("sessionInfoToResponse")
+    public abstract SessionResponse sessionInfoToResponse(SessionInfo sessionInfo);
+
+    @IterableMapping(qualifiedByName = "sessionInfoToResponse")
+    public abstract List<SessionResponse> sessionInfosToResponses(List<SessionInfo> sessionInfos);
 }

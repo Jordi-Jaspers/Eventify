@@ -1,5 +1,6 @@
 package io.github.eventify.api.user.service;
 
+import io.github.eventify.api.notification.service.NotificationDispatchService;
 import io.github.eventify.api.user.model.AuthProvider;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.UserAuthProvider;
@@ -41,7 +42,14 @@ public class UserServiceRegisterAuthProviderTest extends UnitTest {
 
     @BeforeEach
     public void setUp() {
-        userService = new UserService(passwordEncoder, userRepository, userAuthProviderRepository, null, emailService);
+        userService = new UserService(
+            passwordEncoder,
+            userRepository,
+            userAuthProviderRepository,
+            null,
+            emailService,
+            mock(NotificationDispatchService.class)
+        );
         when(passwordEncoder.encode(any(String.class))).thenReturn(ENCODED_PASSWORD);
         when(userRepository.save(any(User.class))).thenAnswer(i -> {
             final User u = i.getArgument(0);

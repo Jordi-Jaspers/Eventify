@@ -1,5 +1,6 @@
 package io.github.eventify.api.organization.model.response;
 
+import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.model.OrganizationalRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -38,6 +39,13 @@ public class UserOrganizationResponse {
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String organizationSlug;
+
+    @Schema(
+        description = "Organization status",
+        example = "ACTIVE",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private OrganizationStatus organizationStatus;
 
     @Schema(
         description = "User's role within the organization",

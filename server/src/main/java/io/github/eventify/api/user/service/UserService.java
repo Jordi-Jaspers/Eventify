@@ -1,6 +1,7 @@
 package io.github.eventify.api.user.service;
 
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.notification.service.NotificationDispatchService;
 import io.github.eventify.api.user.model.AuthProvider;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.UserAuthProvider;
@@ -49,7 +50,12 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.ExcessiveImports")
+@SuppressWarnings(
+    {
+        "PMD.ExcessiveImports",
+        "checkstyle:ClassFanOutComplexity"
+    }
+)
 public class UserService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
@@ -61,6 +67,8 @@ public class UserService implements UserDetailsService {
     private final UserMetaData userMetaData;
 
     private final EmailService emailService;
+
+    private final NotificationDispatchService notificationDispatchService;
 
     /**
      * Loads a user by their email address (username) for Spring Security authentication.
@@ -218,6 +226,7 @@ public class UserService implements UserDetailsService {
         final User user = register(newUser, password);
         log.info("User has been registered, sending email to validate account.");
         emailService.sendUserValidationEmail(user);
+        notificationDispatchService.dispatchWelcomeNotification(user);
         return user;
     }
 

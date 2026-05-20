@@ -5,7 +5,7 @@
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import UserSearchCombobox from '$lib/components/user/UserSearchCombobox.svelte';
 	import { Building2, CircleAlert, LoaderCircle, Tag, UserCircle } from '@lucide/svelte';
-	import { createOrganization } from '$lib/api/organization/OrganizationController';
+	import { createOrganization } from '$lib/api/admin/AdminOrganizationController';
 	import type { OrganizationResponse, UserResponse } from '$lib/api/models';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
@@ -179,7 +179,7 @@
 			<div class="rounded-xl border border-primary/20 bg-primary/5 backdrop-blur-sm p-4">
 				<p class="text-sm text-muted-foreground">
 					<strong class="text-foreground">Note:</strong> Creating an organization will generate a
-					unique slug and set the status to TRIAL. You can manage organization settings after
+					unique slug and set the status to ACTIVE. You can manage organization settings after
 					creation.
 				</p>
 			</div>

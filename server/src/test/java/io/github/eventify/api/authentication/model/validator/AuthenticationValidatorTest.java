@@ -11,7 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.passay.RuleResult;
+import org.passay.FailureValidationResult;
+import org.passay.SuccessValidationResult;
 
 import static io.github.eventify.api.authentication.model.validator.AuthenticationValidator.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -91,7 +92,7 @@ public class AuthenticationValidatorTest extends UnitTest {
                 .setPasswordConfirmation(VALID_PASSWORD_CONFIRMATION);
 
             // And: The password validator returns a valid result
-            final RuleResult passwordRuleResult = new RuleResult(true);
+            final org.passay.ValidationResult passwordRuleResult = new SuccessValidationResult();
             when(customPasswordValidator.validatePassword(VALID_PASSWORD))
                 .thenReturn(passwordRuleResult);
 
@@ -111,7 +112,7 @@ public class AuthenticationValidatorTest extends UnitTest {
                 .setPasswordConfirmation(VALID_PASSWORD_CONFIRMATION);
 
             // And: The password validator returns a valid result
-            final RuleResult passwordRuleResult = new RuleResult(true);
+            final org.passay.ValidationResult passwordRuleResult = new SuccessValidationResult();
             when(customPasswordValidator.validatePassword(VALID_PASSWORD))
                 .thenReturn(passwordRuleResult);
 
@@ -131,7 +132,7 @@ public class AuthenticationValidatorTest extends UnitTest {
                 .setPasswordConfirmation(VALID_PASSWORD_CONFIRMATION);
 
             // And: The password validator returns a valid result
-            final RuleResult passwordRuleResult = new RuleResult(true);
+            final org.passay.ValidationResult passwordRuleResult = new SuccessValidationResult();
             when(customPasswordValidator.validatePassword(VALID_PASSWORD))
                 .thenReturn(passwordRuleResult);
 
@@ -326,7 +327,7 @@ public class AuthenticationValidatorTest extends UnitTest {
                 .setPasswordConfirmation(WEAK_PASSWORD);
 
             // And: The password validator returns an invalid result
-            final RuleResult passwordRuleResult = new RuleResult(false);
+            final org.passay.ValidationResult passwordRuleResult = new FailureValidationResult();
             when(customPasswordValidator.validatePassword(WEAK_PASSWORD))
                 .thenReturn(passwordRuleResult);
 
@@ -704,7 +705,7 @@ public class AuthenticationValidatorTest extends UnitTest {
                 .setPasswordConfirmation(WEAK_PASSWORD);
 
             // And: The password validator returns an invalid result
-            final RuleResult passwordRuleResult = new RuleResult(false);
+            final org.passay.ValidationResult passwordRuleResult = new FailureValidationResult();
             when(customPasswordValidator.validatePassword(WEAK_PASSWORD))
                 .thenReturn(passwordRuleResult);
 
@@ -728,7 +729,7 @@ public class AuthenticationValidatorTest extends UnitTest {
                 .setPasswordConfirmation(VALID_PASSWORD_CONFIRMATION);
 
             // And: The password validator returns a valid result
-            final RuleResult passwordRuleResult = new RuleResult(true);
+            final org.passay.ValidationResult passwordRuleResult = new SuccessValidationResult();
             when(customPasswordValidator.validatePassword(VALID_PASSWORD))
                 .thenReturn(passwordRuleResult);
 

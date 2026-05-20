@@ -1,5 +1,6 @@
 package io.github.eventify.common.security.oauth2;
 
+import io.github.eventify.api.notification.service.NotificationDispatchService;
 import io.github.eventify.api.user.model.AuthProvider;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.repository.UserRepository;
@@ -52,7 +53,12 @@ public class CustomOAuth2UserServiceUpdateUserTest extends UnitTest {
 
     @BeforeEach
     public void setUp() {
-        customOAuth2UserService = new CustomOAuth2UserService(userRepository, userAuthProviderService, passwordEncoder);
+        customOAuth2UserService = new CustomOAuth2UserService(
+            userRepository,
+            userAuthProviderService,
+            passwordEncoder,
+            mock(NotificationDispatchService.class)
+        );
         lenient().when(userAuthProviderService.findByProviderAndProviderEmail(any(AuthProvider.class), any(String.class)))
             .thenReturn(Optional.empty());
     }

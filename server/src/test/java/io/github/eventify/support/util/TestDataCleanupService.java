@@ -48,7 +48,10 @@ public class TestDataCleanupService {
             "DELETE FROM event WHERE channel_id IN (SELECT id FROM channel WHERE user_id IN " + userIdList + ")"
         );
 
-        // 2. User event quotas
+        // 2. Audit logs
+        jdbcTemplate.execute("DELETE FROM audit_log WHERE actor_id IN " + userIdList);
+
+        // 3. User event quotas
         jdbcTemplate.execute("DELETE FROM user_event_quota WHERE user_id IN " + userIdList);
 
         // 3. API key audit records (revoked_by and owner_user_id are the user FK columns)
@@ -61,7 +64,13 @@ public class TestDataCleanupService {
         // 5. Channels
         jdbcTemplate.execute("DELETE FROM channel WHERE user_id IN " + userIdList);
 
-        // 6. Watchlists
+        // 6. Subscriptions (depends on watchlist and user)
+        jdbcTemplate.execute("DELETE FROM subscription WHERE user_id IN " + userIdList);
+        jdbcTemplate.execute(
+            "DELETE FROM subscription WHERE watchlist_id IN (SELECT id FROM watchlist WHERE user_id IN " + userIdList + ")"
+        );
+
+        // 6b. Watchlists
         jdbcTemplate.execute("DELETE FROM watchlist WHERE user_id IN " + userIdList);
 
         // 7. Organization memberships
@@ -77,7 +86,18 @@ public class TestDataCleanupService {
         // 9. Tokens
         jdbcTemplate.execute("DELETE FROM token WHERE user_id IN " + userIdList);
 
-        // 10. Users (table name is "user" with quotes - reserved word in PostgreSQL)
+        // 10. Notifications (must be before notification_broadcast due to FK)
+        jdbcTemplate.execute("DELETE FROM notification WHERE user_id IN " + userIdList);
+        // Also delete notifications referencing broadcasts sent by test users (e.g. ALL_USERS broadcasts)
+        jdbcTemplate.execute(
+            "DELETE FROM notification WHERE broadcast_id IN " +
+                "(SELECT id FROM notification_broadcast WHERE sent_by IN " + userIdList + ")"
+        );
+
+        // 11. Notification broadcasts (sent_by FK references user)
+        jdbcTemplate.execute("DELETE FROM notification_broadcast WHERE sent_by IN " + userIdList);
+
+        // 12. Users (table name is "user" with quotes - reserved word in PostgreSQL)
         jdbcTemplate.execute("DELETE FROM \"user\" WHERE id IN " + userIdList);
 
         // Also clean up by name pattern

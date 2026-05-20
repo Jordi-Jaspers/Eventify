@@ -2,8 +2,18 @@ import type {
 	TimelineDuration,
 	Severity,
 	Timeline,
-	TimeRange
+	TimeRange,
+	EventSearchResponse
 } from '$lib/api/models';
+
+// ============ Event Feed Types ============
+
+export type EventFeedSeverity = NonNullable<EventSearchResponse['severity']>;
+
+export interface EventFeedChannel {
+	id: number;
+	name: string;
+}
 
 // ============ Zoom Types ============
 

@@ -52,6 +52,7 @@ public void process(User user) {        // Missing final
 - ✅ Lombok: `@Getter`, `@Setter`, `@Builder`, `@RequiredArgsConstructor`
 - ✅ Lombok `@Accessors(chain = true)` for response objects
 - ✅ Layered: Controller → Service → Repository → Entity
+- ✅ Enums for categorical fields in entities (`@Enumerated(EnumType.STRING)`), request DTOs, and response DTOs — NEVER use `String` for values that have a fixed set (e.g. category, status, type, role)
 
 ## Entity Pattern
 
@@ -252,6 +253,34 @@ public class UserController {
 - ✅ Endpoints from `Paths.java` constants only (never hardcode)
 - ✅ MapStruct for entity-to-DTO conversion (service returns entities)
 - ✅ Inject validator as dependency, call in controller method
+
+## Security Pattern (@PreAuthorize)
+
+**All resource-scoped endpoints MUST use `@PreAuthorize` with a security service bean.** Security checks live at the controller level, NOT in services.
+
+```java
+// Single resource — security bean checks ownership
+@PreAuthorize("@channelSecurity.canAccessChannelAsUser(#id, principal) or hasAuthority('MANAGE_USERS')")
+
+// Batch resource — security bean checks ALL IDs belong to user
+@PreAuthorize("@channelSecurity.canAccessChannelsAsUser(#request.channelIds, principal) or hasAuthority('MANAGE_USERS')")
+
+// Organization resource — org role check
+@PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id) or hasAuthority('MANAGE_ORGANIZATIONS')")
+```
+
+**Security rules:**
+- ✅ **ALWAYS `@PreAuthorize`** on endpoints that access specific resources by ID
+- ✅ **Security bean pattern:** `@beanName.method(#pathVar, principal)` — returns boolean
+- ✅ **Admin bypass via SpEL:** `or hasAuthority('...')` — never check authority inside the security bean
+- ✅ **Batch endpoints:** security bean must validate ALL IDs in the list (all-or-nothing)
+- ✅ **Rejected = 403** for user resources (no existence leakage), **404** for org resources
+- ❌ **NEVER** check ownership inside service methods — that's the security layer's job
+- ❌ **NEVER** skip `@PreAuthorize` and rely on service-level scoped queries for security
+
+**When `@PreAuthorize` is NOT needed:**
+- Public endpoints (`/api/public/**` — `permitAll()` in security config)
+- User-profile endpoints that only access the authenticated user's own data via `principal` (no resource ID in path)
 
 
 ## DTO Pattern

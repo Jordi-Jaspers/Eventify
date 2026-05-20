@@ -1,9 +1,9 @@
 package io.github.eventify.api.user.service;
 
 import io.github.eventify.api.user.model.AuthProvider;
+import io.github.eventify.api.user.model.ProviderInfo;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.model.UserAuthProvider;
-import io.github.eventify.api.user.model.response.ProviderResponse;
 import io.github.eventify.api.user.repository.UserAuthProviderRepository;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.common.exception.LastAuthMethodException;
@@ -58,26 +58,26 @@ public class UserAuthProviderServiceTest extends UnitTest {
             .thenReturn(List.of(localProvider, googleProvider));
 
         // When: Listing providers for the user
-        final List<ProviderResponse> responses = userAuthProviderService.listProvidersForUser(user);
+        final List<ProviderInfo> responses = userAuthProviderService.listProvidersForUser(user);
 
         // Then: Should return 3 entries (LOCAL, GOOGLE, GITHUB)
         assertThat(responses, hasSize(3));
 
         // And: LOCAL should be connected with user's email
-        final ProviderResponse localResponse = responses.get(0);
-        assertThat(localResponse.getProvider(), is(equalTo(AuthProvider.LOCAL)));
+        final ProviderInfo localResponse = responses.get(0);
+        assertThat(localResponse.getProvider(), is(equalTo(AuthProvider.LOCAL.name())));
         assertThat(localResponse.isConnected(), is(true));
         assertThat(localResponse.getProviderEmail(), is(equalTo(user.getEmail())));
 
         // And: GOOGLE should be connected with stored email
-        final ProviderResponse googleResponse = responses.get(1);
-        assertThat(googleResponse.getProvider(), is(equalTo(AuthProvider.GOOGLE)));
+        final ProviderInfo googleResponse = responses.get(1);
+        assertThat(googleResponse.getProvider(), is(equalTo(AuthProvider.GOOGLE.name())));
         assertThat(googleResponse.isConnected(), is(true));
         assertThat(googleResponse.getProviderEmail(), is(equalTo("google@gmail.com")));
 
         // And: GITHUB should not be connected with no email
-        final ProviderResponse githubResponse = responses.get(2);
-        assertThat(githubResponse.getProvider(), is(equalTo(AuthProvider.GITHUB)));
+        final ProviderInfo githubResponse = responses.get(2);
+        assertThat(githubResponse.getProvider(), is(equalTo(AuthProvider.GITHUB.name())));
         assertThat(githubResponse.isConnected(), is(false));
         assertThat(githubResponse.getProviderEmail(), is(nullValue()));
     }
@@ -92,12 +92,12 @@ public class UserAuthProviderServiceTest extends UnitTest {
             .thenReturn(List.of());
 
         // When: Listing providers for the user
-        final List<ProviderResponse> responses = userAuthProviderService.listProvidersForUser(user);
+        final List<ProviderInfo> responses = userAuthProviderService.listProvidersForUser(user);
 
         // Then: Should return 3 entries all not connected
         assertThat(responses, hasSize(3));
-        assertThat(responses, everyItem(hasProperty("connected", is(false))));
-        assertThat(responses, everyItem(hasProperty("providerEmail", is(nullValue()))));
+        assertThat(responses.stream().allMatch(r -> !r.isConnected()), is(true));
+        assertThat(responses.stream().allMatch(r -> r.getProviderEmail() == null), is(true));
     }
 
     @Test

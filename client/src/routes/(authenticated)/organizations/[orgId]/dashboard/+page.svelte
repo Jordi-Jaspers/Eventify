@@ -6,7 +6,7 @@
 	import type { UserOrganizationResponse, DashboardStatsResponse } from '$lib/api/models';
 	import { formatDate, formatRelativeTime } from '$lib/utils/date';
 	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
-	import { getOrgDashboardStats, getErrorRateVariant } from '$lib/services/dashboard.service';
+	import { getOrgDashboardStats, getErrorRateVariant } from '$lib/api/dashboard/DashboardController';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
 	import { StatCard } from '$lib/components/ui/stat-card';

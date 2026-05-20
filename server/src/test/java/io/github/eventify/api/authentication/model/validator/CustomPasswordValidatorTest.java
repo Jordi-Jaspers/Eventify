@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.passay.RuleResult;
+import org.passay.ValidationResult;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -33,7 +33,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String validPassword = VALID_PASSWORD;
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(validPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(validPassword);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -49,7 +49,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String minLengthPassword = VALID_PASSWORD_MIN_LENGTH;
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(minLengthPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(minLengthPassword);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -63,7 +63,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String password = "TESTPass123!";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(password);
+            final ValidationResult result = customPasswordValidator.validatePassword(password);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -77,7 +77,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String password = "Testpass123!";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(password);
+            final ValidationResult result = customPasswordValidator.validatePassword(password);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -91,7 +91,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String password = "Test12345!";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(password);
+            final ValidationResult result = customPasswordValidator.validatePassword(password);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -105,7 +105,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String password = "Test123!@#$%";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(password);
+            final ValidationResult result = customPasswordValidator.validatePassword(password);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -119,7 +119,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String longPassword = VALID_PASSWORD_MIN_LENGTH + "a".repeat(92);
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(longPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(longPassword);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -137,11 +137,11 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String password5 = "Test123%";
 
             // When: Validating the passwords
-            final RuleResult result1 = customPasswordValidator.validatePassword(password1);
-            final RuleResult result2 = customPasswordValidator.validatePassword(password2);
-            final RuleResult result3 = customPasswordValidator.validatePassword(password3);
-            final RuleResult result4 = customPasswordValidator.validatePassword(password4);
-            final RuleResult result5 = customPasswordValidator.validatePassword(password5);
+            final ValidationResult result1 = customPasswordValidator.validatePassword(password1);
+            final ValidationResult result2 = customPasswordValidator.validatePassword(password2);
+            final ValidationResult result3 = customPasswordValidator.validatePassword(password3);
+            final ValidationResult result4 = customPasswordValidator.validatePassword(password4);
+            final ValidationResult result5 = customPasswordValidator.validatePassword(password5);
 
             // Then: All validations should pass
             assertThat(result1.isValid(), is(true));
@@ -164,7 +164,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String shortPassword = PASSWORD_TOO_SHORT;
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(shortPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(shortPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -183,7 +183,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String emptyPassword = "";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(emptyPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(emptyPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -197,7 +197,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String singleCharPassword = "A";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(singleCharPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(singleCharPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -217,7 +217,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String noUppercasePassword = PASSWORD_NO_UPPERCASE;
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(noUppercasePassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(noUppercasePassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -232,7 +232,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String noLowercasePassword = PASSWORD_NO_LOWERCASE;
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(noLowercasePassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(noLowercasePassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -247,7 +247,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String noDigitsPassword = PASSWORD_NO_DIGIT;
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(noDigitsPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(noDigitsPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -262,7 +262,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String noSpecialCharsPassword = PASSWORD_NO_SPECIAL;
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(noSpecialCharsPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(noSpecialCharsPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -277,7 +277,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String onlyUppercasePassword = "TESTPASSWORD";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(onlyUppercasePassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(onlyUppercasePassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -291,7 +291,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String onlyLowercasePassword = "testpassword";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(onlyLowercasePassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(onlyLowercasePassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -305,7 +305,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String onlyDigitsPassword = "12345678";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(onlyDigitsPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(onlyDigitsPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -319,7 +319,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String onlySpecialCharsPassword = "!@#$%^&*";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(onlySpecialCharsPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(onlySpecialCharsPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -339,7 +339,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String passwordWithSpace = "Test 123!";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(passwordWithSpace);
+            final ValidationResult result = customPasswordValidator.validatePassword(passwordWithSpace);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -354,7 +354,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String passwordWithLeadingSpace = " Test123!";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(passwordWithLeadingSpace);
+            final ValidationResult result = customPasswordValidator.validatePassword(passwordWithLeadingSpace);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -368,7 +368,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String passwordWithTrailingSpace = "Test123! ";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(passwordWithTrailingSpace);
+            final ValidationResult result = customPasswordValidator.validatePassword(passwordWithTrailingSpace);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -382,7 +382,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String passwordWithTab = "Test\t123!";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(passwordWithTab);
+            final ValidationResult result = customPasswordValidator.validatePassword(passwordWithTab);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -396,7 +396,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String passwordWithNewline = "Test\n123!";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(passwordWithNewline);
+            final ValidationResult result = customPasswordValidator.validatePassword(passwordWithNewline);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -416,7 +416,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String weakPassword = "testpassword";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(weakPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(weakPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -433,7 +433,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String weakPassword = "test";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(weakPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(weakPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -456,7 +456,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String password = "Test123!@#$%^&*()_+-=[]{}|;:',.<>?/~`";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(password);
+            final ValidationResult result = customPasswordValidator.validatePassword(password);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -470,7 +470,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String exactPassword = "Test123!" + "a".repeat(92);
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(exactPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(exactPassword);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -484,7 +484,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String minRequiredPassword = "Aa1!aaaa";
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(minRequiredPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(minRequiredPassword);
 
             // Then: The validation should pass
             assertThat(result.isValid(), is(true));
@@ -498,9 +498,9 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String password = "Test123!";
 
             // When: Validating the password multiple times
-            final RuleResult result1 = customPasswordValidator.validatePassword(password);
-            final RuleResult result2 = customPasswordValidator.validatePassword(password);
-            final RuleResult result3 = customPasswordValidator.validatePassword(password);
+            final ValidationResult result1 = customPasswordValidator.validatePassword(password);
+            final ValidationResult result2 = customPasswordValidator.validatePassword(password);
+            final ValidationResult result3 = customPasswordValidator.validatePassword(password);
 
             // Then: All results should be consistent
             assertThat(result1.isValid(), is(true));
@@ -518,7 +518,7 @@ public class CustomPasswordValidatorTest extends UnitTest {
             final String tooLongPassword = "Test123!" + "a".repeat(93);
 
             // When: Validating the password
-            final RuleResult result = customPasswordValidator.validatePassword(tooLongPassword);
+            final ValidationResult result = customPasswordValidator.validatePassword(tooLongPassword);
 
             // Then: The validation should fail
             assertThat(result.isValid(), is(false));
@@ -558,14 +558,14 @@ public class CustomPasswordValidatorTest extends UnitTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when password is null")
+        @DisplayName("Should throw IllegalArgumentException when password is null")
         public void shouldThrowNullPointerExceptionWhenPasswordIsNull() {
             // Given: A null password
             final String nullPassword = null;
 
-            // When & Then: Checking if password is weak should throw NullPointerException
+            // When & Then: Checking if password is weak should throw IllegalArgumentException
             assertThrows(
-                NullPointerException.class,
+                IllegalArgumentException.class,
                 () -> customPasswordValidator.isWeakPassword(nullPassword)
             );
         }

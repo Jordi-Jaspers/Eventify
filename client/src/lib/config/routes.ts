@@ -87,20 +87,44 @@ export const CLIENT_ROUTES = {
 		path: '/changelog',
 		type: RouteType.PRIVATE
 	},
-	ADMIN_DASHBOARD_PAGE: {
-		path: '/admin/dashboard',
+	ADMIN_STATISTICS_PAGE: {
+		path: '/admin/statistics',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_RESOURCES_PAGE: {
+		path: '/admin/resources',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_USERS_PAGE: {
-		path: '/admin/users',
+		path: '/admin/resources/users',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_ORGANIZATIONS_PAGE: {
-		path: '/admin/organizations',
+		path: '/admin/resources/organizations',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_API_KEYS_PAGE: {
-		path: '/admin/api-keys',
+		path: '/admin/resources/api-keys',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_TOOLS_PAGE: {
+		path: '/admin/tools',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_TOOLS_NOTIFICATIONS_PAGE: {
+		path: '/admin/tools/notifications',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_TOOLS_NOTIFICATIONS_SEND_PAGE: {
+		path: '/admin/tools/notifications/send',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_TOOLS_NOTIFICATIONS_HISTORY_PAGE: {
+		path: '/admin/tools/notifications/history',
+		type: RouteType.PRIVATE
+	},
+	ADMIN_AUDIT_LOG_PAGE: {
+		path: '/admin/tools/audit-log',
 		type: RouteType.PRIVATE
 	},
 	ORGANIZATION_MEMBERS_PAGE: (orgId: number) => ({

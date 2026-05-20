@@ -62,7 +62,7 @@
         
         See: ChannelStalenessJob.java for the staleness marking logic.
     -->
-    <changeSet id="202602171400-PRD-channel-staleness-tracking-4" author="jordi.jaspers">
+    <changeSet id="202602171400-PRD-channel-staleness-tracking-4" author="jordi.jaspers" runOnChange="true">
         <comment>Create trigger function to update channel last_event_at on event insert</comment>
         <sqlFile
             path="../triggers/update_channel_last_event.sql"

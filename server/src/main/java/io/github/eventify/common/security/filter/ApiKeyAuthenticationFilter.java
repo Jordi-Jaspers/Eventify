@@ -49,7 +49,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         if (!hasText(apiKey)) {
             log.debug("Missing API key for external endpoint: {}", request.getRequestURI());
             SecurityContextHolder.clearContext();
-            UnauthorizedHandler.handleAuthenticationFailure(request, response, "API key is required for external endpoints");
+            SecurityResponseHandler.handleUnauthorizedAccess(request, response, "API key is required for external endpoints");
             return;
         }
 
@@ -62,7 +62,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         } catch (final Exception ex) {
             log.debug("API key authentication failed: {}", ex.getMessage());
             SecurityContextHolder.clearContext();
-            UnauthorizedHandler.handleAuthenticationFailure(request, response, ex.getMessage());
+            SecurityResponseHandler.handleUnauthorizedAccess(request, response, ex.getMessage());
         }
     }
 

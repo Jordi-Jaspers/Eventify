@@ -6,6 +6,7 @@ export type RegisterRequest = components['schemas']['RegisterUserRequest'];
 export type AuthenticationResponse = components['schemas']['AuthenticationResponse'];
 export type RegisterResponse = components['schemas']['RegisterResponse'];
 export type ForgotPasswordRequest = components['schemas']['ForgotPasswordRequest'];
+export type UpdatePasswordRequest = components['schemas']['UpdatePasswordRequest'];
 
 // ================ User ===================
 export type UserResponse = components['schemas']['UserResponse'];
@@ -34,9 +35,14 @@ export type TransferOwnershipRequest = components['schemas']['TransferOwnershipR
 export type AssignOwnerRequest = components['schemas']['AssignOwnerRequest'];
 
 // ================ Admin ===================
-export type AdminStatsResponse = components['schemas']['AdminStatsResponse'];
 export type GrowthDataPoint = components['schemas']['GrowthDataPoint'];
+export type AdminCountsResponse = components['schemas']['AdminCountsResponse'];
+export type AdminGrowthResponse = components['schemas']['AdminGrowthResponse'];
+export type AdminEventVolumeResponse = components['schemas']['AdminEventVolumeResponse'];
+export type DailyVolumePoint = components['schemas']['DailyVolumePoint'];
+export type AdminEventStatsResponse = components['schemas']['AdminEventStatsResponse'];
 export type AdminApiKeyStatsResponse = components['schemas']['ApiKeyStatsResponse'];
+export type TableSizeEntry = components['schemas']['TableSizeEntry'];
 export type AdminApiKeyAuditResponse = components['schemas']['ApiKeyAuditResponse'];
 export type PageResourceAdminApiKeyAuditResponse =
 	components['schemas']['PageResourceApiKeyAuditResponse'];
@@ -54,6 +60,7 @@ export type ApiKeyResponse = components['schemas']['ApiKeyResponse'];
 export type ChannelDetailsResponse = components['schemas']['ChannelDetailsResponse'];
 export type CreateChannelRequest = components['schemas']['CreateChannelRequest'];
 export type UpdateChannelRequest = components['schemas']['UpdateChannelRequest'];
+export type ChannelBatchRequest = components['schemas']['ChannelBatchRequest'];
 export type PageResourceChannelDetailsResponse =
 	components['schemas']['PageResourceChannelDetailsResponse'];
 
@@ -68,6 +75,8 @@ export type WatchlistConfigurationRequest = components['schemas']['WatchlistConf
 export type WatchlistFiltersRequest = components['schemas']['WatchlistFiltersRequest'];
 export type PageResourceWatchlistDetailsResponse =
 	components['schemas']['PageResourceWatchlistDetailsResponse'];
+export type SubscribeRequest = components['schemas']['SubscribeRequest'];
+export type SubscriptionResponse = components['schemas']['SubscriptionResponse'];
 
 // ================ Monitor ===================
 export type MonitorRequest = components['schemas']['MonitorRequest'];
@@ -81,9 +90,6 @@ export type Timeline = components['schemas']['Timeline'];
 export type TimelineDuration = components['schemas']['TimelineDuration'];
 export type EventSearchResponse = components['schemas']['EventSearchResponse'];
 export type PageResourceEventSearchResponse = components['schemas']['PageResourceEventSearchResponse'];
-export type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
-export type Severity = 'CRITICAL' | 'WARNING' | 'OK' | 'NO_DATA';
-export type BucketSize = NonNullable<MonitorResponse['bucketSize']>;
 
 // ================ Pagination ===================
 export type SearchInput = components['schemas']['SearchInput'];
@@ -95,14 +101,41 @@ export type PageResourceOrganizationMembershipResponse = components['schemas']['
 export type PageResourceUserDetailsResponse = components['schemas']['PageResourceUserDetailsResponse'];
 export type PageResourceApiKeyResponse = components['schemas']['PageResourceApiKeyResponse'];
 
+// ================ User Notifications ===================
+export type NotificationResponse = components['schemas']['NotificationResponse'];
+export type PageResourceNotificationResponse = components['schemas']['PageResourceNotificationResponse'];
+
+// ================ Changelog ===================
+export type ChangelogEntry = components['schemas']['ChangelogEntry'];
+
+// ================ Notifications / Broadcasts ===================
+export type BroadcastResponse = components['schemas']['BroadcastResponse'] & {
+	audienceTargetId?: number;
+	audienceRole?: string;
+	audienceTargetName?: string;
+};
+export type RecipientResponse = components['schemas']['RecipientResponse'];
+export type CreateBroadcastRequest = components['schemas']['CreateBroadcastRequest'];
+export type AudienceRequest = components['schemas']['AudienceRequest'];
+export type PreviewResponse = components['schemas']['PreviewResponse'];
+
 // ================ Enums ===================
-// These are inline enums from generated types - extracted for convenience
+// Derived from generated OpenAPI types where possible
 export type OAuthProvider = 'google' | 'github';
+export type TimeRange = '2h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'custom';
+export type BroadcastCategory = NonNullable<BroadcastResponse['category']>;
+export type AudienceType = NonNullable<AudienceRequest['type']>;
+export type Severity = NonNullable<TimelineDuration['severity']>;
+export type BucketSize = NonNullable<MonitorResponse['bucketSize']>;
 export type ProviderType = NonNullable<ProviderResponse['provider']>;
 export type OrganizationStatus = NonNullable<OrganizationResponse['status']>;
 export type OrganizationalRole = NonNullable<OrganizationMembershipResponse['role']>;
 export type UserRole = NonNullable<UserDetailsResponse['role']>;
 export type SortDirection = NonNullable<SortableColumn['direction']>;
+
+// ================ Audit Log ===================
+export type AuditLogResponse = components['schemas']['AuditLogResponse'];
+export type AuditLogStatsResponse = components['schemas']['AuditLogStatsResponse'];
 
 // ================ Generic PageResource ===================
 // Generic type for paginated responses (mirrors backend PageResource<T>)

@@ -21,7 +21,6 @@
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { showDevCredentials } from '$lib/config/env';
 	import { APP_VERSION } from '$lib/config/version';
-	import { versionStore } from '$lib/stores/version.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette, Sparkles, Bell } from '@lucide/svelte';
@@ -32,25 +31,17 @@
 	import { handleError } from '$lib/utils/error-handler';
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
-	import { onMount } from 'svelte';
+	import { mode, setMode } from 'mode-watcher';
 
 	// Theme state
-	let isDarkMode: boolean = $state(true);
+	const isDarkMode: boolean = $derived(mode.current === 'dark');
 	const shouldShowDevPlaybook: boolean = showDevCredentials();
-	const hasNewVersion: boolean = $derived(versionStore.hasNewVersion);
 	const hasUnread: boolean = $derived(notificationStore.hasUnread);
-
-	onMount(() => {
-		isDarkMode = document.documentElement.classList.contains('dark');
-	});
+	const unreadCount: number = $derived(notificationStore.unreadCount);
+	const unreadBadgeLabel: string = $derived(unreadCount > 9 ? '9+' : String(unreadCount));
 
 	function toggleTheme(): void {
-		isDarkMode = !isDarkMode;
-		if (isDarkMode) {
-			document.documentElement.classList.add('dark');
-		} else {
-			document.documentElement.classList.remove('dark');
-		}
+		setMode(isDarkMode ? 'light' : 'dark');
 	}
 
 	// Organization state
@@ -78,7 +69,7 @@
 	}
 
 	async function handleOrgSwitch(orgId: number): Promise<void> {
-		organizationStore.switchOrganization(orgId);
+		if (!organizationStore.switchOrganization(orgId)) return;
 
 		// Check if we're on an org-specific page and navigate to the new org
 		const orgRouteMatch: RegExpMatchArray | null = currentPath.match(/^\/organizations\/(\d+)(\/.*)?$/);
@@ -129,7 +120,7 @@
 				</div>
 				<span>Notifications</span>
 				{#if hasUnread}
-					<Badge class="ml-auto text-[10px] px-1.5 py-0">New</Badge>
+					<Badge class="ml-auto text-[10px] px-1.5 py-0">{unreadBadgeLabel}</Badge>
 				{/if}
 			</Sidebar.MenuButton>
 		</Sidebar.MenuItem>
@@ -277,9 +268,6 @@
 					>
 						<Sparkles class="mr-2 h-4 w-4" />
 						<span>What's New</span>
-						{#if hasNewVersion}
-							<span class="ml-auto h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-						{/if}
 					</DropdownMenu.Item>
 					<DropdownMenu.Item
 						class="cursor-pointer hover:bg-primary/10"

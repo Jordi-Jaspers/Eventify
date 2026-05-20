@@ -8,6 +8,7 @@
     import * as Sidebar from '$lib/components/ui/sidebar';
     import { organizationStore } from '$lib/stores/organization.svelte';
     import { authStore } from '$lib/stores/auth';
+    import { notificationStore } from '$lib/stores/notification.svelte';
     import { CLIENT_ROUTES } from '$lib/config/routes';
     import { LoaderCircle } from '@lucide/svelte';
 
@@ -24,6 +25,7 @@
     onMount((): (() => void) => {
         if (!browser) return (): void => {};
 
+        notificationStore.init();
         isValidating = true;
         
         (async (): Promise<void> => {
@@ -44,6 +46,7 @@
 
         return (): void => {
             clearInterval(refreshInterval);
+            notificationStore.destroy();
         };
     });
 </script>

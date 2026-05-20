@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202601091003-TST-user-quota-test-data.xml">
 
-    <changeSet id="202601091003-TST-user-quota-test-data-1" author="backend-agent" context="tst">
+    <changeSet id="202601091003-TST-user-quota-test-data-1" author="jordi.jaspers" context="tst">
         <comment>Insert user event quota records. One user near limit (85%), one minimal usage, varied usage across others. Limit is 1000 events/month.</comment>
         <sql>
             -- User 1 (admin): Near limit - 85% usage

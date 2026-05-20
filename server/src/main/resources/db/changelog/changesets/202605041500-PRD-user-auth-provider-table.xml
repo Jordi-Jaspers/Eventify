@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
                    logicalFilePath="202605041500-PRD-user-auth-provider-table.xml">
 
-    <changeSet id="202605041500-PRD-user-auth-provider-table-1" author="eventify.dev">
+    <changeSet id="202605041500-PRD-user-auth-provider-table-1" author="jordi.jaspers">
         <comment>Create user_auth_provider table to track linked authentication providers per user.</comment>
         <sql>
             CREATE TABLE IF NOT EXISTS user_auth_provider (
@@ -21,21 +21,21 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202605041500-PRD-user-auth-provider-table-2" author="eventify.dev">
+    <changeSet id="202605041500-PRD-user-auth-provider-table-2" author="jordi.jaspers">
         <comment>Add has_password column to user table to track whether the user has a real password set.</comment>
         <sql>
             ALTER TABLE "user" ADD COLUMN IF NOT EXISTS has_password BOOLEAN NOT NULL DEFAULT false;
         </sql>
     </changeSet>
 
-    <changeSet id="202605041500-PRD-user-auth-provider-table-3" author="eventify.dev">
+    <changeSet id="202605041500-PRD-user-auth-provider-table-3" author="jordi.jaspers">
         <comment>Backfill has_password=true for all existing users (assume they registered with password).</comment>
         <sql>
             UPDATE "user" SET has_password = true WHERE has_password = false;
         </sql>
     </changeSet>
 
-    <changeSet id="202605041500-PRD-user-auth-provider-table-4" author="eventify.dev">
+    <changeSet id="202605041500-PRD-user-auth-provider-table-4" author="jordi.jaspers">
         <comment>Backfill LOCAL UserAuthProvider records for all existing users.</comment>
         <sql>
             INSERT INTO user_auth_provider (user_id, provider, provider_email, linked_at)
@@ -45,7 +45,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202605041500-PRD-user-auth-provider-table-5" author="eventify.dev">
+    <changeSet id="202605041500-PRD-user-auth-provider-table-5" author="jordi.jaspers">
         <comment>Add documentation comments for user_auth_provider table and columns.</comment>
         <sql>
             COMMENT ON TABLE user_auth_provider IS 'Tracks linked authentication providers for each user (LOCAL, GOOGLE, GITHUB)';

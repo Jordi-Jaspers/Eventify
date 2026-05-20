@@ -95,7 +95,7 @@ public class Organization implements PageableItem, Serializable {
     public Organization(final String name, final String slug) {
         this.name = name;
         this.slug = slug;
-        this.status = OrganizationStatus.TRIAL;
+        this.status = OrganizationStatus.ACTIVE;
         this.createdBy = getLoggedInUser().getId();
         this.createdAt = OffsetDateTime.now(UTC);
     }

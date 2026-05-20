@@ -1,11 +1,5 @@
 import type { OrganizationStatus } from '$lib/api/models';
 
-/**
- * Get the badge variant for an organization status
- * - ACTIVE: success (green)
- * - SUSPENDED: destructive (red)
- * - TRIAL: default (neutral)
- */
 export function getOrganizationStatusBadgeVariant(
 	status: OrganizationStatus | undefined
 ): 'default' | 'success' | 'destructive' {
@@ -14,16 +8,22 @@ export function getOrganizationStatusBadgeVariant(
 			return 'success';
 		case 'SUSPENDED':
 			return 'destructive';
-		case 'TRIAL':
 		default:
 			return 'default';
 	}
 }
 
-/**
- * Get the display name for an organization owner
- * Returns "No owner" if owner is undefined or has no name
- */
+export function getOrganizationStatusLabel(status: OrganizationStatus | undefined): string {
+	switch (status) {
+		case 'ACTIVE':
+			return 'Active';
+		case 'SUSPENDED':
+			return 'Suspended';
+		default:
+			return status ?? 'Unknown';
+	}
+}
+
 export function getOwnerDisplayName(
 	owner: { firstName?: string; lastName?: string } | undefined
 ): string {

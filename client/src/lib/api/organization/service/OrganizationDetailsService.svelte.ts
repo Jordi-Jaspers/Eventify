@@ -4,7 +4,7 @@ import type {
 	OrganizationResponse,
 	OrganizationalRole
 } from '$lib/api/models';
-import { getOrganizationById } from '../OrganizationController';
+import { getOrganizationById } from '$lib/api/admin/AdminOrganizationController';
 
 /**
  * Consolidated organization details state

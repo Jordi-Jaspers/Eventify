@@ -13,6 +13,7 @@ import type {
 import {
 	type MonitorFilters,
 	type MonitorSession,
+	type MonitorTab,
 	createDefaultFilters,
 	createDefaultSession,
 	getMonitorSessionKey,
@@ -63,6 +64,9 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 	let selectedDuration: TimelineDuration | null = $state(null);
 	let selectedTimelineDurations: TimelineDuration[] = $state([]);
 
+	// Tab state
+	let activeTab: MonitorTab = $state('timeline');
+
 	// Zoom state
 	let zoomStack: ZoomEntry[] = $state([]);
 
@@ -93,6 +97,7 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 		return new Date(monitorData.rangeEnd);
 	});
 	const isLive: boolean = $derived.by(() => monitorData?.live ?? false);
+	let eventFeedLive: boolean = $state(false);
 	const hasChannels: boolean = $derived.by(() =>
 		(watchlist?.configuration?.channelIds?.length ?? 0) > 0 ||
 		(watchlist?.configuration?.groups?.length ?? 0) > 0
@@ -269,7 +274,16 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 				...createDefaultFilters(),
 				...queryParams.filters
 			};
+			if (queryParams.tab) {
+				activeTab = queryParams.tab;
+			}
 			replaceState(buildMonitorRoute(), {});
+		} else {
+			// Restore tab from sessionStorage
+			const savedTab = sessionStorage.getItem(getMonitorSessionKey(orgId) + '_tab');
+			if (savedTab === 'timeline' || savedTab === 'events') {
+				activeTab = savedTab;
+			}
 		}
 
 		// If still no watchlist, try to fetch the first one
@@ -297,7 +311,7 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 	async function handleShare(): Promise<void> {
 		if (watchlistId === null) return;
 		
-		const url: string = buildMonitorShareUrl(buildMonitorRoute(), watchlistId, filters);
+		const url: string = buildMonitorShareUrl(buildMonitorRoute(), watchlistId, filters, activeTab);
 		try {
 			await navigator.clipboard.writeText(url);
 			toast.success('Link copied to clipboard');
@@ -449,6 +463,13 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 		get rangeStart(): Date | null { return rangeStart; },
 		get rangeEnd(): Date | null { return rangeEnd; },
 		get isLive(): boolean { return isLive; },
+		get eventFeedLive(): boolean { return eventFeedLive; },
+		set eventFeedLive(v: boolean) { eventFeedLive = v; },
+		get activeTab(): MonitorTab { return activeTab; },
+		set activeTab(v: MonitorTab) {
+			activeTab = v;
+			sessionStorage.setItem(getMonitorSessionKey(orgId) + '_tab', v);
+		},
 		get hasChannels(): boolean { return hasChannels; },
 		get hasMonitorData(): boolean { return hasMonitorData; },
 		get filtersMatchDefaults(): boolean { return filtersMatchDefaults; },

@@ -7,6 +7,7 @@ import io.github.eventify.api.organization.service.OrganizationService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.model.WatchlistMetaData;
+import io.github.eventify.api.watchlist.repository.WatchlistChannelRepository;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
 import io.github.eventify.common.exception.DuplicateWatchlistNameException;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
@@ -23,7 +24,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static io.github.eventify.common.exception.ApiErrorCode.CHANNEL_NOT_FOUND;
 import static io.github.eventify.common.security.SecurityUtil.getLoggedInUser;
 
 /**
@@ -39,18 +39,20 @@ public class OrganizationWatchlistService extends WatchlistService {
     /**
      * Constructor.
      *
-     * @param watchlistRepository the watchlist repository
-     * @param channelRepository   the channel repository
-     * @param watchlistMetaData   the watchlist metadata
-     * @param organizationService the organization service
+     * @param watchlistRepository        the watchlist repository
+     * @param channelRepository          the channel repository
+     * @param watchlistMetaData          the watchlist metadata
+     * @param organizationService        the organization service
+     * @param watchlistChannelRepository the watchlist channel junction repository
      */
     public OrganizationWatchlistService(
                                         final WatchlistRepository watchlistRepository,
                                         final ChannelRepository channelRepository,
                                         final WatchlistMetaData watchlistMetaData,
-                                        final OrganizationService organizationService
+                                        final OrganizationService organizationService,
+                                        final WatchlistChannelRepository watchlistChannelRepository
     ) {
-        super(watchlistRepository, watchlistMetaData);
+        super(watchlistRepository, watchlistMetaData, watchlistChannelRepository);
         this.channelRepository = channelRepository;
         this.organizationService = organizationService;
     }
@@ -83,7 +85,9 @@ public class OrganizationWatchlistService extends WatchlistService {
         }
         initializeDefaults(watchlist);
 
-        return watchlistRepository.save(watchlist);
+        final Watchlist saved = watchlistRepository.save(watchlist);
+        syncWatchlistChannels(saved);
+        return saved;
     }
 
     /**
@@ -148,7 +152,9 @@ public class OrganizationWatchlistService extends WatchlistService {
         }
         applyUpdates(watchlist, updated);
 
-        return watchlistRepository.save(watchlist);
+        final Watchlist saved = watchlistRepository.save(watchlist);
+        syncWatchlistChannels(saved);
+        return saved;
     }
 
     /**
@@ -180,11 +186,6 @@ public class OrganizationWatchlistService extends WatchlistService {
             .map(Channel::getId)
             .collect(Collectors.toSet());
 
-        channelIds.stream()
-            .filter(id -> !foundIds.contains(id))
-            .findFirst()
-            .ifPresent(id -> {
-                throw new DataNotFoundException(CHANNEL_NOT_FOUND);
-            });
+        validateFoundChannelIds(channelIds, foundIds);
     }
 }

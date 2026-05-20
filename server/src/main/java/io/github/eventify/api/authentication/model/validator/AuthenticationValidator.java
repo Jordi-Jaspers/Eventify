@@ -7,7 +7,6 @@ import io.github.jframe.validation.ValidationResult;
 import io.github.jframe.validation.Validator;
 import lombok.RequiredArgsConstructor;
 
-import org.passay.RuleResult;
 import org.springframework.stereotype.Component;
 
 import static io.github.eventify.common.constant.Constants.Email.OWASP_EMAIL_REGEX;
@@ -79,7 +78,7 @@ public class AuthenticationValidator implements Validator<Object> {
             throw new ValidationException(result);
         }
 
-        final RuleResult passwordValidationResult = passwordValidator.validatePassword(request.getPassword());
+        final org.passay.ValidationResult passwordValidationResult = passwordValidator.validatePassword(request.getPassword());
         result.rejectField(PASSWORD, request.getPassword())
             .when(
                 password -> !passwordValidationResult.isValid(),
