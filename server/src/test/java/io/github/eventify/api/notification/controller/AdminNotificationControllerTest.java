@@ -356,7 +356,8 @@ public class AdminNotificationControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should return empty page when no broadcasts exist")
     public void listBroadcastsReturnsEmptyWhenNone() throws Exception {
-        // Given: No broadcasts exist
+        // Given: No test-created broadcasts exist (startup job may have created system broadcasts)
+        final long baselineCount = notificationBroadcastRepository.count();
 
         // When: Listing broadcasts
         final SortablePageInput input = new SortablePageInput();
@@ -373,11 +374,8 @@ public class AdminNotificationControllerTest extends IntegrationTest {
         // Then: Response should be OK
         response.andExpect(status().is(SC_OK));
 
-        // And: Response should be empty
-        final String content = response.andReturn().getResponse().getContentAsString();
-        final PageResource<BroadcastResponse> page = fromJson(content, new TypeReference<>() {});
-
-        assertThat(page.getTotalElements(), is(0L));
+        // And: No new broadcasts should have been created
+        assertThat(notificationBroadcastRepository.count(), is(baselineCount));
     }
 
     @Test
@@ -452,6 +450,7 @@ public class AdminNotificationControllerTest extends IntegrationTest {
     @DisplayName("Should not create any broadcast or notification rows when previewing")
     public void previewBroadcastHasNoSideEffects() throws Exception {
         // Given: An audience request
+        final long baselineBroadcastCount = notificationBroadcastRepository.count();
         final AudienceRequest audienceRequest = anAudienceRequest(NotificationAudienceType.ALL_USERS, null, null);
 
         // When: Previewing recipient count
@@ -463,7 +462,7 @@ public class AdminNotificationControllerTest extends IntegrationTest {
         mockMvc.perform(httpRequest).andExpect(status().is(SC_OK));
 
         // Then: No broadcast rows should be created
-        assertThat(notificationBroadcastRepository.count(), is(0L));
+        assertThat(notificationBroadcastRepository.count(), is(baselineBroadcastCount));
     }
 
     @Test

@@ -1,4 +1,13 @@
-# Skill: Release
+---
+name: eventify-release-process
+description: release conventions for eventify following a git flow standard.
+metadata:
+  skill-type: version management
+  language: command line
+  framework:  git
+---
+
+# Git release process
 
 Create a new release following git flow conventions.
 

@@ -1,4 +1,12 @@
-# Eventify What's New Changelog Skill
+---
+name: eventify-whats-new
+description: Guidelines for updating the user-facing "What's New" changelog in Eventify.
+metadata:
+    skill-type: documentation
+    language: English
+---
+
+# What's New Guidelines
 
 ## Overview
 
