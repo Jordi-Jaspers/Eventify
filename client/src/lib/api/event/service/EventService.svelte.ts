@@ -63,9 +63,9 @@ export function createEventService() {
 			let response: PageResourceEventSearchResponse;
 
 			if (orgId) {
-				response = await searchOrgEvents(orgId, channelId, startTime, endTime, page, currentSeverity);
+				response = await searchOrgEvents(orgId, { channelId, startTime, endTime, severity: currentSeverity }, page);
 			} else {
-				response = await searchUserEvents(channelId, startTime, endTime, page, currentSeverity);
+				response = await searchUserEvents({ channelId, startTime, endTime, severity: currentSeverity }, page);
 			}
 
 			const newEvents = response.content || [];

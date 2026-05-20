@@ -45,7 +45,9 @@ export function getMonitorSessionKey(orgId?: number): string {
 
 // ============ URL Query Params ============
 
-export function parseMonitorQueryParams(url: URL): { watchlistId: number; filters: Partial<MonitorFilters> } | null {
+export type MonitorTab = 'timeline' | 'events';
+
+export function parseMonitorQueryParams(url: URL): { watchlistId: number; filters: Partial<MonitorFilters>; tab?: MonitorTab } | null {
 	const id = url.searchParams.get('id');
 	if (!id) return null;
 
@@ -70,10 +72,13 @@ export function parseMonitorQueryParams(url: URL): { watchlistId: number; filter
 	if (st) filters.customStartTime = st;
 	if (et) filters.customEndTime = et;
 
-	return { watchlistId: parseInt(id, 10), filters };
+	const tab = url.searchParams.get('tab');
+	const parsedTab: MonitorTab | undefined = (tab === 'timeline' || tab === 'events') ? tab : undefined;
+
+	return { watchlistId: parseInt(id, 10), filters, tab: parsedTab };
 }
 
-export function buildMonitorShareUrl(basePath: string, watchlistId: number, filters: MonitorFilters): string {
+export function buildMonitorShareUrl(basePath: string, watchlistId: number, filters: MonitorFilters, tab?: MonitorTab): string {
 	const url = new URL(window.location.origin + basePath);
 	url.searchParams.set('id', watchlistId.toString());
 	url.searchParams.set('timeRange', filters.timeRange);
@@ -84,6 +89,9 @@ export function buildMonitorShareUrl(basePath: string, watchlistId: number, filt
 	if (filters.timeRange === 'custom' && filters.customStartTime && filters.customEndTime) {
 		url.searchParams.set('startTime', filters.customStartTime);
 		url.searchParams.set('endTime', filters.customEndTime);
+	}
+	if (tab && tab !== 'timeline') {
+		url.searchParams.set('tab', tab);
 	}
 	return url.toString();
 }

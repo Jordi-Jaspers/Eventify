@@ -2482,6 +2482,16 @@ export interface components {
              */
             message?: string;
             /**
+             * @description Event title
+             * @example Deployment failed
+             */
+            title: string;
+            /**
+             * @description Channel name
+             * @example prod-alerts
+             */
+            channelName: string;
+            /**
              * Format: date-time
              * @description Event timestamp
              * @example 2026-01-30T10:30:00Z

@@ -62,13 +62,4 @@
         </sql>
     </changeSet>
 
-    <changeSet id="202605201000-PRD-subscription-table-5" author="jordi.jaspers">
-        <comment>Update channel last event trigger to also set current_severity on event insert.</comment>
-        <sqlFile
-            path="../triggers/update_channel_last_event.sql"
-            relativeToChangelogFile="true"
-            splitStatements="false"
-            stripComments="false"/>
-    </changeSet>
-
 </databaseChangeLog>

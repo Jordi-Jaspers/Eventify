@@ -18,6 +18,8 @@
 		getCurrentSeverityFromTimeline,
 		formatZoomRangeLabel
 	} from '$lib/components/monitor';
+	import EventFeed from './EventFeed.svelte';
+	import type { EventFeedChannel } from '$lib/api/event/service/EventFeedService.svelte';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
@@ -27,6 +29,30 @@
 	}
 
 	let { service, orgId, selector }: Props = $props();
+
+	// Tab state
+	type MonitorTab = 'timeline' | 'events';
+	const activeTab: MonitorTab = $derived(service.activeTab);
+
+	// Channels for EventFeed derived from monitorData — includes standalone + group channels
+	const feedChannels: EventFeedChannel[] = $derived.by(() => {
+		const standaloneChannels = service.monitorData?.dashboard?.channels ?? [];
+		const groups = service.monitorData?.dashboard?.groups ?? [];
+		const groupChannels = groups.flatMap((g) => g.channels ?? []);
+		const allChannels = [...standaloneChannels, ...groupChannels];
+		const seen = new Set<number>();
+		return allChannels
+			.filter((c) => c.channelId != null && c.channelName != null)
+			.filter((c) => {
+				if (seen.has(c.channelId!)) return false;
+				seen.add(c.channelId!);
+				return true;
+			})
+			.map((c) => ({ id: c.channelId!, name: c.channelName! }));
+	});
+
+	const feedStartTime: string = $derived(service.rangeStart?.toISOString() ?? '');
+	const feedEndTime: string = $derived(service.rangeEnd?.toISOString() ?? '');
 
 	// Derived state from monitor data
 	const dashboardSeverity: Severity | null = $derived(
@@ -113,6 +139,30 @@
 	/>
 {/if}
 
+<!-- Tabs -->
+{#if service.watchlist && service.hasChannels}
+	<div class="flex items-center gap-6 border-b border-border/40">
+		<button
+			onclick={() => { service.activeTab = 'timeline'; }}
+			class="pb-2 text-sm font-medium transition-colors border-b-2 -mb-px
+				{activeTab === 'timeline'
+					? 'border-primary text-foreground'
+					: 'border-transparent text-muted-foreground hover:text-foreground'}"
+		>
+			Timeline
+		</button>
+		<button
+			onclick={() => { service.activeTab = 'events'; }}
+			class="pb-2 text-sm font-medium transition-colors border-b-2 -mb-px
+				{activeTab === 'events'
+					? 'border-primary text-foreground'
+					: 'border-transparent text-muted-foreground hover:text-foreground'}"
+		>
+			Events
+		</button>
+	</div>
+{/if}
+
 <!-- Loading State -->
 {#if service.loading}
 	<div class="flex items-center justify-center py-12">
@@ -143,85 +193,97 @@
 		onAction={() => goto(service.handleEdit())}
 	/>
 {:else if service.monitorData && service.rangeStart && service.rangeEnd}
-	<!-- Main Monitor Card -->
-	<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg overflow-hidden pt-2">
-		<CardContent class="p-0">
-			<TimeAxisHeader
-				rangeStart={service.rangeStart}
-				rangeEnd={service.rangeEnd}
-				{timeTicks}
-				isLive={service.isLive}
-				lastUpdated={service.lastUpdated}
-				bucketSizeLabel={service.bucketSizeLabel}
-			/>
-
-			<div class="divide-y divide-border/30">
-				<!-- Dashboard Timeline Row -->
-				<MonitorRow
-					type="dashboard"
-					name={service.monitorData.watchlistName}
-					timeline={service.monitorData.dashboard.timeline}
-					currentSeverity={dashboardSeverity}
-					status={null}
+	{#if activeTab === 'timeline'}
+		<!-- Main Monitor Card -->
+		<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg overflow-hidden pt-2">
+			<CardContent class="p-0">
+				<TimeAxisHeader
 					rangeStart={service.rangeStart}
 					rangeEnd={service.rangeEnd}
-					isAggregated={service.isAggregated}
+					{timeTicks}
+					isLive={service.isLive}
+					lastUpdated={service.lastUpdated}
+					bucketSizeLabel={service.bucketSizeLabel}
 				/>
 
-				<!-- Grouped View -->
-				{#if service.filters.groupedView && service.monitorData.dashboard.groups?.length}
-					{#each service.monitorData.dashboard.groups as group, idx (`group-${idx}-${group.id}`)}
-						{#if group.timeline && group.channels}
-							<MonitorGroup
-								name={group.name ?? 'Unnamed Group'}
-								timeline={group.timeline}
-								channels={group.channels}
-								rangeStart={service.rangeStart}
-								rangeEnd={service.rangeEnd}
-								isAggregated={service.isAggregated}
-								onSegmentClick={(channelId, name, severity, d, timeline) =>
-									handleSegmentClick(channelId, name, severity, d, timeline)}
-							/>
-						{/if}
-					{/each}
-				{/if}
+				<div class="divide-y divide-border/30">
+					<!-- Dashboard Timeline Row -->
+					<MonitorRow
+						type="dashboard"
+						name={service.monitorData.watchlistName}
+						timeline={service.monitorData.dashboard.timeline}
+						currentSeverity={dashboardSeverity}
+						status={null}
+						rangeStart={service.rangeStart}
+						rangeEnd={service.rangeEnd}
+						isAggregated={service.isAggregated}
+					/>
 
-				<!-- Standalone Channels or Flat View -->
-				{#if service.monitorData.dashboard.channels?.length}
-					{#each service.monitorData.dashboard.channels as channel, idx (`channel-${idx}-${channel.channelId}`)}
-						{#if channel.timeline}
-							<MonitorRow
-								type="channel"
-								name={channel.channelName ?? 'Unnamed Channel'}
-								timeline={channel.timeline}
-								currentSeverity={channel.currentSeverity ?? null}
-								status={channel.status ?? null}
-								rangeStart={service.rangeStart}
-								rangeEnd={service.rangeEnd}
-								isAggregated={service.isAggregated}
-								onSegmentClick={(d) =>
-									handleSegmentClick(
-										channel.channelId!,
-										channel.channelName!,
-										channel.currentSeverity ?? null,
-										d,
-										channel.timeline!.durations!
-									)}
-							/>
-						{/if}
-					{/each}
-				{/if}
+					<!-- Grouped View -->
+					{#if service.filters.groupedView && service.monitorData.dashboard.groups?.length}
+						{#each service.monitorData.dashboard.groups as group, idx (`group-${idx}-${group.id}`)}
+							{#if group.timeline && group.channels}
+								<MonitorGroup
+									name={group.name ?? 'Unnamed Group'}
+									timeline={group.timeline}
+									channels={group.channels}
+									rangeStart={service.rangeStart}
+									rangeEnd={service.rangeEnd}
+									isAggregated={service.isAggregated}
+									onSegmentClick={(channelId, name, severity, d, timeline) =>
+										handleSegmentClick(channelId, name, severity, d, timeline)}
+								/>
+							{/if}
+						{/each}
+					{/if}
 
-				<!-- No Data State -->
-				{#if !service.hasMonitorData}
-					<div class="p-8 text-center flex flex-col items-center gap-2 text-muted-foreground">
-						<SearchX class="h-8 w-8 opacity-40" />
-						<span class="text-sm">No data available for the selected filters</span>
-					</div>
-				{/if}
-			</div>
-		</CardContent>
-	</Card>
+					<!-- Standalone Channels or Flat View -->
+					{#if service.monitorData.dashboard.channels?.length}
+						{#each service.monitorData.dashboard.channels as channel, idx (`channel-${idx}-${channel.channelId}`)}
+							{#if channel.timeline}
+								<MonitorRow
+									type="channel"
+									name={channel.channelName ?? 'Unnamed Channel'}
+									timeline={channel.timeline}
+									currentSeverity={channel.currentSeverity ?? null}
+									status={channel.status ?? null}
+									rangeStart={service.rangeStart}
+									rangeEnd={service.rangeEnd}
+									isAggregated={service.isAggregated}
+									onSegmentClick={(d) =>
+										handleSegmentClick(
+											channel.channelId!,
+											channel.channelName!,
+											channel.currentSeverity ?? null,
+											d,
+											channel.timeline!.durations!
+										)}
+								/>
+							{/if}
+						{/each}
+					{/if}
+
+					<!-- No Data State -->
+					{#if !service.hasMonitorData}
+						<div class="p-8 text-center flex flex-col items-center gap-2 text-muted-foreground">
+							<SearchX class="h-8 w-8 opacity-40" />
+							<span class="text-sm">No data available for the selected filters</span>
+						</div>
+					{/if}
+				</div>
+			</CardContent>
+		</Card>
+	{:else}
+		<!-- Events Tab -->
+		<EventFeed
+			channels={feedChannels}
+			startTime={feedStartTime}
+			endTime={feedEndTime}
+			{orgId}
+			isLive={service.eventFeedLive}
+			onToggleLive={() => { service.eventFeedLive = !service.eventFeedLive; }}
+		/>
+	{/if}
 {/if}
 
 <!-- Details Modal -->

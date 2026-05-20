@@ -1,36 +1,18 @@
 import { client } from '$lib/api/client';
 import type { components } from '$lib/types/api';
+import { buildEventSearchBody } from './eventSearchUtils';
+import type { EventSearchParams } from './eventSearchUtils';
 
 type PageResourceEventSearchResponse = components['schemas']['PageResourceEventSearchResponse'];
 
 export async function searchOrgEvents(
 	orgId: number,
-	channelId: number,
-	startTime: string,
-	endTime: string,
-	page: number = 0,
-	severity?: string
+	params: EventSearchParams,
+	page: number = 0
 ): Promise<PageResourceEventSearchResponse> {
-	const searchInputs: components['schemas']['SearchInput'][] = [
-		{ fieldName: 'channelId', textValue: String(channelId) },
-		{ fieldName: 'timestamp', fromDateValue: startTime, toDateValue: endTime }
-	];
-
-	// Add severity filter if provided
-	if (severity) {
-		searchInputs.push({ fieldName: 'severity', textValue: severity });
-	}
-
 	const { data, error } = await client.POST('/v1/organization/{orgId}/event/search', {
-		params: {
-			path: { orgId }
-		},
-		body: {
-			pageNumber: page,
-			pageSize: 20,
-			sortOrder: [{ name: 'timestamp', direction: 'DESC' }],
-			searchInputs
-		}
+		params: { path: { orgId } },
+		body: buildEventSearchBody(params, page)
 	});
 	if (error) throw error;
 	return data;

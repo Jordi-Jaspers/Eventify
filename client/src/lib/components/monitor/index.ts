@@ -11,4 +11,5 @@ export { default as SubscribeWatchlistDialog } from './SubscribeWatchlistDialog.
 export { default as DurationDetailsModal } from './DurationDetailsModal.svelte';
 export { default as ZoomBreadcrumb } from './ZoomBreadcrumb.svelte';
 export { default as MonitorCanvas } from './MonitorCanvas.svelte';
+export { default as EventFeed } from './EventFeed.svelte';
 export * from './types';

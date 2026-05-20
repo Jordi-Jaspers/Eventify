@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 /**
@@ -48,6 +49,10 @@ public abstract class EventMapper extends PageMapper<EventSearchResponse, Event>
      */
     @Override
     @Named("toResourceObject")
+    @Mapping(
+        source = "channel.name",
+        target = "channelName"
+    )
     public abstract EventSearchResponse toResourceObject(Event event);
 
     /**

@@ -28,6 +28,20 @@ public class EventSearchResponse implements PageableItemResource {
     private String message;
 
     @Schema(
+        description = "Event title",
+        example = "Deployment failed",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String title;
+
+    @Schema(
+        description = "Channel name",
+        example = "prod-alerts",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String channelName;
+
+    @Schema(
         description = "Event timestamp",
         example = "2026-01-30T10:30:00Z",
         requiredMode = Schema.RequiredMode.REQUIRED
