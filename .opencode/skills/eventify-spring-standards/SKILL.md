@@ -1,5 +1,5 @@
 ---
-name: springboot-standards
+name: eventify-spring-standards
 description: Spring Boot code standards, patterns, and architecture guidelines. Use when implementing features, writing entities, services, controllers, DTOs, validators, exceptions, tests, or migrations. Covers Lombok, Mapstruct, JFrame validation/search/pagination, and Liquibase patterns.
 metadata:
   skill-type: backend

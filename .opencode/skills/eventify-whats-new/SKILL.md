@@ -1,3 +1,13 @@
+---
+name: eventify-svelte-standards
+description: Project-specific conventions for the eventify frontend.
+metadata:
+  skill-type: frontend
+  language: svelte
+  framework: sveltekit
+  build-tool: vite, bun
+---
+
 # Eventify What's New Changelog Skill
 
 ## Overview
