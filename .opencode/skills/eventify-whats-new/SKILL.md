@@ -1,14 +1,12 @@
 ---
-name: eventify-svelte-standards
-description: Project-specific conventions for the eventify frontend.
+name: eventify-whats-new
+description: Guidelines for updating the user-facing "What's New" changelog in Eventify.
 metadata:
-  skill-type: frontend
-  language: svelte
-  framework: sveltekit
-  build-tool: vite, bun
+    skill-type: documentation
+    language: English
 ---
 
-# Eventify What's New Changelog Skill
+# What's New Guidelines
 
 ## Overview
 

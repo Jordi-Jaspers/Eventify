@@ -1,4 +1,12 @@
-# Skill: jframe-search-pagination
+---
+name: jframe-search-pagination
+description: Patterns for implementing searchable, paginated endpoints in Eventify using the jFrame library.
+metadata:
+  skill-type: backend
+  language: Java
+  framework: JFrame
+  build-tool: gradle 
+---
 
 # jFrame Search & Pagination Pattern
 
