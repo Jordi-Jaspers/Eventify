@@ -9,4 +9,5 @@ export { default as OrganizationWatchlistSelector } from './OrganizationWatchlis
 export { default as ConfigurePopover } from './ConfigurePopover.svelte';
 export { default as DurationDetailsModal } from './DurationDetailsModal.svelte';
 export { default as ZoomBreadcrumb } from './ZoomBreadcrumb.svelte';
+export { default as MonitorCanvas } from './MonitorCanvas.svelte';
 export * from './types';

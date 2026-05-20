@@ -14,6 +14,7 @@
 	} from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Radio, Plus } from '@lucide/svelte';
+	import { PageHeader } from '$lib/components/ui/page-header';
 	import {
 		CreateChannelSheet,
 		ChannelDetailsSheet,
@@ -196,22 +197,18 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 	<!-- Header -->
-	<div class="flex items-center justify-between mb-8">
-		<div>
-			<h1 class="text-3xl font-bold text-primary">Organization Channels</h1>
-			<p class="text-muted-foreground mt-2">
-				Manage channels for {orgName}
-			</p>
-		</div>
-		{#if canManage}
-			<div class="flex items-center gap-3">
-				<Button onclick={() => (showCreateSheet = true)}>
-					<Plus class="mr-2 h-4 w-4" />
-					New Channel
-				</Button>
-			</div>
-		{/if}
-	</div>
+	<PageHeader title="Organization Channels" description="Manage channels for {orgName}">
+		{#snippet actions()}
+			{#if canManage}
+				<div class="flex items-center gap-3">
+					<Button onclick={() => (showCreateSheet = true)}>
+						<Plus class="mr-2 h-4 w-4" />
+						New Channel
+					</Button>
+				</div>
+			{/if}
+		{/snippet}
+	</PageHeader>
 
 		<!-- DataTable -->
 		{#if dataTableService}

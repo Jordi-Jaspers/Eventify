@@ -9,6 +9,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { UserCog, MoreVertical, Eye, Lock, Unlock, Key } from '@lucide/svelte';
+	import { PageHeader } from '$lib/components/ui/page-header';
 	import { getInitials } from '$lib/utils/string';
 	import { formatDate } from '$lib/utils/date';
 	import { getUserRoleBadgeClass } from '$lib/utils/role';
@@ -177,14 +178,7 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
-		<div class="mb-8">
-			<h1
-				class="text-3xl font-bold text-primary"
-			>
-				Users
-			</h1>
-			<p class="text-muted-foreground mt-2">Manage and monitor all users on the platform</p>
-		</div>
+		<PageHeader title="Users" description="Manage and monitor all users on the platform" />
 
 		<!-- DataTable -->
 		<DataTable {columns} service={dataTableService} title="All Users" icon={UserCog}>

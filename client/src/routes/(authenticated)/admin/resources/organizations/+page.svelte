@@ -9,6 +9,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Building2, Users, Key, MoreVertical, Pencil } from '@lucide/svelte';
+	import { PageHeader } from '$lib/components/ui/page-header';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { formatDate } from '$lib/utils/date';
 	import {
@@ -106,18 +107,14 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
-		<div class="mb-8 flex items-center justify-between">
-			<div>
-				<h1 class="text-3xl font-bold text-primary">
-					Organizations
-				</h1>
-				<p class="text-muted-foreground mt-2">Manage and monitor all organizations on the platform</p>
-			</div>
-			<Button onclick={() => (isCreateSheetOpen = true)}>
-				<Building2 class="mr-2 h-4 w-4" />
-				New Organization
-			</Button>
-		</div>
+		<PageHeader title="Organizations" description="Manage and monitor all organizations on the platform">
+			{#snippet actions()}
+				<Button onclick={() => (isCreateSheetOpen = true)}>
+					<Building2 class="mr-2 h-4 w-4" />
+					New Organization
+				</Button>
+			{/snippet}
+		</PageHeader>
 
 		<!-- DataTable -->
 		<DataTable {columns} {service} title="All Organizations" icon={Building2}>

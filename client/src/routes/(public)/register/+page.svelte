@@ -10,7 +10,8 @@
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
     import {validateEmail, validateName, validatePassword} from '$lib/utils/password-validator';
     import {toast} from 'svelte-sonner';
-    import {Eye, EyeOff, LoaderCircle, UserPlus} from '@lucide/svelte';
+    import {LoaderCircle, UserPlus} from '@lucide/svelte';
+    import { PasswordInput } from '$lib/components/ui/password-input';
     import {CLIENT_ROUTES} from "$lib/config/routes.ts";
     import {handleError} from "$lib/utils/error-handler.ts";
 
@@ -20,8 +21,6 @@
     let password: string = $state('');
     let passwordConfirmation: string = $state('');
     let loading: boolean = $state(false);
-    let showPassword: boolean = $state(false);
-    let showPasswordConfirmation: boolean = $state(false);
 
     // Field-level errors
     let errors: {
@@ -211,30 +210,14 @@
                         Password
                         <span class="text-destructive" aria-label="required">*</span>
                     </Label>
-                    <div class="relative">
-                        <Input
-                                id="password"
-                                type={showPassword ? 'text' : 'password'}
-                                placeholder="Enter a strong password"
-                                bind:value={password}
-                                required
-                                aria-invalid={!!errors.password}
-                                aria-describedby={errors.password ? 'password-error' : undefined}
-                                class="pr-10 bg-background/50 border-border transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
-                        />
-                        <button
-                                type="button"
-                                onclick={() => (showPassword = !showPassword)}
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-0.5"
-                                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        >
-                            {#if showPassword}
-                                <EyeOff class="h-4 w-4"/>
-                            {:else}
-                                <Eye class="h-4 w-4"/>
-                            {/if}
-                        </button>
-                    </div>
+                    <PasswordInput
+                            id="password"
+                            placeholder="Enter a strong password"
+                            bind:value={password}
+                            required
+                            ariaInvalid={!!errors.password}
+                            ariaDescribedby={errors.password ? 'password-error' : undefined}
+                    />
                     {#if errors.password}
                         <p id="password-error" class="text-sm text-destructive">
                             {errors.password}
@@ -251,32 +234,14 @@
                         Confirm Password
                         <span class="text-destructive" aria-label="required">*</span>
                     </Label>
-                    <div class="relative">
-                        <Input
-                                id="passwordConfirmation"
-                                type={showPasswordConfirmation ? 'text' : 'password'}
-                                placeholder="Re-enter your password"
-                                bind:value={passwordConfirmation}
-                                required
-                                aria-invalid={!!errors.passwordConfirmation}
-                                aria-describedby={errors.passwordConfirmation
-								? 'passwordConfirmation-error'
-								: undefined}
-                                class="pr-10 bg-background/50 border-border transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
-                        />
-                        <button
-                                type="button"
-                                onclick={() => (showPasswordConfirmation = !showPasswordConfirmation)}
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-0.5"
-                                aria-label={showPasswordConfirmation ? 'Hide password' : 'Show password'}
-                        >
-                            {#if showPasswordConfirmation}
-                                <EyeOff class="h-4 w-4"/>
-                            {:else}
-                                <Eye class="h-4 w-4"/>
-                            {/if}
-                        </button>
-                    </div>
+                    <PasswordInput
+                            id="passwordConfirmation"
+                            placeholder="Re-enter your password"
+                            bind:value={passwordConfirmation}
+                            required
+                            ariaInvalid={!!errors.passwordConfirmation}
+                            ariaDescribedby={errors.passwordConfirmation ? 'passwordConfirmation-error' : undefined}
+                    />
                     {#if errors.passwordConfirmation}
                         <p id="passwordConfirmation-error" class="text-sm text-destructive">
                             {errors.passwordConfirmation}

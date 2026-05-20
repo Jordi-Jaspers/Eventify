@@ -1,3 +1,4 @@
+export { default as WatchlistTableRow } from './WatchlistTableRow.svelte';
 export { default as WatchlistBuilder } from './WatchlistBuilder.svelte';
 export { default as Configurator } from './Configurator.svelte';
 export { default as ConfigChannel } from './ConfigChannel.svelte';

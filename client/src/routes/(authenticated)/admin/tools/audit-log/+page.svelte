@@ -7,6 +7,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { ScrollText } from '@lucide/svelte';
+	import { PageHeader } from '$lib/components/ui/page-header';
 	import { formatDateTime } from '$lib/utils/date';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
@@ -197,10 +198,7 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
-		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-primary">Audit Log</h1>
-			<p class="text-muted-foreground mt-2">Track all API activity and requests on the platform</p>
-		</div>
+		<PageHeader title="Audit Log" description="Track all API activity and requests on the platform" />
 
 		<!-- KPI Cards -->
 		<AuditLogKpiCards

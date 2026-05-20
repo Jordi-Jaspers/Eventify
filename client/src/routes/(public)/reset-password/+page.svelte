@@ -3,14 +3,14 @@
 	import { page } from '$app/state';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import Input from '$lib/components/ui/input/input.svelte';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import AppLogo from '$lib/components/layout/AppLogo.svelte';
 	import PasswordStrengthMeter from '$lib/components/registration/PasswordStrengthMeter.svelte';
 	import { toast } from 'svelte-sonner';
-	import { CircleAlert, Eye, EyeOff, KeyRound, LoaderCircle } from '@lucide/svelte';
+	import { CircleAlert, KeyRound, LoaderCircle } from '@lucide/svelte';
+	import { PasswordInput } from '$lib/components/ui/password-input';
 	import { handleError } from '$lib/utils/error-handler';
 	import { resetPassword } from '$lib/api/authentication/PasswordController';
 	import { validatePassword } from '$lib/utils/password-validator';
@@ -19,8 +19,6 @@
 
 	let newPassword: string = $state('');
 	let confirmPassword: string = $state('');
-	let showNewPassword: boolean = $state(false);
-	let showConfirmPassword: boolean = $state(false);
 	let isSubmitting: boolean = $state(false);
 	let errors: Record<string, string> = $state({});
 
@@ -83,18 +81,10 @@
 			} else {
 				errors.general = message;
 			}
-		} finally {
-			isSubmitting = false;
-		}
+	} finally {
+		isSubmitting = false;
 	}
-
-	function toggleNewPasswordVisibility(): void {
-		showNewPassword = !showNewPassword;
-	}
-
-	function toggleConfirmPasswordVisibility(): void {
-		showConfirmPassword = !showConfirmPassword;
-	}
+}
 </script>
 
 <svelte:head>
@@ -153,33 +143,15 @@
 				<form onsubmit={handleSubmit} class="space-y-6">
 					<div class="space-y-2">
 						<Label for="newPassword">New Password</Label>
-						<div class="relative">
-							<Input
-								id="newPassword"
-								type={showNewPassword ? 'text' : 'password'}
-								placeholder="Enter your new password"
-								bind:value={newPassword}
-								disabled={isSubmitting}
-								class="pr-10 bg-background/50 border-border transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
-								aria-invalid={!!errors.newPassword}
-								aria-describedby={errors.newPassword ? 'newPassword-error' : undefined}
-								required
-							/>
-							<button
-								type="button"
-								onclick={toggleNewPasswordVisibility}
-								disabled={isSubmitting}
-								class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
-								aria-label={showNewPassword ? 'Hide password' : 'Show password'}
-								tabindex="0"
-							>
-								{#if showNewPassword}
-									<EyeOff class="h-4 w-4" />
-								{:else}
-									<Eye class="h-4 w-4" />
-								{/if}
-							</button>
-						</div>
+					<PasswordInput
+							id="newPassword"
+							placeholder="Enter your new password"
+							bind:value={newPassword}
+							disabled={isSubmitting}
+							ariaInvalid={!!errors.newPassword}
+							ariaDescribedby={errors.newPassword ? 'newPassword-error' : undefined}
+							required
+						/>
 						{#if errors.newPassword}
 							<p id="newPassword-error" class="text-sm text-destructive">{errors.newPassword}</p>
 						{/if}
@@ -190,33 +162,15 @@
 
 					<div class="space-y-2">
 						<Label for="confirmPassword">Confirm Password</Label>
-						<div class="relative">
-							<Input
-								id="confirmPassword"
-								type={showConfirmPassword ? 'text' : 'password'}
-								placeholder="Confirm your new password"
-								bind:value={confirmPassword}
-								disabled={isSubmitting}
-								class="pr-10 bg-background/50 border-border transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
-								aria-invalid={!!errors.confirmPassword}
-								aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
-								required
-							/>
-							<button
-								type="button"
-								onclick={toggleConfirmPasswordVisibility}
-								disabled={isSubmitting}
-								class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
-								aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-								tabindex="0"
-							>
-								{#if showConfirmPassword}
-									<EyeOff class="h-4 w-4" />
-								{:else}
-									<Eye class="h-4 w-4" />
-								{/if}
-							</button>
-						</div>
+					<PasswordInput
+							id="confirmPassword"
+							placeholder="Confirm your new password"
+							bind:value={confirmPassword}
+							disabled={isSubmitting}
+							ariaInvalid={!!errors.confirmPassword}
+							ariaDescribedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
+							required
+						/>
 						{#if errors.confirmPassword}
 							<p id="confirmPassword-error" class="text-sm text-destructive">{errors.confirmPassword}</p>
 						{:else if passwordsMatch}

@@ -26,6 +26,12 @@
     import { ChannelRow, ChannelBulkActionBar } from '$lib/components/channels';
     import { createChannelSelectionService } from '$lib/api/channel/service/ChannelSelectionService.svelte';
     import { channelTableColumns } from '$lib/config/channel-table-columns';
+    import { PageHeader } from '$lib/components/ui/page-header';
+    import { PasswordInput } from '$lib/components/ui/password-input';
+    import { RevokeApiKeyAlertDialog } from '$lib/components/api-keys';
+    import { WatchlistTableRow } from '$lib/components/watchlist';
+    import ConfirmDialog from '$lib/components/ui/confirm-dialog/confirm-dialog.svelte';
+    import { ClipboardList, Eye, Plus } from '@lucide/svelte';
 
     // DataTable demo — mock ChannelDetailsResponse data
     const demoChannels: ChannelDetailsResponse[] = [
@@ -108,6 +114,12 @@
 
     onMount(() => demoService.load());
     
+    // Phase 1-2 component demos
+    let demoPassword: string = $state('');
+    let demoPassword2: string = $state('');
+    let showRevokeDialog: boolean = $state(false);
+    let showConfirmDialog: boolean = $state(false);
+
     // DateTimePicker state
     let dateTimeValue1: string = $state('');
     let dateTimeValue2: string = $state(new Date().toISOString());
@@ -1906,6 +1918,91 @@
                         </p>
                     </CardContent>
                 </Card>
+            </section>
+
+            <!-- PageHeader -->
+            <section>
+                <h2 class="text-xl font-semibold mb-4 text-primary">PageHeader</h2>
+                <p class="text-sm text-muted-foreground mb-4">Standardized page header with title, description, and optional action buttons.</p>
+                <div class="space-y-4 p-4 rounded-lg border border-border/50 bg-muted/10">
+                    <PageHeader title="My Channels" description="Manage your personal channels for organizing events">
+                        {#snippet actions()}
+                            <Button><Plus class="mr-2 h-4 w-4" />New Channel</Button>
+                        {/snippet}
+                    </PageHeader>
+                    <div class="border-t border-border/30 pt-4">
+                        <PageHeader title="Users" description="Manage and monitor all users on the platform" />
+                    </div>
+                </div>
+            </section>
+
+            <!-- PasswordInput -->
+            <section>
+                <h2 class="text-xl font-semibold mb-4 text-primary">PasswordInput</h2>
+                <p class="text-sm text-muted-foreground mb-4">Password field with show/hide toggle, accessibility, and disabled state.</p>
+                <div class="space-y-4 max-w-sm">
+                    <div>
+                        <label for="demo-pw" class="text-sm font-medium mb-1 block">Password</label>
+                        <PasswordInput id="demo-pw" placeholder="Enter your password" bind:value={demoPassword} />
+                    </div>
+                    <div>
+                        <label for="demo-pw2" class="text-sm font-medium mb-1 block">Disabled</label>
+                        <PasswordInput id="demo-pw2" placeholder="Disabled field" bind:value={demoPassword2} disabled={true} />
+                    </div>
+                </div>
+            </section>
+
+            <!-- RevokeApiKeyAlertDialog -->
+            <section>
+                <h2 class="text-xl font-semibold mb-4 text-primary">RevokeApiKeyAlertDialog</h2>
+                <p class="text-sm text-muted-foreground mb-4">Confirmation dialog for revoking API keys.</p>
+                <Button variant="destructive" onclick={() => (showRevokeDialog = true)}>Revoke API Key</Button>
+                <RevokeApiKeyAlertDialog
+                    open={showRevokeDialog}
+                    onOpenChange={(o) => (showRevokeDialog = o)}
+                    keyName="my-production-key"
+                    isRevoking={false}
+                    onConfirm={() => (showRevokeDialog = false)}
+                />
+            </section>
+
+            <!-- ConfirmDialog -->
+            <section>
+                <h2 class="text-xl font-semibold mb-4 text-primary">ConfirmDialog</h2>
+                <p class="text-sm text-muted-foreground mb-4">Generic confirmation dialog with destructive variant.</p>
+                <Button variant="outline" onclick={() => (showConfirmDialog = true)}>Delete Item</Button>
+                <ConfirmDialog
+                    open={showConfirmDialog}
+                    title="Delete Watchlist"
+                    confirmLabel="Delete"
+                    destructive={true}
+                    onOpenChange={(o) => (showConfirmDialog = o)}
+                    onConfirm={() => (showConfirmDialog = false)}
+                >
+                    {#snippet description()}
+                        Are you sure you want to delete "Production Monitor"? This action cannot be undone.
+                    {/snippet}
+                </ConfirmDialog>
+            </section>
+
+            <!-- WatchlistTableRow -->
+            <section>
+                <h2 class="text-xl font-semibold mb-4 text-primary">WatchlistTableRow</h2>
+                <p class="text-sm text-muted-foreground mb-4">Reusable table row for watchlist items with actions.</p>
+                <div class="rounded-lg border border-border/50 overflow-hidden">
+                    <WatchlistTableRow
+                        watchlist={{ id: 1, name: 'Production Monitor', description: 'Monitors all production channels for downtime', createdAt: '2026-01-15T10:00:00Z' }}
+                        onMonitor={() => {}}
+                        onEdit={() => {}}
+                        onDelete={() => {}}
+                    />
+                    <WatchlistTableRow
+                        watchlist={{ id: 2, name: 'Staging Health', description: 'Tracks staging environment health metrics', createdAt: '2026-03-20T14:30:00Z' }}
+                        onMonitor={() => {}}
+                        onEdit={() => {}}
+                        onDelete={() => {}}
+                    />
+                </div>
             </section>
 
             <!-- Footer -->

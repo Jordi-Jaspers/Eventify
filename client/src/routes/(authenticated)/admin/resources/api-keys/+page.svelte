@@ -34,6 +34,7 @@
 		BarChart3,
 		AlertTriangle
 	} from '@lucide/svelte';
+	import { PageHeader } from '$lib/components/ui/page-header';
 	import {
 		RecentRevocations,
 		RevokeApiKeyDialog,
@@ -195,10 +196,7 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
-		<div class="mb-8 space-y-2">
-			<h1 class="text-3xl font-bold text-primary">API Keys</h1>
-			<p class="text-muted-foreground">Monitor and manage API keys across the platform</p>
-		</div>
+		<PageHeader title="API Keys" description="Monitor and manage API keys across the platform" />
 
 		<!-- Error Alert -->
 		{#if error && !loadingStats}

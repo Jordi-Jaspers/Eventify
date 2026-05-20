@@ -8,11 +8,13 @@
 	import type { WatchlistDetailsResponse, SortablePageInput, PageResourceWatchlistDetailsResponse } from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { ClipboardList, Edit, Trash2, Plus, Eye } from '@lucide/svelte';
+	import { PageHeader } from '$lib/components/ui/page-header';
 	import { formatDate } from '$lib/utils/date';
 	import { truncateText } from '$lib/utils/string';
 	import { toast } from 'svelte-sonner';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { organizationStore } from '$lib/stores/organization.svelte';
+	import ConfirmDialog from '$lib/components/ui/confirm-dialog/confirm-dialog.svelte';
 
 	// Get orgId from URL params
 	const orgId: number = $derived(Number($page.params.orgId));
@@ -21,6 +23,9 @@
 	const canManage: boolean = $derived(
 		organizationStore.currentRole === 'OWNER' || organizationStore.currentRole === 'ADMIN'
 	);
+
+	let confirmOpen: boolean = $state(false);
+	let watchlistToDelete: WatchlistDetailsResponse | null = $state(null);
 
 	// Columns configuration
 	const columns: DataTableColumn<WatchlistDetailsResponse>[] = [
@@ -73,17 +78,22 @@
 		goto(`${CLIENT_ROUTES.ORGANIZATION_WATCHLISTS_PAGE(orgId).path}/new`);
 	}
 
-	async function handleDeleteWatchlist(watchlist: WatchlistDetailsResponse): Promise<void> {
-		if (!confirm(`Are you sure you want to delete "${watchlist.name}"? This action cannot be undone.`)) {
-			return;
-		}
+	function handleDeleteWatchlist(watchlist: WatchlistDetailsResponse): void {
+		watchlistToDelete = watchlist;
+		confirmOpen = true;
+	}
 
+	async function confirmDelete(): Promise<void> {
+		if (!watchlistToDelete) return;
 		try {
-			await deleteWatchlist(orgId, watchlist.id ?? 0);
+			await deleteWatchlist(orgId, watchlistToDelete.id ?? 0);
 			toast.success('Watchlist deleted');
 			dataTableService.load();
-		} catch (error) {
+		} catch {
 			toast.error('Failed to delete watchlist');
+		} finally {
+			confirmOpen = false;
+			watchlistToDelete = null;
 		}
 	}
 
@@ -98,22 +108,16 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
 		<!-- Header -->
-		<div class="flex items-center justify-between mb-8">
-			<div>
-				<h1 class="text-3xl font-bold text-primary">
-					Organization Watchlists
-				</h1>
-				<p class="text-muted-foreground mt-2">
-					Monitor channels and track important events for your organization
-				</p>
-			</div>
-			{#if canManage}
-				<Button onclick={handleNewWatchlist}>
-					<Plus class="mr-2 h-4 w-4" />
-					New Watchlist
-				</Button>
-			{/if}
-		</div>
+		<PageHeader title="Organization Watchlists" description="Monitor channels and track important events for your organization">
+			{#snippet actions()}
+				{#if canManage}
+					<Button onclick={handleNewWatchlist}>
+						<Plus class="mr-2 h-4 w-4" />
+						New Watchlist
+					</Button>
+				{/if}
+			{/snippet}
+		</PageHeader>
 
 		<!-- DataTable -->
 		<DataTable {columns} service={dataTableService} title="All Watchlists" icon={ClipboardList}>
@@ -186,3 +190,16 @@
 		</DataTable>
 	</div>
 </main>
+
+<ConfirmDialog
+	open={confirmOpen}
+	title="Delete Watchlist"
+	confirmLabel="Delete"
+	destructive={true}
+	onOpenChange={(o) => (confirmOpen = o)}
+	onConfirm={confirmDelete}
+>
+	{#snippet description()}
+		Are you sure you want to delete "{watchlistToDelete?.name}"? This action cannot be undone.
+	{/snippet}
+</ConfirmDialog>

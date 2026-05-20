@@ -3,6 +3,7 @@
 	import { browser } from '$app/environment';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { UserPlus, Users } from '@lucide/svelte';
+	import { PageHeader } from '$lib/components/ui/page-header';
 	import type { OrganizationMembershipResponse, OrganizationalRole, SortablePageInput, PageResource } from '$lib/api/models';
 	import { currentUser } from '$lib/stores/auth';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
@@ -206,21 +207,16 @@
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-8 animate-fade-in">
 		<!-- Header -->
-		<div class="flex items-center justify-between">
-			<div>
-				<h1 class="text-3xl font-bold text-primary">
-					Organization Members
-				</h1>
-				<p class="text-muted-foreground mt-2">Manage members and permissions</p>
-			</div>
-
-			{#if canManageMembers}
-				<Button onclick={openAddSheet}>
-					<UserPlus class="mr-2 h-4 w-4" />
-					Add Member
-				</Button>
-			{/if}
-		</div>
+		<PageHeader title="Organization Members" description="Manage members and permissions">
+			{#snippet actions()}
+				{#if canManageMembers}
+					<Button onclick={openAddSheet}>
+						<UserPlus class="mr-2 h-4 w-4" />
+						Add Member
+					</Button>
+				{/if}
+			{/snippet}
+		</PageHeader>
 
 		<!-- DataTable -->
 		{#if dataTableService && memberService}

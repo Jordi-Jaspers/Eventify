@@ -3,14 +3,14 @@
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Key, Plus, Info } from '@lucide/svelte';
 	import { SettingsNav } from '$lib/components/settings';
 	import {
 		ApiKeyList,
 		CreateApiKeySheet,
 		ApiKeyCreatedModal,
-		QuotaProgressBar
+		QuotaProgressBar,
+		RevokeApiKeyAlertDialog
 	} from '$lib/components/api-keys';
 	import { createUserApiKeyManagementService } from '$lib/api/apikey/service/UserApiKeyManagementService.svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
@@ -163,27 +163,10 @@
 />
 
 <!-- Revoke Dialog -->
-<AlertDialog.Root
+<RevokeApiKeyAlertDialog
 	open={apiKeyService.showRevokeDialog}
 	onOpenChange={(o) => apiKeyService.setShowRevokeDialog(o)}
->
-	<AlertDialog.Content class="bg-card/95 backdrop-blur-xl border-border/50">
-		<AlertDialog.Header>
-			<AlertDialog.Title>Revoke API Key</AlertDialog.Title>
-			<AlertDialog.Description>
-				Are you sure you want to revoke <strong>{apiKeyService.keyToRevoke?.name ?? 'Unnamed'}</strong>? This action cannot be
-				undone and any applications using this key will stop working immediately.
-			</AlertDialog.Description>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel class="bg-background/50 border-border/50">Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action
-				onclick={apiKeyService.handleRevoke}
-				disabled={apiKeyService.isRevoking}
-				class="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-			>
-				{apiKeyService.isRevoking ? 'Revoking...' : 'Revoke'}
-			</AlertDialog.Action>
-		</AlertDialog.Footer>
-	</AlertDialog.Content>
-</AlertDialog.Root>
+	keyName={apiKeyService.keyToRevoke?.name}
+	isRevoking={apiKeyService.isRevoking}
+	onConfirm={apiKeyService.handleRevoke}
+/>

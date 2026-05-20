@@ -7,10 +7,9 @@
 	import type { ApiKeyResponse, SortablePageInput, PageResource, UserOrganizationResponse, OrganizationResponse } from '$lib/api/models';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn, DataTableService } from '$lib/components/data-table/types';
-	import { CreateApiKeySheet, ApiKeyCreatedModal, ApiKeyTableRow } from '$lib/components/api-keys';
+	import { CreateApiKeySheet, ApiKeyCreatedModal, ApiKeyTableRow, RevokeApiKeyAlertDialog } from '$lib/components/api-keys';
 	import { searchOrganizationApiKeys } from '$lib/api/organization/OrganizationApiKeyController';
 	import { getOrganizationById } from '$lib/api/admin/AdminOrganizationController';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import { currentUser } from '$lib/stores/auth';
 	import { createApiKeyManagementService } from '$lib/api/organization/service/ApiKeyManagementService.svelte';
@@ -233,27 +232,10 @@
 />
 
 <!-- Revoke Dialog -->
-<AlertDialog.Root
+<RevokeApiKeyAlertDialog
 	open={apiKeyService.showRevokeDialog}
 	onOpenChange={(o) => apiKeyService.setShowRevokeDialog(o)}
->
-	<AlertDialog.Content class="bg-card/95 backdrop-blur-xl border-border/50">
-		<AlertDialog.Header>
-			<AlertDialog.Title>Revoke API Key</AlertDialog.Title>
-			<AlertDialog.Description>
-				Are you sure you want to revoke the API key "{apiKeyService.keyToRevoke?.name ?? 'Unnamed'}"? This action
-				cannot be undone and any applications using this key will lose access immediately.
-			</AlertDialog.Description>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action
-				onclick={apiKeyService.handleRevoke}
-				disabled={apiKeyService.isRevoking}
-				class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-			>
-				{apiKeyService.isRevoking ? 'Revoking...' : 'Revoke Key'}
-			</AlertDialog.Action>
-		</AlertDialog.Footer>
-	</AlertDialog.Content>
-</AlertDialog.Root>
+	keyName={apiKeyService.keyToRevoke?.name}
+	isRevoking={apiKeyService.isRevoking}
+	onConfirm={apiKeyService.handleRevoke}
+/>

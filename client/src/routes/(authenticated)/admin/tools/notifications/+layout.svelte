@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
+	import { PageHeader } from '$lib/components/ui/page-header';
 
 	interface Props {
 		children: import('svelte').Snippet;
@@ -17,10 +18,7 @@
 
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-6 animate-fade-in">
-		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-primary">Notification Broadcasts</h1>
-			<p class="text-muted-foreground mt-2">Send system-wide notifications to users</p>
-		</div>
+		<PageHeader title="Notification Broadcasts" description="Send system-wide notifications to users" />
 
 		<div class="border-b border-border/50 mb-6">
 			<nav class="flex gap-1 px-1">
