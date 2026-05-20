@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
+    import { mode, setMode } from 'mode-watcher';
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
     import Button from '$lib/components/ui/button/button.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
@@ -135,21 +136,12 @@
     });
     
     // Theme toggle
-    let isDarkMode = $state(true);
+    const isDarkMode: boolean = $derived(mode.current === 'dark');
     let mobileNavOpen = $state(false);
     
     function toggleTheme() {
-        isDarkMode = !isDarkMode;
-        if (isDarkMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        setMode(isDarkMode ? 'light' : 'dark');
     }
-    
-    onMount(() => {
-        isDarkMode = document.documentElement.classList.contains('dark');
-    });
 
     // Get current environment
     const currentEnvironment: Environment = $derived(getEnvironment());

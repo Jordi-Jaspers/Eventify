@@ -459,6 +459,30 @@ Add to dev-playbook if the component is:
 
 Examples: StatusIndicator, InfoField, SectionHeader, EditableField, RoleBadge
 
+### Dev Playbook Section Template
+
+Every section in `(public)/dev-playbook/+page.svelte` MUST follow this exact structure:
+
+```svelte
+<!-- ComponentName -->
+<section id="component-id" class="mb-20 scroll-mt-20">
+    <h2 class="text-2xl font-semibold mb-2">Component Name</h2>
+    <p class="text-muted-foreground mb-6">Short description of the component.</p>
+
+    <Card class="border-border/50">
+        <CardHeader>
+            <CardTitle class="text-base">Variant/Demo Title</CardTitle>
+            <CardDescription>Brief explanation</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <!-- Component demo here -->
+        </CardContent>
+    </Card>
+</section>
+```
+
+Also add the component to the `navSections` array in the script block under the appropriate category.
+
 ---
 
 ## Utility Functions
