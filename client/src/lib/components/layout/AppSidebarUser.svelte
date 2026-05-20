@@ -31,26 +31,17 @@
 	import { handleError } from '$lib/utils/error-handler';
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
-	import { onMount } from 'svelte';
+	import { mode, setMode } from 'mode-watcher';
 
 	// Theme state
-	let isDarkMode: boolean = $state(true);
+	const isDarkMode: boolean = $derived(mode.current === 'dark');
 	const shouldShowDevPlaybook: boolean = showDevCredentials();
 	const hasUnread: boolean = $derived(notificationStore.hasUnread);
 	const unreadCount: number = $derived(notificationStore.unreadCount);
 	const unreadBadgeLabel: string = $derived(unreadCount > 9 ? '9+' : String(unreadCount));
 
-	onMount(() => {
-		isDarkMode = document.documentElement.classList.contains('dark');
-	});
-
 	function toggleTheme(): void {
-		isDarkMode = !isDarkMode;
-		if (isDarkMode) {
-			document.documentElement.classList.add('dark');
-		} else {
-			document.documentElement.classList.remove('dark');
-		}
+		setMode(isDarkMode ? 'light' : 'dark');
 	}
 
 	// Organization state

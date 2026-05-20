@@ -33,6 +33,6 @@
 	<link rel="icon" href={currentFavicon} />
 </svelte:head>
 
-<ModeWatcher defaultTheme={'dark'} />
+<ModeWatcher defaultMode="dark" />
 <Toaster richColors />
 {@render children()}
