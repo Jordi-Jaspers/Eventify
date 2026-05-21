@@ -398,8 +398,15 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 		const midTime: number =
 			(new Date(duration.startTime).getTime() + new Date(duration.endTime).getTime()) / 2;
 		const halfWindowMs: number = (bucketInfo.zoomWindowHours * 60 * 60 * 1000) / 2;
-		const zoomStart: Date = new Date(midTime - halfWindowMs);
-		const zoomEnd: Date = new Date(midTime + halfWindowMs);
+		let zoomEndMs = midTime + halfWindowMs;
+		let zoomStartMs = midTime - halfWindowMs;
+		const now = Date.now();
+		if (zoomEndMs > now) {
+			zoomStartMs -= zoomEndMs - now;
+			zoomEndMs = now;
+		}
+		const zoomStart: Date = new Date(zoomStartMs);
+		const zoomEnd: Date = new Date(zoomEndMs);
 
 		session.update({
 			timeRange: 'custom',

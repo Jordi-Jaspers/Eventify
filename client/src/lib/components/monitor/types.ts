@@ -64,25 +64,30 @@ export function getCurrentSeverityFromTimeline(timeline: Timeline): Severity | n
 }
 
 /**
- * Calculate segment position for timeline rendering
+ * Calculate all segment styles with cumulative left positioning to eliminate
+ * sub-pixel floating-point gaps between adjacent segments.
  */
-export function calculateSegmentStyle(
-	duration: TimelineDuration,
+export function calculateCumulativeSegmentStyles(
+	durations: TimelineDuration[],
 	rangeStart: Date,
 	rangeEnd: Date
-): SegmentStyle {
+): SegmentStyle[] {
 	const totalMs: number = rangeEnd.getTime() - rangeStart.getTime();
-	const startOffset: number = new Date(duration.startTime).getTime() - rangeStart.getTime();
-	// Use rangeEnd for ongoing durations (null endTime)
-	const endMs: number = duration.endTime
-		? new Date(duration.endTime).getTime()
-		: rangeEnd.getTime();
-	const segmentDuration: number = endMs - new Date(duration.startTime).getTime();
+	const styles: SegmentStyle[] = [];
+	let cumulativeLeft: number = 0;
 
-	return {
-		left: (startOffset / totalMs) * 100,
-		width: (segmentDuration / totalMs) * 100
-	};
+	for (const duration of durations) {
+		const endMs: number = duration.endTime
+			? new Date(duration.endTime).getTime()
+			: rangeEnd.getTime();
+		const width: number =
+			((endMs - new Date(duration.startTime).getTime()) / totalMs) * 100;
+
+		styles.push({ left: cumulativeLeft, width });
+		cumulativeLeft += width;
+	}
+
+	return styles;
 }
 
 /**

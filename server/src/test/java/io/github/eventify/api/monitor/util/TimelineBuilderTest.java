@@ -193,8 +193,8 @@ class TimelineBuilderTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should not extend last duration in non-live mode")
-    void shouldNotExtendLastDurationInNonLiveMode() {
+    @DisplayName("Should extend last duration to range end in non-live mode")
+    void shouldExtendLastDurationToRangeEndInNonLiveMode() {
         // Given: Event before range end (non-live mode - end is in the past)
         final Channel channel = aChannel(1L, "test", ChannelStatus.ACTIVE);
         final OffsetDateTime rangeEnd = OffsetDateTime.now().minusMinutes(5); // Non-live: end is 5 minutes ago
@@ -205,10 +205,10 @@ class TimelineBuilderTest extends UnitTest {
         // When: Building timeline in non-live mode
         final Timeline timeline = TimelineBuilder.fromEvents(events, new TimeSpan(rangeStart, rangeEnd));
 
-        // Then: Last duration ends at event time
+        // Then: Last duration extends to rangeEnd (no white gap at end)
         assertThat(timeline.getDurations(), hasSize(2));
         final TimelineDuration lastDuration = timeline.getDurations().getLast();
-        assertThat(lastDuration.getEndTime(), is(equalTo(eventTime)));
+        assertThat(lastDuration.getEndTime(), is(equalTo(rangeEnd)));
     }
 
     @Test
