@@ -7,9 +7,6 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
-- [ ] **The configure button in watchlist needs restyling** - it should use an existing component and be different edit watchlist button. also the hover make the text the same color as the background which is not good for accessibility.
-- [ ] **get started should route to login page** - currently it routes to register
-
 ---
 
 ## Epic: Organization Management
@@ -61,29 +58,12 @@ Raw ideas and future work. Items here need refinement before development.
 
 ---
 
-## Epic: Audit System
-**Context**: Cross-cutting audit trail for security, compliance, and debugging. Identified during Channel Management refinement.
+## Epic: AI Monitoring
+**Context**: configure AI per org / user and let user create API keys to use their AI with our application as proxy. We can use this for anomaly detection, alerting, and insights on event data, cost management, orgs should als have budget controls and usage alerts for AI calls.
 
-**NOTE** something like Axiom's frontend logging / pocketbase monitoring to capture user interactions for audits? This should be something that can be monitored in the application as an admin.
-
-- [ ] **Bulk action audit trail** - Record bulk operations (channel deletes, etc.) with user, action, targets, timestamp.
-- [ ] **Admin action audit** - Track admin-specific actions: status changes, user management, system configuration.
 
 ---
-
-## Epic: Billing & Subscription Tiers (NOT MVP)
-**Context**: Commercial pricing model with tier-based limits. Replaces removed TRIAL concept. All quota/limit enforcement should be driven by the user's subscription tier.
-
-- [ ] **Pricing Model & Plan Entity** - Define plan tiers (Free/Pro/Enterprise or similar). Plan entity with limits: members, monthly events, API keys, retention days. Admin can assign plans to users/orgs.
-- [ ] **Configurable Event Quotas** - Monthly event limit driven by subscription tier (replaces hardcoded 1000). Orgs inherit tier from their plan. Upgrade prompts when approaching limit.
-- [ ] **Max Retention Per Tier** - Retention days capped by plan tier. Lower tiers get shorter retention. Enforce on cleanup job + show limit in retention settings UI.
-- [ ] **Subscription Info Tab (User Details)** - User settings page showing: current plan, usage vs limits (events, API keys, members, retention), billing period, upgrade CTA.
-- [ ] **Subscription Info Tab (Org Details)** - Org settings page showing: current plan, usage vs limits for the org, managed by org owner/admin.
-- [ ] **Stripe Integration** - Payment processing, plan upgrades/downgrades, webhook handling for subscription lifecycle events.
-- [ ] **Pricing/Upgrade Page** - Authenticated users can view plans, compare features, and initiate upgrade from within the app.
-
----
-## Epic: Developer API Documentation (NOT MVP)
+## Epic: Developer API Documentation 
 **Context**: Developers integrating with Eventify need comprehensive documentation to understand the API and get started quickly.
 
 - [ ] **Getting Started Guide** - Step-by-step guide: create API key, create channel, send first event. Interactive examples with copy-paste commands.
@@ -98,6 +78,7 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Future Considerations (NOT MVP)
 **Context**: Ideas to keep in mind for architecture decisions but not for immediate development.
 
+- [ ] **Opentelemtry in frontend** - Add opentelemetry instrumentation to the frontend for performance monitoring and debugging. also persist frontend traces to the same backend for unified observability. Deferred until backend tracing infrastructure is mature enough to consume frontend data without overwhelming it.
 - [ ] **Basic Tracing** - Consuming tracing data from a opentelemetry collector. Could be used for debugging and performance monitoring. (custom jeager, configurable per organization/user)
 - [ ] **Growthbook** - https://www.growthbook.io/ for feature flagging and A/B testing. Could be useful for gradual rollouts and testing new features.
 - [ ] **Admin User can create dashboards from every org channel** - Admins can create dashboards that pull in data from any channel across the organization, even if they are not the channel owner. This allows for cross-channel monitoring and insights.
@@ -111,3 +92,15 @@ Raw ideas and future work. Items here need refinement before development.
 - [ ] **Company Login SSO / SAML** - EntraID authentication, configuring IdP during org creation. User not searchable by regular users / org. Requires SAML library, org-level IdP config, JIT provisioning, admin setup UI. (XL — consider as sub-epic)
 - [ ] **SSE / WebSocket push for notifications** - Replace 30s polling (NOTIF-03) with server push for real-time delivery. SSE preferred (one-way, simple, behind cookie auth). Adds backend `/api/v1/notifications/stream` endpoint, frontend `EventSource` integration. Polling remains as fallback. Consider when notification volume justifies it or for "presence"-type features.
 
+---
+
+## Epic: Billing & Subscription Tiers (NOT MVP)
+**Context**: Commercial pricing model with tier-based limits. Replaces removed TRIAL concept. All quota/limit enforcement should be driven by the user's subscription tier.
+
+- [ ] **Pricing Model & Plan Entity** - Define plan tiers (Free/Pro/Enterprise or similar). Plan entity with limits: members, monthly events, API keys, retention days. Admin can assign plans to users/orgs.
+- [ ] **Configurable Event Quotas** - Monthly event limit driven by subscription tier (replaces hardcoded 1000). Orgs inherit tier from their plan. Upgrade prompts when approaching limit.
+- [ ] **Max Retention Per Tier** - Retention days capped by plan tier. Lower tiers get shorter retention. Enforce on cleanup job + show limit in retention settings UI.
+- [ ] **Subscription Info Tab (User Details)** - User settings page showing: current plan, usage vs limits (events, API keys, members, retention), billing period, upgrade CTA.
+- [ ] **Subscription Info Tab (Org Details)** - Org settings page showing: current plan, usage vs limits for the org, managed by org owner/admin.
+- [ ] **Stripe Integration** - Payment processing, plan upgrades/downgrades, webhook handling for subscription lifecycle events.
+- [ ] **Pricing/Upgrade Page** - Authenticated users can view plans, compare features, and initiate upgrade from within the app.
