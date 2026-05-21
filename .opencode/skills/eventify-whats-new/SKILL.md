@@ -10,7 +10,7 @@ metadata:
 
 ## Overview
 
-This skill defines when and how to update the user-facing "What's New" changelog at `server/src/main/resources/changelog.json`. This changelog powers the in-app changelog page (served via `GET /v1/public/changelog`) and the "new updates available" indicator in the sidebar.
+This skill defines how to update the user-facing "What's New" changelog at `server/src/main/resources/changelog.json`. This changelog powers the in-app changelog page (served via `GET /v1/public/changelog`) and the "new updates available" indicator in the sidebar.
 
 ## File Location
 
@@ -171,18 +171,3 @@ When completing a story, ask:
 | `client/src/routes/(authenticated)/changelog/+page.svelte` | Changelog page UI |
 | `.opencode/CHANGELOG.md` | Developer changelog (different audience) |
 
-## Example Workflow
-
-After completing a user-facing feature:
-
-```bash
-# 1. Update What's New
-# Edit: server/src/main/resources/changelog.json
-# Add entry to appropriate category in current version
-
-# 2. Verify build
-cd server && ../gradlew build
-
-# 3. Commit with feature (or separately)
-git add server/src/main/resources/changelog.json
-```

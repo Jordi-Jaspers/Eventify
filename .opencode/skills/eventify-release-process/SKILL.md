@@ -36,6 +36,11 @@ git checkout -b release/X.Y.Z
 - `server/gradle.properties`: `version="X.Y.Z"`
 - `client/package.json`: `"version": "X.Y.Z"`
 
+### 3. Update user-facing "What's New" changelog
+
+- Gather information since last release (new features, improvements, fixes) via commits and .opencode/CHANGELOG.md
+- load the `eventify-whats-new` skill and follow intructions to update the changelog
+
 ### 3. Commit and push release branch
 
 ```bash

@@ -181,7 +181,7 @@ They override the global agents of the same name when working on this project.
 | eventify-architecture     | Project structure, layer architecture, where code belongs (REQUIRED)                                 |
 | eventify-spring-standards | Spring Boot patterns: JFrame search/pagination, entities, services, controllers, tests               |
 | eventify-svelte-standards | SvelteKit patterns: Controller→Service→Page, API client, DataTable, reusable components              |
-| eventify-whats-new        | When and how to update the user-facing What's New changelog                                          |
+| eventify-whats-new        | How to update the user-facing What's New changelog                                                   |
 | release                   | Git flow release process: branch, tag, merge, version bump                                           |
 | jframe-search-pagination  | Using the JFRAME pattern for search and pagination in Spring Boot (backend) and SvelteKit (frontend) |
 
