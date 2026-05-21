@@ -28,7 +28,7 @@
 <Collapsible bind:open={isExpanded}>
 	<!-- Group Header Row -->
 	<CollapsibleTrigger class="w-full">
-		<div class="grid grid-cols-[auto_minmax(120px,180px)_1fr_32px] gap-3 items-center px-4 py-2 hover:bg-muted/30 transition-colors border-b border-border/30 cursor-pointer">
+		<div class="grid grid-cols-[32px_minmax(120px,180px)_1fr_32px] gap-3 items-center px-4 py-2 hover:bg-muted/30 transition-colors border-b border-border/30 cursor-pointer">
 			<!-- Icon Column - fixed width, right-aligned -->
 			<div class="flex items-center justify-end gap-1 w-8">
 				<ChevronRight 

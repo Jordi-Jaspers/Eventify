@@ -26,7 +26,7 @@
 		{/if}
 		{#if lastUpdated}
 			<span class="text-[11px] text-muted-foreground">
-				Last updated {lastUpdated.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+				Last updated {lastUpdated.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}{#if bucketSizeLabel}&ensp;·&ensp;{bucketSizeLabel}{/if}
 			</span>
 		{/if}
 	</div>
@@ -36,7 +36,7 @@
 		<div class="absolute bottom-0 left-0 right-0 h-px bg-border"></div>
 
 		<!-- Start time -->
-		<div class="absolute left-0 bottom-0 flex flex-col items-start">
+		<div class="absolute left-0 bottom-0 flex flex-col items-center -translate-x-1/2">
 			<span class="text-[10px] text-muted-foreground mb-0.5">
 				{rangeStart.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
 			</span>
@@ -57,7 +57,7 @@
 		{/each}
 
 		<!-- End time / Now -->
-		<div class="absolute right-0 bottom-0 flex flex-col items-end">
+		<div class="absolute right-0 bottom-0 flex flex-col items-center translate-x-1/2">
 			<span class="text-[10px] text-muted-foreground mb-0.5">
 				{#if isLive}
 					Now
@@ -70,9 +70,5 @@
 	</div>
 
 	<!-- Status placeholder -->
-	<div class="flex items-center justify-center">
-		{#if bucketSizeLabel}
-			<span class="text-[10px] text-muted-foreground/70 font-medium">{bucketSizeLabel}</span>
-		{/if}
-	</div>
+	<div></div>
 </div>
