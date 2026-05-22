@@ -211,7 +211,7 @@ routes/
 
 ### Development Notes
 
-- After backend API changes, run `bun run sync:api` from `client/` to regenerate TypeScript types
+- After backend API changes, run `bun run sync:api` from `client/` to start the backend and regenerate TypeScript types
 - Frontend uses glassmorphism design with dark-mode-first aesthetic
 - UI components follow shadcn-svelte patterns
 - Use `@PreAuthorize` annotations for endpoint security

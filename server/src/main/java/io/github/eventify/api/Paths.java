@@ -175,6 +175,8 @@ public final class Paths {
 
     public static final String USER_DASHBOARD_STATS_PATH = USERS_PATH + DASHBOARD_PART + STATS_PART;
 
+    public static final String USER_DASHBOARD_PATH = USERS_PATH + DASHBOARD_PART;
+
     /* ------------------------------- GLOBAL ADMIN ENDPOINTS ------------------------------- */
 
     public static final String ADMIN_ORGANIZATIONS_PATH = ADMIN_PATH + ORGANIZATIONS_PART;

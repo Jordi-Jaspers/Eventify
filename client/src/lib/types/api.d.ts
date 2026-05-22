@@ -1327,6 +1327,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/user/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get user dashboard
+         * @description Returns aggregated dashboard data for the authenticated user
+         */
+        get: operations["getDashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/user/dashboard/stats": {
         parameters: {
             query?: never;
@@ -3739,6 +3759,116 @@ export interface components {
              * @example user@gmail.com
              */
             providerEmail?: string;
+        };
+        /** @description Organization status summary */
+        OrganizationStatusResponse: {
+            /**
+             * Format: int64
+             * @description Organization unique identifier
+             * @example 10
+             */
+            id: number;
+            /**
+             * @description Organization name
+             * @example Acme Corp
+             */
+            name: string;
+            /**
+             * @description Organization status
+             * @example ACTIVE
+             */
+            status?: string;
+            /**
+             * @description User's role within this organization
+             * @example ADMIN
+             */
+            role: string;
+            /**
+             * Format: int64
+             * @description Number of events received today
+             * @example 1500
+             */
+            eventVolumeToday: number;
+            /**
+             * Format: int32
+             * @description Number of channels currently in alert
+             * @example 2
+             */
+            channelsInAlertCount: number;
+        };
+        /** @description Recent notification summary */
+        RecentNotificationResponse: {
+            /**
+             * Format: int64
+             * @description Notification unique identifier
+             * @example 42
+             */
+            id: number;
+            /**
+             * @description Notification title
+             * @example Channel Alert
+             */
+            title: string;
+            /**
+             * @description Notification message body
+             * @example Channel X exceeded threshold
+             */
+            message: string;
+            /**
+             * @description Notification category
+             * @example ALERT
+             */
+            category?: string;
+            /**
+             * @description Whether the notification is urgent
+             * @example false
+             */
+            urgent: boolean;
+            /**
+             * Format: date-time
+             * @description Timestamp when the notification was created
+             * @example 2026-01-08T10:30:00Z
+             */
+            createdAt: string;
+            /**
+             * @description Optional action URL for the notification
+             * @example https://app.eventify.io/channels/1
+             */
+            actionUrl?: string;
+        };
+        /** @description Aggregated user dashboard data */
+        UserDashboardResponse: {
+            /** @description Watchlist health summaries */
+            watchlistHealth: components["schemas"]["WatchlistHealthResponse"][];
+            /** @description Recent notifications within the last 24 hours */
+            recentNotifications: components["schemas"]["RecentNotificationResponse"][];
+            /** @description Organization membership summaries */
+            organizations: components["schemas"]["OrganizationStatusResponse"][];
+        };
+        /** @description Watchlist health summary */
+        WatchlistHealthResponse: {
+            /**
+             * Format: int64
+             * @description Watchlist unique identifier
+             * @example 1
+             */
+            id: number;
+            /**
+             * @description Watchlist name
+             * @example Production Watchlist
+             */
+            name: string;
+            /**
+             * @description Worst severity level across all channels
+             * @example WARNING
+             */
+            severity: string;
+            /**
+             * Format: int32
+             * @description Number of channels currently in alert
+             * @example 3
+             */
+            channelsInAlert: number;
         };
         /** @description Dashboard statistics response */
         DashboardStatsResponse: {
@@ -12224,6 +12354,98 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserOrganizationResponse"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    getDashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDashboardResponse"];
                 };
             };
             /** @description Unauthorized */

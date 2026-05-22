@@ -93,6 +93,14 @@ public interface WatchlistRepository extends JpaRepository<Watchlist, Long>, Jpa
     Optional<Watchlist> findByOrganizationIdAndName(@Param("organizationId") Long organizationId, @Param("name") String name);
 
     /**
+     * Finds all watchlists belonging to a user.
+     *
+     * @param userId the user ID
+     * @return list of watchlists
+     */
+    List<Watchlist> findAllByUserId(Long userId);
+
+    /**
      * Finds all watchlists that contain the given channel via the junction table.
      * Used by SeverityTransitionJob to find affected watchlists when a channel's severity changes.
      *

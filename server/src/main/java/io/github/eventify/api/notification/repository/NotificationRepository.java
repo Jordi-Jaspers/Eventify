@@ -3,8 +3,10 @@ package io.github.eventify.api.notification.repository;
 import io.github.eventify.api.notification.model.Notification;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -34,6 +36,17 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      * @return optional notification
      */
     Optional<Notification> findByIdAndUserId(Long id, Long userId);
+
+    /**
+     * Finds recent notifications for a user created after the given threshold, limited by pageable.
+     *
+     * @param userId    the user ID
+     * @param threshold the earliest createdAt to include
+     * @param pageable  pagination (use to limit to max 10, ordered by createdAt desc)
+     * @return list of recent notifications
+     */
+    @Query("SELECT n FROM Notification n WHERE n.user.id = :userId AND n.createdAt >= :threshold ORDER BY n.createdAt DESC")
+    List<Notification> findRecentByUserId(@Param("userId") Long userId, @Param("threshold") OffsetDateTime threshold, Pageable pageable);
 
     /**
      * Marks all unread notifications as read for a user.

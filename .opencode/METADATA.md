@@ -6,10 +6,9 @@
 
 ## Configuration
 
-| Setting               | Value  | Description                                                                      |
-|-----------------------|--------|----------------------------------------------------------------------------------|
-| `update_whats_new`    | `true` | Add user-facing changes to What's New changelog (see `eventify-whats-new` skill) |
-| `skip_frontend_tests` | `true` | Skip frontend tests during the TDD-workflow                                      |
+| Setting               | Value  | Description                                 |
+|-----------------------|--------|---------------------------------------------|
+| `skip_frontend_tests` | `true` | Skip frontend tests during the TDD-workflow |
 
 ## Project Files
 
@@ -182,7 +181,7 @@ They override the global agents of the same name when working on this project.
 | eventify-spring-standards | Spring Boot patterns: JFrame search/pagination, entities, services, controllers, tests               |
 | eventify-svelte-standards | SvelteKit patterns: Controller→Service→Page, API client, DataTable, reusable components              |
 | eventify-whats-new        | How to update the user-facing What's New changelog                                                   |
-| release                   | Git flow release process: branch, tag, merge, version bump                                           |
+| eventify-release-process  | Git flow release process: branch, tag, merge, version bump                                           |
 | jframe-search-pagination  | Using the JFRAME pattern for search and pagination in Spring Boot (backend) and SvelteKit (frontend) |
 
 **Note:** Project-specific skills contain patterns tailored to this codebase. Agents should load these first.
@@ -218,5 +217,4 @@ They override the global agents of the same name when working on this project.
 ## Notes
 
 - Styling guide: `.opencode/STYLING-GUIDE.md`
-- After backend API changes, run `bun run sync:api` from `client/` to regenerate TypeScript types
-- Frontend uses glassmorphism design with dark-mode-first aesthetic
+- After backend API changes, run `bun run sync:api` from `client/` to start the backend and regenerate TypeScript types

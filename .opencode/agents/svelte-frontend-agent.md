@@ -73,7 +73,7 @@ Execute these steps sequentially. Do not explain progress — just do the work.
 ```bash
 bun run dev              # Dev server
 bun run build            # Production build
-bun run sync:api         # Regenerate API types (ALWAYS run first)
+bun run sync:api         # Start backend and regenerate API types (ALWAYS run first)
 bun run check            # Type check (must pass)
 ```
 
@@ -136,7 +136,7 @@ Verify before outputting final report:
 
 ## Critical Rules
 
-1. **Run `bun run sync:api` FIRST** — before any API code
+1. **Run `bun run sync:api` FIRST** — before any API code. it starts the backend and regenerates API types. Do not skip.
 2. **Use openapi-fetch client ONLY** — never custom fetch wrappers
 3. **Types from `components['schemas']`** — never manual types
 4. **Load project skill** — contains all patterns and standards

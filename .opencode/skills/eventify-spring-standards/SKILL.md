@@ -49,6 +49,9 @@ public void process(User user) {        // Missing final
 - ✅ Explicit types (NEVER `var`)
 - ✅ Constructor injection (NO `@Autowired` fields)
 - ✅ NO Java records (standard classes only)
+- ✅ NO Inner Classes 
+- ✅ Services return domain objects/entities ONLY — NEVER response DTOs (`*Response` classes)
+- ✅ Controllers are responsible for mapping domain objects → response DTOs (via MapStruct mappers)
 - ✅ Lombok: `@Getter`, `@Setter`, `@Builder`, `@RequiredArgsConstructor`
 - ✅ Lombok `@Accessors(chain = true)` for response objects
 - ✅ Layered: Controller → Service → Repository → Entity
