@@ -73,18 +73,18 @@ export function calculateCumulativeSegmentStyles(
 	rangeEnd: Date
 ): SegmentStyle[] {
 	const totalMs: number = rangeEnd.getTime() - rangeStart.getTime();
+	const rangeStartMs: number = rangeStart.getTime();
 	const styles: SegmentStyle[] = [];
-	let cumulativeLeft: number = 0;
 
 	for (const duration of durations) {
+		const startMs: number = new Date(duration.startTime).getTime();
 		const endMs: number = duration.endTime
 			? new Date(duration.endTime).getTime()
 			: rangeEnd.getTime();
-		const width: number =
-			((endMs - new Date(duration.startTime).getTime()) / totalMs) * 100;
+		const left: number = ((startMs - rangeStartMs) / totalMs) * 100;
+		const right: number = ((endMs - rangeStartMs) / totalMs) * 100;
 
-		styles.push({ left: cumulativeLeft, width });
-		cumulativeLeft += width;
+		styles.push({ left, width: right - left });
 	}
 
 	return styles;
