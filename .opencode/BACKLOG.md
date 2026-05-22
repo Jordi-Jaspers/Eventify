@@ -3,15 +3,11 @@
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
+- [ ] **Consider adding /auth/ to auditing logs** - currently only admin endpoints are logged. Adding /auth/ would give visibility into login/logout patterns, failed login attempts, and potential abuse. the hide noise button in audit logs should filter out only /auth endpoint. remove the /health endpoint from the audit logs because it is polled every 30s and adds a lot of noise to the logs.
+
 - [ ] **Perfomance issue:** /api/v1/admin/stats/growth and /api/v1/admin/stats/event-volume take over 5s to respond on TST. which only has 700k events in the last 180 days. imagine when we scale to millions a month.
 
----
-
-## Epic: Organization Management
-**Context**: Admins need better tools to manage organizations, especially around trial limitations and status
-
-- [ ] **Refactor user/org dashboards to something useful**
-- [ ] **Watchlist Subscribtion on SUSPENDED orgs** - all notifications should be blocked if org is suspended.
+- [ ] **Table filter bars popover do not close when clicked outside**
 
 ---
 
@@ -28,7 +24,7 @@
 
 - [ ] **Organization/User Notification Settings UI** - Manage their notification adapters links. For each adapter: enable/disable, Linking process, Test connections, multiple destinations per chat adapter (mattermost/telegram/slack).
 
-- [ ] **Watchlist subscribtion redesign** - users now can go to their watchtlist (user/orgs) and click the subscribe button, which will open a modal to know on what severity transition they personally want to be notified. but with the addition of the notification adapters we will first need to think about a system to manage the personal subscribtions and org shared subsribtions. Should we add a complete subscribtion settings in the profile page where users can manage theri subscribtions (search, add, remove) and their prefered adapters? also add a the same page in the org which will be used as shared notification accross all members (should add disclaimer). the subscribe button on the watchtlists remains and will add/remove the watchlist from the personal subscribtions of the user, but the org shared subscribtions will be managed only from the org settings page.
+- [ ] **Watchlist subscribtion redesign** - users now can go to their watchtlist (user/orgs) and click the subscribe button, which will open a modal to know on what severity transition they personally want to be notified. but with the addition of the notification adapters we will first need to think about a system to manage the personal subscribtions and org shared subsribtions. Should we add a complete subscribtion settings in the profile page where users can manage theri subscribtions (search, add, remove) and their prefered adapters? also add a the same page in the org which will be used as shared notification accross all members (should add disclaimer). the subscribe button on the watchtlists remains and will add/remove the watchlist from the personal subscribtions of the user, but the org shared subscribtions will be managed only from the org settings page. users with subscribtions on on an suspended should also have a visible indicator on that watchlist so they now the subscribtion is there but notifications are blocked. they should be able to remove the subscribtion if they want but not edit it. they should also not be able to find the watchlists of suspended orgs when they search for watchlists to subscribe to.
 
 - [ ] **Channel Rhythm Detection + Overdue Alerts** - Statistical (no LLM): period detection on inter-arrival times via FFT or simple periodicity over `event_timeline_hourly`. New trigger type `CHANNEL_OVERDUE` fires when expected next event is late by configurable margin. Severity drift detection (CRITICAL ratio anomaly vs baseline) as additional trigger type. All evaluated through existing dispatch path.
 
@@ -39,13 +35,6 @@
 
 - [ ] **Retention Policy Configuration**: See "User/Organization Retention Settings UI" under Event Channels epic for UI implementation. DB columns already exist with CHECK constraints (90-1825 days). This item covers backend service logic for applying retention during cleanup.
 - [ ] **Global Retention Settings (Admin)**: Admin can set system-wide default retention, maximum retention (users can't exceed), view storage usage stats.
-
----
-
-## Epic: Admin Global Oversight
-**Context**: Platform administrators need visibility into all API keys, channels, and events across the system for support, security, and compliance.
-
-- [ ] **Monthly Quota Analytics Tracking** - Track monthly event counts for both personal users and organizations separately for analytics and reporting purposes. Even though organizations have no limits, we want visibility into usage patterns. Requires new database table or extending existing quota tracking.
 
 ---
 
@@ -77,6 +66,7 @@
 **Context**: Ideas to keep in mind for architecture decisions but not for immediate development.
 
 - [ ] **Opentelemtry in frontend** - Add opentelemetry instrumentation to the frontend for performance monitoring and debugging. also persist frontend traces to the same backend for unified observability. Deferred until backend tracing infrastructure is mature enough to consume frontend data without overwhelming it.
+- [ ] **Monthly Quota Analytics Tracking** - Track monthly event counts for both personal users and organizations separately for analytics and reporting purposes. Even though organizations have no limits, we want visibility into usage patterns. Requires new database table or extending existing quota tracking.
 - [ ] **Basic Tracing** - Consuming tracing data from a opentelemetry collector. Could be used for debugging and performance monitoring. (custom jeager, configurable per organization/user)
 - [ ] **Growthbook** - https://www.growthbook.io/ for feature flagging and A/B testing. Could be useful for gradual rollouts and testing new features.
 - [ ] **Admin User can create dashboards from every org channel** - Admins can create dashboards that pull in data from any channel across the organization, even if they are not the channel owner. This allows for cross-channel monitoring and insights.
