@@ -1,28 +1,17 @@
 # Backlog
 
-Raw ideas and future work. Items here need refinement before development.
-
----
-
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
+
+- [ ] **Perfomance issue:** /api/v1/admin/stats/growth and /api/v1/admin/stats/event-volume take over 5s to respond on TST. which only has 700k events in the last 180 days. imagine when we scale to millions a month.
 
 ---
 
 ## Epic: Organization Management
 **Context**: Admins need better tools to manage organizations, especially around trial limitations and status
 
-- [ ] **Organization status change audit log** - Track when admin changes org status, with reason field. Part of broader admin audit log feature.
 - [ ] **Refactor user/org dashboards to something useful**
-
----
-
-## Epic: Watchlist Composition
-**Context**: Templates and additional views to make watchlists more reusable and informative. Templates are a new first-class concept distinct from inline groups: live-linked, editable, propagating across all consumers.
-
-- [ ] **Reusable Channel/Group Templates** - New entity separate from inline groups. Templates contain channels, groups, or groups-with-channels (no nesting templates inside templates). Inline groups CAN reference templates. Personal scope (user-owned, used in personal watchlists with personal channels) and org scope (org-shared, used in org watchlists with org channels). Edits propagate to every watchlist using the template — show confirmation modal warning ("dangerous operation: used in N watchlists"). Org template edits restricted to org owner/admin. Channel deletion cascades: removed channels are auto-removed from referencing templates. Template detail page shows usage count + list of consuming watchlists.
-- [ ] **Save Group as Template** - Action on a watchlist group in the editor. Modal: name + scope (personal/org) + propagation warning. On confirm: create template from group's current channels, replace inline group with template reference in the watchlist. Subsequent edits to that group go through the template editor and propagate.
-
+- [ ] **Watchlist Subscribtion on SUSPENDED orgs** - all notifications should be blocked if org is suspended.
 
 ---
 
@@ -35,10 +24,13 @@ Raw ideas and future work. Items here need refinement before development.
 
 **Adapter pattern:** `NotificationAdapter` interface with pluggable destinations. MVP destinations: in-app + Telegram. Email and Slack/Discord/webhooks come later via the same abstraction.
 
-- [ ] **NOTIF-07: Telegram Adapter + Personal Telegram Linking** - `TelegramAdapter` implementation. User settings page for linking via bot `/link <code>` flow associating Telegram chat ID with user. Per-subscription destination preferences (which adapters fire for this subscription). Subscriptions can fan out to multiple destinations.
-- [ ] **NOTIF-08: Org Shared Telegram Destinations + Routing Rule** - Org settings page for adding shared Telegram chats (group chats: bot added to chat, `/link <orgcode>`). Org-level routing rule entity: "send transitions to CRITICAL on any org watchlist to this shared destination." Start with a single global org rule; per-watchlist or per-channel rules deferred. Acknowledged: a user with personal subscription on watchlist X plus org rule routing X to shared Telegram = both fire (different audiences, intentional).
-- [ ] **NOTIF-09 (deferred, post-MVP): Email Adapter** - Plug into existing email infra. Throttling/digest logic to prevent email floods. Deferred until email infra is more mature.
-- [ ] **NOTIF-10 (deferred, post-MVP): Channel Rhythm Detection + Overdue Alerts** - Statistical (no LLM): period detection on inter-arrival times via FFT or simple periodicity over `event_timeline_hourly`. New trigger type `CHANNEL_OVERDUE` fires when expected next event is late by configurable margin. Severity drift detection (CRITICAL ratio anomaly vs baseline) as additional trigger type. All evaluated through existing dispatch path.
+- [ ] **Add Notification Adapters** - Telegram Adapter, Mattermost Adapter, Email Adapter, Slack Adapter,. Each implements `NotificationAdapter` interface with `send(notification: Notification): Promise<void>` method. Notification object contains: user ID, watchlist ID, channel ID, old severity, new severity, timestamp, event context (e.g., event message or link). Adapters handle formatting and delivery to their respective platforms. It should be an extensible system and easily be triggered. The emails adapter is not something that can be configured. because it must use the email associated with the user account, and we want to avoid impersonation risks. It will be enabled by default for all users but can be disabled in the notification settings. but there should be research to our current email services and check which ones can be migrated to be triggered via our adapter system.
+
+- [ ] **Organization/User Notification Settings UI** - Manage their notification adapters links. For each adapter: enable/disable, Linking process, Test connections, multiple destinations per chat adapter (mattermost/telegram/slack).
+
+- [ ] **Watchlist subscribtion redesign** - users now can go to their watchtlist (user/orgs) and click the subscribe button, which will open a modal to know on what severity transition they personally want to be notified. but with the addition of the notification adapters we will first need to think about a system to manage the personal subscribtions and org shared subsribtions. Should we add a complete subscribtion settings in the profile page where users can manage theri subscribtions (search, add, remove) and their prefered adapters? also add a the same page in the org which will be used as shared notification accross all members (should add disclaimer). the subscribe button on the watchtlists remains and will add/remove the watchlist from the personal subscribtions of the user, but the org shared subscribtions will be managed only from the org settings page.
+
+- [ ] **Channel Rhythm Detection + Overdue Alerts** - Statistical (no LLM): period detection on inter-arrival times via FFT or simple periodicity over `event_timeline_hourly`. New trigger type `CHANNEL_OVERDUE` fires when expected next event is late by configurable margin. Severity drift detection (CRITICAL ratio anomaly vs baseline) as additional trigger type. All evaluated through existing dispatch path.
 
 ---
 
@@ -53,14 +45,20 @@ Raw ideas and future work. Items here need refinement before development.
 ## Epic: Admin Global Oversight
 **Context**: Platform administrators need visibility into all API keys, channels, and events across the system for support, security, and compliance.
 
-- [ ] **Admin Audit Log**: Track admin actions: key revocations, channel archives, user impersonation. Searchable log with: action, target, admin user, timestamp.
 - [ ] **Monthly Quota Analytics Tracking** - Track monthly event counts for both personal users and organizations separately for analytics and reporting purposes. Even though organizations have no limits, we want visibility into usage patterns. Requires new database table or extending existing quota tracking.
+
+---
+
+## Epic: Watchlist Composition
+**Context**: Templates and additional views to make watchlists more reusable and informative. Templates are a new first-class concept distinct from inline groups: live-linked, editable, propagating across all consumers.
+
+- [ ] **Reusable Channel/Group Templates** - New entity separate from inline groups. Templates contain channels, groups, or groups-with-channels (no nesting templates inside templates). Inline groups CAN reference templates. Personal scope (user-owned, used in personal watchlists with personal channels) and org scope (org-shared, used in org watchlists with org channels). Edits propagate to every watchlist using the template — show confirmation modal warning ("dangerous operation: used in N watchlists"). Org template edits restricted to org owner/admin. Channel deletion cascades: removed channels are auto-removed from referencing templates. Template detail page shows usage count + list of consuming watchlists.
+- [ ] **Save Group as Template** - Action on a watchlist group in the editor. Modal: name + scope (personal/org) + propagation warning. On confirm: create template from group's current channels, replace inline group with template reference in the watchlist. Subsequent edits to that group go through the template editor and propagate.
 
 ---
 
 ## Epic: AI Monitoring
 **Context**: configure AI per org / user and let user create API keys to use their AI with our application as proxy. We can use this for anomaly detection, alerting, and insights on event data, cost management, orgs should als have budget controls and usage alerts for AI calls.
-
 
 ---
 ## Epic: Developer API Documentation 

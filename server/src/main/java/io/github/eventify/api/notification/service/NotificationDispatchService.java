@@ -62,7 +62,7 @@ public class NotificationDispatchService {
     private void dispatchOrganizationSuspended(final Long orgId, final String orgName) {
         final NotificationPayload payload = buildOrganizationStatusPayload(
             "Organization suspended",
-            orgName + " has been suspended",
+            orgName + " has been suspended. Contact a platform administrator for more information.",
             true
         );
         dispatch(NotificationAudience.organization(orgId), payload);
