@@ -13,7 +13,7 @@
 		getMonitor: (request: any) => getUserMonitor(request),
 		buildEditRoute: (watchlistId: number) => `${CLIENT_ROUTES.WATCHLISTS_PAGE.path}/${watchlistId}`,
 		buildWatchlistsRoute: () => CLIENT_ROUTES.WATCHLISTS_PAGE.path,
-		buildMonitorRoute: () => CLIENT_ROUTES.WATCHLISTS_MONITOR_PAGE.path
+		buildMonitorRoute: () => CLIENT_ROUTES.MONITOR_PAGE.path
 	});
 
 	// Initial load

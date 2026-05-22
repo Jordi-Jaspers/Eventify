@@ -55,7 +55,7 @@
 	}
 
 	function handleMonitorWatchlist(watchlist: WatchlistDetailsResponse): void {
-		goto(`${CLIENT_ROUTES.WATCHLISTS_MONITOR_PAGE.path}?id=${watchlist.id}`);
+		goto(`${CLIENT_ROUTES.MONITOR_PAGE.path}?id=${watchlist.id}`);
 	}
 
 	function handleNewWatchlist(): void {

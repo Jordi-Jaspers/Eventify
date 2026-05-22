@@ -70,7 +70,7 @@
 	$effect(() => {
 		if (browser && !retentionService.loading && !canManage && orgId > 0) {
 			toast.error('You do not have permission to access this page');
-			goto(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(orgId).path);
+			goto(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(orgId).path);
 		}
 	});
 

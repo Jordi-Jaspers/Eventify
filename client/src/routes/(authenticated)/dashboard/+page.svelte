@@ -40,7 +40,7 @@
 
     async function handleOrgClick(orgId: number): Promise<void> {
         organizationStore.switchOrganization(orgId);
-        await goto(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(orgId).path);
+        await goto(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(orgId).path);
     }
 </script>
 

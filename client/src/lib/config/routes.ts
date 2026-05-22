@@ -79,8 +79,8 @@ export const CLIENT_ROUTES = {
 		path: '/watchlists',
 		type: RouteType.PRIVATE
 	},
-	WATCHLISTS_MONITOR_PAGE: {
-		path: '/watchlists/monitor',
+	MONITOR_PAGE: {
+		path: '/monitor',
 		type: RouteType.PRIVATE
 	},
 	CHANGELOG_PAGE: {
@@ -91,20 +91,20 @@ export const CLIENT_ROUTES = {
 		path: '/admin/statistics',
 		type: RouteType.PRIVATE
 	},
-	ADMIN_RESOURCES_PAGE: {
-		path: '/admin/resources',
+	ADMIN_MANAGE_PAGE: {
+		path: '/admin/manage',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_USERS_PAGE: {
-		path: '/admin/resources/users',
+		path: '/admin/manage/users',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_ORGANIZATIONS_PAGE: {
-		path: '/admin/resources/organizations',
+		path: '/admin/manage/organizations',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_API_KEYS_PAGE: {
-		path: '/admin/resources/api-keys',
+		path: '/admin/manage/api-keys',
 		type: RouteType.PRIVATE
 	},
 	ADMIN_TOOLS_PAGE: {
@@ -129,10 +129,6 @@ export const CLIENT_ROUTES = {
 	},
 	ORGANIZATION_MEMBERS_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/members`,
-		type: RouteType.PRIVATE
-	}),
-	ORGANIZATION_DASHBOARD_PAGE: (orgId: number) => ({
-		path: `/organizations/${orgId}/dashboard`,
 		type: RouteType.PRIVATE
 	}),
 	ORGANIZATION_SETTINGS_PAGE: (orgId: number) => ({
@@ -160,7 +156,11 @@ export const CLIENT_ROUTES = {
 		type: RouteType.PRIVATE
 	}),
 	ORGANIZATION_MONITOR_PAGE: (orgId: number) => ({
-		path: `/organizations/${orgId}/watchlists/monitor`,
+		path: `/organizations/${orgId}/monitor`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_STATISTICS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/statistics`,
 		type: RouteType.PRIVATE
 	})
 } as const;
