@@ -33,6 +33,8 @@
     import { WatchlistTableRow } from '$lib/components/watchlist';
     import ConfirmDialog from '$lib/components/ui/confirm-dialog/confirm-dialog.svelte';
     import { ClipboardList, Eye, Plus } from '@lucide/svelte';
+    import { PillToggle } from '$lib/components/ui/pill-toggle';
+    import { TimeRangePopover } from '$lib/components/ui/time-range-popover';
 
     // DataTable demo — mock ChannelDetailsResponse data
     const demoChannels: ChannelDetailsResponse[] = [
@@ -125,6 +127,15 @@
     let dateTimeValue1: string = $state('');
     let dateTimeValue2: string = $state(new Date().toISOString());
     let dateTimeValue3: string = $state('');
+
+    // PillToggle demo state
+    let activePill: string = $state('option1');
+
+    // TimeRangePopover demo state
+    let demoSelectedDays: string = $state('30');
+    let demoIsCustom: boolean = $state(false);
+    let demoCustomStart: string = $state('');
+    let demoCustomEnd: string = $state('');
     
     // Redirect if not in dev mode
     const isDev = showDevCredentials();
@@ -169,6 +180,8 @@
                 { id: 'stat-card', label: 'Stat Card' },
                 { id: 'badges', label: 'Badges' },
                 { id: 'date-time-picker', label: 'DateTimePicker' },
+                { id: 'pill-toggle', label: 'PillToggle' },
+                { id: 'time-range-popover', label: 'TimeRangePopover' },
                 { id: 'live-indicator', label: 'Live Indicator' },
                 { id: 'loading-card', label: 'Loading Card' },
                 { id: 'access-denied-card', label: 'Access Denied Card' },
@@ -874,7 +887,63 @@
                 </div>
             </section>
 
-            <!-- Live Indicator -->
+            <!-- PillToggle -->
+            <section id="pill-toggle" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">PillToggle</h2>
+                <p class="text-muted-foreground mb-6">Compact pill-style toggle for switching between views or modes.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Demo</CardTitle>
+                        <CardDescription>Import from $lib/components/ui/pill-toggle</CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-4">
+                        <PillToggle
+                            items={[
+                                { value: 'option1', label: 'Option 1' },
+                                { value: 'option2', label: 'Option 2' },
+                                { value: 'option3', label: 'Option 3' }
+                            ]}
+                            active={activePill}
+                            onSelect={(v: string) => { activePill = v; }}
+                        />
+                        <p class="text-sm text-muted-foreground">Active: <code class="text-xs bg-muted px-1 py-0.5 rounded">{activePill}</code></p>
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- TimeRangePopover -->
+            <section id="time-range-popover" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">TimeRangePopover</h2>
+                <p class="text-muted-foreground mb-6">Popover for selecting quick date ranges or a custom date/time range.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Demo</CardTitle>
+                        <CardDescription>Import from $lib/components/ui/time-range-popover</CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-4">
+                        <TimeRangePopover
+                            selectedDays={demoSelectedDays}
+                            isCustomRange={demoIsCustom}
+                            customStart={demoCustomStart}
+                            customEnd={demoCustomEnd}
+                            onQuickRangeSelect={(days: string) => { demoSelectedDays = days; demoIsCustom = false; demoCustomStart = ''; demoCustomEnd = ''; }}
+                            onCustomRangeApply={(start: string, end: string) => { demoCustomStart = start; demoCustomEnd = end; demoIsCustom = true; }}
+                            onCustomRangeToggle={() => { demoIsCustom = true; }}
+                        />
+                        <p class="text-sm text-muted-foreground">
+                            {#if demoIsCustom && demoCustomStart && demoCustomEnd}
+                                Custom: <code class="text-xs bg-muted px-1 py-0.5 rounded">{demoCustomStart} → {demoCustomEnd}</code>
+                            {:else}
+                                Last <code class="text-xs bg-muted px-1 py-0.5 rounded">{demoSelectedDays}</code> days
+                            {/if}
+                        </p>
+                    </CardContent>
+                </Card>
+            </section>
+
+
             <section id="live-indicator" class="mb-20 scroll-mt-20">
                 <h2 class="text-2xl font-semibold mb-2">Pulse Indicator</h2>
                 <p class="text-muted-foreground mb-6">Smooth pulsing animation for real-time status</p>

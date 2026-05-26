@@ -438,8 +438,11 @@ For server-side paginated lists with sorting/filtering.
 | Location | Purpose |
 |----------|---------|
 | `$lib/components/ui/` | shadcn-svelte base components |
+| `$lib/components/ui/pill-toggle/` | Generic pill-style segmented control |
+| `$lib/components/ui/time-range-popover/` | Reusable time range selector (quick ranges + custom DateTimePicker) |
 | `$lib/components/layout/` | AppBackground, AppSidebar, AppLogo, AppNavbar |
 | `$lib/components/data-table/` | Paginated table with filters |
+| `$lib/components/organization/` | Org-specific (api-key-stats-section, etc.) |
 | `$lib/components/[feature]/` | Feature-specific (channels, members, api-keys, etc.) |
 
 ### When Creating New Components
@@ -457,7 +460,7 @@ Add to dev-playbook if the component is:
 - Has configurable props/variants
 - Would benefit other developers as a reference
 
-Examples: StatusIndicator, InfoField, SectionHeader, EditableField, RoleBadge
+Examples: StatusIndicator, InfoField, SectionHeader, EditableField, RoleBadge, PillToggle, TimeRangePopover
 
 ### Dev Playbook Section Template
 

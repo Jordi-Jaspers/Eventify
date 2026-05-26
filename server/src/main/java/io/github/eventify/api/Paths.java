@@ -259,6 +259,14 @@ public final class Paths {
 
     public static final String ORGANIZATION_DASHBOARD_STATS_PATH = ORGANIZATION_PATH + DASHBOARD_PART + STATS_PART;
 
+    public static final String ORGANIZATION_STATS_PATH = ORGANIZATION_PATH + STATS_PART;
+
+    public static final String ORGANIZATION_STATS_TIMELINE_PATH = ORGANIZATION_STATS_PATH + "/timeline";
+
+    public static final String ORGANIZATION_STATS_SUMMARY_PATH = ORGANIZATION_STATS_PATH + "/summary";
+
+    public static final String ORGANIZATION_STATS_API_KEYS_PATH = ORGANIZATION_STATS_PATH + API_KEYS_PART;
+
     /* ------------------------------- OPTIONS ENDPOINTS ------------------------------- */
 
     public static final String OPTIONS_PATH = BASE_PATH + "/options";

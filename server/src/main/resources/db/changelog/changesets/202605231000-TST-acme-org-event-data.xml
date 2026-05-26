@@ -1,0 +1,241 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202605231000-TST-acme-org-event-data.xml">
+
+    <!-- ==================== ACME CORP ORG STATISTICS TEST DATA ==================== -->
+    <!-- Adds 4 extra channels + 3 months of realistic event history for org stats page testing -->
+
+    <changeSet id="202605231000-TST-acme-org-event-data-1" author="jordi.jaspers" context="tst">
+        <comment>Add 4 more ACTIVE channels to Acme Corp to make it a sizeable org for statistics testing.</comment>
+        <sql><![CDATA[
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT
+                'Acme API Gateway',
+                'acme.api.gateway',
+                'API gateway request/response events, rate limiting, and routing metrics for Acme Corp.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'ACTIVE',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour'
+            ON CONFLICT DO NOTHING;
+
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT
+                'Acme Payment Service',
+                'acme.payment.service',
+                'Payment transaction events, fraud detection alerts, and settlement notifications.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'ACTIVE',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '45 minutes'
+            ON CONFLICT DO NOTHING;
+
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT
+                'Acme User Auth',
+                'acme.user.auth',
+                'Authentication and authorization events including logins, token refreshes, and access violations.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'ACTIVE',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '30 minutes'
+            ON CONFLICT DO NOTHING;
+
+            INSERT INTO channel (name, slug, description, user_id, organization_id, status, created_at, updated_at)
+            SELECT
+                'Acme Background Jobs',
+                'acme.background.jobs',
+                'Async job queue events: scheduling, execution, retries, and failures.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'ACTIVE',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '60 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 minutes'
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="202605231000-TST-acme-org-event-data-2" author="jordi.jaspers" context="tst">
+        <comment>Generate 3 months of variable-throughput event data across all Acme Corp channels using generate_series.</comment>
+        <sql><![CDATA[
+            WITH acme_channels AS (
+                SELECT c.id AS channel_id, c.name AS channel_name
+                FROM channel c
+                INNER JOIN organization o ON o.id = c.organization_id
+                WHERE o.slug = 'acme-corp'
+                  AND c.status = 'ACTIVE'
+            ),
+            -- 10-minute base slots over 3 months, ~40% randomly dropped for variable throughput
+            time_slots AS (
+                SELECT generate_series(
+                    (NOW() - INTERVAL '3 months')::timestamptz,
+                    NOW()::timestamptz,
+                    INTERVAL '30 minutes'
+                ) AS slot
+            ),
+            active_slots AS (
+                SELECT slot FROM time_slots WHERE random() > 0.40
+            ),
+            event_data AS (
+                SELECT
+                    ac.channel_id,
+                    ac.channel_name,
+                    s.slot,
+                    -- Weighted severity: 65% OK, 22% WARNING, 13% CRITICAL
+                    CASE
+                        WHEN random() < 0.65 THEN 'OK'
+                        WHEN random() < 0.87 THEN 'WARNING'
+                        ELSE 'CRITICAL'
+                    END AS severity
+                FROM acme_channels ac
+                CROSS JOIN active_slots s
+            )
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                ed.channel_id,
+                ed.severity,
+                -- Realistic titles per channel
+                CASE ed.channel_name
+                    WHEN 'Acme API Gateway' THEN
+                        (ARRAY['Request Routed', 'Rate Limit Hit', 'Upstream Timeout', 'Cache Miss', 'Health Check OK'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Acme Payment Service' THEN
+                        (ARRAY['Transaction Processed', 'Payment Declined', 'Fraud Score High', 'Settlement Complete', 'Refund Initiated'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Acme User Auth' THEN
+                        (ARRAY['Login Success', 'Token Refreshed', 'Login Failed', 'Session Expired', 'MFA Verified'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Acme Background Jobs' THEN
+                        (ARRAY['Job Completed', 'Job Queued', 'Job Retried', 'Job Failed', 'Queue Flushed'])[FLOOR(random() * 5 + 1)::int]
+                    WHEN 'Acme Production Events' THEN
+                        (ARRAY['Deploy Succeeded', 'Health Check Passed', 'Error Rate Spike', 'Rollback Triggered', 'Service Restarted'])[FLOOR(random() * 5 + 1)::int]
+                    ELSE
+                        (ARRAY['Event Received', 'Status Update', 'Metric Report', 'Heartbeat', 'Notification'])[FLOOR(random() * 5 + 1)::int]
+                END AS title,
+                -- Message matches severity
+                CASE ed.severity
+                    WHEN 'CRITICAL' THEN 'Critical issue detected in ' || ed.channel_name || ' — immediate attention required'
+                    WHEN 'WARNING'  THEN 'Warning threshold exceeded in ' || ed.channel_name || ' — monitoring closely'
+                    ELSE                 'Normal operation for ' || ed.channel_name || ' — all systems nominal'
+                END AS message,
+                -- Rich metadata
+                jsonb_build_object(
+                    'source',           (ARRAY['api-server', 'worker-1', 'worker-2', 'scheduler', 'gateway'])[FLOOR(random() * 5 + 1)::int],
+                    'channel_name',     ed.channel_name,
+                    'environment',      (ARRAY['production', 'staging'])[FLOOR(random() * 2 + 1)::int],
+                    'region',           (ARRAY['eu-west-1', 'us-east-1', 'ap-southeast-1'])[FLOOR(random() * 3 + 1)::int],
+                    'response_time_ms', (random() * 800 + 20)::int,
+                    'cpu_usage',        ROUND((random() * 85 + 5)::numeric, 1),
+                    'memory_mb',        (random() * 8192)::int,
+                    'request_count',    (random() * 2000)::int
+                ) AS metadata,
+                -- Jitter ±4 minutes around the slot
+                ed.slot + (random() * INTERVAL '8 minutes' - INTERVAL '4 minutes') AS timestamp
+            FROM event_data ed
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="202605231000-TST-acme-org-event-data-3" author="jordi.jaspers" context="tst">
+        <comment>Simulate 5 incident bursts spread across the 3-month window with higher CRITICAL ratio for Acme Corp channels.</comment>
+        <sql><![CDATA[
+            WITH acme_channels AS (
+                SELECT c.id AS channel_id, c.name AS channel_name
+                FROM channel c
+                INNER JOIN organization o ON o.id = c.organization_id
+                WHERE o.slug = 'acme-corp'
+                  AND c.status = 'ACTIVE'
+            ),
+            incident_starts AS (
+                SELECT unnest(ARRAY[
+                    NOW() - INTERVAL '85 days' + INTERVAL '10 hours',
+                    NOW() - INTERVAL '65 days' + INTERVAL '14 hours',
+                    NOW() - INTERVAL '45 days' + INTERVAL '3 hours',
+                    NOW() - INTERVAL '20 days' + INTERVAL '17 hours',
+                    NOW() - INTERVAL '5 days'  + INTERVAL '9 hours'
+                ]) AS incident_start
+            ),
+            burst_slots AS (
+                SELECT
+                    i.incident_start + (n * INTERVAL '30 seconds') AS event_time,
+                    n
+                FROM incident_starts i
+                CROSS JOIN generate_series(0, 24) AS n
+            )
+            INSERT INTO event (channel_id, severity, title, message, metadata, timestamp)
+            SELECT
+                ac.channel_id,
+                -- Higher CRITICAL ratio during bursts: first 8 CRITICAL, next 12 WARNING, rest OK
+                CASE
+                    WHEN bs.n < 8  THEN 'CRITICAL'
+                    WHEN bs.n < 20 THEN 'WARNING'
+                    ELSE                'OK'
+                END AS severity,
+                CASE
+                    WHEN bs.n < 8  THEN 'Incident Detected'
+                    WHEN bs.n < 20 THEN 'Recovery In Progress'
+                    ELSE                'Service Restored'
+                END AS title,
+                CASE
+                    WHEN bs.n < 8  THEN 'Critical incident in ' || ac.channel_name || ' — escalating to on-call team'
+                    WHEN bs.n < 20 THEN 'Recovery actions underway for ' || ac.channel_name || ' — monitoring metrics'
+                    ELSE                'Service fully restored for ' || ac.channel_name || ' — incident resolved'
+                END AS message,
+                jsonb_build_object(
+                    'source',         'incident-detector',
+                    'channel_name',   ac.channel_name,
+                    'incident_id',    'INC-' || LPAD((random() * 9999)::int::text, 4, '0'),
+                    'severity_level', CASE WHEN bs.n < 8 THEN 'P1' WHEN bs.n < 20 THEN 'P2' ELSE 'P3' END,
+                    'affected_users', (random() * 5000)::int
+                ) AS metadata,
+                bs.event_time AS timestamp
+            FROM acme_channels ac
+            CROSS JOIN burst_slots bs
+            -- Target only 2 random channels per burst to keep it realistic
+            WHERE ac.channel_id IN (
+                SELECT channel_id FROM acme_channels ORDER BY random() LIMIT 2
+            )
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="202605231000-TST-acme-org-event-data-4" author="jordi.jaspers" context="tst">
+        <comment>Create org-level watchlist "Acme Operations Dashboard" with all Acme Corp channels.</comment>
+        <sql><![CDATA[
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            SELECT
+                'Acme Operations Dashboard',
+                'Organisation-wide operations dashboard covering all Acme Corp channels. Configured for real-time monitoring with severity grouping.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                jsonb_build_object(
+                    'channelIds', (
+                        SELECT jsonb_agg(c.id ORDER BY c.created_at)
+                        FROM channel c
+                        INNER JOIN organization o ON o.id = c.organization_id
+                        WHERE o.slug = 'acme-corp'
+                          AND c.status = 'ACTIVE'
+                    )
+                ),
+                jsonb_build_object(
+                    'timeRange',      '24h',
+                    'onlyCritical',   false,
+                    'sortBySeverity', true,
+                    'groupedView',    true
+                ),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '55 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 hour'
+            ON CONFLICT DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="202605231000-TST-acme-org-event-data-5" author="jordi.jaspers" context="tst" runInTransaction="false">
+        <comment>Manually refresh event_timeline_hourly continuous aggregate to pick up all 3 months of historical Acme Corp data.</comment>
+        <sql><![CDATA[
+            CALL refresh_continuous_aggregate('event_timeline_hourly', NULL, NULL);
+        ]]></sql>
+    </changeSet>
+
+</databaseChangeLog>

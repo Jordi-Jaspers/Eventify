@@ -19,6 +19,7 @@ All project-specific files are in `.opencode/`:
 | `BACKLOG.md`       | Raw ideas, future work (needs refinement) |
 | `CHANGELOG.md`     | Completed features index                  |
 | `STYLING-GUIDE.md` | UI design system reference                |
+| `dev-playbook`     | Live component showcase at `/dev-playbook` (route: `client/src/routes/(public)/dev-playbook/+page.svelte`) |
 | `refined/`         | Refined stories ready for development     |
 | `completed/`       | Audit copies of completed work            |
 | `agents/`          | Project-specific agent overrides          |
@@ -69,7 +70,7 @@ eventify/
 │   │   │   └── config/     # Routes, constants
 │   │   └── routes/         # SvelteKit file-based routing
 │   │       ├── (authenticated)/  # Protected routes
-│   │       └── (public)/         # Landing, login, registration
+│   │       └── (public)/         # Landing, login, registration, dev-playbook
 │   └── tests/              # Playwright E2E tests
 │
 ├── server/                 # Spring Boot backend (Java 25, Gradle)

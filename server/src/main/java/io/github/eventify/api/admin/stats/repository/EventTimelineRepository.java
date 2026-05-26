@@ -1,9 +1,12 @@
 package io.github.eventify.api.admin.stats.repository;
 
 import io.github.eventify.api.admin.stats.model.projection.DailyEventIngestion;
+import io.github.eventify.api.admin.stats.model.projection.OrgTimelineProjection;
 import io.github.eventify.api.admin.stats.model.projection.TopChannelData;
 import io.github.eventify.api.event.model.Event;
+import io.github.eventify.api.organization.model.projection.OrgErrorRateProjection;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -73,4 +76,46 @@ public interface EventTimelineRepository extends JpaRepository<Event, Long> {
         @Param("to") OffsetDateTime to,
         @Param("severity") String severity
     );
+
+    @Query(
+        nativeQuery = true,
+        value = """
+            SELECT time_bucket(CAST(:interval AS interval), eth.bucket) AS bucket,
+                   SUM(eth.event_count) AS eventCount
+            FROM event_timeline_hourly eth
+            JOIN channel c ON c.id = eth.channel_id
+            WHERE c.organization_id = :orgId AND eth.bucket >= :since
+            GROUP BY 1 ORDER BY 1
+            """
+    )
+    List<OrgTimelineProjection> findOrgTimeline(
+        @Param("orgId") Long orgId,
+        @Param("since") LocalDateTime since,
+        @Param("interval") String interval
+    );
+
+    @Query(
+        nativeQuery = true,
+        value = """
+            SELECT time_bucket(CAST(:interval AS interval), e.timestamp) AS bucket,
+                   COUNT(*) FILTER (WHERE e.severity IN ('CRITICAL','WARNING')) * 100.0 / NULLIF(COUNT(*), 0) AS errorRate
+            FROM event e
+            JOIN channel c ON c.id = e.channel_id
+            WHERE c.organization_id = :orgId AND e.timestamp >= :since
+            GROUP BY 1 ORDER BY 1
+            """
+    )
+    List<OrgErrorRateProjection> findOrgErrorTimeline(
+        @Param("orgId") Long orgId,
+        @Param("since") LocalDateTime since,
+        @Param("interval") String interval
+    );
+
+    @Query(
+        nativeQuery = true,
+        value = """
+            SELECT COUNT(*) FROM channel WHERE organization_id = :orgId
+            """
+    )
+    Long countOrgChannels(@Param("orgId") Long orgId);
 }

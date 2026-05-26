@@ -47,6 +47,16 @@ public interface ApiKeyAuditRepository extends JpaRepository<ApiKeyAudit, Long>,
     Long countByRevokedAtAfter(@Param("since") OffsetDateTime since);
 
     /**
+     * Count keys revoked after a specific date for an organization.
+     *
+     * @param orgId the organization ID
+     * @param since the date
+     * @return count of revoked keys
+     */
+    @Query("SELECT COUNT(a) FROM ApiKeyAudit a WHERE a.organizationId = :orgId AND a.revokedAt >= :since")
+    Long countByOrganizationIdAndRevokedAtAfter(@Param("orgId") Long orgId, @Param("since") OffsetDateTime since);
+
+    /**
      * Delete all audit records where the revoking user is in the given list.
      *
      * @param userIds the user IDs of revokers

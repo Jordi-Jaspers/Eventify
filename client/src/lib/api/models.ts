@@ -141,6 +141,14 @@ export type SortDirection = NonNullable<SortableColumn['direction']>;
 export type AuditLogResponse = components['schemas']['AuditLogResponse'];
 export type AuditLogStatsResponse = components['schemas']['AuditLogStatsResponse'];
 
+// ================ Organization Statistics ===================
+export type OrgTimelineResponse = components['schemas']['OrgTimelineResponse'];
+export type OrgSummaryResponse = components['schemas']['OrgSummaryResponse'];
+export type OrgTimelineBucketResponse = components['schemas']['OrgTimelineBucketResponse'];
+export type OrgErrorRateBucketResponse = components['schemas']['OrgErrorRateBucketResponse'];
+export type OrgApiKeyStatsResponse = components['schemas']['OrgApiKeyStatsResponse'];
+export type OrgTopApiKeyResponse = components['schemas']['OrgTopApiKeyResponse'];
+
 // ================ Generic PageResource ===================
 // Generic type for paginated responses (mirrors backend PageResource<T>)
 export interface PageResource<T> {
