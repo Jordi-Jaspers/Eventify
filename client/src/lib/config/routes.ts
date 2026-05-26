@@ -166,13 +166,6 @@ export const CLIENT_ROUTES = {
 } as const;
 
 /**
- * Server routes (backend API endpoints)
- */
-export const SERVER_ROUTES = {
-	ADMIN_STATS: '/admin/stats'
-} as const;
-
-/**
  * Get all public route paths
  */
 export function getPublicRoutes(): string[] {

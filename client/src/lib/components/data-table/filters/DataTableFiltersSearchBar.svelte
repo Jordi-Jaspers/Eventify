@@ -4,7 +4,6 @@
 	import { Search, X, ChevronDown } from '@lucide/svelte';
 	import type { DataTableColumn, FilterValue, DateRange } from '../types';
 	import {
-		TextFilter,
 		EnumFilter,
 		MultiEnumFilter,
 		BooleanFilter,

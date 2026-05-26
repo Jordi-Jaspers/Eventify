@@ -10,10 +10,12 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { UserCog, MoreVertical, Eye, Lock, Unlock, Key } from '@lucide/svelte';
 	import { PageHeader } from '$lib/components/ui/page-header';
-	import { getInitials } from '$lib/utils/string';
+	import { getInitials, getFullName } from '$lib/utils/string';
 	import { formatDate } from '$lib/utils/date';
 	import { getUserRoleBadgeClass } from '$lib/utils/role';
 	import { UserDetailsSheet } from '$lib/components/admin';
+	import { formatLastUsed } from '$lib/components/admin/utils';
+	import { InitialsAvatar } from '$lib/components/ui/initials-avatar';
 
 	// Columns configuration
 	const columns: DataTableColumn<UserDetailsResponse>[] = [
@@ -93,21 +95,14 @@
 		return 'Active';
 	}
 
-	function formatLastLogin(lastLogin: string | null | undefined): string {
-		if (!lastLogin) return 'Never';
-		return formatDate(lastLogin);
-	}
-
 	function getUserInitials(user: UserDetailsResponse): string {
 		const firstName: string = user.firstName ?? 'U';
 		const lastName: string = user.lastName ?? 'U';
 		return getInitials(firstName, lastName);
 	}
 
-	function getFullName(user: UserDetailsResponse): string {
-		const firstName: string = user.firstName ?? '';
-		const lastName: string = user.lastName ?? '';
-		return `${firstName} ${lastName}`.trim() || 'Unknown User';
+	function getFullNameForUser(user: UserDetailsResponse): string {
+		return getFullName(user.firstName, user.lastName);
 	}
 
 	// User details sheet handlers
@@ -194,12 +189,10 @@
 					<div class="col-span-1 md:col-span-3">
 						<div class="flex items-center gap-3">
 							<!-- Avatar -->
-							<div class="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-								<span class="text-sm font-semibold text-primary">{getUserInitials(user)}</span>
-							</div>
+							<InitialsAvatar initials={getUserInitials(user)} size="md" />
 							<!-- Name + Email -->
 							<div class="min-w-0">
-								<div class="font-medium truncate">{getFullName(user)}</div>
+								<div class="font-medium truncate">{getFullNameForUser(user)}</div>
 								<div class="text-sm text-muted-foreground truncate md:hidden">{user.email}</div>
 							</div>
 						</div>
@@ -236,7 +229,7 @@
 					<div class="col-span-1 md:col-span-2 flex items-center">
 						<span class="text-sm text-muted-foreground">
 							<span class="md:hidden">Last Login: </span>
-							{formatLastLogin(user.lastLogin)}
+							{formatLastUsed(user.lastLogin)}
 						</span>
 					</div>
 

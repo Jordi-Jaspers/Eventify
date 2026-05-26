@@ -4,6 +4,7 @@
 	import { organizationStore } from '$lib/stores/organization.svelte';
 	import type { UserOrganizationResponse } from '$lib/api/models';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
+	import { isOrgAdmin } from '$lib/utils/role';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { LayoutDashboard, Shield, Building2, Users, UserCog, Settings, Key, Radio, ClipboardList, Activity, BarChart3, Database, Wrench } from '@lucide/svelte';
 
@@ -21,8 +22,7 @@
 	// Check if user can manage org settings (OWNER, ADMIN, or global ADMIN)
 	const canManageOrgSettings: boolean = $derived.by((): boolean => {
 		if (!currentOrganization) return false;
-		const role: string | undefined = currentOrganization.role;
-		return isAdmin || role === 'OWNER' || role === 'ADMIN';
+		return isAdmin || isOrgAdmin(currentOrganization.role);
 	});
 
 	// Helper to check if route is active

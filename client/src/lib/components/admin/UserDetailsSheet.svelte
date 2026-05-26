@@ -6,6 +6,7 @@
 	import { UserCog, Lock, Unlock, Key, Building2 } from '@lucide/svelte';
 	import { getInitials } from '$lib/utils/string';
 	import { formatDate } from '$lib/utils/date';
+	import { formatLastUsed } from './utils';
 
 	interface Props {
 		open: boolean;
@@ -42,11 +43,6 @@
 		if (!enabled) return 'Locked';
 		if (!validated) return 'Pending Verification';
 		return 'Active';
-	}
-
-	function formatLastLogin(lastLogin: string | null | undefined): string {
-		if (!lastLogin) return 'Never';
-		return formatDate(lastLogin);
 	}
 
 	function getUserInitials(u: UserDetailsResponse): string {
@@ -132,7 +128,7 @@
 					</div>
 					<div class="rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm p-3">
 						<p class="text-xs text-muted-foreground uppercase tracking-wide">Last Login</p>
-						<p class="text-sm font-medium mt-1">{formatLastLogin(user.lastLogin)}</p>
+						<p class="text-sm font-medium mt-1">{formatLastUsed(user.lastLogin)}</p>
 					</div>
 					<div class="rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm p-3">
 						<p class="text-xs text-muted-foreground uppercase tracking-wide">Email Verified</p>

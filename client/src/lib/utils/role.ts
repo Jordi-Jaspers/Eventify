@@ -1,5 +1,14 @@
 import type { OrganizationalRole, UserRole } from '$lib/api/models';
 
+// ================ Role Helpers ==================
+
+/**
+ * Returns true if the given role grants org management permissions (OWNER or ADMIN).
+ */
+export function isOrgAdmin(role: string | undefined | null): boolean {
+	return role === 'OWNER' || role === 'ADMIN';
+}
+
 // ================ Organizational Roles (OWNER, ADMIN, MEMBER) ==================
 
 export function getOrganizationalRoleLabel(role: OrganizationalRole | undefined): string {

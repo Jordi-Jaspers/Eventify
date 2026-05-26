@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { Component } from 'svelte';
 
 	interface Tab {
@@ -19,7 +19,7 @@
 <div class="border-b border-border/50 bg-card/30 backdrop-blur-sm shadow-sm">
 	<nav class="flex gap-4 px-6 max-w-4xl mx-auto" aria-label={ariaLabel}>
 		{#each tabs as tab}
-			{@const isActive = $page.url.pathname.startsWith(tab.path)}
+			{@const isActive = page.url.pathname.startsWith(tab.path)}
 			<a
 				href={tab.path}
 				class="flex items-center gap-2 px-4 py-3 border-b-2 transition-all {isActive

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { AreaChartCard } from '$lib/components/ui/chart';
 	import { StatCard } from '$lib/components/ui/stat-card';
@@ -23,21 +23,23 @@
 	} from '$lib/api/models';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
+	import { formatChartXAxis, formatChartTooltipDate } from '$lib/utils/chart-date-format';
+	import { computeDaysFromRange } from '$lib/utils/time-range';
 
 	const CHART_CONFIG = {
 		throughput: { label: 'Events', color: 'hsl(150 70% 50%)' },
 		errorRate: { label: 'Error Rate', color: 'hsl(0 70% 55%)' }
 	} as const;
 
-	const orgId: number = Number($page.params.orgId);
+	const orgId: number = Number(page.params.orgId);
 
 	// Time range state
-	let selectedDays: string = $state($page.url.searchParams.get('days') ?? '30');
+	let selectedDays: string = $state(page.url.searchParams.get('days') ?? '30');
 	let isCustomRange: boolean = $state(
-		$page.url.searchParams.has('start') && $page.url.searchParams.has('end')
+		page.url.searchParams.has('start') && page.url.searchParams.has('end')
 	);
-	let customStart: string = $state($page.url.searchParams.get('start') ?? '');
-	let customEnd: string = $state($page.url.searchParams.get('end') ?? '');
+	let customStart: string = $state(page.url.searchParams.get('start') ?? '');
+	let customEnd: string = $state(page.url.searchParams.get('end') ?? '');
 
 	// Chart toggle
 	let activeChart: 'throughput' | 'errorRate' = $state('throughput');
@@ -82,41 +84,15 @@
 	const daysNum: number = $derived(Number(selectedDays));
 
 	function computeDays(): number {
-		if (isCustomRange && customStart && customEnd) {
-			const diffMs: number = new Date(customEnd).getTime() - new Date(customStart).getTime();
-			return Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-		}
-		return Number(selectedDays);
+		return computeDaysFromRange(Number(selectedDays), isCustomRange, customStart, customEnd);
 	}
 
 	function formatXAxis(v: unknown): string {
-		const d = v as Date;
-		if (daysNum <= 7) {
-			return d.toLocaleString('en-US', {
-				month: 'short',
-				day: 'numeric',
-				hour: '2-digit',
-				minute: '2-digit',
-				hour12: false
-			});
-		} else if (daysNum <= 30) {
-			return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-		} else {
-			return d.toLocaleDateString('en-US', { month: 'short' });
-		}
+		return formatChartXAxis(v as Date, daysNum);
 	}
 
 	function formatTooltipDate(d: Date): string {
-		if (daysNum <= 7) {
-			return d.toLocaleString('en-US', {
-				month: 'short',
-				day: 'numeric',
-				hour: '2-digit',
-				minute: '2-digit',
-				hour12: false
-			});
-		}
-		return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+		return formatChartTooltipDate(d, daysNum);
 	}
 
 	async function loadTimeline(): Promise<void> {

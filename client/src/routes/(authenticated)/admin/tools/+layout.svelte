@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { TabNav } from '$lib/components/ui/tab-nav';
 
@@ -15,7 +15,7 @@
 	];
 
 	const showTabs: boolean = $derived(
-		tabs.some((t: { label: string; path: string }) => $page.url.pathname.startsWith(t.path))
+		tabs.some((t: { label: string; path: string }) => page.url.pathname.startsWith(t.path))
 	);
 </script>
 

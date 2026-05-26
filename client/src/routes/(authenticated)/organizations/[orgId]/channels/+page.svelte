@@ -4,13 +4,10 @@
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableService } from '$lib/components/data-table/types';
 	import { searchOrganizationChannels, getOrganizationChannel } from '$lib/api/organization/OrganizationChannelController';
-	import { getOrganizationById } from '$lib/api/admin/AdminOrganizationController';
 	import type {
 		ChannelDetailsResponse,
 		SortablePageInput,
-		PageResource,
-		UserOrganizationResponse,
-		OrganizationResponse
+		PageResource
 	} from '$lib/api/models';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Radio, Plus } from '@lucide/svelte';
@@ -22,62 +19,17 @@
 		ChannelBulkActionBar,
 		SendEventsHelpModal
 	} from '$lib/components/channels';
-	import { organizationStore } from '$lib/stores/organization.svelte';
-	import { currentUser } from '$lib/stores/auth';
 	import { ChannelService } from '$lib/api/channel/service/ChannelService';
 	import { createChannelSelectionService } from '$lib/api/channel/service/ChannelSelectionService.svelte';
 	import { channelTableColumns } from '$lib/config/channel-table-columns';
+	import { createAdminOrgContext } from '$lib/api/organization/service/AdminOrgContext.svelte';
 
 	// Reactive orgId from route params
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
+	const ctx = createAdminOrgContext(() => orgId);
 
-	// Get organization from store - find by orgId to handle navigation
-	const organizationFromStore: UserOrganizationResponse | undefined = $derived(
-		organizationStore.organizations.find(
-			(org: UserOrganizationResponse) => org.organizationId === orgId
-		)
-	);
-
-	// Check permissions - canManage if OWNER, ADMIN, or global ADMIN
-	const isGlobalAdmin: boolean = $derived($currentUser?.role === 'ADMIN');
-	const canManage: boolean = $derived.by((): boolean => {
-		if (isGlobalAdmin) return true;
-		if (!organizationFromStore) return false;
-		const role: string | undefined = organizationFromStore.role;
-		return role === 'OWNER' || role === 'ADMIN';
-	});
-
-	// For global admins not in the org, fetch org details from API (for display purposes)
-	let adminFetchedOrg: OrganizationResponse | null = $state(null);
-	let lastFetchedOrgId: number = $state(0);
-
-	$effect(() => {
-		if (!browser) return;
-		const currentOrgId: number = orgId;
-		const needsFetch: boolean =
-			isGlobalAdmin &&
-			!organizationFromStore &&
-			currentOrgId > 0 &&
-			currentOrgId !== lastFetchedOrgId;
-
-		if (needsFetch) {
-			lastFetchedOrgId = currentOrgId;
-			getOrganizationById(currentOrgId)
-				.then((org: OrganizationResponse | null) => {
-					adminFetchedOrg = org;
-				})
-				.catch(() => {
-					adminFetchedOrg = null;
-				});
-		}
-	});
-
-	// Organization name for display
-	const orgName: string = $derived.by((): string => {
-		if (organizationFromStore) return organizationFromStore.organizationName ?? 'Organization';
-		if (adminFetchedOrg) return adminFetchedOrg.name ?? 'Organization';
-		return 'Organization';
-	});
+	const canManage: boolean = $derived(ctx.canManage);
+	const orgName: string = $derived(ctx.orgName);
 
 	// Channel service for CRUD operations
 	let channelService: ChannelService = $derived(new ChannelService(orgId));

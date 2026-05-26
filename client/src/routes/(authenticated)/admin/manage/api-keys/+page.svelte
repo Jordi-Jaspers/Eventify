@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Card } from '$lib/components/ui/card';
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { ErrorAlert } from '$lib/components/ui/error-alert';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import {
@@ -26,7 +26,6 @@
 		Users,
 		Building2,
 		TrendingUp,
-		CircleAlert,
 		Clock,
 		ShieldAlert,
 		MoreVertical,
@@ -37,11 +36,11 @@
 	import { PageHeader } from '$lib/components/ui/page-header';
 	import {
 		RecentRevocations,
-		RevokeApiKeyDialog,
 		getScopeBadgeClass,
 		formatNumber,
 		formatLastUsed
 	} from '$lib/components/admin';
+	import { RevokeApiKeyAlertDialog } from '$lib/components/api-keys';
 	import { StatCard } from '$lib/components/ui/stat-card';
 
 	let stats: AdminApiKeyStatsResponse | null = $state(null);
@@ -200,16 +199,7 @@
 
 		<!-- Error Alert -->
 		{#if error && !loadingStats}
-			<Alert
-				variant="destructive"
-				class="mb-4 bg-destructive/10 border-destructive/50 backdrop-blur-sm"
-			>
-				<CircleAlert class="h-4 w-4" />
-				<AlertDescription>
-					{error}
-					<Button variant="outline" size="sm" class="ml-4" onclick={loadStats}> Retry</Button>
-				</AlertDescription>
-			</Alert>
+			<ErrorAlert message={error} onRetry={loadStats} />
 		{/if}
 
 		<!-- Statistics Cards (2 rows of 4) -->
@@ -368,10 +358,11 @@
 </main>
 
 <!-- Revoke Confirmation Dialog -->
-<RevokeApiKeyDialog
+<RevokeApiKeyAlertDialog
 	open={showRevokeDialog}
+	onOpenChange={(o) => { if (!o) closeRevokeDialog(); }}
+	keyName={keyToRevoke?.name}
+	isRevoking={revoking}
+	onConfirm={handleRevoke}
 	apiKey={keyToRevoke}
-	{revoking}
-	onClose={closeRevokeDialog}
-	onRevoke={handleRevoke}
 />

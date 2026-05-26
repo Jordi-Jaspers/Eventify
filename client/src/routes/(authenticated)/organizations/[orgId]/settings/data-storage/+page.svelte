@@ -4,62 +4,15 @@
 	import { goto } from '$app/navigation';
 	import { DataRetentionSettings } from '$lib/components/settings';
 	import { toast } from 'svelte-sonner';
-	import { organizationStore } from '$lib/stores/organization.svelte';
-	import { currentUser } from '$lib/stores/auth';
-	import { getOrganizationById } from '$lib/api/admin/AdminOrganizationController';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { createRetentionService } from '$lib/api/settings/service/RetentionService.svelte';
-	import type { UserOrganizationResponse, OrganizationResponse } from '$lib/api/models';
+	import { createAdminOrgContext } from '$lib/api/organization/service/AdminOrgContext.svelte';
 
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
+	const ctx = createAdminOrgContext(() => orgId);
 
-	// Get organization from store
-	const organizationFromStore: UserOrganizationResponse | undefined = $derived(
-		organizationStore.organizations.find(
-			(org: UserOrganizationResponse) => org.organizationId === orgId
-		)
-	);
-
-	// Check permissions - canManage if OWNER, ADMIN, or global ADMIN
-	const isGlobalAdmin: boolean = $derived($currentUser?.role === 'ADMIN');
-	const canManage: boolean = $derived.by((): boolean => {
-		if (isGlobalAdmin) return true;
-		if (!organizationFromStore) return false;
-		const role: string | undefined = organizationFromStore.role;
-		return role === 'OWNER' || role === 'ADMIN';
-	});
-
-	// For global admins not in the org, fetch org details from API
-	let adminFetchedOrg: OrganizationResponse | null = $state(null);
-	let lastFetchedOrgId: number = $state(0);
-
-	$effect(() => {
-		if (!browser) return;
-		const currentOrgId: number = orgId;
-		const needsFetch: boolean =
-			isGlobalAdmin &&
-			!organizationFromStore &&
-			currentOrgId > 0 &&
-			currentOrgId !== lastFetchedOrgId;
-
-		if (needsFetch) {
-			lastFetchedOrgId = currentOrgId;
-			getOrganizationById(currentOrgId)
-				.then((org: OrganizationResponse | null) => {
-					adminFetchedOrg = org;
-				})
-				.catch(() => {
-					adminFetchedOrg = null;
-				});
-		}
-	});
-
-	// Organization name for display
-	const orgName: string = $derived.by((): string => {
-		if (organizationFromStore) return organizationFromStore.organizationName ?? 'Organization';
-		if (adminFetchedOrg) return adminFetchedOrg.name ?? 'Organization';
-		return 'Organization';
-	});
+	const canManage: boolean = $derived(ctx.canManage);
+	const orgName: string = $derived(ctx.orgName);
 
 	// Create retention service - recreate when orgId changes
 	// Initialize with 0; the $effect below will set the correct orgId

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { WatchlistBuilder } from '$lib/components/watchlist';
@@ -19,8 +19,8 @@
 
 	type UpdateWatchlistRequest = components['schemas']['UpdateWatchlistRequest'];
 
-	const orgId: number = $derived(Number($page.params.orgId));
-	const watchlistId: number = $derived(Number($page.params.id));
+	const orgId: number = $derived(Number(page.params.orgId));
+	const watchlistId: number = $derived(Number(page.params.id));
 
 	// Role-based access check
 	const canManage: boolean = $derived(

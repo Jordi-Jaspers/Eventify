@@ -21,6 +21,7 @@
 	import { type Component } from 'svelte';
 	import { Card } from '$lib/components/ui/card';
 	import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 
 	// Copy button state
 	let copied: boolean = $state(false);
@@ -111,15 +112,15 @@
   }'`;
 
 		try {
-			await navigator.clipboard.writeText(code);
+			await copyToClipboard(code);
 			copied = true;
 			setTimeout(() => {
 				copied = false;
 			}, 2000);
-	} catch (err: unknown) {
-		console.error('Failed to copy:', err);
+		} catch {
+			// copyToClipboard already shows error toast
+		}
 	}
-}
 
 </script>
 

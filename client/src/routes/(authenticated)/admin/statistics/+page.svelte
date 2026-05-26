@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import { page } from '$app/state';
 	import {
 		getAdminCounts,
 		getAdminGrowth,
@@ -14,7 +12,8 @@
 	import { getAdminApiKeyStats } from '$lib/api/admin/AdminApiKeyController';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
-	import { CircleAlert } from '@lucide/svelte';
+	import { PillToggle } from '$lib/components/ui/pill-toggle';
+	import { ErrorAlert } from '$lib/components/ui/error-alert';
 	import type {
 		AdminApiKeyStatsResponse,
 		TableSizeEntry,
@@ -53,7 +52,7 @@
 
 	const activeTab: Tab = $derived(
 		((): Tab => {
-			const t: string | null = $page.url.searchParams.get('tab');
+			const t: string | null = page.url.searchParams.get('tab');
 			if (t === 'infrastructure') return 'infrastructure';
 			if (t === 'events') return 'events';
 			return 'overview';
@@ -61,14 +60,14 @@
 	);
 	const selectedDays: Days = $derived(
 		((): Days => {
-			const d: number = Number($page.url.searchParams.get('days') ?? '30');
+			const d: number = Number(page.url.searchParams.get('days') ?? '30');
 			if (d === 7 || d === 90 || d === 180) return d as Days;
 			return 30;
 		})()
 	);
 
 	function setTab(tab: Tab): void {
-		const url: URL = new URL($page.url);
+		const url: URL = new URL(page.url);
 		url.searchParams.set('tab', tab);
 		goto(url.toString(), { replaceState: true });
 		if (tab === 'infrastructure' && !apiKeyStats) {
@@ -80,7 +79,7 @@
 	}
 
 	function setDays(days: Days): void {
-		const url: URL = new URL($page.url);
+		const url: URL = new URL(page.url);
 		url.searchParams.set('days', String(days));
 		goto(url.toString(), { replaceState: true });
 		loadOverview(days);
@@ -166,23 +165,6 @@
 	});
 </script>
 
-{#snippet pillToggle(items: { value: string; label: string }[], active: string, onSelect: (v: string) => void, size?: 'sm' | 'md')}
-	{@const px = size === 'sm' ? 'px-3 py-1' : 'px-4 py-1.5'}
-	{@const text = size === 'sm' ? 'text-xs' : 'text-sm'}
-	<div class="flex items-center gap-1 bg-muted/40 rounded-full p-1 border border-border/50">
-		{#each items as item (item.value)}
-			<button
-				class="{px} rounded-full {text} font-medium transition-all {active === item.value
-					? 'bg-primary text-primary-foreground shadow-sm'
-					: 'text-muted-foreground hover:text-foreground'}"
-				onclick={() => onSelect(item.value)}
-			>
-				{item.label}
-			</button>
-		{/each}
-	</div>
-{/snippet}
-
 {#snippet loadingSkeleton(rows: number, height?: string)}
 	{@const h = height ?? 'h-6'}
 	<div class="space-y-3">
@@ -190,16 +172,6 @@
 			<div class="{h} bg-muted animate-pulse rounded"></div>
 		{/each}
 	</div>
-{/snippet}
-
-{#snippet sectionError(message: string, onRetry: () => void)}
-	<Alert variant="destructive" class="bg-destructive/10 border-destructive/50 backdrop-blur-sm">
-		<CircleAlert class="h-4 w-4" />
-		<AlertDescription>
-			{message}
-			<Button variant="outline" size="sm" class="ml-4" onclick={onRetry}>Retry</Button>
-		</AlertDescription>
-	</Alert>
 {/snippet}
 
 <svelte:head>
@@ -219,27 +191,27 @@
 
 		<!-- Tab navigation + Time range -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-			{@render pillToggle(
-				[
+			<PillToggle
+				items={[
 					{ value: 'overview', label: 'Overview' },
 					{ value: 'infrastructure', label: 'Infrastructure' },
 					{ value: 'events', label: 'Events' }
-				],
-				activeTab,
-				(v) => setTab(v as Tab),
-				'md'
-			)}
-			{@render pillToggle(
-				([7, 30, 90, 180] as Days[]).map((d) => ({ value: String(d), label: `${d}d` })),
-				String(selectedDays),
-				(v) => setDays(Number(v) as Days),
-				'sm'
-			)}
+				]}
+				active={activeTab}
+				onSelect={(v) => setTab(v as Tab)}
+				size="md"
+			/>
+			<PillToggle
+				items={([7, 30, 90, 180] as Days[]).map((d) => ({ value: String(d), label: `${d}d` }))}
+				active={String(selectedDays)}
+				onSelect={(v) => setDays(Number(v) as Days)}
+				size="sm"
+			/>
 		</div>
 
 		{#if activeTab === 'overview'}
 			{#if overviewError}
-				{@render sectionError(overviewError, () => loadOverview())}
+				<ErrorAlert message={overviewError} onRetry={() => loadOverview()} />
 			{:else}
 				<OverviewTab
 					{counts}
@@ -252,7 +224,7 @@
 			{/if}
 		{:else if activeTab === 'infrastructure'}
 			{#if infraError}
-				{@render sectionError(infraError, () => loadInfra())}
+				<ErrorAlert message={infraError} onRetry={() => loadInfra()} />
 			{:else}
 				<InfrastructureTab
 					{counts}
@@ -265,7 +237,7 @@
 			{/if}
 		{:else if activeTab === 'events'}
 			{#if eventsError}
-				{@render sectionError(eventsError, () => loadEvents())}
+				<ErrorAlert message={eventsError} onRetry={() => loadEvents()} />
 			{:else}
 				<EventsTab
 					{eventStats}

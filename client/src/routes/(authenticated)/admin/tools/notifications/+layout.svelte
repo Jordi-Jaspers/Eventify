@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { PageHeader } from '$lib/components/ui/page-header';
@@ -26,7 +26,7 @@
 					<button
 						onclick={() => goto(tab.path)}
 						class="px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px
-							{$page.url.pathname === tab.path
+							{page.url.pathname === tab.path
 							? 'border-primary text-primary'
 							: 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'}"
 					>
