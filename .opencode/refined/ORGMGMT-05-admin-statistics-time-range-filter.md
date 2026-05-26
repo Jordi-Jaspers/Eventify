@@ -17,7 +17,7 @@ claimed_by_date:
 **So that** I can analyze platform trends over specific periods\
 
 ## 2. Business Context & Value
-Admin statistics currently use a hardcoded `?days=30` param. Adding the same time range filter as the org statistics page gives admins flexible analysis. Reuses the `TimeRangeToolbar` component from ORGMGMT-04.
+Admin statistics currently use a hardcoded `?days=30` param. Adding the same time range filter as the org statistics page gives admins flexible analysis. Reuses the `TimeRangePopover` and `PillToggle` components from ORGMGMT-04.
 
 ## 3. Acceptance Criteria
 * [ ] **Quick range buttons on admin stats**
@@ -28,10 +28,10 @@ Admin statistics currently use a hardcoded `?days=30` param. Adding the same tim
     * Given an admin selects "Custom"
     * When picking start and end dates
     * Then stats refresh for that exact range
-* [ ] **Reuses shared component**
-    * Given the `TimeRangeToolbar` component from ORGMGMT-04
+* [ ] **Reuses shared components**
+    * Given the `TimeRangePopover` (`$lib/components/ui/time-range-popover/`) and `PillToggle` (`$lib/components/ui/pill-toggle/`) from ORGMGMT-04
     * When integrated into admin statistics
-    * Then it behaves identically (same UX, same quick buttons)
+    * Then it behaves identically (same UX, same quick ranges + custom date picker)
 * [ ] **Backend supports date range params**
     * Given existing admin stats endpoints accept `?days=N`
     * When custom range is selected
@@ -45,20 +45,25 @@ Admin statistics currently use a hardcoded `?days=30` param. Adding the same tim
 * **Performance**: Cache keys must include the date range. Existing `@Cacheable` keys use `#days` — extend to include date params.
 
 ## 5. Design & UI/UX
-* Add `TimeRangeToolbar` component to top of admin statistics page
+* Add `TimeRangePopover` component to top of admin statistics page (header row, right-aligned)
+* Replace inline `pillToggle` snippet for day range with the shared `PillToggle` component (already done in Batch A extraction)
 * Same position/styling as org statistics page
 * Default selection: 30d (matches current behavior)
 
 ## 6. Implementation Notes
-* **Reuse**: `TimeRangeToolbar.svelte` from ORGMGMT-04
+* **Reuse**: `TimeRangePopover` (`$lib/components/ui/time-range-popover/`) — popover with quick ranges (7d/30d/90d/180d) + custom DateTimePicker
+* **Reuse**: `PillToggle` (`$lib/components/ui/pill-toggle/`) — already used in admin stats for tab switching
+* **Reuse**: `computeDaysFromRange` (`$lib/utils/time-range.ts`) — computes effective days from preset or custom range
 * **Backend**: `AdminDashboardController` endpoints already accept `?days` — add optional `startDate`/`endDate` params
 * **Cache**: Update `@Cacheable` keys in `AdminStatsService` to include date range
-* **Frontend**: `client/src/routes/(authenticated)/admin/statistics/+page.svelte` — add toolbar, wire to API calls
+* **Frontend**: `client/src/routes/(authenticated)/admin/statistics/+page.svelte` — add TimeRangePopover, wire to API calls
 
 ### Files to modify (MANDATORY):
 | File | Change |
 |------|--------|
-| `client/src/routes/(authenticated)/admin/statistics/+page.svelte` | Add TimeRangeToolbar, wire to API |
+| `client/src/routes/(authenticated)/admin/statistics/+page.svelte` | Add TimeRangePopover, wire to API |
 | `server/.../admin/controller/AdminDashboardController.java` | Add startDate/endDate params |
 | `server/.../admin/service/AdminStatsService.java` | Update cache keys, support date range |
-| `client/src/lib/components/statistics/TimeRangeToolbar.svelte` | Already created in ORGMGMT-04 |
+| `$lib/components/ui/time-range-popover/time-range-popover.svelte` | Already exists |
+| `$lib/components/ui/pill-toggle/pill-toggle.svelte` | Already exists (with size prop) |
+| `$lib/utils/time-range.ts` | Already exists (computeDaysFromRange) |
