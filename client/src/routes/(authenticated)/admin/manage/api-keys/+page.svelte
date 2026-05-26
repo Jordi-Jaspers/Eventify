@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Card } from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { ErrorAlert } from '$lib/components/ui/error-alert';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import {
@@ -23,25 +21,18 @@
 	import { formatDate } from '$lib/utils/date';
 	import {
 		Key,
-		Users,
-		Building2,
-		TrendingUp,
-		Clock,
-		ShieldAlert,
 		MoreVertical,
-		Trash2,
-		BarChart3,
-		AlertTriangle
+		Trash2
 	} from '@lucide/svelte';
 	import { PageHeader } from '$lib/components/ui/page-header';
 	import {
 		RecentRevocations,
+		AdminApiKeyStats,
 		getScopeBadgeClass,
 		formatNumber,
 		formatLastUsed
 	} from '$lib/components/admin';
 	import { RevokeApiKeyAlertDialog } from '$lib/components/api-keys';
-	import { StatCard } from '$lib/components/ui/stat-card';
 
 	let stats: AdminApiKeyStatsResponse | null = $state(null);
 	let recentRevocations: AdminApiKeyAuditResponse[] = $state([]);
@@ -197,80 +188,8 @@
 		<!-- Header -->
 		<PageHeader title="API Keys" description="Monitor and manage API keys across the platform" />
 
-		<!-- Error Alert -->
-		{#if error && !loadingStats}
-			<ErrorAlert message={error} onRetry={loadStats} />
-		{/if}
-
-		<!-- Statistics Cards (2 rows of 4) -->
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-			<StatCard
-				title="Total Keys"
-				value={formatNumber(stats?.totalKeys)}
-				icon={Key}
-				loading={loadingStats}
-				variant="primary"
-			/>
-
-			<StatCard
-				title="User Keys"
-				value={formatNumber(stats?.userKeys)}
-				icon={Users}
-				loading={loadingStats}
-				variant="blue"
-			/>
-
-			<StatCard
-				title="Org Keys"
-				value={formatNumber(stats?.organizationKeys)}
-				icon={Building2}
-				loading={loadingStats}
-				variant="purple"
-			/>
-
-			<StatCard
-				title="Created This Month"
-				value={formatNumber(stats?.createdThisMonth)}
-				icon={TrendingUp}
-				loading={loadingStats}
-				variant="green"
-			/>
-
-			<StatCard
-				title="Never Used"
-				value={formatNumber(stats?.neverUsedKeys)}
-				icon={Clock}
-				loading={loadingStats}
-				variant="yellow"
-			/>
-
-			<StatCard
-				title="Expiring (30d)"
-				value={formatNumber(stats?.expiringNext30Days)}
-				icon={AlertTriangle}
-				loading={loadingStats}
-				variant="orange"
-			/>
-
-			<StatCard
-				title="Revoked This Month"
-				value={formatNumber(stats?.revokedThisMonth)}
-				icon={ShieldAlert}
-				loading={loadingStats}
-				variant="red"
-			/>
-
-			<StatCard
-				title="Top Key"
-				value={stats?.topKeysByUsage && stats.topKeysByUsage.length > 0
-					? formatNumber(stats.topKeysByUsage[0].totalRequests)
-					: 'No usage data'}
-				subtitle={stats?.topKeysByUsage?.[0]?.name}
-				icon={BarChart3}
-				loading={loadingStats}
-				variant="accent"
-			/>
-		</div>
+		<!-- Statistics Cards -->
+		<AdminApiKeyStats {stats} loading={loadingStats} {error} onRetry={loadStats} />
 
 		<!-- All API Keys DataTable -->
 		<DataTable {columns} service={dataTableService} title="All API Keys" icon={Key}>

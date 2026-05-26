@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
-	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import { searchUsers } from '$lib/api/admin/AdminUserController';
 	import { createAdminUserService } from '$lib/api/admin/service/AdminUserService.svelte';
 	import type { UserDetailsResponse } from '$lib/api/models';
@@ -16,59 +15,10 @@
 	import { UserDetailsSheet } from '$lib/components/admin';
 	import { formatLastUsed } from '$lib/components/admin/utils';
 	import { InitialsAvatar } from '$lib/components/ui/initials-avatar';
+	import { userTableColumns, getStatusBadgeVariant, getStatusLabel } from '$lib/config/user-table-columns';
 
 	// Columns configuration
-	const columns: DataTableColumn<UserDetailsResponse>[] = [
-		{
-			key: 'search',
-			label: 'User',
-			filterable: true,
-			filterType: 'FUZZY_TEXT',
-			filterPlaceholder: 'Search by name or email...',
-			colSpan: 3
-		},
-		{
-			key: 'email',
-			label: 'Email',
-			sortable: true,
-			colSpan: 2
-		},
-		{
-			key: 'role',
-			label: 'Role',
-			sortable: true,
-			filterable: true,
-			filterType: 'MULTI_ENUM',
-			filterOptions: [
-				{ value: 'USER', label: 'User' },
-				{ value: 'ADMIN', label: 'Admin' }
-			],
-			colSpan: 1
-		},
-		{
-			key: 'enabled',
-			label: 'Status',
-			sortable: true,
-			filterable: true,
-			filterType: 'BOOLEAN',
-			colSpan: 1
-		},
-		{
-			key: 'createdAt',
-			label: 'Created',
-			sortable: true,
-			colSpan: 2
-		},
-		{
-			key: 'lastLogin',
-			label: 'Last Login',
-			sortable: true,
-			colSpan: 2
-		},
-		{
-			key: 'actions'
-		}
-	];
+	const columns = userTableColumns;
 
 	// Services
 	const dataTableService = createDataTableService<UserDetailsResponse>({
@@ -83,18 +33,6 @@
 	let selectedUser: UserDetailsResponse | null = $state(null);
 
 	// Helper functions
-	function getStatusBadgeVariant(enabled: boolean | undefined, validated: boolean | undefined): 'success' | 'destructive' | 'default' {
-		if (!enabled) return 'destructive';
-		if (!validated) return 'default';
-		return 'success';
-	}
-
-	function getStatusLabel(enabled: boolean | undefined, validated: boolean | undefined): string {
-		if (!enabled) return 'Locked';
-		if (!validated) return 'Pending Verification';
-		return 'Active';
-	}
-
 	function getUserInitials(user: UserDetailsResponse): string {
 		const firstName: string = user.firstName ?? 'U';
 		const lastName: string = user.lastName ?? 'U';

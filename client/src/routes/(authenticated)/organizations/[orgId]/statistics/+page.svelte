@@ -14,17 +14,16 @@
 		getOrganizationSummary,
 		getOrganizationApiKeyStats
 	} from '$lib/api/organization/OrganizationStatisticsController';
-	import type {
-		OrgTimelineResponse,
-		OrgSummaryResponse,
-		OrgApiKeyStatsResponse,
-		OrgTimelineBucketResponse,
-		OrgErrorRateBucketResponse
-	} from '$lib/api/models';
+	import type { OrgTimelineResponse, OrgSummaryResponse, OrgApiKeyStatsResponse } from '$lib/api/models';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
 	import { formatChartXAxis, formatChartTooltipDate } from '$lib/utils/chart-date-format';
 	import { computeDaysFromRange } from '$lib/utils/time-range';
+	import {
+		buildThroughputChartData,
+		buildErrorChartData,
+		type ChartPoint
+	} from './statistics-transforms';
 
 	const CHART_CONFIG = {
 		throughput: { label: 'Events', color: 'hsl(150 70% 50%)' },
@@ -33,7 +32,6 @@
 
 	const orgId: number = Number(page.params.orgId);
 
-	// Time range state
 	let selectedDays: string = $state(page.url.searchParams.get('days') ?? '30');
 	let isCustomRange: boolean = $state(
 		page.url.searchParams.has('start') && page.url.searchParams.has('end')
@@ -41,10 +39,8 @@
 	let customStart: string = $state(page.url.searchParams.get('start') ?? '');
 	let customEnd: string = $state(page.url.searchParams.get('end') ?? '');
 
-	// Chart toggle
 	let activeChart: 'throughput' | 'errorRate' = $state('throughput');
 
-	// Data state
 	let timeline: OrgTimelineResponse | null = $state<OrgTimelineResponse | null>(null);
 	let summary: OrgSummaryResponse | null = $state<OrgSummaryResponse | null>(null);
 	let apiKeyStats: OrgApiKeyStatsResponse | null = $state<OrgApiKeyStatsResponse | null>(null);
@@ -53,28 +49,12 @@
 	let summaryLoading: boolean = $state(false);
 	let apiKeyLoading: boolean = $state(false);
 
-	type ChartPoint = { date: Date; count: number };
-
 	const throughputChartData: ChartPoint[] = $derived(
-		timeline != null
-			? timeline.timeline.map(
-					(b: OrgTimelineBucketResponse): ChartPoint => ({
-						date: new Date(b.bucket),
-						count: b.eventCount
-					})
-				)
-			: []
+		timeline != null ? buildThroughputChartData(timeline.timeline) : []
 	);
 
 	const errorChartData: ChartPoint[] = $derived(
-		timeline?.errorTimeline != null && timeline.errorTimeline.length > 0
-			? timeline.errorTimeline.map(
-					(b: OrgErrorRateBucketResponse): ChartPoint => ({
-						date: new Date(b.bucket),
-						count: b.errorRate
-					})
-				)
-			: []
+		buildErrorChartData(timeline?.errorTimeline)
 	);
 
 	const activeChartData: ChartPoint[] = $derived(
@@ -143,9 +123,7 @@
 		customStart = start;
 		customEnd = end;
 		isCustomRange = true;
-		goto(`?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`, {
-			replaceState: true
-		});
+		goto(`?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`, { replaceState: true });
 	}
 
 	function handleCustomRangeToggle(): void {
@@ -172,7 +150,6 @@
 
 <main class="container mx-auto px-4 py-8">
 	<div class="max-w-7xl mx-auto space-y-8 animate-fade-in">
-		<!-- Header -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
 			<div>
 				<h1 class="text-3xl font-bold text-primary">Statistics</h1>
@@ -189,7 +166,6 @@
 			/>
 		</div>
 
-		<!-- Summary Stat Cards -->
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 			<StatCard
 				title="Total Events"
@@ -200,18 +176,14 @@
 			/>
 			<StatCard
 				title="Avg Daily Volume"
-				value={summary?.avgDailyVolume != null
-					? Math.round(summary.avgDailyVolume).toLocaleString()
-					: '0'}
+				value={summary?.avgDailyVolume != null ? Math.round(summary.avgDailyVolume).toLocaleString() : '0'}
 				icon={TrendingUp}
 				variant="green"
 				loading={summaryLoading}
 			/>
 			<StatCard
 				title="Error Rate"
-				value={summary?.currentErrorRate != null
-					? `${summary.currentErrorRate.toFixed(2)}%`
-					: '0%'}
+				value={summary?.currentErrorRate != null ? `${summary.currentErrorRate.toFixed(2)}%` : '0%'}
 				icon={AlertTriangle}
 				variant="red"
 				loading={summaryLoading}
@@ -225,7 +197,6 @@
 			/>
 		</div>
 
-		<!-- Chart with toggle -->
 		<div class="space-y-3">
 			<PillToggle
 				items={[{ value: 'throughput', label: 'Event Volume' }, { value: 'errorRate', label: 'Error Rate' }]}
@@ -275,7 +246,6 @@
 			{/if}
 		</div>
 
-		<!-- API Key Stats -->
 		{#if apiKeyStats != null}
 			<ApiKeyStatsSection apiKeyStats={apiKeyStats} loading={apiKeyLoading} />
 		{/if}

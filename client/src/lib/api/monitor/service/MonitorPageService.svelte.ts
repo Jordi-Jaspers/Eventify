@@ -21,7 +21,8 @@ import {
 	buildMonitorShareUrl,
 	createAutoRefresh
 } from '../monitor.service';
-import { type ZoomEntry, type ZoomBreadcrumb, BUCKET_INFO, formatZoomRangeLabel } from '$lib/components/monitor/types';
+import { BUCKET_INFO } from '$lib/components/monitor/types';
+import { createMonitorZoomService } from './MonitorZoomService.svelte';
 
 // ============ Types ============
 
@@ -53,7 +54,6 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 	let loadingMonitor: boolean = $state(false);
 	let noWatchlistSelected: boolean = $state(false);
 	let lastUpdated: Date | null = $state(null);
-	// Tracks the watchlistId of the last successfully loaded watchlist (for filter defaults)
 	let lastLoadedWatchlistId: number | null = null;
 
 	// Modal state
@@ -66,9 +66,6 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 
 	// Tab state
 	let activeTab: MonitorTab = $state('timeline');
-
-	// Zoom state
-	let zoomStack: ZoomEntry[] = $state([]);
 
 	// Request counter for race condition protection
 	let loadMonitorRequestId: number = 0;
@@ -107,9 +104,8 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 		(monitorData?.dashboard?.groups?.length ?? 0) > 0
 	);
 
-	// Check if current filters match watchlist defaults
 	const filtersMatchDefaults = $derived.by(() => {
-		if (!watchlist?.filters) return true; // No saved defaults = always match
+		if (!watchlist?.filters) return true;
 		const defaults = watchlist.filters;
 		return (
 			filters.timeRange === ((defaults.timeRange as TimeRange) ?? '24h') &&
@@ -119,20 +115,23 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 		);
 	});
 
-	// Derived zoom state
-	const currentZoomLevel: number = $derived(zoomStack.length);
 	const isAggregated: boolean = $derived.by(() => monitorData?.bucketSize != null);
 	const bucketSizeLabel: string | null = $derived.by(() => {
 		if (!monitorData?.bucketSize) return null;
 		return BUCKET_INFO[monitorData.bucketSize]?.label ?? null;
 	});
-	const canZoomIn: boolean = $derived(isAggregated && currentZoomLevel < 2);
-	const zoomBreadcrumbs: ZoomBreadcrumb[] = $derived.by(() => {
-		if (currentZoomLevel === 0) return [];
-		return zoomStack.map((entry: ZoomEntry, index: number): ZoomBreadcrumb => ({
-			level: index,
-			label: entry.label
-		}));
+
+	// Zoom service
+	const zoom = createMonitorZoomService({
+		getFilters: () => filters,
+		getRangeStart: () => rangeStart,
+		getRangeEnd: () => rangeEnd,
+		getIsAggregated: () => isAggregated,
+		getBucketSize: () => monitorData?.bucketSize,
+		onZoomChange: (timeRange: string, customStartTime: string, customEndTime: string) => {
+			session.update({ timeRange: timeRange as TimeRange, customStartTime, customEndTime });
+		},
+		onReload: () => loadMonitorData()
 	});
 
 	// ============ Filter Handlers ============
@@ -140,12 +139,10 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 	function updateFilter<K extends keyof MonitorFilters>(key: K, value: MonitorFilters[K]): void {
 		const updates: Partial<MonitorSession> = { [key]: value };
 		
-		// Reset zoom when time range changes
 		if (key === 'timeRange' || key === 'customStartTime' || key === 'customEndTime') {
-			zoomStack = [];
+			zoom.resetStack();
 		}
 		
-		// Clear custom times when switching away from custom
 		if (key === 'timeRange' && value !== 'custom') {
 			updates.customStartTime = '';
 			updates.customEndTime = '';
@@ -153,14 +150,12 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 		
 		session.update(updates);
 		
-		// For custom range, only reload when both times are set
 		if (key === 'customStartTime' || key === 'customEndTime') {
 			const currentSession: MonitorSession = session.value;
 			if (currentSession.customStartTime && currentSession.customEndTime) {
 				loadMonitorData();
 			}
 		} else if (key !== 'timeRange' || value !== 'custom') {
-			// For other filters or non-custom timeRange, reload immediately
 			loadMonitorData();
 		}
 	}
@@ -188,9 +183,6 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 		try {
 			watchlist = await getWatchlist(watchlistId);
 			
-			// Apply watchlist's saved filters if this is a fresh load or watchlist switch.
-			// Compare against lastLoadedWatchlistId (set AFTER successful load) to correctly
-			// detect a watchlist switch — session.value.watchlistId is already the new ID.
 			if (watchlist?.filters) {
 				const isFirstLoad: boolean = lastLoadedWatchlistId === null;
 				const isWatchlistSwitch: boolean =
@@ -202,7 +194,6 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 						onlyCritical: watchlist.filters.onlyCritical ?? false,
 						sortBySeverity: watchlist.filters.sortBySeverity ?? false,
 						groupedView: watchlist.filters.groupedView ?? false,
-						// Clear custom times when loading watchlist defaults
 						customStartTime: '',
 						customEndTime: ''
 					});
@@ -237,15 +228,13 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 
 			const data: MonitorResponse = await getMonitor(request);
 
-			// Discard stale response if a newer request has been fired
 			if (requestId !== loadMonitorRequestId) return;
 
 			monitorData = data;
 			lastUpdated = new Date();
 
-			// Setup auto-refresh if live mode
 			autoRefresh.stop();
-			if (monitorData.live && (filters.timeRange !== 'custom' || currentZoomLevel > 0)) {
+			if (monitorData.live && (filters.timeRange !== 'custom' || zoom.currentZoomLevel > 0)) {
 				autoRefresh.start();
 			}
 		} catch (err: unknown) {
@@ -264,11 +253,9 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 	async function initializePage(): Promise<void> {
 		loading = true;
 		
-		// Try query params first, then use session storage (already loaded)
 		const queryParams = parseMonitorQueryParams(new URL(window.location.href));
 		
 		if (queryParams) {
-			// Update session with query params
 			session.value = {
 				watchlistId: queryParams.watchlistId,
 				...createDefaultFilters(),
@@ -279,14 +266,12 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 			}
 			replaceState(buildMonitorRoute(), {});
 		} else {
-			// Restore tab from sessionStorage
 			const savedTab = sessionStorage.getItem(getMonitorSessionKey(orgId) + '_tab');
 			if (savedTab === 'timeline' || savedTab === 'events') {
 				activeTab = savedTab;
 			}
 		}
 
-		// If still no watchlist, try to fetch the first one
 		if (session.value.watchlistId === null) {
 			const firstId: number | null = await fetchFirstWatchlistId();
 			if (firstId) {
@@ -328,7 +313,6 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 	}
 
 	async function handleWatchlistChange(newWatchlistId: number): Promise<void> {
-		// Just update watchlistId, let loadWatchlist apply the filters
 		session.update({ watchlistId: newWatchlistId });
 		
 		loading = true;
@@ -369,78 +353,6 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 
 	function cleanup(): void {
 		autoRefresh.stop();
-	}
-
-	// ============ Zoom Methods ============
-
-	function zoomIn(duration: TimelineDuration): void {
-		if (!isAggregated || !monitorData?.bucketSize || !rangeStart || !rangeEnd) return;
-		if (currentZoomLevel >= 2) return;
-
-		const bucketInfo = BUCKET_INFO[monitorData.bucketSize];
-		if (!bucketInfo) return;
-
-		const label: string =
-			currentZoomLevel === 0
-				? `${filters.timeRange} overview`
-				: formatZoomRangeLabel(rangeStart, rangeEnd);
-
-		zoomStack = [
-			...zoomStack,
-			{
-				timeRange: filters.timeRange,
-				customStartTime: filters.customStartTime,
-				customEndTime: filters.customEndTime,
-				label
-			}
-		];
-
-		const midTime: number =
-			(new Date(duration.startTime).getTime() + new Date(duration.endTime).getTime()) / 2;
-		const halfWindowMs: number = (bucketInfo.zoomWindowHours * 60 * 60 * 1000) / 2;
-		let zoomEndMs = midTime + halfWindowMs;
-		let zoomStartMs = midTime - halfWindowMs;
-		const now = Date.now();
-		if (zoomEndMs > now) {
-			zoomStartMs -= zoomEndMs - now;
-			zoomEndMs = now;
-		}
-		const zoomStart: Date = new Date(zoomStartMs);
-		const zoomEnd: Date = new Date(zoomEndMs);
-
-		session.update({
-			timeRange: 'custom',
-			customStartTime: zoomStart.toISOString(),
-			customEndTime: zoomEnd.toISOString()
-		});
-		loadMonitorData();
-	}
-
-	function zoomOut(level: number): void {
-		if (level < 0 || level >= zoomStack.length) return;
-
-		const entry: ZoomEntry = zoomStack[level];
-		zoomStack = zoomStack.slice(0, level);
-
-		session.update({
-			timeRange: entry.timeRange,
-			customStartTime: entry.customStartTime,
-			customEndTime: entry.customEndTime
-		});
-
-		if (entry.timeRange !== 'custom') {
-			session.update({
-				customStartTime: '',
-				customEndTime: ''
-			});
-		}
-
-		loadMonitorData();
-	}
-
-	function resetZoom(): void {
-		if (zoomStack.length === 0) return;
-		zoomOut(0);
 	}
 
 	// ============ Return Service Interface ============
@@ -492,17 +404,17 @@ export function createMonitorPageService(config: MonitorPageConfig) {
 		cleanup,
 		buildWatchlistsRoute,
 
-		// Zoom state
-		get currentZoomLevel(): number { return currentZoomLevel; },
+		// Zoom state (delegated)
+		get currentZoomLevel(): number { return zoom.currentZoomLevel; },
 		get isAggregated(): boolean { return isAggregated; },
 		get bucketSizeLabel(): string | null { return bucketSizeLabel; },
-		get canZoomIn(): boolean { return canZoomIn; },
-		get zoomBreadcrumbs(): ZoomBreadcrumb[] { return zoomBreadcrumbs; },
+		get canZoomIn(): boolean { return zoom.canZoomIn; },
+		get zoomBreadcrumbs() { return zoom.zoomBreadcrumbs; },
 
-		// Zoom methods
-		zoomIn,
-		zoomOut,
-		resetZoom
+		// Zoom methods (delegated)
+		zoomIn: (duration: TimelineDuration) => zoom.zoomIn(duration),
+		zoomOut: (level: number) => zoom.zoomOut(level),
+		resetZoom: () => zoom.resetZoom()
 	};
 }
 

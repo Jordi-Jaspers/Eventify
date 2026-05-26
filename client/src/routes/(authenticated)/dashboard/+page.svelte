@@ -3,19 +3,14 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import {
-		CheckCircle2,
-		AlertTriangle,
 		Building2,
 		Bell,
-		ListChecks,
 		Activity,
 		Radio,
-		Mail,
 		Shield,
-		ChevronRight
+		Mail
 	} from '@lucide/svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
-	import { formatRelativeTime } from '$lib/utils/date';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
 	import { getUserDashboard } from '$lib/api/dashboard/UserDashboardController';
@@ -23,6 +18,7 @@
 	import { PulseIndicator } from '$lib/components/ui/pulse-indicator';
 	import { authStore } from '$lib/stores/auth';
 	import { StatCard } from '$lib/components/ui/stat-card';
+	import { WatchlistHealthSection, NotificationsSection } from '$lib/components/dashboard';
 
 	let dashboard: UserDashboardResponse | null = $state(null);
 	let loading: boolean = $state(true);
@@ -57,12 +53,6 @@
 		}
 	}
 
-	function getSeverityClass(severity: string): string {
-		return severity === 'CRITICAL'
-			? 'bg-destructive/20 text-destructive border-destructive/50'
-			: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-	}
-
 	function getOrgStatusClass(status: string): string {
 		return status === 'ACTIVE'
 			? 'bg-green-500/20 text-green-400 border-green-500/50'
@@ -82,12 +72,9 @@
 		<!-- Welcome card -->
 		<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
 			<CardContent class="py-5 flex flex-col sm:flex-row sm:items-center gap-4">
-				<!-- Avatar icon -->
 				<div class="shrink-0 w-11 h-11 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
 					<Shield class="w-5 h-5 text-primary" />
 				</div>
-
-				<!-- User info -->
 				<div class="flex-1 min-w-0">
 					<p class="text-base font-semibold">
 						Welcome back, <span class="text-primary">{$authStore.user?.firstName ?? 'there'}</span>
@@ -101,8 +88,6 @@
 						{/if}
 					</div>
 				</div>
-
-				<!-- Role + dynamic status -->
 				<div class="flex items-center gap-3 shrink-0">
 					{#if $authStore.user?.role}
 						<Badge variant="outline" class="text-xs">{$authStore.user.role}</Badge>
@@ -152,98 +137,8 @@
 		{:else}
 			<!-- Top row: Watchlist Health + Recent Notifications -->
 			<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-				<!-- Watchlist Health -->
-				<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
-					<CardHeader class="flex-row items-center justify-between space-y-0 pb-3">
-						<CardTitle class="text-lg flex items-center gap-2">
-							<ListChecks class="w-5 h-5 text-primary" />
-							Watchlist Health
-						</CardTitle>
-						<a
-							href={CLIENT_ROUTES.MONITOR_PAGE.path}
-							class="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-						>
-							View all <ChevronRight class="w-3 h-3" />
-						</a>
-					</CardHeader>
-					<CardContent>
-						{#if watchlistHealth.length === 0}
-							<div class="flex items-center gap-3 py-4 text-green-400">
-								<CheckCircle2 class="w-5 h-5 shrink-0" />
-								<span class="text-sm font-medium">All watchlists are healthy</span>
-							</div>
-						{:else}
-							<ul class="space-y-2">
-								{#each watchlistHealth as item (item.id)}
-									<li class="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border/50">
-										<div class="flex items-center gap-2 min-w-0">
-											<AlertTriangle class="w-4 h-4 shrink-0 {item.severity === 'CRITICAL' ? 'text-destructive' : 'text-yellow-400'}" />
-											<span class="text-sm font-medium truncate">{item.name}</span>
-										</div>
-										<div class="flex items-center gap-2 shrink-0 ml-2">
-											<span class="text-xs text-muted-foreground">{item.channelsInAlert} ch</span>
-											<Badge class="text-xs border {getSeverityClass(item.severity)}">
-												{item.severity}
-											</Badge>
-										</div>
-									</li>
-								{/each}
-							</ul>
-						{/if}
-					</CardContent>
-				</Card>
-
-				<!-- Recent Notifications -->
-				<Card class="border-border/50 bg-card/50 backdrop-blur-xl shadow-lg">
-					<CardHeader class="flex-row items-center justify-between space-y-0 pb-3">
-						<CardTitle class="text-lg flex items-center gap-2">
-							<Bell class="w-5 h-5 text-primary" />
-							Recent Notifications
-							{#if notifCount > 0}
-								<span class="text-sm font-normal text-muted-foreground">({notifCount})</span>
-							{/if}
-						</CardTitle>
-					</CardHeader>
-					<CardContent>
-						{#if recentNotifications.length === 0}
-							<div class="py-4 text-center text-sm text-muted-foreground">
-								No recent activity in the last 24h
-							</div>
-						{:else}
-							<ul class="space-y-2">
-								{#each recentNotifications as notif (notif.id)}
-									<li>
-										<button
-											onclick={() => handleNotificationClick(notif)}
-											class="w-full text-left p-3 rounded-lg bg-background/50 border border-border/50 hover:bg-muted/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background {notif.actionUrl ? 'cursor-pointer' : 'cursor-default'}"
-											aria-label={notif.title}
-										>
-											<div class="flex items-start justify-between gap-2">
-												<div class="min-w-0 flex-1">
-													<div class="flex items-center gap-2">
-														{#if notif.urgent}
-															<PulseIndicator variant="red" size="sm" />
-														{/if}
-														<span class="text-sm font-medium truncate">{notif.title}</span>
-													</div>
-													<p class="text-xs text-muted-foreground mt-0.5 line-clamp-1">{notif.message}</p>
-												</div>
-												<div class="flex flex-col items-end gap-1 shrink-0">
-													<Badge variant="outline" class="text-xs">{notif.category}</Badge>
-													<span class="text-xs text-muted-foreground">{formatRelativeTime(notif.createdAt)}</span>
-												</div>
-												{#if notif.actionUrl}
-													<ChevronRight class="w-4 h-4 text-muted-foreground shrink-0 self-center" />
-												{/if}
-											</div>
-										</button>
-									</li>
-								{/each}
-							</ul>
-						{/if}
-					</CardContent>
-				</Card>
+				<WatchlistHealthSection {watchlistHealth} />
+				<NotificationsSection {recentNotifications} onNotificationClick={handleNotificationClick} />
 			</div>
 
 			<!-- Organizations Grid -->

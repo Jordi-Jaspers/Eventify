@@ -1,17 +1,16 @@
 <script lang="ts">
-	import { Calendar as CalendarIcon, Clock } from '@lucide/svelte';
+	import { Calendar as CalendarIcon } from '@lucide/svelte';
 	import { Calendar } from '$lib/components/ui/calendar';
 	import * as Popover from '$lib/components/ui/popover';
 	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import {
 		CalendarDate,
 		CalendarDateTime,
 		getLocalTimeZone,
-		today,
 		type DateValue
 	} from '@internationalized/date';
+	import TimeInputSection from './TimeInputSection.svelte';
 
 	interface Props {
 		/** ISO string value */
@@ -50,7 +49,6 @@
 
 	let open: boolean = $state(false);
 
-	// Parse ISO string to CalendarDate for the calendar
 	const calendarValue: CalendarDate | undefined = $derived.by(() => {
 		if (!value) return undefined;
 		try {
@@ -62,7 +60,6 @@
 		}
 	});
 
-	// Extract time from ISO string
 	const timeValue: string = $derived.by(() => {
 		if (!value) return '';
 		try {
@@ -76,7 +73,6 @@
 		}
 	});
 
-	// Format display value
 	const displayValue: string = $derived.by(() => {
 		if (!value) return '';
 		try {
@@ -112,7 +108,6 @@
 			return;
 		}
 
-		// Preserve existing time or use current time
 		let hours: number = 0;
 		let minutes: number = 0;
 
@@ -123,7 +118,6 @@
 				minutes = existingDate.getMinutes();
 			}
 		} else {
-			// Default to current time if no existing value
 			const now: Date = new Date();
 			hours = now.getHours();
 			minutes = now.getMinutes();
@@ -146,7 +140,6 @@
 
 		if (isNaN(hours) || isNaN(minutes)) return;
 
-		// Use existing date or today
 		let year: number, month: number, day: number;
 
 		if (calendarValue) {
@@ -209,7 +202,6 @@
 			align="start"
 			sideOffset={4}
 		>
-			<!-- Calendar -->
 			<div class="p-3 border-b border-border/30">
 				<Calendar
 					type="single"
@@ -221,35 +213,18 @@
 				/>
 			</div>
 
-		<!-- Time Input -->
-		{#if !dateOnly}
-		<div class="p-3 border-b border-border/30">
-			<div class="flex items-center gap-2">
-				<Clock class="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-				<Label for="{id}-time" class="text-xs font-medium text-muted-foreground shrink-0"
-					>Time</Label
-				>
-				<Input
-					id="{id}-time"
-					type="time"
-					value={timeValue}
-					onchange={handleTimeChange}
-					lang="en-GB"
-					class="flex-1 h-8 text-xs bg-background/50 border-border/30 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 [&::-webkit-calendar-picker-indicator]:hidden"
-				/>
-			</div>
-		</div>
-		{/if}
+			{#if !dateOnly}
+				<TimeInputSection {id} {timeValue} onTimeChange={handleTimeChange} />
+			{/if}
 
-			<!-- Quick Actions -->
 			<div class="p-2 flex items-center justify-between gap-2 bg-muted/5">
 				<Button
 					variant="ghost"
 					size="sm"
-				onclick={handleNow}
-				class="h-7 text-xs text-muted-foreground hover:text-foreground"
-			>
-				{dateOnly ? 'Today' : 'Now'}
+					onclick={handleNow}
+					class="h-7 text-xs text-muted-foreground hover:text-foreground"
+				>
+					{dateOnly ? 'Today' : 'Now'}
 				</Button>
 				<div class="flex items-center gap-1">
 					{#if value}

@@ -7,7 +7,7 @@
 	import type { OrganizationMembershipResponse, OrganizationalRole, SortablePageInput, PageResource } from '$lib/api/models';
 	import { currentUser } from '$lib/stores/auth';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
-	import type { DataTableColumn, DataTableService } from '$lib/components/data-table/types';
+	import type { DataTableService } from '$lib/components/data-table/types';
 	import { getInitials } from '$lib/utils/string';
 	import { formatRelativeDate } from '$lib/utils/date';
 	import { InitialsAvatar } from '$lib/components/ui/initials-avatar';
@@ -21,6 +21,7 @@
 	} from '$lib/components/members';
 	import { searchCurrentMembers } from '$lib/api/organization/OrganizationMembershipController';
 	import { createMemberManagementService } from '$lib/api/organization/service/MemberManagementService.svelte';
+	import { memberTableColumns } from '$lib/config/member-table-columns';
 
 	// Reactive orgId from route params
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
@@ -50,49 +51,7 @@
 	});
 
 	// Columns configuration
-	const columns: DataTableColumn<OrganizationMembershipResponse>[] = [
-		{
-			key: 'search',
-			label: 'Search',
-			filterable: true,
-			filterType: 'FUZZY_TEXT',
-			filterPlaceholder: 'Search members...',
-			colSpan: 0
-		},
-		{
-			key: 'member',
-			label: 'Member',
-			colSpan: 4
-		},
-		{
-			key: 'email',
-			label: 'Email',
-			sortable: true,
-			colSpan: 3
-		},
-		{
-			key: 'role',
-			label: 'Role',
-			sortable: true,
-			filterable: true,
-			filterType: 'MULTI_ENUM',
-			filterOptions: [
-				{ value: 'OWNER', label: 'Owner' },
-				{ value: 'ADMIN', label: 'Admin' },
-				{ value: 'MEMBER', label: 'Member' }
-			],
-			colSpan: 2
-		},
-		{
-			key: 'joinedAt',
-			label: 'Joined',
-			sortable: true,
-			colSpan: 2
-		},
-		{
-			key: 'actions'
-		}
-	];
+	const columns = memberTableColumns;
 
 	// Derived permissions
 	const currentUserRole: OrganizationalRole | null = $derived.by(() => {

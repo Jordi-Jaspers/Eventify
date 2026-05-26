@@ -2,17 +2,9 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Label } from '$lib/components/ui/label';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import {
-		UserPlus,
-		Shield,
-		Search,
-		X,
-		User as UserIcon,
-		LoaderCircle,
-		Crown
-	} from '@lucide/svelte';
+	import { UserPlus, Search, X, User as UserIcon, LoaderCircle } from '@lucide/svelte';
 	import type { OrganizationalRole, UserResponse } from '$lib/api/models';
+	import { MemberRoleSelector } from '$lib/components/members';
 
 	interface Props {
 		open: boolean;
@@ -56,16 +48,6 @@
 		debouncedQueryLength
 	}: Props = $props();
 
-	// OWNER button is disabled if org already has an owner OR user is not a global admin
-	const ownerButtonDisabled: boolean = $derived(hasOwner || !isGlobalAdmin);
-	const ownerButtonTooltip: string = $derived(
-		hasOwner
-			? 'This organization already has an owner'
-			: !isGlobalAdmin
-				? 'Only global admins can assign owners'
-				: ''
-	);
-
 	function handleSearchInput(event: Event): void {
 		const target = event.target as HTMLInputElement;
 		onSearchQueryChange(target.value);
@@ -90,84 +72,18 @@
 
 		<div class="flex-1 space-y-4 py-6">
 			<!-- Role Selector -->
-			<div class="space-y-2">
-				<Label>Role</Label>
-				<div class="flex gap-2">
-					{#if ownerButtonDisabled}
-						<Tooltip.Provider>
-							<Tooltip.Root>
-								<Tooltip.Trigger>
-									{#snippet child({ props })}
-										<Button
-											{...props}
-											variant="outline"
-											size="sm"
-											disabled={true}
-											class="bg-background/50 border-border/50 opacity-50 cursor-not-allowed"
-										>
-											<Crown class="mr-2 h-4 w-4" />
-											OWNER
-										</Button>
-									{/snippet}
-								</Tooltip.Trigger>
-								<Tooltip.Content>
-									<p>{ownerButtonTooltip}</p>
-								</Tooltip.Content>
-							</Tooltip.Root>
-						</Tooltip.Provider>
-				{:else}
-					<Button
-						variant={selectedRole === 'OWNER' ? 'default' : 'outline'}
-						size="sm"
-						onclick={() => onRoleChange('OWNER')}
-						disabled={adding}
-						class={selectedRole !== 'OWNER' ? 'bg-background/50 border-border/50' : ''}
-					>
-						<Crown class="mr-2 h-4 w-4" />
-						OWNER
-					</Button>
-				{/if}
-				<Button
-					variant={selectedRole === 'ADMIN' ? 'default' : 'outline'}
-					size="sm"
-					onclick={() => onRoleChange('ADMIN')}
-					disabled={adding}
-					class={selectedRole !== 'ADMIN' ? 'bg-background/50 border-border/50' : ''}
-				>
-					<Shield class="mr-2 h-4 w-4" />
-					ADMIN
-				</Button>
-				<Button
-					variant={selectedRole === 'MEMBER' ? 'default' : 'outline'}
-					size="sm"
-					onclick={() => onRoleChange('MEMBER')}
-					disabled={adding}
-					class={selectedRole !== 'MEMBER' ? 'bg-background/50 border-border/50' : ''}
-				>
-					<UserIcon class="mr-2 h-4 w-4" />
-					MEMBER
-				</Button>
-				</div>
-			</div>
+			<MemberRoleSelector {selectedRole} {adding} {hasOwner} {isGlobalAdmin} onRoleChange={onRoleChange} />
 
 			<!-- User Search -->
 			<div class="space-y-2">
 				<Label for="user-search">User</Label>
 				{#if selectedUser}
-					<!-- Selected User Display -->
-					<div
-						class="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur-sm"
-					>
-						<div
-							class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20"
-						>
+					<div class="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur-sm">
+						<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
 							<UserIcon class="h-5 w-5 text-primary" />
 						</div>
 						<div class="flex-1 min-w-0">
-							<p class="text-sm font-medium truncate">
-								{selectedUser.firstName}
-								{selectedUser.lastName}
-							</p>
+							<p class="text-sm font-medium truncate">{selectedUser.firstName} {selectedUser.lastName}</p>
 							<p class="text-xs text-muted-foreground truncate">{selectedUser.email}</p>
 						</div>
 						<Button
@@ -182,11 +98,8 @@
 						</Button>
 					</div>
 				{:else}
-					<!-- Search Input -->
 					<div class="relative">
-						<Search
-							class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-						/>
+						<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 						<input
 							type="text"
 							value={searchQuery}
@@ -197,9 +110,7 @@
 							class="flex h-9 w-full rounded-md border border-border/50 bg-background/50 px-3 py-1 pl-9 pr-10 text-sm shadow-sm transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
 						/>
 						{#if searching}
-							<LoaderCircle
-								class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary"
-							/>
+							<LoaderCircle class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary" />
 						{:else if searchQuery.length > 0}
 							<button
 								type="button"
@@ -212,11 +123,8 @@
 						{/if}
 					</div>
 
-					<!-- Search Dropdown -->
 					{#if showSearchDropdown}
-						<div
-							class="rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden"
-						>
+						<div class="rounded-lg border border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden">
 							{#if searchQuery.length > 0 && searchQuery.length < 3}
 								<div class="p-4 text-center">
 									<p class="text-sm text-muted-foreground">Type at least 3 characters to search</p>
@@ -239,16 +147,11 @@
 											onclick={() => onSelectUser(user)}
 											class="w-full p-3 flex items-center gap-3 hover:bg-accent/10 transition-colors border-b border-border/30 last:border-0"
 										>
-											<div
-												class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 flex-shrink-0"
-											>
+											<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 flex-shrink-0">
 												<UserIcon class="h-5 w-5 text-primary" />
 											</div>
 											<div class="flex-1 min-w-0 text-left">
-												<p class="text-sm font-medium truncate">
-													{user.firstName}
-													{user.lastName}
-												</p>
+												<p class="text-sm font-medium truncate">{user.firstName} {user.lastName}</p>
 												<p class="text-xs text-muted-foreground truncate">{user.email}</p>
 											</div>
 										</button>
@@ -270,11 +173,7 @@
 			>
 				Cancel
 			</Button>
-			<Button
-				onclick={onSubmit}
-				disabled={adding || !selectedUser}
-				class="flex-1"
-			>
+			<Button onclick={onSubmit} disabled={adding || !selectedUser} class="flex-1">
 				{#if adding}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 					Adding...
