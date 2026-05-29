@@ -1564,10 +1564,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get organization event timeline (Owner/Admin only) */
-        get: operations["getTimeline"];
+        get?: never;
         put?: never;
-        post?: never;
+        /** Get organization event timeline (Owner/Admin only) */
+        post: operations["postTimeline"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1581,10 +1581,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get organization event summary (Owner/Admin only) */
-        get: operations["getSummary"];
+        get?: never;
         put?: never;
-        post?: never;
+        /** Get organization event summary (Owner/Admin only) */
+        post: operations["postSummary"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3303,6 +3303,26 @@ export interface components {
         };
         /** @description Admin stats request — use either days or startDate+endDate, not both */
         AdminStatsRequest: {
+            /**
+             * Format: int32
+             * @description Number of days to look back (1–365)
+             * @example 30
+             */
+            days?: number;
+            /**
+             * Format: date
+             * @description Start date of explicit range (inclusive)
+             * @example 2024-01-01
+             */
+            startDate?: string;
+            /**
+             * Format: date
+             * @description End date of explicit range (inclusive, must not be in future)
+             * @example 2024-01-31
+             */
+            endDate?: string;
+        };
+        OrgStatsRequest: {
             /**
              * Format: int32
              * @description Number of days to look back (1–365)
@@ -14031,6 +14051,108 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
+            };
+        };
+    };
+    postTimeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgStatsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgTimelineResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["ErrorResponseResource"] };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["ErrorResponseResource"] };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["ErrorResponseResource"] };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["RateLimitErrorResponseResource"] };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["ErrorResponseResource"] };
+            };
+        };
+    };
+    postSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgStatsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgSummaryResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["ErrorResponseResource"] };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["ErrorResponseResource"] };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["ErrorResponseResource"] };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["RateLimitErrorResponseResource"] };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: { [name: string]: unknown };
+                content: { "application/json": components["schemas"]["ErrorResponseResource"] };
             };
         };
     };

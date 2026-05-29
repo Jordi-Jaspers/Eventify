@@ -1,11 +1,11 @@
 package io.github.eventify.api.admin.stats.controller;
 
-import io.github.eventify.api.admin.stats.model.request.AdminStatsRequest;
 import io.github.eventify.api.admin.stats.model.response.AdminEventStatsResponse;
 import io.github.eventify.api.admin.stats.model.response.AdminEventVolumeResponse;
 import io.github.eventify.api.admin.stats.model.response.AdminGrowthResponse;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.model.request.StatsRequest;
 import io.github.eventify.support.IntegrationTest;
 
 import java.time.LocalDate;
@@ -39,7 +39,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getGrowthWithDaysModeSuccess() throws Exception {
         // Given: an authenticated admin user with a days-only request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest().setDays(30);
+        final StatsRequest request = new StatsRequest().setDays(30);
 
         // When: posting to growth endpoint
         final MockHttpServletRequestBuilder req = post(ADMIN_STATS_GROWTH_PATH)
@@ -67,7 +67,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getGrowthWithExplicitDateRangeSuccess() throws Exception {
         // Given: an authenticated admin user with a date range request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 1, 1))
             .setEndDate(LocalDate.of(2024, 1, 31));
 
@@ -96,7 +96,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
         // Given: an authenticated admin user with same-day range
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
         final LocalDate sameDay = LocalDate.of(2024, 6, 15);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(sameDay)
             .setEndDate(sameDay);
 
@@ -123,7 +123,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getGrowthWithFarPastStartDateSuccess() throws Exception {
         // Given: an authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2000, 1, 1))
             .setEndDate(LocalDate.of(2000, 1, 7));
 
@@ -146,7 +146,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getGrowthWithBothModesShouldReturn400() throws Exception {
         // Given: a request with both days and date range set
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setDays(7)
             .setStartDate(LocalDate.of(2024, 1, 1))
             .setEndDate(LocalDate.of(2024, 1, 31));
@@ -168,7 +168,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getGrowthWithNoModeShouldReturn400() throws Exception {
         // Given: an empty request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest();
+        final StatsRequest request = new StatsRequest();
 
         // When: posting to growth endpoint
         final MockHttpServletRequestBuilder req = post(ADMIN_STATS_GROWTH_PATH)
@@ -187,7 +187,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getGrowthWithOnlyStartDateShouldReturn400() throws Exception {
         // Given: request with only startDate
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 1, 1));
 
         // When: posting to growth endpoint
@@ -207,7 +207,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getGrowthWithOnlyEndDateShouldReturn400() throws Exception {
         // Given: request with only endDate
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setEndDate(LocalDate.of(2024, 1, 31));
 
         // When: posting to growth endpoint
@@ -227,7 +227,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getGrowthWithStartDateAfterEndDateShouldReturn400() throws Exception {
         // Given: inverted date range
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 1, 31))
             .setEndDate(LocalDate.of(2024, 1, 1));
 
@@ -248,7 +248,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getGrowthWithFutureEndDateShouldReturn400() throws Exception {
         // Given: future endDate
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 1, 1))
             .setEndDate(LocalDate.of(2099, 12, 31));
 
@@ -271,7 +271,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventVolumeWithDaysModeSuccess() throws Exception {
         // Given: an authenticated admin user with days request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest().setDays(30);
+        final StatsRequest request = new StatsRequest().setDays(30);
 
         // When: posting to event-volume endpoint
         final MockHttpServletRequestBuilder req = post(ADMIN_STATS_EVENT_VOLUME_PATH)
@@ -298,7 +298,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventVolumeWithExplicitDateRangeSuccess() throws Exception {
         // Given: an authenticated admin user with a date range request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 3, 1))
             .setEndDate(LocalDate.of(2024, 3, 7));
 
@@ -328,7 +328,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventVolumeWithBothModesShouldReturn400() throws Exception {
         // Given: request with both modes
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setDays(7)
             .setStartDate(LocalDate.of(2024, 1, 1))
             .setEndDate(LocalDate.of(2024, 1, 31));
@@ -350,7 +350,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventVolumeWithNoModeShouldReturn400() throws Exception {
         // Given: empty request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest();
+        final StatsRequest request = new StatsRequest();
 
         // When: posting to event-volume endpoint
         final MockHttpServletRequestBuilder req = post(ADMIN_STATS_EVENT_VOLUME_PATH)
@@ -369,7 +369,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventVolumeWithOnlyStartDateShouldReturn400() throws Exception {
         // Given: request with only startDate
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 1, 1));
 
         // When: posting to event-volume endpoint
@@ -389,7 +389,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventVolumeWithOnlyEndDateShouldReturn400() throws Exception {
         // Given: request with only endDate
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setEndDate(LocalDate.of(2024, 1, 31));
 
         // When: posting to event-volume endpoint
@@ -409,7 +409,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventVolumeWithStartDateAfterEndDateShouldReturn400() throws Exception {
         // Given: inverted date range
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 6, 30))
             .setEndDate(LocalDate.of(2024, 6, 1));
 
@@ -430,7 +430,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventVolumeWithFutureEndDateShouldReturn400() throws Exception {
         // Given: future endDate
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 1, 1))
             .setEndDate(LocalDate.of(2099, 12, 31));
 
@@ -453,7 +453,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventStatsWithDaysModeSuccess() throws Exception {
         // Given: an authenticated admin user with days request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest().setDays(30);
+        final StatsRequest request = new StatsRequest().setDays(30);
 
         // When: posting to event-stats endpoint
         final MockHttpServletRequestBuilder req = post(ADMIN_STATS_EVENTS_PATH)
@@ -480,7 +480,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventStatsWithExplicitDateRangeSuccess() throws Exception {
         // Given: an authenticated admin user with a date range request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 2, 1))
             .setEndDate(LocalDate.of(2024, 2, 29));
 
@@ -509,7 +509,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventStatsWithBothModesShouldReturn400() throws Exception {
         // Given: request with both modes
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setDays(7)
             .setStartDate(LocalDate.of(2024, 1, 1))
             .setEndDate(LocalDate.of(2024, 1, 31));
@@ -531,7 +531,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventStatsWithNoModeShouldReturn400() throws Exception {
         // Given: empty request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest();
+        final StatsRequest request = new StatsRequest();
 
         // When: posting to event-stats endpoint
         final MockHttpServletRequestBuilder req = post(ADMIN_STATS_EVENTS_PATH)
@@ -550,7 +550,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventStatsWithOnlyStartDateShouldReturn400() throws Exception {
         // Given: request with only startDate
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 1, 1));
 
         // When: posting to event-stats endpoint
@@ -570,7 +570,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventStatsWithOnlyEndDateShouldReturn400() throws Exception {
         // Given: request with only endDate
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setEndDate(LocalDate.of(2024, 1, 31));
 
         // When: posting to event-stats endpoint
@@ -590,7 +590,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventStatsWithStartDateAfterEndDateShouldReturn400() throws Exception {
         // Given: inverted date range
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 12, 31))
             .setEndDate(LocalDate.of(2024, 1, 1));
 
@@ -611,7 +611,7 @@ public class AdminDashboardControllerDateRangeTest extends IntegrationTest {
     public void getEventStatsWithFutureEndDateShouldReturn400() throws Exception {
         // Given: future endDate
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest request = new AdminStatsRequest()
+        final StatsRequest request = new StatsRequest()
             .setStartDate(LocalDate.of(2024, 1, 1))
             .setEndDate(LocalDate.of(2099, 1, 1));
 

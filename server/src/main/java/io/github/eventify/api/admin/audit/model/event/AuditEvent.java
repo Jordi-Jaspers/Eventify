@@ -1,4 +1,4 @@
-package io.github.eventify.common.audit.event;
+package io.github.eventify.api.admin.audit.model.event;
 
 import io.github.eventify.api.user.model.User;
 import lombok.Getter;

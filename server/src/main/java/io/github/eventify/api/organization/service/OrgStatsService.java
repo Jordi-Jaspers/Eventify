@@ -12,6 +12,7 @@ import io.github.eventify.api.organization.model.OrgTimelineBucketData;
 import io.github.eventify.api.organization.model.OrgTopKey;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -44,6 +45,14 @@ public class OrgStatsService {
         return fetchTimeline(orgId, days);
     }
 
+    /** Returns org event timeline for the given org and explicit date range (uncached). */
+    @Transactional(readOnly = true)
+    public OrgTimeline getTimeline(final Long orgId, final LocalDate startDate, final LocalDate endDate) {
+        final int days = (int) (endDate.toEpochDay() - startDate.toEpochDay()) + 1;
+        final LocalDateTime since = startDate.atStartOfDay();
+        return fetchTimelineForRange(orgId, since, days);
+    }
+
     /** Returns org event summary for the given org and time window. */
     @Cacheable(
         value = "orgSummary",
@@ -52,22 +61,16 @@ public class OrgStatsService {
     @Transactional(readOnly = true)
     public OrgSummary getSummary(final Long orgId, final int days) {
         final OrgTimeline orgTimeline = fetchTimeline(orgId, days);
-        final List<OrgTimelineBucketData> timeline = orgTimeline.getTimeline();
-        final List<OrgErrorRateBucket> errorTimeline = orgTimeline.getErrorTimeline();
-        final long totalChannels = eventTimelineRepository.countOrgChannels(orgId);
+        return buildSummary(orgId, orgTimeline, days);
+    }
 
-        final long totalEvents = timeline.stream().mapToLong(OrgTimelineBucketData::getEventCount).sum();
-        final long avgDailyVolume = days > 0 ? totalEvents / days : 0L;
-
-        final double avgErrorRate = errorTimeline.isEmpty() ? 0.0
-            : errorTimeline.stream().mapToDouble(OrgErrorRateBucket::getErrorRate).average().orElse(0.0);
-        final double currentErrorRate = totalEvents > 0 ? avgErrorRate : 0.0;
-
-        return new OrgSummary()
-            .setTotalEvents(totalEvents)
-            .setAvgDailyVolume(avgDailyVolume)
-            .setCurrentErrorRate(currentErrorRate)
-            .setTotalChannels(totalChannels);
+    /** Returns org event summary for the given org and explicit date range (uncached). */
+    @Transactional(readOnly = true)
+    public OrgSummary getSummary(final Long orgId, final LocalDate startDate, final LocalDate endDate) {
+        final int days = (int) (endDate.toEpochDay() - startDate.toEpochDay()) + 1;
+        final LocalDateTime since = startDate.atStartOfDay();
+        final OrgTimeline orgTimeline = fetchTimelineForRange(orgId, since, days);
+        return buildSummary(orgId, orgTimeline, days);
     }
 
     /** Returns org API key statistics. */
@@ -82,6 +85,10 @@ public class OrgStatsService {
 
     private OrgTimeline fetchTimeline(final Long orgId, final int days) {
         final LocalDateTime since = LocalDateTime.now().minusDays(days);
+        return fetchTimelineForRange(orgId, since, days);
+    }
+
+    private OrgTimeline fetchTimelineForRange(final Long orgId, final LocalDateTime since, final int days) {
         final String interval = resolveInterval(days);
 
         final List<OrgTimelineBucketData> timeline = eventTimelineRepository.findOrgTimeline(orgId, since, interval)
@@ -104,6 +111,25 @@ public class OrgStatsService {
             return "1 hour";
         }
         return days <= SIX_HOUR_BUCKET_MAX_DAYS ? "6 hours" : "1 day";
+    }
+
+    private OrgSummary buildSummary(final Long orgId, final OrgTimeline orgTimeline, final int days) {
+        final List<OrgTimelineBucketData> timeline = orgTimeline.getTimeline();
+        final List<OrgErrorRateBucket> errorTimeline = orgTimeline.getErrorTimeline();
+        final long totalChannels = eventTimelineRepository.countOrgChannels(orgId);
+
+        final long totalEvents = timeline.stream().mapToLong(OrgTimelineBucketData::getEventCount).sum();
+        final long avgDailyVolume = days > 0 ? totalEvents / days : 0L;
+
+        final double avgErrorRate = errorTimeline.isEmpty() ? 0.0
+            : errorTimeline.stream().mapToDouble(OrgErrorRateBucket::getErrorRate).average().orElse(0.0);
+        final double currentErrorRate = totalEvents > 0 ? avgErrorRate : 0.0;
+
+        return new OrgSummary()
+            .setTotalEvents(totalEvents)
+            .setAvgDailyVolume(avgDailyVolume)
+            .setCurrentErrorRate(currentErrorRate)
+            .setTotalChannels(totalChannels);
     }
 
     private OrgApiKeyStatistics buildApiKeyStats(final Long orgId) {

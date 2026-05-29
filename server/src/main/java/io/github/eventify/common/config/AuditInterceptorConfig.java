@@ -1,6 +1,6 @@
-package io.github.eventify.common.audit.config;
+package io.github.eventify.common.config;
 
-import io.github.eventify.common.audit.interceptor.AdminAuditInterceptor;
+import io.github.eventify.api.admin.audit.model.interceptor.AdminAuditInterceptor;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.ApplicationEventPublisher;

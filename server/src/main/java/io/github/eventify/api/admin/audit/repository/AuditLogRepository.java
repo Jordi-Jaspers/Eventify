@@ -1,8 +1,8 @@
-package io.github.eventify.common.audit.repository;
+package io.github.eventify.api.admin.audit.repository;
 
+import io.github.eventify.api.admin.audit.model.AuditLog;
 import io.github.eventify.api.admin.audit.model.response.AuditLogStatsProjection;
 import io.github.eventify.api.admin.audit.model.response.HourlyBucketProjection;
-import io.github.eventify.common.audit.model.AuditLog;
 
 import java.time.OffsetDateTime;
 import java.util.List;

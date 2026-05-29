@@ -1,4 +1,4 @@
-package io.github.eventify.api.admin.stats.model.request;
+package io.github.eventify.common.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -8,13 +8,13 @@ import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 
-/** Request body for admin stats endpoints. Exactly one mode must be set: days OR (startDate + endDate). */
+/** Shared stats request — use either days or startDate+endDate, not both. */
 @Getter
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-@Schema(description = "Admin stats request — use either days or startDate+endDate, not both")
-public class AdminStatsRequest {
+@Schema(description = "Stats request — use either days or startDate+endDate, not both")
+public class StatsRequest {
 
     @Schema(
         description = "Number of days to look back (1–365)",

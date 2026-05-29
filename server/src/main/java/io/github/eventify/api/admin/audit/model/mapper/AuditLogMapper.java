@@ -1,7 +1,7 @@
 package io.github.eventify.api.admin.audit.model.mapper;
 
+import io.github.eventify.api.admin.audit.model.AuditLog;
 import io.github.eventify.api.admin.audit.model.response.AuditLogResponse;
-import io.github.eventify.common.audit.model.AuditLog;
 import io.github.jframe.datasource.search.model.mapper.PageMapper;
 import io.github.jframe.util.mapper.DateTimeMapper;
 import io.github.jframe.util.mapper.config.SharedMapperConfig;

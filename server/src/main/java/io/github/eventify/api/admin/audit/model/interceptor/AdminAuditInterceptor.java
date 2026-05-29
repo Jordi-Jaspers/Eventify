@@ -1,7 +1,7 @@
-package io.github.eventify.common.audit.interceptor;
+package io.github.eventify.api.admin.audit.model.interceptor;
 
+import io.github.eventify.api.admin.audit.model.event.AuditEvent;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.common.audit.event.AuditEvent;
 import io.github.eventify.common.security.SecurityUtil;
 import io.github.eventify.common.util.DeviceInfoExtractor;
 import lombok.RequiredArgsConstructor;

@@ -14,11 +14,10 @@
 		getOrganizationSummary,
 		getOrganizationApiKeyStats
 	} from '$lib/api/organization/OrganizationStatisticsController';
-	import type { OrgTimelineResponse, OrgSummaryResponse, OrgApiKeyStatsResponse } from '$lib/api/models';
+	import type { OrgStatsRequest, OrgTimelineResponse, OrgSummaryResponse, OrgApiKeyStatsResponse } from '$lib/api/models';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
 	import { formatChartXAxis, formatChartTooltipDate } from '$lib/utils/chart-date-format';
-	import { computeDaysFromRange } from '$lib/utils/time-range';
 	import {
 		buildThroughputChartData,
 		buildErrorChartData,
@@ -63,8 +62,11 @@
 
 	const daysNum: number = $derived(Number(selectedDays));
 
-	function computeDays(): number {
-		return computeDaysFromRange(Number(selectedDays), isCustomRange, customStart, customEnd);
+	function buildStatsRequest(): OrgStatsRequest {
+		if (isCustomRange && customStart && customEnd) {
+			return { startDate: customStart, endDate: customEnd };
+		}
+		return { days: Number(selectedDays) };
 	}
 
 	function formatXAxis(v: unknown): string {
@@ -78,7 +80,7 @@
 	async function loadTimeline(): Promise<void> {
 		timelineLoading = true;
 		try {
-			timeline = await getOrganizationTimeline(orgId, computeDays());
+			timeline = await getOrganizationTimeline(orgId, buildStatsRequest());
 		} catch (err: unknown) {
 			const { message } = handleError(err, 'Failed to load timeline');
 			toast.error(message);
@@ -90,7 +92,7 @@
 	async function loadSummary(): Promise<void> {
 		summaryLoading = true;
 		try {
-			summary = await getOrganizationSummary(orgId, computeDays());
+			summary = await getOrganizationSummary(orgId, buildStatsRequest());
 		} catch (err: unknown) {
 			const { message } = handleError(err, 'Failed to load summary');
 			toast.error(message);

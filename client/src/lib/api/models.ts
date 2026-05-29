@@ -143,6 +143,7 @@ export type AuditLogResponse = components['schemas']['AuditLogResponse'];
 export type AuditLogStatsResponse = components['schemas']['AuditLogStatsResponse'];
 
 // ================ Organization Statistics ===================
+export type OrgStatsRequest = components['schemas']['OrgStatsRequest'];
 export type OrgTimelineResponse = components['schemas']['OrgTimelineResponse'];
 export type OrgSummaryResponse = components['schemas']['OrgSummaryResponse'];
 export type OrgTimelineBucketResponse = components['schemas']['OrgTimelineBucketResponse'];

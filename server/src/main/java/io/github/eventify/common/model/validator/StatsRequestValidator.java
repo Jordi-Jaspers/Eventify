@@ -1,6 +1,6 @@
-package io.github.eventify.api.admin.stats.model.validator;
+package io.github.eventify.common.model.validator;
 
-import io.github.eventify.api.admin.stats.model.request.AdminStatsRequest;
+import io.github.eventify.common.model.request.StatsRequest;
 import io.github.jframe.exception.core.ValidationException;
 import io.github.jframe.validation.ValidationResult;
 
@@ -8,9 +8,9 @@ import java.time.LocalDate;
 
 import org.springframework.stereotype.Component;
 
-/** Validates admin stats query parameters. */
+/** Validates stats request — mutual exclusivity of days vs date range. */
 @Component
-public class AdminStatsValidator {
+public class StatsRequestValidator {
 
     public static final String INVALID_DAYS = "days must be between 1 and 365";
     public static final String DATE_RANGE_PARTIAL = "Both startDate and endDate must be provided together";
@@ -20,10 +20,10 @@ public class AdminStatsValidator {
     public static final String NO_MODE = "Either days or startDate+endDate must be provided";
 
     /**
-     * Validates an AdminStatsRequest — exactly one mode must be present:
+     * Validates a StatsRequest — exactly one mode must be present:
      * either days OR (startDate + endDate).
      */
-    public void validateAndThrow(final AdminStatsRequest request) {
+    public void validateAndThrow(final StatsRequest request) {
         final boolean hasDays = request.getDays() != null;
         final boolean hasStart = request.getStartDate() != null;
         final boolean hasEnd = request.getEndDate() != null;

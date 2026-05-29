@@ -1,11 +1,11 @@
 package io.github.eventify.api.admin.stats.controller;
 
-import io.github.eventify.api.admin.stats.model.request.AdminStatsRequest;
 import io.github.eventify.api.admin.stats.model.response.AdminCountsResponse;
 import io.github.eventify.api.admin.stats.model.response.AdminEventVolumeResponse;
 import io.github.eventify.api.admin.stats.model.response.AdminGrowthResponse;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.model.request.StatsRequest;
 import io.github.eventify.support.IntegrationTest;
 
 import org.junit.jupiter.api.DisplayName;
@@ -146,7 +146,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     public void getGrowthUnauthorizedFails() throws Exception {
         // Given: A regular validated user without admin role
         final User regularUser = aValidatedUser();
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(30);
+        final StatsRequest statsRequest = new StatsRequest().setDays(30);
 
         // When: Posting to growth without admin authority
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_GROWTH_PATH)
@@ -164,7 +164,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     @DisplayName("Should reject unauthenticated growth request")
     public void getGrowthWithoutAuthenticationFails() throws Exception {
         // Given: No authentication provided
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(30);
+        final StatsRequest statsRequest = new StatsRequest().setDays(30);
 
         // When: Posting to growth without authentication
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_GROWTH_PATH)
@@ -182,7 +182,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     public void getGrowthWithDays0ShouldReturn400() throws Exception {
         // Given: An authenticated admin user with days=0 (below minimum of 1)
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(0);
+        final StatsRequest statsRequest = new StatsRequest().setDays(0);
 
         // When: Posting to growth with days=0
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_GROWTH_PATH)
@@ -201,7 +201,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     public void getGrowthWithNegativeDaysShouldReturn400() throws Exception {
         // Given: An authenticated admin user with days=-5 (below minimum of 1)
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(-5);
+        final StatsRequest statsRequest = new StatsRequest().setDays(-5);
 
         // When: Posting to growth with days=-5
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_GROWTH_PATH)
@@ -220,7 +220,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     public void getGrowthWithDaysOver365ShouldReturn400() throws Exception {
         // Given: An authenticated admin user with days=366 (above maximum of 365)
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(366);
+        final StatsRequest statsRequest = new StatsRequest().setDays(366);
 
         // When: Posting to growth with days=366
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_GROWTH_PATH)
@@ -239,7 +239,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     public void getGrowthDataPointsShouldHaveNonNegativeCounts() throws Exception {
         // Given: An authenticated admin user with a valid days request
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(30);
+        final StatsRequest statsRequest = new StatsRequest().setDays(30);
 
         // When: Posting to growth endpoint
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_GROWTH_PATH)
@@ -268,7 +268,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     public void getEventVolumeWithNoEventsShouldReturnZeros() throws Exception {
         // Given: An authenticated admin user (no events seeded)
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(30);
+        final StatsRequest statsRequest = new StatsRequest().setDays(30);
 
         // When: Posting to event volume endpoint
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENT_VOLUME_PATH)
@@ -293,7 +293,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     public void getEventVolumeWithDays0ShouldReturn400() throws Exception {
         // Given: An authenticated admin user with days=0 (below minimum of 1)
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(0);
+        final StatsRequest statsRequest = new StatsRequest().setDays(0);
 
         // When: Posting to event volume with days=0
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENT_VOLUME_PATH)
@@ -312,7 +312,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     public void getEventVolumeWithNegativeDaysShouldReturn400() throws Exception {
         // Given: An authenticated admin user with days=-1 (below minimum of 1)
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(-1);
+        final StatsRequest statsRequest = new StatsRequest().setDays(-1);
 
         // When: Posting to event volume with days=-1
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENT_VOLUME_PATH)
@@ -331,7 +331,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     public void getEventVolumeUnauthorizedFails() throws Exception {
         // Given: A regular validated user without admin role
         final User regularUser = aValidatedUser();
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(30);
+        final StatsRequest statsRequest = new StatsRequest().setDays(30);
 
         // When: Posting to event volume without admin authority
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENT_VOLUME_PATH)
@@ -349,7 +349,7 @@ public class AdminDashboardControllerSplitTest extends IntegrationTest {
     @DisplayName("Should reject unauthenticated event-volume request")
     public void getEventVolumeWithoutAuthenticationFails() throws Exception {
         // Given: No authentication provided
-        final AdminStatsRequest statsRequest = new AdminStatsRequest().setDays(30);
+        final StatsRequest statsRequest = new StatsRequest().setDays(30);
 
         // When: Posting to event volume without authentication
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENT_VOLUME_PATH)

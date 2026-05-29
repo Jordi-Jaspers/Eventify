@@ -1,4 +1,4 @@
-package io.github.eventify.common.audit.filter;
+package io.github.eventify.common.security.filter;
 
 import java.io.IOException;
 import jakarta.servlet.FilterChain;

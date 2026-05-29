@@ -1,6 +1,5 @@
 package io.github.eventify.api.admin.audit.model;
 
-import io.github.eventify.common.audit.model.AuditLog;
 import io.github.jframe.datasource.search.JpaSearchSpecification;
 import io.github.jframe.datasource.search.SearchType;
 import io.github.jframe.datasource.search.model.AbstractSortSearchMetaData;

@@ -1,7 +1,7 @@
 package io.github.eventify.common.config;
 
-import io.github.eventify.common.audit.filter.AdminRequestCachingFilter;
 import io.github.eventify.common.config.properties.SecurityProperties;
+import io.github.eventify.common.security.filter.AdminRequestCachingFilter;
 import io.github.eventify.common.security.filter.ApiKeyAuthenticationFilter;
 import io.github.eventify.common.security.filter.JwtAuthenticationFilter;
 import io.github.eventify.common.security.filter.SuspendedOrganizationFilter;

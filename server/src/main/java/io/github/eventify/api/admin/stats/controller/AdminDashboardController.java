@@ -6,15 +6,15 @@ import io.github.eventify.api.admin.stats.model.AdminGrowth;
 import io.github.eventify.api.admin.stats.model.EventStats;
 import io.github.eventify.api.admin.stats.model.StorageStats;
 import io.github.eventify.api.admin.stats.model.mapper.AdminStatsMapper;
-import io.github.eventify.api.admin.stats.model.request.AdminStatsRequest;
 import io.github.eventify.api.admin.stats.model.response.AdminCountsResponse;
 import io.github.eventify.api.admin.stats.model.response.AdminEventStatsResponse;
 import io.github.eventify.api.admin.stats.model.response.AdminEventVolumeResponse;
 import io.github.eventify.api.admin.stats.model.response.AdminGrowthResponse;
 import io.github.eventify.api.admin.stats.model.response.TableSizeEntry;
-import io.github.eventify.api.admin.stats.model.validator.AdminStatsValidator;
 import io.github.eventify.api.admin.stats.service.AdminEventStatsService;
 import io.github.eventify.api.admin.stats.service.AdminStatsService;
+import io.github.eventify.common.model.request.StatsRequest;
+import io.github.eventify.common.model.validator.StatsRequestValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class AdminDashboardController {
 
     private final AdminStatsService adminStatsService;
     private final AdminEventStatsService adminEventStatsService;
-    private final AdminStatsValidator adminStatsValidator;
+    private final StatsRequestValidator adminStatsValidator;
     private final AdminStatsMapper adminStatsMapper;
 
     @ResponseStatus(OK)
@@ -71,7 +71,7 @@ public class AdminDashboardController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<AdminGrowthResponse> getGrowth(@RequestBody final AdminStatsRequest request) {
+    public ResponseEntity<AdminGrowthResponse> getGrowth(@RequestBody final StatsRequest request) {
         adminStatsValidator.validateAndThrow(request);
         final AdminGrowth growth = request.getDays() != null
             ? adminStatsService.getAdminGrowth(request.getDays())
@@ -87,7 +87,7 @@ public class AdminDashboardController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<AdminEventVolumeResponse> getEventVolume(@RequestBody final AdminStatsRequest request) {
+    public ResponseEntity<AdminEventVolumeResponse> getEventVolume(@RequestBody final StatsRequest request) {
         adminStatsValidator.validateAndThrow(request);
         final AdminEventVolume volume = request.getDays() != null
             ? adminStatsService.getEventVolume(request.getDays())
@@ -103,7 +103,7 @@ public class AdminDashboardController {
         consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<AdminEventStatsResponse> getEventStats(@RequestBody final AdminStatsRequest request) {
+    public ResponseEntity<AdminEventStatsResponse> getEventStats(@RequestBody final StatsRequest request) {
         adminStatsValidator.validateAndThrow(request);
         final EventStats data = request.getDays() != null
             ? adminEventStatsService.getEventStats(request.getDays())

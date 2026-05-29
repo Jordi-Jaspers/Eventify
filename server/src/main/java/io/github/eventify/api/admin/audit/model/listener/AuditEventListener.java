@@ -1,8 +1,8 @@
-package io.github.eventify.common.audit.listener;
+package io.github.eventify.api.admin.audit.model.listener;
 
-import io.github.eventify.common.audit.event.AuditEvent;
-import io.github.eventify.common.audit.model.AuditLog;
-import io.github.eventify.common.audit.repository.AuditLogRepository;
+import io.github.eventify.api.admin.audit.model.AuditLog;
+import io.github.eventify.api.admin.audit.model.event.AuditEvent;
+import io.github.eventify.api.admin.audit.repository.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

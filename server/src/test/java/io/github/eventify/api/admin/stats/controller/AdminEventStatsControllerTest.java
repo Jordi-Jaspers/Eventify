@@ -1,9 +1,9 @@
 package io.github.eventify.api.admin.stats.controller;
 
-import io.github.eventify.api.admin.stats.model.request.AdminStatsRequest;
 import io.github.eventify.api.admin.stats.model.response.AdminEventStatsResponse;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.model.request.StatsRequest;
 import io.github.eventify.support.IntegrationTest;
 
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +31,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsSuccess() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats with days=30
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -60,7 +60,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldIncludeSeverityBreakdown() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -87,7 +87,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldIncludeQuotaStats() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -114,7 +114,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnNonNegativeSeverityCounts() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -140,7 +140,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnNonNegativeQuotaStats() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -166,7 +166,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnTopChannelsWithAtMost10Entries() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -191,7 +191,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsWithoutAuthorityFails() throws Exception {
         // Given: A regular validated user without admin role
         final User regularUser = aValidatedUser();
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats without VIEW_PLATFORM_STATS authority
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -209,7 +209,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     @DisplayName("Should return 401 when unauthenticated request is made")
     public void getEventStatsWithoutAuthenticationFails() throws Exception {
         // Given: No authentication provided
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats without authentication
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -227,7 +227,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsWithDays0ShouldReturn400() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(0);
+        final StatsRequest body = new StatsRequest().setDays(0);
 
         // When: Requesting event stats with days=0
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -246,7 +246,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsWithNegativeDaysShouldReturn400() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(-1);
+        final StatsRequest body = new StatsRequest().setDays(-1);
 
         // When: Requesting event stats with days=-1
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -265,7 +265,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsWithDaysOver365ShouldReturn400() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(366);
+        final StatsRequest body = new StatsRequest().setDays(366);
 
         // When: Requesting event stats with days=366
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -284,7 +284,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsWithDays7ShouldSucceed() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(7);
+        final StatsRequest body = new StatsRequest().setDays(7);
 
         // When: Requesting event stats with days=7
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -303,7 +303,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsWithDays365ShouldSucceed() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(365);
+        final StatsRequest body = new StatsRequest().setDays(365);
 
         // When: Requesting event stats with days=365
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -322,7 +322,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnEmptyDailyIngestionWhenNoData() throws Exception {
         // Given: An authenticated admin user (no event data seeded)
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
@@ -350,7 +350,7 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnApplicationJsonContentType() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
+        final StatsRequest body = new StatsRequest().setDays(30);
 
         // When: Requesting event stats
         final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)

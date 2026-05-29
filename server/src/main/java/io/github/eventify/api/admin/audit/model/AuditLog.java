@@ -1,4 +1,4 @@
-package io.github.eventify.common.audit.model;
+package io.github.eventify.api.admin.audit.model;
 
 import io.github.eventify.api.user.model.User;
 import io.github.jframe.datasource.search.model.PageableItem;

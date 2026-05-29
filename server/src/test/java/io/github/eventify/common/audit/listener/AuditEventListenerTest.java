@@ -1,9 +1,10 @@
 package io.github.eventify.common.audit.listener;
 
+import io.github.eventify.api.admin.audit.model.AuditLog;
+import io.github.eventify.api.admin.audit.model.event.AuditEvent;
+import io.github.eventify.api.admin.audit.model.listener.AuditEventListener;
+import io.github.eventify.api.admin.audit.repository.AuditLogRepository;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.common.audit.event.AuditEvent;
-import io.github.eventify.common.audit.model.AuditLog;
-import io.github.eventify.common.audit.repository.AuditLogRepository;
 import io.github.eventify.support.UnitTest;
 
 import org.junit.jupiter.api.BeforeEach;

@@ -6,7 +6,10 @@ import io.github.eventify.api.organization.model.response.OrgApiKeyStatsResponse
 import io.github.eventify.api.organization.model.response.OrgSummaryResponse;
 import io.github.eventify.api.organization.model.response.OrgTimelineResponse;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.model.request.StatsRequest;
 import io.github.eventify.support.IntegrationTest;
+
+import java.time.LocalDate;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,12 +21,14 @@ import static io.github.eventify.api.Paths.ORGANIZATION_STATS_SUMMARY_PATH;
 import static io.github.eventify.api.Paths.ORGANIZATION_STATS_TIMELINE_PATH;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
+import static io.github.jframe.util.mapper.ObjectMappers.toJson;
 import static jakarta.servlet.http.HttpServletResponse.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("Integration Test - Org Statistics Controller")
@@ -41,7 +46,7 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         return ORGANIZATION_STATS_API_KEYS_PATH.replace("{orgId}", orgId.toString());
     }
 
-    // ─── GET /stats/timeline ─────────────────────────────────────────────────────
+    // ─── POST /stats/timeline ─────────────────────────────────────────────────────
 
     @Test
     @DisplayName("Should return timeline for organization owner")
@@ -50,10 +55,11 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final User owner = aValidatedUser();
         final Organization org = anOrganisationWithOwner(owner);
 
-        // When: Owner requests timeline
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
+        // When: Owner requests timeline with default 30 days
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -79,9 +85,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
         // When: Admin requests timeline
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -99,9 +106,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
         // When: Member requests timeline
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + member.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + member.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -118,9 +126,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final User nonMember = aValidatedUser();
 
         // When: Non-member requests timeline
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -136,8 +145,9 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting timeline without auth
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
-            .contentType(APPLICATION_JSON);
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -153,10 +163,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting timeline with days=0
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
-            .param("days", "0")
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(0)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -172,10 +182,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting timeline with days=-1
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
-            .param("days", "-1")
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(-1)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -191,10 +201,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting timeline with days=999
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
-            .param("days", "999")
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(999)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -210,10 +220,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting timeline with days=1
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
-            .param("days", "1")
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(1)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -229,10 +239,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting timeline with days=365
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
-            .param("days", "365")
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(365)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -248,9 +258,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Owner requests timeline
-        final MockHttpServletRequestBuilder request = get(timelinePath(org.getId()))
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -265,7 +276,165 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         assertThat(result.getErrorTimeline(), is(empty()));
     }
 
-    // ─── GET /stats/summary ──────────────────────────────────────────────────────
+    @Test
+    @DisplayName("Should return timeline with valid startDate and endDate")
+    public void getTimelineWithDateRangeSuccess() throws Exception {
+        // Given: An organization with owner and a valid date range
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Owner requests timeline with date range
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(
+                toJson(
+                    new StatsRequest()
+                        .setStartDate(LocalDate.now().minusDays(30))
+                        .setEndDate(LocalDate.now())
+                )
+            );
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when timeline has only startDate (no endDate)")
+    public void getTimelineWithOnlyStartDateBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting timeline with only startDate
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setStartDate(LocalDate.now().minusDays(7))));
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when timeline has only endDate (no startDate)")
+    public void getTimelineWithOnlyEndDateBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting timeline with only endDate
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setEndDate(LocalDate.now())));
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when timeline startDate is after endDate")
+    public void getTimelineWithInvertedDateRangeBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting timeline with inverted date range
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(
+                toJson(
+                    new StatsRequest()
+                        .setStartDate(LocalDate.now())
+                        .setEndDate(LocalDate.now().minusDays(1))
+                )
+            );
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when timeline endDate is in the future")
+    public void getTimelineWithFutureEndDateBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting timeline with future endDate
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(
+                toJson(
+                    new StatsRequest()
+                        .setStartDate(LocalDate.now().minusDays(7))
+                        .setEndDate(LocalDate.now().plusDays(1))
+                )
+            );
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when timeline has both days and date range")
+    public void getTimelineWithBothModesBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting timeline with both days and date range
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(
+                toJson(
+                    new StatsRequest()
+                        .setDays(30)
+                        .setStartDate(LocalDate.now().minusDays(30))
+                        .setEndDate(LocalDate.now())
+                )
+            );
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when timeline request has neither days nor date range")
+    public void getTimelineWithNoModeBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting timeline with empty body
+        final MockHttpServletRequestBuilder request = post(timelinePath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest()));
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    // ─── POST /stats/summary ──────────────────────────────────────────────────────
 
     @Test
     @DisplayName("Should return summary for organization owner")
@@ -275,9 +444,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Owner requests summary
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -305,9 +475,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         addMemberToOrganization(org, admin, OrganizationalRole.ADMIN);
 
         // When: Admin requests summary
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + admin.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -325,9 +496,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         addMemberToOrganization(org, member, OrganizationalRole.MEMBER);
 
         // When: Member requests summary
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + member.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + member.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -344,9 +516,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final User nonMember = aValidatedUser();
 
         // When: Non-member requests summary
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + nonMember.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -362,8 +535,9 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting summary without auth
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
-            .contentType(APPLICATION_JSON);
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -379,10 +553,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting summary with days=0
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
-            .param("days", "0")
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(0)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -398,10 +572,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting summary with days=-1
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
-            .param("days", "-1")
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(-1)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -417,10 +591,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting summary with days=999
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
-            .param("days", "999")
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(999)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -436,10 +610,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting summary with days=1
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
-            .param("days", "1")
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(1)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -455,10 +629,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         final Organization org = anOrganisationWithOwner(owner);
 
         // When: Requesting summary with days=365
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
-            .param("days", "365")
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(365)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -476,9 +650,10 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
         aChannelForOrganisation(owner, org, "Channel Two");
 
         // When: Owner requests summary
-        final MockHttpServletRequestBuilder request = get(summaryPath(org.getId()))
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setDays(30)));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -490,6 +665,164 @@ public class OrgStatisticsControllerTest extends IntegrationTest {
             OrgSummaryResponse.class
         );
         assertThat(result.getTotalChannels(), is(equalTo(2L)));
+    }
+
+    @Test
+    @DisplayName("Should return summary with valid startDate and endDate")
+    public void getSummaryWithDateRangeSuccess() throws Exception {
+        // Given: An organization with owner and a valid date range
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Owner requests summary with date range
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(
+                toJson(
+                    new StatsRequest()
+                        .setStartDate(LocalDate.now().minusDays(30))
+                        .setEndDate(LocalDate.now())
+                )
+            );
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be OK
+        response.andExpect(status().is(SC_OK));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when summary has only startDate (no endDate)")
+    public void getSummaryWithOnlyStartDateBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting summary with only startDate
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setStartDate(LocalDate.now().minusDays(7))));
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when summary has only endDate (no startDate)")
+    public void getSummaryWithOnlyEndDateBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting summary with only endDate
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest().setEndDate(LocalDate.now())));
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when summary startDate is after endDate")
+    public void getSummaryWithInvertedDateRangeBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting summary with inverted date range
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(
+                toJson(
+                    new StatsRequest()
+                        .setStartDate(LocalDate.now())
+                        .setEndDate(LocalDate.now().minusDays(1))
+                )
+            );
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when summary endDate is in the future")
+    public void getSummaryWithFutureEndDateBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting summary with future endDate
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(
+                toJson(
+                    new StatsRequest()
+                        .setStartDate(LocalDate.now().minusDays(7))
+                        .setEndDate(LocalDate.now().plusDays(1))
+                )
+            );
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when summary has both days and date range")
+    public void getSummaryWithBothModesBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting summary with both days and date range
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(
+                toJson(
+                    new StatsRequest()
+                        .setDays(30)
+                        .setStartDate(LocalDate.now().minusDays(30))
+                        .setEndDate(LocalDate.now())
+                )
+            );
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when summary request has neither days nor date range")
+    public void getSummaryWithNoModeBadRequest() throws Exception {
+        // Given: An organization with owner
+        final User owner = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(owner);
+
+        // When: Requesting summary with empty body
+        final MockHttpServletRequestBuilder request = post(summaryPath(org.getId()))
+            .contentType(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + owner.getAccessToken().getValue())
+            .content(toJson(new StatsRequest()));
+
+        final ResultActions response = mockMvc.perform(request);
+
+        // Then: Response should be BAD_REQUEST
+        response.andExpect(status().is(SC_BAD_REQUEST));
     }
 
     // ─── GET /stats/api-keys ─────────────────────────────────────────────────────

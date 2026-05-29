@@ -7,8 +7,9 @@ import io.github.eventify.api.organization.model.mapper.OrgStatsMapper;
 import io.github.eventify.api.organization.model.response.OrgApiKeyStatsResponse;
 import io.github.eventify.api.organization.model.response.OrgSummaryResponse;
 import io.github.eventify.api.organization.model.response.OrgTimelineResponse;
-import io.github.eventify.api.organization.model.validator.OrgStatsValidator;
 import io.github.eventify.api.organization.service.OrgStatsService;
+import io.github.eventify.common.model.request.StatsRequest;
+import io.github.eventify.common.model.validator.StatsRequestValidator;
 import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,7 +20,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,39 +42,45 @@ public class OrgStatisticsController {
 
     private final OrgStatsService orgStatsService;
     private final OrgStatsMapper orgStatsMapper;
-    private final OrgStatsValidator orgStatsValidator;
+    private final StatsRequestValidator statsRequestValidator;
 
     @ResponseStatus(OK)
     @Operation(summary = "Get organization event timeline (Owner/Admin only)")
     @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id)")
-    @GetMapping(
+    @PostMapping(
         path = ORGANIZATION_STATS_TIMELINE_PATH,
+        consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<OrgTimelineResponse> getTimeline(
         @PathVariable final Long orgId,
-        @RequestParam(defaultValue = "30") final int days,
+        @RequestBody final StatsRequest request,
         @AuthenticationPrincipal final UserTokenPrincipal principal
     ) {
-        orgStatsValidator.validateAndThrow(days);
-        final OrgTimeline timeline = orgStatsService.getTimeline(orgId, days);
+        statsRequestValidator.validateAndThrow(request);
+        final OrgTimeline timeline = request.getDays() != null
+            ? orgStatsService.getTimeline(orgId, request.getDays())
+            : orgStatsService.getTimeline(orgId, request.getStartDate(), request.getEndDate());
         return ResponseEntity.status(OK).body(orgStatsMapper.toTimelineResponse(timeline));
     }
 
     @ResponseStatus(OK)
     @Operation(summary = "Get organization event summary (Owner/Admin only)")
     @PreAuthorize("@orgSecurity.isOwnerOrAdmin(#orgId, principal.user.id)")
-    @GetMapping(
+    @PostMapping(
         path = ORGANIZATION_STATS_SUMMARY_PATH,
+        consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<OrgSummaryResponse> getSummary(
         @PathVariable final Long orgId,
-        @RequestParam(defaultValue = "30") final int days,
+        @RequestBody final StatsRequest request,
         @AuthenticationPrincipal final UserTokenPrincipal principal
     ) {
-        orgStatsValidator.validateAndThrow(days);
-        final OrgSummary summary = orgStatsService.getSummary(orgId, days);
+        statsRequestValidator.validateAndThrow(request);
+        final OrgSummary summary = request.getDays() != null
+            ? orgStatsService.getSummary(orgId, request.getDays())
+            : orgStatsService.getSummary(orgId, request.getStartDate(), request.getEndDate());
         return ResponseEntity.status(OK).body(orgStatsMapper.toSummaryResponse(summary));
     }
 
