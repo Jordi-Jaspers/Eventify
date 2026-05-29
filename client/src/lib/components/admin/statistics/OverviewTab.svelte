@@ -82,20 +82,17 @@
 
 <!-- Growth Chart with toggle -->
 <div class="space-y-3">
-	<div class="flex items-center justify-between">
-		<h2 class="text-lg font-semibold">Growth Trends</h2>
-		<div class="flex items-center gap-1 bg-muted/40 rounded-full p-1 border border-border/50">
-			{#each ([{ value: 'users-orgs', label: 'Users & Orgs' }, { value: 'events', label: 'Events' }] as { value: string; label: string }[]) as item (item.value)}
-				<button
-					class="px-3 py-1 rounded-full text-xs font-medium transition-all {chartView === item.value
-						? 'bg-primary text-primary-foreground shadow-sm'
-						: 'text-muted-foreground hover:text-foreground'}"
-					onclick={() => (chartView = item.value as ChartView)}
-				>
-					{item.label}
-				</button>
-			{/each}
-		</div>
+	<div class="flex items-center gap-1 bg-muted/40 rounded-full p-1 border border-border/50 w-fit">
+		{#each ([{ value: 'users-orgs', label: 'Users & Orgs' }, { value: 'events', label: 'Events' }] as { value: string; label: string }[]) as item (item.value)}
+			<button
+				class="px-3 py-1 rounded-full text-xs font-medium transition-all {chartView === item.value
+					? 'bg-primary text-primary-foreground shadow-sm'
+					: 'text-muted-foreground hover:text-foreground'}"
+				onclick={() => (chartView = item.value as ChartView)}
+			>
+				{item.label}
+			</button>
+		{/each}
 	</div>
 
 	{#if chartView === 'users-orgs'}

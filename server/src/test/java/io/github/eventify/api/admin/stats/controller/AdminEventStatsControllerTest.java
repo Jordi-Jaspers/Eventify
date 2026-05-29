@@ -1,5 +1,6 @@
 package io.github.eventify.api.admin.stats.controller;
 
+import io.github.eventify.api.admin.stats.model.request.AdminStatsRequest;
 import io.github.eventify.api.admin.stats.model.response.AdminEventStatsResponse;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
@@ -13,12 +14,13 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import static io.github.eventify.api.Paths.ADMIN_STATS_EVENTS_PATH;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
+import static io.github.jframe.util.mapper.ObjectMappers.toJson;
 import static jakarta.servlet.http.HttpServletResponse.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("Admin Event Stats Controller Tests")
@@ -29,12 +31,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsSuccess() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats with days=30
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -57,12 +60,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldIncludeSeverityBreakdown() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -83,12 +87,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldIncludeQuotaStats() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -109,12 +114,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnNonNegativeSeverityCounts() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -134,12 +140,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnNonNegativeQuotaStats() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -159,12 +166,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnTopChannelsWithAtMost10Entries() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -183,12 +191,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsWithoutAuthorityFails() throws Exception {
         // Given: A regular validated user without admin role
         final User regularUser = aValidatedUser();
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats without VIEW_PLATFORM_STATS authority
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + regularUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + regularUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -200,11 +209,12 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     @DisplayName("Should return 401 when unauthenticated request is made")
     public void getEventStatsWithoutAuthenticationFails() throws Exception {
         // Given: No authentication provided
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats without authentication
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
-            .contentType(APPLICATION_JSON);
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
+            .contentType(APPLICATION_JSON)
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -213,34 +223,17 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return 400 when days param is invalid value 15")
-    public void getEventStatsWithInvalidDays15ShouldReturn400() throws Exception {
-        // Given: An authenticated admin user
-        final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-
-        // When: Requesting event stats with invalid days=15
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "15")
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
-
-        final ResultActions response = mockMvc.perform(request);
-
-        // Then: Response should be 400 Bad Request
-        response.andExpect(status().is(SC_BAD_REQUEST));
-    }
-
-    @Test
-    @DisplayName("Should return 400 when days param is 0")
+    @DisplayName("Should return 400 when days is 0")
     public void getEventStatsWithDays0ShouldReturn400() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(0);
 
         // When: Requesting event stats with days=0
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "0")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -249,16 +242,17 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return 400 when days param is negative")
+    @DisplayName("Should return 400 when days is negative")
     public void getEventStatsWithNegativeDaysShouldReturn400() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(-1);
 
         // When: Requesting event stats with days=-1
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "-1")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -267,16 +261,17 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return 400 when days param is non-numeric")
-    public void getEventStatsWithNonNumericDaysShouldReturn400() throws Exception {
+    @DisplayName("Should return 400 when days exceeds 365")
+    public void getEventStatsWithDaysOver365ShouldReturn400() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(366);
 
-        // When: Requesting event stats with days=abc
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "abc")
+        // When: Requesting event stats with days=366
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -289,12 +284,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsWithDays7ShouldSucceed() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(7);
 
         // When: Requesting event stats with days=7
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "7")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -303,33 +299,17 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return 200 with valid days=90")
-    public void getEventStatsWithDays90ShouldSucceed() throws Exception {
+    @DisplayName("Should return 200 with valid days=365")
+    public void getEventStatsWithDays365ShouldSucceed() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(365);
 
-        // When: Requesting event stats with days=90
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "90")
+        // When: Requesting event stats with days=365
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
-
-        final ResultActions response = mockMvc.perform(request);
-
-        // Then: Response should be 200 OK
-        response.andExpect(status().is(SC_OK));
-    }
-
-    @Test
-    @DisplayName("Should return 200 with default days=30 when no days param provided")
-    public void getEventStatsWithDefaultDaysShouldSucceed() throws Exception {
-        // Given: An authenticated admin user
-        final User adminUser = aValidatedUserWithRole(Role.ADMIN);
-
-        // When: Requesting event stats without days param (defaults to 30)
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -342,12 +322,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnEmptyDailyIngestionWhenNoData() throws Exception {
         // Given: An authenticated admin user (no event data seeded)
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 
@@ -369,12 +350,13 @@ public class AdminEventStatsControllerTest extends IntegrationTest {
     public void getEventStatsShouldReturnApplicationJsonContentType() throws Exception {
         // Given: An authenticated admin user
         final User adminUser = aValidatedUserWithRole(Role.ADMIN);
+        final AdminStatsRequest body = new AdminStatsRequest().setDays(30);
 
         // When: Requesting event stats
-        final MockHttpServletRequestBuilder request = get(ADMIN_STATS_EVENTS_PATH)
-            .param("days", "30")
+        final MockHttpServletRequestBuilder request = post(ADMIN_STATS_EVENTS_PATH)
             .contentType(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue());
+            .header(AUTHORIZATION, BEARER + adminUser.getAccessToken().getValue())
+            .content(toJson(body));
 
         final ResultActions response = mockMvc.perform(request);
 

@@ -1,13 +1,8 @@
 package io.github.eventify.api.admin.stats.service;
 
-import io.github.eventify.api.admin.stats.model.AdminCounts;
-import io.github.eventify.api.admin.stats.model.AdminEventVolume;
-import io.github.eventify.api.admin.stats.model.AdminGrowth;
-import io.github.eventify.api.admin.stats.model.DailyVolumeData;
-import io.github.eventify.api.admin.stats.model.StorageStats;
+import io.github.eventify.api.admin.stats.model.*;
 import io.github.eventify.api.admin.stats.model.mapper.AdminStatsMapper;
 import io.github.eventify.api.admin.stats.model.projection.DailyGrowthData;
-import io.github.eventify.api.admin.stats.model.response.AdminStatsResponse;
 import io.github.eventify.api.admin.stats.model.response.GrowthDataPoint;
 import io.github.eventify.api.admin.stats.repository.AdminStorageRepository;
 import io.github.eventify.api.channel.model.ChannelStatus;
@@ -50,7 +45,6 @@ public class AdminStatsService {
 
     /** Returns counts for organizations, users and channels. */
     @Cacheable("adminCounts")
-    @Transactional(readOnly = true)
     public AdminCounts getAdminCounts() {
         return AdminCounts.builder()
             .totalOrganizations(organizationRepository.count())
@@ -69,9 +63,14 @@ public class AdminStatsService {
         value = "adminGrowth",
         key = "#days"
     )
-    @Transactional(readOnly = true)
     public AdminGrowth getAdminGrowth(final int days) {
-        final List<GrowthDataPoint> growthData = calculateGrowthData(days);
+        final LocalDate today = LocalDate.now();
+        return getAdminGrowth(today.minusDays(days), today);
+    }
+
+    /** Returns growth data points for an explicit date range (not cached). */
+    public AdminGrowth getAdminGrowth(final LocalDate startDate, final LocalDate endDate) {
+        final List<GrowthDataPoint> growthData = calculateGrowthData(startDate, endDate);
         return AdminGrowth.builder()
             .growthData(growthData)
             .bestGrowthDayUsers(findBestDay(growthData, GrowthDataPoint::getNewUsers))
@@ -85,17 +84,18 @@ public class AdminStatsService {
         value = "adminEventVolume",
         key = "#days"
     )
-    @Transactional(readOnly = true)
     public AdminEventVolume getEventVolume(final int days) {
-        final OffsetDateTime since = TimeProvider.startOfDayUtc(LocalDate.now().minusDays(days));
-        final long totalEvents = eventRepository.countByTimestampAfter(since);
-
         final LocalDate today = LocalDate.now();
-        final LocalDate startDate = today.minusDays(days);
+        return getEventVolume(today.minusDays(days), today);
+    }
+
+    /** Returns daily event volume for an explicit date range (not cached). */
+    public AdminEventVolume getEventVolume(final LocalDate startDate, final LocalDate endDate) {
         final OffsetDateTime start = TimeProvider.startOfDayUtc(startDate);
+        final long totalEvents = eventRepository.countByTimestampAfter(start);
         final Map<LocalDate, DailyGrowthData> eventCounts = toDateMap(eventRepository.findDailyEventCounts(start));
 
-        final List<DailyVolumeData> dailyVolume = startDate.datesUntil(today.plusDays(1))
+        final List<DailyVolumeData> dailyVolume = startDate.datesUntil(endDate.plusDays(1))
             .map(date -> {
                 final DailyGrowthData data = eventCounts.get(date);
                 final long count = data != null ? data.getNew() : 0L;
@@ -109,36 +109,6 @@ public class AdminStatsService {
         return AdminEventVolume.builder()
             .totalEvents(totalEvents)
             .dailyVolume(dailyVolume)
-            .build();
-    }
-
-    /** Aggregates platform statistics for the given time window. */
-    @Cacheable(
-        value = "adminStats",
-        key = "#days"
-    )
-    @Transactional(readOnly = true)
-    public AdminStatsResponse getAdminStats(final int days) {
-        final AdminCounts counts = getAdminCounts();
-        final AdminGrowth growth = getAdminGrowth(days);
-
-        final OffsetDateTime since = TimeProvider.startOfDayUtc(LocalDate.now().minusDays(days));
-        final long totalEventsInPeriod = eventRepository.countByTimestampAfter(since);
-
-        return AdminStatsResponse.builder()
-            .totalOrganizations(counts.getTotalOrganizations())
-            .totalUsers(counts.getTotalUsers())
-            .activeUsers(counts.getActiveUsers())
-            .totalChannels(counts.getTotalChannels())
-            .activeChannels(counts.getActiveChannels())
-            .pausedChannels(counts.getPausedChannels())
-            .staleChannels(counts.getStaleChannels())
-            .pendingDeletionChannels(counts.getPendingDeletionChannels())
-            .totalEventsInPeriod(totalEventsInPeriod)
-            .growthData(growth.getGrowthData())
-            .bestGrowthDayUsers(growth.getBestGrowthDayUsers())
-            .bestGrowthDayOrganizations(growth.getBestGrowthDayOrganizations())
-            .bestGrowthDayEvents(growth.getBestGrowthDayEvents())
             .build();
     }
 
@@ -156,18 +126,16 @@ public class AdminStatsService {
             .orElse(null);
     }
 
-    private List<GrowthDataPoint> calculateGrowthData(final int days) {
-        final LocalDate today = LocalDate.now();
-        final LocalDate startDate = today.minusDays(days);
+    private List<GrowthDataPoint> calculateGrowthData(final LocalDate startDate, final LocalDate endDate) {
 
         final OffsetDateTime start = TimeProvider.startOfDayUtc(startDate);
-        final OffsetDateTime end = TimeProvider.startOfDayUtc(today);
+        final OffsetDateTime end = TimeProvider.startOfDayUtc(endDate);
 
         final Map<LocalDate, DailyGrowthData> userCounts = toDateMap(userRepository.findDailyGrowthCounts(start, end));
         final Map<LocalDate, DailyGrowthData> orgCounts = toDateMap(organizationRepository.findDailyGrowthCounts(start, end));
         final Map<LocalDate, DailyGrowthData> eventCounts = toDateMap(eventRepository.findDailyEventCounts(start));
 
-        final List<GrowthDataPoint> dataPoints = startDate.datesUntil(today.plusDays(1))
+        final List<GrowthDataPoint> dataPoints = startDate.datesUntil(endDate.plusDays(1))
             .map(
                 date -> GrowthDataPoint.builder()
                     .date(date)

@@ -43,6 +43,7 @@ export type DailyVolumePoint = components['schemas']['DailyVolumePoint'];
 export type AdminEventStatsResponse = components['schemas']['AdminEventStatsResponse'];
 export type AdminApiKeyStatsResponse = components['schemas']['ApiKeyStatsResponse'];
 export type TableSizeEntry = components['schemas']['TableSizeEntry'];
+export type AdminStatsRequest = components['schemas']['AdminStatsRequest'];
 export type AdminApiKeyAuditResponse = components['schemas']['ApiKeyAuditResponse'];
 export type PageResourceAdminApiKeyAuditResponse =
 	components['schemas']['PageResourceApiKeyAuditResponse'];

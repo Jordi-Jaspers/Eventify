@@ -38,9 +38,21 @@ public class AdminEventStatsService {
     /** Builds event statistics for the given number of days. */
     @Transactional(readOnly = true)
     public EventStats getEventStats(final int days) {
-        final OffsetDateTime from = startOfDayUtc(LocalDate.now().minusDays(days));
-        final OffsetDateTime to = startOfDayUtc(LocalDate.now().plusDays(1));
+        final OffsetDateTime from = TimeProvider.startOfDayUtc(LocalDate.now().minusDays(days));
+        final OffsetDateTime to = TimeProvider.startOfDayUtc(LocalDate.now().plusDays(1));
+        return buildEventStats(from, to);
+    }
 
+    /** Builds event statistics for an explicit date range (not cached). */
+    @Transactional(readOnly = true)
+    public EventStats getEventStats(final LocalDate startDate, final LocalDate endDate) {
+        return buildEventStats(
+            TimeProvider.startOfDayUtc(startDate),
+            TimeProvider.startOfDayUtc(endDate.plusDays(1))
+        );
+    }
+
+    private EventStats buildEventStats(final OffsetDateTime from, final OffsetDateTime to) {
         return EventStats.builder()
             .dailyIngestion(buildDailyIngestion(from, to))
             .topChannels(buildTopChannels(from, to))
@@ -75,10 +87,6 @@ public class AdminEventStatsService {
             .usersAtLimit(userEventQuotaRepository.countUsersAtLimit(MONTHLY_LIMIT))
             .averageUtilization(userEventQuotaRepository.calculateAverageUtilization(MONTHLY_LIMIT))
             .build();
-    }
-
-    private static OffsetDateTime startOfDayUtc(final LocalDate date) {
-        return TimeProvider.startOfDayUtc(date);
     }
 
     private static DailyIngestion toDailyIngestion(final DailyEventIngestion d) {
