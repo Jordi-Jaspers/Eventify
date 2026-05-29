@@ -9,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static io.github.eventify.api.Paths.ADMIN_PATH;
+import static io.github.eventify.api.Paths.AUTH_PATH;
 import static io.github.eventify.api.Paths.WILDCARD_PART;
 
 /**
@@ -23,6 +24,6 @@ public class AuditInterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(new AdminAuditInterceptor(eventPublisher))
-            .addPathPatterns(ADMIN_PATH + WILDCARD_PART);
+            .addPathPatterns(ADMIN_PATH + WILDCARD_PART, AUTH_PATH + WILDCARD_PART);
     }
 }

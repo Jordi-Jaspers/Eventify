@@ -96,7 +96,7 @@
 	let stats: AuditLogStatsResponse | null = $state(null);
 	let statsLoading: boolean = $state(true);
 
-	const NOISE_PATHS: string = '/v1/health,/v1/auth/refresh';
+	const NOISE_PATHS: string = '/v1/auth';
 	function addNoisePreset(): void {
 		const current = (dataTableService.filters['excludePath'] as string) ?? '';
 		const existing = current ? current.split(',').map((s: string) => s.trim()) : [];
