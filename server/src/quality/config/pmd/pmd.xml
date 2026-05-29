@@ -74,6 +74,11 @@
             <property name="reportLevel" value="21"/>
         </properties>
     </rule>
+    <rule ref="category/java/design.xml/CouplingBetweenObjects">
+        <properties>
+            <property name="threshold" value="25"/>
+        </properties>
+    </rule>
     <rule ref="category/java/design.xml/CyclomaticComplexity">
         <properties>
             <property name="cycloOptions" value="ignoreBooleanPaths"/>

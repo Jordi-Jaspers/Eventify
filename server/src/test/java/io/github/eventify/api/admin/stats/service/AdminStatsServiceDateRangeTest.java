@@ -3,7 +3,9 @@ package io.github.eventify.api.admin.stats.service;
 import io.github.eventify.api.admin.stats.model.AdminEventVolume;
 import io.github.eventify.api.admin.stats.model.AdminGrowth;
 import io.github.eventify.api.admin.stats.model.mapper.AdminStatsMapper;
+import io.github.eventify.api.admin.stats.repository.AdminEventStatsDailyRepository;
 import io.github.eventify.api.admin.stats.repository.AdminStorageRepository;
+import io.github.eventify.api.admin.stats.repository.EventTimelineRepository;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
@@ -49,6 +51,12 @@ public class AdminStatsServiceDateRangeTest extends UnitTest {
     @Mock
     private AdminStatsMapper adminStatsMapper;
 
+    @Mock
+    private AdminEventStatsDailyRepository adminEventStatsDailyRepository;
+
+    @Mock
+    private EventTimelineRepository eventTimelineRepository;
+
     @BeforeEach
     public void setUp() {
         adminStatsService = new AdminStatsService(
@@ -57,11 +65,14 @@ public class AdminStatsServiceDateRangeTest extends UnitTest {
             channelRepository,
             eventRepository,
             adminStorageRepository,
-            adminStatsMapper
+            adminStatsMapper,
+            adminEventStatsDailyRepository,
+            eventTimelineRepository
         );
 
-        lenient().when(eventRepository.countByTimestampAfter(any())).thenReturn(0L);
-        lenient().when(eventRepository.findDailyEventCounts(any())).thenReturn(Collections.emptyList());
+        lenient().when(adminEventStatsDailyRepository.findDailyStats(any(), any())).thenReturn(Collections.emptyList());
+        lenient().when(adminEventStatsDailyRepository.countTotalEvents(any(), any())).thenReturn(0L);
+        lenient().when(eventTimelineRepository.findDailyIngestion(any(), any())).thenReturn(Collections.emptyList());
         lenient().when(userRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
         lenient().when(organizationRepository.findDailyGrowthCounts(any(), any())).thenReturn(Collections.emptyList());
         lenient().when(userRepository.count()).thenReturn(0L);
@@ -183,20 +194,38 @@ public class AdminStatsServiceDateRangeTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should query event repository with timestamp derived from explicit startDate for getEventVolume")
-    public void shouldQueryEventRepositoryWithCorrectTimestampForEventVolume() {
-        // Given: explicit start/end dates
+    @DisplayName("Should query adminEventStatsDailyRepository with timestamp derived from explicit startDate for multi-day getEventVolume")
+    public void shouldQueryAdminEventStatsDailyRepositoryWithCorrectTimestampForEventVolume() {
+        // Given: explicit multi-day start/end dates
         final LocalDate startDate = LocalDate.now().minusDays(7);
         final LocalDate endDate = LocalDate.now();
 
         final ArgumentCaptor<OffsetDateTime> startCaptor = ArgumentCaptor.forClass(OffsetDateTime.class);
+        final ArgumentCaptor<OffsetDateTime> endCaptor = ArgumentCaptor.forClass(OffsetDateTime.class);
 
-        // When: calling getEventVolume with explicit dates
+        // When: calling getEventVolume with explicit multi-day dates
         adminStatsService.getEventVolume(startDate, endDate);
 
-        // Then: event repository queried with correct start timestamp
-        verify(eventRepository).findDailyEventCounts(startCaptor.capture());
+        // Then: daily aggregate repository queried with correct start timestamp
+        verify(adminEventStatsDailyRepository).findDailyStats(startCaptor.capture(), endCaptor.capture());
         assertThat(startCaptor.getValue().toLocalDate(), is(equalTo(startDate)));
+    }
+
+    @Test
+    @DisplayName("Should route single-day getEventVolume to EventTimelineRepository not daily aggregate")
+    public void shouldRouteToEventTimelineRepositoryForSingleDayEventVolume() {
+        // Given: single-day range (startDate == endDate)
+        final LocalDate singleDay = LocalDate.now().minusDays(1);
+
+        final ArgumentCaptor<OffsetDateTime> startCaptor = ArgumentCaptor.forClass(OffsetDateTime.class);
+        final ArgumentCaptor<OffsetDateTime> endCaptor = ArgumentCaptor.forClass(OffsetDateTime.class);
+
+        // When: calling getEventVolume with same start and end
+        adminStatsService.getEventVolume(singleDay, singleDay);
+
+        // Then: hourly timeline repository is used (not the daily aggregate)
+        verify(eventTimelineRepository).findDailyIngestion(startCaptor.capture(), endCaptor.capture());
+        assertThat(startCaptor.getValue().toLocalDate(), is(equalTo(singleDay)));
     }
 
     @Test
