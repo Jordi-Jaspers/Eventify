@@ -52,6 +52,7 @@ Also reference:
 ## Workflow Notes
 
 - API types are auto-generated from server/openapi.json — never edit src/lib/types/api.d.ts manually
+- API types generated from OpenAPI spec can then be defined in the `api/models.ts` files for reusability
 - New API calls: create XxxController.ts in src/lib/api/, use openapi-fetch client
 - State: prefer Svelte 5 rune-based class singletons over legacy writable stores
 - Forms: manual $state bindings + $derived for validation, no form library

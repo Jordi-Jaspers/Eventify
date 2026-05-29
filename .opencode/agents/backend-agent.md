@@ -25,12 +25,13 @@ Implement backend features that satisfy pre-written tests. Follow framework skil
 ## Project Skills
 
 Load these skills before implementing:
-- `.opencode/skills/eventify-backend-patterns/SKILL.md` — code patterns, naming, structure
-- `.opencode/skills/eventify-architecture/SKILL.md` — where to put code
+- `.opencode/skills/eventify-backend-patterns/SKILL.md` — (project) code patterns, conventions, architecture layers
+- `.opencode/skills/eventify-architecture/SKILL.md` — (project) where to put code, project structure
 
-Also load global skills if needed:
-- `spring-boot-standards` — general Spring Boot patterns
-- `liquibase-standards` — database migration patterns
+Optionally load these skills if relevant:
+- `.opencode/skills/jframe-search-pagination/SKILL.md` — (project) specific patterns for search/pagination endpoints
+- `spring-boot-standards` — (global) general Spring Boot patterns
+- `liquibase-standards` — (global) database migration patterns
 
 ## Framework & Tools
 

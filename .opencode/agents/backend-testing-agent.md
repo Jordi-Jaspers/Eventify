@@ -24,13 +24,16 @@ Write tests FIRST that define the contract. The backend-agent implements code to
 
 ## Project Skills
 
-Load these skills before writing tests:
-- `.opencode/skills/eventify-backend-testing-patterns/SKILL.md` — test patterns, base classes, fixtures
-- `.opencode/skills/eventify-backend-patterns/SKILL.md` — understand what you're testing
+Load these skills before implementing:
+- `.opencode/skills/eventify-backend-testing-patterns/SKILL.md` — (project) test patterns, base classes, fixtures
+- `.opencode/skills/eventify-architecture/SKILL.md` — (project) where to put code, project structure
+- `test-behaviour` — (global) testing behavioral guidelines
 
-Also load global skills as needed:
-- `spring-boot-standards` — general patterns
-- `test-behaviour` — testing behavioral guidelines
+Optionally load these skills if relevant:
+- `.opencode/skills/jframe-search-pagination/SKILL.md` — (project) specific patterns for search/pagination endpoints
+- `.opencode/skills/eventify-backend-patterns/SKILL.md` — (project) code patterns, conventions, architecture layers
+- `spring-boot-standards` — (global) general Spring Boot patterns
+- `liquibase-standards` — (global) database migration patterns
 
 ## Framework & Tools
 
