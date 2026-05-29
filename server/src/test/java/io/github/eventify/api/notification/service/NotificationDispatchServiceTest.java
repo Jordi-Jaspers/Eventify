@@ -128,7 +128,7 @@ public class NotificationDispatchServiceTest extends UnitTest {
             verify(inAppAdapter).send(eq(user), captor.capture());
             final NotificationPayload payload = captor.getValue();
             assertThat(payload.getTitle(), is("Organization suspended"));
-            assertThat(payload.getMessage(), is("Acme Corp has been suspended"));
+            assertThat(payload.getMessage(), is("Acme Corp has been suspended. Contact a platform administrator for more information."));
             assertThat(payload.getCategory(), is(NotificationCategory.SYSTEM));
             assertThat(payload.getActionUrl(), is("/organizations"));
             assertThat(payload.isUrgent(), is(true));
