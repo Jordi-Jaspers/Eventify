@@ -5,8 +5,6 @@
 
 - [ ] **Consider adding /auth/ to auditing logs** - currently only admin endpoints are logged. Adding /auth/ would give visibility into login/logout patterns, failed login attempts, and potential abuse. the hide noise button in audit logs should filter out only /auth endpoint. remove the /health endpoint from the audit logs because it is polled every 30s and adds a lot of noise to the logs.
 
-- [ ] **Perfomance issue:** /api/v1/admin/stats/growth and /api/v1/admin/stats/event-volume take over 5s to respond on TST. which only has 700k events in the last 180 days. imagine when we scale to millions a month.
-
 - [ ] **Table filter bars popover do not close when clicked outside**
 
 ---
