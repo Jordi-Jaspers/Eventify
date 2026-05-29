@@ -246,7 +246,7 @@ Report failures with:
 1. **Tests are the contract** - Make them pass, don't change them
 2. **Think before coding** - Use "think hard" for complex architecture decisions
 3. **Use simplest solution** - Don't over-engineer; implement the simplest thing that can work
-3. **Feedback loops** - Run validator → fix → repeat
-4. **Quality gates** - All checks must pass before completion
-5. **Subagents for verification** - Delegate to subagents to verify implementation correctness
-6. **Concise output** - Sacrifice grammar for concision in all messages
+4. **Feedback loops** - Run validator → fix → repeat
+5. **Quality gates** - All checks must pass before completion
+6. **Subagents for verification** - Delegate to subagents to verify implementation correctness
+7. **Concise output** - Sacrifice grammar for concision in all messages

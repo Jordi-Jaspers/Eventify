@@ -1,221 +1,168 @@
 # Project: eventify
 
-**Initialized:** 2026-01-23
-**Last Updated:** 2026-05-15
-**Current Version:** 1.1.0-SNAPSHOT (released 1.0.0 on 2026-05-08)
+**Initialized:** 2026-05-29
 
 ## Configuration
 
-| Setting               | Value  | Description                                 |
-|-----------------------|--------|---------------------------------------------|
-| `skip_frontend_tests` | `true` | Skip frontend tests during the TDD-workflow |
-
-## Project Files
-
-All project-specific files are in `.opencode/`:
-
-| File               | Purpose                                   |
-|--------------------|-------------------------------------------|
-| `BACKLOG.md`       | Raw ideas, future work (needs refinement) |
-| `CHANGELOG.md`     | Completed features index                  |
-| `STYLING-GUIDE.md` | UI design system reference                |
-| `dev-playbook`     | Live component showcase at `/dev-playbook` (route: `client/src/routes/(public)/dev-playbook/+page.svelte`) |
-| `refined/`         | Refined stories ready for development     |
-| `completed/`       | Audit copies of completed work            |
-| `agents/`          | Project-specific agent overrides          |
-| `skills/`          | Project-specific skill files              |
+| Setting             | Value | Description                                                           |
+|---------------------|-------|-----------------------------------------------------------------------|
+| skip_frontend_tests | true  | Skip frontend tests during the TDD-workflow (only 2 test files exist) |
+| skip_backend_tests  | false | Skip backend tests during the TDD-workflow                            |
 
 ## Tech Stack
 
-| Type            | Technology               | Version |
-|-----------------|--------------------------|---------|
-| Language        | Java                     | 25      |
-| Language        | TypeScript               | 5.x     |
-| Framework       | Spring Boot              | 4.0.1   |
-| Framework       | SvelteKit                | 2.x     |
-| Framework       | Svelte                   | 5       |
-| Database        | TimescaleDB (PostgreSQL) | 16      |
-| Build Tool      | Gradle                   | 8.x     |
-| Package Manager | Bun                      | 1.x     |
-| CSS             | TailwindCSS              | 4       |
+| Type                 | Technology                         | Version       |
+|----------------------|------------------------------------|---------------|
+| Backend Language     | Java                               | 25            |
+| Backend Framework    | Spring Boot                        | 4.1.0-RC1     |
+| Build Tool           | Gradle (Kotlin DSL)                | latest        |
+| Frontend Framework   | SvelteKit                          | 2.59          |
+| Frontend Language    | TypeScript / Svelte 5              | —             |
+| CSS                  | Tailwind CSS                       | v4            |
+| UI Components        | shadcn-svelte                      | —             |
+| Database             | PostgreSQL + TimescaleDB           | pg17          |
+| Migrations           | Liquibase                          | XML + raw SQL |
+| Package Manager (FE) | Bun                                | ≥1.3.0        |
+| API Contract         | OpenAPI 3 + openapi-fetch          | —             |
+| Mapping              | MapStruct                          | 1.6.3         |
+| Testing (BE)         | JUnit 5 + Mockito + Testcontainers | —             |
+| Testing (FE)         | Vitest                             | —             |
+
+## Agents
+
+| Agent                 | Path                                        | Purpose                         |
+|-----------------------|---------------------------------------------|---------------------------------|
+| backend-agent         | `.opencode/agents/backend-agent.md`         | Implements Spring Boot features |
+| backend-testing-agent | `.opencode/agents/backend-testing-agent.md` | Writes JUnit 5 tests            |
+| frontend-agent        | `.opencode/agents/frontend-agent.md`        | Builds SvelteKit UI             |
+
+## Skills
+
+| Skill                             | Path                                                          | Purpose                                    |
+|-----------------------------------|---------------------------------------------------------------|--------------------------------------------|
+| eventify-architecture             | `.opencode/skills/eventify-architecture/SKILL.md`             | Project structure, where to put code       |
+| eventify-backend-patterns         | `.opencode/skills/eventify-backend-patterns/SKILL.md`         | Java code patterns, naming, structure      |
+| eventify-backend-testing-patterns | `.opencode/skills/eventify-backend-testing-patterns/SKILL.md` | Test patterns, base classes, fixtures      |
+| eventify-frontend-patterns        | `.opencode/skills/eventify-frontend-patterns/SKILL.md`        | Svelte component, store, API patterns      |
+| eventify-whats-new                | `.opencode/skills/eventify-whats-new/SKILL.md`                | User-facing changelog update guidelines    |
+| eventify-release-process          | `.opencode/skills/eventify-release-process/SKILL.md`          | Git flow release conventions               |
+| jframe-search-pagination          | `.opencode/skills/jframe-search-pagination/SKILL.md`          | JFrame search/pagination endpoint patterns |
 
 ## Architecture
 
-### System Overview
+Eventify is an event notification and monitoring platform. It is a fullstack monorepo:
 
-Eventify is a real-time event ingestion and monitoring platform designed for high-performance time-series data handling.
-It provides:
-
-- **Event Ingestion:** High-volume REST API with batching and API Key authentication
-- **Data Organization:** Multi-level hierarchy (Organization → Channel → Event)
-- **Monitoring:** Real-time visualization and monitoring dashboards
-- **Access Control:** Granular permissions, organization memberships, API key management
-- **Security:** Multi-modal authentication (OAuth2, JWT, API Keys)
+- **Backend:** Spring Boot 4.1 (Java 25), Gradle Kotlin DSL, Lombok, MapStruct
+- **Frontend:** SvelteKit (Svelte 5), TypeScript, Tailwind CSS v4, Bun, shadcn-svelte
+- **Database:** PostgreSQL 17 + TimescaleDB (time-series hypertables)
+- **API contract:** OpenAPI spec auto-generated from server → typed TS client via `openapi-fetch`
 
 ### Project Structure
 
 ```
 eventify/
-├── client/                 # SvelteKit frontend (Svelte 5, Bun)
-│   ├── src/
-│   │   ├── lib/            # Shared logic
-│   │   │   ├── api/        # API layer (openapi-fetch client, controllers, services, models)
-│   │   │   │   ├── client.ts       # openapi-fetch typed client
-│   │   │   │   ├── models.ts       # Type exports + enum derivations from OpenAPI spec
-│   │   │   │   └── [domain]/       # Feature modules
-│   │   │   │       ├── Controller.ts       # API calls using client
-│   │   │   │       └── service/            # Business logic + state (.svelte.ts)
-│   │   │   ├── components/ # UI Components (organized by feature + /ui)
-│   │   │   ├── stores/     # Global state (Svelte 5 runes)
-│   │   │   └── config/     # Routes, constants
-│   │   └── routes/         # SvelteKit file-based routing
-│   │       ├── (authenticated)/  # Protected routes
-│   │       └── (public)/         # Landing, login, registration, dev-playbook
-│   └── tests/              # Playwright E2E tests
-│
-├── server/                 # Spring Boot backend (Java 25, Gradle)
-│   ├── src/
-│   │   ├── main/java/io/github/eventify/
-│   │   │   ├── api/        # Feature-based packages (event, user, channel, etc.)
-│   │   │   └── common/     # Cross-cutting concerns (security, email, config)
-│   │   └── main/resources/
-│   │       └── db/         # Liquibase migrations & SQL triggers
+├── server/                   # Spring Boot backend (port 8080)
+│   ├── src/main/java/io/github/eventify/
+│   │   ├── common/           # Cross-cutting: config, security, audit, util, email, exception, constant
+│   │   └── api/              # Domain modules (one folder per domain)
+│   ├── src/main/resources/
+│   │   └── db/changelog/     # Liquibase migrations
 │   └── build.gradle.kts
-│
-├── scripts/                # Shared automation (DB reset, CI/CD helpers)
-├── docker-compose.yml      # Local development services
-└── .opencode/              # Project configuration & documentation
+├── client/                   # SvelteKit frontend (port 3000 / dev: 5173)
+│   └── src/
+│       ├── routes/
+│       │   ├── (authenticated)/  # Protected pages
+│       │   └── (public)/         # Login, register, etc.
+│       └── lib/
+│           ├── api/          # Generated + hand-written API controllers (TS)
+│           ├── components/   # Feature components + shadcn-svelte ui/ primitives
+│           ├── config/
+│           ├── hooks/
+│           ├── stores/
+│           ├── types/        # api.d.ts (generated), domain types
+│           └── utils/
+└── scripts/                  # openapi-sync.sh, database-reset.sh, common.sh
 ```
 
-### Backend Layer Architecture
+### Backend Domain Modules
+
+Each domain under `api/{domain}/`:
 
 ```
-Controller → Validator → Service → Repository → Entity
-     ↓           ↓           ↓           ↓          ↓
-  REST API   Validation  Business   Data Access   JPA Model
-  Security                Logic
+controller/  → REST controllers ({Context}{Domain}Controller)
+service/     → Business logic (split by responsibility)
+repository/  → Spring Data JPA + JpaSpecificationExecutor
+model/
+  {Domain}.java       → JPA entity
+  request/            → Inbound DTOs
+  response/           → Outbound DTOs (@Schema annotated)
+  mapper/             → MapStruct mappers
+  validator/          → Fluent DSL validators (NOT JSR-303)
+job/          → (optional) Scheduled tasks
+cache/        → (optional) Cache logic
 ```
 
-The backend uses **feature-first packaging** under `io.github.eventify.api`:
+**Domains:** organization, token, monitor, bootstrap, changelog, notification, admin, user, subscription, channel,
+dashboard, apikey, quota, authentication, event, watchlist, session
 
-| Code Type        | Location                                    | Responsibilities                         |
-|------------------|---------------------------------------------|------------------------------------------|
-| **Controllers**  | `api/<feature>/controller`                  | REST endpoints, `@PreAuthorize` security |
-| **Services**     | `api/<feature>/service`                     | Business logic, `@Transactional`         |
-| **Repositories** | `api/<feature>/repository`                  | Spring Data JPA interfaces               |
-| **Entities**     | `api/<feature>/model`                       | JPA Entities with Lombok                 |
-| **DTOs**         | `api/<feature>/model/request` & `/response` | Immutable records for API                |
-| **Mappers**      | `api/<feature>/model/mapper`                | MapStruct interfaces                     |
-| **Validators**   | `api/<feature>/model/validator`             | Request validation logic                 |
+### Where to Put New Code
 
-### Frontend Architecture
-
-Routes use SvelteKit's file-based routing with layout groups:
-
-| Code Type              | Location                        | Pattern                                                |
-|------------------------|---------------------------------|--------------------------------------------------------|
-| **Routes/Pages**       | `src/routes/`                   | File-based with `(authenticated)/`, `(public)/` groups |
-| **Generic UI**         | `src/lib/components/ui/`        | shadcn-svelte (Radix primitives)                       |
-| **Feature Components** | `src/lib/components/<feature>/` | Domain-specific components                             |
-| **API Controllers**    | `src/lib/api/<domain>/`         | Typed API calls using openapi-fetch client             |
-| **Services**           | `src/lib/api/<domain>/service/` | Business logic, state (.svelte.ts)                     |
-| **Models & Enums**     | `src/lib/api/models.ts`         | OpenAPI-derived types and enum derivations             |
-| **Stores**             | `src/lib/stores/`               | Global state (Svelte 5 runes)                          |
-
-### Database Layer
-
-- **Technology:** TimescaleDB (PostgreSQL extension for time-series)
-- **Migrations:** Liquibase with raw SQL changesets
-- **Key Entities:** User, Organization, Channel, Event (Hypertable), ApiKey, Watchlist
+| I need to create... | Location                                                                          |
+|---------------------|-----------------------------------------------------------------------------------|
+| New domain module   | `server/src/main/java/io/github/eventify/api/{domain}/`                           |
+| Controller          | `api/{domain}/controller/{Context}{Domain}Controller.java`                        |
+| Service             | `api/{domain}/service/{Domain}Service.java`                                       |
+| Entity              | `api/{domain}/model/{Domain}.java`                                                |
+| Request DTO         | `api/{domain}/model/request/Create{Domain}Request.java`                           |
+| Response DTO        | `api/{domain}/model/response/{Domain}Response.java`                               |
+| Mapper              | `api/{domain}/model/mapper/{Domain}Mapper.java`                                   |
+| Validator           | `api/{domain}/model/validator/{Domain}Validator.java`                             |
+| DB migration        | `server/src/main/resources/db/changelog/changesets/{YYYYMMDDHHMM}-PRD-{desc}.xml` |
+| New page            | `client/src/routes/(authenticated)/{route}/+page.svelte`                          |
+| Feature component   | `client/src/lib/components/{feature}/{ComponentName}.svelte`                      |
+| API controller (TS) | `client/src/lib/api/{Domain}Controller.ts`                                        |
+| Store / service     | `client/src/lib/stores/{domain}.svelte.ts`                                        |
 
 ### Key Patterns
 
-| Pattern         | Where Used          | Example                                                       |
-|-----------------|---------------------|---------------------------------------------------------------|
-| Method Security | Backend Controllers | `@PreAuthorize("@channelSecurity.canAccess(#id, principal)")` |
-| MapStruct       | Entity↔DTO mapping  | `EventMapper.toCreatedResponse(event)`                        |
-| Lombok          | Reduce boilerplate  | `@RequiredArgsConstructor`, `@Getter`, `@Builder`             |
-| Svelte 5 Runes  | Frontend reactivity | `let count = $state(0);`                                      |
-| OpenAPI Fetch   | Type-safe API calls | `client.POST('/api/v1/events', { body })`                     |
+| Pattern           | Detail                                                                             |
+|-------------------|------------------------------------------------------------------------------------|
+| Domain modules    | Self-contained under `api/`; no cross-domain imports except via service interfaces |
+| Multi-tenancy     | Personal = `user_id` only; org-scoped = `user_id + organization_id`                |
+| OpenAPI sync      | Server generates spec → `scripts/openapi-sync.sh` → typed client                   |
+| Custom validation | Fluent DSL validators. **No JSR-303**                                              |
+| Security services | Named beans for SpEL in `@PreAuthorize`                                            |
+| TimescaleDB       | `event` and `audit_log` are hypertables; continuous aggregates for dashboards      |
 
 ### Quick Reference
 
-| Task           | Command                       | Location  |
-|----------------|-------------------------------|-----------|
-| Start Backend  | `./gradlew bootRun`           | Root      |
-| Start Frontend | `bun run dev`                 | `client/` |
-| Run Java Tests | `./gradlew test`              | Root      |
-| Sync API Types | `bun run sync:api`            | `client/` |
-| Reset Database | `./scripts/database-reset.sh` | Root      |
-| Format Code    | `./gradlew spotlessApply`     | Root      |
+```bash
+# Dev infrastructure
+docker compose up -d                  # starts DB, Jaeger, Inbucket
 
-## Agents
+# Backend (from server/)
+./gradlew bootRun                     # run with dev profile
+./gradlew clean build                 # full build + tests + quality
+./gradlew test                        # tests only
+./gradlew spotlessApply               # format code
 
-### Project-Specific Agents (in `.opencode/agents/`)
+# Frontend (from client/)
+bun run dev                           # dev server (port 5173)
+bun run build                         # production build
+bun run check                         # type checking
+bun run test                          # vitest
+bun run sync:api                      # regenerate API types from server spec
 
-| Agent                 | Purpose                            |
-|-----------------------|------------------------------------|
-| spring-testing-agent  | Write Java/JUnit tests (TDD first) |
-| spring-backend-agent  | Implement Spring Boot backend      |
-| svelte-frontend-agent | Build SvelteKit frontend           |
-
-**Note:** These agents contain eventify-specific patterns (test infrastructure, coding standards).
-They override the global agents of the same name when working on this project.
-
-### Global Agents (in `~/.config/opencode/agent/`)
-
-| Agent                    | Purpose                               |
-|--------------------------|---------------------------------------|
-| ui-validator             | Polish UI appearance                  |
-| deep-research-agent      | Explore codebase, find patterns       |
-| frontend-optimizer-agent | Refactor frontend for maintainability |
-| github-actions-agent     | CI/CD workflows                       |
-| email-composer-agent     | MJML email templates                  |
-
-## Skills
-
-### Project-Specific Skills (in `.opencode/skills/`)
-
-| Skill                     | Purpose                                                                                              |
-|---------------------------|------------------------------------------------------------------------------------------------------|
-| eventify-architecture     | Project structure, layer architecture, where code belongs (REQUIRED)                                 |
-| eventify-spring-standards | Spring Boot patterns: JFrame search/pagination, entities, services, controllers, tests               |
-| eventify-svelte-standards | SvelteKit patterns: Controller→Service→Page, API client, DataTable, reusable components              |
-| eventify-whats-new        | How to update the user-facing What's New changelog                                                   |
-| eventify-release-process  | Git flow release process: branch, tag, merge, version bump                                           |
-| jframe-search-pagination  | Using the JFRAME pattern for search and pagination in Spring Boot (backend) and SvelteKit (frontend) |
-
-**Note:** Project-specific skills contain patterns tailored to this codebase. Agents should load these first.
-
-### Global Skills (in `~/.config/opencode/skill/`)
-
-| Skill                          | Purpose                                      |
-|--------------------------------|----------------------------------------------|
-| liquibase-migrations-standards | Database migration patterns with raw SQL     |
-| ui-validation                  | Playwright UI validation with ui-polish-loop |
-| screenshot-tests               | Playwright screenshot test creation          |
-| gradle-test-reports            | Analyze Gradle test failures from reports    |
-| spring-security-best-practices | JWT, authentication, authorization patterns  |
-| api-design-best-practices      | REST API design patterns                     |
-| svelte-best-practices          | Svelte 5 runes, reactivity patterns          |
-| reflect                        | Session analysis and skill improvement       |
-
-## Bounded Contexts
-
-- Authentication & User Management
-- Event Management (Channels, Events, Watchlists)
-- Team Management (Organizations, Memberships)
-- Notification System
-
-## Security Patterns
-
-- Input validation with custom validators
-- Rate limiting for sensitive operations
-- Token hashing before storage
-- Audit logging for security events
-- JWT with RSA signing, refresh token rotation
+# Scripts
+scripts/database-reset.sh             # drop + recreate tst_eventify
+scripts/openapi-sync.sh               # full sync pipeline
+```
 
 ## Notes
 
-- Styling guide: `.opencode/STYLING-GUIDE.md`
-- After backend API changes, run `bun run sync:api` from `client/` to start the backend and regenerate TypeScript types
+- After adding/changing backend endpoints, run `bun run sync:api` from client/ to regenerate types
+- Validators use fluent DSL, NOT JSR-303 annotations — no `@Valid` anywhere
+- All path constants centralized in `api/Paths.java`
+- Error codes in `common/exception/ApiErrorCode.java` — add new ones sequentially (ERR-0063, etc.)
+- Frontend has minimal tests (2 files) — skip_frontend_tests=true
+- Dev stack: `docker compose up -d` from root for TimescaleDB + Jaeger + Inbucket
