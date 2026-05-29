@@ -125,7 +125,7 @@
 			{@const active = isFilterActive(col.key)}
 			<div class="relative">
 				<button
-					onclick={() => toggleFilter(col.key)}
+					onclick={(e) => { e.stopPropagation(); toggleFilter(col.key); }}
 					class="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-lg border transition-colors whitespace-nowrap
 						{active
 						? 'bg-primary/10 border-primary/30 text-primary'
@@ -139,10 +139,12 @@
 
 				<!-- Popover -->
 				{#if openFilter === col.key}
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<div
+				<div
+						role="menu"
+						tabindex="-1"
 						class="absolute top-full right-0 mt-1 z-50 min-w-[220px] rounded-lg border border-border/50 bg-card shadow-xl p-3"
-						onmousedown={(e) => e.stopPropagation()}
+						onclick={(e) => e.stopPropagation()}
+						onkeydown={(e) => { if (e.key === 'Escape') openFilter = null; }}
 					>
 						{#if col.filterType === 'TEXT' || col.filterType === 'FUZZY_TEXT'}
 							<input
@@ -216,6 +218,4 @@
 </div>
 
 <!-- Click outside to close popover -->
-{#if openFilter}
-	<button type="button" class="fixed inset-0 z-40 cursor-default" aria-label="Close filter" onclick={() => { openFilter = null; }}></button>
-{/if}
+<svelte:window onclick={() => { if (openFilter) openFilter = null; }} />

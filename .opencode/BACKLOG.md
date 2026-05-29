@@ -3,10 +3,7 @@
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
-- [ ] **Consider adding /auth/ to auditing logs** - currently only admin endpoints are logged. Adding /auth/ would give visibility into login/logout patterns, failed login attempts, and potential abuse. the hide noise button in audit logs should filter out only /auth endpoint. remove the /health endpoint from the audit logs because it is polled every 30s and adds a lot of noise to the logs.
-
-- [ ] **Table filter bars popover do not close when clicked outside**
-
+- [ ] **Table filter bars popover do not close when clicked outside** - only the filter bar in the admin audit page closes all the others do not. shouldn't they be the same component and if not shouldn't they have the same behaviour so clicking outside the bar closes the popover?
 ---
 
 ## Epic: Notification System
