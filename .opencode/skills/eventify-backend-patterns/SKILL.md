@@ -93,7 +93,6 @@ public class ChannelService {
     @Transactional
     public Channel create(final Long orgId, final CreateChannelRequest request) { ... }
 
-    @Transactional(readOnly = true)
     public Channel getById(final Long id) { ... }
 }
 
@@ -109,6 +108,7 @@ public class ChannelSecurityService {
 
 **Rules:**
 - `@Transactional` per method, not class-level
+- Only use `@Transactional` on complex operations involving multiple steps (e.g., create with related entities).
 - Security services: `@Service("domainSecurity")` naming for SpEL
 - Use `SecurityUtil.getLoggedInUser()` / `SecurityUtil.hasAuthority()` within services
 - Returns domain entities, not DTOs
