@@ -12,7 +12,7 @@ jframe:
     response-length: ${LOGGING_RESPONSE_LENGTH:-1}
 
   otlp:
-    disabled: ${OTLP_DISABLED:false}
+    disabled: ${OTLP_DISABLED:true}
     url: ${OTLP_URL:http://localhost:4318}
     timeout: ${OTLP_TIMEOUT:10s}
     sampling-rate: ${OTLP_SAMPLING_RATE:1.0}
