@@ -3,7 +3,6 @@
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
 
-- [ ] **Table filter bars popover do not close when clicked outside** - only the filter bar in the admin audit page closes all the others do not. shouldn't they be the same component and if not shouldn't they have the same behaviour so clicking outside the bar closes the popover?
 ---
 
 ## Epic: Notification System
