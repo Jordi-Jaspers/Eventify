@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { goto } from '$app/navigation';
     import { toast } from 'svelte-sonner';
     import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
@@ -24,15 +24,15 @@
     const sessionService = createSessionService();
 
     onMount(() => {
-        const error: string | null = $page.url.searchParams.get('error');
-        const linked: string | null = $page.url.searchParams.get('linked');
+        const error: string | null = page.url.searchParams.get('error');
+        const linked: string | null = page.url.searchParams.get('linked');
         if (error) {
             const message: string = LINK_ERROR_MESSAGES[error] ?? 'Failed to link provider. Please try again.';
             toast.error(message);
-            goto($page.url.pathname, { replaceState: true });
+            goto(page.url.pathname, { replaceState: true });
         } else if (linked) {
             toast.success(`${linked.charAt(0).toUpperCase() + linked.slice(1)} has been linked to your account.`);
-            goto($page.url.pathname, { replaceState: true });
+            goto(page.url.pathname, { replaceState: true });
         }
         accountsService.load();
         sessionService.load();

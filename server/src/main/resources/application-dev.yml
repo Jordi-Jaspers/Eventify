@@ -1,3 +1,8 @@
+jframe:
+  otlp:
+    disabled: ${OTLP_DISABLED:false}
+    url: ${OTLP_URL:http://jaeger.internal.jordijaspers.dev:4318}
+
 spring:
   liquibase:
     contexts: tst

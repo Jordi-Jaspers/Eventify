@@ -17,3 +17,15 @@ export function truncateText(
 	if (text.length <= maxLength) return text;
 	return `${text.substring(0, maxLength)}...`;
 }
+
+/**
+ * Get full name from first and last name parts
+ */
+export function getFullName(
+	firstName?: string | null,
+	lastName?: string | null,
+	fallback: string = 'Unknown User'
+): string {
+	const full: string = [firstName, lastName].filter(Boolean).join(' ').trim();
+	return full || fallback;
+}

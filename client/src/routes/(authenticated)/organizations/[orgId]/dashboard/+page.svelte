@@ -10,7 +10,7 @@
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
 	import { StatCard } from '$lib/components/ui/stat-card';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	const currentOrganization: UserOrganizationResponse | null = $derived(
 		organizationStore.currentOrganization
@@ -20,7 +20,7 @@
 	let statsLoading: boolean = $state(true);
 
 	$effect(() => {
-		const orgId = Number($page.params.orgId);
+		const orgId = Number(page.params.orgId);
 		if (!isNaN(orgId)) {
 			loadStats(orgId);
 		}

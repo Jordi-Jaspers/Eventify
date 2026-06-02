@@ -33,6 +33,11 @@
     import { WatchlistTableRow } from '$lib/components/watchlist';
     import ConfirmDialog from '$lib/components/ui/confirm-dialog/confirm-dialog.svelte';
     import { ClipboardList, Eye, Plus } from '@lucide/svelte';
+    import { PillToggle } from '$lib/components/ui/pill-toggle';
+    import { TimeRangePopover } from '$lib/components/ui/time-range-popover';
+    import { ErrorAlert } from '$lib/components/ui/error-alert';
+    import { InitialsAvatar } from '$lib/components/ui/initials-avatar';
+    import { HttpMethodBadge, HttpStatusBadge } from '$lib/components/ui/http-badge';
 
     // DataTable demo — mock ChannelDetailsResponse data
     const demoChannels: ChannelDetailsResponse[] = [
@@ -125,6 +130,15 @@
     let dateTimeValue1: string = $state('');
     let dateTimeValue2: string = $state(new Date().toISOString());
     let dateTimeValue3: string = $state('');
+
+    // PillToggle demo state
+    let activePill: string = $state('option1');
+
+    // TimeRangePopover demo state
+    let demoSelectedDays: string = $state('30');
+    let demoIsCustom: boolean = $state(false);
+    let demoCustomStart: string = $state('');
+    let demoCustomEnd: string = $state('');
     
     // Redirect if not in dev mode
     const isDev = showDevCredentials();
@@ -169,6 +183,8 @@
                 { id: 'stat-card', label: 'Stat Card' },
                 { id: 'badges', label: 'Badges' },
                 { id: 'date-time-picker', label: 'DateTimePicker' },
+                { id: 'pill-toggle', label: 'PillToggle' },
+                { id: 'time-range-popover', label: 'TimeRangePopover' },
                 { id: 'live-indicator', label: 'Live Indicator' },
                 { id: 'loading-card', label: 'Loading Card' },
                 { id: 'access-denied-card', label: 'Access Denied Card' },
@@ -180,7 +196,11 @@
                 { id: 'password-input', label: 'PasswordInput' },
                 { id: 'revoke-api-key-dialog', label: 'RevokeApiKeyAlertDialog' },
                 { id: 'confirm-dialog', label: 'ConfirmDialog' },
-                { id: 'watchlist-table-row', label: 'WatchlistTableRow' }
+                { id: 'watchlist-table-row', label: 'WatchlistTableRow' },
+                { id: 'error-alert', label: 'ErrorAlert' },
+                { id: 'initials-avatar', label: 'InitialsAvatar' },
+                { id: 'http-method-badge', label: 'HttpMethodBadge' },
+                { id: 'http-status-badge', label: 'HttpStatusBadge' }
             ]
         },
         {
@@ -874,7 +894,80 @@
                 </div>
             </section>
 
-            <!-- Live Indicator -->
+            <!-- PillToggle -->
+            <section id="pill-toggle" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">PillToggle</h2>
+                <p class="text-muted-foreground mb-6">Compact pill-style toggle for switching between views or modes.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Demo</CardTitle>
+                        <CardDescription>Import from $lib/components/ui/pill-toggle</CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-4">
+                        <div>
+                            <p class="text-xs text-muted-foreground mb-2">size="sm" (default)</p>
+                            <PillToggle
+                                items={[
+                                    { value: 'option1', label: 'Option 1' },
+                                    { value: 'option2', label: 'Option 2' },
+                                    { value: 'option3', label: 'Option 3' }
+                                ]}
+                                active={activePill}
+                                onSelect={(v: string) => { activePill = v; }}
+                                size="sm"
+                            />
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground mb-2">size="md"</p>
+                            <PillToggle
+                                items={[
+                                    { value: 'overview', label: 'Overview' },
+                                    { value: 'infrastructure', label: 'Infrastructure' },
+                                    { value: 'events', label: 'Events' }
+                                ]}
+                                active={activePill}
+                                onSelect={(v: string) => { activePill = v; }}
+                                size="md"
+                            />
+                        </div>
+                        <p class="text-sm text-muted-foreground">Active: <code class="text-xs bg-muted px-1 py-0.5 rounded">{activePill}</code></p>
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- TimeRangePopover -->
+            <section id="time-range-popover" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">TimeRangePopover</h2>
+                <p class="text-muted-foreground mb-6">Popover for selecting quick date ranges or a custom date/time range.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Demo</CardTitle>
+                        <CardDescription>Import from $lib/components/ui/time-range-popover</CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-4">
+                        <TimeRangePopover
+                            selectedDays={demoSelectedDays}
+                            isCustomRange={demoIsCustom}
+                            customStart={demoCustomStart}
+                            customEnd={demoCustomEnd}
+                            onQuickRangeSelect={(days: string) => { demoSelectedDays = days; demoIsCustom = false; demoCustomStart = ''; demoCustomEnd = ''; }}
+                            onCustomRangeApply={(start: string, end: string) => { demoCustomStart = start; demoCustomEnd = end; demoIsCustom = true; }}
+                            onCustomRangeToggle={() => { demoIsCustom = true; }}
+                        />
+                        <p class="text-sm text-muted-foreground">
+                            {#if demoIsCustom && demoCustomStart && demoCustomEnd}
+                                Custom: <code class="text-xs bg-muted px-1 py-0.5 rounded">{demoCustomStart} → {demoCustomEnd}</code>
+                            {:else}
+                                Last <code class="text-xs bg-muted px-1 py-0.5 rounded">{demoSelectedDays}</code> days
+                            {/if}
+                        </p>
+                    </CardContent>
+                </Card>
+            </section>
+
+
             <section id="live-indicator" class="mb-20 scroll-mt-20">
                 <h2 class="text-2xl font-semibold mb-2">Pulse Indicator</h2>
                 <p class="text-muted-foreground mb-6">Smooth pulsing animation for real-time status</p>
@@ -2037,6 +2130,97 @@
                             onEdit={() => {}}
                             onDelete={() => {}}
                         />
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- ErrorAlert -->
+            <section id="error-alert" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">ErrorAlert</h2>
+                <p class="text-muted-foreground mb-6">Destructive alert for displaying errors with optional retry action.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Without Retry</CardTitle>
+                        <CardDescription>Simple error message display</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ErrorAlert message="Failed to load data. Please try again later." />
+                    </CardContent>
+                </Card>
+
+                <Card class="border-border/50 mt-4">
+                    <CardHeader>
+                        <CardTitle class="text-base">With Retry</CardTitle>
+                        <CardDescription>Error message with retry button</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ErrorAlert message="Failed to load statistics." onRetry={() => {}} />
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- InitialsAvatar -->
+            <section id="initials-avatar" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">InitialsAvatar</h2>
+                <p class="text-muted-foreground mb-6">Circular avatar displaying user initials in three sizes.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Sizes</CardTitle>
+                        <CardDescription>sm, md, lg variants</CardDescription>
+                    </CardHeader>
+                    <CardContent class="flex items-center gap-4">
+                        <div class="flex flex-col items-center gap-1">
+                            <InitialsAvatar initials="JD" size="sm" />
+                            <span class="text-xs text-muted-foreground">sm</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <InitialsAvatar initials="JD" size="md" />
+                            <span class="text-xs text-muted-foreground">md</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <InitialsAvatar initials="JD" size="lg" />
+                            <span class="text-xs text-muted-foreground">lg</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- HttpMethodBadge -->
+            <section id="http-method-badge" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">HttpMethodBadge</h2>
+                <p class="text-muted-foreground mb-6">Color-coded badge for HTTP methods.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">All Methods</CardTitle>
+                        <CardDescription>GET, POST, PUT, PATCH, DELETE</CardDescription>
+                    </CardHeader>
+                    <CardContent class="flex flex-wrap gap-2">
+                        <HttpMethodBadge method="GET" />
+                        <HttpMethodBadge method="POST" />
+                        <HttpMethodBadge method="PUT" />
+                        <HttpMethodBadge method="PATCH" />
+                        <HttpMethodBadge method="DELETE" />
+                    </CardContent>
+                </Card>
+            </section>
+
+            <!-- HttpStatusBadge -->
+            <section id="http-status-badge" class="mb-20 scroll-mt-20">
+                <h2 class="text-2xl font-semibold mb-2">HttpStatusBadge</h2>
+                <p class="text-muted-foreground mb-6">Color-coded badge for HTTP status codes.</p>
+
+                <Card class="border-border/50">
+                    <CardHeader>
+                        <CardTitle class="text-base">Status Ranges</CardTitle>
+                        <CardDescription>2xx=green, 4xx=yellow, 5xx=red</CardDescription>
+                    </CardHeader>
+                    <CardContent class="flex flex-wrap gap-2">
+                        <HttpStatusBadge status={200} />
+                        <HttpStatusBadge status={404} />
+                        <HttpStatusBadge status={500} />
                     </CardContent>
                 </Card>
             </section>

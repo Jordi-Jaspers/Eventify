@@ -43,6 +43,7 @@ export type DailyVolumePoint = components['schemas']['DailyVolumePoint'];
 export type AdminEventStatsResponse = components['schemas']['AdminEventStatsResponse'];
 export type AdminApiKeyStatsResponse = components['schemas']['ApiKeyStatsResponse'];
 export type TableSizeEntry = components['schemas']['TableSizeEntry'];
+export type AdminStatsRequest = components['schemas']['AdminStatsRequest'];
 export type AdminApiKeyAuditResponse = components['schemas']['ApiKeyAuditResponse'];
 export type PageResourceAdminApiKeyAuditResponse =
 	components['schemas']['PageResourceApiKeyAuditResponse'];
@@ -84,6 +85,10 @@ export type MonitorResponse = components['schemas']['MonitorResponse'];
 export type MonitorFilters = components['schemas']['MonitorFilters'];
 export type DashboardResponse = components['schemas']['DashboardResponse'];
 export type DashboardStatsResponse = components['schemas']['DashboardStatsResponse'];
+export type UserDashboardResponse = components['schemas']['UserDashboardResponse'];
+export type WatchlistHealthResponse = components['schemas']['WatchlistHealthResponse'];
+export type RecentNotificationResponse = components['schemas']['RecentNotificationResponse'];
+export type OrganizationStatusResponse = components['schemas']['OrganizationStatusResponse'];
 export type ChannelResponse = components['schemas']['ChannelResponse'];
 export type ChannelGroupResponse = components['schemas']['ChannelGroupResponse'];
 export type Timeline = components['schemas']['Timeline'];
@@ -136,6 +141,15 @@ export type SortDirection = NonNullable<SortableColumn['direction']>;
 // ================ Audit Log ===================
 export type AuditLogResponse = components['schemas']['AuditLogResponse'];
 export type AuditLogStatsResponse = components['schemas']['AuditLogStatsResponse'];
+
+// ================ Organization Statistics ===================
+export type OrgStatsRequest = components['schemas']['OrgStatsRequest'];
+export type OrgTimelineResponse = components['schemas']['OrgTimelineResponse'];
+export type OrgSummaryResponse = components['schemas']['OrgSummaryResponse'];
+export type OrgTimelineBucketResponse = components['schemas']['OrgTimelineBucketResponse'];
+export type OrgErrorRateBucketResponse = components['schemas']['OrgErrorRateBucketResponse'];
+export type OrgApiKeyStatsResponse = components['schemas']['OrgApiKeyStatsResponse'];
+export type OrgTopApiKeyResponse = components['schemas']['OrgTopApiKeyResponse'];
 
 // ================ Generic PageResource ===================
 // Generic type for paginated responses (mirrors backend PageResource<T>)

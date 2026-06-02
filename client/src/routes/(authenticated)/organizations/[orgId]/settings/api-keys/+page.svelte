@@ -4,65 +4,20 @@
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Key, Plus, Info } from '@lucide/svelte';
-	import type { ApiKeyResponse, SortablePageInput, PageResource, UserOrganizationResponse, OrganizationResponse } from '$lib/api/models';
+	import type { ApiKeyResponse, SortablePageInput, PageResource } from '$lib/api/models';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn, DataTableService } from '$lib/components/data-table/types';
 	import { CreateApiKeySheet, ApiKeyCreatedModal, ApiKeyTableRow, RevokeApiKeyAlertDialog } from '$lib/components/api-keys';
 	import { searchOrganizationApiKeys } from '$lib/api/organization/OrganizationApiKeyController';
-	import { getOrganizationById } from '$lib/api/admin/AdminOrganizationController';
-	import { organizationStore } from '$lib/stores/organization.svelte';
-	import { currentUser } from '$lib/stores/auth';
 	import { createApiKeyManagementService } from '$lib/api/organization/service/ApiKeyManagementService.svelte';
+	import { createAdminOrgContext } from '$lib/api/organization/service/AdminOrgContext.svelte';
 
 	// Reactive orgId from route params
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
-	
-	// Get organization from store - find by orgId to handle navigation
-	const organizationFromStore: UserOrganizationResponse | undefined = $derived(
-		organizationStore.organizations.find(
-			(org: UserOrganizationResponse) => org.organizationId === orgId
-		)
-	);
-	
-	// Check permissions - canManage if OWNER, ADMIN, or global ADMIN
-	const isGlobalAdmin: boolean = $derived($currentUser?.role === 'ADMIN');
-	const canManage: boolean = $derived.by((): boolean => {
-		// Global admin can always manage
-		if (isGlobalAdmin) return true;
-		// Check if user is OWNER or ADMIN of this specific org
-		if (!organizationFromStore) return false;
-		const role: string | undefined = organizationFromStore.role;
-		return role === 'OWNER' || role === 'ADMIN';
-	});
+	const ctx = createAdminOrgContext(() => orgId);
 
-	// For global admins not in the org, fetch org details from API (for display purposes)
-	let adminFetchedOrg: OrganizationResponse | null = $state(null);
-	let lastFetchedOrgId: number = $state(0);
-
-	// Fetch org for global admin if not in store
-	$effect(() => {
-		if (!browser) return;
-		const currentOrgId: number = orgId;
-		const needsFetch: boolean = isGlobalAdmin && !organizationFromStore && currentOrgId > 0 && currentOrgId !== lastFetchedOrgId;
-		
-		if (needsFetch) {
-			lastFetchedOrgId = currentOrgId;
-			getOrganizationById(currentOrgId)
-				.then((org: OrganizationResponse | null) => {
-					adminFetchedOrg = org;
-				})
-				.catch(() => {
-					adminFetchedOrg = null;
-				});
-		}
-	});
-
-	// Organization name for display
-	const orgName: string = $derived.by((): string => {
-		if (organizationFromStore) return organizationFromStore.organizationName ?? 'Organization';
-		if (adminFetchedOrg) return adminFetchedOrg.name ?? 'Organization';
-		return 'Organization';
-	});
+	const canManage: boolean = $derived(ctx.canManage);
+	const orgName: string = $derived(ctx.orgName);
 
 	// DataTable service - will be recreated when orgId changes
 	let service: DataTableService<ApiKeyResponse> | undefined = $state(undefined);

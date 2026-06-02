@@ -1,12 +1,12 @@
 package io.github.eventify.api.admin.audit.controller;
 
+import io.github.eventify.api.admin.audit.model.AuditLog;
 import io.github.eventify.api.admin.audit.model.mapper.AuditLogMapper;
 import io.github.eventify.api.admin.audit.model.mapper.AuditLogStatsMapper;
 import io.github.eventify.api.admin.audit.model.response.AuditLogResponse;
 import io.github.eventify.api.admin.audit.model.response.AuditLogStatsData;
 import io.github.eventify.api.admin.audit.model.response.AuditLogStatsResponse;
 import io.github.eventify.api.admin.audit.service.AdminAuditLogService;
-import io.github.eventify.common.audit.model.AuditLog;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.datasource.search.model.resource.PageResource;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import { page } from '$app/state';
 	import {
 		getAdminCounts,
 		getAdminGrowth,
@@ -11,10 +9,13 @@
 		getStorageStats,
 		getEventStats
 	} from '$lib/api/admin/AdminController';
+	import type { AdminStatsRequest } from '$lib/api/models.ts';
 	import { getAdminApiKeyStats } from '$lib/api/admin/AdminApiKeyController';
 	import { handleError } from '$lib/utils/error-handler';
 	import { toast } from 'svelte-sonner';
-	import { CircleAlert } from '@lucide/svelte';
+	import { TimeRangePopover } from '$lib/components/ui/time-range-popover';
+	import { ErrorAlert } from '$lib/components/ui/error-alert';
+	import { computeDaysFromRange } from '$lib/utils/time-range';
 	import type {
 		AdminApiKeyStatsResponse,
 		TableSizeEntry,
@@ -49,26 +50,33 @@
 
 	// ── URL params ─────────────────────────────────────────────────────────────
 	type Tab = 'overview' | 'infrastructure' | 'events';
-	type Days = 7 | 30 | 90 | 180;
 
 	const activeTab: Tab = $derived(
-		((): Tab => {
-			const t: string | null = $page.url.searchParams.get('tab');
-			if (t === 'infrastructure') return 'infrastructure';
-			if (t === 'events') return 'events';
-			return 'overview';
-		})()
-	);
-	const selectedDays: Days = $derived(
-		((): Days => {
-			const d: number = Number($page.url.searchParams.get('days') ?? '30');
-			if (d === 7 || d === 90 || d === 180) return d as Days;
-			return 30;
-		})()
+		page.url.searchParams.get('tab') === 'infrastructure' ? 'infrastructure'
+		: page.url.searchParams.get('tab') === 'events' ? 'events'
+		: 'overview'
 	);
 
+	let selectedDays: string = $state(page.url.searchParams.get('days') ?? '30');
+	let isCustomRange: boolean = $state(
+		page.url.searchParams.has('start') && page.url.searchParams.has('end')
+	);
+	let customStart: string = $state(page.url.searchParams.get('start') ?? '');
+	let customEnd: string = $state(page.url.searchParams.get('end') ?? '');
+
+	function buildStatsRequest(): AdminStatsRequest {
+		if (isCustomRange && customStart && customEnd) {
+			return { startDate: customStart, endDate: customEnd };
+		}
+		return { days: Number(selectedDays) };
+	}
+
+	function buildDaysForEventTab(): number {
+		return computeDaysFromRange(Number(selectedDays), isCustomRange, customStart, customEnd);
+	}
+
 	function setTab(tab: Tab): void {
-		const url: URL = new URL($page.url);
+		const url: URL = new URL(page.url);
 		url.searchParams.set('tab', tab);
 		goto(url.toString(), { replaceState: true });
 		if (tab === 'infrastructure' && !apiKeyStats) {
@@ -79,37 +87,65 @@
 		}
 	}
 
-	function setDays(days: Days): void {
-		const url: URL = new URL($page.url);
-		url.searchParams.set('days', String(days));
+	function reloadAfterRangeChange(): void {
+		loadOverview();
+		if (activeTab === 'events') loadEvents();
+	}
+
+	function handleQuickRangeSelect(days: string): void {
+		selectedDays = days;
+		isCustomRange = false;
+		customStart = '';
+		customEnd = '';
+		const url: URL = new URL(page.url);
+		url.searchParams.set('days', days);
+		url.searchParams.delete('start');
+		url.searchParams.delete('end');
 		goto(url.toString(), { replaceState: true });
-		loadOverview(days);
-		if (activeTab === 'events') {
-			loadEvents(days);
-		}
+		reloadAfterRangeChange();
+	}
+
+	function handleCustomRangeApply(start: string, end: string): void {
+		customStart = start;
+		customEnd = end;
+		isCustomRange = true;
+		const url: URL = new URL(page.url);
+		url.searchParams.delete('days');
+		url.searchParams.set('start', start);
+		url.searchParams.set('end', end);
+		goto(url.toString(), { replaceState: true });
+		reloadAfterRangeChange();
+	}
+
+	function handleCustomRangeToggle(): void {
+		isCustomRange = true;
 	}
 
 	// ── Data loading ───────────────────────────────────────────────────────────
-	async function loadOverview(days?: Days): Promise<void> {
+	function showError(err: unknown, fallback: string, setter: (msg: string) => void): void {
+		const { message } = handleError(err, fallback);
+		setter(message);
+		toast.error(message);
+	}
+
+	async function loadOverview(): Promise<void> {
 		overviewError = null;
 		countsLoading = true;
 		growthLoading = true;
+		const request: AdminStatsRequest = buildStatsRequest();
 		try {
-			const [c, g, v]: [AdminCountsResponse, AdminGrowthResponse, AdminEventVolumeResponse] =
-				await Promise.all([
-					getAdminCounts().finally(() => (countsLoading = false)),
-					getAdminGrowth(days ?? selectedDays).finally(() => (growthLoading = false)),
-					getEventVolume(days ?? selectedDays).finally(() => (growthLoading = false))
-				]);
+			const [c, g, v] = await Promise.all([
+				getAdminCounts().finally(() => (countsLoading = false)),
+				getAdminGrowth(request).finally(() => (growthLoading = false)),
+				getEventVolume(request).finally(() => (growthLoading = false))
+			]);
 			counts = c;
 			growth = g;
 			eventVolume = v;
 		} catch (err: unknown) {
 			countsLoading = false;
 			growthLoading = false;
-			const { message }: { message: string } = handleError(err, 'Failed to load overview statistics');
-			overviewError = message;
-			toast.error(message);
+			showError(err, 'Failed to load overview statistics', (m) => (overviewError = m));
 		}
 	}
 
@@ -117,41 +153,37 @@
 		infraError = null;
 		infraLoading = true;
 		try {
-			const [keys, storage, c]: [AdminApiKeyStatsResponse, TableSizeEntry[], AdminCountsResponse] =
-				await Promise.all([
-					getAdminApiKeyStats(),
-					getStorageStats(),
-					counts ? Promise.resolve(counts) : getAdminCounts()
-				]);
+			const [keys, storage, c] = await Promise.all([
+				getAdminApiKeyStats(),
+				getStorageStats(),
+				counts ? Promise.resolve(counts) : getAdminCounts()
+			]);
 			apiKeyStats = keys;
 			storageStats = storage;
 			counts = c;
 		} catch (err: unknown) {
-			const { message }: { message: string } = handleError(err, 'Failed to load infrastructure stats');
-			infraError = message;
-			toast.error(message);
+			showError(err, 'Failed to load infrastructure stats', (m) => (infraError = m));
 		} finally {
 			infraLoading = false;
 		}
 	}
 
-	async function loadEvents(days?: Days): Promise<void> {
+	async function loadEvents(): Promise<void> {
 		eventsError = null;
 		eventsLoading = true;
 		volumeLoading = true;
+		const request: AdminStatsRequest = buildStatsRequest();
 		try {
-			const [es, ev]: [AdminEventStatsResponse, AdminEventVolumeResponse] = await Promise.all([
-				getEventStats(days ?? selectedDays).finally(() => (eventsLoading = false)),
-				getEventVolume(days ?? selectedDays).finally(() => (volumeLoading = false))
+			const [es, ev] = await Promise.all([
+				getEventStats(request).finally(() => (eventsLoading = false)),
+				getEventVolume(request).finally(() => (volumeLoading = false))
 			]);
 			eventStats = es;
 			eventVolume = ev;
 		} catch (err: unknown) {
 			eventsLoading = false;
 			volumeLoading = false;
-			const { message }: { message: string } = handleError(err, 'Failed to load event stats');
-			eventsError = message;
-			toast.error(message);
+			showError(err, 'Failed to load event stats', (m) => (eventsError = m));
 		}
 	}
 
@@ -166,23 +198,6 @@
 	});
 </script>
 
-{#snippet pillToggle(items: { value: string; label: string }[], active: string, onSelect: (v: string) => void, size?: 'sm' | 'md')}
-	{@const px = size === 'sm' ? 'px-3 py-1' : 'px-4 py-1.5'}
-	{@const text = size === 'sm' ? 'text-xs' : 'text-sm'}
-	<div class="flex items-center gap-1 bg-muted/40 rounded-full p-1 border border-border/50">
-		{#each items as item (item.value)}
-			<button
-				class="{px} rounded-full {text} font-medium transition-all {active === item.value
-					? 'bg-primary text-primary-foreground shadow-sm'
-					: 'text-muted-foreground hover:text-foreground'}"
-				onclick={() => onSelect(item.value)}
-			>
-				{item.label}
-			</button>
-		{/each}
-	</div>
-{/snippet}
-
 {#snippet loadingSkeleton(rows: number, height?: string)}
 	{@const h = height ?? 'h-6'}
 	<div class="space-y-3">
@@ -190,16 +205,6 @@
 			<div class="{h} bg-muted animate-pulse rounded"></div>
 		{/each}
 	</div>
-{/snippet}
-
-{#snippet sectionError(message: string, onRetry: () => void)}
-	<Alert variant="destructive" class="bg-destructive/10 border-destructive/50 backdrop-blur-sm">
-		<CircleAlert class="h-4 w-4" />
-		<AlertDescription>
-			{message}
-			<Button variant="outline" size="sm" class="ml-4" onclick={onRetry}>Retry</Button>
-		</AlertDescription>
-	</Alert>
 {/snippet}
 
 <svelte:head>
@@ -219,27 +224,35 @@
 
 		<!-- Tab navigation + Time range -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-			{@render pillToggle(
-				[
-					{ value: 'overview', label: 'Overview' },
-					{ value: 'infrastructure', label: 'Infrastructure' },
-					{ value: 'events', label: 'Events' }
-				],
-				activeTab,
-				(v) => setTab(v as Tab),
-				'md'
-			)}
-			{@render pillToggle(
-				([7, 30, 90, 180] as Days[]).map((d) => ({ value: String(d), label: `${d}d` })),
-				String(selectedDays),
-				(v) => setDays(Number(v) as Days),
-				'sm'
-			)}
+			<div class="border-b border-border/50">
+				<nav class="flex gap-1 px-1">
+					{#each [{ value: 'overview', label: 'Overview' }, { value: 'infrastructure', label: 'Infrastructure' }, { value: 'events', label: 'Events' }] as tab (tab.value)}
+						<button
+							onclick={() => setTab(tab.value as Tab)}
+							class="px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px
+								{activeTab === tab.value
+								? 'border-primary text-primary'
+								: 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'}"
+						>
+							{tab.label}
+						</button>
+					{/each}
+				</nav>
+			</div>
+			<TimeRangePopover
+				{selectedDays}
+				{isCustomRange}
+				{customStart}
+				{customEnd}
+				onQuickRangeSelect={handleQuickRangeSelect}
+				onCustomRangeApply={handleCustomRangeApply}
+				onCustomRangeToggle={handleCustomRangeToggle}
+			/>
 		</div>
 
 		{#if activeTab === 'overview'}
 			{#if overviewError}
-				{@render sectionError(overviewError, () => loadOverview())}
+				<ErrorAlert message={overviewError} onRetry={() => loadOverview()} />
 			{:else}
 				<OverviewTab
 					{counts}
@@ -252,7 +265,7 @@
 			{/if}
 		{:else if activeTab === 'infrastructure'}
 			{#if infraError}
-				{@render sectionError(infraError, () => loadInfra())}
+				<ErrorAlert message={infraError} onRetry={() => loadInfra()} />
 			{:else}
 				<InfrastructureTab
 					{counts}
@@ -265,12 +278,12 @@
 			{/if}
 		{:else if activeTab === 'events'}
 			{#if eventsError}
-				{@render sectionError(eventsError, () => loadEvents())}
+				<ErrorAlert message={eventsError} onRetry={() => loadEvents()} />
 			{:else}
 				<EventsTab
 					{eventStats}
 					{eventVolume}
-					{selectedDays}
+					selectedDays={buildDaysForEventTab()}
 					{eventsLoading}
 					{volumeLoading}
 					{loadingSkeleton}

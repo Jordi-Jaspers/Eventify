@@ -35,81 +35,45 @@ public class AggregateTimelineBuilder {
         final TimeSpan range,
         final BucketSize bucketSize
     ) {
-        final List<TimelineDuration> durations = computeDurationsFromBuckets(buckets, range, bucketSize.getDuration());
-        return Timeline.builder().durations(durations).build();
-    }
-
-    private List<TimelineDuration> computeDurationsFromBuckets(
-        final List<TimelineBucket> buckets,
-        final TimeSpan range,
-        final Duration bucketDuration
-    ) {
-        if (buckets == null || buckets.isEmpty()) {
-            return List.of(TimelineDuration.of(Severity.NO_DATA, range.getStart(), range.getEnd()));
-        }
-        return buildFromNonEmptyBuckets(buckets, range, bucketDuration);
-    }
-
-    private List<TimelineDuration> buildFromNonEmptyBuckets(
-        final List<TimelineBucket> buckets,
-        final TimeSpan range,
-        final Duration bucketDuration
-    ) {
         final OffsetDateTime rangeStart = range.getStart();
         final OffsetDateTime rangeEnd = range.getEnd();
+
+        if (buckets == null || buckets.isEmpty()) {
+            return Timeline.builder()
+                .durations(List.of(TimelineDuration.of(Severity.NO_DATA, rangeStart, rangeEnd)))
+                .build();
+        }
+
+        final Duration bucketDuration = bucketSize.getDuration();
 
         final List<TimelineBucket> sortedBuckets = buckets.stream()
             .sorted(Comparator.comparing(TimelineBucket::getBucketTime))
             .toList();
 
-        final TimelineBucket priorBucket = findPriorBucket(sortedBuckets, rangeStart);
-        final List<TimelineBucket> inRangeBuckets = filterInRangeBuckets(sortedBuckets, rangeStart, rangeEnd);
-        final Severity initialSeverity = resolveInitialSeverity(priorBucket);
-
-        if (inRangeBuckets.isEmpty()) {
-            return List.of(TimelineDuration.of(initialSeverity, range.getStart(), range.getEnd()));
-        }
-
-        final List<TimelineDuration> durations = buildDurationsFromBuckets(
-            inRangeBuckets,
-            range.getStart(),
-            range.getEnd(),
-            bucketDuration,
-            initialSeverity
-        );
-
-        if (!durations.isEmpty()) {
-            durations.getLast().setEndTime(range.getEnd());
-        }
-
-        return durations;
-    }
-
-    private TimelineBucket findPriorBucket(
-        final List<TimelineBucket> sortedBuckets,
-        final OffsetDateTime rangeStart
-    ) {
-        return sortedBuckets.stream()
+        final TimelineBucket priorBucket = sortedBuckets.stream()
             .filter(b -> b.getBucketTime().isBefore(rangeStart))
             .reduce((a, b) -> b)
             .orElse(null);
-    }
 
-    private List<TimelineBucket> filterInRangeBuckets(
-        final List<TimelineBucket> sortedBuckets,
-        final OffsetDateTime start,
-        final OffsetDateTime end
-    ) {
-        return sortedBuckets.stream()
-            .filter(b -> !b.getBucketTime().isBefore(start) && b.getBucketTime().isBefore(end))
+        final List<TimelineBucket> inRangeBuckets = sortedBuckets.stream()
+            .filter(b -> !b.getBucketTime().isBefore(rangeStart) && b.getBucketTime().isBefore(rangeEnd))
             .toList();
-    }
 
-    private Severity resolveInitialSeverity(final TimelineBucket priorBucket) {
-        if (priorBucket == null) {
-            return Severity.NO_DATA;
+        final Severity initialSeverity = priorBucket == null
+            ? Severity.NO_DATA
+            : Severity.fromString(priorBucket.getLastSeverity());
+
+        final List<TimelineDuration> durations;
+        if (inRangeBuckets.isEmpty()) {
+            durations = new ArrayList<>(List.of(TimelineDuration.of(initialSeverity, rangeStart, rangeEnd)));
+        } else {
+            durations = buildDurationsFromBuckets(inRangeBuckets, rangeStart, rangeEnd, bucketDuration, initialSeverity);
+            if (!durations.isEmpty()) {
+                durations.getLast().setEndTime(rangeEnd);
+            }
         }
-        return Severity.fromString(priorBucket.getLastSeverity());
+
+        return Timeline.builder().durations(durations).build();
     }
 
     private List<TimelineDuration> buildDurationsFromBuckets(
@@ -131,11 +95,12 @@ public class AggregateTimelineBuilder {
 
         for (final TimelineBucket bucket : inRangeBuckets) {
             final OffsetDateTime bucketStart = bucket.getBucketTime();
-            final OffsetDateTime bucketEnd = computeBucketEnd(bucketStart, bucketDuration, rangeEnd);
+            final OffsetDateTime naturalEnd = bucketStart.plus(bucketDuration);
+            final OffsetDateTime bucketEnd = naturalEnd.isAfter(rangeEnd) ? rangeEnd : naturalEnd;
 
             if (bucketStart.isAfter(prevEnd)) {
-                durations.add(TimelineDuration.of(Severity.NO_DATA, prevEnd, bucketStart));
-                prevSeverity = null;
+                final Severity gapSeverity = prevSeverity != null ? prevSeverity : initialSeverity;
+                durations.add(TimelineDuration.of(gapSeverity, prevEnd, bucketStart));
             }
 
             final Severity bucketSeverity = Severity.fromString(bucket.getLastSeverity());
@@ -156,15 +121,6 @@ public class AggregateTimelineBuilder {
         }
 
         return durations;
-    }
-
-    private OffsetDateTime computeBucketEnd(
-        final OffsetDateTime bucketStart,
-        final Duration bucketDuration,
-        final OffsetDateTime rangeEnd
-    ) {
-        final OffsetDateTime naturalEnd = bucketStart.plus(bucketDuration);
-        return naturalEnd.isAfter(rangeEnd) ? rangeEnd : naturalEnd;
     }
 
 }

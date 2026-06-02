@@ -7,9 +7,10 @@
 	import type { OrganizationMembershipResponse, OrganizationalRole, SortablePageInput, PageResource } from '$lib/api/models';
 	import { currentUser } from '$lib/stores/auth';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
-	import type { DataTableColumn, DataTableService } from '$lib/components/data-table/types';
+	import type { DataTableService } from '$lib/components/data-table/types';
 	import { getInitials } from '$lib/utils/string';
 	import { formatRelativeDate } from '$lib/utils/date';
+	import { InitialsAvatar } from '$lib/components/ui/initials-avatar';
 	import {
 		AddMemberSheet,
 		RemoveMemberSheet,
@@ -20,6 +21,7 @@
 	} from '$lib/components/members';
 	import { searchCurrentMembers } from '$lib/api/organization/OrganizationMembershipController';
 	import { createMemberManagementService } from '$lib/api/organization/service/MemberManagementService.svelte';
+	import { memberTableColumns } from '$lib/config/member-table-columns';
 
 	// Reactive orgId from route params
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
@@ -49,49 +51,7 @@
 	});
 
 	// Columns configuration
-	const columns: DataTableColumn<OrganizationMembershipResponse>[] = [
-		{
-			key: 'search',
-			label: 'Search',
-			filterable: true,
-			filterType: 'FUZZY_TEXT',
-			filterPlaceholder: 'Search members...',
-			colSpan: 0
-		},
-		{
-			key: 'member',
-			label: 'Member',
-			colSpan: 4
-		},
-		{
-			key: 'email',
-			label: 'Email',
-			sortable: true,
-			colSpan: 3
-		},
-		{
-			key: 'role',
-			label: 'Role',
-			sortable: true,
-			filterable: true,
-			filterType: 'MULTI_ENUM',
-			filterOptions: [
-				{ value: 'OWNER', label: 'Owner' },
-				{ value: 'ADMIN', label: 'Admin' },
-				{ value: 'MEMBER', label: 'Member' }
-			],
-			colSpan: 2
-		},
-		{
-			key: 'joinedAt',
-			label: 'Joined',
-			sortable: true,
-			colSpan: 2
-		},
-		{
-			key: 'actions'
-		}
-	];
+	const columns = memberTableColumns;
 
 	// Derived permissions
 	const currentUserRole: OrganizationalRole | null = $derived.by(() => {
@@ -225,11 +185,7 @@
 					<div class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-4 hover:bg-muted/30 transition-all">
 						<!-- Avatar & Name -->
 						<div class="col-span-1 md:col-span-4 flex items-center gap-3">
-							<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 flex-shrink-0">
-								<span class="text-sm font-medium text-primary">
-									{getInitials(member.userFirstName ?? '', member.userLastName ?? '')}
-								</span>
-							</div>
+							<InitialsAvatar initials={getInitials(member.userFirstName ?? '', member.userLastName ?? '')} size="md" />
 							<div class="min-w-0">
 								<p class="font-medium truncate">
 									{member.userFirstName ?? ''} {member.userLastName ?? ''}

@@ -1,12 +1,12 @@
 <script lang="ts">
     import AppBackground from '$lib/components/layout/AppBackground.svelte';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
 
     let {children} = $props();
     
     // Check if we're on a full-width page (landing, pricing)
     const isFullWidthPage = $derived(
-        $page.url.pathname === '/' || $page.url.pathname === '/pricing'
+        page.url.pathname === '/' || page.url.pathname === '/pricing'
     );
 </script>
 

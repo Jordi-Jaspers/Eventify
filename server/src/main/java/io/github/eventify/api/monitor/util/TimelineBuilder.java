@@ -47,7 +47,7 @@ public class TimelineBuilder {
             .filter(e -> !e.getTimestamp().isBefore(range.getStart()) && !e.getTimestamp().isAfter(range.getEnd()))
             .toList();
 
-        return buildTimeline(priorEvent, eventsInRange, range.getStart(), range.getEnd(), range.isLive());
+        return buildTimeline(priorEvent, eventsInRange, range.getStart(), range.getEnd());
     }
 
     /**
@@ -113,8 +113,7 @@ public class TimelineBuilder {
         final Event priorEvent,
         final List<Event> eventsInRange,
         final OffsetDateTime rangeStart,
-        final OffsetDateTime rangeEnd,
-        final boolean extendToEnd
+        final OffsetDateTime rangeEnd
     ) {
         final List<TimelineDuration> durations = new ArrayList<>();
 
@@ -148,12 +147,9 @@ public class TimelineBuilder {
             }
         }
 
-        // Close final duration
+        // Close final duration — always extend to rangeEnd so the timeline is fully covered
         if (currentSeverity != null) {
-            final OffsetDateTime endTime = extendToEnd
-                ? rangeEnd
-                : eventsInRange.getLast().getTimestamp();
-            durations.add(TimelineDuration.of(currentSeverity, durationStart, endTime));
+            durations.add(TimelineDuration.of(currentSeverity, durationStart, rangeEnd));
         }
 
         return Timeline.builder().durations(durations).build();

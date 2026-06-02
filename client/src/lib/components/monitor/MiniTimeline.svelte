@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { formatTime, formatDate } from '$lib/utils/date';
-	import { formatDurationLength } from '$lib/utils/duration';
 	import type { TimelineDuration, Severity } from '$lib/api/models';
-	import { getSeverityColors } from './types';
+	import { getSeverityColors } from './monitor-utils';
 	import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '$lib/components/ui/tooltip';
-    import { ChevronLeft, ChevronRight, MoreVertical, ArrowRight } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight, MoreVertical, ArrowRight } from '@lucide/svelte';
+	import MiniTimelineTooltip from './MiniTimelineTooltip.svelte';
 
 	interface Props {
 		durations: TimelineDuration[];
@@ -117,8 +117,6 @@
             {@const isSelected = selectedDuration && 
                 item.duration.startTime === selectedDuration.startTime && 
                 item.duration.endTime === selectedDuration.endTime}
-            {@const colors = getSeverityColors(item.duration.severity)}
-            
             <!-- Segment -->
             <TooltipProvider>
                 <Tooltip>
@@ -162,28 +160,13 @@
                         </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" class="text-xs bg-popover text-popover-foreground border border-border shadow-lg">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2">
-                                <span class="font-semibold {colors.text}">{item.duration.severity}</span>
-                                {#if item.isCollapsed}
-                                    <span class="text-[10px] bg-muted px-1 rounded">Collapsed (>24h)</span>
-                                {/if}
-                                {#if item.isOngoing}
-                                    <span class="text-[10px] bg-primary/20 text-primary px-1 rounded animate-pulse">Ongoing</span>
-                                {/if}
-                            </div>
-                            <p class="text-muted-foreground font-mono">
-                                {formatTime(item.duration.startTime)} – {item.duration.endTime ? formatTime(item.duration.endTime) : 'Now'}
-                            </p>
-                            <p class="text-muted-foreground/80">
-                                Duration: {formatDurationLength(item.duration.startTime, item.duration.endTime ?? new Date())}
-                            </p>
-                            {#if i === 0 && hasPrevious}
-                                <p class="text-[10px] text-muted-foreground mt-1 border-t border-border/50 pt-1">
-                                    Started: {formatDate(item.duration.startTime)}
-                                </p>
-                            {/if}
-                        </div>
+                        <MiniTimelineTooltip
+                            duration={item.duration}
+                            index={i}
+                            {hasPrevious}
+                            isCollapsed={item.isCollapsed}
+                            isOngoing={item.isOngoing}
+                        />
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>

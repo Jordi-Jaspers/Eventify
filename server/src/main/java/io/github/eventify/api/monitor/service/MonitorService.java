@@ -5,6 +5,7 @@ import io.github.eventify.api.channel.model.ChannelGroup;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.model.Event;
+import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.event.repository.EventRepository;
 import io.github.eventify.api.monitor.model.BucketSize;
 import io.github.eventify.api.monitor.model.MonitorFilters;
@@ -201,9 +202,6 @@ public class MonitorService {
         return toChannelMap(channels);
     }
 
-    /**
-     * Fetches in-range and prior buckets, then merges them into a per-channel map.
-     */
     private Map<Long, List<TimelineBucket>> fetchAndMergeBuckets(
         final List<Long> channelIds,
         final OffsetDateTime start,
@@ -224,9 +222,6 @@ public class MonitorService {
         return mergeBuckets(inRangeBuckets, priorBuckets);
     }
 
-    /**
-     * Merges in-range buckets with prior buckets (prior buckets at the start).
-     */
     private Map<Long, List<TimelineBucket>> mergeBuckets(
         final List<TimelineBucket> inRangeBuckets,
         final List<TimelineBucket> priorBuckets
@@ -244,23 +239,14 @@ public class MonitorService {
         return result;
     }
 
-    /**
-     * Groups a flat list of events by channel ID.
-     */
     private Map<Long, List<Event>> groupEventsByChannel(final List<Event> events) {
         return events.stream().collect(Collectors.groupingBy(e -> e.getChannel().getId()));
     }
 
-    /**
-     * Converts a list of channels to a map keyed by channel ID.
-     */
     private Map<Long, Channel> toChannelMap(final List<Channel> channels) {
         return channels.stream().collect(Collectors.toMap(Channel::getId, Function.identity()));
     }
 
-    /**
-     * Enriches a channel group with its member channels.
-     */
     private void enrichGroup(final ChannelGroup group, final Map<Long, Channel> enrichedChannelsById) {
         final List<Channel> enrichedChannels = group.getChannels().stream()
             .map(Channel::getId)
@@ -271,16 +257,12 @@ public class MonitorService {
         group.setChannels(enrichedChannels);
     }
 
-    /**
-     * Builds a timeline from raw events for a channel.
-     */
     private void buildTimelineFromEvents(
         final Channel channel,
         final Map<Long, List<Event>> eventsByChannel,
         final TimeSpan timeRange
     ) {
-        if (isPaused(channel)) {
-            applyPausedTimeline(channel);
+        if (applyPausedTimelineIfNeeded(channel)) {
             return;
         }
 
@@ -289,17 +271,13 @@ public class MonitorService {
         channel.setCurrentSeverity(TimelineBuilder.getCurrentSeverity(events, timeRange.getStart(), timeRange.getEnd()));
     }
 
-    /**
-     * Builds a timeline from aggregate buckets for a channel.
-     */
     private void buildTimelineFromBuckets(
         final Channel channel,
         final Map<Long, List<TimelineBucket>> bucketsByChannel,
         final TimeSpan timeRange,
         final BucketSize bucketSize
     ) {
-        if (isPaused(channel)) {
-            applyPausedTimeline(channel);
+        if (applyPausedTimelineIfNeeded(channel)) {
             return;
         }
 
@@ -308,9 +286,6 @@ public class MonitorService {
         channel.setCurrentSeverity(null);
     }
 
-    /**
-     * Builds a stitched timeline: historical aggregates + recent raw events.
-     */
     private void buildStitchedTimeline(
         final Channel channel,
         final Map<Long, List<TimelineBucket>> bucketsByChannel,
@@ -319,8 +294,7 @@ public class MonitorService {
         final BucketSize bucketSize,
         final OffsetDateTime historicalEnd
     ) {
-        if (isPaused(channel)) {
-            applyPausedTimeline(channel);
+        if (applyPausedTimelineIfNeeded(channel)) {
             return;
         }
 
@@ -330,7 +304,14 @@ public class MonitorService {
 
         final List<Event> recentEvents = recentEventsByChannel.getOrDefault(channel.getId(), List.of());
         final TimeSpan recentRange = new TimeSpan(historicalEnd, fullRange.getEnd());
-        final Timeline recentTimeline = TimelineBuilder.fromEvents(recentEvents, recentRange);
+
+        // Carry forward last historical severity as prior event for recent window
+        final List<Event> eventsWithPrior = new ArrayList<>(recentEvents);
+        final Severity lastHistoricalSeverity = historicalTimeline.getDurations().getLast().getSeverity();
+        if (lastHistoricalSeverity != Severity.NO_DATA) {
+            eventsWithPrior.addFirst(syntheticPriorEvent(lastHistoricalSeverity, historicalEnd));
+        }
+        final Timeline recentTimeline = TimelineBuilder.fromEvents(eventsWithPrior, recentRange);
 
         final List<TimelineDuration> allDurations = new ArrayList<>(historicalTimeline.getDurations());
         allDurations.addAll(recentTimeline.getDurations());
@@ -341,12 +322,19 @@ public class MonitorService {
         );
     }
 
-    private boolean isPaused(final Channel channel) {
-        return channel.getStatus() == ChannelStatus.PAUSED;
+    private Event syntheticPriorEvent(final Severity severity, final OffsetDateTime historicalEnd) {
+        final Event event = new Event();
+        event.setSeverity(severity);
+        event.setTimestamp(historicalEnd.minusSeconds(1));
+        return event;
     }
 
-    private void applyPausedTimeline(final Channel channel) {
+    private boolean applyPausedTimelineIfNeeded(final Channel channel) {
+        if (channel.getStatus() != ChannelStatus.PAUSED) {
+            return false;
+        }
         channel.setTimeline(Timeline.empty());
         channel.setCurrentSeverity(null);
+        return true;
     }
 }

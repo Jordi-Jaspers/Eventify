@@ -35,22 +35,6 @@ export interface IngestionChartPoint {
 
 // ── Formatters ─────────────────────────────────────────────────────────────────
 
-export function formatChartData(growthData: GrowthDataPoint[]): ChartDataPoint[] {
-	return growthData.map((point: GrowthDataPoint): ChartDataPoint => {
-		const dateStr: string = point.date ?? '';
-		const date: Date = new Date(dateStr);
-		return {
-			date,
-			totalOrganizations: point.totalOrganizations ?? 0,
-			totalUsers: point.totalUsers ?? 0,
-			newEvents: point.newEvents ?? 0,
-			dateStr: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-			newUsersGrowthPercentage: point.newUsersGrowthPercentage,
-			newOrganizationsGrowthPercentage: point.newOrganizationsGrowthPercentage
-		};
-	});
-}
-
 export function formatXAxisDate(date: Date): string {
 	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
@@ -68,21 +52,6 @@ export function formatPercentage(value: number | null | undefined): string {
 export function getBadgeVariant(value: number | null | undefined): 'default' | 'success' | 'destructive' {
 	if (value === null || value === undefined || value === 0) return 'default';
 	return value > 0 ? 'success' : 'destructive';
-}
-
-export function formatBestDayDate(point: GrowthDataPoint | null | undefined): string {
-	if (!point?.date) return '';
-	const date: Date = new Date(point.date);
-	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-export function formatBestDayCount(
-	point: GrowthDataPoint | null | undefined,
-	field: 'newUsers' | 'newOrganizations' | 'newEvents'
-): string {
-	if (!point?.date) return '—';
-	const count: number = (point[field] as number | undefined) ?? 0;
-	return `${count.toLocaleString()} on ${formatBestDayDate(point)}`;
 }
 
 export function formatIngestionData(

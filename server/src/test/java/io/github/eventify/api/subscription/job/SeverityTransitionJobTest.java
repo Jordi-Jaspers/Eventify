@@ -7,6 +7,9 @@ import io.github.eventify.api.notification.model.NotificationAudience;
 import io.github.eventify.api.notification.model.NotificationCategory;
 import io.github.eventify.api.notification.model.NotificationPayload;
 import io.github.eventify.api.notification.service.NotificationDispatchService;
+import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.organization.model.OrganizationStatus;
+import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.subscription.model.Subscription;
 import io.github.eventify.api.subscription.repository.SubscriptionRepository;
 import io.github.eventify.api.user.model.User;
@@ -44,6 +47,9 @@ public class SeverityTransitionJobTest extends UnitTest {
     @Mock
     private NotificationDispatchService notificationDispatchService;
 
+    @Mock
+    private OrganizationRepository organizationRepository;
+
     private SeverityTransitionJob severityTransitionJob;
 
     @BeforeEach
@@ -52,7 +58,8 @@ public class SeverityTransitionJobTest extends UnitTest {
             channelRepository,
             watchlistRepository,
             subscriptionRepository,
-            notificationDispatchService
+            notificationDispatchService,
+            organizationRepository
         );
     }
 
@@ -297,6 +304,220 @@ public class SeverityTransitionJobTest extends UnitTest {
         verifyNoInteractions(notificationDispatchService);
     }
 
+    // ========================= Org status filtering =========================
+
+    @Test
+    @DisplayName("Should skip channel belonging to SUSPENDED organization")
+    public void shouldSkipChannelBelongingToSuspendedOrganization() {
+        // Given: A channel owned by a SUSPENDED organization
+        final User channelOwner = aValidUser();
+        channelOwner.setId(1L);
+        final Organization suspendedOrg = anOrganizationWithStatus(100L, OrganizationStatus.SUSPENDED);
+        final Channel channel = aChannelWithSeverityChange(10L, "Org Channel", channelOwner, Severity.CRITICAL, Severity.OK);
+        channel.setOrganization(suspendedOrg);
+
+        given(channelRepository.findChannelsWithSeverityChange()).willReturn(List.of(channel));
+        given(organizationRepository.findAllById(List.of(100L))).willReturn(List.of(suspendedOrg));
+
+        // When: Job executes
+        severityTransitionJob.processSeverityTransitions();
+
+        // Then: No notifications dispatched and watchlist/subscription repos not queried
+        verifyNoInteractions(notificationDispatchService);
+        verifyNoInteractions(watchlistRepository);
+        verifyNoInteractions(subscriptionRepository);
+    }
+
+    @Test
+    @DisplayName("Should process channel belonging to ACTIVE organization normally")
+    public void shouldProcessChannelBelongingToActiveOrganizationNormally() {
+        // Given: A channel owned by an ACTIVE organization
+        final User channelOwner = aValidUser();
+        channelOwner.setId(1L);
+        final Organization activeOrg = anOrganizationWithStatus(100L, OrganizationStatus.ACTIVE);
+        final Channel channel = aChannelWithSeverityChange(10L, "Org Channel", channelOwner, Severity.CRITICAL, Severity.OK);
+        channel.setOrganization(activeOrg);
+
+        given(channelRepository.findChannelsWithSeverityChange()).willReturn(List.of(channel));
+        given(organizationRepository.findAllById(List.of(100L))).willReturn(List.of(activeOrg));
+
+        final Watchlist watchlist = aWatchlist(20L, "My Watchlist", channelOwner);
+        given(watchlistRepository.findWatchlistsContainingChannel(channel.getId()))
+            .willReturn(List.of(watchlist));
+
+        final User subscriber = aValidUser();
+        subscriber.setId(2L);
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("CRITICAL"), List.of("IN_APP"));
+        given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
+            .willReturn(List.of(sub));
+
+        // When: Job executes
+        severityTransitionJob.processSeverityTransitions();
+
+        // Then: Notification is dispatched
+        verify(notificationDispatchService).dispatch(any(NotificationAudience.class), any(NotificationPayload.class));
+    }
+
+    @Test
+    @DisplayName("Should process personal channel (null organization) normally")
+    public void shouldProcessPersonalChannelWithNullOrganizationNormally() {
+        // Given: A personal channel with no organization
+        final User channelOwner = aValidUser();
+        channelOwner.setId(1L);
+        final Channel channel = aChannelWithSeverityChange(10L, "Personal Channel", channelOwner, Severity.CRITICAL, Severity.OK);
+        // channel.organization is null by default
+
+        given(channelRepository.findChannelsWithSeverityChange()).willReturn(List.of(channel));
+
+        final Watchlist watchlist = aWatchlist(20L, "My Watchlist", channelOwner);
+        given(watchlistRepository.findWatchlistsContainingChannel(channel.getId()))
+            .willReturn(List.of(watchlist));
+
+        final User subscriber = aValidUser();
+        subscriber.setId(2L);
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("CRITICAL"), List.of("IN_APP"));
+        given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
+            .willReturn(List.of(sub));
+
+        // When: Job executes
+        severityTransitionJob.processSeverityTransitions();
+
+        // Then: Notification is dispatched (personal channels are never filtered)
+        verify(notificationDispatchService).dispatch(any(NotificationAudience.class), any(NotificationPayload.class));
+    }
+
+    @Test
+    @DisplayName("Should look up org statuses in batch — repository called once with all org IDs")
+    public void shouldLookUpOrgStatusesInBatchWithSingleRepositoryCall() {
+        // Given: Three channels — two from different orgs, one personal
+        final User channelOwner = aValidUser();
+        channelOwner.setId(1L);
+
+        final Organization orgA = anOrganizationWithStatus(100L, OrganizationStatus.ACTIVE);
+        final Organization orgB = anOrganizationWithStatus(200L, OrganizationStatus.ACTIVE);
+
+        final Channel channelWithOrgA = aChannelWithSeverityChange(10L, "Channel A", channelOwner, Severity.WARNING, Severity.OK);
+        channelWithOrgA.setOrganization(orgA);
+
+        final Channel channelWithOrgB = aChannelWithSeverityChange(11L, "Channel B", channelOwner, Severity.WARNING, Severity.OK);
+        channelWithOrgB.setOrganization(orgB);
+
+        final Channel personalChannel = aChannelWithSeverityChange(12L, "Personal", channelOwner, Severity.WARNING, Severity.OK);
+
+        given(channelRepository.findChannelsWithSeverityChange())
+            .willReturn(List.of(channelWithOrgA, channelWithOrgB, personalChannel));
+        given(organizationRepository.findAllById(any())).willReturn(List.of(orgA, orgB));
+        given(watchlistRepository.findWatchlistsContainingChannel(any())).willReturn(List.of());
+
+        // When: Job executes
+        severityTransitionJob.processSeverityTransitions();
+
+        // Then: Organization repository is called exactly once (batch lookup, not per-channel)
+        verify(organizationRepository, times(1)).findAllById(any());
+    }
+
+    @Test
+    @DisplayName("Should dispatch zero notifications when all channels belong to suspended orgs")
+    public void shouldDispatchZeroNotificationsWhenAllChannelsBelongToSuspendedOrgs() {
+        // Given: Two channels both belonging to suspended organizations
+        final User channelOwner = aValidUser();
+        channelOwner.setId(1L);
+
+        final Organization suspendedOrg1 = anOrganizationWithStatus(100L, OrganizationStatus.SUSPENDED);
+        final Organization suspendedOrg2 = anOrganizationWithStatus(200L, OrganizationStatus.SUSPENDED);
+
+        final Channel channel1 = aChannelWithSeverityChange(10L, "Channel 1", channelOwner, Severity.CRITICAL, Severity.OK);
+        channel1.setOrganization(suspendedOrg1);
+
+        final Channel channel2 = aChannelWithSeverityChange(11L, "Channel 2", channelOwner, Severity.WARNING, Severity.OK);
+        channel2.setOrganization(suspendedOrg2);
+
+        given(channelRepository.findChannelsWithSeverityChange()).willReturn(List.of(channel1, channel2));
+        given(organizationRepository.findAllById(any())).willReturn(List.of(suspendedOrg1, suspendedOrg2));
+
+        // When: Job executes
+        severityTransitionJob.processSeverityTransitions();
+
+        // Then: Zero notifications dispatched
+        verifyNoInteractions(notificationDispatchService);
+        verifyNoInteractions(watchlistRepository);
+        verifyNoInteractions(subscriptionRepository);
+    }
+
+    @Test
+    @DisplayName("Should process only active-org channels when batch contains mix of suspended and active")
+    public void shouldProcessOnlyActiveOrgChannelsInMixedBatch() {
+        // Given: One channel from a suspended org and one from an active org
+        final User channelOwner = aValidUser();
+        channelOwner.setId(1L);
+
+        final Organization suspendedOrg = anOrganizationWithStatus(100L, OrganizationStatus.SUSPENDED);
+        final Organization activeOrg = anOrganizationWithStatus(200L, OrganizationStatus.ACTIVE);
+
+        final Channel suspendedOrgChannel = aChannelWithSeverityChange(
+            10L,
+            "Suspended Org Channel",
+            channelOwner,
+            Severity.CRITICAL,
+            Severity.OK
+        );
+        suspendedOrgChannel.setOrganization(suspendedOrg);
+
+        final Channel activeOrgChannel = aChannelWithSeverityChange(
+            11L,
+            "Active Org Channel",
+            channelOwner,
+            Severity.CRITICAL,
+            Severity.OK
+        );
+        activeOrgChannel.setOrganization(activeOrg);
+
+        given(channelRepository.findChannelsWithSeverityChange()).willReturn(List.of(suspendedOrgChannel, activeOrgChannel));
+        given(organizationRepository.findAllById(any())).willReturn(List.of(suspendedOrg, activeOrg));
+
+        final Watchlist watchlist = aWatchlist(20L, "My Watchlist", channelOwner);
+        given(watchlistRepository.findWatchlistsContainingChannel(activeOrgChannel.getId()))
+            .willReturn(List.of(watchlist));
+
+        final User subscriber = aValidUser();
+        subscriber.setId(2L);
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("CRITICAL"), List.of("IN_APP"));
+        given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
+            .willReturn(List.of(sub));
+
+        // When: Job executes
+        severityTransitionJob.processSeverityTransitions();
+
+        // Then: Only one notification dispatched (for the active org channel)
+        verify(notificationDispatchService, times(1)).dispatch(any(NotificationAudience.class), any(NotificationPayload.class));
+
+        // And: Suspended org channel's watchlists are never queried
+        verify(watchlistRepository, never()).findWatchlistsContainingChannel(suspendedOrgChannel.getId());
+    }
+
+    @Test
+    @DisplayName("Should skip channel when org status is null (defensive — treats as suspended)")
+    public void shouldSkipChannelWhenOrgStatusIsNull() {
+        // Given: A channel whose organization has a null status
+        final User channelOwner = aValidUser();
+        channelOwner.setId(1L);
+
+        final Organization orgWithNullStatus = anOrganizationWithStatus(100L, null);
+        final Channel channel = aChannelWithSeverityChange(10L, "Org Channel", channelOwner, Severity.CRITICAL, Severity.OK);
+        channel.setOrganization(orgWithNullStatus);
+
+        given(channelRepository.findChannelsWithSeverityChange()).willReturn(List.of(channel));
+        given(organizationRepository.findAllById(List.of(100L))).willReturn(List.of(orgWithNullStatus));
+
+        // When: Job executes
+        severityTransitionJob.processSeverityTransitions();
+
+        // Then: Channel is skipped — no notifications dispatched
+        verifyNoInteractions(notificationDispatchService);
+        verifyNoInteractions(watchlistRepository);
+        verifyNoInteractions(subscriptionRepository);
+    }
+
     // ========================= FACTORY METHODS =========================
 
     private Channel aChannelWithSeverityChange(
@@ -327,5 +548,14 @@ public class SeverityTransitionJobTest extends UnitTest {
         subscription.setAdapters(adapters);
         subscription.setCreatedAt(OffsetDateTime.now().minusDays(1));
         return subscription;
+    }
+
+    private static Organization anOrganizationWithStatus(final Long id, final OrganizationStatus status) {
+        final Organization org = new Organization();
+        org.setId(id);
+        org.setName("Test Org " + id);
+        org.setSlug("test-org-" + id);
+        org.setStatus(status);
+        return org;
     }
 }

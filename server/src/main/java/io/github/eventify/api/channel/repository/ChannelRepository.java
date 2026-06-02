@@ -289,6 +289,10 @@ public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpec
      * Finds channels where currentSeverity IS DISTINCT FROM lastNotifiedSeverity.
      * Used by SeverityTransitionJob to detect severity changes requiring notification.
      */
-    @Query("SELECT c FROM Channel c WHERE c.currentSeverity IS NOT NULL AND c.currentSeverity <> c.lastNotifiedSeverity")
+    @Query("""
+        SELECT c FROM Channel c
+        WHERE c.currentSeverity IS NOT NULL
+          AND (c.lastNotifiedSeverity IS NULL OR c.currentSeverity <> c.lastNotifiedSeverity)
+        """)
     List<Channel> findChannelsWithSeverityChange();
 }

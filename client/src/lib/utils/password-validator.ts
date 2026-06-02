@@ -82,10 +82,6 @@ export function validateEmail(email: string): boolean {
     return emailRegex.test(email);
 }
 
-export function validateRequired(value: string): boolean {
-    return value.trim().length > 0;
-}
-
 export function validateName(name: string): boolean {
     return name.trim().length >= 1 && name.trim().length <= 255;
 }

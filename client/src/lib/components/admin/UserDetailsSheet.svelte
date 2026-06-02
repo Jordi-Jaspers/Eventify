@@ -3,9 +3,11 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { UserCog, Lock, Unlock, Key, Building2 } from '@lucide/svelte';
+	import { UserCog, Key, Building2 } from '@lucide/svelte';
 	import { getInitials } from '$lib/utils/string';
 	import { formatDate } from '$lib/utils/date';
+	import { formatLastUsed } from './utils';
+	import UserActionButtons from './UserActionButtons.svelte';
 
 	interface Props {
 		open: boolean;
@@ -42,11 +44,6 @@
 		if (!enabled) return 'Locked';
 		if (!validated) return 'Pending Verification';
 		return 'Active';
-	}
-
-	function formatLastLogin(lastLogin: string | null | undefined): string {
-		if (!lastLogin) return 'Never';
-		return formatDate(lastLogin);
 	}
 
 	function getUserInitials(u: UserDetailsResponse): string {
@@ -132,7 +129,7 @@
 					</div>
 					<div class="rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm p-3">
 						<p class="text-xs text-muted-foreground uppercase tracking-wide">Last Login</p>
-						<p class="text-sm font-medium mt-1">{formatLastLogin(user.lastLogin)}</p>
+						<p class="text-sm font-medium mt-1">{formatLastUsed(user.lastLogin)}</p>
 					</div>
 					<div class="rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm p-3">
 						<p class="text-xs text-muted-foreground uppercase tracking-wide">Email Verified</p>
@@ -184,35 +181,14 @@
 			</div>
 
 			<!-- Footer Actions -->
-			<div class="sticky bottom-0 mt-4 p-4 border-t border-border/50 bg-background/98 backdrop-blur-xl shadow-lg">
-				<div class="flex gap-2">
-					<Button
-						variant={user.enabled ? 'destructive' : 'default'}
-						class="flex-1"
-						onclick={() => onLockToggle(user?.id, !user?.enabled)}
-						disabled={lockingUser}
-					>
-						{#if user.enabled}
-							<Lock class="mr-2 h-4 w-4" />
-							Lock User
-						{:else}
-							<Unlock class="mr-2 h-4 w-4" />
-							Unlock User
-						{/if}
-					</Button>
-					<Button 
-						variant="outline" 
-						onclick={() => onForcePasswordReset(user?.id, user?.email)}
-						disabled={forcingPasswordReset}
-					>
-						<Key class="mr-2 h-4 w-4" />
-						Reset Password
-					</Button>
-					<Button variant="outline" onclick={() => onOpenChange(false)}>
-						Close
-					</Button>
-				</div>
-			</div>
+			<UserActionButtons
+				{user}
+				{lockingUser}
+				{forcingPasswordReset}
+				{onLockToggle}
+				{onForcePasswordReset}
+				onClose={() => onOpenChange(false)}
+			/>
 		{/if}
 	</Sheet.Content>
 </Sheet.Root>

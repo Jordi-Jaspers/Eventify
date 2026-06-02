@@ -1,11 +1,11 @@
 package io.github.eventify.api.admin.audit.service;
 
 import io.github.eventify.api.admin.audit.model.AdminAuditLogMetaData;
+import io.github.eventify.api.admin.audit.model.AuditLog;
 import io.github.eventify.api.admin.audit.model.response.AuditLogStatsData;
 import io.github.eventify.api.admin.audit.model.response.AuditLogStatsProjection;
 import io.github.eventify.api.admin.audit.model.response.HourlyBucketProjection;
-import io.github.eventify.common.audit.model.AuditLog;
-import io.github.eventify.common.audit.repository.AuditLogRepository;
+import io.github.eventify.api.admin.audit.repository.AuditLogRepository;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import lombok.RequiredArgsConstructor;
 

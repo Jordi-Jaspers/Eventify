@@ -1,9 +1,9 @@
 package io.github.eventify.common.audit;
 
+import io.github.eventify.api.admin.audit.model.AuditLog;
+import io.github.eventify.api.admin.audit.model.event.AuditEvent;
 import io.github.eventify.api.authentication.model.Role;
 import io.github.eventify.api.user.model.User;
-import io.github.eventify.common.audit.event.AuditEvent;
-import io.github.eventify.common.audit.model.AuditLog;
 import io.github.eventify.support.IntegrationTest;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 

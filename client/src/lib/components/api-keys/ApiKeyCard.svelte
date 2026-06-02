@@ -3,6 +3,7 @@
 	import { Key, Trash2 } from '@lucide/svelte';
 	import type { ApiKeyResponse } from '$lib/api/models';
 	import { formatDate } from '$lib/utils/date';
+	import { formatLastUsed } from '$lib/components/admin/utils';
 
 	interface Props {
 		apiKey: ApiKeyResponse;
@@ -13,11 +14,6 @@
 	let { apiKey, onRevoke, revoking }: Props = $props();
 
 	let showRevokeDialog: boolean = $state(false);
-
-	function formatLastUsed(lastUsedAt: string | undefined): string {
-		if (!lastUsedAt) return 'Never';
-		return formatDate(lastUsedAt);
-	}
 
 	function formatExpiration(expiresAt: string | undefined): string {
 		if (!expiresAt) return 'Never';

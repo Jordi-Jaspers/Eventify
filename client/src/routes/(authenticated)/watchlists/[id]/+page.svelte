@@ -67,7 +67,7 @@
 	}
 
 	function handleMonitor(): void {
-		goto(`${CLIENT_ROUTES.WATCHLISTS_MONITOR_PAGE.path}?id=${watchlistId}`);
+		goto(`${CLIENT_ROUTES.MONITOR_PAGE.path}?id=${watchlistId}`);
 	}
 
 	onMount(() => loadData());

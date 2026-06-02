@@ -12,13 +12,14 @@
     import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
     import AppLogo from '$lib/components/layout/AppLogo.svelte';
     import {toast} from 'svelte-sonner';
-    import {CircleAlert, Info, LoaderCircle, Shield, Terminal} from '@lucide/svelte';
+    import {CircleAlert, Info, LoaderCircle, Shield} from '@lucide/svelte';
     import { PasswordInput } from '$lib/components/ui/password-input';
     import {handleError} from '$lib/utils/error-handler';
     import {getDevCredentials} from '$lib/api/dev/DevController';
     import type {DevCredentialsResponse} from '$lib/api/models';
     import {showDevCredentials} from '$lib/config/env';
     import {Checkbox} from '$lib/components/ui/checkbox';
+    import DevCredentialsPanel from '$lib/components/auth/DevCredentialsPanel.svelte';
 
     $effect(() => {
         if ($isAuthenticated) {
@@ -223,43 +224,11 @@
 
     <!-- Dev Credentials Block -->
     {#if shouldShowDevCredentials}
-        <div class="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 backdrop-blur-sm">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2 text-amber-500 text-sm font-medium">
-                    <Terminal class="w-4 h-4"/>
-                    Dev Credentials
-                </div>
-                <a 
-                    href="/dev-playbook" 
-                    class="text-xs text-primary hover:underline"
-                >
-                    Component Playbook →
-                </a>
-            </div>
-            {#if devCredentialsLoading}
-                <div class="text-xs text-muted-foreground flex items-center gap-2">
-                    <LoaderCircle class="w-3 h-3 animate-spin"/>
-                    Loading credentials...
-                </div>
-            {:else if devCredentials}
-                <div class="text-xs text-muted-foreground space-y-1">
-                    <p><span class="font-medium">Email:</span> {devCredentials.email}</p>
-                    <p><span class="font-medium">Password:</span> {devCredentials.password}</p>
-                </div>
-                <Button
-                        variant="outline"
-                        size="sm"
-                        class="mt-2 w-full text-xs"
-                        onclick={fillDevCredentials}
-                >
-                    Fill Credentials
-                </Button>
-            {:else}
-                <div class="text-xs text-muted-foreground">
-                    Failed to load dev credentials
-                </div>
-            {/if}
-        </div>
+        <DevCredentialsPanel
+            {devCredentials}
+            {devCredentialsLoading}
+            onFill={fillDevCredentials}
+        />
     {/if}
 
     <!-- Footer -->

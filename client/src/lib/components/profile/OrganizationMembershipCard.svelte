@@ -13,7 +13,7 @@
 
 	let { membership }: Props = $props();
 
-	const href: string = $derived(CLIENT_ROUTES.ORGANIZATION_DASHBOARD_PAGE(membership.organizationId).path);
+	const href: string = $derived(CLIENT_ROUTES.ORGANIZATION_MONITOR_PAGE(membership.organizationId).path);
 
 	async function handleClick(event: MouseEvent): Promise<void> {
 		event.preventDefault();

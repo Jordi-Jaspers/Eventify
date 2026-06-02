@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { DataTable, createDataTableService } from '$lib/components/data-table';
 	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import { searchWatchlists, deleteWatchlist } from '$lib/api/watchlist/OrganizationWatchlistController';
@@ -17,7 +17,7 @@
 	import ConfirmDialog from '$lib/components/ui/confirm-dialog/confirm-dialog.svelte';
 
 	// Get orgId from URL params
-	const orgId: number = $derived(Number($page.params.orgId));
+	const orgId: number = $derived(Number(page.params.orgId));
 
 	// Role-based visibility: OWNER/ADMIN can create/edit/delete
 	const canManage: boolean = $derived(

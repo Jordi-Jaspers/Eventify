@@ -4,6 +4,7 @@
 	import { Copy, CircleCheck, Terminal, Key, TriangleAlert, Shield } from '@lucide/svelte';
 	import type { ApiKeyCreationResponse } from '$lib/api/models';
 	import { toast } from 'svelte-sonner';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 
 	interface Props {
 		open: boolean;
@@ -16,32 +17,24 @@
 	let copied: boolean = $state(false);
 	let curlCopied: boolean = $state(false);
 
-	async function copyToClipboard(): Promise<void> {
+	async function copyToClipboardKey(): Promise<void> {
 		if (!apiKey?.key) return;
-		try {
-			await navigator.clipboard.writeText(apiKey.key);
-			copied = true;
-			toast.success('API key copied to clipboard');
-			setTimeout(() => {
-				copied = false;
-			}, 2000);
-		} catch (err: unknown) {
-			toast.error('Failed to copy to clipboard');
-		}
+		await copyToClipboard(apiKey.key, 'Failed to copy to clipboard');
+		copied = true;
+		toast.success('API key copied to clipboard');
+		setTimeout(() => {
+			copied = false;
+		}, 2000);
 	}
 
 	async function copyCurlToClipboard(): Promise<void> {
 		if (!curlExample) return;
-		try {
-			await navigator.clipboard.writeText(curlExample);
-			curlCopied = true;
-			toast.success('cURL command copied to clipboard');
-			setTimeout(() => {
-				curlCopied = false;
-			}, 2000);
-		} catch (err: unknown) {
-			toast.error('Failed to copy to clipboard');
-		}
+		await copyToClipboard(curlExample, 'Failed to copy to clipboard');
+		curlCopied = true;
+		toast.success('cURL command copied to clipboard');
+		setTimeout(() => {
+			curlCopied = false;
+		}, 2000);
 	}
 
 	const curlExample: string = $derived(
@@ -99,7 +92,7 @@
 								{apiKey.key}
 							</code>
 							<Button
-								onclick={copyToClipboard}
+								onclick={copyToClipboardKey}
 								size="sm"
 								variant={copied ? 'default' : 'outline'}
 								class="absolute top-1/2 -translate-y-1/2 right-2 h-8 gap-1.5 {copied

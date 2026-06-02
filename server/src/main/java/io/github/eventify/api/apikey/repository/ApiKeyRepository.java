@@ -139,6 +139,39 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, Long>, JpaSpecif
     List<ApiKey> findTopByOrderByTotalRequestsDesc(Pageable pageable);
 
     /**
+     * Count API keys for an organization that have never been used.
+     *
+     * @param organizationId the organization ID
+     * @return count of keys
+     */
+    Long countByOrganizationIdAndLastUsedAtIsNull(Long organizationId);
+
+    /**
+     * Count API keys for an organization expiring between two dates.
+     *
+     * @param orgId the organization ID
+     * @param start the start date
+     * @param end   the end date
+     * @return count of keys
+     */
+    @Query(
+        "SELECT COUNT(k) FROM ApiKey k WHERE k.organization.id = :orgId AND k.expiresAt IS NOT NULL AND k.expiresAt BETWEEN :start AND :end"
+    )
+    Long countByOrganizationIdAndExpiresAtBetween(@Param("orgId") Long orgId, @Param("start") OffsetDateTime start, @Param(
+        "end"
+    ) OffsetDateTime end);
+
+    /**
+     * Find top API keys for an organization by total requests.
+     *
+     * @param orgId    the organization ID
+     * @param pageable the pageable
+     * @return list of top keys
+     */
+    @Query("SELECT k FROM ApiKey k WHERE k.organization.id = :orgId ORDER BY k.totalRequests DESC")
+    List<ApiKey> findTopByOrganizationIdOrderByTotalRequestsDesc(@Param("orgId") Long orgId, Pageable pageable);
+
+    /**
      * Delete all API keys owned by users with the given IDs.
      *
      * @param userIds the user IDs

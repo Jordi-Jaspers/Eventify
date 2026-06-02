@@ -1,6 +1,7 @@
 package io.github.eventify.support.util;
 
 import io.github.eventify.Main;
+import io.github.eventify.api.admin.audit.repository.AuditLogRepository;
 import io.github.eventify.api.apikey.repository.ApiKeyAuditRepository;
 import io.github.eventify.api.apikey.repository.ApiKeyRepository;
 import io.github.eventify.api.authentication.service.AuthenticationService;
@@ -18,7 +19,6 @@ import io.github.eventify.api.user.repository.UserAuthProviderRepository;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserService;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
-import io.github.eventify.common.audit.repository.AuditLogRepository;
 import io.github.eventify.support.config.BeanConfiguration;
 import io.github.eventify.support.config.TimescaleLiquibaseConfiguration;
 import io.github.eventify.support.container.TimescaleContainer;

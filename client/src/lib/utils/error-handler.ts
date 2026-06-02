@@ -128,20 +128,3 @@ export function formatValidationErrors(validationErrors: ValidationErrorResource
 		.join('\n');
 }
 
-/**
- * Converts validation errors into a field-keyed object for easy lookup
- *
- * @param validationErrors - Array of validation errors
- * @returns Object with field names as keys and error codes as values
- */
-export function getValidationErrorMap(
-	validationErrors: ValidationErrorResource[]
-): Record<string, string> {
-	const errorMap: Record<string, string> = {};
-	validationErrors.forEach((err: ValidationErrorResource) => {
-		if (err.field && err.code) {
-			errorMap[err.field] = err.code;
-		}
-	});
-	return errorMap;
-}

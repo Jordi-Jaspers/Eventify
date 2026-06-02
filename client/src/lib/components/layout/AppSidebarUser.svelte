@@ -23,14 +23,14 @@
 	import { APP_VERSION } from '$lib/config/version';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { ChevronsUpDown, User, LogOut, Building2, Check, RefreshCw, Sun, Moon, Palette, Sparkles, Bell } from '@lucide/svelte';
+	import { ChevronsUpDown, User, LogOut, Building2, Sun, Moon, Sparkles, Bell, Palette } from '@lucide/svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { notificationStore } from '$lib/stores/notification.svelte';
 	import NotificationPanel from '$lib/components/notification/NotificationPanel.svelte';
+	import OrgSwitcherMenu from './OrgSwitcherMenu.svelte';
 	import { toast } from 'svelte-sonner';
 	import { handleError } from '$lib/utils/error-handler';
 	import type { UserOrganizationResponse } from '$lib/api/models';
-	import { getOrganizationalRoleBadgeClass } from '$lib/utils/role';
 	import { mode, setMode } from 'mode-watcher';
 
 	// Theme state
@@ -51,7 +51,6 @@
 	const currentOrganization: UserOrganizationResponse | null = $derived(
 		organizationStore.currentOrganization
 	);
-	const hasOrgs: boolean = $derived(organizations.length > 0);
 
 	const currentPath: string = $derived(page.url.pathname);
 
@@ -98,10 +97,6 @@
 	});
 
 	const userEmail: string = $derived($currentUser?.email || 'user@example.com');
-
-	function getOrgInitial(name: string | undefined): string {
-		return name?.charAt(0)?.toUpperCase() || '?';
-	}
 </script>
 
 <Sidebar.Footer class="border-t border-border/50">
@@ -201,55 +196,15 @@
 						</div>
 					</div>
 
-					<!-- Organization Section -->
-					{#if error}
-						<div class="p-1">
-							<DropdownMenu.Item
-								class="cursor-pointer hover:bg-primary/10"
-								onclick={handleRetry}
-							>
-								<RefreshCw class="mr-2 h-4 w-4" />
-								<span>Retry loading organizations</span>
-							</DropdownMenu.Item>
-						</div>
-					{:else if hasOrgs}
-						<div class="p-1">
-							<DropdownMenu.Label class="text-xs text-muted-foreground px-2 py-1.5">
-								Switch Organization
-							</DropdownMenu.Label>
-							{#each organizations as org (org.organizationId)}
-								<DropdownMenu.Item
-									class="cursor-pointer hover:bg-primary/10 flex items-center gap-3 px-2 py-2"
-									onclick={() => handleOrgSwitch(org.organizationId)}
-								>
-									<!-- Org Avatar -->
-									<div
-										class="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary/80 to-accent/80 text-primary-foreground font-semibold text-xs"
-									>
-										{getOrgInitial(org.organizationName)}
-									</div>
-									<div class="flex-1 min-w-0">
-										<div class="font-medium truncate text-sm">{org.organizationName}</div>
-										<Badge
-											class="{getOrganizationalRoleBadgeClass(org.role)} w-fit text-[10px] px-1.5 py-0 leading-tight mt-0.5"
-										>
-											{org.role}
-										</Badge>
-									</div>
-									{#if org.organizationId === currentOrganization?.organizationId}
-										<Check class="size-4 text-primary flex-shrink-0" />
-									{/if}
-								</DropdownMenu.Item>
-							{/each}
-						</div>
-					{:else if !loading}
-						<div class="p-1">
-							<div class="px-2 py-3 text-center">
-								<Building2 class="size-5 mx-auto mb-1 text-muted-foreground/50" />
-								<p class="text-xs text-muted-foreground">No organizations</p>
-							</div>
-						</div>
-					{/if}
+				<!-- Organization Section -->
+				<OrgSwitcherMenu
+					{organizations}
+					{currentOrganization}
+					{loading}
+					{error}
+					onOrgSwitch={handleOrgSwitch}
+					onRetry={handleRetry}
+				/>
 
 					<DropdownMenu.Separator />
 

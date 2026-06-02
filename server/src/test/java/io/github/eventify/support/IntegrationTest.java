@@ -1,5 +1,6 @@
 package io.github.eventify.support;
 
+import io.github.eventify.api.admin.audit.model.AuditLog;
 import io.github.eventify.api.apikey.model.ApiKey;
 import io.github.eventify.api.apikey.model.ApiKeyScope;
 import io.github.eventify.api.authentication.model.Role;
@@ -604,8 +605,8 @@ public class IntegrationTest extends WebMvcConfigurator {
         }
     }
 
-    protected io.github.eventify.common.audit.model.AuditLog findAuditLogByMethod(
-        final java.util.List<io.github.eventify.common.audit.model.AuditLog> logs,
+    protected AuditLog findAuditLogByMethod(
+        final java.util.List<AuditLog> logs,
         final String method
     ) {
         return logs.stream()

@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { OrgSettingsNav } from '$lib/components/settings';
-	import { organizationStore } from '$lib/stores/organization.svelte';
-	import { currentUser } from '$lib/stores/auth';
-	import type { UserOrganizationResponse } from '$lib/api/models';
+	import { createAdminOrgContext } from '$lib/api/organization/service/AdminOrgContext.svelte';
 
 	interface Props {
 		children: import('svelte').Snippet;
@@ -12,22 +10,8 @@
 	let { children }: Props = $props();
 
 	const orgId: number = $derived(parseInt(page.params.orgId ?? '0'));
-
-	// Get organization from store
-	const organizationFromStore: UserOrganizationResponse | undefined = $derived(
-		organizationStore.organizations.find(
-			(org: UserOrganizationResponse) => org.organizationId === orgId
-		)
-	);
-	
-	// Check permissions - canManage if OWNER, ADMIN, or global ADMIN
-	const isGlobalAdmin: boolean = $derived($currentUser?.role === 'ADMIN');
-	const canManage: boolean = $derived.by((): boolean => {
-		if (isGlobalAdmin) return true;
-		if (!organizationFromStore) return false;
-		const role: string | undefined = organizationFromStore.role;
-		return role === 'OWNER' || role === 'ADMIN';
-	});
+	const ctx = createAdminOrgContext(() => orgId);
+	const canManage: boolean = $derived(ctx.canManage);
 </script>
 
 <svelte:head>

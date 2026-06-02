@@ -4,7 +4,6 @@
 	import type { DataTableColumn } from '$lib/components/data-table/types';
 	import { searchAuditLog, getAuditLogStats } from '$lib/api/admin/AdminAuditLogController';
 	import type { AuditLogResponse, AuditLogStatsResponse } from '$lib/api/models';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { ScrollText } from '@lucide/svelte';
 	import { PageHeader } from '$lib/components/ui/page-header';
@@ -13,6 +12,8 @@
 	import { toast } from 'svelte-sonner';
 	import AuditLogKpiCards from './AuditLogKpiCards.svelte';
 	import AuditLogSparkline from './AuditLogSparkline.svelte';
+	import { HttpMethodBadge, HttpStatusBadge } from '$lib/components/ui/http-badge';
+	import { prettyPrintJson } from '$lib/utils/json';
 
 	const columns: DataTableColumn<AuditLogResponse>[] = [
 		{
@@ -95,41 +96,13 @@
 	let stats: AuditLogStatsResponse | null = $state(null);
 	let statsLoading: boolean = $state(true);
 
-	const NOISE_PATHS: string = '/v1/health,/v1/auth/refresh';
-
+	const NOISE_PATHS: string = '/v1/auth';
 	function addNoisePreset(): void {
 		const current = (dataTableService.filters['excludePath'] as string) ?? '';
 		const existing = current ? current.split(',').map((s: string) => s.trim()) : [];
 		const toAdd = NOISE_PATHS.split(',').filter((p: string) => !existing.includes(p));
 		const merged = [...existing, ...toAdd].join(',');
 		dataTableService.setFilter('excludePath', merged);
-	}
-
-	function getMethodBadgeClass(method: string): string {
-		switch (method) {
-			case 'GET': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-			case 'POST': return 'bg-green-500/20 text-green-400 border-green-500/30';
-			case 'PUT': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-			case 'PATCH': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-			case 'DELETE': return 'bg-red-500/20 text-red-400 border-red-500/30';
-			default: return 'bg-muted text-muted-foreground';
-		}
-	}
-
-	function getStatusBadgeClass(statusCode: number): string {
-		if (statusCode >= 200 && statusCode < 300) return 'bg-green-500/20 text-green-400 border-green-500/30';
-		if (statusCode >= 400 && statusCode < 500) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-		if (statusCode >= 500) return 'bg-red-500/20 text-red-400 border-red-500/30';
-		return 'bg-muted text-muted-foreground';
-	}
-
-	function formatRequestBody(body: string | null | undefined): string {
-		if (!body) return 'No request body';
-		try {
-			return JSON.stringify(JSON.parse(body), null, 2);
-		} catch {
-			return body;
-		}
 	}
 
 	function toggleExpand(id: number): void {
@@ -229,9 +202,7 @@
 
 						<!-- Method -->
 						<div style="grid-column: span 1;" class="flex items-center">
-							<Badge class={getMethodBadgeClass(item.method)}>
-								{item.method}
-							</Badge>
+							<HttpMethodBadge method={item.method} />
 						</div>
 
 						<!-- Path -->
@@ -241,9 +212,7 @@
 
 						<!-- Status -->
 						<div style="grid-column: span 1;" class="flex items-center">
-							<Badge class={getStatusBadgeClass(item.statusCode)}>
-								{item.statusCode}
-							</Badge>
+							<HttpStatusBadge status={item.statusCode} />
 						</div>
 
 						<!-- IP Address -->
@@ -265,9 +234,9 @@
 						onclick={() => toggleExpand(item.id)}
 						onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') toggleExpand(item.id); }}
 					>
-						<div class="flex items-center gap-2">
-							<Badge class={getMethodBadgeClass(item.method)}>{item.method}</Badge>
-							<Badge class={getStatusBadgeClass(item.statusCode)}>{item.statusCode}</Badge>
+					<div class="flex items-center gap-2">
+						<HttpMethodBadge method={item.method} />
+						<HttpStatusBadge status={item.statusCode} />
 							<span class="text-xs text-muted-foreground ml-auto">{formatDateTime(item.createdAt)}</span>
 						</div>
 						<span class="text-sm truncate">{item.actorEmail}</span>
@@ -276,7 +245,7 @@
 					{#if expandedId === item.id}
 						<div class="px-4 pb-4 border-t border-border/50">
 							<p class="text-xs text-muted-foreground mb-2 mt-3 font-medium uppercase tracking-wide">Request Body</p>
-							<pre class="text-xs bg-muted/50 rounded-md p-3 overflow-x-auto font-mono text-muted-foreground whitespace-pre-wrap break-all">{formatRequestBody(item.requestBody)}</pre>
+							<pre class="text-xs bg-muted/50 rounded-md p-3 overflow-x-auto font-mono text-muted-foreground whitespace-pre-wrap break-all">{prettyPrintJson(item.requestBody) || 'No request body'}</pre>
 						</div>
 					{/if}
 				</div>

@@ -11,9 +11,10 @@ import io.github.eventify.api.admin.stats.model.response.AdminEventStatsResponse
 import io.github.eventify.api.admin.stats.model.response.AdminEventVolumeResponse;
 import io.github.eventify.api.admin.stats.model.response.AdminGrowthResponse;
 import io.github.eventify.api.admin.stats.model.response.TableSizeEntry;
-import io.github.eventify.api.admin.stats.model.validator.AdminStatsValidator;
 import io.github.eventify.api.admin.stats.service.AdminEventStatsService;
 import io.github.eventify.api.admin.stats.service.AdminStatsService;
+import io.github.eventify.common.model.request.StatsRequest;
+import io.github.eventify.common.model.validator.StatsRequestValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,8 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,7 +48,7 @@ public class AdminDashboardController {
 
     private final AdminStatsService adminStatsService;
     private final AdminEventStatsService adminEventStatsService;
-    private final AdminStatsValidator adminStatsValidator;
+    private final StatsRequestValidator adminStatsValidator;
     private final AdminStatsMapper adminStatsMapper;
 
     @ResponseStatus(OK)
@@ -64,42 +66,48 @@ public class AdminDashboardController {
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('VIEW_PLATFORM_STATS')")
     @Operation(summary = "Get growth data for admin dashboard")
-    @GetMapping(
+    @PostMapping(
         path = ADMIN_STATS_GROWTH_PATH,
+        consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<AdminGrowthResponse> getGrowth(
-        @RequestParam(defaultValue = "30") final int days) {
-        adminStatsValidator.validateAndThrow(days);
-        final AdminGrowth growth = adminStatsService.getAdminGrowth(days);
+    public ResponseEntity<AdminGrowthResponse> getGrowth(@RequestBody final StatsRequest request) {
+        adminStatsValidator.validateAndThrow(request);
+        final AdminGrowth growth = request.getDays() != null
+            ? adminStatsService.getAdminGrowth(request.getDays())
+            : adminStatsService.getAdminGrowth(request.getStartDate(), request.getEndDate());
         return ResponseEntity.status(OK).body(adminStatsMapper.toGrowthResponse(growth));
     }
 
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('VIEW_PLATFORM_STATS')")
     @Operation(summary = "Get event volume for admin dashboard")
-    @GetMapping(
+    @PostMapping(
         path = ADMIN_STATS_EVENT_VOLUME_PATH,
+        consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<AdminEventVolumeResponse> getEventVolume(
-        @RequestParam(defaultValue = "30") final int days) {
-        adminStatsValidator.validateAndThrow(days);
-        final AdminEventVolume volume = adminStatsService.getEventVolume(days);
+    public ResponseEntity<AdminEventVolumeResponse> getEventVolume(@RequestBody final StatsRequest request) {
+        adminStatsValidator.validateAndThrow(request);
+        final AdminEventVolume volume = request.getDays() != null
+            ? adminStatsService.getEventVolume(request.getDays())
+            : adminStatsService.getEventVolume(request.getStartDate(), request.getEndDate());
         return ResponseEntity.status(OK).body(adminStatsMapper.toEventVolumeResponse(volume));
     }
 
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('VIEW_PLATFORM_STATS')")
     @Operation(summary = "Get event statistics for admin dashboard")
-    @GetMapping(
+    @PostMapping(
         path = ADMIN_STATS_EVENTS_PATH,
+        consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<AdminEventStatsResponse> getEventStats(
-        @RequestParam(defaultValue = "30") final int days) {
-        adminStatsValidator.validateAndThrow(days);
-        final EventStats data = adminEventStatsService.getEventStats(days);
+    public ResponseEntity<AdminEventStatsResponse> getEventStats(@RequestBody final StatsRequest request) {
+        adminStatsValidator.validateAndThrow(request);
+        final EventStats data = request.getDays() != null
+            ? adminEventStatsService.getEventStats(request.getDays())
+            : adminEventStatsService.getEventStats(request.getStartDate(), request.getEndDate());
         return ResponseEntity.status(OK).body(adminStatsMapper.toEventStatsResponse(data));
     }
 

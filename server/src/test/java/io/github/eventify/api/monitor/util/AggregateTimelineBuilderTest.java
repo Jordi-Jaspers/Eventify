@@ -95,15 +95,15 @@ class AggregateTimelineBuilderTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should create NO_DATA gap between non-adjacent buckets")
-    void shouldCreateNoDataGapBetweenNonAdjacentBuckets() {
-        // Given: Two buckets with a gap between them
+    @DisplayName("Should carry forward previous bucket's severity in gap between non-adjacent buckets")
+    void shouldCarryForwardSeverityInGapBetweenNonAdjacentBuckets() {
+        // Given: Two buckets with a 1.5h gap between them; first bucket ends in OK
         final OffsetDateTime rangeEnd = OffsetDateTime.now().minusMinutes(5);
         final OffsetDateTime rangeStart = rangeEnd.minusHours(12);
         final TimeSpan range = new TimeSpan(rangeStart, rangeEnd);
         final BucketSize bucketSize = BucketSize.PT30M;
 
-        // Bucket at start and bucket 2 hours later — 1.5h gap between them
+        // Bucket at start (OK/OK) and bucket 2 hours later — 1.5h gap between them
         final List<TimelineBucket> buckets = List.of(
             aTimelineBucket(1, rangeStart, "OK", "OK", 2L),
             aTimelineBucket(1, rangeStart.plusHours(2), "WARNING", "WARNING", 3L)
@@ -112,14 +112,72 @@ class AggregateTimelineBuilderTest extends UnitTest {
         // When: Building timeline
         final Timeline timeline = AggregateTimelineBuilder.fromBuckets(buckets, range, bucketSize);
 
-        // Then: Should have a NO_DATA gap between the two buckets
+        // Then: Gap between the two buckets should carry forward OK (the previous bucket's lastSeverity)
+        final boolean hasOkGap = timeline.getDurations().stream()
+            .anyMatch(
+                d -> d.getSeverity() == Severity.OK
+                    && d.getStartTime().isAfter(rangeStart)
+                    && d.getStartTime().isBefore(rangeStart.plusHours(2))
+            );
+        assertThat(hasOkGap, is(true));
+
+        // And: The gap should NOT be NO_DATA
         final boolean hasNoDataGap = timeline.getDurations().stream()
             .anyMatch(
                 d -> d.getSeverity() == Severity.NO_DATA
                     && d.getStartTime().isAfter(rangeStart)
                     && d.getStartTime().isBefore(rangeStart.plusHours(2))
             );
-        assertThat(hasNoDataGap, is(true));
+        assertThat(hasNoDataGap, is(false));
+    }
+
+    @Test
+    @DisplayName("Should carry forward severity through multiple sequential gaps")
+    void shouldCarryForwardSeverityThroughMultipleGaps() {
+        // Given: Three buckets with gaps between each; severities escalate OK → WARNING → CRITICAL
+        final OffsetDateTime rangeEnd = OffsetDateTime.now().minusMinutes(5);
+        final OffsetDateTime rangeStart = rangeEnd.minusHours(12);
+        final TimeSpan range = new TimeSpan(rangeStart, rangeEnd);
+        final BucketSize bucketSize = BucketSize.PT30M;
+
+        // Bucket A at t=0 (OK), Bucket B at t=3h (WARNING), Bucket C at t=6h (CRITICAL)
+        // Gap 1: t=30m → t=3h  — should carry forward OK (lastSeverity of bucket A)
+        // Gap 2: t=3h30m → t=6h — should carry forward WARNING (lastSeverity of bucket B)
+        final List<TimelineBucket> buckets = List.of(
+            aTimelineBucket(1, rangeStart, "OK", "OK", 2L),
+            aTimelineBucket(1, rangeStart.plusHours(3), "WARNING", "WARNING", 3L),
+            aTimelineBucket(1, rangeStart.plusHours(6), "CRITICAL", "CRITICAL", 1L)
+        );
+
+        // When: Building timeline
+        final Timeline timeline = AggregateTimelineBuilder.fromBuckets(buckets, range, bucketSize);
+
+        // Then: First gap (between bucket A and B) should carry forward OK
+        final boolean firstGapIsOk = timeline.getDurations().stream()
+            .anyMatch(
+                d -> d.getSeverity() == Severity.OK
+                    && d.getStartTime().isAfter(rangeStart)
+                    && d.getStartTime().isBefore(rangeStart.plusHours(3))
+            );
+        assertThat(firstGapIsOk, is(true));
+
+        // And: Second gap (between bucket B and C) should carry forward WARNING
+        final boolean secondGapIsWarning = timeline.getDurations().stream()
+            .anyMatch(
+                d -> d.getSeverity() == Severity.WARNING
+                    && d.getStartTime().isAfter(rangeStart.plusHours(3))
+                    && d.getStartTime().isBefore(rangeStart.plusHours(6))
+            );
+        assertThat(secondGapIsWarning, is(true));
+
+        // And: No gap should be NO_DATA
+        final boolean anyGapIsNoData = timeline.getDurations().stream()
+            .anyMatch(
+                d -> d.getSeverity() == Severity.NO_DATA
+                    && d.getStartTime().isAfter(rangeStart)
+                    && d.getStartTime().isBefore(rangeStart.plusHours(6))
+            );
+        assertThat(anyGapIsNoData, is(false));
     }
 
     @Test
