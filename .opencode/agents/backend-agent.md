@@ -30,6 +30,7 @@ Load these skills before implementing:
 
 Optionally load these skills if relevant:
 - `.opencode/skills/jframe-search-pagination/SKILL.md` — (project) specific patterns for search/pagination endpoints
+- `.opencode/skills/jframe-exception-handling/SKILL.md` — (project) ApiException, ApiErrorCode, error handling patterns
 - `spring-boot-standards` — (global) general Spring Boot patterns
 - `liquibase-standards` — (global) database migration patterns
 

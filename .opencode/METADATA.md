@@ -47,6 +47,7 @@
 | eventify-whats-new                | `.opencode/skills/eventify-whats-new/SKILL.md`                | User-facing changelog update guidelines    |
 | eventify-release-process          | `.opencode/skills/eventify-release-process/SKILL.md`          | Git flow release conventions               |
 | jframe-search-pagination          | `.opencode/skills/jframe-search-pagination/SKILL.md`          | JFrame search/pagination endpoint patterns |
+| jframe-exception-handling         | `.opencode/skills/jframe-exception-handling/SKILL.md`         | ApiException, ApiErrorCode, error handling |
 
 ## Architecture
 

@@ -19,7 +19,7 @@
 ---
 
 ## Epic: Organization Enhancement: Team support (To be discussed)
-**Context**: Organizations should support team creations and have members in teams with specific settings. maybe we should completely revisit our current setup. notifications adapters, watchlists on team level per org? team-based access control? how would this affect the current org structure? we should create a scheme of the all the old vs new flows first.
+**Context**: Organizations should support team creations and have members in teams with specific settings. maybe we should completely revisit our current setup. notifications adapters, watchlists on team level per org? team-based access control? how would this affect the current org structure? first we need possible high level options that would work for an enterprise. we should create a scheme of the all the old vs new flows first.
 
 ---
 
@@ -74,6 +74,7 @@ key question: Should this be in this application or should we build a separate a
 - [ ] **Refresh token theft detection (token reuse → family revocation)** - When a previously-rotated refresh token is presented again, treat as a theft signal and revoke the entire token family for that user. RFC 6819 §5.2.2.3 / OAuth 2.0 Security BCP §4.13.2. Standard at Auth0, Okta, Cognito, Clerk. Pre-req: AUTH-04 (introduces `family_id` column on `token`). Implementation needs: `revoked_at TIMESTAMPTZ NULL` column, preserve old rows on rotation (delete-on-presentation only), grace-period logic to absorb network races (just-rotated token valid for ~30s after rotation), daily cleanup job for revoked rows past max session lifetime. Deferred from AUTH-04 because pre-MVP has no concrete threat and false-positive race conditions add behavioural complexity.
 - [ ] **Company Login SSO / SAML** - EntraID authentication, configuring IdP during org creation. User not searchable by regular users / org. Requires SAML library, org-level IdP config, JIT provisioning, admin setup UI. (XL — consider as sub-epic)
 - [ ] **SSE / WebSocket push for notifications** - Replace 30s polling (NOTIF-03) with server push for real-time delivery. SSE preferred (one-way, simple, behind cookie auth). Adds backend `/api/v1/notifications/stream` endpoint, frontend `EventSource` integration. Polling remains as fallback. Consider when notification volume justifies it or for "presence"-type features.
+- [ ] **Admin Tools Tab** - Admin-only page with system maintenance actions. First action: "Rebuild watchlist_channel junction" button (with confirmation warning) that triggers a full reconciliation of all watchlist-channel junction rows from JSONB + template references. Useful as a manual recovery tool. Future actions: cache invalidation, re-index, health checks. Discuss scope and what else belongs here.
 
 ---
 
