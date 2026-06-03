@@ -72,6 +72,10 @@ public class OrganizationChannelController {
 - Return `ResponseEntity<T>` with explicit status
 - Controller body: validate → call service → map → return. No business logic.
 - Auth principals: `UserTokenPrincipal` (JWT), `ApiKeyPrincipal` (API key / ingestion)
+- ✅ ALWAYS split user and org controllers: `User{Domain}Controller` + `Organization{Domain}Controller`
+- ✅ Same for services: `User{Domain}Service` + `Organization{Domain}Service`
+- ❌ NEVER combine user and org endpoints in one controller
+- ❌ `Admin` prefix is reserved for system admin controllers under the `admin` package only
 
 ## 2. Service Pattern
 
@@ -202,6 +206,33 @@ public ApiKeyAudit toAuditRecord(final User revoker) {
 
 Audit tables: FKs should be nullable (user may be deleted later). Store ID directly for deleted references.
 
+### Entity Masking Pattern
+
+Sensitive fields (webhooks, keys, secrets) are masked via entity methods — NEVER in mappers or services:
+
+```java
+// Entity
+public String getMaskedKey() {
+    return scope.getPrefix() + Strings.repeat("*", 6) + suffix;
+}
+
+public String getMaskedWebhookUrl() {
+    if (webhookUrl == null || webhookUrl.length() <= 8) return "********";
+    return webhookUrl.substring(0, 8) + Strings.repeat("*", 6) + webhookUrl.substring(webhookUrl.length() - 4);
+}
+```
+
+```java
+// Mapper uses expression to call entity method
+@Mapping(target = "maskedKey", expression = "java(apiKey.getMaskedKey())")
+public abstract ApiKeyResponse toResourceObject(ApiKey apiKey);
+```
+
+**Rules:**
+- ✅ Masking logic lives on the entity
+- ✅ Mapper calls entity method via `expression`
+- ❌ NEVER return raw secrets in responses
+
 ## 4. Request DTO
 
 ```java
@@ -283,6 +314,11 @@ public class ChannelValidator implements Validator<CreateChannelRequest> {
 - Fluent DSL: `.rejectField(FIELD, value).whenNull(MSG).orWhen(predicate, MSG)`
 - `validateAndThrow()` called from controller before service call
 - Sections in constants: field names, error messages, other validation params
+- **Error messages are user-facing** — write them as polished, human-friendly sentences (capitalized, with period). Avoid technical jargon, enum names, or field names in the message text.
+  - ❌ `"NO_DATA is not allowed in target severities"`
+  - ✅ `"The 'No Data' severity cannot be used as a notification trigger."`
+  - ❌ `"IN_APP adapter is required"`
+  - ✅ `"In-app notifications must always be enabled."`
 
 ## 7. Mapper Pattern
 
@@ -349,7 +385,8 @@ public class ChannelPausedException extends ApiException {
 **Hierarchy:**
 - `ApiException` (jframe) — domain errors (4xx/5xx)
 - `DataNotFoundException` (jframe) — 404s
-- `ValidationException` (jframe) — 400 validation
+- `ValidationException` (jframe) — 400 validation (returns HTTP 400)
+- `AccessDeniedException` (Spring Security) — 403 forbidden
 
 **Throwing in services:**
 ```java
@@ -358,9 +395,12 @@ if (channel.isPaused()) throw new ChannelPausedException();
 ```
 
 **Rules:**
-- Error codes: `ApiErrorCode.ERR_0001` through `ERR_0062` (central enum)
+- Error codes: `ApiErrorCode.ERR_0001` through `ERR-0062` (central enum)
 - `ApiErrorCode implements ApiError` — each entry has code + reason string
 - Global exception handling provided by jframe `@ControllerAdvice` base
+- ❌ NEVER hardcode not-found messages as `private static final String` — always add to `ApiErrorCode`
+- ❌ NEVER create custom ForbiddenException classes — use `@PreAuthorize` + security service
+- ❌ NEVER throw `AccessDeniedException` manually from services — security belongs in `@PreAuthorize`
 
 ## 10. Naming Conventions
 

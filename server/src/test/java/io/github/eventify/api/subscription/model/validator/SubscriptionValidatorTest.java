@@ -1,5 +1,7 @@
 package io.github.eventify.api.subscription.model.validator;
 
+import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.api.subscription.model.request.SubscribeRequest;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.exception.core.ValidationException;
@@ -33,8 +35,8 @@ public class SubscriptionValidatorTest extends UnitTest {
     public void shouldAcceptValidRequestWithCriticalAndInApp() {
         // Given: Valid subscribe request
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL"));
-        request.setAdapters(List.of("IN_APP"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL));
+        request.setAdapters(List.of(AdapterType.IN_APP));
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -49,8 +51,8 @@ public class SubscriptionValidatorTest extends UnitTest {
     public void shouldAcceptValidRequestWithMultipleValidSeverities() {
         // Given: Request with CRITICAL, WARNING, OK
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL", "WARNING", "OK"));
-        request.setAdapters(List.of("IN_APP"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL, Severity.WARNING, Severity.OK));
+        request.setAdapters(List.of(AdapterType.IN_APP));
         final ValidationResult result = new ValidationResult();
 
         // When: Validating request
@@ -68,7 +70,7 @@ public class SubscriptionValidatorTest extends UnitTest {
         // Given: Request with null targetSeverities
         final SubscribeRequest request = new SubscribeRequest();
         request.setTargetSeverities(null);
-        request.setAdapters(List.of("IN_APP"));
+        request.setAdapters(List.of(AdapterType.IN_APP));
         final ValidationResult result = new ValidationResult();
 
         // When & Then: Should throw ValidationException
@@ -91,7 +93,7 @@ public class SubscriptionValidatorTest extends UnitTest {
         // Given: Request with empty targetSeverities
         final SubscribeRequest request = new SubscribeRequest();
         request.setTargetSeverities(List.of());
-        request.setAdapters(List.of("IN_APP"));
+        request.setAdapters(List.of(AdapterType.IN_APP));
         final ValidationResult result = new ValidationResult();
 
         // When & Then: Should throw ValidationException
@@ -113,8 +115,8 @@ public class SubscriptionValidatorTest extends UnitTest {
     public void shouldRejectNoDataInTargetSeverities() {
         // Given: Request with NO_DATA in targetSeverities
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL", "NO_DATA"));
-        request.setAdapters(List.of("IN_APP"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL, Severity.NO_DATA));
+        request.setAdapters(List.of(AdapterType.IN_APP));
         final ValidationResult result = new ValidationResult();
 
         // When & Then: Should throw ValidationException
@@ -131,29 +133,6 @@ public class SubscriptionValidatorTest extends UnitTest {
         );
     }
 
-    @Test
-    @DisplayName("Should reject invalid severity value in targetSeverities")
-    public void shouldRejectInvalidSeverityValueInTargetSeverities() {
-        // Given: Request with invalid severity
-        final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL", "UNKNOWN_SEVERITY"));
-        request.setAdapters(List.of("IN_APP"));
-        final ValidationResult result = new ValidationResult();
-
-        // When & Then: Should throw ValidationException
-        final ValidationException exception = assertThrows(
-            ValidationException.class,
-            () -> validator.validate(request, result)
-        );
-
-        assertThat(exception.getValidationResult().hasErrors(), is(true));
-        assertThat(
-            exception.getValidationResult().getErrors().stream()
-                .anyMatch(e -> e.getField().equals(TARGET_SEVERITIES) && e.getCode().equals(TARGET_SEVERITIES_INVALID)),
-            is(true)
-        );
-    }
-
     // ========================= adapters validation =========================
 
     @Test
@@ -161,7 +140,7 @@ public class SubscriptionValidatorTest extends UnitTest {
     public void shouldRejectNullAdapters() {
         // Given: Request with null adapters
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL));
         request.setAdapters(null);
         final ValidationResult result = new ValidationResult();
 
@@ -184,7 +163,7 @@ public class SubscriptionValidatorTest extends UnitTest {
     public void shouldRejectEmptyAdapters() {
         // Given: Request with empty adapters
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL));
         request.setAdapters(List.of());
         final ValidationResult result = new ValidationResult();
 
@@ -207,8 +186,8 @@ public class SubscriptionValidatorTest extends UnitTest {
     public void shouldRejectAdaptersWithoutInApp() {
         // Given: Request with adapters that don't include IN_APP
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL"));
-        request.setAdapters(List.of("EMAIL"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL));
+        request.setAdapters(List.of(AdapterType.SLACK));
         final ValidationResult result = new ValidationResult();
 
         // When & Then: Should throw ValidationException

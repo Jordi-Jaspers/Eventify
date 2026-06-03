@@ -7,8 +7,9 @@ import io.github.eventify.api.apikey.repository.ApiKeyRepository;
 import io.github.eventify.api.authentication.service.AuthenticationService;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.repository.EventRepository;
-import io.github.eventify.api.notification.repository.NotificationBroadcastRepository;
-import io.github.eventify.api.notification.repository.NotificationRepository;
+import io.github.eventify.api.notification.adapter.repository.AdapterConfigRepository;
+import io.github.eventify.api.notification.core.repository.NotificationBroadcastRepository;
+import io.github.eventify.api.notification.core.repository.NotificationRepository;
 import io.github.eventify.api.organization.repository.OrganizationMembershipRepository;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
 import io.github.eventify.api.quota.repository.UserEventQuotaRepository;
@@ -146,5 +147,8 @@ public class TestContextInitializer {
 
     @Autowired
     protected NotificationBroadcastRepository notificationBroadcastRepository;
+
+    @Autowired
+    protected AdapterConfigRepository adapterConfigRepository;
 
 }

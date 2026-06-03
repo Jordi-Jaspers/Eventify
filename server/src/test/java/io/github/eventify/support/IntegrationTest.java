@@ -9,11 +9,13 @@ import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.model.ChannelStatus;
 import io.github.eventify.api.event.model.Event;
 import io.github.eventify.api.event.model.Severity;
-import io.github.eventify.api.notification.model.NotificationAudienceType;
-import io.github.eventify.api.notification.model.NotificationBroadcast;
-import io.github.eventify.api.notification.model.NotificationCategory;
-import io.github.eventify.api.notification.model.request.AudienceRequest;
-import io.github.eventify.api.notification.model.request.CreateBroadcastRequest;
+import io.github.eventify.api.notification.adapter.model.AdapterConfig;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
+import io.github.eventify.api.notification.core.model.NotificationAudienceType;
+import io.github.eventify.api.notification.core.model.NotificationBroadcast;
+import io.github.eventify.api.notification.core.model.NotificationCategory;
+import io.github.eventify.api.notification.core.model.request.AudienceRequest;
+import io.github.eventify.api.notification.core.model.request.CreateBroadcastRequest;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.OrganizationalRole;
@@ -508,11 +510,22 @@ public class IntegrationTest extends WebMvcConfigurator {
 
     // ========================= NOTIFICATION FACTORY METHODS =========================
 
+    protected AdapterConfig anAdapterConfigForUser(final User user, final AdapterType adapterType, final String label) {
+        final AdapterConfig config = new AdapterConfig();
+        config.setUser(user);
+        config.setOrganizationId(null);
+        config.setAdapterType(adapterType);
+        config.setLabel(label);
+        config.setConfig(java.util.Map.of());
+        config.setEnabled(true);
+        return adapterConfigRepository.save(config);
+    }
+
     protected void aNotificationForUser(final User user, final String title) {
-        final io.github.eventify.api.notification.model.Notification notification =
-            new io.github.eventify.api.notification.model.Notification(
+        final io.github.eventify.api.notification.core.model.Notification notification =
+            new io.github.eventify.api.notification.core.model.Notification(
                 user,
-                io.github.eventify.api.notification.model.NotificationCategory.ANNOUNCEMENT,
+                io.github.eventify.api.notification.core.model.NotificationCategory.ANNOUNCEMENT,
                 title,
                 "Test message for " + title,
                 null,
@@ -523,17 +536,17 @@ public class IntegrationTest extends WebMvcConfigurator {
     }
 
     protected void aNotificationForUserWithBroadcast(final User user, final NotificationBroadcast broadcast) {
-        final io.github.eventify.api.notification.model.Notification notification =
-            new io.github.eventify.api.notification.model.Notification(
+        final io.github.eventify.api.notification.core.model.Notification notification =
+            new io.github.eventify.api.notification.core.model.Notification(
                 user,
-                io.github.eventify.api.notification.model.NotificationCategory.ANNOUNCEMENT,
+                io.github.eventify.api.notification.core.model.NotificationCategory.ANNOUNCEMENT,
                 broadcast.getTitle(),
                 broadcast.getMessage(),
                 null,
                 null,
                 false
             );
-        final io.github.eventify.api.notification.model.Notification saved = notificationRepository.save(notification);
+        final io.github.eventify.api.notification.core.model.Notification saved = notificationRepository.save(notification);
         // Set broadcast FK via JDBC — the broadcast_id column is added by the backend-agent migration
         jdbcTemplate.update(
             "UPDATE notification SET broadcast_id = ? WHERE id = ?",
@@ -543,12 +556,12 @@ public class IntegrationTest extends WebMvcConfigurator {
     }
 
     protected NotificationBroadcast aBroadcastForAdmin(final io.github.eventify.api.user.model.User sentBy,
-        final String title, final io.github.eventify.api.notification.model.NotificationAudienceType audienceType) {
+        final String title, final io.github.eventify.api.notification.core.model.NotificationAudienceType audienceType) {
         final NotificationBroadcast broadcast = new NotificationBroadcast();
         broadcast.setSentBy(sentBy);
         broadcast.setTitle(title);
         broadcast.setMessage("Broadcast message for " + title);
-        broadcast.setCategory(io.github.eventify.api.notification.model.NotificationCategory.ANNOUNCEMENT);
+        broadcast.setCategory(io.github.eventify.api.notification.core.model.NotificationCategory.ANNOUNCEMENT);
         broadcast.setAudienceType(audienceType);
         broadcast.setRecipientCount(0);
         return notificationBroadcastRepository.save(broadcast);

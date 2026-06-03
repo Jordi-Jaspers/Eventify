@@ -1,6 +1,6 @@
 package io.github.eventify.api.organization.service;
 
-import io.github.eventify.api.notification.service.NotificationDispatchService;
+import io.github.eventify.api.notification.core.service.NotificationDispatchService;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.OrganizationMetaData;

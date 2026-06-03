@@ -97,7 +97,10 @@ public class TestDataCleanupService {
         // 11. Notification broadcasts (sent_by FK references user)
         jdbcTemplate.execute("DELETE FROM notification_broadcast WHERE sent_by IN " + userIdList);
 
-        // 12. Users (table name is "user" with quotes - reserved word in PostgreSQL)
+        // 12. Adapter configs
+        jdbcTemplate.execute("DELETE FROM adapter_config WHERE user_id IN " + userIdList);
+
+        // 13. Users (table name is "user" with quotes - reserved word in PostgreSQL)
         jdbcTemplate.execute("DELETE FROM \"user\" WHERE id IN " + userIdList);
 
         // Also clean up by name pattern

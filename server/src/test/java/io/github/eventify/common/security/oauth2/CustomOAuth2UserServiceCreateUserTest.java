@@ -1,7 +1,7 @@
 package io.github.eventify.common.security.oauth2;
 
 import io.github.eventify.api.authentication.model.Role;
-import io.github.eventify.api.notification.service.NotificationDispatchService;
+import io.github.eventify.api.notification.core.service.NotificationDispatchService;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.repository.UserRepository;
 import io.github.eventify.api.user.service.UserAuthProviderService;

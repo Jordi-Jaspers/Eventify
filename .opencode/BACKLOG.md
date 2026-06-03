@@ -2,7 +2,13 @@
 
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
+- [ ] **Improve error message in validators** -  The backend has custom validators and all the error messages are user-facing. verify that all validators have clear, user-friendly error messages. Also double check the frontend that errors are always shown via a toast (with.without retry) and not just an error block on the screen. report any discrepancies so we can also update the agent frontend skill if possible.
+- 
+- [ ] **Permission Gaps Fix** - Fix 12 identified permission inconsistencies across backend and frontend. Includes: missing server-side admin route guard in frontend, missing `MANAGE_ORGANIZATIONS` bypass on org settings/statistics/dashboard endpoints, missing `@PreAuthorize` on UserWatchlistController and UserApiKeyController, dead `SEND_EVENTS` authority, inconsistent frontend route guards, security logic mixed in service layer. Reference: `.opencode/.tmp/permission-gaps.md`
 
+- [ ] **Refactor Security services** - the `AdapterConfigSecurityService`, `ChannelSecurityService`, ` EventSecurityService`, `OrganizationSecurityService`, and `WatchlistSecurityService` (Maybe other i forgot) have some overlapping logic and inconsistent patterns. Refactor to extract common patterns, ensure consistent method signatures, and improve readability. migrate all these services to the common.security package so they are all in one place and can share common patterns and utilities.
+
+- [ ] **Remove all unecessary Hibernate properties** - Lots of models have (updatable = , length =, ...) or any other field in the @Column annotation. Remove all of them except if they should not be updateable. the classes need to look as clean as possible.
 ---
 
 ## Epic: Notification System
@@ -26,16 +32,12 @@
 ## Epic: Retention & Data Lifecycle
 **Context**: Events should not be stored forever. Configurable retention policies help manage storage costs and comply with data governance requirements.
 
+- [ ] **Enterprise Audit Trail Enhancement** - Upgrade audit system from HTTP-level capture to semantic, enterprise-grade authorization auditing. Includes: authz denial logging (403s), semantic event types enum, org-scoped audit log (visible to org owners/admins), auth event semantics (login success/failure), actor snapshot (immutable), 1-year retention, API key usage logging. New `authorization_event` table. Compliance targets: SOC2 CC6.1/CC6.2/CC7.2, ISO27001 A.12.4.1/A.12.4.3. Reference: `.opencode/.tmp/audit-trail-enhancement-plan.md`
+
 - [ ] **Retention Policy Configuration**: See "User/Organization Retention Settings UI" under Event Channels epic for UI implementation. DB columns already exist with CHECK constraints (90-1825 days). This item covers backend service logic for applying retention during cleanup.
 - [ ] **Global Retention Settings (Admin)**: Admin can set system-wide default retention, maximum retention (users can't exceed), view storage usage stats.
 
 ---
-
-## Epic: Watchlist Composition
-**Context**: Templates and additional views to make watchlists more reusable and informative. Templates are a new first-class concept distinct from inline groups: live-linked, editable, propagating across all consumers.
-
-- [ ] **Reusable Channel/Group Templates** - New entity separate from inline groups. Templates contain channels, groups, or groups-with-channels (no nesting templates inside templates). Inline groups CAN reference templates. Personal scope (user-owned, used in personal watchlists with personal channels) and org scope (org-shared, used in org watchlists with org channels). Edits propagate to every watchlist using the template — show confirmation modal warning ("dangerous operation: used in N watchlists"). Org template edits restricted to org owner/admin. Channel deletion cascades: removed channels are auto-removed from referencing templates. Template detail page shows usage count + list of consuming watchlists.
-- [ ] **Save Group as Template** - Action on a watchlist group in the editor. Modal: name + scope (personal/org) + propagation warning. On confirm: create template from group's current channels, replace inline group with template reference in the watchlist. Subsequent edits to that group go through the template editor and propagate.
 
 ---
 

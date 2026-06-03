@@ -1,6 +1,6 @@
 package io.github.eventify.common.security.oauth2;
 
-import io.github.eventify.api.notification.service.NotificationDispatchService;
+import io.github.eventify.api.notification.core.service.NotificationDispatchService;
 import io.github.eventify.api.user.model.AuthProvider;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.user.repository.UserRepository;

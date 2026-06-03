@@ -1,13 +1,20 @@
 package io.github.eventify.api.notification.adapter;
 
-import io.github.eventify.api.notification.model.NotificationPayload;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
+import io.github.eventify.api.notification.core.model.NotificationPayload;
 import io.github.eventify.api.user.model.User;
 
 /**
  * Adapter interface for sending notifications via different channels.
  */
-@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface NotificationAdapter {
+
+    /**
+     * Returns the type of this adapter.
+     *
+     * @return the adapter type
+     */
+    AdapterType getAdapterType();
 
     /**
      * Sends a notification to a user.

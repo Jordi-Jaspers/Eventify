@@ -47,6 +47,16 @@ public interface OrganizationMembershipRepository extends JpaRepository<Organiza
     boolean existsByOrganizationIdAndUserId(Long orgId, Long userId);
 
     /**
+     * Find the role of a user in an organization.
+     *
+     * @param userId the user ID
+     * @param orgId  the organization ID
+     * @return Optional containing the role if membership exists
+     */
+    @Query("SELECT m.role FROM OrganizationMembership m WHERE m.user.id = :userId AND m.organization.id = :orgId")
+    Optional<OrganizationalRole> findRoleByUserIdAndOrganizationId(@Param("userId") Long userId, @Param("orgId") Long orgId);
+
+    /**
      * Find all memberships for an organization with user data eagerly loaded.
      *
      * @param orgId the organization ID

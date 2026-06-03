@@ -3,10 +3,11 @@ package io.github.eventify.api.subscription.job;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.model.Severity;
-import io.github.eventify.api.notification.model.NotificationAudience;
-import io.github.eventify.api.notification.model.NotificationCategory;
-import io.github.eventify.api.notification.model.NotificationPayload;
-import io.github.eventify.api.notification.service.NotificationDispatchService;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
+import io.github.eventify.api.notification.core.model.NotificationAudience;
+import io.github.eventify.api.notification.core.model.NotificationCategory;
+import io.github.eventify.api.notification.core.model.NotificationPayload;
+import io.github.eventify.api.notification.core.service.NotificationDispatchService;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
@@ -102,8 +103,14 @@ public class SeverityTransitionJobTest extends UnitTest {
         final User subscriber2 = aValidUser();
         subscriber2.setId(3L);
 
-        final Subscription sub1 = aSubscription(1L, watchlist, subscriber1, List.of("CRITICAL"), List.of("IN_APP"));
-        final Subscription sub2 = aSubscription(2L, watchlist, subscriber2, List.of("CRITICAL", "WARNING"), List.of("IN_APP"));
+        final Subscription sub1 = aSubscription(1L, watchlist, subscriber1, List.of(Severity.CRITICAL), List.of(AdapterType.IN_APP));
+        final Subscription sub2 = aSubscription(
+            2L,
+            watchlist,
+            subscriber2,
+            List.of(Severity.CRITICAL, Severity.WARNING),
+            List.of(AdapterType.IN_APP)
+        );
 
         given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
             .willReturn(List.of(sub1, sub2));
@@ -111,8 +118,12 @@ public class SeverityTransitionJobTest extends UnitTest {
         // When: Job executes
         severityTransitionJob.processSeverityTransitions();
 
-        // Then: Two notifications should be dispatched
-        verify(notificationDispatchService, times(2)).dispatch(any(NotificationAudience.class), any(NotificationPayload.class));
+        // Then: Two notifications should be dispatched (each with subscription's own adapter list)
+        verify(notificationDispatchService, times(2)).dispatch(
+            any(NotificationAudience.class),
+            any(NotificationPayload.class),
+            any(List.class)
+        );
     }
 
     @Test
@@ -131,7 +142,7 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         final User subscriber = aValidUser();
         subscriber.setId(2L);
-        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("CRITICAL"), List.of("IN_APP"));
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of(Severity.CRITICAL), List.of(AdapterType.IN_APP));
 
         given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
             .willReturn(List.of(sub));
@@ -141,7 +152,11 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         // Then: Notification should be urgent and ALERT category
         final ArgumentCaptor<NotificationPayload> payloadCaptor = ArgumentCaptor.forClass(NotificationPayload.class);
-        verify(notificationDispatchService).dispatch(any(NotificationAudience.class), payloadCaptor.capture());
+        verify(notificationDispatchService).dispatch(
+            any(NotificationAudience.class),
+            payloadCaptor.capture(),
+            eq(List.of(AdapterType.IN_APP))
+        );
 
         final NotificationPayload payload = payloadCaptor.getValue();
         assertThat(payload.isUrgent(), is(true));
@@ -164,7 +179,7 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         final User subscriber = aValidUser();
         subscriber.setId(2L);
-        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("WARNING"), List.of("IN_APP"));
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of(Severity.WARNING), List.of(AdapterType.IN_APP));
 
         given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "WARNING"))
             .willReturn(List.of(sub));
@@ -174,7 +189,11 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         // Then: Notification should NOT be urgent
         final ArgumentCaptor<NotificationPayload> payloadCaptor = ArgumentCaptor.forClass(NotificationPayload.class);
-        verify(notificationDispatchService).dispatch(any(NotificationAudience.class), payloadCaptor.capture());
+        verify(notificationDispatchService).dispatch(
+            any(NotificationAudience.class),
+            payloadCaptor.capture(),
+            eq(List.of(AdapterType.IN_APP))
+        );
 
         final NotificationPayload payload = payloadCaptor.getValue();
         assertThat(payload.isUrgent(), is(false));
@@ -197,7 +216,7 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         final User subscriber = aValidUser();
         subscriber.setId(99L);
-        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("CRITICAL"), List.of("IN_APP"));
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of(Severity.CRITICAL), List.of(AdapterType.IN_APP));
 
         given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
             .willReturn(List.of(sub));
@@ -207,10 +226,46 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         // Then: Notification should target subscriber's user ID
         final ArgumentCaptor<NotificationAudience> audienceCaptor = ArgumentCaptor.forClass(NotificationAudience.class);
-        verify(notificationDispatchService).dispatch(audienceCaptor.capture(), any(NotificationPayload.class));
+        verify(notificationDispatchService).dispatch(audienceCaptor.capture(), any(NotificationPayload.class), any(List.class));
 
         final NotificationAudience audience = audienceCaptor.getValue();
         assertThat(audience.getUserId(), is(99L));
+    }
+
+    @Test
+    @DisplayName("Should pass subscription adapters as targetAdapters when dispatching notification")
+    public void shouldPassSubscriptionAdaptersAsTargetAdapters() {
+        // Given: A channel with severity change
+        final User channelOwner = aValidUser();
+        channelOwner.setId(1L);
+        final Channel channel = aChannelWithSeverityChange(10L, "Production API", channelOwner, Severity.CRITICAL, Severity.WARNING);
+
+        given(channelRepository.findChannelsWithSeverityChange()).willReturn(List.of(channel));
+
+        final Watchlist watchlist = aWatchlist(20L, "My Watchlist", channelOwner);
+        given(watchlistRepository.findWatchlistsContainingChannel(channel.getId()))
+            .willReturn(List.of(watchlist));
+
+        final User subscriber = aValidUser();
+        subscriber.setId(5L);
+        final List<AdapterType> subscriptionAdapters = List.of(AdapterType.IN_APP, AdapterType.SLACK);
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of(Severity.CRITICAL), subscriptionAdapters);
+
+        given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
+            .willReturn(List.of(sub));
+
+        // When: Job executes
+        severityTransitionJob.processSeverityTransitions();
+
+        // Then: dispatch is called with the subscription's adapter list
+        @SuppressWarnings("unchecked") final ArgumentCaptor<List<AdapterType>> adaptersCaptor = ArgumentCaptor.forClass(List.class);
+        verify(notificationDispatchService).dispatch(
+            any(NotificationAudience.class),
+            any(NotificationPayload.class),
+            adaptersCaptor.capture()
+        );
+
+        assertThat(adaptersCaptor.getValue(), containsInAnyOrder(AdapterType.IN_APP, AdapterType.SLACK));
     }
 
     @Test
@@ -229,7 +284,7 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         final User subscriber = aValidUser();
         subscriber.setId(2L);
-        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("CRITICAL"), List.of("IN_APP"));
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of(Severity.CRITICAL), List.of(AdapterType.IN_APP));
 
         given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
             .willReturn(List.of(sub));
@@ -264,8 +319,8 @@ public class SeverityTransitionJobTest extends UnitTest {
         final User subscriber2 = aValidUser();
         subscriber2.setId(3L);
 
-        final Subscription sub1 = aSubscription(1L, watchlist1, subscriber1, List.of("CRITICAL"), List.of("IN_APP"));
-        final Subscription sub2 = aSubscription(2L, watchlist2, subscriber2, List.of("CRITICAL"), List.of("IN_APP"));
+        final Subscription sub1 = aSubscription(1L, watchlist1, subscriber1, List.of(Severity.CRITICAL), List.of(AdapterType.IN_APP));
+        final Subscription sub2 = aSubscription(2L, watchlist2, subscriber2, List.of(Severity.CRITICAL), List.of(AdapterType.IN_APP));
 
         given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist1.getId(), "CRITICAL"))
             .willReturn(List.of(sub1));
@@ -276,7 +331,11 @@ public class SeverityTransitionJobTest extends UnitTest {
         severityTransitionJob.processSeverityTransitions();
 
         // Then: Both subscribers should receive notifications
-        verify(notificationDispatchService, times(2)).dispatch(any(NotificationAudience.class), any(NotificationPayload.class));
+        verify(notificationDispatchService, times(2)).dispatch(
+            any(NotificationAudience.class),
+            any(NotificationPayload.class),
+            any(List.class)
+        );
     }
 
     @Test
@@ -347,7 +406,7 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         final User subscriber = aValidUser();
         subscriber.setId(2L);
-        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("CRITICAL"), List.of("IN_APP"));
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of(Severity.CRITICAL), List.of(AdapterType.IN_APP));
         given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
             .willReturn(List.of(sub));
 
@@ -355,7 +414,7 @@ public class SeverityTransitionJobTest extends UnitTest {
         severityTransitionJob.processSeverityTransitions();
 
         // Then: Notification is dispatched
-        verify(notificationDispatchService).dispatch(any(NotificationAudience.class), any(NotificationPayload.class));
+        verify(notificationDispatchService).dispatch(any(NotificationAudience.class), any(NotificationPayload.class), any(List.class));
     }
 
     @Test
@@ -375,7 +434,7 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         final User subscriber = aValidUser();
         subscriber.setId(2L);
-        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("CRITICAL"), List.of("IN_APP"));
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of(Severity.CRITICAL), List.of(AdapterType.IN_APP));
         given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
             .willReturn(List.of(sub));
 
@@ -383,7 +442,7 @@ public class SeverityTransitionJobTest extends UnitTest {
         severityTransitionJob.processSeverityTransitions();
 
         // Then: Notification is dispatched (personal channels are never filtered)
-        verify(notificationDispatchService).dispatch(any(NotificationAudience.class), any(NotificationPayload.class));
+        verify(notificationDispatchService).dispatch(any(NotificationAudience.class), any(NotificationPayload.class), any(List.class));
     }
 
     @Test
@@ -481,7 +540,7 @@ public class SeverityTransitionJobTest extends UnitTest {
 
         final User subscriber = aValidUser();
         subscriber.setId(2L);
-        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of("CRITICAL"), List.of("IN_APP"));
+        final Subscription sub = aSubscription(1L, watchlist, subscriber, List.of(Severity.CRITICAL), List.of(AdapterType.IN_APP));
         given(subscriptionRepository.findByWatchlistIdAndTargetSeveritiesContaining(watchlist.getId(), "CRITICAL"))
             .willReturn(List.of(sub));
 
@@ -489,7 +548,11 @@ public class SeverityTransitionJobTest extends UnitTest {
         severityTransitionJob.processSeverityTransitions();
 
         // Then: Only one notification dispatched (for the active org channel)
-        verify(notificationDispatchService, times(1)).dispatch(any(NotificationAudience.class), any(NotificationPayload.class));
+        verify(notificationDispatchService, times(1)).dispatch(
+            any(NotificationAudience.class),
+            any(NotificationPayload.class),
+            any(List.class)
+        );
 
         // And: Suspended org channel's watchlists are never queried
         verify(watchlistRepository, never()).findWatchlistsContainingChannel(suspendedOrgChannel.getId());
@@ -537,8 +600,8 @@ public class SeverityTransitionJobTest extends UnitTest {
         final Long id,
         final Watchlist watchlist,
         final User user,
-        final List<String> targetSeverities,
-        final List<String> adapters
+        final List<Severity> targetSeverities,
+        final List<AdapterType> adapters
     ) {
         final Subscription subscription = new Subscription();
         subscription.setId(id);

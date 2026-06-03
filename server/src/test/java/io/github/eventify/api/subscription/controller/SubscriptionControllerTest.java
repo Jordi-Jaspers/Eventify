@@ -1,5 +1,7 @@
 package io.github.eventify.api.subscription.controller;
 
+import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.api.subscription.model.request.SubscribeRequest;
 import io.github.eventify.api.subscription.model.response.SubscriptionResponse;
 import io.github.eventify.api.user.model.User;
@@ -57,8 +59,8 @@ public class SubscriptionControllerTest extends IntegrationTest {
 
         assertThat(subscriptionResponse.getId(), is(notNullValue()));
         assertThat(subscriptionResponse.getWatchlistId(), is(watchlist.getId()));
-        assertThat(subscriptionResponse.getTargetSeverities(), hasItems("CRITICAL"));
-        assertThat(subscriptionResponse.getAdapters(), hasItems("IN_APP"));
+        assertThat(subscriptionResponse.getTargetSeverities(), hasItems(Severity.CRITICAL));
+        assertThat(subscriptionResponse.getAdapters(), hasItems(AdapterType.IN_APP));
         assertThat(subscriptionResponse.getCreatedAt(), is(notNullValue()));
     }
 
@@ -80,8 +82,8 @@ public class SubscriptionControllerTest extends IntegrationTest {
 
         // When: Subscribing again with different severities
         final SubscribeRequest updatedRequest = new SubscribeRequest();
-        updatedRequest.setTargetSeverities(List.of("CRITICAL", "WARNING"));
-        updatedRequest.setAdapters(List.of("IN_APP"));
+        updatedRequest.setTargetSeverities(List.of(Severity.CRITICAL, Severity.WARNING));
+        updatedRequest.setAdapters(List.of(AdapterType.IN_APP));
 
         final MockHttpServletRequestBuilder createRequest = post(USER_WATCHLIST_SUBSCRIPTION_PATH, watchlist.getId())
             .contentType(APPLICATION_JSON)
@@ -97,7 +99,7 @@ public class SubscriptionControllerTest extends IntegrationTest {
         final String content = response.andReturn().getResponse().getContentAsString();
         final SubscriptionResponse subscriptionResponse = fromJson(content, SubscriptionResponse.class);
 
-        assertThat(subscriptionResponse.getTargetSeverities(), hasItems("CRITICAL", "WARNING"));
+        assertThat(subscriptionResponse.getTargetSeverities(), hasItems(Severity.CRITICAL, Severity.WARNING));
     }
 
     @Test
@@ -110,7 +112,7 @@ public class SubscriptionControllerTest extends IntegrationTest {
         // And: Request with empty targetSeverities
         final SubscribeRequest request = new SubscribeRequest();
         request.setTargetSeverities(List.of());
-        request.setAdapters(List.of("IN_APP"));
+        request.setAdapters(List.of(AdapterType.IN_APP));
 
         // When: Creating subscription
         final MockHttpServletRequestBuilder createRequest = post(USER_WATCHLIST_SUBSCRIPTION_PATH, watchlist.getId())
@@ -133,8 +135,8 @@ public class SubscriptionControllerTest extends IntegrationTest {
 
         // And: Request with NO_DATA in targetSeverities
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL", "NO_DATA"));
-        request.setAdapters(List.of("IN_APP"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL, Severity.NO_DATA));
+        request.setAdapters(List.of(AdapterType.IN_APP));
 
         // When: Creating subscription
         final MockHttpServletRequestBuilder createRequest = post(USER_WATCHLIST_SUBSCRIPTION_PATH, watchlist.getId())
@@ -157,8 +159,8 @@ public class SubscriptionControllerTest extends IntegrationTest {
 
         // And: Request without IN_APP adapter
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL"));
-        request.setAdapters(List.of("EMAIL"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL));
+        request.setAdapters(List.of(AdapterType.SLACK));
 
         // When: Creating subscription
         final MockHttpServletRequestBuilder createRequest = post(USER_WATCHLIST_SUBSCRIPTION_PATH, watchlist.getId())
@@ -339,8 +341,8 @@ public class SubscriptionControllerTest extends IntegrationTest {
 
     private static SubscribeRequest aValidSubscribeRequest() {
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL"));
-        request.setAdapters(List.of("IN_APP"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL));
+        request.setAdapters(List.of(AdapterType.IN_APP));
         return request;
     }
 }

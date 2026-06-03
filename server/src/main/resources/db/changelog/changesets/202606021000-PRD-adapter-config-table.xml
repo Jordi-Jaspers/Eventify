@@ -1,0 +1,45 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202606021000-PRD-adapter-config-table.xml">
+
+    <changeSet id="202606021000-PRD-adapter-config-table-1" author="jordi.jaspers">
+        <comment>Creating adapter_config table for user and organization notification adapter configurations.</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS adapter_config (
+                id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                user_id         BIGINT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+                organization_id BIGINT NULL REFERENCES organization(id) ON DELETE CASCADE,
+                adapter_type    VARCHAR(50) NOT NULL,
+                label           VARCHAR(100) NOT NULL,
+                config          JSONB NOT NULL DEFAULT '{}',
+                enabled         BOOLEAN NOT NULL DEFAULT TRUE,
+                created_at      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+                updated_at      TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+            );
+
+            CREATE INDEX idx_adapter_config_user_adapter_type ON adapter_config (user_id, adapter_type);
+            CREATE INDEX idx_adapter_config_org_adapter_type ON adapter_config (organization_id, adapter_type);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202606021000-PRD-adapter-config-table-2" author="jordi.jaspers">
+        <comment>Adding documentation for adapter_config table.</comment>
+        <sql>
+            COMMENT ON TABLE adapter_config IS 'Stores adapter configurations for users and organizations to receive notifications via different channels';
+            COMMENT ON COLUMN adapter_config.id IS 'Unique identifier for the adapter configuration';
+            COMMENT ON COLUMN adapter_config.user_id IS 'Reference to the user who owns this configuration';
+            COMMENT ON COLUMN adapter_config.organization_id IS 'Reference to the organization (null for personal configurations)';
+            COMMENT ON COLUMN adapter_config.adapter_type IS 'Type of the notification adapter (e.g. IN_APP, SLACK, MATTERMOST)';
+            COMMENT ON COLUMN adapter_config.label IS 'Human-readable label for this adapter configuration';
+            COMMENT ON COLUMN adapter_config.config IS 'Adapter-specific configuration properties (e.g. webhookUrl)';
+            COMMENT ON COLUMN adapter_config.enabled IS 'Whether this adapter configuration is active';
+            COMMENT ON COLUMN adapter_config.created_at IS 'Timestamp when the configuration was created';
+            COMMENT ON COLUMN adapter_config.updated_at IS 'Timestamp when the configuration was last updated';
+            COMMENT ON INDEX idx_adapter_config_user_adapter_type IS 'Index for finding configs by user and adapter type';
+            COMMENT ON INDEX idx_adapter_config_org_adapter_type IS 'Index for finding configs by organization and adapter type';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

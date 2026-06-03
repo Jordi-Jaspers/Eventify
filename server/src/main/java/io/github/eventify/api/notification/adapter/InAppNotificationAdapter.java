@@ -1,8 +1,9 @@
 package io.github.eventify.api.notification.adapter;
 
-import io.github.eventify.api.notification.model.Notification;
-import io.github.eventify.api.notification.model.NotificationPayload;
-import io.github.eventify.api.notification.repository.NotificationRepository;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
+import io.github.eventify.api.notification.core.model.Notification;
+import io.github.eventify.api.notification.core.model.NotificationPayload;
+import io.github.eventify.api.notification.core.repository.NotificationRepository;
 import io.github.eventify.api.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,11 @@ import org.springframework.stereotype.Component;
 public class InAppNotificationAdapter implements NotificationAdapter {
 
     private final NotificationRepository notificationRepository;
+
+    @Override
+    public AdapterType getAdapterType() {
+        return AdapterType.IN_APP;
+    }
 
     @Override
     public void send(final User user, final NotificationPayload payload) {

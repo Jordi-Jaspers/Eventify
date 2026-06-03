@@ -1,9 +1,9 @@
 package io.github.eventify.api.dashboard.service;
 
 import io.github.eventify.api.dashboard.model.UserDashboard;
-import io.github.eventify.api.notification.model.Notification;
-import io.github.eventify.api.notification.model.NotificationCategory;
-import io.github.eventify.api.notification.repository.NotificationRepository;
+import io.github.eventify.api.notification.core.model.Notification;
+import io.github.eventify.api.notification.core.model.NotificationCategory;
+import io.github.eventify.api.notification.core.repository.NotificationRepository;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationMembership;
 import io.github.eventify.api.organization.model.OrganizationStatus;

@@ -1,5 +1,7 @@
 package io.github.eventify.api.subscription.service;
 
+import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.api.subscription.model.Subscription;
 import io.github.eventify.api.subscription.model.request.SubscribeRequest;
 import io.github.eventify.api.subscription.repository.SubscriptionRepository;
@@ -78,8 +80,8 @@ public class SubscriptionServiceTest extends UnitTest {
         // Then: Subscription should be created
         assertThat(result, is(notNullValue()));
         assertThat(result.getId(), is(1L));
-        assertThat(result.getTargetSeverities(), hasItems("CRITICAL"));
-        assertThat(result.getAdapters(), hasItems("IN_APP"));
+        assertThat(result.getTargetSeverities(), hasItems(Severity.CRITICAL));
+        assertThat(result.getAdapters(), hasItems(AdapterType.IN_APP));
 
         verify(subscriptionRepository).save(any(Subscription.class));
     }
@@ -97,14 +99,14 @@ public class SubscriptionServiceTest extends UnitTest {
 
         // And: Updated request with different severities
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL", "WARNING"));
-        request.setAdapters(List.of("IN_APP"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL, Severity.WARNING));
+        request.setAdapters(List.of(AdapterType.IN_APP));
 
         // When: Subscribing again
         final Subscription result = subscriptionService.subscribe(watchlistId, request);
 
         // Then: Existing subscription should be updated
-        assertThat(result.getTargetSeverities(), hasItems("CRITICAL", "WARNING"));
+        assertThat(result.getTargetSeverities(), hasItems(Severity.CRITICAL, Severity.WARNING));
         assertThat(result.getId(), is(1L));
 
         verify(subscriptionRepository).save(existing);
@@ -187,8 +189,8 @@ public class SubscriptionServiceTest extends UnitTest {
 
     private static SubscribeRequest aValidSubscribeRequest() {
         final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of("CRITICAL"));
-        request.setAdapters(List.of("IN_APP"));
+        request.setTargetSeverities(List.of(Severity.CRITICAL));
+        request.setAdapters(List.of(AdapterType.IN_APP));
         return request;
     }
 
@@ -200,8 +202,8 @@ public class SubscriptionServiceTest extends UnitTest {
         subscription.setId(id);
         subscription.setUser(user);
         subscription.setWatchlist(watchlist);
-        subscription.setTargetSeverities(List.of("CRITICAL"));
-        subscription.setAdapters(List.of("IN_APP"));
+        subscription.setTargetSeverities(List.of(Severity.CRITICAL));
+        subscription.setAdapters(List.of(AdapterType.IN_APP));
         subscription.setCreatedAt(OffsetDateTime.now().minusDays(1));
         return subscription;
     }

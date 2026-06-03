@@ -56,7 +56,7 @@ Without a UI, users cannot link adapters or test connections. This story provide
     * When they view org settings
     * Then the "Notifications" tab is not visible
 * [ ] **Edge Case**: Webhook URL masking
-    * Given a saved config with webhook URL `https://hooks.slack.com/services/T00/B00/xxxx`
+    * Given a saved config with webhook URL `https://example.com/webhook/services/T00/B00/xxxx`
     * When the config list is displayed
     * Then the URL shows as `••••••••/xxxx` (last 8 chars visible)
 

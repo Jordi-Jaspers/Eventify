@@ -1,5 +1,7 @@
 package io.github.eventify.api.subscription.model.request;
 
+import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,12 +23,12 @@ public class SubscribeRequest {
         example = "[\"CRITICAL\", \"WARNING\"]",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private List<String> targetSeverities;
+    private List<Severity> targetSeverities;
 
     @Schema(
         description = "Notification adapters to use for delivery",
         example = "[\"IN_APP\"]",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private List<String> adapters;
+    private List<AdapterType> adapters;
 }

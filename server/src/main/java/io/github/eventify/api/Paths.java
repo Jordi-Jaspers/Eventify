@@ -339,6 +339,20 @@ public final class Paths {
 
     /* ------------------------------- END ------------------------------- */
 
+    public static final String ADAPTER_CONFIGS_PART = "/adapter-configs";
+
+    public static final String USER_ADAPTER_CONFIGS_PATH = USERS_PATH + ADAPTER_CONFIGS_PART;
+
+    public static final String USER_ADAPTER_CONFIGS_SEARCH_PATH = USER_ADAPTER_CONFIGS_PATH + SEARCH_PART;
+
+    public static final String USER_ADAPTER_CONFIG_PATH = USER_ADAPTER_CONFIGS_PATH + ID_PART;
+
+    public static final String ORGANIZATION_ADAPTER_CONFIGS_PATH = ORGANIZATION_PATH + ADAPTER_CONFIGS_PART;
+
+    public static final String ORGANIZATION_ADAPTER_CONFIG_PATH = ORGANIZATION_ADAPTER_CONFIGS_PATH + ID_PART;
+
+    /* ------------------------------- PRIVATE CONSTRUCTOR ------------------------------- */
+
     private Paths() {
         // private constructor to prevent instantiation.
     }

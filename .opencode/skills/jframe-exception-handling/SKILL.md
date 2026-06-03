@@ -135,6 +135,10 @@ That's it. jFrame handles the rest automatically.
 - **Constructor takes `ApiErrorCode`** (not raw strings)
 - **Javadoc required** on class and constructor
 - **Package:** `io.github.eventify.common.exception`
+- ❌ **NEVER hardcode not-found messages** as `private static final String` — always add to `ApiErrorCode`
+- ❌ **NEVER create custom ForbiddenException classes** — use `@PreAuthorize` + security service beans
+- ✅ **For 404s:** use `DataNotFoundException(ApiErrorCode.XXX_NOT_FOUND)` — maps to HTTP 404 automatically
+- ✅ **For 403s:** `@PreAuthorize` returns 403 via Spring Security — no exception needed in code
 
 ## Existing Exceptions (Reference)
 

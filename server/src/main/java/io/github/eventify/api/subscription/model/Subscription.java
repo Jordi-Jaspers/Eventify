@@ -1,5 +1,7 @@
 package io.github.eventify.api.subscription.model;
 
+import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import lombok.Getter;
@@ -55,7 +57,7 @@ public class Subscription implements Serializable {
         nullable = false,
         columnDefinition = "jsonb"
     )
-    private List<String> targetSeverities;
+    private List<Severity> targetSeverities;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(
@@ -63,7 +65,7 @@ public class Subscription implements Serializable {
         nullable = false,
         columnDefinition = "jsonb"
     )
-    private List<String> adapters;
+    private List<AdapterType> adapters;
 
     @CreationTimestamp
     @Column(

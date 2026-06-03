@@ -1,5 +1,7 @@
 package io.github.eventify.api.subscription.model.validator;
 
+import io.github.eventify.api.event.model.Severity;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.api.subscription.model.request.SubscribeRequest;
 import io.github.jframe.exception.core.ValidationException;
 import io.github.jframe.validation.ValidationResult;
@@ -18,19 +20,15 @@ import static java.util.Objects.isNull;
 public class SubscriptionValidator implements Validator<SubscribeRequest> {
 
     // Error messages
-    public static final String TARGET_SEVERITIES_REQUIRED = "Target severities are required";
-    public static final String TARGET_SEVERITIES_NO_DATA_NOT_ALLOWED = "NO_DATA is not allowed in target severities";
-    public static final String TARGET_SEVERITIES_INVALID = "Invalid severity value";
-    public static final String ADAPTERS_REQUIRED = "Adapters are required";
-    public static final String ADAPTERS_IN_APP_REQUIRED = "IN_APP adapter is required";
+    public static final String TARGET_SEVERITIES_REQUIRED = "At least one severity level must be selected.";
+    public static final String TARGET_SEVERITIES_NO_DATA_NOT_ALLOWED = "The 'No Data' severity cannot be used as a notification trigger.";
+    public static final String TARGET_SEVERITIES_INVALID = "One or more severity values are not recognized.";
+    public static final String ADAPTERS_REQUIRED = "At least one notification channel must be selected.";
+    public static final String ADAPTERS_IN_APP_REQUIRED = "In-app notifications must always be enabled.";
 
     // Fields
     public static final String TARGET_SEVERITIES = "targetSeverities";
     public static final String ADAPTERS = "adapters";
-
-    // Constants
-    private static final String NO_DATA = "NO_DATA";
-    private static final List<String> ALLOWED_SEVERITIES = List.of("CRITICAL", "WARNING", "OK");
 
     @Override
     public void validate(final SubscribeRequest request, final ValidationResult result) {
@@ -48,7 +46,7 @@ public class SubscriptionValidator implements Validator<SubscribeRequest> {
     }
 
     private void validateTargetSeverities(final SubscribeRequest request, final ValidationResult result) {
-        final List<String> severities = request.getTargetSeverities();
+        final List<Severity> severities = request.getTargetSeverities();
 
         if (isNull(severities) || severities.isEmpty()) {
             result.rejectField(TARGET_SEVERITIES, severities)
@@ -57,22 +55,15 @@ public class SubscriptionValidator implements Validator<SubscribeRequest> {
             throw new ValidationException(result);
         }
 
-        if (severities.contains(NO_DATA)) {
-            result.rejectField(TARGET_SEVERITIES, NO_DATA)
+        if (severities.contains(Severity.NO_DATA)) {
+            result.rejectField(TARGET_SEVERITIES, Severity.NO_DATA)
                 .when(v -> true, TARGET_SEVERITIES_NO_DATA_NOT_ALLOWED);
-            throw new ValidationException(result);
-        }
-
-        final boolean hasInvalid = severities.stream().anyMatch(s -> !ALLOWED_SEVERITIES.contains(s));
-        if (hasInvalid) {
-            result.rejectField(TARGET_SEVERITIES, "invalid")
-                .when(v -> true, TARGET_SEVERITIES_INVALID);
             throw new ValidationException(result);
         }
     }
 
     private void validateAdapters(final SubscribeRequest request, final ValidationResult result) {
-        final List<String> adapters = request.getAdapters();
+        final List<AdapterType> adapters = request.getAdapters();
 
         if (isNull(adapters) || adapters.isEmpty()) {
             result.rejectField(ADAPTERS, adapters)
@@ -81,7 +72,7 @@ public class SubscriptionValidator implements Validator<SubscribeRequest> {
             throw new ValidationException(result);
         }
 
-        if (!adapters.contains("IN_APP")) {
+        if (!adapters.contains(AdapterType.IN_APP)) {
             result.rejectField(ADAPTERS, "missing-in-app")
                 .when(v -> true, ADAPTERS_IN_APP_REQUIRED);
             throw new ValidationException(result);

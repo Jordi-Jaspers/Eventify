@@ -3,10 +3,10 @@ package io.github.eventify.api.subscription.job;
 import io.github.eventify.api.channel.model.Channel;
 import io.github.eventify.api.channel.repository.ChannelRepository;
 import io.github.eventify.api.event.model.Severity;
-import io.github.eventify.api.notification.model.NotificationAudience;
-import io.github.eventify.api.notification.model.NotificationCategory;
-import io.github.eventify.api.notification.model.NotificationPayload;
-import io.github.eventify.api.notification.service.NotificationDispatchService;
+import io.github.eventify.api.notification.core.model.NotificationAudience;
+import io.github.eventify.api.notification.core.model.NotificationCategory;
+import io.github.eventify.api.notification.core.model.NotificationPayload;
+import io.github.eventify.api.notification.core.service.NotificationDispatchService;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -65,16 +64,10 @@ public class SeverityTransitionJob {
             .filter(Objects::nonNull)
             .map(Organization::getId)
             .distinct()
-            .collect(Collectors.toList());
+            .toList();
 
-        final Map<Long, OrganizationStatus> orgStatusMap;
-        if (orgIds.isEmpty()) {
-            orgStatusMap = Map.of();
-        } else {
-            final HashMap<Long, OrganizationStatus> statusMap = new HashMap<>();
-            organizationRepository.findAllById(orgIds).forEach(org -> statusMap.put(org.getId(), org.getStatus()));
-            orgStatusMap = statusMap;
-        }
+        final Map<Long, OrganizationStatus> orgStatusMap = new HashMap<>();
+        organizationRepository.findAllById(orgIds).forEach(org -> orgStatusMap.put(org.getId(), org.getStatus()));
 
         final long notificationCount = channels.stream()
             .filter(channel -> isChannelAllowed(channel, orgStatusMap))
@@ -125,7 +118,7 @@ public class SeverityTransitionJob {
         final Subscription subscription) {
         final NotificationAudience audience = NotificationAudience.user(subscription.getUser().getId());
         final NotificationPayload payload = buildPayload(channel, watchlist, severity);
-        notificationDispatchService.dispatch(audience, payload);
+        notificationDispatchService.dispatch(audience, payload, subscription.getAdapters());
     }
 
     private NotificationPayload buildPayload(final Channel channel, final Watchlist watchlist, final Severity severity) {
