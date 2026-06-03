@@ -2,13 +2,14 @@
 
 ## Epic: Bugs & Technical Debt
 **Context**: Ongoing maintenance, bug fixes, and technical debt cleanup.
+
 - [ ] **Improve error message in validators** -  The backend has custom validators and all the error messages are user-facing. verify that all validators have clear, user-friendly error messages. Also double check the frontend that errors are always shown via a toast (with.without retry) and not just an error block on the screen. report any discrepancies so we can also update the agent frontend skill if possible.
-- 
+
 - [ ] **Permission Gaps Fix** - Fix 12 identified permission inconsistencies across backend and frontend. Includes: missing server-side admin route guard in frontend, missing `MANAGE_ORGANIZATIONS` bypass on org settings/statistics/dashboard endpoints, missing `@PreAuthorize` on UserWatchlistController and UserApiKeyController, dead `SEND_EVENTS` authority, inconsistent frontend route guards, security logic mixed in service layer. Reference: `.opencode/.tmp/permission-gaps.md`
 
 - [ ] **Refactor Security services** - the `AdapterConfigSecurityService`, `ChannelSecurityService`, ` EventSecurityService`, `OrganizationSecurityService`, and `WatchlistSecurityService` (Maybe other i forgot) have some overlapping logic and inconsistent patterns. Refactor to extract common patterns, ensure consistent method signatures, and improve readability. migrate all these services to the common.security package so they are all in one place and can share common patterns and utilities.
 
-- [ ] **Remove all unecessary Hibernate properties** - Lots of models have (updatable = , length =, ...) or any other field in the @Column annotation. Remove all of them except if they should not be updateable. the classes need to look as clean as possible.
+- [ ] **Remove all unnecessary Hibernate properties** - Lots of models have (updatable = , length =, ...) or any other field in the @Column annotation. Remove all of them except if they should not be updatable. the classes need to look as clean as possible.
 ---
 
 ## Epic: Notification System
