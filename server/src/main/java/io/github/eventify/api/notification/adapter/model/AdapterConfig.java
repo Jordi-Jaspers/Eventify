@@ -22,7 +22,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import org.apache.logging.log4j.util.Strings;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -105,26 +104,4 @@ public class AdapterConfig implements PageableItem, Serializable {
         nullable = false
     )
     private OffsetDateTime updatedAt;
-
-    /**
-     * Returns a masked version of the webhookUrl from config.
-     * Shows first 8 chars and last 4 chars, with 6 asterisks in between.
-     *
-     * @return masked webhook URL, or "********" if absent/too short
-     */
-    public String getMaskedWebhookUrl() {
-        final String url = getWebhookUrlFromConfig();
-        if (url == null || url.length() <= 8) {
-            return "********";
-        }
-        return url.substring(0, 8) + Strings.repeat("*", 6) + url.substring(url.length() - 4);
-    }
-
-    private String getWebhookUrlFromConfig() {
-        if (config == null) {
-            return null;
-        }
-        final Object raw = config.get("webhookUrl");
-        return raw instanceof String s ? s : null;
-    }
 }

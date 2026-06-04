@@ -1,24 +1,24 @@
 package io.github.eventify.api.notification.adapter.controller;
 
-import io.github.eventify.api.notification.adapter.model.AdapterConfig;
 import io.github.eventify.api.notification.adapter.model.AdapterType;
+import io.github.eventify.api.notification.adapter.model.request.TestAdapterConnectionRequest;
 import io.github.eventify.api.notification.adapter.model.response.TestConnectionResponse;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.support.IntegrationTest;
-
-import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static io.github.eventify.api.Paths.USER_ADAPTER_CONFIG_TEST_PATH;
+import static io.github.eventify.api.Paths.ADAPTER_CONFIG_TEST_PATH;
 import static io.github.eventify.common.constant.Constants.Security.BEARER;
 import static io.github.jframe.util.mapper.ObjectMappers.fromJson;
+import static io.github.jframe.util.mapper.ObjectMappers.toJson;
 import static jakarta.servlet.http.HttpServletResponse.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -26,16 +26,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AdapterTestConnectionControllerTest extends IntegrationTest {
 
     @Test
-    @DisplayName("Should return 200 with success=true when connection test passes")
-    public void testConnectionSuccessReturnsOkWithSuccessTrue() throws Exception {
-        // Given: an authenticated user with a valid adapter config
+    @DisplayName("Should return 200 with success=true when IN_APP adapter sends successfully")
+    public void testConnectionSuccessForInAppAdapter() throws Exception {
+        // Given: an authenticated user
         final User user = aValidatedUser();
-        final Long configId = anAdapterConfigForUser(user, AdapterType.IN_APP, "In-App Test").getId();
+        final TestAdapterConnectionRequest request = new TestAdapterConnectionRequest()
+            .setAdapterType(AdapterType.IN_APP)
+            .setWebhookUrl("https://example.com/webhook");
 
         // When: posting to the test endpoint
         final ResultActions response = mockMvc.perform(
-            post(USER_ADAPTER_CONFIG_TEST_PATH, configId)
+            post(ADAPTER_CONFIG_TEST_PATH)
+                .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(request))
         );
 
         // Then: response is 200 OK
@@ -53,19 +57,18 @@ public class AdapterTestConnectionControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should return 200 with success=false when webhook URL is unreachable")
     public void testConnectionWithUnreachableWebhookReturnsSuccessFalse() throws Exception {
-        // Given: an authenticated user with a Slack config pointing to a bad URL
+        // Given: an authenticated user with a bad Slack webhook URL
         final User user = aValidatedUser();
-        final Long configId = anAdapterConfigForUserWithConfig(
-            user,
-            AdapterType.SLACK,
-            "Broken Slack",
-            Map.of("webhookUrl", "https://hooks.slack.com/services/INVALID/DEAD/BEEF")
-        ).getId();
+        final TestAdapterConnectionRequest request = new TestAdapterConnectionRequest()
+            .setAdapterType(AdapterType.SLACK)
+            .setWebhookUrl("https://hooks.slack.com/services/INVALID/DEAD/BEEF");
 
         // When: posting to the test endpoint
         final ResultActions response = mockMvc.perform(
-            post(USER_ADAPTER_CONFIG_TEST_PATH, configId)
+            post(ADAPTER_CONFIG_TEST_PATH)
+                .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(request))
         );
 
         // Then: response is still 200 (not a 5xx)
@@ -83,10 +86,16 @@ public class AdapterTestConnectionControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should return 401 when testing connection without authentication")
     public void testConnectionRequiresAuthentication() throws Exception {
-        // Given: no auth header and any config ID
+        // Given: no auth header
+        final TestAdapterConnectionRequest request = new TestAdapterConnectionRequest()
+            .setAdapterType(AdapterType.SLACK)
+            .setWebhookUrl("https://example.com/webhook");
+
         // When: posting without token
         final ResultActions response = mockMvc.perform(
-            post(USER_ADAPTER_CONFIG_TEST_PATH, 1L)
+            post(ADAPTER_CONFIG_TEST_PATH)
+                .contentType(APPLICATION_JSON)
+                .content(toJson(request))
         );
 
         // Then: unauthorized
@@ -94,55 +103,42 @@ public class AdapterTestConnectionControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return 403 when testing another user's config")
-    public void testConnectionForbiddenForOtherUsersConfig() throws Exception {
-        // Given: user1 owns a config
-        final User user1 = aValidatedUser();
-        final Long configId = anAdapterConfigForUser(user1, AdapterType.IN_APP, "User1 Config").getId();
+    @DisplayName("Should return 400 when adapterType is missing")
+    public void testConnectionReturnsBadRequestWhenAdapterTypeMissing() throws Exception {
+        // Given: an authenticated user and a request without adapterType
+        final User user = aValidatedUser();
+        final TestAdapterConnectionRequest request = new TestAdapterConnectionRequest()
+            .setWebhookUrl("https://example.com/webhook");
 
-        // And: user2 tries to access it
-        final User user2 = aValidatedUser();
-
-        // When: user2 posts to test user1's config
+        // When: posting without adapterType
         final ResultActions response = mockMvc.perform(
-            post(USER_ADAPTER_CONFIG_TEST_PATH, configId)
-                .header(AUTHORIZATION, BEARER + user2.getAccessToken().getValue())
+            post(ADAPTER_CONFIG_TEST_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(request))
         );
 
-        // Then: forbidden
-        response.andExpect(status().is(SC_FORBIDDEN));
+        // Then: bad request
+        response.andExpect(status().is(SC_BAD_REQUEST));
     }
 
     @Test
-    @DisplayName("Should return 403 for non-existent config ID")
-    public void testConnectionForbiddenForNonExistentConfig() throws Exception {
-        // Given: authenticated user and a non-existent config ID
+    @DisplayName("Should return 400 when webhookUrl is missing")
+    public void testConnectionReturnsBadRequestWhenWebhookUrlMissing() throws Exception {
+        // Given: an authenticated user and a request without webhookUrl
         final User user = aValidatedUser();
+        final TestAdapterConnectionRequest request = new TestAdapterConnectionRequest()
+            .setAdapterType(AdapterType.SLACK);
 
-        // When: testing a non-existent config
+        // When: posting without webhookUrl
         final ResultActions response = mockMvc.perform(
-            post(USER_ADAPTER_CONFIG_TEST_PATH, Long.MAX_VALUE)
+            post(ADAPTER_CONFIG_TEST_PATH)
+                .contentType(APPLICATION_JSON)
                 .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(request))
         );
 
-        // Then: forbidden (security check fails for non-owned/non-existent resource)
-        response.andExpect(status().is(SC_FORBIDDEN));
-    }
-
-    // ========================= FACTORY METHODS =========================
-
-    private AdapterConfig anAdapterConfigForUserWithConfig(
-        final User user,
-        final AdapterType adapterType,
-        final String label,
-        final Map<String, Object> configMap
-    ) {
-        final AdapterConfig config = new AdapterConfig();
-        config.setUser(user);
-        config.setAdapterType(adapterType);
-        config.setLabel(label);
-        config.setConfig(configMap);
-        config.setEnabled(true);
-        return adapterConfigRepository.save(config);
+        // Then: bad request
+        response.andExpect(status().is(SC_BAD_REQUEST));
     }
 }

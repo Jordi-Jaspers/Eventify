@@ -71,6 +71,10 @@ export const CLIENT_ROUTES = {
 		path: '/profile/security',
 		type: RouteType.PRIVATE
 	},
+	PROFILE_NOTIFICATIONS_PAGE: {
+		path: '/profile/notifications',
+		type: RouteType.PRIVATE
+	},
 	CHANNELS_PAGE: {
 		path: '/channels',
 		type: RouteType.PRIVATE
@@ -145,6 +149,10 @@ export const CLIENT_ROUTES = {
 	}),
 	ORGANIZATION_SETTINGS_DATA_STORAGE_PAGE: (orgId: number) => ({
 		path: `/organizations/${orgId}/settings/data-storage`,
+		type: RouteType.PRIVATE
+	}),
+	ORGANIZATION_SETTINGS_NOTIFICATIONS_PAGE: (orgId: number) => ({
+		path: `/organizations/${orgId}/settings/notifications`,
 		type: RouteType.PRIVATE
 	}),
 	ORGANIZATION_CHANNELS_PAGE: (orgId: number) => ({

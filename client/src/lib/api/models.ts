@@ -152,6 +152,13 @@ export type OrgApiKeyStatsResponse = components['schemas']['OrgApiKeyStatsRespon
 export type OrgTopApiKeyResponse = components['schemas']['OrgTopApiKeyResponse'];
 
 // ================ Generic PageResource ===================
+// ================ Notification / Adapter Configs ===================
+export type AdapterConfigResponse = components['schemas']['AdapterConfigResponse'];
+export type CreateAdapterConfigRequest = components['schemas']['CreateAdapterConfigRequest'];
+export type UpdateAdapterConfigRequest = components['schemas']['UpdateAdapterConfigRequest'];
+export type TestConnectionResponse = components['schemas']['TestConnectionResponse'];
+export type AdapterType = components['schemas']['CreateAdapterConfigRequest']['adapterType'];
+
 // Generic type for paginated responses (mirrors backend PageResource<T>)
 export interface PageResource<T> {
 	totalElements?: number;

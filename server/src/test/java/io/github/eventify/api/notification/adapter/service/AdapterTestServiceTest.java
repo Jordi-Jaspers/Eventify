@@ -5,19 +5,20 @@ import io.github.eventify.api.notification.adapter.adapters.NotificationAdapter;
 import io.github.eventify.api.notification.adapter.model.AdapterConfig;
 import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.api.notification.adapter.model.response.TestConnectionResponse;
-import io.github.eventify.api.notification.adapter.repository.AdapterConfigRepository;
 import io.github.eventify.api.notification.core.model.NotificationPayload;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.security.SecurityUtil;
 import io.github.eventify.support.UnitTest;
 
-import java.util.Map;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -27,9 +28,6 @@ import static org.mockito.Mockito.*;
 public class AdapterTestServiceTest extends UnitTest {
 
     @Mock
-    private AdapterConfigRepository adapterConfigRepository;
-
-    @Mock
     private AdapterRegistry adapterRegistry;
 
     @Mock
@@ -37,24 +35,31 @@ public class AdapterTestServiceTest extends UnitTest {
 
     private AdapterTestService adapterTestService;
 
+    private MockedStatic<SecurityUtil> securityUtilMock;
+
     @BeforeEach
     public void setUp() {
-        adapterTestService = new AdapterTestService(adapterConfigRepository, adapterRegistry);
+        adapterTestService = new AdapterTestService(adapterRegistry);
+        securityUtilMock = mockStatic(SecurityUtil.class);
+        securityUtilMock.when(SecurityUtil::getLoggedInUser).thenReturn(aValidUser());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (securityUtilMock != null) {
+            securityUtilMock.close();
+        }
     }
 
     @Test
     @DisplayName("Should return success=true when adapter sends successfully")
     public void shouldReturnSuccessTrueWhenAdapterSendsSuccessfully() {
-        // Given: a config owned by the user and a working adapter
-        final User user = aValidUser();
-        final AdapterConfig config = aConfigForUser(user, AdapterType.MATTERMOST);
-
-        when(adapterConfigRepository.findByIdAndUserId(1L, user.getId())).thenReturn(Optional.of(config));
+        // Given: a working adapter
         when(adapterRegistry.getByAdapterType(AdapterType.MATTERMOST)).thenReturn(Optional.of(adapter));
         doNothing().when(adapter).send(any(User.class), any(NotificationPayload.class), any(AdapterConfig.class));
 
         // When: testing the connection
-        final TestConnectionResponse response = adapterTestService.testConnection(1L, user.getId());
+        final TestConnectionResponse response = adapterTestService.testConnection(AdapterType.MATTERMOST, "https://example.com/webhook");
 
         // Then: success is true and no error
         assertThat(response.isSuccess(), is(true));
@@ -64,17 +69,16 @@ public class AdapterTestServiceTest extends UnitTest {
     @Test
     @DisplayName("Should return success=false with error message when adapter throws")
     public void shouldReturnSuccessFalseWhenAdapterThrows() {
-        // Given: a config owned by the user and an adapter that throws
-        final User user = aValidUser();
-        final AdapterConfig config = aConfigForUser(user, AdapterType.SLACK);
-
-        when(adapterConfigRepository.findByIdAndUserId(1L, user.getId())).thenReturn(Optional.of(config));
+        // Given: an adapter that throws
         when(adapterRegistry.getByAdapterType(AdapterType.SLACK)).thenReturn(Optional.of(adapter));
         doThrow(new RuntimeException("Connection refused")).when(adapter)
             .send(any(User.class), any(NotificationPayload.class), any(AdapterConfig.class));
 
         // When: testing the connection
-        final TestConnectionResponse response = adapterTestService.testConnection(1L, user.getId());
+        final TestConnectionResponse response = adapterTestService.testConnection(
+            AdapterType.SLACK,
+            "https://hooks.slack.com/services/INVALID"
+        );
 
         // Then: success is false, error message is propagated
         assertThat(response.isSuccess(), is(false));
@@ -83,19 +87,15 @@ public class AdapterTestServiceTest extends UnitTest {
     }
 
     @Test
-    @DisplayName("Should not throw exception when adapter fails — failure is returned in response")
+    @DisplayName("Should not propagate exception when adapter fails — failure is returned in response")
     public void shouldNotPropagateExceptionWhenAdapterFails() {
         // Given: an adapter that throws a runtime exception
-        final User user = aValidUser();
-        final AdapterConfig config = aConfigForUser(user, AdapterType.MATTERMOST);
-
-        when(adapterConfigRepository.findByIdAndUserId(1L, user.getId())).thenReturn(Optional.of(config));
         when(adapterRegistry.getByAdapterType(AdapterType.MATTERMOST)).thenReturn(Optional.of(adapter));
         doThrow(new RuntimeException("Webhook unreachable")).when(adapter)
             .send(any(User.class), any(NotificationPayload.class), any(AdapterConfig.class));
 
         // When / Then: no exception thrown
-        final TestConnectionResponse response = adapterTestService.testConnection(1L, user.getId());
+        final TestConnectionResponse response = adapterTestService.testConnection(AdapterType.MATTERMOST, "https://example.com/webhook");
         assertThat(response, is(notNullValue()));
         assertThat(response.isSuccess(), is(false));
     }
@@ -103,64 +103,47 @@ public class AdapterTestServiceTest extends UnitTest {
     @Test
     @DisplayName("Should send a canned test payload to the adapter")
     public void shouldSendCannedTestPayloadToAdapter() {
-        // Given: a working adapter and config
-        final User user = aValidUser();
-        final AdapterConfig config = aConfigForUser(user, AdapterType.EMAIL);
-
-        when(adapterConfigRepository.findByIdAndUserId(1L, user.getId())).thenReturn(Optional.of(config));
+        // Given: a working adapter
         when(adapterRegistry.getByAdapterType(AdapterType.EMAIL)).thenReturn(Optional.of(adapter));
 
         // When: testing
-        adapterTestService.testConnection(1L, user.getId());
+        adapterTestService.testConnection(AdapterType.EMAIL, "https://example.com/webhook");
 
         // Then: adapter.send is called with a non-null payload
         final ArgumentCaptor<NotificationPayload> payloadCaptor = ArgumentCaptor.forClass(NotificationPayload.class);
-        verify(adapter).send(any(User.class), payloadCaptor.capture(), eq(config));
+        verify(adapter).send(any(User.class), payloadCaptor.capture(), any(AdapterConfig.class));
         assertThat(payloadCaptor.getValue(), is(notNullValue()));
         assertThat(payloadCaptor.getValue().getTitle(), is(notNullValue()));
     }
 
     @Test
-    @DisplayName("Should use AdapterConfig from the resolved config when calling adapter")
-    public void shouldPassResolvedConfigToAdapter() {
-        // Given: a config for the user
-        final User user = aValidUser();
-        final AdapterConfig config = aConfigForUser(user, AdapterType.MATTERMOST);
-
-        when(adapterConfigRepository.findByIdAndUserId(1L, user.getId())).thenReturn(Optional.of(config));
+    @DisplayName("Should pass a transient config with the given webhook URL to the adapter")
+    public void shouldPassTransientConfigWithWebhookUrlToAdapter() {
+        // Given: a working adapter
         when(adapterRegistry.getByAdapterType(AdapterType.MATTERMOST)).thenReturn(Optional.of(adapter));
+        final String webhookUrl = "https://example.com/hook";
 
         // When: testing connection
-        adapterTestService.testConnection(1L, user.getId());
+        adapterTestService.testConnection(AdapterType.MATTERMOST, webhookUrl);
 
-        // Then: the exact same config is passed to the adapter
-        verify(adapter).send(any(User.class), any(NotificationPayload.class), eq(config));
+        // Then: config passed to adapter contains the webhook URL
+        final ArgumentCaptor<AdapterConfig> configCaptor = ArgumentCaptor.forClass(AdapterConfig.class);
+        verify(adapter).send(any(User.class), any(NotificationPayload.class), configCaptor.capture());
+        assertThat(configCaptor.getValue().getConfig().get("webhookUrl"), is(webhookUrl));
     }
 
     @Test
-    @DisplayName("Should return success=false with error when config not found for user")
-    public void shouldReturnFailureWhenConfigNotFound() {
-        // Given: no config found for the user
-        when(adapterConfigRepository.findByIdAndUserId(99L, 1L)).thenReturn(Optional.empty());
+    @DisplayName("Should return failure when no adapter is registered for the given type")
+    public void shouldReturnFailureWhenNoAdapterRegistered() {
+        // Given: no adapter registered
+        when(adapterRegistry.getByAdapterType(AdapterType.SLACK)).thenReturn(Optional.empty());
 
-        // When: testing connection with non-existent config
-        final TestConnectionResponse response = adapterTestService.testConnection(99L, 1L);
+        // When: testing connection
+        final TestConnectionResponse response = adapterTestService.testConnection(AdapterType.SLACK, "https://example.com/hook");
 
-        // Then: failure is returned, no exception thrown
+        // Then: failure is returned
         assertThat(response.isSuccess(), is(false));
         assertThat(response.getError(), is(notNullValue()));
-        verifyNoInteractions(adapterRegistry);
-    }
-
-    // ========================= FACTORY METHODS =========================
-
-    private static AdapterConfig aConfigForUser(final User user, final AdapterType adapterType) {
-        final AdapterConfig config = new AdapterConfig();
-        config.setUser(user);
-        config.setAdapterType(adapterType);
-        config.setLabel("Test Config");
-        config.setConfig(Map.of("webhookUrl", "https://example.com/webhook/test"));
-        config.setEnabled(true);
-        return config;
+        verifyNoMoreInteractions(adapter);
     }
 }

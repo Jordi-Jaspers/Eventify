@@ -126,8 +126,8 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should mask webhookUrl in response (first 8 + 6 stars + last 4 chars)")
-    public void createSlackAdapterConfigMasksWebhookUrl() throws Exception {
+    @DisplayName("Should return webhookUrl in response without masking")
+    public void createSlackAdapterConfigReturnsWebhookUrl() throws Exception {
         // Given: Authenticated user and valid SLACK request
         final User user = aValidatedUser();
         final String webhookUrl = "https://example.com/webhook/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX";
@@ -149,16 +149,12 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
         // Then: Response is CREATED
         response.andExpect(status().is(SC_CREATED));
 
-        // And: webhookUrl in response is masked
+        // And: webhookUrl in response is returned as-is
         final AdapterConfigResponse body = fromJson(
             response.andReturn().getResponse().getContentAsString(),
             AdapterConfigResponse.class
         );
-        final String maskedWebhookUrl = (String) body.getConfig().get("webhookUrl");
-        assertThat(maskedWebhookUrl, is(notNullValue()));
-        assertThat(maskedWebhookUrl.length(), is(lessThan(webhookUrl.length())));
-        assertThat(maskedWebhookUrl, startsWith(webhookUrl.substring(0, 8)));
-        assertThat(maskedWebhookUrl, endsWith(webhookUrl.substring(webhookUrl.length() - 4)));
+        assertThat(body.getConfig().get("webhookUrl"), is(webhookUrl));
     }
 
     // ========================= GET /v1/user/adapter-configs =========================

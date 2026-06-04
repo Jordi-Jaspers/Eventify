@@ -61,6 +61,8 @@ public final class Paths {
 
     public static final String SUBSCRIPTION_PART = "/subscription";
 
+    public static final String TEST_PART = "/test";
+
     public static final String EVENTS_PART = "/event";
 
     /* ------------------------------- PUBLIC ENDPOINTS ------------------------------- */
@@ -337,7 +339,7 @@ public final class Paths {
 
     public static final String ADMIN_AUDIT_LOG_STATS_PATH = ADMIN_PATH + ADMIN_AUDIT_LOG_PART + STATS_PART;
 
-    /* ------------------------------- END ------------------------------- */
+    /* ------------------------------- MESSAGE ADAPTERS ------------------------------- */
 
     public static final String ADAPTER_CONFIGS_PART = "/adapter-configs";
 
@@ -350,6 +352,8 @@ public final class Paths {
     public static final String ORGANIZATION_ADAPTER_CONFIGS_PATH = ORGANIZATION_PATH + ADAPTER_CONFIGS_PART;
 
     public static final String ORGANIZATION_ADAPTER_CONFIG_PATH = ORGANIZATION_ADAPTER_CONFIGS_PATH + ID_PART;
+
+    public static final String ADAPTER_CONFIG_TEST_PATH = BASE_PATH + ADAPTER_CONFIGS_PART + TEST_PART;
 
     /* ------------------------------- PRIVATE CONSTRUCTOR ------------------------------- */
 

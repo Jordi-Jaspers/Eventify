@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Building2, Key, Database } from '@lucide/svelte';
+	import { Building2, Key, Database, Bell } from '@lucide/svelte';
 	import { CLIENT_ROUTES } from '$lib/config/routes';
 	import { TabNav } from '$lib/components/ui/tab-nav';
 	import type { Component } from 'svelte';
@@ -20,8 +20,9 @@
 
 	const allTabs: OrgTab[] = $derived([
 		{ label: 'General', path: CLIENT_ROUTES.ORGANIZATION_SETTINGS_GENERAL_PAGE(orgId).path, icon: Building2 },
+        { label: 'Notifications', path: CLIENT_ROUTES.ORGANIZATION_SETTINGS_NOTIFICATIONS_PAGE(orgId).path, icon: Bell, adminOnly: true },
 		{ label: 'API Keys', path: CLIENT_ROUTES.ORGANIZATION_SETTINGS_API_KEYS_PAGE(orgId).path, icon: Key },
-		{ label: 'Data & Storage', path: CLIENT_ROUTES.ORGANIZATION_SETTINGS_DATA_STORAGE_PAGE(orgId).path, icon: Database, adminOnly: true }
+		{ label: 'Data & Storage', path: CLIENT_ROUTES.ORGANIZATION_SETTINGS_DATA_STORAGE_PAGE(orgId).path, icon: Database, adminOnly: true },
 	].filter((tab: OrgTab) => !tab.adminOnly || canManage));
 </script>
 
