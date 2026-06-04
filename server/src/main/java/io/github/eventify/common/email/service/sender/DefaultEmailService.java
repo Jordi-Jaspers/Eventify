@@ -1,5 +1,6 @@
 package io.github.eventify.common.email.service.sender;
 
+import io.github.eventify.api.notification.core.model.NotificationPayload;
 import io.github.eventify.api.token.model.Token;
 import io.github.eventify.api.token.model.TokenType;
 import io.github.eventify.api.token.service.TokenService;
@@ -70,6 +71,23 @@ public class DefaultEmailService implements EmailService {
         variables.put(TOKEN, token.getValue());
 
         final MailMessage message = mailMessageFactory.createUserValidationMessage(variables);
+        sendEmail(recipient, message);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void sendNotificationEmail(final User recipient, final NotificationPayload payload) {
+        log.info("Sending notification email '{}' to user '{}'.", payload.getTitle(), recipient.getEmail());
+        final Map<String, Object> variables = new ConcurrentHashMap<>();
+        variables.put("title", payload.getTitle());
+        variables.put("message", payload.getMessage());
+        variables.put("actionUrl", payload.getActionUrl());
+        variables.put("actionLabel", payload.getActionLabel());
+        variables.put("urgent", payload.isUrgent());
+
+        final MailMessage message = mailMessageFactory.createNotificationAlertMessage(payload.getTitle(), variables);
         sendEmail(recipient, message);
     }
 

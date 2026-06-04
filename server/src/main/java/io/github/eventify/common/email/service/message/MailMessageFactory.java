@@ -50,6 +50,14 @@ public class MailMessageFactory {
     }
 
     /**
+     * Creates a new MailMessage for a notification alert.
+     */
+    public MailMessage createNotificationAlertMessage(final String title, final Map<String, Object> variables) {
+        final String subject = "[Eventify.io] " + title;
+        return createMessage(subject, "notification-alert", variables);
+    }
+
+    /**
      * Creates a new MailMessage.
      */
     private MailMessage createMessage(final String subject, final String template, final Map<String, Object> variables) {
