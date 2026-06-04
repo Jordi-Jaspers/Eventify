@@ -69,7 +69,12 @@ public class OrganizationChannelController {
 - No class-level `@RequestMapping` — paths per method only
 - Paths from `io.github.eventify.api.Paths` constants
 - Method annotation order: `@PostMapping` → `@ResponseStatus` → `@PreAuthorize` → `@Operation` → method
-- Return `ResponseEntity<T>` with explicit status
+- Return `ResponseEntity<T>` with explicit status via `ResponseEntity.status(HttpStatus.OK).body(...)`
+- ✅ Use `ResponseEntity.status(HttpStatus.OK).body(...)` — always explicit status
+- ✅ Use `ResponseEntity.status(HttpStatus.CREATED).body(...)` for creation
+- ✅ Use `ResponseEntity.noContent().build()` for void returns (delete)
+- ❌ NEVER use `ResponseEntity.ok(...)` — always explicit status
+- `@ResponseStatus` is REQUIRED on every endpoint for OpenAPI documentation (even alongside ResponseEntity)
 - Controller body: validate → call service → map → return. No business logic.
 - Auth principals: `UserTokenPrincipal` (JWT), `ApiKeyPrincipal` (API key / ingestion)
 - ✅ ALWAYS split user and org controllers: `User{Domain}Controller` + `Organization{Domain}Controller`

@@ -1,6 +1,6 @@
 ---
 name: eventify-frontend-patterns
-description: Eventify frontend code patterns for SvelteKit 5 + Svelte runes. Use when writing frontend components, pages, stores, or API integration in the Eventify client. Extends spring-boot-standards for backend awareness. Trigger when asked about Svelte components, stores, API controllers, forms, auth flow, or UI patterns.
+description: Eventify frontend code patterns for SvelteKit 5 + Svelte runes. Use when writing frontend components, pages, stores, or API integration in the Eventify config. Extends spring-boot-standards for backend awareness. Trigger when asked about Svelte components, stores, API controllers, forms, auth flow, or UI patterns.
 metadata:
   skill-type: patterns
   language: typescript
@@ -234,7 +234,7 @@ if (!tokens && !isPublicPath(event.url.pathname)) {
 **401 handling** — automatic via client middleware (do not duplicate):
 
 ```ts
-// Already in client.ts — do NOT add manual 401 checks in controllers
+// Already in config.ts — do NOT add manual 401 checks in controllers
 client.use({
   onResponse: async ({ response }) => {
     if (response.status === 401 && !isRedirecting) {

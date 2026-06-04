@@ -1,5 +1,6 @@
-package io.github.eventify.api.notification.adapter;
+package io.github.eventify.api.notification.adapter.adapters;
 
+import io.github.eventify.api.notification.adapter.model.AdapterConfig;
 import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.api.notification.core.model.Notification;
 import io.github.eventify.api.notification.core.model.NotificationPayload;
@@ -26,7 +27,7 @@ public class InAppNotificationAdapter implements NotificationAdapter {
     }
 
     @Override
-    public void send(final User user, final NotificationPayload payload) {
+    public void send(final User user, final NotificationPayload payload, final AdapterConfig config) {
         final Notification notification = new Notification(
             user,
             payload.getCategory(),
@@ -40,6 +41,6 @@ public class InAppNotificationAdapter implements NotificationAdapter {
             notification.setBroadcast(payload.getBroadcast());
         }
         notificationRepository.save(notification);
-        log.debug("In-app notification saved for user {}: {}", user.getId(), payload.getTitle());
+        log.debug("In-app notification saved for user '{}': {}", user.getId(), payload.getTitle());
     }
 }

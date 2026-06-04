@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @DisplayName("Unit Test - User Adapter Config Service")
-public class UserAdapterConfigServiceTest extends UnitTest {
+public class UserAdapterClientServiceTest extends UnitTest {
 
     @Mock
     private AdapterConfigRepository adapterConfigRepository;

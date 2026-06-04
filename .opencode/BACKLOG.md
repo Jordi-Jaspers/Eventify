@@ -25,6 +25,21 @@
 
 ---
 
+## Epic: Cross-Application Rate Limiting
+**Context**: Rate limiting is currently ad-hoc (one-off ConcurrentHashMap in a service). We need a proper, reusable rate limiting solution that works across all endpoints, supports per-user and per-IP keys, and can be applied declaratively via annotation.
+
+- [ ] **Rate Limiting Infrastructure** - Design and implement a reusable rate limiting system:
+  - Annotation-based: `@RateLimit(key = "T(io.github.eventify.common.security.util.SecurityUtil).getUserId()", limit = 5, window = 60)` with SpEL key extraction
+  - Supports both authenticated (userId) and anonymous (IP) keys
+  - Configurable per-endpoint limits and windows
+  - Uses Bucket4j or similar mature library (not custom ConcurrentHashMap)
+  - Exception with proper 429 response body (retry-after header)
+  - Integration test coverage
+  - **Not started** — requires design decisions on storage (in-memory vs Redis), library choice, and whether to integrate with Spring's interceptor or AOP infrastructure.
+
+
+---
+
 ## Epic: Organization Enhancement: Team support (To be discussed)
 **Context**: Organizations should support team creations and have members in teams with specific settings. maybe we should completely revisit our current setup. notifications adapters, watchlists on team level per org? team-based access control? how would this affect the current org structure? first we need possible high level options that would work for an enterprise. we should create a scheme of the all the old vs new flows first.
 

@@ -1,5 +1,5 @@
 ---
-description: Eventify SvelteKit 5 frontend specialist. Builds accessible UIs with Svelte runes, shadcn-svelte, Tailwind v4, and typed openapi-fetch API client.
+description: Eventify SvelteKit 5 frontend specialist. Builds accessible UIs with Svelte runes, shadcn-svelte, Tailwind v4, and typed openapi-fetch API config.
 temperature: 0.1
 mode: subagent
 model: github-copilot/claude-sonnet-4.6

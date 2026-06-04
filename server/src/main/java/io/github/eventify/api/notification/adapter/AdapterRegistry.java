@@ -1,5 +1,6 @@
 package io.github.eventify.api.notification.adapter;
 
+import io.github.eventify.api.notification.adapter.adapters.NotificationAdapter;
 import io.github.eventify.api.notification.adapter.model.AdapterType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

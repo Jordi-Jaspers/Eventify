@@ -147,7 +147,7 @@ docker compose up -d                  # starts DB, Jaeger, Inbucket
 ./gradlew test                        # tests only
 ./gradlew spotlessApply               # format code
 
-# Frontend (from client/)
+# Frontend (from config/)
 bun run dev                           # dev server (port 5173)
 bun run build                         # production build
 bun run check                         # type checking

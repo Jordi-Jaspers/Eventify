@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("Integration Test - User Adapter Config Controller")
-public class UserAdapterConfigControllerTest extends IntegrationTest {
+public class UserAdapterClientControllerTest extends IntegrationTest {
 
     // ========================= POST /v1/user/adapter-configs =========================
 

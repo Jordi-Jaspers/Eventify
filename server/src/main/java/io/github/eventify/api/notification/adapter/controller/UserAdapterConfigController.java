@@ -4,8 +4,11 @@ import io.github.eventify.api.notification.adapter.model.mapper.AdapterConfigMap
 import io.github.eventify.api.notification.adapter.model.request.CreateAdapterConfigRequest;
 import io.github.eventify.api.notification.adapter.model.request.UpdateAdapterConfigRequest;
 import io.github.eventify.api.notification.adapter.model.response.AdapterConfigResponse;
+import io.github.eventify.api.notification.adapter.model.response.TestConnectionResponse;
 import io.github.eventify.api.notification.adapter.model.validator.AdapterConfigValidator;
+import io.github.eventify.api.notification.adapter.service.AdapterTestService;
 import io.github.eventify.api.notification.adapter.service.UserAdapterConfigService;
+import io.github.eventify.common.security.principal.UserTokenPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -14,20 +17,11 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
-import static io.github.eventify.api.Paths.USER_ADAPTER_CONFIGS_PATH;
-import static io.github.eventify.api.Paths.USER_ADAPTER_CONFIG_PATH;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
+import static io.github.eventify.api.Paths.*;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -44,6 +38,7 @@ public class UserAdapterConfigController {
     private final UserAdapterConfigService userAdapterConfigService;
     private final AdapterConfigValidator adapterConfigValidator;
     private final AdapterConfigMapper adapterConfigMapper;
+    private final AdapterTestService adapterTestService;
 
     @PostMapping(
         path = USER_ADAPTER_CONFIGS_PATH,
@@ -75,7 +70,7 @@ public class UserAdapterConfigController {
         description = "Lists personal adapter configurations for the current user"
     )
     public ResponseEntity<List<AdapterConfigResponse>> listPersonal() {
-        return ResponseEntity.ok(
+        return ResponseEntity.status(OK).body(
             adapterConfigMapper.toResourceObjects(userAdapterConfigService.listPersonal())
         );
     }
@@ -91,7 +86,7 @@ public class UserAdapterConfigController {
         description = "Returns an adapter configuration by ID"
     )
     public ResponseEntity<AdapterConfigResponse> get(@PathVariable final Long id) {
-        return ResponseEntity.ok(adapterConfigMapper.toResourceObject(userAdapterConfigService.get(id)));
+        return ResponseEntity.status(OK).body(adapterConfigMapper.toResourceObject(userAdapterConfigService.get(id)));
     }
 
     @PutMapping(
@@ -108,7 +103,7 @@ public class UserAdapterConfigController {
     public ResponseEntity<AdapterConfigResponse> update(
         @PathVariable final Long id,
         @RequestBody final UpdateAdapterConfigRequest request) {
-        return ResponseEntity.ok(
+        return ResponseEntity.status(OK).body(
             adapterConfigMapper.toResourceObject(userAdapterConfigService.update(id, request))
         );
     }
@@ -123,5 +118,20 @@ public class UserAdapterConfigController {
     public ResponseEntity<Void> delete(@PathVariable final Long id) {
         userAdapterConfigService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(
+        path = USER_ADAPTER_CONFIG_TEST_PATH,
+        produces = APPLICATION_JSON_VALUE
+    )
+    @ResponseStatus(OK)
+    @PreAuthorize("@adapterConfigSecurity.canAccessPersonalConfig(#id, principal.user.id)")
+    @Operation(
+        summary = "Test adapter config connection",
+        description = "Sends a test notification through the adapter to verify connectivity"
+    )
+    public ResponseEntity<TestConnectionResponse> testConnection(@PathVariable final Long id,
+        @AuthenticationPrincipal final UserTokenPrincipal principal) {
+        return ResponseEntity.status(OK).body(adapterTestService.testConnection(id, principal.getUser().getId()));
     }
 }

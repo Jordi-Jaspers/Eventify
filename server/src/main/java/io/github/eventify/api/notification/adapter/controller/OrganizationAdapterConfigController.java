@@ -3,7 +3,9 @@ package io.github.eventify.api.notification.adapter.controller;
 import io.github.eventify.api.notification.adapter.model.mapper.AdapterConfigMapper;
 import io.github.eventify.api.notification.adapter.model.request.CreateAdapterConfigRequest;
 import io.github.eventify.api.notification.adapter.model.response.AdapterConfigResponse;
+import io.github.eventify.api.notification.adapter.model.response.TestConnectionResponse;
 import io.github.eventify.api.notification.adapter.model.validator.AdapterConfigValidator;
+import io.github.eventify.api.notification.adapter.service.AdapterTestService;
 import io.github.eventify.api.notification.adapter.service.OrganizationAdapterConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import static io.github.eventify.api.Paths.ORGANIZATION_ADAPTER_CONFIGS_PATH;
+import static io.github.eventify.api.Paths.ORGANIZATION_ADAPTER_CONFIG_TEST_PATH;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -39,6 +42,7 @@ public class OrganizationAdapterConfigController {
     private final OrganizationAdapterConfigService organizationAdapterConfigService;
     private final AdapterConfigValidator adapterConfigValidator;
     private final AdapterConfigMapper adapterConfigMapper;
+    private final AdapterTestService adapterTestService;
 
     @PostMapping(
         path = ORGANIZATION_ADAPTER_CONFIGS_PATH,
@@ -74,10 +78,26 @@ public class OrganizationAdapterConfigController {
     )
     public ResponseEntity<List<AdapterConfigResponse>> listForOrganization(
         @PathVariable final Long orgId) {
-        return ResponseEntity.ok(
+        return ResponseEntity.status(OK).body(
             adapterConfigMapper.toResourceObjects(
                 organizationAdapterConfigService.listForOrganization(orgId)
             )
         );
+    }
+
+    @PostMapping(
+        path = ORGANIZATION_ADAPTER_CONFIG_TEST_PATH,
+        produces = APPLICATION_JSON_VALUE
+    )
+    @ResponseStatus(OK)
+    @PreAuthorize("@adapterConfigSecurity.canManageOrgConfigs(#orgId, principal.user.id) or hasAuthority('MANAGE_ORGANIZATIONS')")
+    @Operation(
+        summary = "Test org adapter config connection",
+        description = "Sends a test notification through the org adapter to verify connectivity"
+    )
+    public ResponseEntity<TestConnectionResponse> testConnection(
+        @PathVariable final Long orgId,
+        @PathVariable final Long id) {
+        return ResponseEntity.status(OK).body(adapterTestService.testConnectionForOrg(id, orgId));
     }
 }

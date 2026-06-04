@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Unit Test - Adapter Config Validator")
-public class AdapterConfigValidatorTest extends UnitTest {
+public class AdapterClientValidatorTest extends UnitTest {
 
     private AdapterConfigValidator validator;
 

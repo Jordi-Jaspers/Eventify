@@ -1,5 +1,7 @@
 package io.github.eventify.api.notification.adapter;
 
+import io.github.eventify.api.notification.adapter.adapters.NoOpNotificationAdapter;
+import io.github.eventify.api.notification.adapter.adapters.NotificationAdapter;
 import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.support.UnitTest;
 

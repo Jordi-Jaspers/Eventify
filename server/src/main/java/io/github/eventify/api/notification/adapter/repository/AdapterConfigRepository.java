@@ -38,4 +38,13 @@ public interface AdapterConfigRepository extends JpaRepository<AdapterConfig, Lo
      * @return Optional containing the config if found and owned by user
      */
     Optional<AdapterConfig> findByIdAndUserId(Long id, Long userId);
+
+    /**
+     * Find an org-scoped config by ID and organization ID.
+     *
+     * @param id             the config ID
+     * @param organizationId the organization ID
+     * @return Optional containing the config if found and owned by org
+     */
+    Optional<AdapterConfig> findByIdAndOrganizationId(Long id, Long organizationId);
 }

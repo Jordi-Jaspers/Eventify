@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("Unit Test - Organization Adapter Config Service")
-public class OrganizationAdapterConfigServiceTest extends UnitTest {
+public class OrganizationAdapterClientServiceTest extends UnitTest {
 
     @Mock
     private AdapterConfigRepository adapterConfigRepository;

@@ -1,0 +1,104 @@
+<!--
+  Template: Notification Alert (severity change / general notification)
+  Supports urgent and non-urgent variants via ${urgent} Thymeleaf boolean.
+  Try it here: https://mjml.io/try-it-live/H1zQwXkBye
+-->
+<mjml>
+  <mj-head>
+    <mj-title>Notification - Eventify</mj-title>
+    <mj-attributes>
+      <mj-all font-family="Ubuntu, Helvetica, Arial, sans-serif" />
+      <mj-text font-size="14px" line-height="1.6" color="#475569" />
+      <mj-button border-radius="8px" font-size="16px" font-weight="500" />
+    </mj-attributes>
+    <mj-style>
+      .gradient-header {
+        background: linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%);
+      }
+      .urgent-badge {
+        display: inline-block;
+        background-color: #fef2f2;
+        color: #dc2626;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid #fecaca;
+      }
+    </mj-style>
+  </mj-head>
+
+  <mj-body background-color="#f1f5f9">
+
+    <!-- Gradient Header -->
+    <mj-section css-class="gradient-header" background-color="#0ea5e9" padding="24px 0">
+      <mj-column>
+        <mj-text font-size="28px" font-weight="600" color="#ffffff" align="center">
+          Eventify
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Spacer -->
+    <mj-section background-color="#f1f5f9" padding="20px 0 0 0">
+      <mj-column>
+        <mj-spacer height="1px" />
+      </mj-column>
+    </mj-section>
+
+    <!-- Main Content Card -->
+    <!-- URGENT VARIANT: when ${urgent}=true, card has border-left: 4px solid #ef4444 -->
+    <mj-section background-color="#f1f5f9" padding="0 20px">
+      <mj-column background-color="#ffffff" border-radius="12px" padding="32px 24px">
+
+        <!-- URGENT badge — th:if="${urgent}" in compiled HTML -->
+        <mj-text align="center" padding-bottom="12px">
+          <span class="urgent-badge"
+                style="display:inline-block;background-color:#fef2f2;color:#dc2626;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid #fecaca;">
+            ⚠ URGENT
+          </span>
+        </mj-text>
+
+        <!-- Title — th:text="${title}" in compiled HTML -->
+        <mj-text font-size="24px" font-weight="600" color="#1e293b" align="center" padding-bottom="16px">
+          Severity Changed: Production API
+        </mj-text>
+
+        <!-- Message — th:text="${message}" in compiled HTML -->
+        <mj-text align="center" padding-bottom="24px">
+          The severity level for the monitored service has changed. Please review the details and take action if required.
+        </mj-text>
+
+        <!-- CTA Button — th:href="${actionUrl}", th:text="${actionLabel}" in compiled HTML -->
+        <mj-button background-color="#0ea5e9" color="#ffffff" padding="16px 0" href="#actionUrl">
+          <a href="#actionUrl">View Details</a>
+        </mj-button>
+
+        <!-- Divider -->
+        <mj-divider border-color="#e2e8f0" border-width="1px" padding="24px 0 16px 0" />
+
+        <!-- Signature -->
+        <mj-text align="left">
+          The Eventify Team
+        </mj-text>
+
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section background-color="#f1f5f9" padding="24px 0">
+      <mj-column>
+        <mj-text font-size="12px" color="#94a3b8" align="center">
+          © 2026 Eventify. All rights reserved.
+        </mj-text>
+        <!-- Footer app link — th:href="${applicationUrl}" in compiled HTML -->
+        <mj-text font-size="11px" color="#94a3b8" align="center" padding-top="8px">
+          <a href="#applicationUrl" style="color:#94a3b8;text-decoration:none;">Real-time monitoring and event tracking</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>

@@ -1,12 +1,15 @@
-package io.github.eventify.api.notification.adapter;
+package io.github.eventify.api.notification.adapter.adapters;
 
+import io.github.eventify.api.notification.adapter.model.AdapterConfig;
 import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.api.notification.core.model.NotificationPayload;
 import io.github.eventify.api.user.model.User;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * No-op notification adapter — for testing or as a fallback. Does nothing on send.
  */
+@Slf4j
 public class NoOpNotificationAdapter implements NotificationAdapter {
 
     private final AdapterType adapterType;
@@ -26,7 +29,7 @@ public class NoOpNotificationAdapter implements NotificationAdapter {
     }
 
     @Override
-    public void send(final User user, final NotificationPayload payload) {
-        // no-op
+    public void send(final User user, final NotificationPayload payload, final AdapterConfig config) {
+        log.debug("No-op adapter '{}' received send call for user {}: {}", adapterType, user.getId(), payload.getTitle());
     }
 }

@@ -1,8 +1,10 @@
 package io.github.eventify.api.notification.core.service;
 
 import io.github.eventify.api.notification.adapter.AdapterRegistry;
-import io.github.eventify.api.notification.adapter.NotificationAdapter;
+import io.github.eventify.api.notification.adapter.adapters.NotificationAdapter;
 import io.github.eventify.api.notification.adapter.model.AdapterType;
+import io.github.eventify.api.notification.adapter.repository.AdapterConfigRepository;
+import io.github.eventify.api.notification.adapter.service.AdapterSendGateway;
 import io.github.eventify.api.notification.core.model.NotificationAudience;
 import io.github.eventify.api.notification.core.model.NotificationCategory;
 import io.github.eventify.api.notification.core.model.NotificationPayload;
@@ -27,31 +29,25 @@ public class NotificationDispatchService {
     private static final String VIEW_ORGANIZATIONS_LABEL = "View organizations";
 
     private final AudienceResolver audienceResolver;
-
     private final AdapterRegistry adapterRegistry;
+    private final AdapterSendGateway adapterSendGateway;
+    private final AdapterConfigRepository adapterConfigRepository;
 
     /**
      * Dispatches a notification to all users in the audience via the specified adapters.
-     *
-     * @param audience       the target audience
-     * @param payload        the notification payload
-     * @param targetAdapters the list of adapter types to use
      */
     public void dispatch(final NotificationAudience audience, final NotificationPayload payload, final List<AdapterType> targetAdapters) {
         final List<User> recipients = audienceResolver.resolve(audience);
         final List<NotificationAdapter> adapters = adapterRegistry.filterByAdapterTypes(targetAdapters);
         for (final User recipient : recipients) {
             for (final NotificationAdapter adapter : adapters) {
-                adapter.send(recipient, payload);
+                dispatchToUser(adapter, recipient, payload);
             }
         }
     }
 
     /**
      * Dispatches a notification to all users in the audience via the IN_APP adapter.
-     *
-     * @param audience the target audience
-     * @param payload  the notification payload
      */
     public void dispatch(final NotificationAudience audience, final NotificationPayload payload) {
         dispatch(audience, payload, List.of(AdapterType.IN_APP));
@@ -71,6 +67,33 @@ public class NotificationDispatchService {
         } else if (oldStatus == OrganizationStatus.SUSPENDED && newStatus != OrganizationStatus.SUSPENDED) {
             dispatchOrganizationReactivated(orgId, orgName);
         }
+    }
+
+    /**
+     * Dispatches a welcome notification to the given user. Swallows exceptions to avoid disrupting the registration flow.
+     */
+    public void dispatchWelcomeNotification(final User user) {
+        final NotificationPayload payload = new NotificationPayload(
+            NotificationCategory.ANNOUNCEMENT,
+            "Welcome to Eventify",
+            "Get started by creating your first channel and setting up your first watchlist.",
+            "/channels",
+            "Get started",
+            false,
+            null
+        );
+        dispatch(NotificationAudience.user(user.getId()), payload, List.of(AdapterType.IN_APP));
+    }
+
+    private void dispatchToUser(final NotificationAdapter adapter, final User recipient, final NotificationPayload payload) {
+        if (adapter.getAdapterType() == AdapterType.IN_APP) {
+            adapterSendGateway.sendAsync(adapter, recipient, payload, null);
+            return;
+        }
+        adapterConfigRepository.findByUserIdAndOrganizationIdIsNull(recipient.getId())
+            .stream()
+            .filter(c -> c.getAdapterType() == adapter.getAdapterType() && c.isEnabled())
+            .forEach(config -> adapterSendGateway.sendAsync(adapter, recipient, payload, config));
     }
 
     private void dispatchOrganizationSuspended(final Long orgId, final String orgName) {
@@ -105,23 +128,5 @@ public class NotificationDispatchService {
             urgent,
             null
         );
-    }
-
-    /**
-     * Dispatches a welcome notification to the given user. Swallows exceptions to avoid disrupting the registration flow.
-     *
-     * @param user the newly registered user
-     */
-    public void dispatchWelcomeNotification(final User user) {
-        final NotificationPayload payload = new NotificationPayload(
-            NotificationCategory.ANNOUNCEMENT,
-            "Welcome to Eventify",
-            "Get started by creating your first channel and setting up your first watchlist.",
-            "/channels",
-            "Get started",
-            false,
-            null
-        );
-        dispatch(NotificationAudience.user(user.getId()), payload, List.of(AdapterType.IN_APP));
     }
 }
