@@ -31,20 +31,6 @@ public class AdapterClientValidatorTest extends UnitTest {
     // ========================= Valid requests =========================
 
     @Test
-    @DisplayName("Should pass when IN_APP request is valid")
-    public void shouldPassWhenInAppRequestIsValid() {
-        // Given: Valid IN_APP request (no webhookUrl required)
-        final CreateAdapterConfigRequest request = new CreateAdapterConfigRequest()
-            .setAdapterType(AdapterType.IN_APP)
-            .setLabel("My In-App Notifier")
-            .setConfig(Map.of());
-        final ValidationResult result = new ValidationResult();
-
-        // When / Then: No exception
-        assertDoesNotThrow(() -> validator.validate(request, result));
-    }
-
-    @Test
     @DisplayName("Should pass when MATTERMOST request has webhookUrl in config")
     public void shouldPassWhenMattermostRequestHasWebhookUrl() {
         // Given: Valid MATTERMOST request with webhookUrl
@@ -72,6 +58,44 @@ public class AdapterClientValidatorTest extends UnitTest {
         assertDoesNotThrow(() -> validator.validate(request, result));
     }
 
+    // ========================= system-managed type rejection =========================
+
+    @Test
+    @DisplayName("Should reject IN_APP adapter type as system-managed")
+    public void shouldRejectInAppAsSystemManaged() {
+        // Given: Request with IN_APP type (system-managed)
+        final CreateAdapterConfigRequest request = new CreateAdapterConfigRequest()
+            .setAdapterType(AdapterType.IN_APP)
+            .setLabel("My In-App Notifier")
+            .setConfig(Map.of());
+        final ValidationResult result = new ValidationResult();
+
+        // When / Then: ValidationException thrown
+        final ValidationException ex = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+        assertThat(fieldError(ex, FIELD_ADAPTER_TYPE), is(true));
+    }
+
+    @Test
+    @DisplayName("Should reject EMAIL adapter type as system-managed")
+    public void shouldRejectEmailAsSystemManaged() {
+        // Given: Request with EMAIL type (system-managed)
+        final CreateAdapterConfigRequest request = new CreateAdapterConfigRequest()
+            .setAdapterType(AdapterType.EMAIL)
+            .setLabel("My Email Notifier")
+            .setConfig(Map.of());
+        final ValidationResult result = new ValidationResult();
+
+        // When / Then: ValidationException thrown
+        final ValidationException ex = assertThrows(
+            ValidationException.class,
+            () -> validator.validate(request, result)
+        );
+        assertThat(fieldError(ex, FIELD_ADAPTER_TYPE), is(true));
+    }
+
     // ========================= adapterType validation =========================
 
     @Test
@@ -97,11 +121,11 @@ public class AdapterClientValidatorTest extends UnitTest {
     @Test
     @DisplayName("Should reject null label")
     public void shouldRejectNullLabel() {
-        // Given: Request with null label
+        // Given: Request with null label (using MATTERMOST — a non-system-managed type)
         final CreateAdapterConfigRequest request = new CreateAdapterConfigRequest()
-            .setAdapterType(AdapterType.IN_APP)
+            .setAdapterType(AdapterType.MATTERMOST)
             .setLabel(null)
-            .setConfig(Map.of());
+            .setConfig(Map.of("webhookUrl", "https://example.com/webhook"));
         final ValidationResult result = new ValidationResult();
 
         // When / Then: ValidationException thrown
@@ -115,11 +139,11 @@ public class AdapterClientValidatorTest extends UnitTest {
     @Test
     @DisplayName("Should reject blank label")
     public void shouldRejectBlankLabel() {
-        // Given: Request with blank label
+        // Given: Request with blank label (using MATTERMOST — a non-system-managed type)
         final CreateAdapterConfigRequest request = new CreateAdapterConfigRequest()
-            .setAdapterType(AdapterType.IN_APP)
+            .setAdapterType(AdapterType.MATTERMOST)
             .setLabel("")
-            .setConfig(Map.of());
+            .setConfig(Map.of("webhookUrl", "https://example.com/webhook"));
         final ValidationResult result = new ValidationResult();
 
         // When / Then: ValidationException thrown
@@ -135,9 +159,9 @@ public class AdapterClientValidatorTest extends UnitTest {
     @Test
     @DisplayName("Should reject null config")
     public void shouldRejectNullConfig() {
-        // Given: Request with null config
+        // Given: Request with null config (using MATTERMOST — a non-system-managed type)
         final CreateAdapterConfigRequest request = new CreateAdapterConfigRequest()
-            .setAdapterType(AdapterType.IN_APP)
+            .setAdapterType(AdapterType.MATTERMOST)
             .setLabel("My Config")
             .setConfig(null);
         final ValidationResult result = new ValidationResult();

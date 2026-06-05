@@ -1,8 +1,7 @@
 package io.github.eventify.api.subscription.model.validator;
 
 import io.github.eventify.api.event.model.Severity;
-import io.github.eventify.api.notification.adapter.model.AdapterType;
-import io.github.eventify.api.subscription.model.request.SubscribeRequest;
+import io.github.eventify.api.subscription.model.request.CreateSubscriptionRequest;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.exception.core.ValidationException;
 import io.github.jframe.validation.ValidationResult;
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import static io.github.eventify.api.subscription.model.validator.SubscriptionValidator.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Unit Test - Subscription Validator")
@@ -31,34 +31,29 @@ public class SubscriptionValidatorTest extends UnitTest {
     // ========================= Valid requests =========================
 
     @Test
-    @DisplayName("Should accept valid request with CRITICAL and IN_APP")
-    public void shouldAcceptValidRequestWithCriticalAndInApp() {
-        // Given: Valid subscribe request
-        final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of(Severity.CRITICAL));
-        request.setAdapters(List.of(AdapterType.IN_APP));
+    @DisplayName("Should accept valid request with severities and adapter config IDs")
+    public void shouldAcceptValidRequestWithSeveritiesAndAdapterConfigIds() {
+        // Given: valid create subscription request
+        final CreateSubscriptionRequest request = aValidCreateRequest();
         final ValidationResult result = new ValidationResult();
 
-        // When: Validating request
-        validator.validate(request, result);
-
-        // Then: Validation should pass
+        // When / Then: validation passes without exception
+        assertDoesNotThrow(() -> validator.validate(request, result));
         assertThat(result.hasErrors(), is(false));
     }
 
     @Test
-    @DisplayName("Should accept valid request with multiple valid severities")
-    public void shouldAcceptValidRequestWithMultipleValidSeverities() {
-        // Given: Request with CRITICAL, WARNING, OK
-        final SubscribeRequest request = new SubscribeRequest();
+    @DisplayName("Should accept valid request with multiple severities")
+    public void shouldAcceptValidRequestWithMultipleSeverities() {
+        // Given: request with multiple valid severities
+        final CreateSubscriptionRequest request = new CreateSubscriptionRequest();
+        request.setWatchlistId(1L);
         request.setTargetSeverities(List.of(Severity.CRITICAL, Severity.WARNING, Severity.OK));
-        request.setAdapters(List.of(AdapterType.IN_APP));
+        request.setAdapterConfigIds(List.of(1L));
         final ValidationResult result = new ValidationResult();
 
-        // When: Validating request
-        validator.validate(request, result);
-
-        // Then: Validation should pass
+        // When / Then: validation passes
+        assertDoesNotThrow(() -> validator.validate(request, result));
         assertThat(result.hasErrors(), is(false));
     }
 
@@ -67,13 +62,14 @@ public class SubscriptionValidatorTest extends UnitTest {
     @Test
     @DisplayName("Should reject null targetSeverities")
     public void shouldRejectNullTargetSeverities() {
-        // Given: Request with null targetSeverities
-        final SubscribeRequest request = new SubscribeRequest();
+        // Given: request with null targetSeverities
+        final CreateSubscriptionRequest request = new CreateSubscriptionRequest();
+        request.setWatchlistId(1L);
         request.setTargetSeverities(null);
-        request.setAdapters(List.of(AdapterType.IN_APP));
+        request.setAdapterConfigIds(List.of(1L));
         final ValidationResult result = new ValidationResult();
 
-        // When & Then: Should throw ValidationException
+        // When / Then: validation exception is thrown with correct field error
         final ValidationException exception = assertThrows(
             ValidationException.class,
             () -> validator.validate(request, result)
@@ -90,13 +86,14 @@ public class SubscriptionValidatorTest extends UnitTest {
     @Test
     @DisplayName("Should reject empty targetSeverities")
     public void shouldRejectEmptyTargetSeverities() {
-        // Given: Request with empty targetSeverities
-        final SubscribeRequest request = new SubscribeRequest();
+        // Given: request with empty targetSeverities
+        final CreateSubscriptionRequest request = new CreateSubscriptionRequest();
+        request.setWatchlistId(1L);
         request.setTargetSeverities(List.of());
-        request.setAdapters(List.of(AdapterType.IN_APP));
+        request.setAdapterConfigIds(List.of(1L));
         final ValidationResult result = new ValidationResult();
 
-        // When & Then: Should throw ValidationException
+        // When / Then: validation exception is thrown
         final ValidationException exception = assertThrows(
             ValidationException.class,
             () -> validator.validate(request, result)
@@ -113,13 +110,14 @@ public class SubscriptionValidatorTest extends UnitTest {
     @Test
     @DisplayName("Should reject NO_DATA in targetSeverities")
     public void shouldRejectNoDataInTargetSeverities() {
-        // Given: Request with NO_DATA in targetSeverities
-        final SubscribeRequest request = new SubscribeRequest();
+        // Given: request with NO_DATA in targetSeverities
+        final CreateSubscriptionRequest request = new CreateSubscriptionRequest();
+        request.setWatchlistId(1L);
         request.setTargetSeverities(List.of(Severity.CRITICAL, Severity.NO_DATA));
-        request.setAdapters(List.of(AdapterType.IN_APP));
+        request.setAdapterConfigIds(List.of(1L));
         final ValidationResult result = new ValidationResult();
 
-        // When & Then: Should throw ValidationException
+        // When / Then: validation exception is thrown with NO_DATA error code
         final ValidationException exception = assertThrows(
             ValidationException.class,
             () -> validator.validate(request, result)
@@ -133,18 +131,19 @@ public class SubscriptionValidatorTest extends UnitTest {
         );
     }
 
-    // ========================= adapters validation =========================
+    // ========================= adapterConfigIds validation =========================
 
     @Test
-    @DisplayName("Should reject null adapters")
-    public void shouldRejectNullAdapters() {
-        // Given: Request with null adapters
-        final SubscribeRequest request = new SubscribeRequest();
+    @DisplayName("Should reject null adapterConfigIds")
+    public void shouldRejectNullAdapterConfigIds() {
+        // Given: request with null adapterConfigIds
+        final CreateSubscriptionRequest request = new CreateSubscriptionRequest();
+        request.setWatchlistId(1L);
         request.setTargetSeverities(List.of(Severity.CRITICAL));
-        request.setAdapters(null);
+        request.setAdapterConfigIds(null);
         final ValidationResult result = new ValidationResult();
 
-        // When & Then: Should throw ValidationException
+        // When / Then: validation exception is thrown with correct field error
         final ValidationException exception = assertThrows(
             ValidationException.class,
             () -> validator.validate(request, result)
@@ -153,21 +152,22 @@ public class SubscriptionValidatorTest extends UnitTest {
         assertThat(exception.getValidationResult().hasErrors(), is(true));
         assertThat(
             exception.getValidationResult().getErrors().stream()
-                .anyMatch(e -> e.getField().equals(ADAPTERS) && e.getCode().equals(ADAPTERS_REQUIRED)),
+                .anyMatch(e -> e.getField().equals(ADAPTER_CONFIG_IDS) && e.getCode().equals(ADAPTER_CONFIG_IDS_REQUIRED)),
             is(true)
         );
     }
 
     @Test
-    @DisplayName("Should reject empty adapters")
-    public void shouldRejectEmptyAdapters() {
-        // Given: Request with empty adapters
-        final SubscribeRequest request = new SubscribeRequest();
+    @DisplayName("Should reject empty adapterConfigIds")
+    public void shouldRejectEmptyAdapterConfigIds() {
+        // Given: request with empty adapterConfigIds
+        final CreateSubscriptionRequest request = new CreateSubscriptionRequest();
+        request.setWatchlistId(1L);
         request.setTargetSeverities(List.of(Severity.CRITICAL));
-        request.setAdapters(List.of());
+        request.setAdapterConfigIds(List.of());
         final ValidationResult result = new ValidationResult();
 
-        // When & Then: Should throw ValidationException
+        // When / Then: validation exception is thrown
         final ValidationException exception = assertThrows(
             ValidationException.class,
             () -> validator.validate(request, result)
@@ -176,47 +176,48 @@ public class SubscriptionValidatorTest extends UnitTest {
         assertThat(exception.getValidationResult().hasErrors(), is(true));
         assertThat(
             exception.getValidationResult().getErrors().stream()
-                .anyMatch(e -> e.getField().equals(ADAPTERS) && e.getCode().equals(ADAPTERS_REQUIRED)),
+                .anyMatch(e -> e.getField().equals(ADAPTER_CONFIG_IDS) && e.getCode().equals(ADAPTER_CONFIG_IDS_REQUIRED)),
             is(true)
         );
     }
 
     @Test
-    @DisplayName("Should reject adapters without IN_APP")
-    public void shouldRejectAdaptersWithoutInApp() {
-        // Given: Request with adapters that don't include IN_APP
-        final SubscribeRequest request = new SubscribeRequest();
-        request.setTargetSeverities(List.of(Severity.CRITICAL));
-        request.setAdapters(List.of(AdapterType.SLACK));
+    @DisplayName("Should not require IN_APP — any adapter config ID is valid")
+    public void shouldAcceptAnyAdapterConfigId() {
+        // Given: request with arbitrary IDs (not constrained to IN_APP)
+        final CreateSubscriptionRequest request = new CreateSubscriptionRequest();
+        request.setWatchlistId(1L);
+        request.setTargetSeverities(List.of(Severity.WARNING));
+        request.setAdapterConfigIds(List.of(1L, 2L));
         final ValidationResult result = new ValidationResult();
 
-        // When & Then: Should throw ValidationException
-        final ValidationException exception = assertThrows(
-            ValidationException.class,
-            () -> validator.validate(request, result)
-        );
-
-        assertThat(exception.getValidationResult().hasErrors(), is(true));
-        assertThat(
-            exception.getValidationResult().getErrors().stream()
-                .anyMatch(e -> e.getField().equals(ADAPTERS) && e.getCode().equals(ADAPTERS_IN_APP_REQUIRED)),
-            is(true)
-        );
+        // When / Then: validation passes — no IN_APP constraint
+        assertDoesNotThrow(() -> validator.validate(request, result));
+        assertThat(result.hasErrors(), is(false));
     }
 
     @Test
     @DisplayName("Should reject null request body")
     public void shouldRejectNullRequestBody() {
-        // Given: Null request
-        final SubscribeRequest request = null;
+        // Given: null request
         final ValidationResult result = new ValidationResult();
 
-        // When & Then: Should throw ValidationException
+        // When / Then: validation exception is thrown
         final ValidationException exception = assertThrows(
             ValidationException.class,
-            () -> validator.validate(request, result)
+            () -> validator.validate(null, result)
         );
 
         assertThat(exception.getValidationResult().getErrors().size(), is(greaterThanOrEqualTo(1)));
+    }
+
+    // ========================= FACTORY METHODS =========================
+
+    private static CreateSubscriptionRequest aValidCreateRequest() {
+        final CreateSubscriptionRequest request = new CreateSubscriptionRequest();
+        request.setWatchlistId(1L);
+        request.setTargetSeverities(List.of(Severity.CRITICAL));
+        request.setAdapterConfigIds(List.of(1L));
+        return request;
     }
 }

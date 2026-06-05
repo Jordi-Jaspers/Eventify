@@ -5,7 +5,12 @@ import io.github.eventify.api.subscription.model.Subscription;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,16 +19,24 @@ import org.springframework.stereotype.Repository;
  * Repository for Subscription entity.
  */
 @Repository
-public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
+public interface SubscriptionRepository extends JpaRepository<Subscription, Long>, JpaSpecificationExecutor<Subscription> {
+
+    @Override
+    @EntityGraph(attributePaths = "watchlist")
+    Optional<Subscription> findById(Long id);
+
+    @Override
+    @EntityGraph(attributePaths = "watchlist")
+    Page<Subscription> findAll(Specification<Subscription> spec, Pageable pageable);
 
     /**
-     * Finds a subscription by watchlist ID and user ID.
+     * Finds a personal subscription (no org) by watchlist ID and user ID.
      *
      * @param watchlistId the watchlist ID
      * @param userId      the user ID
      * @return optional subscription
      */
-    Optional<Subscription> findByWatchlistIdAndUserId(Long watchlistId, Long userId);
+    Optional<Subscription> findByWatchlistIdAndUserIdAndOrganizationIsNull(Long watchlistId, Long userId);
 
     /**
      * Finds subscriptions by watchlist ID where targetSeverities contains the given severity.
@@ -52,12 +65,4 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
      * @return list of subscriptions
      */
     List<Subscription> findByWatchlistIdIn(List<Long> watchlistIds);
-
-    /**
-     * Deletes a subscription by watchlist ID and user ID.
-     *
-     * @param watchlistId the watchlist ID
-     * @param userId      the user ID
-     */
-    void deleteByWatchlistIdAndUserId(Long watchlistId, Long userId);
 }

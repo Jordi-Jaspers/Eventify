@@ -43,7 +43,7 @@ export type DailyVolumePoint = components['schemas']['DailyVolumePoint'];
 export type AdminEventStatsResponse = components['schemas']['AdminEventStatsResponse'];
 export type AdminApiKeyStatsResponse = components['schemas']['ApiKeyStatsResponse'];
 export type TableSizeEntry = components['schemas']['TableSizeEntry'];
-export type AdminStatsRequest = components['schemas']['AdminStatsRequest'];
+export type AdminStatsRequest = components['schemas']['StatsRequest'];
 export type AdminApiKeyAuditResponse = components['schemas']['ApiKeyAuditResponse'];
 export type PageResourceAdminApiKeyAuditResponse =
 	components['schemas']['PageResourceApiKeyAuditResponse'];
@@ -76,8 +76,9 @@ export type WatchlistConfigurationRequest = components['schemas']['WatchlistConf
 export type WatchlistFiltersRequest = components['schemas']['WatchlistFiltersRequest'];
 export type PageResourceWatchlistDetailsResponse =
 	components['schemas']['PageResourceWatchlistDetailsResponse'];
-export type SubscribeRequest = components['schemas']['SubscribeRequest'];
-export type SubscriptionResponse = components['schemas']['SubscriptionResponse'];
+export type SubscriptionResponse = components['schemas']['SubscriptionResponse'] & {
+	watchlistName?: string;
+};
 
 // ================ Monitor ===================
 export type MonitorRequest = components['schemas']['MonitorRequest'];
@@ -143,7 +144,7 @@ export type AuditLogResponse = components['schemas']['AuditLogResponse'];
 export type AuditLogStatsResponse = components['schemas']['AuditLogStatsResponse'];
 
 // ================ Organization Statistics ===================
-export type OrgStatsRequest = components['schemas']['OrgStatsRequest'];
+export type OrgStatsRequest = components['schemas']['StatsRequest'];
 export type OrgTimelineResponse = components['schemas']['OrgTimelineResponse'];
 export type OrgSummaryResponse = components['schemas']['OrgSummaryResponse'];
 export type OrgTimelineBucketResponse = components['schemas']['OrgTimelineBucketResponse'];
@@ -158,6 +159,11 @@ export type CreateAdapterConfigRequest = components['schemas']['CreateAdapterCon
 export type UpdateAdapterConfigRequest = components['schemas']['UpdateAdapterConfigRequest'];
 export type TestConnectionResponse = components['schemas']['TestConnectionResponse'];
 export type AdapterType = components['schemas']['CreateAdapterConfigRequest']['adapterType'];
+
+// ================ Subscriptions ===================
+export type CreateSubscriptionRequest = components['schemas']['CreateSubscriptionRequest'];
+export type UpdateSubscriptionRequest = components['schemas']['UpdateSubscriptionRequest'];
+export type PageResourceSubscriptionResponse = components['schemas']['PageResourceSubscriptionResponse'];
 
 // Generic type for paginated responses (mirrors backend PageResource<T>)
 export interface PageResource<T> {

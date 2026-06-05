@@ -7,7 +7,7 @@
 	import { currentUser } from '$lib/stores/auth';
 
 	const service = createAdapterConfigService('personal');
-	const webhookConfigs = $derived(service.configs.filter((c) => c.adapterType !== 'EMAIL'));
+	const webhookConfigs = $derived(service.configs.filter((c) => !c.systemManaged));
 	const userEmail = $derived($currentUser?.email ?? '');
 
 	onMount(() => service.loadConfigs());
@@ -25,6 +25,7 @@
 			{service}
 			configs={webhookConfigs}
 			connectionsDescription="Connect external services to receive notifications."
+			scope="personal"
 		>
 			{#snippet alwaysActiveChannels()}
 				<AlwaysActiveChannels email={userEmail} />

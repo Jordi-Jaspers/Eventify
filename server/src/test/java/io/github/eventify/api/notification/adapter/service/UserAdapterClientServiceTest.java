@@ -6,6 +6,7 @@ import io.github.eventify.api.notification.adapter.model.request.CreateAdapterCo
 import io.github.eventify.api.notification.adapter.model.request.UpdateAdapterConfigRequest;
 import io.github.eventify.api.notification.adapter.repository.AdapterConfigRepository;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.exception.AdapterConfigSystemManagedException;
 import io.github.eventify.common.security.SecurityUtil;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.exception.core.DataNotFoundException;
@@ -177,6 +178,20 @@ public class UserAdapterClientServiceTest extends UnitTest {
 
         // Then: Config is deleted
         verify(adapterConfigRepository, times(1)).delete(config);
+    }
+
+    @Test
+    @DisplayName("Should throw when deleting system-managed config")
+    public void shouldThrowWhenDeletingSystemManagedConfig() {
+        // Given: System-managed config
+        final Long id = 1L;
+        final AdapterConfig config = anAdapterConfig(id, currentUser, null, AdapterType.IN_APP, "In-App Notifications");
+        config.setSystemManaged(true);
+        when(adapterConfigRepository.findById(id)).thenReturn(Optional.of(config));
+
+        // When / Then: AdapterConfigSystemManagedException thrown
+        assertThrows(AdapterConfigSystemManagedException.class, () -> userAdapterConfigService.delete(id));
+        verify(adapterConfigRepository, never()).delete(any(AdapterConfig.class));
     }
 
     @Test

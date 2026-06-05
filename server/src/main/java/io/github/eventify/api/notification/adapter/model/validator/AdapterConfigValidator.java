@@ -27,8 +27,11 @@ public class AdapterConfigValidator implements Validator<CreateAdapterConfigRequ
     public static final String LABEL_REQUIRED = "Label is required";
     public static final String CONFIG_REQUIRED = "Config must not be null";
     public static final String WEBHOOK_URL_REQUIRED = "webhookUrl is required in config for adapter type ";
+    public static final String SYSTEM_MANAGED_TYPE =
+        "In-app and email adapter configurations are managed by the system and cannot be created manually.";
 
     private static final List<AdapterType> WEBHOOK_REQUIRED_TYPES = List.of(AdapterType.MATTERMOST, AdapterType.SLACK);
+    private static final List<AdapterType> SYSTEM_MANAGED_TYPES = List.of(AdapterType.IN_APP, AdapterType.EMAIL);
 
     @Override
     public void validate(final CreateAdapterConfigRequest request, final ValidationResult result) {
@@ -52,7 +55,8 @@ public class AdapterConfigValidator implements Validator<CreateAdapterConfigRequ
 
     private void validateAdapterType(final CreateAdapterConfigRequest request, final ValidationResult result) {
         result.rejectField(FIELD_ADAPTER_TYPE, request.getAdapterType())
-            .whenNull(ADAPTER_TYPE_REQUIRED);
+            .whenNull(ADAPTER_TYPE_REQUIRED)
+            .orWhen(SYSTEM_MANAGED_TYPES::contains, SYSTEM_MANAGED_TYPE);
 
         if (result.hasErrors()) {
             throw new ValidationException(result);

@@ -1,6 +1,9 @@
 package io.github.eventify.api.user.service;
 
 import io.github.eventify.api.authentication.model.Role;
+import io.github.eventify.api.notification.adapter.model.AdapterConfig;
+import io.github.eventify.api.notification.adapter.model.AdapterType;
+import io.github.eventify.api.notification.adapter.repository.AdapterConfigRepository;
 import io.github.eventify.api.notification.core.service.NotificationDispatchService;
 import io.github.eventify.api.user.model.AuthProvider;
 import io.github.eventify.api.user.model.User;
@@ -22,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.jspecify.annotations.NonNull;
@@ -69,6 +73,8 @@ public class UserService implements UserDetailsService {
     private final EmailService emailService;
 
     private final NotificationDispatchService notificationDispatchService;
+
+    private final AdapterConfigRepository adapterConfigRepository;
 
     /**
      * Loads a user by their email address (username) for Spring Security authentication.
@@ -225,6 +231,7 @@ public class UserService implements UserDetailsService {
         }
         final User user = register(newUser, password);
         log.info("User has been registered, sending email to validate account.");
+        provisionDefaultAdapterConfigs(user);
         emailService.sendUserValidationEmail(user);
         notificationDispatchService.dispatchWelcomeNotification(user);
         return user;
@@ -263,5 +270,21 @@ public class UserService implements UserDetailsService {
         final User savedUser = userRepository.save(newUser);
         userAuthProviderRepository.save(new UserAuthProvider(savedUser, AuthProvider.LOCAL, savedUser.getEmail()));
         return savedUser;
+    }
+
+    private void provisionDefaultAdapterConfigs(final User user) {
+        adapterConfigRepository.save(buildSystemAdapterConfig(user, AdapterType.IN_APP, "In-App Notifications"));
+        adapterConfigRepository.save(buildSystemAdapterConfig(user, AdapterType.EMAIL, "Email Notifications"));
+    }
+
+    private static AdapterConfig buildSystemAdapterConfig(final User user, final AdapterType type, final String label) {
+        final AdapterConfig config = new AdapterConfig();
+        config.setUser(user);
+        config.setAdapterType(type);
+        config.setLabel(label);
+        config.setConfig(Map.of());
+        config.setEnabled(true);
+        config.setSystemManaged(true);
+        return config;
     }
 }

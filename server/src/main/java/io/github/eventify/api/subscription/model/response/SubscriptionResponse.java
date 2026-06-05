@@ -1,7 +1,7 @@
 package io.github.eventify.api.subscription.model.response;
 
 import io.github.eventify.api.event.model.Severity;
-import io.github.eventify.api.notification.adapter.model.AdapterType;
+import io.github.jframe.datasource.search.model.resource.PageableItemResource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Accessors(chain = true)
 @Schema(description = "Subscription details")
-public class SubscriptionResponse {
+public class SubscriptionResponse implements PageableItemResource {
 
     @Schema(
         description = "Unique subscription identifier",
@@ -36,6 +36,20 @@ public class SubscriptionResponse {
     private Long watchlistId;
 
     @Schema(
+        description = "Watchlist name",
+        example = "Production Servers",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String watchlistName;
+
+    @Schema(
+        description = "Organization ID for org-scoped subscriptions",
+        example = "5",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private Long organizationId;
+
+    @Schema(
         description = "Target severities for notifications",
         example = "[\"CRITICAL\"]",
         requiredMode = Schema.RequiredMode.REQUIRED
@@ -43,11 +57,10 @@ public class SubscriptionResponse {
     private List<Severity> targetSeverities;
 
     @Schema(
-        description = "Notification adapters",
-        example = "[\"IN_APP\"]",
+        description = "Adapter config IDs for notification delivery",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private List<AdapterType> adapters;
+    private List<Long> adapterConfigIds;
 
     @Schema(
         description = "Subscription creation timestamp",

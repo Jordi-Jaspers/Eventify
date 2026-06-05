@@ -6,6 +6,7 @@
 
 	const orgId = $derived(parseInt(page.params.orgId ?? '0'));
 	const service = $derived.by(() => createAdapterConfigService('organization', orgId));
+	const webhookConfigs = $derived(service.configs.filter((c) => !c.systemManaged));
 
 	onMount(() => service.loadConfigs());
 </script>
@@ -18,8 +19,10 @@
 	<div class="max-w-4xl mx-auto space-y-8 animate-fade-in">
 		<NotificationSettingsPanel
 			{service}
-			configs={service.configs}
+			configs={webhookConfigs}
 			connectionsDescription="Manage organization notification connections."
+			scope="organization"
+			{orgId}
 		/>
 	</div>
 </main>

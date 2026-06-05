@@ -1,0 +1,53 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202606041000-PRD-subscription-redesign.xml">
+
+    <changeSet id="202606041000-PRD-subscription-redesign-1" author="jordi.jaspers">
+        <comment>Replace adapters column with adapter_config_ids and add organization_id column to subscription table.</comment>
+        <sql>
+            ALTER TABLE subscription
+                DROP COLUMN IF EXISTS adapters;
+
+            ALTER TABLE subscription
+                ADD COLUMN IF NOT EXISTS adapter_config_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+                ADD COLUMN IF NOT EXISTS organization_id BIGINT NULL;
+
+            ALTER TABLE subscription
+                ADD CONSTRAINT fk_subscription_organization
+                FOREIGN KEY (organization_id) REFERENCES organization(id) ON DELETE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202606041000-PRD-subscription-redesign-2" author="jordi.jaspers">
+        <comment>Drop old unique constraint and add new composite unique constraint supporting both personal and org subscriptions.</comment>
+        <sql>
+            DROP INDEX IF EXISTS idx_subscription_watchlist_user;
+
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_subscription_personal_unique
+                ON subscription (watchlist_id, user_id)
+                WHERE organization_id IS NULL;
+
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_subscription_org_unique
+                ON subscription (watchlist_id, user_id, organization_id)
+                WHERE organization_id IS NOT NULL;
+
+            CREATE INDEX IF NOT EXISTS idx_subscription_organization_id
+                ON subscription (organization_id);
+        </sql>
+    </changeSet>
+
+    <changeSet id="202606041000-PRD-subscription-redesign-3" author="jordi.jaspers">
+        <comment>Add documentation for new subscription columns and indexes.</comment>
+        <sql>
+            COMMENT ON COLUMN subscription.adapter_config_ids IS 'JSON array of adapter config UUIDs to use for notification delivery';
+            COMMENT ON COLUMN subscription.organization_id IS 'Optional organization this subscription belongs to (NULL for personal subscriptions)';
+            COMMENT ON INDEX idx_subscription_personal_unique IS 'Unique index ensuring one personal subscription per user per watchlist';
+            COMMENT ON INDEX idx_subscription_org_unique IS 'Unique index ensuring one org subscription per user per watchlist per org';
+            COMMENT ON INDEX idx_subscription_organization_id IS 'Index for finding subscriptions by organization';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

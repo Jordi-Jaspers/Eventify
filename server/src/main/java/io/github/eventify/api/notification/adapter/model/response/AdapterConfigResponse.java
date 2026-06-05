@@ -53,6 +53,12 @@ public class AdapterConfigResponse {
     private boolean enabled;
 
     @Schema(
+        description = "Whether this config is system-managed (cannot be deleted by user)",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private boolean systemManaged;
+
+    @Schema(
         description = "Creation timestamp",
         requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )

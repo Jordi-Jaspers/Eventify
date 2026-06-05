@@ -1,0 +1,43 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202606041100-PRD-adapter-config-system-managed.xml">
+
+    <changeSet id="202606041100-PRD-adapter-config-system-managed-1" author="jordi.jaspers">
+        <comment>Add system_managed column to adapter_config table.</comment>
+        <sql>
+            ALTER TABLE adapter_config ADD COLUMN IF NOT EXISTS system_managed BOOLEAN NOT NULL DEFAULT false;
+        </sql>
+    </changeSet>
+
+    <changeSet id="202606041100-PRD-adapter-config-system-managed-2" author="jordi.jaspers">
+        <comment>Auto-provision IN_APP and EMAIL adapter configs for all existing users without them.</comment>
+        <sql>
+            INSERT INTO adapter_config (user_id, organization_id, adapter_type, label, config, enabled, system_managed)
+            SELECT u.id, NULL, 'IN_APP', 'In-App Notifications', '{}'::jsonb, true, true
+            FROM "user" u
+            WHERE NOT EXISTS (
+                SELECT 1 FROM adapter_config ac
+                WHERE ac.user_id = u.id AND ac.adapter_type = 'IN_APP' AND ac.organization_id IS NULL
+            );
+
+            INSERT INTO adapter_config (user_id, organization_id, adapter_type, label, config, enabled, system_managed)
+            SELECT u.id, NULL, 'EMAIL', 'Email Notifications', '{}'::jsonb, true, true
+            FROM "user" u
+            WHERE NOT EXISTS (
+                SELECT 1 FROM adapter_config ac
+                WHERE ac.user_id = u.id AND ac.adapter_type = 'EMAIL' AND ac.organization_id IS NULL
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202606041100-PRD-adapter-config-system-managed-3" author="jordi.jaspers">
+        <comment>Add documentation for system_managed column.</comment>
+        <sql>
+            COMMENT ON COLUMN adapter_config.system_managed IS 'Whether this configuration is system-managed and cannot be deleted by the user';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

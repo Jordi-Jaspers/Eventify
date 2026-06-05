@@ -38,8 +38,8 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
         // Given: An authenticated user
         final User user = aValidatedUser();
 
-        // And: A valid create request
-        final CreateAdapterConfigRequest request = aValidInAppRequest();
+        // And: A valid create request (SLACK — non-system-managed type)
+        final CreateAdapterConfigRequest request = aValidSlackRequest();
 
         // When: Creating the config
         final MockHttpServletRequestBuilder createRequest = post(USER_ADAPTER_CONFIGS_PATH)
@@ -58,9 +58,57 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
             AdapterConfigResponse.class
         );
         assertThat(body.getId(), is(notNullValue()));
-        assertThat(body.getAdapterType(), is(AdapterType.IN_APP));
-        assertThat(body.getLabel(), is("My In-App Notifier"));
+        assertThat(body.getAdapterType(), is(AdapterType.SLACK));
+        assertThat(body.getLabel(), is("My Slack Notifier"));
         assertThat(body.isEnabled(), is(true));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when creating IN_APP config (system-managed)")
+    public void createInAppAdapterConfigIsBlocked() throws Exception {
+        // Given: An authenticated user
+        final User user = aValidatedUser();
+
+        // And: IN_APP request (system-managed — not allowed)
+        final CreateAdapterConfigRequest request = new CreateAdapterConfigRequest()
+            .setAdapterType(AdapterType.IN_APP)
+            .setLabel("My In-App")
+            .setConfig(Map.of());
+
+        // When: Creating
+        final ResultActions response = mockMvc.perform(
+            post(USER_ADAPTER_CONFIGS_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(request))
+        );
+
+        // Then: Bad request
+        response.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should return 400 when creating EMAIL config (system-managed)")
+    public void createEmailAdapterConfigIsBlocked() throws Exception {
+        // Given: An authenticated user
+        final User user = aValidatedUser();
+
+        // And: EMAIL request (system-managed — not allowed)
+        final CreateAdapterConfigRequest request = new CreateAdapterConfigRequest()
+            .setAdapterType(AdapterType.EMAIL)
+            .setLabel("My Email")
+            .setConfig(Map.of());
+
+        // When: Creating
+        final ResultActions response = mockMvc.perform(
+            post(USER_ADAPTER_CONFIGS_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(request))
+        );
+
+        // Then: Bad request
+        response.andExpect(status().isBadRequest());
     }
 
     @Test
@@ -71,7 +119,7 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
         final ResultActions response = mockMvc.perform(
             post(USER_ADAPTER_CONFIGS_PATH)
                 .contentType(APPLICATION_JSON)
-                .content(toJson(aValidInAppRequest()))
+                .content(toJson(aValidSlackRequest()))
         );
 
         // Then: Unauthorized
@@ -162,9 +210,9 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should list personal adapter configs for current user")
     public void listPersonalAdapterConfigsSuccess() throws Exception {
-        // Given: User with two personal adapter configs
+        // Given: User with two additional adapter configs (plus 2 auto-provisioned on registration)
         final User user = aValidatedUser();
-        anAdapterConfigForUser(user, AdapterType.IN_APP, "In-App 1");
+        anAdapterConfigForUser(user, AdapterType.MATTERMOST, "Mattermost 1");
         anAdapterConfigForUser(user, AdapterType.SLACK, "Slack 1");
 
         // When: Listing personal configs
@@ -173,20 +221,20 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
                 .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
         );
 
-        // Then: Response is OK with two configs
+        // Then: Response is OK with 4 configs (2 auto-provisioned + 2 manually added)
         response.andExpect(status().is(SC_OK));
         final List<?> body = fromJson(response.andReturn().getResponse().getContentAsString(), List.class);
-        assertThat(body, hasSize(2));
+        assertThat(body, hasSize(4));
     }
 
     @Test
     @DisplayName("Should not return another user's personal configs")
     public void listPersonalAdapterConfigsOnlyReturnsOwnConfigs() throws Exception {
-        // Given: Two users, each with their own config
+        // Given: Two users, each with an additional SLACK config (plus 2 auto-provisioned each)
         final User user1 = aValidatedUser();
         final User user2 = aValidatedUser();
-        anAdapterConfigForUser(user1, AdapterType.IN_APP, "User1 Config");
-        anAdapterConfigForUser(user2, AdapterType.IN_APP, "User2 Config");
+        anAdapterConfigForUser(user1, AdapterType.SLACK, "User1 Slack");
+        anAdapterConfigForUser(user2, AdapterType.SLACK, "User2 Slack");
 
         // When: User1 lists their configs
         final ResultActions response = mockMvc.perform(
@@ -194,10 +242,10 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
                 .header(AUTHORIZATION, BEARER + user1.getAccessToken().getValue())
         );
 
-        // Then: Only user1's config is returned
+        // Then: Only user1's configs are returned (2 auto-provisioned + 1 manually added = 3)
         response.andExpect(status().is(SC_OK));
         final List<?> body = fromJson(response.andReturn().getResponse().getContentAsString(), List.class);
-        assertThat(body, hasSize(1));
+        assertThat(body, hasSize(3));
     }
 
     // ========================= GET /v1/user/adapter-configs/{id} =========================
@@ -205,9 +253,9 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should get personal adapter config by id")
     public void getAdapterConfigSuccess() throws Exception {
-        // Given: User's personal config
+        // Given: User's personal SLACK config
         final User user = aValidatedUser();
-        final AdapterConfigResponse created = createAndGetConfig(user, aValidInAppRequest());
+        final AdapterConfigResponse created = createAndGetConfig(user, aValidSlackRequest());
 
         // When: Getting by ID
         final ResultActions response = mockMvc.perform(
@@ -227,9 +275,9 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should return 403 when accessing another user's config")
     public void getAdapterConfigForbiddenForOtherUser() throws Exception {
-        // Given: User1's config
+        // Given: User1's SLACK config
         final User user1 = aValidatedUser();
-        final AdapterConfigResponse created = createAndGetConfig(user1, aValidInAppRequest());
+        final AdapterConfigResponse created = createAndGetConfig(user1, aValidSlackRequest());
 
         // And: A different user
         final User user2 = aValidatedUser();
@@ -266,14 +314,14 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should update personal adapter config successfully")
     public void updateAdapterConfigSuccess() throws Exception {
-        // Given: User's personal config
+        // Given: User's personal SLACK config
         final User user = aValidatedUser();
-        final AdapterConfigResponse created = createAndGetConfig(user, aValidInAppRequest());
+        final AdapterConfigResponse created = createAndGetConfig(user, aValidSlackRequest());
 
         // And: An update request
         final UpdateAdapterConfigRequest updateRequest = new UpdateAdapterConfigRequest()
             .setLabel("Updated Label")
-            .setConfig(Map.of())
+            .setConfig(Map.of("webhookUrl", "https://example.com/updated"))
             .setEnabled(false);
 
         // When: Updating
@@ -297,9 +345,9 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should return 403 when updating another user's config")
     public void updateAdapterConfigForbiddenForOtherUser() throws Exception {
-        // Given: User1's config
+        // Given: User1's SLACK config
         final User user1 = aValidatedUser();
-        final AdapterConfigResponse created = createAndGetConfig(user1, aValidInAppRequest());
+        final AdapterConfigResponse created = createAndGetConfig(user1, aValidSlackRequest());
 
         // And: A different user
         final User user2 = aValidatedUser();
@@ -321,9 +369,9 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should delete personal adapter config successfully")
     public void deleteAdapterConfigSuccess() throws Exception {
-        // Given: User's personal config
+        // Given: User's personal SLACK config (non-system-managed)
         final User user = aValidatedUser();
-        final AdapterConfigResponse created = createAndGetConfig(user, aValidInAppRequest());
+        final AdapterConfigResponse created = createAndGetConfig(user, aValidSlackRequest());
 
         // When: Deleting
         final ResultActions response = mockMvc.perform(
@@ -338,9 +386,9 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
     @Test
     @DisplayName("Should return 403 when deleting another user's config")
     public void deleteAdapterConfigForbiddenForOtherUser() throws Exception {
-        // Given: User1's config
+        // Given: User1's SLACK config
         final User user1 = aValidatedUser();
-        final AdapterConfigResponse created = createAndGetConfig(user1, aValidInAppRequest());
+        final AdapterConfigResponse created = createAndGetConfig(user1, aValidSlackRequest());
 
         // And: A different user
         final User user2 = aValidatedUser();
@@ -356,52 +404,82 @@ public class UserAdapterClientControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should allow multiple configs of the same adapter type for the same user")
-    public void createMultipleConfigsOfSameAdapterType() throws Exception {
-        // Given: An authenticated user
+    @DisplayName("Should return 400 when deleting a system-managed config")
+    public void deleteSystemManagedConfigIsBlocked() throws Exception {
+        // Given: User whose auto-provisioned IN_APP config is system-managed
         final User user = aValidatedUser();
+        final io.github.eventify.api.notification.adapter.model.AdapterConfig inAppConfig =
+            adapterConfigRepository.findByUserIdAndOrganizationIdIsNull(user.getId())
+                .stream()
+                .filter(c -> c.getAdapterType() == AdapterType.IN_APP)
+                .findFirst()
+                .orElseThrow();
 
-        // When: Creating two IN_APP configs
-        mockMvc.perform(
-            post(USER_ADAPTER_CONFIGS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(
-                    toJson(
-                        new CreateAdapterConfigRequest()
-                            .setAdapterType(AdapterType.IN_APP).setLabel("First").setConfig(Map.of()).setEnabled(true)
-                    )
-                )
-        ).andExpect(status().is(SC_CREATED));
-
-        mockMvc.perform(
-            post(USER_ADAPTER_CONFIGS_PATH)
-                .contentType(APPLICATION_JSON)
-                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
-                .content(
-                    toJson(
-                        new CreateAdapterConfigRequest()
-                            .setAdapterType(AdapterType.IN_APP).setLabel("Second").setConfig(Map.of()).setEnabled(true)
-                    )
-                )
-        ).andExpect(status().is(SC_CREATED));
-
-        // Then: Both configs exist
-        final ResultActions listResponse = mockMvc.perform(
-            get(USER_ADAPTER_CONFIGS_PATH)
+        // When: Attempting to delete the system-managed config
+        final ResultActions response = mockMvc.perform(
+            delete(USER_ADAPTER_CONFIG_PATH, inAppConfig.getId())
                 .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
         );
-        final List<?> body = fromJson(listResponse.andReturn().getResponse().getContentAsString(), List.class);
-        assertThat(body, hasSize(2));
+
+        // Then: Bad request (system-managed protection)
+        response.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should allow multiple configs of the same adapter type for the same user")
+    public void createMultipleConfigsOfSameAdapterType() throws Exception {
+        // Given: An authenticated user (auto-provisioned with IN_APP + EMAIL = 2 configs)
+        final User user = aValidatedUser();
+
+        // When: Creating two SLACK configs
+        mockMvc.perform(
+            post(USER_ADAPTER_CONFIGS_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(
+                    toJson(
+                        new CreateAdapterConfigRequest()
+                            .setAdapterType(AdapterType.SLACK)
+                            .setLabel("First Slack")
+                            .setConfig(Map.of("webhookUrl", "https://example.com/webhook/1"))
+                            .setEnabled(true)
+                    )
+                )
+        ).andExpect(status().is(SC_CREATED));
+
+        mockMvc.perform(
+            post(USER_ADAPTER_CONFIGS_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(
+                    toJson(
+                        new CreateAdapterConfigRequest()
+                            .setAdapterType(AdapterType.SLACK)
+                            .setLabel("Second Slack")
+                            .setConfig(Map.of("webhookUrl", "https://example.com/webhook/2"))
+                            .setEnabled(true)
+                    )
+                )
+        ).andExpect(status().is(SC_CREATED));
+
+        // Then: All configs exist (2 auto-provisioned + 2 SLACK)
+        final List<?> body = fromJson(
+            mockMvc.perform(
+                get(USER_ADAPTER_CONFIGS_PATH)
+                    .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+            ).andReturn().getResponse().getContentAsString(),
+            List.class
+        );
+        assertThat(body, hasSize(4));
     }
 
     // ========================= FACTORY METHODS =========================
 
-    private static CreateAdapterConfigRequest aValidInAppRequest() {
+    private static CreateAdapterConfigRequest aValidSlackRequest() {
         return new CreateAdapterConfigRequest()
-            .setAdapterType(AdapterType.IN_APP)
-            .setLabel("My In-App Notifier")
-            .setConfig(Map.of())
+            .setAdapterType(AdapterType.SLACK)
+            .setLabel("My Slack Notifier")
+            .setConfig(Map.of("webhookUrl", "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXX"))
             .setEnabled(true);
     }
 

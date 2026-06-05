@@ -5,6 +5,7 @@ import io.github.eventify.api.notification.adapter.model.request.CreateAdapterCo
 import io.github.eventify.api.notification.adapter.model.request.UpdateAdapterConfigRequest;
 import io.github.eventify.api.notification.adapter.repository.AdapterConfigRepository;
 import io.github.eventify.api.user.model.User;
+import io.github.eventify.common.exception.AdapterConfigSystemManagedException;
 import io.github.eventify.common.security.SecurityUtil;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +65,9 @@ public class UserAdapterConfigService {
     public void delete(final Long id) {
         final AdapterConfig config = adapterConfigRepository.findById(id)
             .orElseThrow(() -> new DataNotFoundException(ADAPTER_CONFIG_NOT_FOUND));
+        if (config.isSystemManaged()) {
+            throw new AdapterConfigSystemManagedException();
+        }
         adapterConfigRepository.delete(config);
     }
 }

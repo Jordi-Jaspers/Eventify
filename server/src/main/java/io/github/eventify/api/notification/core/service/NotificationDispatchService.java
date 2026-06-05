@@ -2,6 +2,7 @@ package io.github.eventify.api.notification.core.service;
 
 import io.github.eventify.api.notification.adapter.AdapterRegistry;
 import io.github.eventify.api.notification.adapter.adapters.NotificationAdapter;
+import io.github.eventify.api.notification.adapter.model.AdapterConfig;
 import io.github.eventify.api.notification.adapter.model.AdapterType;
 import io.github.eventify.api.notification.adapter.repository.AdapterConfigRepository;
 import io.github.eventify.api.notification.adapter.service.AdapterSendGateway;
@@ -51,6 +52,21 @@ public class NotificationDispatchService {
      */
     public void dispatch(final NotificationAudience audience, final NotificationPayload payload) {
         dispatch(audience, payload, List.of(AdapterType.IN_APP));
+    }
+
+    /**
+     * Dispatches a notification to all users in the audience via adapters resolved from the given config IDs.
+     * Only enabled configs are used; duplicate adapter types are deduplicated.
+     */
+    public void dispatchByAdapterConfigIds(final NotificationAudience audience, final NotificationPayload payload,
+        final List<Long> adapterConfigIds) {
+        final List<AdapterConfig> configs = adapterConfigRepository.findAllById(adapterConfigIds);
+        final List<AdapterType> adapterTypes = configs.stream()
+            .filter(AdapterConfig::isEnabled)
+            .map(AdapterConfig::getAdapterType)
+            .distinct()
+            .toList();
+        dispatch(audience, payload, adapterTypes);
     }
 
     /**

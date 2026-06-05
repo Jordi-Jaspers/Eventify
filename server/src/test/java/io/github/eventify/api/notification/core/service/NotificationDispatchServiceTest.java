@@ -156,9 +156,107 @@ public class NotificationDispatchServiceTest extends UnitTest {
         );
     }
 
+    private static AdapterConfig anAdapterConfig(final Long id, final AdapterType type, final boolean enabled) {
+        final AdapterConfig config = new AdapterConfig();
+        config.setId(id);
+        config.setAdapterType(type);
+        config.setEnabled(enabled);
+        return config;
+    }
+
+    // -------------------------------------------------------------------------
+    // dispatchByAdapterConfigIds
+    // -------------------------------------------------------------------------
+
+    @Nested
+    @DisplayName("Dispatch By Adapter Config IDs")
+    class DispatchByAdapterConfigIdsTests {
+
+        @Test
+        @DisplayName("Should dispatch via adapter types resolved from config IDs")
+        void shouldDispatchViaResolvedAdapterTypes() {
+            // Given
+            final User user = aValidUser();
+            final NotificationAudience audience = NotificationAudience.user(user.getId());
+            final NotificationPayload payload = aValidPayload();
+            final AdapterConfig inAppConfig = anAdapterConfig(1L, AdapterType.IN_APP, true);
+            final List<Long> configIds = List.of(1L);
+
+            when(adapterConfigRepository.findAllById(configIds)).thenReturn(List.of(inAppConfig));
+            when(audienceResolver.resolve(audience)).thenReturn(List.of(user));
+            when(adapterRegistry.filterByAdapterTypes(List.of(AdapterType.IN_APP))).thenReturn(List.of(inAppAdapter));
+
+            // When
+            dispatchService.dispatchByAdapterConfigIds(audience, payload, configIds);
+
+            // Then
+            verify(adapterSendGateway).sendAsync(eq(inAppAdapter), eq(user), eq(payload), isNull());
+        }
+
+        @Test
+        @DisplayName("Should skip disabled configs when resolving adapter types")
+        void shouldSkipDisabledConfigs() {
+            // Given
+            final NotificationAudience audience = NotificationAudience.user(1L);
+            final NotificationPayload payload = aValidPayload();
+            final AdapterConfig disabledConfig = anAdapterConfig(1L, AdapterType.IN_APP, false);
+            final List<Long> configIds = List.of(1L);
+
+            when(adapterConfigRepository.findAllById(configIds)).thenReturn(List.of(disabledConfig));
+            when(audienceResolver.resolve(audience)).thenReturn(List.of(aValidUser()));
+            when(adapterRegistry.filterByAdapterTypes(List.of())).thenReturn(List.of());
+
+            // When
+            dispatchService.dispatchByAdapterConfigIds(audience, payload, configIds);
+
+            // Then: no adapters dispatched
+            verifyNoInteractions(adapterSendGateway);
+        }
+
+        @Test
+        @DisplayName("Should deduplicate adapter types when multiple configs resolve to same type")
+        void shouldDeduplicateAdapterTypes() {
+            // Given
+            final NotificationAudience audience = NotificationAudience.user(1L);
+            final NotificationPayload payload = aValidPayload();
+            final AdapterConfig config1 = anAdapterConfig(1L, AdapterType.IN_APP, true);
+            final AdapterConfig config2 = anAdapterConfig(2L, AdapterType.IN_APP, true);
+            final List<Long> configIds = List.of(1L, 2L);
+
+            when(adapterConfigRepository.findAllById(configIds)).thenReturn(List.of(config1, config2));
+            when(audienceResolver.resolve(audience)).thenReturn(List.of(aValidUser()));
+            when(adapterRegistry.filterByAdapterTypes(List.of(AdapterType.IN_APP))).thenReturn(List.of(inAppAdapter));
+
+            // When
+            dispatchService.dispatchByAdapterConfigIds(audience, payload, configIds);
+
+            // Then: filterByAdapterTypes called with deduplicated list
+            verify(adapterRegistry).filterByAdapterTypes(List.of(AdapterType.IN_APP));
+        }
+
+        @Test
+        @DisplayName("Should not dispatch when config IDs list is empty")
+        void shouldNotDispatchWhenConfigIdsIsEmpty() {
+            // Given
+            final NotificationAudience audience = NotificationAudience.user(1L);
+            final NotificationPayload payload = aValidPayload();
+
+            when(adapterConfigRepository.findAllById(List.of())).thenReturn(List.of());
+            when(audienceResolver.resolve(audience)).thenReturn(List.of(aValidUser()));
+            when(adapterRegistry.filterByAdapterTypes(List.of())).thenReturn(List.of());
+
+            // When
+            dispatchService.dispatchByAdapterConfigIds(audience, payload, List.of());
+
+            // Then
+            verifyNoInteractions(adapterSendGateway);
+        }
+    }
+
     // -------------------------------------------------------------------------
     // dispatchOrganizationStatusChange
     // -------------------------------------------------------------------------
+
 
     @Nested
     @DisplayName("Organization Status Change Notifications")

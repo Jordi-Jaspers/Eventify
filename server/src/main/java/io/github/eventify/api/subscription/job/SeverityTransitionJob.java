@@ -118,7 +118,7 @@ public class SeverityTransitionJob {
         final Subscription subscription) {
         final NotificationAudience audience = NotificationAudience.user(subscription.getUser().getId());
         final NotificationPayload payload = buildPayload(channel, watchlist, severity);
-        notificationDispatchService.dispatch(audience, payload, subscription.getAdapters());
+        notificationDispatchService.dispatchByAdapterConfigIds(audience, payload, subscription.getAdapterConfigIds());
     }
 
     private NotificationPayload buildPayload(final Channel channel, final Watchlist watchlist, final Severity severity) {

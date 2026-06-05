@@ -266,6 +266,18 @@ public enum ApiErrorCode implements ApiError {
     ADAPTER_CONFIG_NOT_FOUND(
         "ERR-0063",
         "The requested adapter configuration does not exist."
+    ),
+    SUBSCRIPTION_NOT_FOUND(
+        "ERR-0064",
+        "The requested subscription does not exist."
+    ),
+    ORGANIZATION_SUSPENDED_ERROR(
+        "ERR-0065",
+        "The organization is currently suspended. Subscriptions cannot be created for suspended organizations."
+    ),
+    ADAPTER_CONFIG_SYSTEM_MANAGED(
+        "ERR-0066",
+        "This adapter configuration is system-managed and cannot be deleted."
     );
 
     /* The error code for this reason. */

@@ -1,9 +1,10 @@
 package io.github.eventify.api.subscription.model;
 
 import io.github.eventify.api.event.model.Severity;
-import io.github.eventify.api.notification.adapter.model.AdapterType;
+import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
+import io.github.jframe.datasource.search.model.PageableItem;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,7 +29,7 @@ import static io.github.eventify.Main.SERIAL_VERSION_UID;
 @Entity
 @NoArgsConstructor
 @Table(name = "subscription")
-public class Subscription implements Serializable {
+public class Subscription implements PageableItem, Serializable {
 
     @Serial
     private static final long serialVersionUID = SERIAL_VERSION_UID;
@@ -51,6 +52,10 @@ public class Subscription implements Serializable {
     )
     private Watchlist watchlist;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
+    private Organization organization;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(
         name = "target_severities",
@@ -61,11 +66,11 @@ public class Subscription implements Serializable {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(
-        name = "adapters",
+        name = "adapter_config_ids",
         nullable = false,
         columnDefinition = "jsonb"
     )
-    private List<AdapterType> adapters;
+    private List<Long> adapterConfigIds;
 
     @CreationTimestamp
     @Column(

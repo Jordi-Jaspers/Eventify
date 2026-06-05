@@ -90,6 +90,12 @@ public class AdapterConfig implements PageableItem, Serializable {
     )
     private boolean enabled;
 
+    @Column(
+        name = "system_managed",
+        nullable = false
+    )
+    private boolean systemManaged;
+
     @CreationTimestamp
     @Column(
         name = "created_at",

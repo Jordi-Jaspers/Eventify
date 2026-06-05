@@ -40,13 +40,15 @@ function isApiErrorResponseResource(error: unknown): error is ApiErrorResponseRe
 }
 
 /**
- * Type guard to check if error is ValidationErrorResponseResource
+ * Type guard to check if error is ValidationErrorResponseResource.
+ * Supports both formats: with `errorMessage` (standard) and without (jFrame validation).
  */
 function isValidationErrorResponseResource(
 	error: unknown
 ): error is ValidationErrorResponseResource {
 	return (
-		isErrorResponseResource(error) &&
+		typeof error === 'object' &&
+		error !== null &&
 		'errors' in error &&
 		Array.isArray((error as ValidationErrorResponseResource).errors)
 	);
@@ -64,10 +66,10 @@ export function handleError(error: unknown, fallbackMessage: string = 'An unexpe
 	if (isValidationErrorResponseResource(error)) {
 		const validationError: ValidationErrorResponseResource = error;
 		return {
-			message: validationError.errorMessage || 'Validation failed',
+			message: validationError.errorMessage || (error as { statusMessage?: string }).statusMessage || 'Validation failed',
 			validationErrors: validationError.errors,
-			traceId: validationError.traceId,
-            txId: validationError.txId
+			traceId: validationError.traceId ?? (error as { traceId?: string }).traceId,
+            txId: validationError.txId ?? (error as { txId?: string }).txId
 		};
 	}
 

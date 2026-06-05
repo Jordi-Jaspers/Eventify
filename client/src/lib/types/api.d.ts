@@ -102,6 +102,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/subscriptions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update personal subscription
+         * @description Updates a personal subscription by ID
+         */
+        put: operations["updatePersonalSubscription"];
+        post?: never;
+        /**
+         * Delete personal subscription
+         * @description Deletes a personal subscription by ID
+         */
+        delete: operations["deletePersonalSubscription"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/organization/{orgId}/watchlist/{id}": {
         parameters: {
             query?: never;
@@ -125,6 +149,30 @@ export interface paths {
          * @description Deletes an organization watchlist. Requires OWNER or ADMIN role.
          */
         delete: operations["deleteOrganizationWatchlist"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/organization/{orgId}/subscriptions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update org subscription
+         * @description Updates an org subscription by ID
+         */
+        put: operations["updateOrgSubscription"];
+        post?: never;
+        /**
+         * Delete org subscription
+         * @description Deletes an org subscription by ID
+         */
+        delete: operations["deleteOrgSubscription"];
         options?: never;
         head?: never;
         patch?: never;
@@ -238,34 +286,6 @@ export interface paths {
          */
         post: operations["createWatchlist"];
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/user/watchlist/{watchlistId}/subscription": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get subscription
-         * @description Returns the subscription for the authenticated user on the given watchlist
-         */
-        get: operations["getSubscription"];
-        put?: never;
-        /**
-         * Subscribe to watchlist
-         * @description Creates or updates a subscription for the authenticated user on the given watchlist
-         */
-        post: operations["subscribe"];
-        /**
-         * Unsubscribe from watchlist
-         * @description Deletes the subscription for the authenticated user on the given watchlist
-         */
-        delete: operations["unsubscribe"];
         options?: never;
         head?: never;
         patch?: never;
@@ -501,6 +521,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create personal subscription
+         * @description Creates or upserts a personal subscription for the authenticated user
+         */
+        post: operations["createPersonalSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/subscriptions/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Search personal subscriptions
+         * @description Returns paginated personal subscriptions for the authenticated user
+         */
+        post: operations["searchPersonalSubscriptions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/public/reset-password": {
         parameters: {
             query?: never;
@@ -603,6 +663,46 @@ export interface paths {
         put?: never;
         /** Transfer ownership of an organization */
         post: operations["transferOwnership"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/organization/{orgId}/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create org subscription
+         * @description Creates a subscription for the organization
+         */
+        post: operations["createOrgSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/organization/{orgId}/subscriptions/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Search org subscriptions
+         * @description Returns paginated subscriptions for the organization
+         */
+        post: operations["searchOrgSubscriptions"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2025,6 +2125,21 @@ export interface components {
             traceId?: string;
             spanId?: string;
         };
+        ApiErrorResponseResource: {
+            method?: string;
+            uri?: string;
+            query?: string;
+            contentType?: string;
+            /** Format: int32 */
+            statusCode?: number;
+            statusMessage?: string;
+            errorMessage?: string;
+            txId?: string;
+            traceId?: string;
+            spanId?: string;
+            apiErrorCode?: string;
+            apiErrorReason?: string;
+        };
         RateLimitErrorResponseResource: {
             method?: string;
             uri?: string;
@@ -2061,21 +2176,6 @@ export interface components {
             traceId?: string;
             spanId?: string;
             errors?: components["schemas"]["ValidationErrorResource"][];
-        };
-        ApiErrorResponseResource: {
-            method?: string;
-            uri?: string;
-            query?: string;
-            contentType?: string;
-            /** Format: int32 */
-            statusCode?: number;
-            statusMessage?: string;
-            errorMessage?: string;
-            txId?: string;
-            traceId?: string;
-            spanId?: string;
-            apiErrorCode?: string;
-            apiErrorReason?: string;
         };
         ChannelGroupRequest: {
             /** Format: uuid */
@@ -2319,6 +2419,8 @@ export interface components {
             };
             /** @description Whether this configuration is enabled */
             enabled: boolean;
+            /** @description Whether this adapter config is system-managed (auto-provisioned) */
+            systemManaged?: boolean;
             /**
              * Format: date-time
              * @description Creation timestamp
@@ -2329,6 +2431,55 @@ export interface components {
              * @description Last update timestamp
              */
             updatedAt?: string;
+        };
+        /** @description Update subscription request */
+        UpdateSubscriptionRequest: {
+            /**
+             * @description Severity levels to receive notifications for
+             * @example [
+             *       "CRITICAL",
+             *       "WARNING"
+             *     ]
+             */
+            targetSeverities: ("CRITICAL" | "WARNING" | "OK" | "NO_DATA")[];
+            /** @description Adapter config UUIDs to use for notification delivery */
+            adapterConfigIds: string[];
+        };
+        /** @description Subscription details */
+        SubscriptionResponse: {
+            /**
+             * Format: int64
+             * @description Unique subscription identifier
+             * @example 1
+             */
+            id: number;
+            /**
+             * Format: int64
+             * @description Watchlist ID this subscription belongs to
+             * @example 10
+             */
+            watchlistId: number;
+            /**
+             * Format: int64
+             * @description Organization ID for org-scoped subscriptions
+             * @example 5
+             */
+            organizationId?: number;
+            /**
+             * @description Target severities for notifications
+             * @example [
+             *       "CRITICAL"
+             *     ]
+             */
+            targetSeverities: ("CRITICAL" | "WARNING" | "OK" | "NO_DATA")[];
+            /** @description Adapter config UUIDs for notification delivery */
+            adapterConfigIds: string[];
+            /**
+             * Format: date-time
+             * @description Subscription creation timestamp
+             * @example 2026-01-08T10:30:00Z
+             */
+            createdAt: string;
         };
         UpdateRoleRequest: {
             /**
@@ -2434,59 +2585,6 @@ export interface components {
             description?: string;
             configuration?: components["schemas"]["WatchlistConfigurationRequest"];
             filters?: components["schemas"]["WatchlistFiltersRequest"];
-        };
-        /** @description Subscribe request for a watchlist */
-        SubscribeRequest: {
-            /**
-             * @description Severity levels to receive notifications for
-             * @example [
-             *       "CRITICAL",
-             *       "WARNING"
-             *     ]
-             */
-            targetSeverities: ("CRITICAL" | "WARNING" | "OK" | "NO_DATA")[];
-            /**
-             * @description Notification adapters to use for delivery
-             * @example [
-             *       "IN_APP"
-             *     ]
-             */
-            adapters: ("IN_APP" | "MATTERMOST" | "SLACK" | "EMAIL")[];
-        };
-        /** @description Subscription details */
-        SubscriptionResponse: {
-            /**
-             * Format: int64
-             * @description Unique subscription identifier
-             * @example 1
-             */
-            id: number;
-            /**
-             * Format: int64
-             * @description Watchlist ID this subscription belongs to
-             * @example 10
-             */
-            watchlistId: number;
-            /**
-             * @description Target severities for notifications
-             * @example [
-             *       "CRITICAL"
-             *     ]
-             */
-            targetSeverities: ("CRITICAL" | "WARNING" | "OK" | "NO_DATA")[];
-            /**
-             * @description Notification adapters
-             * @example [
-             *       "IN_APP"
-             *     ]
-             */
-            adapters: ("IN_APP" | "MATTERMOST" | "SLACK" | "EMAIL")[];
-            /**
-             * Format: date-time
-             * @description Subscription creation timestamp
-             * @example 2026-01-08T10:30:00Z
-             */
-            createdAt: string;
         };
         SearchInput: {
             /**
@@ -2936,6 +3034,53 @@ export interface components {
              * @example true
              */
             enabled?: boolean;
+        };
+        /** @description Create subscription request */
+        CreateSubscriptionRequest: {
+            /**
+             * Format: int64
+             * @description Watchlist ID to subscribe to
+             * @example 10
+             */
+            watchlistId: number;
+            /**
+             * @description Severity levels to receive notifications for
+             * @example [
+             *       "CRITICAL",
+             *       "WARNING"
+             *     ]
+             */
+            targetSeverities: ("CRITICAL" | "WARNING" | "OK" | "NO_DATA")[];
+            /** @description Adapter config UUIDs to use for notification delivery */
+            adapterConfigIds: string[];
+        };
+        PageResourceSubscriptionResponse: {
+            /**
+             * Format: int64
+             * @description Total number of elements available
+             * @example 125
+             */
+            totalElements: number;
+            /**
+             * Format: int32
+             * @description Total number of pages available
+             * @example 5
+             */
+            totalPages: number;
+            /**
+             * Format: int32
+             * @description Number of items per page
+             * @example 25
+             */
+            pageSize: number;
+            /**
+             * Format: int32
+             * @description Current page number (0-based)
+             * @example 0
+             */
+            pageNumber: number;
+            /** @description List of items on the current page */
+            content?: components["schemas"]["SubscriptionResponse"][];
         };
         ForgotPasswordRequest: {
             /**
@@ -4755,15 +4900,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -4771,6 +4907,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -4853,15 +4998,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -4869,6 +5005,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -4945,15 +5090,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -4961,6 +5097,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5037,15 +5182,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5053,6 +5189,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5133,15 +5278,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5149,6 +5285,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5227,15 +5372,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5243,6 +5379,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5325,15 +5470,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5341,6 +5477,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5419,15 +5564,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5435,6 +5571,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5517,15 +5662,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5533,6 +5669,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5609,6 +5754,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
             /** @description Input Validation Exception */
             "400 (Validation)": {
                 headers: {
@@ -5618,6 +5772,86 @@ export interface operations {
                     "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
+        };
+    };
+    updatePersonalSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSubscriptionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5625,6 +5859,107 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    deletePersonalSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5704,15 +6039,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5720,6 +6046,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5803,15 +6138,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5819,6 +6145,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5896,6 +6231,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
             /** @description Input Validation Exception */
             "400 (Validation)": {
                 headers: {
@@ -5905,6 +6249,87 @@ export interface operations {
                     "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
+        };
+    };
+    updateOrgSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSubscriptionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -5912,6 +6337,108 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    deleteOrgSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -5990,15 +6517,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -6006,6 +6524,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -6088,15 +6615,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -6104,6 +6622,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -6183,15 +6710,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -6199,6 +6717,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -6282,15 +6809,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -6298,6 +6816,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -6380,15 +6907,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -6396,6 +6914,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -6474,15 +7001,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -6490,6 +7008,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -6568,15 +7095,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -6584,6 +7102,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -6664,15 +7191,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -6682,82 +7200,6 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
                 };
             };
-        };
-    };
-    getSubscription: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                watchlistId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubscriptionResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Access Denied */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Resource Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Rate Limit Exceeded */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
-                };
-            };
-            /** @description Uncaught Exceptions - Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Default HTTP Exception */
-            "400 (default)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
             /** @description Input Validation Exception */
             "400 (Validation)": {
                 headers: {
@@ -6765,205 +7207,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
-            /** @description API Exception */
-            "400 (API)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseResource"];
-                };
-            };
-        };
-    };
-    subscribe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                watchlistId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SubscribeRequest"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubscriptionResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Access Denied */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Resource Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Rate Limit Exceeded */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
-                };
-            };
-            /** @description Uncaught Exceptions - Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Default HTTP Exception */
-            "400 (default)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
-            /** @description API Exception */
-            "400 (API)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseResource"];
-                };
-            };
-        };
-    };
-    unsubscribe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                watchlistId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Access Denied */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Resource Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Rate Limit Exceeded */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
-                };
-            };
-            /** @description Uncaught Exceptions - Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Default HTTP Exception */
-            "400 (default)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseResource"];
-                };
-            };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
-            /** @description API Exception */
-            "400 (API)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseResource"];
                 };
             };
         };
@@ -7044,15 +7287,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7060,6 +7294,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7140,15 +7383,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7156,6 +7390,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7236,15 +7479,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7252,6 +7486,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7328,15 +7571,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7344,6 +7578,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7424,15 +7667,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7440,6 +7674,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7520,15 +7763,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7536,6 +7770,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7614,15 +7857,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7630,6 +7864,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7712,15 +7955,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7728,6 +7962,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7808,15 +8051,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7824,6 +8058,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7902,15 +8145,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -7918,6 +8152,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -7996,15 +8239,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8012,6 +8246,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8088,15 +8331,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8104,6 +8338,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8184,15 +8427,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8200,6 +8434,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8276,15 +8519,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8292,6 +8526,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8372,6 +8615,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
             /** @description Input Validation Exception */
             "400 (Validation)": {
                 headers: {
@@ -8381,6 +8633,84 @@ export interface operations {
                     "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
+        };
+    };
+    createPersonalSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSubscriptionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8388,6 +8718,111 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    searchPersonalSubscriptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SortablePageInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResourceSubscriptionResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8466,15 +8901,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8482,6 +8908,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8558,15 +8993,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8574,6 +9000,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8652,15 +9087,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8668,6 +9094,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8750,15 +9185,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8766,6 +9192,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8848,15 +9283,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8864,6 +9290,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -8944,6 +9379,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
             /** @description Input Validation Exception */
             "400 (Validation)": {
                 headers: {
@@ -8953,6 +9397,86 @@ export interface operations {
                     "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
+        };
+    };
+    createOrgSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSubscriptionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -8960,6 +9484,113 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
+                };
+            };
+        };
+    };
+    searchOrgSubscriptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SortablePageInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResourceSubscriptionResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Access Denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Resource Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Rate Limit Exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateLimitErrorResponseResource"];
+                };
+            };
+            /** @description Uncaught Exceptions - Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Default HTTP Exception */
+            "400 (default)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description API Exception */
+            "400 (API)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9042,15 +9673,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9058,6 +9680,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9140,15 +9771,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9156,6 +9778,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9238,15 +9869,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9254,6 +9876,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9332,15 +9963,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9348,6 +9970,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9430,15 +10061,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9446,6 +10068,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9528,15 +10159,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9544,6 +10166,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9626,15 +10257,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9642,6 +10264,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9724,15 +10355,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9740,6 +10362,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9822,15 +10453,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9838,6 +10460,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -9918,15 +10549,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -9934,6 +10556,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10017,15 +10648,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10033,6 +10655,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10115,15 +10746,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10131,6 +10753,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10211,15 +10842,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10227,6 +10849,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10307,15 +10938,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10323,6 +10945,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10405,15 +11036,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10421,6 +11043,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10503,15 +11134,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10519,6 +11141,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10597,15 +11228,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10613,6 +11235,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10695,15 +11326,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10711,6 +11333,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10787,15 +11418,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10803,6 +11425,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10883,15 +11514,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10899,6 +11521,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -10975,15 +11606,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -10991,6 +11613,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11071,15 +11702,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11087,6 +11709,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11167,15 +11798,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11183,6 +11805,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11263,15 +11894,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11279,6 +11901,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11357,15 +11988,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11373,6 +11995,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11449,15 +12080,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11465,6 +12087,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11545,15 +12176,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11561,6 +12183,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11641,15 +12272,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11657,6 +12279,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11737,15 +12368,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11753,6 +12375,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11829,15 +12460,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11845,6 +12467,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -11925,15 +12556,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -11941,6 +12563,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12021,15 +12652,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12037,6 +12659,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12117,15 +12748,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12133,6 +12755,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12213,15 +12844,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12229,6 +12851,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12309,15 +12940,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12325,6 +12947,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12407,15 +13038,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12423,6 +13045,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12503,15 +13134,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12519,6 +13141,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12599,15 +13230,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12615,6 +13237,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12697,15 +13328,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12713,6 +13335,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12793,15 +13424,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12809,6 +13431,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12889,15 +13520,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -12905,6 +13527,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -12985,15 +13616,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13001,6 +13623,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13081,15 +13712,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13097,6 +13719,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13177,15 +13808,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13193,6 +13815,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13273,15 +13904,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13289,6 +13911,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13366,15 +13997,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13382,6 +14004,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13465,15 +14096,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13481,6 +14103,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13563,15 +14194,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13579,6 +14201,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13655,15 +14286,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13671,6 +14293,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13745,15 +14376,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13761,6 +14383,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13837,15 +14468,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13853,6 +14475,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -13929,15 +14560,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -13945,6 +14567,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14021,15 +14652,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14037,6 +14659,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14113,15 +14744,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14129,6 +14751,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14205,15 +14836,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14221,6 +14843,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14297,15 +14928,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14313,6 +14935,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14389,15 +15020,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14405,6 +15027,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14483,15 +15114,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14499,6 +15121,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14589,15 +15220,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14605,6 +15227,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14683,15 +15314,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14699,6 +15321,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14779,15 +15410,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14795,6 +15417,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14873,15 +15504,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14889,6 +15511,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -14967,15 +15598,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -14983,6 +15605,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15061,15 +15692,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15077,6 +15699,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15155,15 +15786,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15171,6 +15793,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15265,15 +15896,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15281,6 +15903,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15357,15 +15988,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15373,6 +15995,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15447,15 +16078,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15463,6 +16085,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15539,15 +16170,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15555,6 +16177,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15631,15 +16262,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15647,6 +16269,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15726,15 +16357,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15742,6 +16364,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15818,15 +16449,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15834,6 +16456,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -15941,15 +16572,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -15957,6 +16579,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -16033,15 +16664,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -16049,6 +16671,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -16125,15 +16756,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -16141,6 +16763,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -16217,15 +16848,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -16233,6 +16855,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -16310,15 +16941,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -16326,6 +16948,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
@@ -16402,15 +17033,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseResource"];
                 };
             };
-            /** @description Input Validation Exception */
-            "400 (Validation)": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
-                };
-            };
             /** @description API Exception */
             "400 (API)": {
                 headers: {
@@ -16418,6 +17040,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseResource"];
+                };
+            };
+            /** @description Input Validation Exception */
+            "400 (Validation)": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationErrorResponseResource"];
                 };
             };
         };
