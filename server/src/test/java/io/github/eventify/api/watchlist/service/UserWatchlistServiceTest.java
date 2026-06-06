@@ -408,6 +408,28 @@ public class UserWatchlistServiceTest extends UnitTest {
         assertThat(watchlists.getContent(), is(empty()));
     }
 
+    @Test
+    @DisplayName("Should exclude suspended org watchlists from personal search via specification")
+    public void shouldExcludeSuspendedOrgWatchlistsFromPersonalSearch() {
+        // Given: only personal watchlists in the result (suspended org watchlists filtered by spec)
+        final Watchlist personalWatchlist = aWatchlist(1L, "Personal Watchlist", user);
+        final Page<Watchlist> mockPage = new PageImpl<>(List.of(personalWatchlist));
+
+        when(watchlistMetaData.toSort(any())).thenReturn(Sort.by(Sort.Direction.DESC, "createdAt"));
+        when(watchlistMetaData.toUserWatchlistSpecification(any())).thenReturn((root, query, cb) -> cb.conjunction());
+        when(watchlistRepository.findAll(any(Specification.class), any(Pageable.class)))
+            .thenReturn(mockPage);
+
+        // When: searching personal watchlists
+        final SortablePageInput input = TestBuilders.aPageInput();
+        final Page<Watchlist> result = userWatchlistService.searchWatchlists(input);
+
+        // Then: toUserWatchlistSpecification is called (it is responsible for excluding suspended org watchlists)
+        verify(watchlistMetaData).toUserWatchlistSpecification(any(SortablePageInput.class));
+        assertThat(result.getContent(), hasSize(1));
+        assertThat(result.getContent().get(0).getName(), is("Personal Watchlist"));
+    }
+
     private List<Channel> channelsWithIds(final Long... ids) {
         final List<Channel> channels = new java.util.ArrayList<>();
         for (final Long id : ids) {

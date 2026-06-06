@@ -2480,6 +2480,10 @@ export interface components {
              * @example 2026-01-08T10:30:00Z
              */
             createdAt: string;
+            /** @description Whether the subscription is blocked due to a suspended organization */
+            blocked?: boolean;
+            /** @description Reason the subscription is blocked, if applicable */
+            blockedReason?: string | null;
         };
         UpdateRoleRequest: {
             /**

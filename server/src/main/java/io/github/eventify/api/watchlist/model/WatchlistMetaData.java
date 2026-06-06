@@ -1,5 +1,7 @@
 package io.github.eventify.api.watchlist.model;
 
+import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.jframe.datasource.search.JpaSearchSpecification;
 import io.github.jframe.datasource.search.SearchType;
 import io.github.jframe.datasource.search.model.AbstractSortSearchMetaData;
@@ -7,6 +9,8 @@ import io.github.jframe.datasource.search.model.SearchCriterium;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 
 import java.util.List;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -72,12 +76,20 @@ public class WatchlistMetaData extends AbstractSortSearchMetaData {
     }
 
     /**
-     * Builds a specification for personal watchlists (organization IS NULL).
+     * Builds a specification for personal watchlists.
+     * Includes: organization IS NULL (personal watchlists) OR organization is not suspended (active org watchlists).
+     * Excludes watchlists belonging to suspended organizations.
      *
      * @return the specification for personal watchlists
      */
     private Specification<Watchlist> buildPersonalWatchlistSpecification() {
-        return (root, query, cb) -> cb.isNull(root.get(ORGANIZATION_TERM));
+        return (root, query, cb) -> {
+            final Join<Watchlist, Organization> orgJoin = root.join(ORGANIZATION_TERM, JoinType.LEFT);
+            return cb.or(
+                cb.isNull(root.get(ORGANIZATION_TERM)),
+                cb.notEqual(orgJoin.get("status"), OrganizationStatus.SUSPENDED)
+            );
+        };
     }
 
     /**

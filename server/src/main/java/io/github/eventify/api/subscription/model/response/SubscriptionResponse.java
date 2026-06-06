@@ -68,4 +68,18 @@ public class SubscriptionResponse implements PageableItemResource {
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     private OffsetDateTime createdAt;
+
+    @Schema(
+        description = "Whether the subscription is blocked due to organization suspension",
+        example = "false",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private Boolean blocked;
+
+    @Schema(
+        description = "Reason why the subscription is blocked, if applicable",
+        example = "The organization is currently suspended.",
+        requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private String blockedReason;
 }

@@ -63,9 +63,10 @@
 
 	const tableColumns: TableColumn[] = [
 		{ key: 'watchlistName', label: 'Watchlist', sortable: true, colSpan: 4 },
-		{ key: 'severities', label: 'Severities', sortable: false, colSpan: 3 },
+		{ key: 'status', label: 'Status', sortable: false, colSpan: 2 },
+		{ key: 'severities', label: 'Severities', sortable: false, colSpan: 2 },
 		{ key: 'adapters', label: 'Adapters', sortable: false, colSpan: 2 },
-		{ key: 'createdAt', label: 'Created', sortable: true, colSpan: 2 },
+		{ key: 'createdAt', label: 'Created', sortable: true, colSpan: 1 },
 		{ key: 'actions', label: '', sortable: false, colSpan: 1 }
 	];
 
@@ -206,10 +207,12 @@
 		</div>
 		<div class="flex items-center bg-muted rounded-full p-1 gap-0.5">
 			<button
+				type="button"
 				onclick={() => activeTab = 'connections'}
 				class="px-3 py-1 text-xs font-medium rounded-full transition-all {activeTab === 'connections' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
 			>Connections</button>
 			<button
+				type="button"
 				onclick={() => activeTab = 'alerts'}
 				class="px-3 py-1 text-xs font-medium rounded-full transition-all {activeTab === 'alerts' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
 			>Alerts</button>
@@ -239,11 +242,12 @@
 						/>
 						</div>
 					{:else}
-						<button
-							class="w-full flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed border-border/50 hover:border-primary/50 hover:bg-accent/30 cursor-pointer transition-colors text-muted-foreground"
-							onclick={() => (showAddForm = true)}
-							aria-label="Add notification connection"
-						>
+					<button
+						type="button"
+						class="w-full flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed border-border/50 hover:border-primary/50 hover:bg-accent/30 cursor-pointer transition-colors text-muted-foreground"
+						onclick={() => (showAddForm = true)}
+						aria-label="Add notification connection"
+					>
 							<Plus class="w-4 h-4" />
 							<span class="text-sm">Add Connection</span>
 						</button>
@@ -327,7 +331,7 @@
 						{#each subscriptions as subscription (subscription.id)}
 							<SubscriptionTableRow
 								{subscription}
-								onEdit={(sub) => { editingSubscription = sub; showSubscriptionDialog = true; }}
+								onEdit={(sub) => { if (sub.blocked) return; editingSubscription = sub; showSubscriptionDialog = true; }}
 								onDelete={(sub) => { deletingSubscription = sub; }}
 							/>
 						{/each}

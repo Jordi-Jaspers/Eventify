@@ -22,11 +22,23 @@ import org.springframework.stereotype.Repository;
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long>, JpaSpecificationExecutor<Subscription> {
 
     @Override
-    @EntityGraph(attributePaths = "watchlist")
+    @EntityGraph(
+        attributePaths = {
+            "watchlist",
+            "watchlist.organization",
+            "organization"
+        }
+    )
     Optional<Subscription> findById(Long id);
 
     @Override
-    @EntityGraph(attributePaths = "watchlist")
+    @EntityGraph(
+        attributePaths = {
+            "watchlist",
+            "watchlist.organization",
+            "organization"
+        }
+    )
     Page<Subscription> findAll(Specification<Subscription> spec, Pageable pageable);
 
     /**

@@ -1,0 +1,116 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   logicalFilePath="202606061000-TST-suspended-org-test-data.xml">
+
+    <!-- ==================== SUSPENDED ORG SUBSCRIPTION UX TEST DATA ==================== -->
+    <!-- Tests: personal subscription on active org, suspended org watchlist, blocked subscription badge,
+         org-level subscription, and Mattermost adapter config. -->
+
+    <changeSet id="202606061000-TST-suspended-org-test-data-1"
+               author="jordi.jaspers"
+               context="tst">
+        <comment>John Doe personal subscription on "Acme Operations Dashboard" for CRITICAL and WARNING via IN_APP adapter.</comment>
+        <sql>
+            INSERT INTO subscription (user_id, watchlist_id, target_severities, adapter_config_ids, organization_id, created_at, updated_at)
+            VALUES (
+                1,
+                (SELECT id FROM watchlist WHERE name = 'Acme Operations Dashboard'
+                    AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp')),
+                '["CRITICAL", "WARNING"]'::jsonb,
+                (SELECT jsonb_agg(id) FROM adapter_config WHERE user_id = 1 AND adapter_type = 'IN_APP' AND organization_id IS NULL),
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '10 days'
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202606061000-TST-suspended-org-test-data-2"
+               author="jordi.jaspers"
+               context="tst">
+        <comment>Suspend Gamma Solutions org to enable blocked subscription UX indicator testing.</comment>
+        <sql>
+            UPDATE organization SET status = 'SUSPENDED' WHERE slug = 'gamma-solutions';
+        </sql>
+    </changeSet>
+
+    <changeSet id="202606061000-TST-suspended-org-test-data-3"
+               author="jordi.jaspers"
+               context="tst">
+        <comment>Create "Gamma Client Monitoring" watchlist for Gamma Solutions org, including the gamma.client.portal channel.</comment>
+        <sql><![CDATA[
+            INSERT INTO watchlist (name, description, user_id, organization_id, configuration, filters, created_at, updated_at)
+            VALUES (
+                'Gamma Client Monitoring',
+                'Client portal monitoring watchlist for Gamma Solutions. Used for suspended org subscription UX testing.',
+                1,
+                (SELECT id FROM organization WHERE slug = 'gamma-solutions'),
+                jsonb_build_object(
+                    'channelIds', (SELECT jsonb_agg(id) FROM channel WHERE slug = 'gamma.client.portal')
+                ),
+                '{"timeRange": "24h", "onlyCritical": false, "sortBySeverity": true, "groupedView": false}'::jsonb,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '20 days'
+            );
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="202606061000-TST-suspended-org-test-data-4"
+               author="jordi.jaspers"
+               context="tst">
+        <comment>John Doe personal subscription on "Gamma Client Monitoring" for CRITICAL and WARNING via IN_APP. Renders as BLOCKED because Gamma Solutions is suspended.</comment>
+        <sql>
+            INSERT INTO subscription (user_id, watchlist_id, target_severities, adapter_config_ids, organization_id, created_at, updated_at)
+            VALUES (
+                1,
+                (SELECT id FROM watchlist WHERE name = 'Gamma Client Monitoring'
+                    AND organization_id = (SELECT id FROM organization WHERE slug = 'gamma-solutions')),
+                '["CRITICAL", "WARNING"]'::jsonb,
+                (SELECT jsonb_agg(id) FROM adapter_config WHERE user_id = 1 AND adapter_type = 'IN_APP' AND organization_id IS NULL),
+                NULL,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '15 days'
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202606061000-TST-suspended-org-test-data-5"
+               author="jordi.jaspers"
+               context="tst">
+        <comment>Mattermost adapter config for Acme Corporation (user 1, org-level) for testing org-scoped notification adapters.</comment>
+        <sql>
+            INSERT INTO adapter_config (user_id, organization_id, adapter_type, label, config, enabled, system_managed)
+            VALUES (
+                1,
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                'MATTERMOST',
+                'Acme Mattermost Alerts',
+                '{"webhookUrl": "https://mattermost.acme.local/hooks/test-webhook-id"}'::jsonb,
+                true,
+                false
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202606061000-TST-suspended-org-test-data-6"
+               author="jordi.jaspers"
+               context="tst">
+        <comment>Acme Corporation ORG subscription on "Acme Operations Dashboard" for CRITICAL only via IN_APP adapter.</comment>
+        <sql>
+            INSERT INTO subscription (user_id, watchlist_id, target_severities, adapter_config_ids, organization_id, created_at, updated_at)
+            VALUES (
+                1,
+                (SELECT id FROM watchlist WHERE name = 'Acme Operations Dashboard'
+                    AND organization_id = (SELECT id FROM organization WHERE slug = 'acme-corp')),
+                '["CRITICAL"]'::jsonb,
+                (SELECT jsonb_agg(id) FROM adapter_config WHERE user_id = 1 AND adapter_type = 'IN_APP' AND organization_id IS NULL),
+                (SELECT id FROM organization WHERE slug = 'acme-corp'),
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '5 days'
+            );
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

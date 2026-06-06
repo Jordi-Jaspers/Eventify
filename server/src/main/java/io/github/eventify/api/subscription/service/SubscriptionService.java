@@ -1,5 +1,6 @@
 package io.github.eventify.api.subscription.service;
 
+import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.organization.model.Organization;
 import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.repository.OrganizationRepository;
@@ -17,6 +18,8 @@ import io.github.eventify.common.util.TimeProvider;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -62,9 +65,7 @@ public class SubscriptionService {
                 return newSub;
             });
 
-        subscription.setTargetSeverities(request.getTargetSeverities());
-        subscription.setAdapterConfigIds(request.getAdapterConfigIds());
-        subscription.setUpdatedAt(TimeProvider.now());
+        applyFields(subscription, request.getTargetSeverities(), request.getAdapterConfigIds());
 
         return subscriptionRepository.save(subscription);
     }
@@ -82,10 +83,9 @@ public class SubscriptionService {
         final Subscription subscription = findSubscriptionOrThrow(id);
 
         verifyUserOwnership(subscription, user);
+        verifyOrgNotSuspended(subscription.getWatchlist().getOrganization());
 
-        subscription.setTargetSeverities(request.getTargetSeverities());
-        subscription.setAdapterConfigIds(request.getAdapterConfigIds());
-        subscription.setUpdatedAt(TimeProvider.now());
+        applyFields(subscription, request.getTargetSeverities(), request.getAdapterConfigIds());
 
         return subscriptionRepository.save(subscription);
     }
@@ -135,9 +135,7 @@ public class SubscriptionService {
         subscription.setUser(user);
         subscription.setWatchlist(watchlist);
         subscription.setOrganization(org);
-        subscription.setTargetSeverities(request.getTargetSeverities());
-        subscription.setAdapterConfigIds(request.getAdapterConfigIds());
-        subscription.setUpdatedAt(TimeProvider.now());
+        applyFields(subscription, request.getTargetSeverities(), request.getAdapterConfigIds());
 
         return subscriptionRepository.save(subscription);
     }
@@ -154,10 +152,9 @@ public class SubscriptionService {
     public Subscription updateOrgSubscription(final Long orgId, final Long id, final UpdateSubscriptionRequest request) {
         final Subscription subscription = findSubscriptionOrThrow(id);
         verifyOrgOwnership(subscription, orgId);
+        verifyOrgNotSuspended(subscription.getOrganization());
 
-        subscription.setTargetSeverities(request.getTargetSeverities());
-        subscription.setAdapterConfigIds(request.getAdapterConfigIds());
-        subscription.setUpdatedAt(TimeProvider.now());
+        applyFields(subscription, request.getTargetSeverities(), request.getAdapterConfigIds());
 
         return subscriptionRepository.save(subscription);
     }
@@ -226,5 +223,11 @@ public class SubscriptionService {
         if (organization != null && OrganizationStatus.SUSPENDED.equals(organization.getStatus())) {
             throw new OrganizationSuspendedException();
         }
+    }
+
+    private void applyFields(final Subscription subscription, final List<Severity> targetSeverities, final List<Long> adapterConfigIds) {
+        subscription.setTargetSeverities(targetSeverities);
+        subscription.setAdapterConfigIds(adapterConfigIds);
+        subscription.setUpdatedAt(TimeProvider.now());
     }
 }

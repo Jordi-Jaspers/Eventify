@@ -11,6 +11,7 @@ import io.github.eventify.api.subscription.repository.SubscriptionRepository;
 import io.github.eventify.api.user.model.User;
 import io.github.eventify.api.watchlist.model.Watchlist;
 import io.github.eventify.api.watchlist.repository.WatchlistRepository;
+import io.github.eventify.common.exception.OrganizationSuspendedException;
 import io.github.eventify.common.security.SecurityUtil;
 import io.github.eventify.support.UnitTest;
 import io.github.jframe.datasource.search.model.input.SortablePageInput;
@@ -421,6 +422,75 @@ public class SubscriptionServiceTest extends UnitTest {
         // Then: page with org subscriptions is returned
         assertThat(result.getTotalElements(), is(1L));
         assertThat(result.getContent(), hasSize(1));
+    }
+
+    // ========================= updatePersonalSubscription (suspended org) =========================
+
+    @Test
+    @DisplayName("Should throw when updating personal subscription for suspended org watchlist")
+    public void shouldThrowWhenUpdatingPersonalSubscriptionForSuspendedOrg() {
+        // Given: personal subscription whose watchlist belongs to a suspended org
+        final Organization suspendedOrg = anOrganization(5L, OrganizationStatus.SUSPENDED);
+        final Watchlist watchlist = aWatchlistWithOrg(10L, user, suspendedOrg);
+        final Subscription existing = aSubscription(1L, watchlist, user, null);
+        when(subscriptionRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+        // When / Then: OrganizationSuspendedException is thrown
+        assertThrows(
+            OrganizationSuspendedException.class,
+            () -> subscriptionService.updatePersonalSubscription(1L, aValidUpdateRequest())
+        );
+        verify(subscriptionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should throw when updating org subscription for suspended org")
+    public void shouldThrowWhenUpdatingOrgSubscriptionForSuspendedOrg() {
+        // Given: org subscription where the org is suspended
+        final Organization suspendedOrg = anOrganization(5L, OrganizationStatus.SUSPENDED);
+        final Watchlist watchlist = aWatchlistWithOrg(10L, user, suspendedOrg);
+        final Subscription existing = aSubscription(2L, watchlist, user, suspendedOrg);
+        when(subscriptionRepository.findById(2L)).thenReturn(Optional.of(existing));
+
+        // When / Then: OrganizationSuspendedException is thrown
+        assertThrows(
+            OrganizationSuspendedException.class,
+            () -> subscriptionService.updateOrgSubscription(5L, 2L, aValidUpdateRequest())
+        );
+        verify(subscriptionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should update personal subscription successfully when watchlist has no org (null-safe check)")
+    public void shouldUpdatePersonalSubscriptionSuccessfullyWhenWatchlistHasNoOrg() {
+        // Given: personal subscription for a personal watchlist (org=null → no suspended check needed)
+        final Watchlist watchlist = aWatchlist(10L, "My Watchlist", user);
+        final Subscription existing = aSubscription(1L, watchlist, user, null);
+        when(subscriptionRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // When: updating the personal subscription
+        final Subscription result = subscriptionService.updatePersonalSubscription(1L, aValidUpdateRequest());
+
+        // Then: update succeeds without exception
+        assertThat(result.getId(), is(1L));
+        verify(subscriptionRepository).save(existing);
+    }
+
+    @Test
+    @DisplayName("Should allow delete of personal subscription even when org is suspended")
+    public void shouldAllowDeleteWhenOrgIsSuspended() {
+        // Given: personal subscription whose watchlist belongs to a suspended org
+        final Organization suspendedOrg = anOrganization(5L, OrganizationStatus.SUSPENDED);
+        final Watchlist watchlist = aWatchlistWithOrg(10L, user, suspendedOrg);
+        final Subscription existing = aSubscription(1L, watchlist, user, null);
+        when(subscriptionRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+        // When: deleting the personal subscription
+        subscriptionService.deletePersonalSubscription(1L);
+
+        // Then: subscription is deleted without exception
+        verify(subscriptionRepository).delete(existing);
     }
 
     // ========================= FACTORY METHODS =========================

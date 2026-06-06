@@ -10,16 +10,12 @@
 - [ ] **Refactor Security services** - the `AdapterConfigSecurityService`, `ChannelSecurityService`, ` EventSecurityService`, `OrganizationSecurityService`, and `WatchlistSecurityService` (Maybe other i forgot) have some overlapping logic and inconsistent patterns. Refactor to extract common patterns, ensure consistent method signatures, and improve readability. migrate all these services to the common.security package so they are all in one place and can share common patterns and utilities.
 
 - [ ] **Remove all unnecessary Hibernate properties** - Lots of models have (updatable = , length =, ...) or any other field in the @Column annotation. Remove all of them except if they should not be updatable. the classes need to look as clean as possible.
+
+- [ ] **Suspended Org UX — Org Switcher + Navigation Blocking** - Suspended orgs still appear in the org switcher popover menu and users can navigate to all suspended org pages. Fix: (1) hide or grey-out suspended orgs in the org switcher with indicator, (2) frontend route guard that intercepts navigation to suspended org pages and shows an appropriate message (backend `SuspendedOrganizationFilter` already returns 403 for non-admin users, but frontend doesn't handle it gracefully).
+
 ---
 
 ## Epic: Notification System
-**Context**: Modular notification subsystem built from scratch. No backend notification entity exists today; "What's New" is purely a frontend changelog reader. Replaces the deprecated "Webhooks/Notifications" and "Integrations: Slack/Discord/PagerDuty" items in Future Considerations.
-
-**Subscription model:** subscriptions are at the WATCHLIST level (not per-channel). When any channel in a subscribed watchlist transitions severity, the subscription evaluates. Subscriptions are global per user — fire regardless of which org context the user is currently viewing.
-
-**Trigger model:** severity *transitions* only (NOT per-event firing). Configurable target severities — user picks which transitions trigger ("notify on transition to CRITICAL" or "notify on transition to WARNING or CRITICAL").
-
-**Adapter pattern:** `NotificationAdapter` interface with pluggable destinations. MVP destinations: in-app + Telegram. Email and Slack/Discord/webhooks come later via the same abstraction.
 
 - [ ] **Channel Rhythm Detection + Overdue Alerts** - Statistical (no LLM): period detection on inter-arrival times via FFT or simple periodicity over `event_timeline_hourly`. New trigger type `CHANNEL_OVERDUE` fires when expected next event is late by configurable margin. Severity drift detection (CRITICAL ratio anomaly vs baseline) as additional trigger type. All evaluated through existing dispatch path.
 
@@ -52,8 +48,6 @@
 
 - [ ] **Retention Policy Configuration**: See "User/Organization Retention Settings UI" under Event Channels epic for UI implementation. DB columns already exist with CHECK constraints (90-1825 days). This item covers backend service logic for applying retention during cleanup.
 - [ ] **Global Retention Settings (Admin)**: Admin can set system-wide default retention, maximum retention (users can't exceed), view storage usage stats.
-
----
 
 ---
 

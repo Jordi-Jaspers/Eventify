@@ -2,6 +2,7 @@ package io.github.eventify.api.subscription.controller;
 
 import io.github.eventify.api.event.model.Severity;
 import io.github.eventify.api.organization.model.Organization;
+import io.github.eventify.api.organization.model.OrganizationStatus;
 import io.github.eventify.api.organization.model.OrganizationalRole;
 import io.github.eventify.api.subscription.model.request.CreateSubscriptionRequest;
 import io.github.eventify.api.subscription.model.request.UpdateSubscriptionRequest;
@@ -65,6 +66,7 @@ public class SubscriptionControllerTest extends IntegrationTest {
         assertThat(body.getTargetSeverities(), hasItems(Severity.CRITICAL));
         assertThat(body.getAdapterConfigIds(), hasSize(1));
         assertThat(body.getCreatedAt(), is(notNullValue()));
+        assertThat(body.getBlocked(), is(false));
     }
 
     @Test
@@ -189,6 +191,7 @@ public class SubscriptionControllerTest extends IntegrationTest {
             SubscriptionResponse.class
         );
         assertThat(body.getTargetSeverities(), hasItems(Severity.CRITICAL, Severity.WARNING));
+        assertThat(body.getBlocked(), is(false));
     }
 
     @Test
@@ -306,6 +309,7 @@ public class SubscriptionControllerTest extends IntegrationTest {
             new TypeReference<>() {}
         );
         assertThat(page.getTotalElements(), is(greaterThanOrEqualTo(1L)));
+        assertThat(page.getContent().get(0).getBlocked(), is(false));
     }
 
     @Test
@@ -367,6 +371,7 @@ public class SubscriptionControllerTest extends IntegrationTest {
         );
         assertThat(body.getId(), is(notNullValue()));
         assertThat(body.getWatchlistId(), is(watchlist.getId()));
+        assertThat(body.getBlocked(), is(false));
     }
 
     @Test
@@ -437,6 +442,13 @@ public class SubscriptionControllerTest extends IntegrationTest {
 
         // Then: response is OK
         response.andExpect(status().is(SC_OK));
+
+        // And: response body reflects blocked=false for active org
+        final SubscriptionResponse body = fromJson(
+            response.andReturn().getResponse().getContentAsString(),
+            SubscriptionResponse.class
+        );
+        assertThat(body.getBlocked(), is(false));
     }
 
     @Test
@@ -544,6 +556,7 @@ public class SubscriptionControllerTest extends IntegrationTest {
             new TypeReference<>() {}
         );
         assertThat(page.getTotalElements(), is(greaterThanOrEqualTo(1L)));
+        assertThat(page.getContent().get(0).getBlocked(), is(false));
     }
 
     @Test
@@ -564,6 +577,92 @@ public class SubscriptionControllerTest extends IntegrationTest {
 
         // Then: response is FORBIDDEN
         response.andExpect(status().is(SC_FORBIDDEN));
+    }
+
+    // ========================= SUSPENDED ORG TESTS =========================
+
+    @Test
+    @DisplayName("Should return 400 when updating personal subscription for suspended org watchlist")
+    public void updatePersonalSubscriptionFailsWhenWatchlistOrgSuspended() throws Exception {
+        // Given: a user with a personal subscription to an org watchlist
+        final User user = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(user);
+        final Watchlist watchlist = aWatchlistForOrganization(user, org, "Org Watchlist");
+        final Long subscriptionId = createPersonalSubscriptionViaApi(user, watchlist.getId());
+
+        // And: the org is suspended after subscription is created
+        org.setStatus(OrganizationStatus.SUSPENDED);
+        organizationRepository.save(org);
+
+        // When: trying to update the personal subscription
+        final ResultActions response = mockMvc.perform(
+            put(SUBSCRIPTION_PATH, subscriptionId)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(aValidUpdateRequest()))
+        );
+
+        // Then: response is BAD_REQUEST (org suspended → OrganizationSuspendedException → 400)
+        response.andExpect(status().is(SC_BAD_REQUEST));
+    }
+
+    @Test
+    @DisplayName("Should show blocked=true when searching personal subscriptions for suspended org")
+    public void searchPersonalSubscriptionsShowsBlockedWhenOrgSuspended() throws Exception {
+        // Given: a user with a personal subscription to an org watchlist
+        final User user = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(user);
+        final Watchlist watchlist = aWatchlistForOrganization(user, org, "Org Watchlist");
+        createPersonalSubscriptionViaApi(user, watchlist.getId());
+
+        // And: the org is suspended
+        org.setStatus(OrganizationStatus.SUSPENDED);
+        organizationRepository.save(org);
+
+        // When: searching personal subscriptions
+        final ResultActions response = mockMvc.perform(
+            post(SUBSCRIPTIONS_SEARCH_PATH)
+                .contentType(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+                .content(toJson(new SortablePageInput()))
+        );
+
+        // Then: response is OK
+        response.andExpect(status().is(SC_OK));
+
+        // And: subscription is present but marked as blocked
+        final String content = response.andReturn().getResponse().getContentAsString();
+        final PageResource<SubscriptionResponse> page = objectMapper.readValue(
+            content,
+            new TypeReference<>() {}
+        );
+        assertThat(page.getTotalElements(), is(greaterThanOrEqualTo(1L)));
+        final SubscriptionResponse item = page.getContent().get(0);
+        assertThat(item.getBlocked(), is(true));
+        assertThat(item.getBlockedReason(), is(notNullValue()));
+    }
+
+    @Test
+    @DisplayName("Should delete personal subscription successfully even when org is suspended")
+    public void deletePersonalSubscriptionSucceedsEvenWhenOrgSuspended() throws Exception {
+        // Given: a user with a personal subscription to an org watchlist
+        final User user = aValidatedUser();
+        final Organization org = anOrganisationWithOwner(user);
+        final Watchlist watchlist = aWatchlistForOrganization(user, org, "Org Watchlist");
+        final Long subscriptionId = createPersonalSubscriptionViaApi(user, watchlist.getId());
+
+        // And: the org is suspended
+        org.setStatus(OrganizationStatus.SUSPENDED);
+        organizationRepository.save(org);
+
+        // When: deleting the subscription
+        final ResultActions response = mockMvc.perform(
+            delete(SUBSCRIPTION_PATH, subscriptionId)
+                .header(AUTHORIZATION, BEARER + user.getAccessToken().getValue())
+        );
+
+        // Then: delete succeeds regardless of org suspension
+        response.andExpect(status().is(SC_NO_CONTENT));
     }
 
     // ========================= HELPER METHODS =========================

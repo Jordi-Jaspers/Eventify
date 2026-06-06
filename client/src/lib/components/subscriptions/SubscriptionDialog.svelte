@@ -53,9 +53,8 @@
 	let showWatchlistDropdown: boolean = $state(false);
 	let watchlistSearchTimeout: ReturnType<typeof setTimeout>;
 
-	const hasSelection: boolean = $derived(selectedSeverities.length > 0);
 	const canSubmit: boolean = $derived(
-		hasSelection && (isEdit || !!watchlistId || selectedWatchlist !== null)
+		selectedSeverities.length > 0 && (isEdit || !!watchlistId || selectedWatchlist !== null)
 	);
 
 	function populateFromSubscription(sub: SubscriptionResponse | null): void {
@@ -73,13 +72,16 @@
 	}
 
 	async function loadAdapters(): Promise<void> {
-		if (preloadedAdapterConfigs !== undefined) {
-			adapterConfigs = preloadedAdapterConfigs;
-			return;
-		}
 		loadingAdapters = true;
 		try {
-			adapterConfigs = await listPersonalConfigs();
+			if (preloadedAdapterConfigs !== undefined) {
+				// Org scope: use preloaded org configs, but also inject personal IN_APP config
+				const personalConfigs = await listPersonalConfigs();
+				const inAppConfigs = personalConfigs.filter((c) => c.adapterType === 'IN_APP');
+				adapterConfigs = [...inAppConfigs, ...preloadedAdapterConfigs];
+			} else {
+				adapterConfigs = await listPersonalConfigs();
+			}
 		} catch (err: unknown) {
 			const { message } = handleError(err, 'Failed to load adapter configs');
 			toast.error(message);
@@ -188,15 +190,11 @@
 			<!-- Watchlist Section -->
 			<div class="space-y-2">
 				<Label class="text-sm font-medium">Watchlist</Label>
-				{#if isEdit}
-					<div class="flex items-center gap-2 px-3 py-2 rounded-md border border-border/50 bg-muted/30 text-sm text-muted-foreground">
-						Watchlist #{subscription?.watchlistId}
-					</div>
-				{:else if watchlistId}
-					<div class="flex items-center gap-2 px-3 py-2 rounded-md border border-border/50 bg-muted/30 text-sm">
-						Watchlist #{watchlistId}
-					</div>
-				{:else}
+			{#if isEdit || watchlistId}
+				<div class="flex items-center gap-2 px-3 py-2 rounded-md border border-border/50 bg-muted/30 text-sm" class:text-muted-foreground={isEdit}>
+					Watchlist #{isEdit ? subscription?.watchlistId : watchlistId}
+				</div>
+			{:else}
 					<div class="space-y-1">
 						<div class="relative">
 							<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
